@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailHolder;
@@ -23,29 +23,25 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 @ExtendWith(MockitoExtension.class)
 class GeneralEmailServiceTest {
 
-    private static final LocalDateTime FIXED_DATE = LocalDateTime.of(2026, 5, 5, 23, 0, 0);
+    private final LocalDateTime fixedLocalDateTime = LocalDateTime.of(2026, 5, 5, 23, 0, 0);
+    private final CaseDocument attachment = caseDocument("A_DOC_1.pdf");
 
     @InjectMocks
     private GeneralEmailService generalEmailService;
 
     @Test
     void givenEmptyGeneralEmailCollection_whenStoreGeneralEmail_thenEmailIsStored() {
-        DocumentCollectionItem documentCollectionItem =
-            DocumentCollectionItem.fromCaseDocument(caseDocument("A_DOC_1.pdf"));
-
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .generalEmailWrapper(GeneralEmailWrapper.builder()
                 .generalEmailBody("Hi, This is the body of an email.")
                 .generalEmailCreatedBy("John John")
                 .generalEmailRecipient("Claire Mumford")
-                .generalEmailUploadedDocuments(List.of(
-                    documentCollectionItem
-                ))
+                .generalEmailUploadedDocument(attachment)
                 .build())
             .build();
 
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
-            mockedStatic.when(LocalDateTime::now).thenReturn(FIXED_DATE);
+            mockedStatic.when(LocalDateTime::now).thenReturn(fixedLocalDateTime);
 
             generalEmailService.storeGeneralEmail(finremCaseData);
 
@@ -54,29 +50,21 @@ class GeneralEmailServiceTest {
                 .extracting(GeneralEmailHolder::getGeneralEmailBody,
                     GeneralEmailHolder::getGeneralEmailRecipient,
                     GeneralEmailHolder::getGeneralEmailCreatedBy,
-                    GeneralEmailHolder::getGeneralEmailDateSent)
+                    GeneralEmailHolder::getGeneralEmailDateSent,
+                    GeneralEmailHolder::getGeneralEmailUploadedDocument)
                 .contains(Tuple.tuple("Hi, This is the body of an email.", "Claire Mumford", "John John",
-                    FIXED_DATE));
-            assertThat(finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection())
-                .extracting(GeneralEmailCollection::getValue)
-                .extracting(GeneralEmailHolder::getGeneralEmailUploadedDocuments)
-                .contains(List.of(documentCollectionItem));
+                    fixedLocalDateTime, attachment));
         }
     }
 
     @Test
     void givenNonEmptyGeneralEmailCollection_whenStoreGeneralEmail_thenEmailIsStored() {
-        DocumentCollectionItem documentCollectionItem =
-            DocumentCollectionItem.fromCaseDocument(caseDocument("A_DOC_1.pdf"));
-
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .generalEmailWrapper(GeneralEmailWrapper.builder()
                 .generalEmailBody("Hi, This is the body of an email.")
                 .generalEmailCreatedBy("John John")
                 .generalEmailRecipient("Claire Mumford")
-                .generalEmailUploadedDocuments(List.of(
-                    documentCollectionItem
-                ))
+                .generalEmailUploadedDocument(attachment)
                 .generalEmailCollection(new ArrayList<>(List.of(
                     GeneralEmailCollection.builder()
                         .value(GeneralEmailHolder.builder()
@@ -88,7 +76,7 @@ class GeneralEmailServiceTest {
             .build();
 
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
-            mockedStatic.when(LocalDateTime::now).thenReturn(FIXED_DATE);
+            mockedStatic.when(LocalDateTime::now).thenReturn(fixedLocalDateTime);
 
             generalEmailService.storeGeneralEmail(finremCaseData);
 
@@ -97,15 +85,13 @@ class GeneralEmailServiceTest {
                 .extracting(GeneralEmailHolder::getGeneralEmailBody,
                     GeneralEmailHolder::getGeneralEmailRecipient,
                     GeneralEmailHolder::getGeneralEmailCreatedBy,
-                    GeneralEmailHolder::getGeneralEmailDateSent)
+                    GeneralEmailHolder::getGeneralEmailDateSent,
+                    GeneralEmailHolder::getGeneralEmailUploadedDocument)
                 .containsExactly(
-                    Tuple.tuple("Hi, This is an existing email.", null, null, null),
-                    Tuple.tuple("Hi, This is the body of an email.", "Claire Mumford", "John John", FIXED_DATE)
+                    Tuple.tuple("Hi, This is an existing email.", null, null, null, null),
+                    Tuple.tuple("Hi, This is the body of an email.", "Claire Mumford", "John John", fixedLocalDateTime,
+                        attachment)
                 );
-            assertThat(finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection())
-                .extracting(GeneralEmailCollection::getValue)
-                .extracting(GeneralEmailHolder::getGeneralEmailUploadedDocuments)
-                .contains(List.of(documentCollectionItem));
         }
     }
 }

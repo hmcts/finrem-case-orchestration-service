@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
@@ -26,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralEmailDocumentCategoriser;
 import uk.gov.service.notify.NotificationClientException;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,27 +63,20 @@ class GeneralEmailAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenEmailWithAttachments_whenHandled_thenAttachmentsShouldBeConvertedToPdfIfRequired() {
+    void givenEmailWithAttachment_whenHandled_thenAttachmentsShouldBeConvertedToPdfIfRequired() {
         CaseDocument caseDocument1 = caseDocument("a.doc");
-        CaseDocument caseDocument2 = caseDocument("b.doc");
 
         FinremCaseData finremCaseData = spy(FinremCaseData.builder()
             .generalEmailWrapper(GeneralEmailWrapper.builder()
-                .generalEmailUploadedDocuments(List.of(
-                    DocumentCollectionItem.fromCaseDocument(caseDocument1),
-                    DocumentCollectionItem.fromCaseDocument(caseDocument2)
-                ))
+                .generalEmailUploadedDocument(caseDocument1)
                 .build())
             .build());
         CaseType caseType = mock(CaseType.class);
         when(finremCaseData.getCcdCaseType()).thenReturn(caseType);
 
         CaseDocument pdf1 = caseDocument("a.pdf");
-        CaseDocument pdf2 = caseDocument("b.pdf");
         when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument1, AUTH_TOKEN, caseType))
             .thenReturn(pdf1);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument2, AUTH_TOKEN, caseType))
-            .thenReturn(pdf2);
 
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(finremCaseData);
 
@@ -93,9 +84,8 @@ class GeneralEmailAboutToSubmitHandlerTest {
 
         assertAll(
             () -> verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument1, AUTH_TOKEN, caseType),
-            () -> verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument2, AUTH_TOKEN, caseType),
-            () -> assertThat(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocuments())
-                .extracting(DocumentCollectionItem::getValue).containsExactly(pdf1, pdf2)
+            () -> assertThat(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument())
+                .isEqualTo(pdf1)
         );
     }
 
@@ -160,7 +150,7 @@ class GeneralEmailAboutToSubmitHandlerTest {
                 "generalEmailRecipient", "generalEmailRecipient",
                 "generalEmailCreatedBy", "generalEmailCreatedBy",
                 "generalEmailBody", "generalEmailBody",
-                "generalEmailUploadedDocuments", "generalEmailUploadedDocuments"
+                "generalEmailUploadedDocument", "generalEmailUploadedDocument"
             ));
     }
 

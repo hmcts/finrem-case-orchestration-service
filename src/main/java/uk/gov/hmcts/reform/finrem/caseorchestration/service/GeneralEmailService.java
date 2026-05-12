@@ -39,7 +39,7 @@ public class GeneralEmailService {
             .generalEmailBody(generalEmailWrapper.getGeneralEmailBody())
             .generalEmailCreatedBy(generalEmailWrapper.getGeneralEmailCreatedBy())
             .generalEmailRecipient(generalEmailWrapper.getGeneralEmailRecipient())
-            .generalEmailUploadedDocuments(generalEmailWrapper.getGeneralEmailUploadedDocuments())
+            .generalEmailUploadedDocument(generalEmailWrapper.getGeneralEmailUploadedDocument())
             .generalEmailDateSent(LocalDateTime.now())
             .build()).build();
         generalEmailCollection.add(collection);
