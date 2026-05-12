@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,8 +89,8 @@ class GeneralEmailServiceTest {
                     GeneralEmailHolder::getGeneralEmailDateSent,
                     GeneralEmailHolder::getGeneralEmailUploadedDocument)
                 .containsExactly(
-                    Tuple.tuple("Hi, This is an existing email.", null, null, null, null),
-                    Tuple.tuple("Hi, This is the body of an email.", "Claire Mumford", "John John", fixedLocalDateTime,
+                    tuple("Hi, This is an existing email.", null, null, null, null),
+                    tuple("Hi, This is the body of an email.", "Claire Mumford", "John John", fixedLocalDateTime,
                         attachment)
                 );
         }
