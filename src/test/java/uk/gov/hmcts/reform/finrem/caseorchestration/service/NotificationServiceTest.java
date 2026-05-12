@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.N
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
@@ -48,7 +47,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -73,7 +71,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -91,7 +88,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
@@ -117,15 +113,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPDATE_CONTACT_DETAILS_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_GENERAL_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_APPLICATION_ISSUED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
@@ -137,23 +130,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER_CONSENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOTICE_OF_CHANGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_SOL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER1;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER2;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER3;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER4;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 
@@ -222,14 +204,6 @@ class NotificationServiceTest {
     }
 
     @Test
-    void sendHwfSuccessfulNotificationEmail() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendConsentedHWFSuccessfulConfirmationEmail(callbackRequest.getCaseDetails());
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_HWF_SUCCESSFUL);
-    }
-
-    @Test
     void sendFinremAssignToJudgeNotificationEmailToIntervenerSolicitor() {
         FinremCallbackRequest finremCallbackRequest = getContestedNewCallbackRequest();
         notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
@@ -276,34 +250,6 @@ class NotificationServiceTest {
     }
 
     @Test
-    void sendPrepareForHearingNotificationEmailToApplicantSolicitor() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-        notificationService.sendPrepareForHearingEmailApplicant(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING);
-    }
-
-    @Test
-    void sendPrepareForHearingNotificationEmailToRespondentSolicitor() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-        notificationService.sendPrepareForHearingEmailRespondent(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING);
-    }
-
-    @Test
-    void sendPrepareForHearingNotificationEmailToIntervenerSolicitor() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-        notificationService.sendPrepareForHearingEmailIntervener(callbackRequest.getCaseDetails(), dataKeysWrapper);
-
-        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
-            dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
-    }
-
-    @Test
     void sendFinremPrepareForHearingNotificationEmailToIntervenerSolicitor() {
         FinremCallbackRequest finremCallbackRequest = getContestedNewCallbackRequest();
         notificationService.sendPrepareForHearingEmailIntervener(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
@@ -311,24 +257,6 @@ class NotificationServiceTest {
         verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
             dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
-    }
-
-    @Test
-    void sendPrepareForHearingAfterSentNotificationEmailApplicant() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-        notificationService.sendPrepareForHearingOrderSentEmailApplicant(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT);
-    }
-
-    @Test
-    void sendPrepareForHearingAfterSentNotificationEmailRespondent() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-        notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT);
     }
 
     @Test
@@ -368,135 +296,12 @@ class NotificationServiceTest {
     }
 
     @Test
-    void sendConsentOrderAvailableEmailToIntervenerSolicitor() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
-            dataKeysWrapper);
-
-        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
-    }
-
-    @Test
-    void sendConsentOrderAvailableNotificationCtscEmail() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-
-        when(notificationServiceConfiguration.getCtscEmail()).thenReturn("ctsc@email.com");
-
-        notificationService.sendConsentOrderAvailableCtscEmail(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE_CTSC);
-    }
-
-    @Test
-    void sendContestedApplicationIssuedEmail() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_APPLICATION_ISSUED);
-    }
-
-    @Test
-    void sendContestOrderApprovedEmailApplicantSolicitor() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper)
-            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_APPLICANT);
-    }
-
-    @Test
-    void sendContestOrderApprovedEmailRespondentSolicitor() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendContestOrderApprovedEmailRespondent(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper)
-            .getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_RESPONDENT);
-    }
-
-    @Test
-    void sendContestOrderApprovedEmailIntervener1Solicitor() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendContestOrderApprovedEmailIntervener(callbackRequest.getCaseDetails(),
-            dataKeysWrapper, IntervenerType.INTERVENER_ONE);
-
-        verify(notificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER1);
-    }
-
-    @Test
-    void sendContestOrderApprovedEmailIntervener2Solicitor() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendContestOrderApprovedEmailIntervener(callbackRequest.getCaseDetails(),
-            dataKeysWrapper, IntervenerType.INTERVENER_TWO);
-
-        verify(notificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER2);
-    }
-
-    @Test
-    void sendContestOrderApprovedEmailIntervener3Solicitor() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendContestOrderApprovedEmailIntervener(callbackRequest.getCaseDetails(),
-            dataKeysWrapper, IntervenerType.INTERVENER_THREE);
-
-        verify(notificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER3);
-    }
-
-    @Test
-    void sendContestOrderApprovedEmailIntervener4Solicitor() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendContestOrderApprovedEmailIntervener(callbackRequest.getCaseDetails(),
-            dataKeysWrapper, IntervenerType.INTERVENER_FOUR);
-
-        verify(notificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER4);
-    }
-
-    @Test
-    void sendSolicitorToDraftOrderEmailRespondent() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER);
-    }
-
-    @Test
     void sendSolicitorToDraftOrderEmailApplicant() {
         CallbackRequest callbackRequest = getConsentedCallbackRequest();
         notificationService.sendSolicitorToDraftOrderEmailApplicant(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER);
-    }
-
-    @Test
-    void sendFinremSolicitorToDraftOrderEmailIntervener() {
-        FinremCallbackRequest finremCallbackRequest = getContestedNewCallbackRequest();
-        notificationService.sendSolicitorToDraftOrderEmailIntervener(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
-            dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER);
-    }
-
-    @Test
-    void sendContestedHwfSuccessfulNotificationEmail() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL);
     }
 
     @Test
@@ -776,27 +581,6 @@ class NotificationServiceTest {
     }
 
     @Test
-    void shouldEmailContestedAppSolicitor() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_USER_EMAIL);
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
-
-        when(caseDataService.isPaperApplication(anyMap())).thenReturn(false);
-        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
-        when(caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseData)).thenReturn(true);
-
-        assertTrue(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseData));
-    }
-
-    @Test
-    void shouldNotEmailContestedAppSolicitor() {
-        when(caseDataService.isPaperApplication(anyMap())).thenReturn(true);
-        lenient().when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
-
-        assertFalse(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(anyMap()));
-    }
-
-    @Test
     void sendTransferToCourtEmailConsented() {
         CallbackRequest callbackRequest = getConsentedCallbackRequest();
         notificationService.sendTransferToLocalCourtEmail(callbackRequest.getCaseDetails());
@@ -945,24 +729,6 @@ class NotificationServiceTest {
         notificationService.sendUpdateFrcInformationEmailToCourt(callbackRequest.getCaseDetails());
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_UPDATE_FRC_COURT);
-    }
-
-    @Test
-    void sendGeneralApplicationRejectionEmailApplicantSolicitor() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-
-        notificationService.sendGeneralApplicationRejectionEmailToAppSolicitor(callbackRequest.getCaseDetails());
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_REJECT_GENERAL_APPLICATION);
-    }
-
-    @Test
-    void sendGeneralApplicationRejectionEmailRespondentSolicitor() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-
-        notificationService.sendGeneralApplicationRejectionEmailToResSolicitor(callbackRequest.getCaseDetails());
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_REJECT_GENERAL_APPLICATION);
     }
 
     @Test
@@ -1355,45 +1121,6 @@ class NotificationServiceTest {
     }
 
     @Test
-    void sendConsentedHearingNotificationEmailToApplicantSolicitor() {
-        CallbackRequest callbackRequest = buildHearingCallbackRequest(CONSENTED_HEARING_JSON);
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-
-        List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
-        List<String> hearingIdsToProcess = List.of("1f7e210d-87d8-4e98-8c48-db15d1dc0d14");
-        when(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(any(CaseDetails.class), anyMap())).thenReturn(
-            notificationRequest);
-
-        hearings.forEach(hearingData -> {
-            if (hearingIdsToProcess.contains(hearingData.getId())) {
-                Map<String, Object> data = helper.convertToMap(hearingData.getValue());
-                notificationService.sendConsentHearingNotificationEmailToApplicantSolicitor(callbackRequest.getCaseDetails(), data);
-                verify(notificationRequestMapper).getNotificationRequestForConsentApplicantSolicitor(callbackRequest.getCaseDetails(), data);
-                verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_LIST_FOR_HEARING);
-            }
-        });
-    }
-
-    @Test
-    void sendConsentedHearingNotificationEmailToRespondentSolicitor() {
-        CallbackRequest callbackRequest = buildHearingCallbackRequest(CONSENTED_HEARING_JSON);
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-
-        List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
-        List<String> hearingIdsToProcess = List.of("1f7e210d-87d8-4e98-8c48-db15d1dc0d14");
-        when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
-
-        hearings.forEach(hearingData -> {
-            if (hearingIdsToProcess.contains(hearingData.getId())) {
-                Map<String, Object> data = helper.convertToMap(hearingData.getValue());
-                notificationService.sendConsentHearingNotificationEmailToRespondentSolicitor(callbackRequest.getCaseDetails(), data);
-                verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails(), data);
-                verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_LIST_FOR_HEARING);
-            }
-        });
-    }
-
-    @Test
     void checkIsIntervenerSolicitorDigitalAndEmailPopulated() {
         CallbackRequest callbackRequest = getConsentedCallbackRequest();
         callbackRequest.getCaseDetails().getData().put("intervener1SolEmail", TEST_SOLICITOR_EMAIL);
@@ -1545,17 +1272,6 @@ class NotificationServiceTest {
             eq(FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED));
         NotificationRequest actual = argumentCaptor.getValue();
         assertEquals("test@test.com", actual.getNotificationEmail());
-    }
-
-    @Test
-    void testSendHearingNotificationToSolicitor() {
-        NotificationRequest nr = NotificationRequest.builder()
-                .notificationEmail("test@test.com")
-                .caseReferenceNumber("123")
-                .build();
-        notificationService.sendHearingNotificationToSolicitor(nr, CaseRole.APP_SOLICITOR.toString(), FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
-        assertTrue(logs.getInfos().contains("123 - Sending hearing notification to solicitor with role APP_SOLICITOR"));
-        verify(emailService).sendConfirmationEmail(nr, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
     }
 
     @ParameterizedTest

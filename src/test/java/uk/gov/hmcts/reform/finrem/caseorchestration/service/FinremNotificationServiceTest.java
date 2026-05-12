@@ -57,7 +57,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getConsentedFinremCaseDetails;
@@ -73,7 +72,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT;
@@ -90,7 +88,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_SOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_APPLICANT;
@@ -207,14 +204,6 @@ class FinremNotificationServiceTest {
     }
 
     @Test
-    void sendPrepareForHearingOrderSentEmailApplicant() {
-        notificationService.sendPrepareForHearingOrderSentEmailApplicant(contestedFinremCaseDetails);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT));
-    }
-
-    @Test
     void sendConsentHearingNotificationEmailToApplicantSolicitor() {
         notificationService.sendConsentHearingNotificationEmailToApplicantSolicitor(consentedFinremCaseDetails, Map.of());
 
@@ -311,14 +300,6 @@ class FinremNotificationServiceTest {
     }
 
     @Test
-    void sendConsentOrderAvailableNotificationCtscEmail() {
-        notificationService.sendConsentOrderAvailableCtscEmail(consentedFinremCaseDetails);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_AVAILABLE_CTSC));
-    }
-
-    @Test
     void sendContestedApplicationIssuedEmail() {
         notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(consentedFinremCaseDetails);
 
@@ -382,14 +363,6 @@ class FinremNotificationServiceTest {
         verify(finremNotificationRequestMapper)
             .getNotificationRequestForIntervenerSolicitor(consentedFinremCaseDetails, dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_INTERVENER4));
-    }
-
-    @Test
-    void sendSolicitorToDraftOrderEmailRespondent() {
-        notificationService.sendSolicitorToDraftOrderEmailRespondent(consentedFinremCaseDetails);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_DRAFT_ORDER));
     }
 
     @Test
@@ -650,50 +623,6 @@ class FinremNotificationServiceTest {
         assertEquals(expectedResult, result);
     }
 
-    @ParameterizedTest
-    @MethodSource("provideTestCases")
-    void testIsContestedApplicantSolicitorEmailCommunicationEnabled(Map<String, Object> caseData,
-                                                                    boolean isPaperApplication, boolean isRepresented, boolean isEmailNotEmpty,
-                                                                    boolean expectedResult) {
-
-        // Mocking caseDataService methods
-        lenient().when(caseDataService.isPaperApplication(caseData)).thenReturn(isPaperApplication);
-        lenient().when(caseDataService.isApplicantRepresentedByASolicitor(caseData)).thenReturn(isRepresented);
-        lenient().when(caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseData)).thenReturn(isEmailNotEmpty);
-
-        // Perform the test
-        boolean result = notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseData);
-
-        // Assert the result
-        assertEquals(expectedResult, result);
-    }
-
-    // MethodSource for parameterized test cases
-    static Stream<Arguments> provideTestCases() {
-        Map<String, Object> caseDataWithAgreement = new HashMap<>();
-        caseDataWithAgreement.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
-
-        Map<String, Object> caseDataWithoutAgreement = new HashMap<>();
-        caseDataWithoutAgreement.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, "No");
-
-        return Stream.of(
-            // Scenario 1: All conditions are true, expect true
-            Arguments.of(caseDataWithAgreement, false, true, true, true),
-
-            // Scenario 2: Paper application, expect false
-            Arguments.of(caseDataWithAgreement, true, true, true, false),
-
-            // Scenario 3: Not represented by a solicitor, expect false
-            Arguments.of(caseDataWithAgreement, false, false, true, false),
-
-            // Scenario 4: Email is empty, expect false
-            Arguments.of(caseDataWithAgreement, false, true, false, false),
-
-            // Scenario 5: Agreement to receive emails is "No", expect false
-            Arguments.of(caseDataWithoutAgreement, false, true, true, false)
-        );
-    }
-
     @Test
     void sendTransferToCourtEmailConsented() {
         notificationService.sendTransferToLocalCourtEmail(consentedFinremCaseDetails);
@@ -767,23 +696,6 @@ class FinremNotificationServiceTest {
         notificationService.sendUpdateFrcInformationEmailToCourt(contestedFinremCaseDetails);
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_UPDATE_FRC_COURT));
-    }
-
-    @Test
-    void sendConsentOrderAvailableEmailToIntervenerSolicitor() {
-        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(consentedFinremCaseDetails,
-            dataKeysWrapper);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(consentedFinremCaseDetails, dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_AVAILABLE));
-    }
-
-    @Test
-    void sendPrepareForHearingAfterSentNotificationEmailRespondent() {
-        notificationService.sendPrepareForHearingOrderSentEmailRespondent(consentedFinremCaseDetails);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT));
     }
 
     @Test
