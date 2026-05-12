@@ -42,7 +42,7 @@ public class GeneralApplicationWrapper implements HasCaseDocument {
     private LocalDate generalApplicationDirectionsCourtOrderDate;
     private String generalApplicationDirectionsTextFromJudge;
     @TemporaryField
-    private CaseDocument gadPreview;
+    private CaseDocument generalApplicationDirectionsPreview;
     @Deprecated
     private CaseDocument generalApplicationDirectionsDocument;
     private List<GeneralApplicationsCollection> generalApplicationIntvrOrders;

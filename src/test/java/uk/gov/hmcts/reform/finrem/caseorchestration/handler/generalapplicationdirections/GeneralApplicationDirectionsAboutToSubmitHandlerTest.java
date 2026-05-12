@@ -501,7 +501,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             .build());
 
         verifyTemporaryFieldsWereSanitised(GENERAL_APPLICATION_DIRECTIONS_MH, aboutToSubmitHandler,
-            finremCaseDetails, finremCaseDetailsMapper, Map.of("gadPreview", caseDocument()));
+            finremCaseDetails, finremCaseDetailsMapper, Map.of("generalApplicationDirectionsPreview", caseDocument()));
     }
 
     private DynamicRadioList buildDynamicIntervenerList() {
