@@ -71,7 +71,7 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
             return response(finremCaseData, null, errors);
         }
 
-        if (!isConsented(finremCaseDetails)) {
+        if (finremCaseDetails.isContestedApplication()) {
             generalEmailCategoriser.categorise(finremCaseData);
         }
 
@@ -88,13 +88,9 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
             .ifPresent(finremCaseData.getGeneralEmailWrapper()::setGeneralEmailUploadedDocument);
     }
 
-    private boolean isConsented(FinremCaseDetails finremCaseDetails) {
-        return finremCaseDetails.isConsentedApplication();
-    }
-
     private void sendGeneralEmail(FinremCaseDetails finremCaseDetails, String userAuthorisation, List<String> errors) {
         try {
-            if (isConsented(finremCaseDetails)) {
+            if (finremCaseDetails.isConsentedApplication()) {
                 notificationService.sendConsentGeneralEmail(finremCaseDetails, userAuthorisation);
             } else {
                 notificationService.sendContestedGeneralEmail(finremCaseDetails, userAuthorisation);

@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -157,7 +158,8 @@ class GeneralEmailAboutToSubmitHandlerTest {
     private FinremCallbackRequest mockCallbackRequest(boolean isConsented) {
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
         FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
-        when(finremCaseDetails.isConsentedApplication()).thenReturn(isConsented);
+        lenient().when(finremCaseDetails.isConsentedApplication()).thenReturn(isConsented);
+        lenient().when(finremCaseDetails.isContestedApplication()).thenReturn(!isConsented);
         when(finremCaseDetails.getData()).thenReturn(finremCaseData);
         return FinremCallbackRequestFactory.from(finremCaseDetails);
     }
