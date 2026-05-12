@@ -102,8 +102,7 @@ public class UpdateRepresentationService {
      *
      * @throws RuntimeException if an error occurs while updating representation details
      */
-    public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
-                                                               String authToken) {
+    public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails, String authToken) {
 
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
 
