@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +24,14 @@ import java.util.List;
 public class UpdateContactDetailsConsentedMidHandler extends FinremCallbackHandler {
 
     private final InternationalPostalService internationalPostalService;
+    private final ValidatePartiesService validatePartiesService;
 
     public UpdateContactDetailsConsentedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                   InternationalPostalService internationalPostalService) {
+                                                   InternationalPostalService internationalPostalService,
+                                                   ValidatePartiesService validatePartiesService) {
         super(finremCaseDetailsMapper);
         this.internationalPostalService = internationalPostalService;
+        this.validatePartiesService = validatePartiesService;
     }
 
     @Override
@@ -48,7 +52,7 @@ public class UpdateContactDetailsConsentedMidHandler extends FinremCallbackHandl
         List<String> errors = new ArrayList<>();
         errors.addAll(internationalPostalService.validate(finremCaseData));
         errors.addAll(ContactDetailsValidator.validatePostcodesByRepresentation(finremCaseDetails));
-        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData, validatePartiesService));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).errors(errors).build();
     }
