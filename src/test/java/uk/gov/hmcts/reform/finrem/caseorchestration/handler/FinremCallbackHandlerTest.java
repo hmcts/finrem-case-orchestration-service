@@ -296,20 +296,37 @@ class FinremCallbackHandlerTest {
 
     @Test
     void givenHandler_whenValidateCaseData_thenThrowException() {
-        assertAll(
-            () ->
-                assertThrows(InvalidCaseDataException.class, () ->
-                    validateCaseDataTestHandler.handle((FinremCallbackRequest) null, AUTH_TOKEN)),
-            () ->
-                assertThrows(InvalidCaseDataException.class, () ->
-                    validateCaseDataTestHandler.handle(FinremCallbackRequestFactory.from((FinremCaseDetails) null), AUTH_TOKEN)),
-            () ->
-                assertThrows(InvalidCaseDataException.class, () ->
-                    validateCaseDataTestHandler.handle(FinremCallbackRequestFactory.from(FinremCaseDetails.builder().build()), AUTH_TOKEN)),
-            () ->
-                assertDoesNotThrow(() ->
-                    validateCaseDataTestHandler.handle(FinremCallbackRequestFactory.from(
-                        FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build()), AUTH_TOKEN))
+
+        assertThrows(
+            InvalidCaseDataException.class,
+            () -> validateCaseDataTestHandler.handle((FinremCallbackRequest) null, AUTH_TOKEN)
+        );
+
+        assertThrows(
+            InvalidCaseDataException.class,
+            () -> validateCaseDataTestHandler.handle(
+                FinremCallbackRequestFactory.from((FinremCaseDetails) null),
+                AUTH_TOKEN
+            )
+        );
+
+        assertThrows(
+            InvalidCaseDataException.class,
+            () -> validateCaseDataTestHandler.handle(
+                FinremCallbackRequestFactory.from(FinremCaseDetails.builder().build()),
+                AUTH_TOKEN
+            )
+        );
+
+        assertDoesNotThrow(
+            () -> validateCaseDataTestHandler.handle(
+                FinremCallbackRequestFactory.from(
+                    FinremCaseDetails.builder()
+                        .data(FinremCaseData.builder().build())
+                        .build()
+                ),
+                AUTH_TOKEN
+            )
         );
     }
 }
