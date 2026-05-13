@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -41,8 +40,6 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         ADD_INTERVENER_THREE_CODE, ADD_INTERVENER_FOUR_CODE);
     private static final List<String> DELETE_OPERATION_CODES = List.of(DEL_INTERVENER_ONE_CODE, DEL_INTERVENER_TWO_CODE,
         DEL_INTERVENER_THREE_CODE, DEL_INTERVENER_FOUR_CODE);
-    private static final String INTERVENER_POSTCODE_REQUIRED_MESSAGE =
-        "Postcode field is required for the intervener.";
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                            IntervenerService intervenerService, IntervenerCoversheetService intervenerCoversheetService) {
@@ -78,9 +75,9 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         }
 
         if (ADD_OPERATION_CODES.contains(selectedOperationCode)) {
-            if (isIntervenerPostCodeMissing(intervener)) {
-                errors.add(INTERVENER_POSTCODE_REQUIRED_MESSAGE);
-            } else {
+            intervenerService.validateIntervenerInformation(intervener, errors);
+
+            if (errors.isEmpty()) {
                 intervenerChangeDetails = intervenerService.updateIntervenerDetails(intervener, errors, callbackRequest);
                 intervenerCoversheetService.updateIntervenerCoversheet(caseDetails, intervenerChangeDetails, userAuthorisation);
             }
@@ -90,11 +87,6 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         }
 
         return response(caseData, null, errors);
-    }
-
-    private boolean isIntervenerPostCodeMissing(IntervenerWrapper intervener) {
-        String postCode = intervener.getIntervenerAddress().getPostCode();
-        return StringUtils.isEmpty(postCode);
     }
 
     private IntervenerWrapper getIntervenerWrapper(FinremCaseData caseData, String selectedOperationCode) {
