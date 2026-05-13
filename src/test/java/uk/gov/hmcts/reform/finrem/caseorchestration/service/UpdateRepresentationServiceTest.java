@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
@@ -67,7 +69,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG2_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
@@ -88,6 +91,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 @ExtendWith(MockitoExtension.class)
@@ -554,17 +558,13 @@ class UpdateRepresentationServiceTest {
         }
 
         @ParameterizedTest
-        @CsvSource(value = {
-            "[APPSOLICITOR],false",
-            "[RESPSOLICITOR],true"
-        })
-        void givenUserHasRepresentedOtherParty_whenUpdateRepresentation_thenRejectChangeOrgRequest(
-            String partyRequesting, boolean sameEmailRepresentingAppSolicitor) {
+        @EnumSource(value = CaseRole.class, names = {"APP_SOLICITOR", "RESP_SOLICITOR"})
+        void givenUserHasRepresentedOtherParty_whenUpdateRepresentation_thenRejectChangeOrgRequest(CaseRole partyRequesting) {
             // Setup
             ChangeOrganisationRequest request = ChangeOrganisationRequest.builder()
                 .caseRoleId(DynamicList.builder()
                     .value(DynamicListElement.builder()
-                        .code(partyRequesting)
+                        .code(partyRequesting.getCcdCode())
                         .build())
                     .build())
                 .build();
@@ -576,12 +576,16 @@ class UpdateRepresentationServiceTest {
                 .thenReturn(false);
 
             FinremCaseData finremCaseData = spy(FinremCaseData.builder()
+                .applicantOrganisationPolicy(OrganisationPolicy.builder()
+                    .organisation(Organisation.builder().organisationID(TEST_ORG_ID).build()).build())
+                .respondentOrganisationPolicy(OrganisationPolicy.builder()
+                    .organisation(Organisation.builder().organisationID(TEST_ORG2_ID).build()).build())
                 .changeOrganisationRequestField(request)
                 .build());
-            if (sameEmailRepresentingAppSolicitor) {
-                when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+            if (APP_SOLICITOR.equals(partyRequesting)) {
+                when(organisationService.findOrganisationIdByUserId(TEST_USER_ID)).thenReturn(Optional.of(TEST_ORG2_ID));
             } else {
-                when(finremCaseData.getRespSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+                when(organisationService.findOrganisationIdByUserId(TEST_USER_ID)).thenReturn(Optional.of(TEST_ORG_ID));
             }
             when(finremCaseDetailsMapper.mapToFinremCaseData(map)).thenReturn(finremCaseData);
 
@@ -590,7 +594,7 @@ class UpdateRepresentationServiceTest {
             when(auditEventService.getLatestAuditEventByName(CASE_ID, NOC_EVENT))
                 .thenReturn(Optional.of(auditEvent));
             UserDetails userDetails = mock(UserDetails.class);
-            when(userDetails.getEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(userDetails.getId()).thenReturn(TEST_USER_ID);
             when(idamClient.getUserByUserId(AUTH_TOKEN, TEST_USER_ID)).thenReturn(userDetails);
 
             // Act
