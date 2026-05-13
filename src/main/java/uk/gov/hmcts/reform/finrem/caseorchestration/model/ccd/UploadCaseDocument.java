@@ -45,6 +45,7 @@ public class UploadCaseDocument implements HasCaseDocument {
                 .documentUrl(scannedDocument.getUrl().getDocumentUrl())
                 .documentBinaryUrl(scannedDocument.getUrl().getDocumentBinaryUrl())
                 .documentFilename(scannedDocument.getUrl().getDocumentFilename())
+                .uploadTimestamp(scannedDocument.getUrl().getUploadTimestamp())
                 .build())
             .exceptionRecordReference(scannedDocument.getExceptionRecordReference())
             .build();
