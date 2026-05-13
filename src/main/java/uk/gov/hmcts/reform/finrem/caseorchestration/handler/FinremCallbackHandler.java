@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -105,12 +106,29 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             .build();
     }
 
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> responseWithoutWarnings(FinremCaseData finremCaseData,
+                                                                                                  List<String> errors) {
+        return responseWithoutWarnings(finremCaseData, errors, null);
+    }
+
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> responseWithoutWarnings(FinremCaseData finremCaseData,
+                                                                                                  List<String> errors,
+                                                                                                  String postState) {
+        return response(finremCaseData, null, errors, postState);
+    }
+
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData) {
         return response(finremCaseData, null, null);
     }
 
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData,
                                                                                    List<String> warnings, List<String> errors) {
+        return response(finremCaseData, warnings, errors, null);
+    }
+
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData,
+                                                                                   List<String> warnings, List<String> errors,
+                                                                                   String postState) {
         var builder = GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder();
         builder.data(finremCaseData);
         if (errors != null && !errors.isEmpty()) {
@@ -118,6 +136,9 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         }
         if (warnings != null && !warnings.isEmpty()) {
             builder.warnings(warnings);
+        }
+        if (StringUtils.isNotBlank(postState)) {
+            builder.state(postState);
         }
         return builder.build();
     }
