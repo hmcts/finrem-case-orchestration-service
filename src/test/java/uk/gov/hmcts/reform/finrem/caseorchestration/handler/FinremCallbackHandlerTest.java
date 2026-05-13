@@ -297,6 +297,21 @@ class FinremCallbackHandlerTest {
     @Test
     void givenHandler_whenValidateCaseData_thenThrowException() {
 
+        FinremCallbackRequest nullCaseDetailsRequest =
+            FinremCallbackRequestFactory.from((FinremCaseDetails) null);
+
+        FinremCallbackRequest emptyCaseDataRequest =
+            FinremCallbackRequestFactory.from(
+                FinremCaseDetails.builder().build()
+            );
+
+        FinremCallbackRequest validRequest =
+            FinremCallbackRequestFactory.from(
+                FinremCaseDetails.builder()
+                    .data(FinremCaseData.builder().build())
+                    .build()
+            );
+
         assertThrows(
             InvalidCaseDataException.class,
             () -> validateCaseDataTestHandler.handle((FinremCallbackRequest) null, AUTH_TOKEN)
@@ -304,29 +319,16 @@ class FinremCallbackHandlerTest {
 
         assertThrows(
             InvalidCaseDataException.class,
-            () -> validateCaseDataTestHandler.handle(
-                FinremCallbackRequestFactory.from((FinremCaseDetails) null),
-                AUTH_TOKEN
-            )
+            () -> validateCaseDataTestHandler.handle(nullCaseDetailsRequest, AUTH_TOKEN)
         );
 
         assertThrows(
             InvalidCaseDataException.class,
-            () -> validateCaseDataTestHandler.handle(
-                FinremCallbackRequestFactory.from(FinremCaseDetails.builder().build()),
-                AUTH_TOKEN
-            )
+            () -> validateCaseDataTestHandler.handle(emptyCaseDataRequest, AUTH_TOKEN)
         );
 
         assertDoesNotThrow(
-            () -> validateCaseDataTestHandler.handle(
-                FinremCallbackRequestFactory.from(
-                    FinremCaseDetails.builder()
-                        .data(FinremCaseData.builder().build())
-                        .build()
-                ),
-                AUTH_TOKEN
-            )
+            () -> validateCaseDataTestHandler.handle(validRequest, AUTH_TOKEN)
         );
     }
 }
