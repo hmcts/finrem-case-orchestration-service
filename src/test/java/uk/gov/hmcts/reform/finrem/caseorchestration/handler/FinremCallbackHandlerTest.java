@@ -163,14 +163,19 @@ class FinremCallbackHandlerTest {
         when(finremCaseDetailsMapper.mapToFinremCaseData(Map.of("retained", YesOrNo.YES)))
             .thenReturn(expectedResponseData);
 
-        assertThat(generalAboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN).getData())
-            .isEqualTo(expectedResponseData); // if expected properties are removed, it must return expectedResponseData
-        verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(TESTING_DATA_IN_MAP);
+        var response = generalAboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        // to ensure callbackRequest is a copy i.e. callbackRequest.toBuilder() was invoked
-        ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
-        verify(generalAboutToSubmitCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
-        assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
+        assertAll(
+            () -> assertThat(response.getData())
+            .isEqualTo(expectedResponseData), // if expected properties are removed, it must return expectedResponseData
+            () -> verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(TESTING_DATA_IN_MAP),
+            () -> {
+                // To ensure method handle(FinremCallbackRequest, String) invoked and CallbackRequest was converted to FinremCallbackRequest
+                ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
+                verify(generalAboutToSubmitCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
+                assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
+            }
+        );
     }
 
     @Test
@@ -187,13 +192,18 @@ class FinremCallbackHandlerTest {
             argThat(arg -> TESTING_DATA_IN_MAP.equals(arg.getData())))
         ).thenReturn(finremCaseDetailsWithExpectedFinremCaseData);
 
-        assertThat(generalFinremCallbackHandler.handle(callbackRequest, AUTH_TOKEN).getData())
-            .isEqualTo(expectedFinremCaseData);
-        verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(Map.of("retained", YesOrNo.YES));
-
-        ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
-        verify(generalFinremCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
-        assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
+        var response = generalFinremCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+        assertAll(
+            () -> assertThat(response.getData())
+                .isEqualTo(expectedFinremCaseData),
+            () -> verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(Map.of("retained", YesOrNo.YES)),
+            () -> {
+                // To ensure method handle(FinremCallbackRequest, String) invoked and CallbackRequest was converted to FinremCallbackRequest
+                ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
+                verify(generalFinremCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
+                assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
+            }
+        );
     }
 
     @Test
