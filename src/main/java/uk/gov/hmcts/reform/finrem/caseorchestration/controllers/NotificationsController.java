@@ -152,7 +152,7 @@ public class NotificationsController extends BaseController {
                 log.info("{} - Caught exception while sending notification to avoid breaking NOC flow.", caseId);
             }
         } else {
-            log.info("{} - Notice of change rejected. Do nothing.", caseId);
+            log.info("{} - Notice of change rejected. No emails or letters were sent.", caseId);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
