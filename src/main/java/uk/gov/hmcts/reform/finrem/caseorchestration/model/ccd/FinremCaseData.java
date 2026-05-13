@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CfvMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CitizenDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderScannedDocWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -64,7 +65,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.isYes;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -450,6 +450,10 @@ public class FinremCaseData implements HasCaseDocument {
     private List<AccessCodeCollection> applicantAccessCodes;
     private List<AccessCodeCollection> respondentAccessCodes;
 
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private CitizenDocumentWrapper citizenDocumentWrapper;
+
     @JsonIgnore
     public CaseDataMetricsWrapper getCaseDataMetricsWrapper() {
         if (caseDataMetricsWrapper == null) {
@@ -808,16 +812,24 @@ public class FinremCaseData implements HasCaseDocument {
 
     @JsonIgnore
     public String getAppSolicitorEmailIfRepresented() {
-        var contactWrapper = getContactDetailsWrapper();
-        if (contactWrapper == null || !isYes(contactWrapper.getApplicantRepresented())) {
+        if (!isApplicantRepresentedByASolicitor()) {
             return null;
         }
 
+        var contactWrapper = getContactDetailsWrapper();
         if (isConsentedApplication()) {
             return contactWrapper.getSolicitorEmail();
         } else {
             return contactWrapper.getApplicantSolicitorEmail();
         }
+    }
+
+    @JsonIgnore
+    public String getRespSolicitorEmailIfRepresented() {
+        if (!isRespondentRepresentedByASolicitor()) {
+            return null;
+        }
+        return getContactDetailsWrapper().getRespondentSolicitorEmail();
     }
 
     @JsonIgnore
@@ -855,7 +867,7 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     /*
-     * Respondent solictor email is kept in a consistent field for contested and consented cases.
+     * Respondent solicitor email is kept in a consistent field for contested and consented cases.
      */
     @JsonIgnore
     public String getRespondentSolicitorEmail() {
@@ -1161,5 +1173,13 @@ public class FinremCaseData implements HasCaseDocument {
             this.manageCaseDocumentsWrapper = new ManageCaseDocumentsWrapper();
         }
         return manageCaseDocumentsWrapper;
+    }
+
+    @JsonIgnore
+    public CitizenDocumentWrapper getCitizenDocumentWrapper() {
+        if (citizenDocumentWrapper == null) {
+            this.citizenDocumentWrapper = new CitizenDocumentWrapper();
+        }
+        return citizenDocumentWrapper;
     }
 }

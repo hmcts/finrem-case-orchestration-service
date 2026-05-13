@@ -54,8 +54,8 @@ class ApplicantLocalCourtValidatorTest {
             assertThat(validationErrors).isEmpty();
         } else {
             assertThat(validationErrors).hasSize(1);
-            assertThat(validationErrors.get(0)).isEqualTo(
-                "Applicant's Local Court is required. Update Please choose the Region in which the Applicant resides");
+            assertThat(validationErrors.getFirst()).isEqualTo(
+                "Applicant's Local Court is required. Update Please state in which Financial Remedies Court Zone the applicant resides");
         }
     }
 

@@ -19,7 +19,9 @@ public enum Features {
     MANAGE_HEARING_ENABLED("manage_hearing_enabled"),
     VACATE_HEARING_ENABLED("vacate_hearing_enabled"),
     MANAGE_CASE_DOCS_DELETE_ENABLED("manage_case_docs_delete_enabled"),
-    FINREM_CITIZEN_UI_ENABLED("finrem_citizen_ui_enabled");
+    DELETE_OLD_BP_COVERSHEET_ENABLED("delete_old_bp_coversheet_enabled"),
+    FINREM_CITIZEN_UI_ENABLED("finrem_citizen_ui_enabled"),
+    FINREM_WORK_ALLOCATION_ENABLED("finrem_work_allocation_enabled");
 
     private final String name;
 }
