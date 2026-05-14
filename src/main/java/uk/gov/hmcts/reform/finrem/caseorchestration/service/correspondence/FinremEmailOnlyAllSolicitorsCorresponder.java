@@ -44,4 +44,8 @@ public abstract class FinremEmailOnlyAllSolicitorsCorresponder extends EmailOnly
 
     protected abstract void emailRespondentSolicitor(FinremCaseDetails caseDetails);
 
+    protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
 }
