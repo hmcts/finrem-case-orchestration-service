@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
 
 @Slf4j
@@ -38,10 +37,7 @@ public class RejectedConsentOrderSubmittedHandler extends FinremCallbackHandler 
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Sending consent order not approved email correspondence to applicant for Case ID: {}", caseDetails.getId());
-        consentOrderNotApprovedCorresponder.sendCorrespondence(caseDetails);
-
+        consentOrderNotApprovedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails());
         return submittedResponse();
     }
 }
