@@ -1,31 +1,26 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.rejectorder;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
+
+import java.util.Map;
 
 @Slf4j
 @Service
-public class RejectedConsentOrderSubmittedHandler extends FinremCallbackHandler {
+@RequiredArgsConstructor
+public class RejectedConsentOrderSubmittedHandler
+    implements CallbackHandler<Map<String, Object>> {
 
     private final ConsentOrderNotApprovedCorresponder consentOrderNotApprovedCorresponder;
-
-    public RejectedConsentOrderSubmittedHandler(FinremCaseDetailsMapper mapper,
-                                                ConsentOrderNotApprovedCorresponder consentOrderNotApprovedCorresponder) {
-        super(mapper);
-        this.consentOrderNotApprovedCorresponder = consentOrderNotApprovedCorresponder;
-    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -35,15 +30,17 @@ public class RejectedConsentOrderSubmittedHandler extends FinremCallbackHandler 
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        log.info(CallbackHandlerLogger.submitted(callbackRequest));
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
+        CallbackRequest callbackRequest,
+        String userAuthorisation) {
 
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Sending consent order not approved email correspondence to applicant for Case ID: {}", caseDetails.getId());
         consentOrderNotApprovedCorresponder.sendCorrespondence(caseDetails);
 
-        return submittedResponse();
+        return GenericAboutToStartOrSubmitCallbackResponse
+            .<Map<String, Object>>builder()
+            .data(callbackRequest.getCaseDetails().getData())
+            .build();
     }
 }
