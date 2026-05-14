@@ -30,7 +30,7 @@ public class OrganisationPolicy {
     private String orgPolicyReference;
 
     @JsonProperty("LastNoCRequestedBy")
-    private String lastNOCRequestedBy;
+    private String lastNoCRequestedBy;
 
     @JsonProperty("PreviousOrganisations")
     private List<PreviousOrganisationCollectionItem> previousOrganisations;
