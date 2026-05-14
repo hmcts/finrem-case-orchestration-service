@@ -18,12 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocument
 @Service
 public class RejectedConsentOrderMidHandler extends FinremCallbackHandler {
 
-    private final RefusalOrderDocumentService service;
+    private final RefusalOrderDocumentService refusalOrderDocumentService;
 
     public RejectedConsentOrderMidHandler(FinremCaseDetailsMapper mapper,
-                                          RefusalOrderDocumentService service) {
+                                          RefusalOrderDocumentService refusalOrderDocumentService) {
         super(mapper);
-        this.service = service;
+        this.refusalOrderDocumentService = refusalOrderDocumentService;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class RejectedConsentOrderMidHandler extends FinremCallbackHandler {
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        FinremCaseData caseData = service.previewConsentOrderNotApproved(userAuthorisation, caseDetails);
+        FinremCaseData caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(userAuthorisation, caseDetails);
         clearContestedFields(caseData);
 
         return response(caseData);
