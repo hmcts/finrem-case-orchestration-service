@@ -20,15 +20,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Re
 @Service
 public class RejectedConsentOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
-    private final RefusalOrderDocumentService service;
+    private final RefusalOrderDocumentService refusalOrderDocumentService;
     private final RefusedConsentOrderDocumentCategoriser categoriser;
 
     @Autowired
     public RejectedConsentOrderAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                    RefusalOrderDocumentService service,
+                                                    RefusalOrderDocumentService refusalOrderDocumentService,
                                                     RefusedConsentOrderDocumentCategoriser categoriser) {
         super(mapper);
-        this.service = service;
+        this.refusalOrderDocumentService = refusalOrderDocumentService;
         this.categoriser = categoriser;
     }
 
@@ -46,7 +46,7 @@ public class RejectedConsentOrderAboutToSubmitHandler extends FinremAboutToSubmi
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        FinremCaseData caseData = service.processConsentOrderNotApproved(caseDetails, userAuthorisation);
+        FinremCaseData caseData = refusalOrderDocumentService.processConsentOrderNotApproved(caseDetails, userAuthorisation);
         categoriser.categorise(caseData);
 
         return response(caseData);
