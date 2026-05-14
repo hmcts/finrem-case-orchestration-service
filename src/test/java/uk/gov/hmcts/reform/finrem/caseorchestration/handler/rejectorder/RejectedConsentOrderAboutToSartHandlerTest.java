@@ -30,9 +30,11 @@ class RejectedConsentOrderAboutToSartHandlerTest {
     }
 
     @Test
-    void given_case_when_order_not_approved_then_reject_order() {
+    void givenCase_whenHandled_thenDefaultsApplied() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+
         handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(refusalOrderDocumentService).setDefaults(callbackRequest.getCaseDetails().getData(), AUTH_TOKEN);
+
+        verify(refusalOrderDocumentService).setDefaults(callbackRequest.getFinremCaseData(), AUTH_TOKEN);
     }
 }
