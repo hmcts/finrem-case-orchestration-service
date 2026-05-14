@@ -695,14 +695,14 @@ public class TestSetUpUtils {
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails()))
             .thenReturn(finremCaseDetails);
 
-        Map<String, Object> dataWithGadPreview = new HashMap(temporaryFieldsWithValue);
-        CaseDetails toBeSanitised = CaseDetails.builder().data(dataWithGadPreview).build();
+        Map<String, Object> temporaryFieldsMap = new HashMap(temporaryFieldsWithValue);
+        CaseDetails toBeSanitised = CaseDetails.builder().data(temporaryFieldsMap).build();
         when(finremCaseDetailsMapper.mapToCaseDetails(argThat(a -> a.getData()
             .equals(finremCaseDetails.getData())))).thenReturn(toBeSanitised);
 
         aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        Assertions.assertThat(dataWithGadPreview)
+        Assertions.assertThat(temporaryFieldsMap)
             .doesNotContainKeys(temporaryFieldsWithValue.keySet().toArray(new String[0]));
     }
 }
