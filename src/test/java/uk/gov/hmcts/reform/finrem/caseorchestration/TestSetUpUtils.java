@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
+import org.assertj.core.api.Assertions;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.function.ThrowingSupplier;
@@ -13,8 +14,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
@@ -61,8 +65,12 @@ import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
@@ -673,5 +681,28 @@ public class TestSetUpUtils {
             any(),
             any()
         );
+    }
+
+    public static void verifyTemporaryFieldsWereSanitised(EventType eventType,
+                                                          FinremAboutToSubmitCallbackHandler aboutToSubmitHandler,
+                                                          FinremCaseDetails finremCaseDetails,
+                                                          FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                          Map<String, Object> temporaryFieldsWithValue) {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(mock(CaseDetails.class))
+            .eventId(eventType.getCcdType())
+            .build();
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails()))
+            .thenReturn(finremCaseDetails);
+
+        Map<String, Object> temporaryFieldsMap = new HashMap(temporaryFieldsWithValue);
+        CaseDetails toBeSanitised = CaseDetails.builder().data(temporaryFieldsMap).build();
+        when(finremCaseDetailsMapper.mapToCaseDetails(argThat(a -> a.getData()
+            .equals(finremCaseDetails.getData())))).thenReturn(toBeSanitised);
+
+        aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        Assertions.assertThat(temporaryFieldsMap)
+            .doesNotContainKeys(temporaryFieldsWithValue.keySet().toArray(new String[0]));
     }
 }
