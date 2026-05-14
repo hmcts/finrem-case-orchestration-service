@@ -296,16 +296,15 @@ class FinremCallbackHandlerTest {
 
     @Test
     void givenHandler_whenValidateCaseData_thenThrowException() {
-
-        FinremCallbackRequest nullCaseDetailsRequest =
+        final FinremCallbackRequest nullCaseDetailsRequest =
             FinremCallbackRequestFactory.from((FinremCaseDetails) null);
 
-        FinremCallbackRequest emptyCaseDataRequest =
+        final FinremCallbackRequest emptyCaseDataRequest =
             FinremCallbackRequestFactory.from(
                 FinremCaseDetails.builder().build()
             );
 
-        FinremCallbackRequest validRequest =
+        final FinremCallbackRequest validRequest =
             FinremCallbackRequestFactory.from(
                 FinremCaseDetails.builder()
                     .data(FinremCaseData.builder().build())
