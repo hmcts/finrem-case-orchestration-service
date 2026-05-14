@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PreviousOrganisationCollectionItem {
 
-    @JsonProperty("id")
     private String id;
 
-    @JsonProperty("value")
     private PreviousOrganisation value;
 }
