@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 import static java.util.Optional.ofNullable;
 
 @Data
@@ -26,6 +28,12 @@ public class OrganisationPolicy {
 
     @JsonProperty("OrgPolicyReference")
     private String orgPolicyReference;
+
+    @JsonProperty("LastNoCRequestedBy")
+    private String lastNOCRequestedBy;
+
+    @JsonProperty("PreviousOrganisations")
+    private List<PreviousOrganisationCollectionItem> previousOrganisations;
 
     @JsonIgnore
     public Organisation getOrganisation() {
