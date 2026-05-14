@@ -42,6 +42,6 @@ public class RejectedConsentOrderSubmittedHandler extends FinremCallbackHandler 
         log.info("Sending consent order not approved email correspondence to applicant for Case ID: {}", caseDetails.getId());
         consentOrderNotApprovedCorresponder.sendCorrespondence(caseDetails);
 
-        return response(callbackRequest.getCaseDetails().getData());
+        return submittedResponse();
     }
 }
