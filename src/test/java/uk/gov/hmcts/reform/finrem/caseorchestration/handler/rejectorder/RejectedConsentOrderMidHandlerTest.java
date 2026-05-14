@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocument
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,8 +26,6 @@ class RejectedConsentOrderMidHandlerTest {
     private RejectedConsentOrderMidHandler handler;
     @Mock
     private RefusalOrderDocumentService refusalOrderDocumentService;
-
-    private static final String AUTH_TOKEN = "Token-:";
 
     @Test
     void given_case_whenEventRejectedOrder_thenCanHandle() {
