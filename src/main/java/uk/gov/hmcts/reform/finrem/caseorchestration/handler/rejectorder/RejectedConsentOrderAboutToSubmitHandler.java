@@ -33,8 +33,7 @@ public class RejectedConsentOrderAboutToSubmitHandler extends FinremAboutToSubmi
     }
 
     @Override
-    public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
-                             final EventType eventType) {
+    public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
             && EventType.REJECT_ORDER.equals(eventType);
