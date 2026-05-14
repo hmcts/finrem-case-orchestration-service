@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
 
 @Slf4j
@@ -36,12 +35,8 @@ public class RejectedConsentOrderAboutToSartHandler extends FinremCallbackHandle
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request for '{}' event '{}' for Case ID: {}",CallbackType.ABOUT_TO_START,
-            EventType.REJECT_ORDER, caseDetails.getId());
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(refusalOrderDocumentService.setDefaults(caseDetails.getData(), userAuthorisation))
-            .build();
+        return response(refusalOrderDocumentService.setDefaults(callbackRequest.getFinremCaseData(), userAuthorisation));
     }
 }
