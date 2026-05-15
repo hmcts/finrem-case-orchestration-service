@@ -50,10 +50,7 @@ public class ApprovedConsentOrderSubmittedHandler extends FinremCallbackHandler 
             consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse
-            .<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .build();
+        return submittedResponse();
     }
 
     private Boolean isPensionDocumentsEmpty(FinremCaseData caseData) {
