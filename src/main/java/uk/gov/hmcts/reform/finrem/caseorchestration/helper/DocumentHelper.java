@@ -173,9 +173,14 @@ public class DocumentHelper {
             .toList();
     }
 
+    /**
+     * Retrieves all non-null pension documents from the case data pension collection.
+     *
+     * @param caseData the financial remedy case data containing pension information
+     * @return a list of pension documents, or an empty list if no pension documents exist
+     */
     public List<CaseDocument> getPensionDocumentsData(FinremCaseData caseData) {
-        return ofNullable(caseData.getPensionCollection())
-            .orElse(emptyList())
+        return emptyIfNull(caseData.getPensionCollection())
             .stream()
             .map(PensionTypeCollection::getTypedCaseDocument)
             .map(PensionType::getPensionDocument)
