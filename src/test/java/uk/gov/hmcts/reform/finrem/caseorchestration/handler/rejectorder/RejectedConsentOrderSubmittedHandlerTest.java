@@ -27,7 +27,7 @@ public class RejectedConsentOrderSubmittedHandlerTest {
 
     @Test
     public void testCanHandle() {
-        assertCanHandle(handler ,CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.REJECT_ORDER);
+        assertCanHandle(handler, CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.REJECT_ORDER);
     }
 
     @Test
