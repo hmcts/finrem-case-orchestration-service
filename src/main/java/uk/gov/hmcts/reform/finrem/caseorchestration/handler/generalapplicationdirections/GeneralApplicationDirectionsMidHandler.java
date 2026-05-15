@@ -61,10 +61,15 @@ public class GeneralApplicationDirectionsMidHandler extends FinremCallbackHandle
             warnings.addAll(validateHearingService.validateGeneralApplicationDirectionsIntervenerParties(finremCaseData));
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData)
-            .warnings(warnings)
-            .errors(errors)
-            .build();
+        if (warnings.isEmpty() && errors.isEmpty()) {
+            createPreviewOfGeneralApplicationDirectionIfNecessary(finremCaseDetails, userAuthorisation);
+        }
+        return response(finremCaseData, warnings, errors);
+    }
+
+    private void createPreviewOfGeneralApplicationDirectionIfNecessary(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
+        generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocumentIfNeeded(userAuthorisation, finremCaseDetails)
+            .ifPresent(doc -> finremCaseDetails.getData().getGeneralApplicationWrapper()
+                .setGeneralApplicationDirectionsPreview(doc));
     }
 }
