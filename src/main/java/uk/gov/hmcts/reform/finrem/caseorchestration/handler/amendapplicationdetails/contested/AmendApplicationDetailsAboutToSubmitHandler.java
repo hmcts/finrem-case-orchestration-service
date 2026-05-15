@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.contested;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -100,14 +100,10 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
 
         List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
         if (!mandatoryDataErrors.isEmpty()) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .errors(mandatoryDataErrors)
-                .data(caseData).build();
+            return response(caseData, null, mandatoryDataErrors);
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .errors(ContactDetailsValidator.validateOrganisationPolicy(caseData))
-            .data(caseData).build();
+        return response(caseData, null, ContactDetailsValidator.validateOrganisationPolicy(caseData));
     }
 
     private void generateMiniFormA(FinremCaseDetails finremCaseDetails, String userAuthorisation) {

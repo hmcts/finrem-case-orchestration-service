@@ -683,6 +683,14 @@ public class TestSetUpUtils {
         );
     }
 
+    public static void assertCondition(String actual, String expect, boolean shouldContain) {
+        if (shouldContain) {
+            org.assertj.core.api.Assertions.assertThat(actual).contains(expect);
+        } else {
+            org.assertj.core.api.Assertions.assertThat(actual).doesNotContain(expect);
+        }
+    }
+  
     public static void verifyTemporaryFieldsWereSanitised(EventType eventType,
                                                           FinremAboutToSubmitCallbackHandler aboutToSubmitHandler,
                                                           FinremCaseDetails finremCaseDetails,
