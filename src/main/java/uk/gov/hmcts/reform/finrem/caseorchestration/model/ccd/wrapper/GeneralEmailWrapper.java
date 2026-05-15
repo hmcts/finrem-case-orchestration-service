@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
@@ -19,21 +20,15 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GeneralEmailWrapper implements HasCaseDocument {
+    @TemporaryField
     private String generalEmailRecipient;
+    @TemporaryField
     private String generalEmailCreatedBy;
+    @TemporaryField
     private String generalEmailBody;
+    @TemporaryField
     private CaseDocument generalEmailUploadedDocument;
-    private List<GeneralEmailCollection> generalEmailCollection;
 
-    /**
-     * Clears working data, but leaves generalEmailCollection untouched.
-     * The data set to null below is working data, used to capture User input from an EXUI event.
-     * The generalEmailCollection is preserved as a record of emails sent.
-     */
-    public void setGeneralEmailValuesToNull() {
-        this.setGeneralEmailRecipient(null);
-        this.setGeneralEmailCreatedBy(null);
-        this.setGeneralEmailUploadedDocument(null);
-        this.setGeneralEmailBody(null);
-    }
+    // It stores the emails sent
+    private List<GeneralEmailCollection> generalEmailCollection;
 }

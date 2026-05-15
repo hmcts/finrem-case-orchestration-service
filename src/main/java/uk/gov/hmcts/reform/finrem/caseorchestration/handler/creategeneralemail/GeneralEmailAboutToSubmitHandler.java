@@ -6,11 +6,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -24,9 +23,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Ge
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
+
 @Slf4j
 @Service
-public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
+public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final NotificationService notificationService;
     private final GeneralEmailService generalEmailService;
@@ -49,7 +50,6 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && (CaseType.CONSENTED.equals(caseType) || CaseType.CONTESTED.equals(caseType))
             && EventType.CREATE_GENERAL_EMAIL.equals(eventType);
     }
 
@@ -59,34 +59,46 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         validateCaseData(callbackRequest);
 
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseDocument generalEmailUploadedDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
-        if (generalEmailUploadedDocument != null) {
-            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalEmailUploadedDocument,
-                userAuthorisation, caseDetails.getCaseType());
-            caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailUploadedDocument(pdfDocument);
-        }
-        generalEmailService.storeGeneralEmail(caseDetails);
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
+
+        convertEmailAttachmentToPdfIfRequired(finremCaseData, userAuthorisation);
+        generalEmailService.storeGeneralEmail(finremCaseData);
 
         List<String> errors = new ArrayList<>();
-        try {
-            if (caseDetails.isConsentedApplication()) {
-                notificationService.sendConsentGeneralEmail(caseDetails, userAuthorisation);
-            } else {
-                notificationService.sendContestedGeneralEmail(caseDetails, userAuthorisation);
-                generalEmailCategoriser.categorise(caseDetails.getData());
-            }
+        sendGeneralEmail(finremCaseDetails, userAuthorisation, errors);
+        if (!errors.isEmpty()) {
+            return response(finremCaseData, null, errors);
+        }
 
-            caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailValuesToNull();
+        if (finremCaseDetails.isContestedApplication()) {
+            generalEmailCategoriser.categorise(finremCaseData);
+        }
+
+        return response(finremCaseData);
+    }
+
+    private void convertEmailAttachmentToPdfIfRequired(FinremCaseData finremCaseData, String userAuthorisation) {
+        ofNullable(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument())
+            .map(document -> genericDocumentService.convertDocumentIfNotPdfAlready(
+                document,
+                userAuthorisation,
+                finremCaseData.getCcdCaseType()
+            ))
+            .ifPresent(finremCaseData.getGeneralEmailWrapper()::setGeneralEmailUploadedDocument);
+    }
+
+    private void sendGeneralEmail(FinremCaseDetails finremCaseDetails, String userAuthorisation, List<String> errors) {
+        try {
+            if (finremCaseDetails.isConsentedApplication()) {
+                notificationService.sendConsentGeneralEmail(finremCaseDetails, userAuthorisation);
+            } else {
+                notificationService.sendContestedGeneralEmail(finremCaseDetails, userAuthorisation);
+            }
         } catch (InvalidEmailAddressException e) {
             errors.add("Not a valid email address");
         } catch (SendEmailException e) {
             errors.add("An error occurred when sending the email");
         }
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseDetails.getData())
-            .errors(errors)
-            .build();
     }
 }
