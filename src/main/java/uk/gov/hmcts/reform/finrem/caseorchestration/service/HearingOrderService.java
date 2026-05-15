@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -142,16 +144,24 @@ public class HearingOrderService {
 
     private void appendDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument order,
                                                     List<DocumentCollectionItem> additionalDocs, YesOrNo isOrderStamped) {
-        List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder()).orElse(new ArrayList<>());
-        directionOrders.add(
-            DirectionOrderCollection.builder()
-                .value(DirectionOrder.builder()
-                    .uploadDraftDocument(order)
-                    .additionalDocuments(additionalDocs)
-                    .isOrderStamped(isOrderStamped)
-                    .build())
-                .build()
-        );
+        appendDocumentToUploadHearingOrder(finremCaseData, order, additionalDocs, isOrderStamped, null);
+    }
+
+    private void appendDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument order,
+                                                    List<DocumentCollectionItem> additionalDocs, YesOrNo isOrderStamped, YesOrNo isFinalYN) {
+        List<DirectionOrderCollection> directionOrders = Optional.ofNullable(finremCaseData.getUploadHearingOrder())
+            .orElseGet(ArrayList::new);
+
+        DirectionOrder.DirectionOrderBuilder orderBuilder = DirectionOrder.builder()
+            .uploadDraftDocument(order)
+            .additionalDocuments(additionalDocs)
+            .isOrderStamped(isOrderStamped);
+
+        Optional.ofNullable(isFinalYN).ifPresent(orderBuilder::isThisFinalYN);
+
+        directionOrders.add(DirectionOrderCollection.builder()
+            .value(orderBuilder.build())
+            .build());
         finremCaseData.setUploadHearingOrder(directionOrders);
     }
 
@@ -230,6 +240,14 @@ public class HearingOrderService {
         FinremCaseData caseData = caseDetails.getData();
         List<DocumentCollectionItem> additionalDocs = order.getAdditionalDocuments();
         YesOrNo isOrderStamped;
+        List<DraftDirectionDetailsCollection> draftDirectionDetailsCollection = caseDetails.getData()
+            .getDraftDirectionWrapper().getDraftDirectionDetailsCollection();
+        YesOrNo isThisFinalYN = ofNullable(draftDirectionDetailsCollection)
+            .filter(CollectionUtils::isNotEmpty)
+            .map(List::getLast)
+            .map(DraftDirectionDetailsCollection::getValue)
+            .map(DraftDirectionDetailsHolder::getIsThisFinalYN)
+            .orElse(null);
         if (ApprovedOrderUploader.CASEWORKER == uploader) {
             CaseDocument stampedDocument = genericDocumentService.stampDocument(
                 order.getApprovedOrder(), authorisationToken, stampType, caseType);
@@ -240,7 +258,8 @@ public class HearingOrderService {
         } else {
             isOrderStamped = YesOrNo.NO;
             // make the uploaded approved orders available for judge uploaded orders in Process Order event
-            appendDocumentToUploadHearingOrder(caseData, order.getApprovedOrder(), additionalDocs, isOrderStamped);
+            // and add the final Order flag if selected by the judge on Direction Order details
+            appendDocumentToUploadHearingOrder(caseData, order.getApprovedOrder(), additionalDocs, isOrderStamped, isThisFinalYN);
         }
     }
 
