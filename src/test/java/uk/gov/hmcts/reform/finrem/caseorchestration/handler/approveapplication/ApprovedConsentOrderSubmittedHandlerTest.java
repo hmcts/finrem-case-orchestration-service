@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.approveapplication;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

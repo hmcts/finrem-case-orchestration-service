@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.approveapplication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
