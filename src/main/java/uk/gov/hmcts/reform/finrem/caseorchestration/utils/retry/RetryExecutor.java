@@ -2,8 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry;
 
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.framework.AopContext;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.retry.RetryContext;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,7 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
  */
 @Slf4j
 @Component
+@EnableAspectJAutoProxy(exposeProxy = true)
 public class RetryExecutor {
 
     private static final RetryErrorHandler SUPPRESS_HANDLER = (ex, actionName, caseId) ->
@@ -51,13 +53,7 @@ public class RetryExecutor {
      * @throws Exception if the operation ultimately fails after all retry attempts
      */
     @Retryable(
-        value = {
-            FeignException.InternalServerError.class,
-            FeignException.ServiceUnavailable.class,
-            FeignException.GatewayTimeout.class
-        },
-        backoff = @Backoff(delay = 2000),
-        listeners = "retryLogger"
+        interceptor = "retryLoggerInterceptor"
     )
     public <T> T supplyWithRetry(ThrowingSupplier<T> supplier, String actionName, String caseId) throws Exception {
         RetryContext context = RetrySynchronizationManager.getContext();
@@ -82,13 +78,7 @@ public class RetryExecutor {
      * @throws Exception if the operation ultimately fails after all retry attempts
      */
     @Retryable(
-        value = {
-            FeignException.InternalServerError.class,
-            FeignException.ServiceUnavailable.class,
-            FeignException.GatewayTimeout.class
-        },
-        backoff = @Backoff(delay = 2000),
-        listeners = "retryLogger"
+        interceptor = "retryLoggerInterceptor"
     )
     public void runWithRetry(ThrowingRunnable action, String actionName, String caseId) throws Exception {
 
@@ -128,7 +118,7 @@ public class RetryExecutor {
             throw new IllegalStateException("no handler provided");
         }
         try {
-            runWithRetry(action, actionName, caseId);
+            ((RetryExecutor) AopContext.currentProxy()).runWithRetry(action, actionName, caseId);
         } catch (Exception ex) {
             log.error("{} - Exception caught when {}", caseId, actionName, ex);
             emptyIfNull(Arrays.asList(errorHandlers)).forEach(errorHandler ->
@@ -154,7 +144,7 @@ public class RetryExecutor {
         String caseId
     ) {
         try {
-            runWithRetry(action, actionName, caseId);
+            ((RetryExecutor) AopContext.currentProxy()).runWithRetry(action, actionName, caseId);
         } catch (Exception ex) {
             SUPPRESS_HANDLER.handle(ex, actionName, caseId);
         }
@@ -192,7 +182,7 @@ public class RetryExecutor {
             throw new IllegalStateException("no handler provided");
         }
         try {
-            return Optional.ofNullable(supplyWithRetry(action, actionName, caseId));
+            return Optional.ofNullable(((RetryExecutor) AopContext.currentProxy()).supplyWithRetry(action, actionName, caseId));
         } catch (Exception ex) {
             log.error("{} - Exception caught when {}", caseId, actionName, ex);
             for (RetryErrorHandler handler : errorHandlers) {
@@ -223,7 +213,7 @@ public class RetryExecutor {
     ) {
         try {
             return Optional.ofNullable(
-                supplyWithRetry(action, actionName, caseId)
+                ((RetryExecutor) AopContext.currentProxy()).supplyWithRetry(action, actionName, caseId)
             );
         } catch (Exception ex) {
             SUPPRESS_HANDLER.handle(ex, actionName, caseId);
