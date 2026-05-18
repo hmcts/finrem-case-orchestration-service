@@ -46,6 +46,8 @@ public abstract class SendOrderPartyDocumentHandler {
                     orderColl.add(getApprovedOrderCollection(document));
                 }
             });
+
+            //Adds to each party collection e.g. applicant, respondent, intervener etc
             addOrdersToPartyCollection(caseData, orderColl);
         }
     }
