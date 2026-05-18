@@ -41,7 +41,8 @@ public abstract class SendOrderPartyDocumentHandler {
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData)).orElse(new ArrayList<>());
 
             orderDocumentPack.forEach(document -> {
-                if (!documentAlreadyExistsInCurrentOrderCollection(document, orderColl)) {
+                if (!documentAlreadyExistsInCurrentOrderCollection(document, orderColl)
+                    && !additionalHearingDocumentAlreadyExists(document, getExistingConsolidateCollection(caseData))) {
                     orderColl.add(getApprovedOrderCollection(document));
                 }
             });
@@ -129,33 +130,34 @@ public abstract class SendOrderPartyDocumentHandler {
             .anyMatch(existingUrl -> Objects.equals(existingUrl, document.getDocumentUrl()));
     }
 
-    protected boolean shouldAddDocumentToOrderColl(CaseDocument document,
-                                                   List<ApprovedOrderConsolidateCollection> orderCollForRole) {
-        List<ApprovedOrderConsolidateCollection> existingCollection
-            = Optional.ofNullable(orderCollForRole).orElse(new ArrayList<>());
-        if (existingCollection.isEmpty()) {
-            return true;
-        }
-        return existingCollection.stream().noneMatch(doc -> checkIfDocumentAlreadyInCollectionElement(document, doc));
-    }
-
-    private boolean checkIfDocumentAlreadyInCollectionElement(CaseDocument document, ApprovedOrderConsolidateCollection doc) {
-        return doc.getValue().getApproveOrders().stream().anyMatch(order ->
-            isDocumentAlreadyInCollection(document, order)
-        );
-    }
-
-    private boolean isDocumentAlreadyInCollection(CaseDocument document, ApprovedOrderCollection order) {
-        if (document == null) {
+    private boolean additionalHearingDocumentAlreadyExists(
+        CaseDocument document,
+        List<ApprovedOrderConsolidateCollection> existingConsolidatedCollection
+    ) {
+        if (!isAdditionalHearingDocument(document)) {
             return false;
         }
 
-        return Optional.ofNullable(order)
+        return Optional.ofNullable(existingConsolidatedCollection)
+            .orElse(List.of())
+            .stream()
+            .map(ApprovedOrderConsolidateCollection::getValue)
+            .filter(Objects::nonNull)
+            .map(ApproveOrdersHolder::getApproveOrders)
+            .filter(Objects::nonNull)
+            .flatMap(List::stream)
             .map(ApprovedOrderCollection::getValue)
+            .filter(Objects::nonNull)
             .map(ApproveOrder::getCaseDocument)
-            .map(CaseDocument::getDocumentUrl)
-            .filter(existingDocumentUrl -> Objects.equals(existingDocumentUrl, document.getDocumentUrl()))
-            .isPresent();
+            .filter(Objects::nonNull)
+            .anyMatch(existingDocument ->
+                Objects.equals(existingDocument.getDocumentUrl(), document.getDocumentUrl())
+            );
+    }
+
+    private boolean isAdditionalHearingDocument(CaseDocument document) {
+        return document != null
+            && ADDITIONAL_HEARING_FILE_NAME.equals(document.getDocumentFilename());
     }
 
     protected List<ApprovedOrderConsolidateCollection> getPartyConsolidateCollection(List<ApprovedOrderConsolidateCollection> list) {

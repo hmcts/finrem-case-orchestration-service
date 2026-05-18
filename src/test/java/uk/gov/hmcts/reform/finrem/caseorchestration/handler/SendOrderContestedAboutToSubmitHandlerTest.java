@@ -175,9 +175,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         caseDetails.getData().setSendOrderWrapper(SendOrderWrapper.builder()
             .ordersToSend(OrdersToSend.builder()
                 .value(of(OrderToShareCollection.builder().value(OrderToShare.builder().build()).build())).build())
-            .additionalDocument(caseDocument())
+            .additionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(caseDocument())))
             .build());
         when(generalOrderService.hearingOrdersToShare(eq(caseDetails), anyList())).thenThrow(new RuntimeException("unlucky"));
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CONTESTED))).thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).isNotEmpty().containsExactly("unlucky");
@@ -201,8 +202,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             ))
             .build();
 
+        CaseDocument additionalDocument = caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf");
+
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
-        data.getSendOrderWrapper().setAdditionalDocument(caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf"));
+        data.getSendOrderWrapper().setAdditionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(additionalDocument)));
         data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "coverLetter.pdf"));
         List<CaseDocument> legacyDocs = new ArrayList<>();
         legacyDocs.add(caseDocument("http://fakeurl/legacyDoc1", "legacyDoc1.pdf"));
@@ -215,6 +218,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED)))
             .thenReturn(caseDocument("http://fakeurl/stampedDoc", "stampedDoc.pdf"));
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(additionalDocument, AUTH_TOKEN, CONTESTED)).thenReturn(additionalDocument);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -251,8 +255,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             ))
             .build();
 
+        CaseDocument additionalDocument = caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf");
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
-        data.getSendOrderWrapper().setAdditionalDocument(caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf"));
+        data.getSendOrderWrapper().setAdditionalDocuments(List.of(DocumentCollectionItem
+            .fromCaseDocument(additionalDocument)));
         data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "coverLetter.pdf"));
         List<CaseDocument> legacyDocs = new ArrayList<>();
         legacyDocs.add(caseDocument("http://fakeurl/legacyDoc1", "legacyDoc1.pdf"));
@@ -265,6 +271,11 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED)))
             .thenReturn(caseDocument("http://fakeurl/stampedDoc", "stampedDoc.pdf"));
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(
+            additionalDocument,
+            AUTH_TOKEN,
+            CONTESTED
+        )).thenReturn(additionalDocument);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -300,7 +311,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
-        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(caseDocument())));
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
@@ -408,9 +419,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             ))
             .build();
 
-        CaseDocument additionalDocument;
+        CaseDocument additionalDocument = caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf");
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
-        data.getSendOrderWrapper().setAdditionalDocument(additionalDocument = caseDocument("http://fakeurl/additionalDocument", "additionalDocument.docx"));
+        data.getSendOrderWrapper().setAdditionalDocuments(List.of(DocumentCollectionItem
+            .fromCaseDocument(additionalDocument)));
         data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "orderApprovedCoverLetter.pdf"));
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
@@ -857,7 +869,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     private void assertClearTempFields(FinremCaseData caseData) {
-        assertNull(caseData.getSendOrderWrapper().getAdditionalDocument());
+        assertNull(caseData.getSendOrderWrapper().getAdditionalDocuments());
         assertThat(caseData)
             .extracting(FinremCaseData::getSendOrderWrapper)
             .extracting(SendOrderWrapper::getOrdersToSend)
