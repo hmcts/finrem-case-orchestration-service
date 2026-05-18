@@ -65,5 +65,7 @@ public class TestConstants {
     public static final String TEST_FORM_TYPE = "testFormType";
     public static final String TEST_BULK_UNSUPPORTED_FORM_TYPE = "unsupportedFormType";
     public static final String TEST_URL = "https://test.com";
-    public static final String TEST_DOCUMENT_BINARY_URL = "http://test.com/document";
+    public static final String TEST_DOCUMENT_BINARY_URL = "http://test.com/document/1234567890/binary";
+    public static final String TEST_DOCUMENT_URL = "http://test.com/document/1234567890";
+    public static final String TEST_DOCUMENT_FILENAME = "test.pdf";
 }

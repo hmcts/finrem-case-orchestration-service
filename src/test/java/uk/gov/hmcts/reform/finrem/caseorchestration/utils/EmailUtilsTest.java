@@ -3,11 +3,35 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EmailUtilsTest {
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "abc@abc.com,abc@abc.com,false",
+        "abc@abc.com,abc@ABC.com,false",
+        "ABC@abc.com,abc@abc.com,false",
+        " abc@abc.com ,abc@ABC.com ,false",
+        "def@abc.com,abc@abc.com,true",
+        "NULL,abc@abc.com,true",
+        "abc@abc.com,,true",
+        "abc@abc.com,NULL,true",
+        "NULL,NULL,false",
+        ",NULL,false",
+        "NULL,,false",
+        ",,false",
+        " , ,false"
+    }, ignoreLeadingAndTrailingWhitespace = false, nullValues = "NULL")
+    void testAreEmailsDifferent(String email1, String email2, boolean expected) {
+        assertThat(EmailUtils.areEmailsDifferent(email1, email2)).isEqualTo(expected);
+
+    }
 
     @Nested
     @DisplayName("Valid email addresses")

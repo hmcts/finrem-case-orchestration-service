@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
@@ -790,6 +791,69 @@ class ContactDetailsValidatorTest {
                 List.of(String.format(ERROR_MSG, (String) null))
             )
         );
+    }
+
+    @Test
+    void givenIntervenerNotRepresented_whenCheckForIntervenerSolicitorEmailAddress_thenReturnsNull() {
+        IntervenerWrapper intervener = mock(IntervenerWrapper.class);
+        when(intervener.getIntervenerRepresented()).thenReturn(YesOrNo.NO);
+        ValidatePartiesService validatePartiesService = mock(ValidatePartiesService.class);
+
+        String error = ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(
+            intervener,
+            validatePartiesService
+        );
+
+        assertThat(error).isNull();
+    }
+
+    @Test
+    void givenRepresentedIntervenerWithInvalidEmail_whenCheckForIntervenerSolicitorEmailAddress_thenReturnsInvalidEmailError() {
+        IntervenerWrapper intervener = mock(IntervenerWrapper.class);
+        when(intervener.getIntervenerRepresented()).thenReturn(YesOrNo.YES);
+        when(intervener.getIntervenerSolEmail()).thenReturn(INVALID_EMAIL);
+        ValidatePartiesService validatePartiesService = mock(ValidatePartiesService.class);
+
+        String error = ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(
+            intervener,
+            validatePartiesService
+        );
+
+        assertThat(error).isEqualTo(
+            ContactDetailsValidator.INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(INVALID_EMAIL)
+        );
+    }
+
+    @Test
+    void givenRepresentedIntervenerWithEmailNotInOrganisation_whenCheckForIntervenerSolicitorEmailAddress_thenReturnsOrganisationError() {
+        IntervenerWrapper intervener = mockRepresentedIntervenerWithEmailAndOrg();
+        ValidatePartiesService validatePartiesService = mock(ValidatePartiesService.class);
+
+        when(validatePartiesService.isEmailRegisteredInOrg(VALID_EMAIL, TEST_ORG_ID))
+            .thenReturn(false);
+
+        String error = ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(
+            intervener,
+            validatePartiesService
+        );
+
+        assertThat(error).isEqualTo(
+            ContactDetailsValidator.EMAIL_NOT_IN_APPLICANT_ORG_ERROR_MESSAGE.formatted(VALID_EMAIL)
+        );
+    }
+
+    private IntervenerWrapper mockRepresentedIntervenerWithEmailAndOrg() {
+        IntervenerWrapper intervener = mock(IntervenerWrapper.class);
+        OrganisationPolicy organisationPolicy = mock(OrganisationPolicy.class);
+        Organisation organisation = mock(Organisation.class);
+
+        when(intervener.getIntervenerRepresented()).thenReturn(YesOrNo.YES);
+        when(intervener.getIntervenerSolEmail()).thenReturn(VALID_EMAIL);
+        when(intervener.getIntervenerOrganisation()).thenReturn(organisationPolicy);
+        when(organisationPolicy.getOrganisation()).thenReturn(organisation);
+        when(organisation.getOrganisationID()).thenReturn(TEST_ORG_ID);
+
+        return intervener;
     }
 
     @ParameterizedTest(name = "{index}: {0}")
