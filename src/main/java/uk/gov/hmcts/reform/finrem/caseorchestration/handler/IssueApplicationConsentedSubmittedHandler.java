@@ -22,9 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHandler {
 
     private final IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
-
     private final AssignPartiesAccessService assignPartiesAccessService;
-
     private final RetryExecutor retryExecutor;
 
     @Autowired

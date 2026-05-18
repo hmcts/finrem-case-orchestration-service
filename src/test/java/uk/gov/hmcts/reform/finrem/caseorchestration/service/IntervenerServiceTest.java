@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,8 +10,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
@@ -34,6 +37,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -46,10 +50,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -58,7 +65,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
@@ -98,6 +104,13 @@ class IntervenerServiceTest {
     private ChangeOfRepresentationService changeOfRepresentationService;
     @Mock
     private AssignPartiesAccessService assignPartiesAccessService;
+    @Mock
+    private ValidatePartiesService validatePartiesService;
+
+    @BeforeEach
+    void setup() {
+        lenient().when(validatePartiesService.isEmailRegisteredInOrg(INTERVENER_TEST_EMAIL, SOME_ORG_ID)).thenReturn(true);
+    }
 
     @Test
     void givenCase_whenRemoveOperationChosenForIntv1NotRepresented_thenRemoveIntervener() {
@@ -135,8 +148,7 @@ class IntervenerServiceTest {
             .intervenerRepresented(YesOrNo.YES).build();
         finremCaseData.setIntervenerOne(oneWrapper);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         intervenerService.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
@@ -188,8 +200,7 @@ class IntervenerServiceTest {
             .intervenerRepresented(YesOrNo.YES).build();
         finremCaseData.setIntervenerTwo(twoWrapper);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         intervenerService.removeIntervenerDetails(twoWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
@@ -240,8 +251,7 @@ class IntervenerServiceTest {
             .build();
         finremCaseData.setIntervenerThree(threeWrapper);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         intervenerService.removeIntervenerDetails(threeWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
@@ -291,8 +301,7 @@ class IntervenerServiceTest {
             .build();
         finremCaseData.setIntervenerFour(fourWrapper);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         intervenerService.removeIntervenerDetails(fourWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
@@ -395,7 +404,6 @@ class IntervenerServiceTest {
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerOne(oneWrapper1);
 
-
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);
         DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
@@ -403,8 +411,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
@@ -449,7 +456,6 @@ class IntervenerServiceTest {
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerOne(oneWrapper1);
 
-
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);
         DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
@@ -457,8 +463,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
@@ -511,7 +516,6 @@ class IntervenerServiceTest {
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerOne(oneWrapper1);
 
-
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);
         DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
@@ -519,8 +523,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
@@ -575,7 +578,6 @@ class IntervenerServiceTest {
             .intervenerOrganisation(organisationPolicyChange).build();
         finremCaseData.setIntervenerOne(oneWrapper1);
 
-
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);
         DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
@@ -583,8 +585,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
@@ -633,7 +634,6 @@ class IntervenerServiceTest {
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .build();
         finremCaseData.setIntervenerOne(oneWrapper1);
-
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -780,8 +780,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
@@ -842,8 +841,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
@@ -904,8 +902,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
@@ -1070,8 +1067,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
@@ -1131,8 +1127,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
@@ -1195,8 +1190,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
@@ -1360,8 +1354,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
@@ -1470,8 +1463,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
@@ -1536,8 +1528,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
@@ -1584,7 +1575,9 @@ class IntervenerServiceTest {
 
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(wrapper, errors,  finremCallbackRequest);
-        assertThat(errors).contains("Could not find intervener with provided email");
+        assertThat(errors).contains(
+            INTERVENER_TEST_EMAIL + " is not a valid Email address. The email address must be registered to access MyHMCTS"
+        );
     }
 
     @Test
@@ -1786,16 +1779,16 @@ class IntervenerServiceTest {
             .build();
         finremCaseData.setIntervenerOne(oneWrapper);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN))
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL))
             .thenReturn(Optional.empty());
         List<String> errors = new ArrayList<>();
         intervenerService.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
-        verify(systemUserService).getSysUserToken();
-        verify(organisationService).findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN);
+        verify(organisationService).findUserByEmail(INTERVENER_TEST_EMAIL);
         verify(assignCaseAccessService, never()).removeCaseRoleToUser(any(), any(), any(), any());
-        assertThat(errors).contains("Could not find intervener with provided email");
+        assertThat(errors).contains(
+            INTERVENER_TEST_EMAIL + " is not a valid Email address. The email address must be registered to access MyHMCTS"
+        );
         assertNull(finremCaseData.getIntervenerOne().getIntervenerName());
     }
 
@@ -1821,6 +1814,139 @@ class IntervenerServiceTest {
             INTVR_SOLICITOR_1.getCcdCode(),
             SOME_ORG_ID
         );
+    }
+
+    @Nested
+    class ValidateIntervenerInformationTests {
+        @Test
+        void givenSolicitorEmailValidationErrorAndPostcodePresent_whenValidateIntervenerInformation_thenAddsSolicitorEmailErrorOnly() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+            when(intervener.getIntervenerAddress().getPostCode()).thenReturn("AB1 2CD");
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn("invalid-email is not a valid Email address.");
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+
+                mockedValidator.verify(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                );
+            }
+
+            assertThat(errors).containsExactly("invalid-email is not a valid Email address.");
+        }
+
+        @Test
+        void givenSolicitorEmailValidationReturnsNullAndPostcodePresent_whenValidateIntervenerInformation_thenNoErrorsAdded() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+            when(intervener.getIntervenerAddress().getPostCode()).thenReturn("AB1 2CD");
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn(null);
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+
+                mockedValidator.verify(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                );
+            }
+
+            assertThat(errors).isEmpty();
+        }
+
+        @Test
+        void givenSolicitorEmailValidationReturnsBlankAndPostcodePresent_whenValidateIntervenerInformation_thenNoErrorsAdded() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+            when(intervener.getIntervenerAddress().getPostCode()).thenReturn("AB1 2CD");
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn(" ");
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+            }
+
+            assertThat(errors).isEmpty();
+        }
+
+        @Test
+        void givenPostcodeMissing_whenValidateIntervenerInformation_thenAddsPostcodeError() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn(null);
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+            }
+
+            assertThat(errors).containsExactly("Postcode field is required for the intervener.");
+        }
+
+        @Test
+        void givenPostcodeBlank_whenValidateIntervenerInformation_thenAddsPostcodeError() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+            when(intervener.getIntervenerAddress().getPostCode()).thenReturn("  ");
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn(null);
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+            }
+
+            assertThat(errors).containsExactly("Postcode field is required for the intervener.");
+        }
+
+        @Test
+        void givenSolicitorEmailValidationErrorAndPostcodeBlank_whenValidateIntervenerInformation_thenAddsBothErrors() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+            when(intervener.getIntervenerAddress().getPostCode()).thenReturn("  ");
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn("invalid-email is not a valid Email address.");
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+            }
+
+            assertThat(errors).containsExactly(
+                "invalid-email is not a valid Email address.",
+                "Postcode field is required for the intervener."
+            );
+        }
     }
 
     @Nested
@@ -1880,31 +2006,27 @@ class IntervenerServiceTest {
 
         @Test
         void givenUserNotFound_whenCalled_thenDoThing() {
-            when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
-            when(organisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN))
+            when(organisationService.findUserByEmail(TEST_SOLICITOR_EMAIL))
                 .thenReturn(Optional.empty());
             IntervenerTwo intervenerTwo = IntervenerTwo.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
                 .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(TEST_ORG_ID)).build())
                 .build();
 
             intervenerService.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
-            verify(systemUserService).getSysUserToken();
-            verify(organisationService).findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN);
+            verify(organisationService).findUserByEmail(TEST_SOLICITOR_EMAIL);
             verifyNoInteractions(assignCaseAccessService);
         }
 
         @Test
         void givenValidIntervenerWrapper_whenCalled_thenRevokeIntervener() {
-            when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
-            when(organisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN))
+            when(organisationService.findUserByEmail(TEST_SOLICITOR_EMAIL))
                 .thenReturn(Optional.of(TEST_USER_ID));
             IntervenerTwo intervenerTwo = IntervenerTwo.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
                 .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(TEST_ORG_ID)).build())
                 .build();
 
             intervenerService.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
-            verify(systemUserService).getSysUserToken();
-            verify(organisationService).findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN);
+            verify(organisationService).findUserByEmail(TEST_SOLICITOR_EMAIL);
             verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID,
                 INTVR_SOLICITOR_2.getCcdCode(), TEST_ORG_ID);
         }

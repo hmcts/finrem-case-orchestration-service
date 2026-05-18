@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,6 +26,15 @@ public class OrganisationPolicy {
 
     @JsonProperty("OrgPolicyReference")
     private String orgPolicyReference;
+
+    @JsonIgnore
+    public Organisation getOrganisation() {
+        if (organisation == null) {
+            return Organisation.builder().build();
+        } else {
+            return organisation;
+        }
+    }
 
     /**
      * Creates a default {@link OrganisationPolicy} for the specified case role.

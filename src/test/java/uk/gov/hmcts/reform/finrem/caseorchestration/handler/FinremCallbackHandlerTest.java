@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -20,10 +21,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -56,6 +60,19 @@ class FinremCallbackHandlerTest {
         }
     }
 
+    static class ValidateCaseDataTestHandler extends GeneralFinremCallbackHandler {
+        public ValidateCaseDataTestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+            super(finremCaseDetailsMapper);
+        }
+
+        @Override
+        public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
+            FinremCallbackRequest callbackRequest, String userAuthorisation) {
+            validateCaseData(callbackRequest);
+            return response(callbackRequest.getCaseDetails().getData());
+        }
+    }
+
     static class GeneralAboutToSubmitCallbackHandler extends FinremAboutToSubmitCallbackHandler {
 
         public GeneralAboutToSubmitCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
@@ -71,6 +88,36 @@ class FinremCallbackHandlerTest {
         @Override
         public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
             return true;
+        }
+    }
+
+    static class ResponseWithoutWarningsTestHandler extends GeneralAboutToSubmitCallbackHandler {
+
+        public ResponseWithoutWarningsTestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+            super(finremCaseDetailsMapper);
+        }
+
+        @Override
+        public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
+            FinremCallbackRequest callbackRequest, String userAuthorisation) {
+            return responseWithoutWarnings(callbackRequest.getCaseDetails().getData(),
+                List.of("ERROR12345"));
+        }
+    }
+
+    static class ResponseTestHandler extends GeneralAboutToSubmitCallbackHandler {
+
+        public ResponseTestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+            super(finremCaseDetailsMapper);
+        }
+
+        @Override
+        public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
+            FinremCallbackRequest callbackRequest, String userAuthorisation) {
+            return response(callbackRequest.getCaseDetails().getData(),
+                List.of("WARNING_1111"),
+                List.of("ERROR_1111"),
+                "POST_STATE");
         }
     }
 
@@ -99,6 +146,9 @@ class FinremCallbackHandlerTest {
     private GeneralFinremCallbackHandler generalFinremCallbackHandler;
     private GeneralAboutToSubmitCallbackHandler generalAboutToSubmitCallbackHandler;
     private GeneralSubmittedCallbackHandler generalSubmittedCallbackHandler;
+    private ResponseWithoutWarningsTestHandler responseWithoutWarningsTestHandler;
+    private ResponseTestHandler responseTestHandler;
+    private ValidateCaseDataTestHandler validateCaseDataTestHandler;
 
     private static final Map<String, Object> TESTING_DATA_IN_MAP = Map.of(
         "retained", YesOrNo.YES,
@@ -111,6 +161,9 @@ class FinremCallbackHandlerTest {
         generalFinremCallbackHandler = spy(new GeneralFinremCallbackHandler(finremCaseDetailsMapper));
         generalAboutToSubmitCallbackHandler = spy(new GeneralAboutToSubmitCallbackHandler(finremCaseDetailsMapper));
         generalSubmittedCallbackHandler = spy(new GeneralSubmittedCallbackHandler(finremCaseDetailsMapper));
+        responseWithoutWarningsTestHandler = new ResponseWithoutWarningsTestHandler(finremCaseDetailsMapper);
+        responseTestHandler = new ResponseTestHandler(finremCaseDetailsMapper);
+        validateCaseDataTestHandler = new ValidateCaseDataTestHandler(finremCaseDetailsMapper);
     }
 
     @Test
@@ -163,14 +216,19 @@ class FinremCallbackHandlerTest {
         when(finremCaseDetailsMapper.mapToFinremCaseData(Map.of("retained", YesOrNo.YES)))
             .thenReturn(expectedResponseData);
 
-        assertThat(generalAboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN).getData())
-            .isEqualTo(expectedResponseData); // if expected properties are removed, it must return expectedResponseData
-        verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(TESTING_DATA_IN_MAP);
+        var response = generalAboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        // to ensure callbackRequest is a copy i.e. callbackRequest.toBuilder() was invoked
-        ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
-        verify(generalAboutToSubmitCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
-        assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
+        assertAll(
+            () -> assertThat(response.getData())
+            .isEqualTo(expectedResponseData), // if expected properties are removed, it must return expectedResponseData
+            () -> verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(TESTING_DATA_IN_MAP),
+            () -> {
+                // To ensure method handle(FinremCallbackRequest, String) invoked and CallbackRequest was converted to FinremCallbackRequest
+                ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
+                verify(generalAboutToSubmitCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
+                assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
+            }
+        );
     }
 
     @Test
@@ -187,13 +245,18 @@ class FinremCallbackHandlerTest {
             argThat(arg -> TESTING_DATA_IN_MAP.equals(arg.getData())))
         ).thenReturn(finremCaseDetailsWithExpectedFinremCaseData);
 
-        assertThat(generalFinremCallbackHandler.handle(callbackRequest, AUTH_TOKEN).getData())
-            .isEqualTo(expectedFinremCaseData);
-        verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(Map.of("retained", YesOrNo.YES));
-
-        ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
-        verify(generalFinremCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
-        assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
+        var response = generalFinremCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+        assertAll(
+            () -> assertThat(response.getData())
+                .isEqualTo(expectedFinremCaseData),
+            () -> verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(Map.of("retained", YesOrNo.YES)),
+            () -> {
+                // To ensure method handle(FinremCallbackRequest, String) invoked and CallbackRequest was converted to FinremCallbackRequest
+                ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
+                verify(generalFinremCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
+                assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
+            }
+        );
     }
 
     @Test
@@ -202,5 +265,69 @@ class FinremCallbackHandlerTest {
             .extracting(GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
                 GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
             .containsExactly("# TEST", "<ul><li><h2>Message One</h2></li><li><h2>Message Two</h2></li></ul>");
+    }
+
+    @Test
+    void givenHandlerWithResponseWithoutWarnings_whenHandled_thenShouldPopulateError() {
+        var response = responseWithoutWarningsTestHandler.handle(FinremCallbackRequestFactory.from(), AUTH_TOKEN);
+        assertThat(response)
+            .extracting(
+                GenericAboutToStartOrSubmitCallbackResponse::getErrors,
+                GenericAboutToStartOrSubmitCallbackResponse::getWarnings
+            ).containsExactly(
+                List.of("ERROR12345"), List.of()
+            )
+        ;
+    }
+
+    @Test
+    void givenHandlerWithResponse_whenHandled_thenShouldPopulateError() {
+        var response = responseTestHandler.handle(FinremCallbackRequestFactory.from(), AUTH_TOKEN);
+        assertThat(response)
+            .extracting(
+                GenericAboutToStartOrSubmitCallbackResponse::getErrors,
+                GenericAboutToStartOrSubmitCallbackResponse::getWarnings,
+                GenericAboutToStartOrSubmitCallbackResponse::getState
+            ).containsExactly(
+                List.of("ERROR_1111"), List.of("WARNING_1111"), "POST_STATE"
+            )
+        ;
+    }
+
+    @Test
+    void givenHandler_whenValidateCaseData_thenThrowException() {
+        final FinremCallbackRequest nullCaseDetailsRequest =
+            FinremCallbackRequestFactory.from((FinremCaseDetails) null);
+
+        final FinremCallbackRequest emptyCaseDataRequest =
+            FinremCallbackRequestFactory.from(
+                FinremCaseDetails.builder().build()
+            );
+
+        final FinremCallbackRequest validRequest =
+            FinremCallbackRequestFactory.from(
+                FinremCaseDetails.builder()
+                    .data(FinremCaseData.builder().build())
+                    .build()
+            );
+
+        assertThrows(
+            InvalidCaseDataException.class,
+            () -> validateCaseDataTestHandler.handle((FinremCallbackRequest) null, AUTH_TOKEN)
+        );
+
+        assertThrows(
+            InvalidCaseDataException.class,
+            () -> validateCaseDataTestHandler.handle(nullCaseDetailsRequest, AUTH_TOKEN)
+        );
+
+        assertThrows(
+            InvalidCaseDataException.class,
+            () -> validateCaseDataTestHandler.handle(emptyCaseDataRequest, AUTH_TOKEN)
+        );
+
+        assertDoesNotThrow(
+            () -> validateCaseDataTestHandler.handle(validRequest, AUTH_TOKEN)
+        );
     }
 }
