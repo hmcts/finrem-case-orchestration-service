@@ -1,9 +1,12 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.contested;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -20,7 +23,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class AmendApplicationContestedAboutToStartHandler extends FinremCallbackHandler  {
+public class AmendApplicationContestedAboutToStartHandler extends FinremCallbackHandler {
 
     private static final String MIAM_INVALID_LEGACY_EXEMPTIONS_WARNING_MESSAGE =
         "The following MIAM exemptions are no longer valid and will be removed from the case data.";
@@ -44,13 +47,13 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType));
+            && EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Amend Application Details contested for Case ID : {}", callbackRequest.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
         onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
         onStartDefaultValueService.defaultTypeOfApplication(callbackRequest);
@@ -70,13 +73,10 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
 
         // setCurrentUserCaseRoleType so applicantInRefugeQuestion and respondentInRefugeQuestion labels show correctly.
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseDetails.getCaseIdAsString(),
-                userAuthorisation);
+            userAuthorisation);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .warnings(warnings)
-            .build();
+        return response(callbackRequest.getCaseDetails().getData(), warnings, null);
     }
 
     private List<String> getMiamInvalidLegacyExemptionWarnings(MiamWrapper miamWrapper) {
