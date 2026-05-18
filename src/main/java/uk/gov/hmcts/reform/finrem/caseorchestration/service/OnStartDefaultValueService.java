@@ -11,7 +11,6 @@ import java.time.LocalDate;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
@@ -66,9 +65,21 @@ public class OnStartDefaultValueService {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public void defaultConsentedOrderJudgeName(CallbackRequest callbackRequest, String userAuthorisation) {
         callbackRequest.getCaseDetails().getData().put(CONSENTED_ORDER_DIRECTION_JUDGE_NAME,
             idamService.getIdamSurname(userAuthorisation));
+    }
+
+    /**
+     * Sets the consented order direction judge name using the surname
+     * retrieved from the authenticated IDAM user.
+     *
+     * @param finremCaseData the case data to update with the judge name
+     * @param userAuthorisation the user authorisation token used to retrieve the IDAM user details
+     */
+    public void defaultConsentedOrderJudgeName(FinremCaseData finremCaseData, String userAuthorisation) {
+        finremCaseData.setOrderDirectionJudgeName(idamService.getIdamSurname(userAuthorisation));
     }
 
     public void defaultContestedOrderJudgeName(CallbackRequest callbackRequest, String userAuthorisation) {
@@ -76,8 +87,13 @@ public class OnStartDefaultValueService {
             idamService.getIdamSurname(userAuthorisation));
     }
 
-    public void defaultConsentedOrderDate(CallbackRequest callbackRequest) {
-        callbackRequest.getCaseDetails().getData().putIfAbsent(CONSENTED_ORDER_DIRECTION_DATE, LocalDate.now());
+    /**
+     * Sets the consented order direction date to the current system date.
+     *
+     * @param finremCaseData the case data to update with the current order direction date
+     */
+    public void defaultConsentedOrderDate(FinremCaseData finremCaseData) {
+        finremCaseData.setOrderDirectionDate(LocalDate.now());
     }
 
     public void defaultContestedOrderDate(CallbackRequest callbackRequest) {
