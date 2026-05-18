@@ -148,7 +148,8 @@ class DuplicateFilenameDocumentCheckerTest {
                 .bytes(new byte[0])
                 .beforeCaseDetails(FinremCaseDetailsBuilderFactory.from(caseType, FinremCaseData.builder()
                     .sendOrderWrapper(SendOrderWrapper.builder()
-                        .additionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(CaseDocument.builder().documentFilename("additionalDocument").build())))
+                        .additionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(
+                            CaseDocument.builder().documentFilename("additionalDocument").build())))
                         .build())
                     .generalOrderWrapper(GeneralOrderWrapper.builder()
                         .generalOrderLatestDocument(CaseDocument.builder().documentFilename("generalOrderLatestDocument").build())
@@ -170,7 +171,8 @@ class DuplicateFilenameDocumentCheckerTest {
                     .value(UploadGeneralDocument.builder().build())
                     .build()))
                 .sendOrderWrapper(SendOrderWrapper.builder()
-                    .additionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(CaseDocument.builder().documentFilename("additionalDocument").build())))
+                    .additionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(
+                        CaseDocument.builder().documentFilename("additionalDocument").build())))
                     .build())
                 .generalOrderWrapper(GeneralOrderWrapper.builder()
                     .generalOrderLatestDocument(CaseDocument.builder().documentFilename("generalOrderLatestDocument").build())

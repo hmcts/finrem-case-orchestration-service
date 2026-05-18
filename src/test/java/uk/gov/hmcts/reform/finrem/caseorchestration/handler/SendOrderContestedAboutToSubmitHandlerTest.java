@@ -178,7 +178,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .additionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(caseDocument())))
             .build());
         when(generalOrderService.hearingOrdersToShare(eq(caseDetails), anyList())).thenThrow(new RuntimeException("unlucky"));
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CONTESTED))).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CONTESTED)))
+            .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).isNotEmpty().containsExactly("unlucky");

@@ -116,6 +116,7 @@ public class SendOrderRespondentDocumentHandler extends SendOrderPartyDocumentHa
         caseData.getOrderWrapper().setRespOrderCollections(orders);
         caseData.getOrderWrapper().setRespOrderCollection(null);
     }
+
     protected List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData) {
         return Optional.ofNullable(caseData.getOrderWrapper().getRespOrderCollections())
                 .orElse(new ArrayList<>());
