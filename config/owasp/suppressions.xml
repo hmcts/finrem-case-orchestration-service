@@ -1,32 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
-    <suppress until="2026-04-01Z">
+    <suppress until="2026-07-01Z">
         <notes><![CDATA[
-Suppress CVE-2025-15104 only when Dependency-Check maps a dependency to the generic CPE
-"validator:validator" (known false-positive for various *-validator libraries).
+    Update PDFBox to version 3.0.8 or later, when available, then remove this suppression.
     ]]></notes>
-
-        <!-- Matches: cpe:2.3:a:validator:validator:<any>:*:*:*:*:*:*:* -->
-        <cpe>cpe:2.3:a:validator:validator:*:*:*:*:*:*:*:*</cpe>
-
-        <!-- Optional: also cover any legacy CPE format -->
-        <cpe>cpe:/a:validator:validator</cpe>
-
-        <cve>CVE-2025-15104</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-Suppress CVE-2020-29582 only when Dependency-Check maps a dependency
-to the overly broad Kotlin CPE "jetbrains:kotlin" (known false positive
-for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
-    ]]></notes>
-
-        <!-- Matches: cpe:2.3:a:jetbrains:kotlin:<any>:*:*:*:*:*:*:* -->
-        <cpe>cpe:2.3:a:jetbrains:kotlin:*:*:*:*:*:*:*:*</cpe>
-
-        <!-- Optional: cover legacy CPE format if your scans include it -->
-        <cpe>cpe:/a:jetbrains:kotlin</cpe>
-
-        <cve>CVE-2020-29582</cve>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.pdfbox/pdfbox@.*$</packageUrl>
+        <cve>CVE-2026-23907</cve>
+        <cve>CVE-2026-33929</cve>
     </suppress>
 </suppressions>
