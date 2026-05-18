@@ -115,8 +115,7 @@ public abstract class SendOrderPartyDocumentHandler {
                 .orderReceivedAt(LocalDateTime.now()).build()).build();
     }
 
-    private boolean documentAlreadyExistsInCurrentOrderCollection(CaseDocument document, List<ApprovedOrderCollection> orderCollection
-    ) {
+    private boolean documentAlreadyExistsInCurrentOrderCollection(CaseDocument document, List<ApprovedOrderCollection> orderCollection) {
         if (document == null) {
             return false;
         }
@@ -185,10 +184,40 @@ public abstract class SendOrderPartyDocumentHandler {
             .approveOrders(orderCollection).orderReceivedAt(value.getOrderReceivedAt()).build()).build();
     }
 
-    protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {
-        return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
-                .approveOrders(orderCollection).orderReceivedAt(LocalDateTime.now()).build()).build();
+    protected ApprovedOrderConsolidateCollection getConsolidateCollection(
+        List<ApprovedOrderCollection> orderCollection,
+        List<DocumentCollectionItem> supportingDocuments
+    ) {
+        return ApprovedOrderConsolidateCollection.builder()
+            .value(ApproveOrdersHolder.builder()
+                .approveOrders(orderCollection)
+                .supportingDocuments(supportingDocuments)
+                .orderReceivedAt(LocalDateTime.now())
+                .build())
+            .build();
     }
+
+    protected List<DocumentCollectionItem> getCategorisedSupportingDocuments(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getSendOrderWrapper().getAdditionalDocuments())
+            .orElse(List.of())
+            .stream()
+            .filter(Objects::nonNull)
+            .map(document -> DocumentCollectionItem.builder()
+                .value(copyDocumentWithCategory(document.getValue(), getSupportingDocumentsCategoryId()))
+                .build())
+            .toList();
+    }
+
+    private CaseDocument copyDocumentWithCategory(CaseDocument document, String categoryId) {
+        return CaseDocument.builder()
+            .documentUrl(document.getDocumentUrl())
+            .documentFilename(document.getDocumentFilename())
+            .documentBinaryUrl(document.getDocumentBinaryUrl())
+            .categoryId(categoryId)
+            .build();
+    }
+
+    protected abstract String getSupportingDocumentsCategoryId();
 
     protected abstract List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData);
 
