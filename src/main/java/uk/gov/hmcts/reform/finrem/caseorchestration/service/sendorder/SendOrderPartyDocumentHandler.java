@@ -35,6 +35,8 @@ public abstract class SendOrderPartyDocumentHandler {
             final Long caseId = finremCaseDetails.getId();
             FinremCaseData caseData = finremCaseDetails.getData();
             log.info("Received request to send hearing pack to {} for Case ID: {}:", caseRoleCode,  caseId);
+
+            //This gets the party's current document collection e.g. appOrderCollection
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData)).orElse(new ArrayList<>());
             if (orderColl.isEmpty()) {
                 addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
@@ -113,7 +115,7 @@ public abstract class SendOrderPartyDocumentHandler {
     }
 
     private void addAdditionalOrderDocumentToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> approvedOrderCollections) {
-        CaseDocument additionalDocument = caseData.getSendOrderWrapper().getAdditionalDocument();
+        CaseDocument additionalDocument = caseData.getSendOrderWrapper().getAdditionalDocuments();
         if (additionalDocument != null) {
             approvedOrderCollections.add(getApprovedOrderCollection(additionalDocument));
         }
