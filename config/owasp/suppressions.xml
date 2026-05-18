@@ -2,16 +2,14 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
     <suppress until="2026-07-01Z">
         <notes><![CDATA[
-    Suppress PDFBox example-code CVEs for pdfbox-io only if Dependency-Check attached
-    the same findings to this artifact in the report.
+    Updating to PDFBox v3.0.8 will resolve when available.
     ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.pdfbox/pdfbox@.*$</packageUrl>
         <cpe>cpe:/a:apache:pdfbox</cpe>
     </suppress>
     <suppress until="2026-07-01Z">
         <notes><![CDATA[
-    Suppress PDFBox example-code CVEs for pdfbox-io only if Dependency-Check attached
-    the same findings to this artifact in the report.
+    Updating to PDFBox v3.0.8 will resolve when available.
     ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.pdfbox/pdfbox-io@.*$</packageUrl>
         <cpe>cpe:/a:apache:pdfbox</cpe>
