@@ -16,20 +16,6 @@
     </suppress>
     <suppress until="2026-07-01Z">
         <notes><![CDATA[
-Suppress CVE-2025-15104 only when Dependency-Check maps a dependency to the generic CPE
-"validator:validator" (known false-positive for various *-validator libraries).
-    ]]></notes>
-
-        <!-- Matches: cpe:2.3:a:validator:validator:<any>:*:*:*:*:*:*:* -->
-        <cpe>cpe:2.3:a:validator:validator:*:*:*:*:*:*:*:*</cpe>
-
-        <!-- Optional: also cover any legacy CPE format -->
-        <cpe>cpe:/a:validator:validator</cpe>
-
-        <cve>CVE-2025-15104</cve>
-    </suppress>
-    <suppress until="2026-07-01Z">
-        <notes><![CDATA[
 Suppress CVE-2020-29582 only when Dependency-Check maps a dependency
 to the overly broad Kotlin CPE "jetbrains:kotlin" (known false positive
 for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
