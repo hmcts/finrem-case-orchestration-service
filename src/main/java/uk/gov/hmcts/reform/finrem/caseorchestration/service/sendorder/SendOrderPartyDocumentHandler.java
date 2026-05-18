@@ -39,11 +39,9 @@ public abstract class SendOrderPartyDocumentHandler {
 
             //This gets the party's current document collection e.g. appOrderCollection
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData)).orElse(new ArrayList<>());
-            if (orderColl.isEmpty()) {
-                addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
-            }
+
             orderDocumentPack.forEach(document -> {
-                if (shouldAddDocumentToOrderColl(document, getExistingConsolidateCollection(caseData))) {
+                if (!documentAlreadyExistsInCurrentOrderCollection(document, orderColl)) {
                     orderColl.add(getApprovedOrderCollection(document));
                 }
             });
@@ -117,11 +115,19 @@ public abstract class SendOrderPartyDocumentHandler {
                 .orderReceivedAt(LocalDateTime.now()).build()).build();
     }
 
-    private void addAdditionalOrderDocumentToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> approvedOrderCollections) {
-        CaseDocument additionalDocument = caseData.getSendOrderWrapper().getAdditionalDocuments();
-        if (additionalDocument != null) {
-            approvedOrderCollections.add(getApprovedOrderCollection(additionalDocument));
+    private boolean documentAlreadyExistsInCurrentOrderCollection(CaseDocument document, List<ApprovedOrderCollection> orderCollection
+    ) {
+        if (document == null) {
+            return false;
         }
+
+        return Optional.ofNullable(orderCollection).orElse(List.of()).stream()
+            .map(ApprovedOrderCollection::getValue)
+            .filter(Objects::nonNull)
+            .map(ApproveOrder::getCaseDocument)
+            .filter(Objects::nonNull)
+            .map(CaseDocument::getDocumentUrl)
+            .anyMatch(existingUrl -> Objects.equals(existingUrl, document.getDocumentUrl()));
     }
 
     protected boolean shouldAddDocumentToOrderColl(CaseDocument document,
