@@ -1,159 +1,140 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.approveapplication;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static org.springframework.util.ObjectUtils.isEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
+import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.CONSENT_ORDER_MADE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler<Map<String, Object>> {
+public class ApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
     private final ConsentOrderPrintService consentOrderPrintService;
     private final DocumentHelper documentHelper;
-    private final ObjectMapper mapper;
+
+    public ApprovedConsentOrderAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
+                                                    ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
+                                                    GenericDocumentService genericDocumentService,
+                                                    ConsentOrderPrintService consentOrderPrintService,
+                                                    DocumentHelper documentHelper) {
+        super(mapper);
+        this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
+        this.genericDocumentService = genericDocumentService;
+        this.consentOrderPrintService = consentOrderPrintService;
+        this.documentHelper = documentHelper;
+    }
 
     @Override
-    public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
-                             final EventType eventType) {
+    public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
             && EventType.APPROVE_ORDER.equals(eventType);
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("ConsentOrderApprovedAboutToSubmitHandle handle Case ID {}", caseId);
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
-        CaseDocument latestConsentOrder = getLatestConsentOrder(caseDetails.getData());
-        if (!isEmpty(latestConsentOrder)) {
-            CaseType caseType = CaseType.forValue(caseDetails.getCaseTypeId());
+        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
+
+        CaseDocument latestConsentOrder = getLatestConsentOrder(finremCaseData);
+        if (nonNull(latestConsentOrder)) {
             CaseDocument pdfConsentOrder = genericDocumentService.convertDocumentIfNotPdfAlready(latestConsentOrder,
-                userAuthorisation, caseType);
-            caseDetails.getData().put(LATEST_CONSENT_ORDER, pdfConsentOrder);
-            generateAndPrepareDocuments(userAuthorisation, caseDetails, caseDetailsBefore, pdfConsentOrder);
+                userAuthorisation, finremCaseData.getCcdCaseType());
+            finremCaseData.setLatestConsentOrder(pdfConsentOrder);
+            generateAndPrepareDocuments(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(),
+                userAuthorisation);
         } else {
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: {}",
-                caseId);
+                finremCaseData.getCcdCaseId());
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
+        return response(finremCaseData);
     }
 
-    private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails,
-                                             CaseDetails caseDetailsBefore, CaseDocument latestConsentOrder) {
-        String caseId = caseDetails.getId().toString();
-        log.info("Generating and preparing documents for latest consent order, Case ID: {}", caseId);
-        Map<String, Object> caseData = caseDetails.getData();
-        StampType stampType = documentHelper.getStampType(caseData);
-        CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-        CaseType caseType = CaseType.forValue(caseDetails.getCaseTypeId());
-        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, stampType, caseType);
+    private void generateAndPrepareDocuments(
+        FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore, String authToken
+    ) {
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
+        String caseId = finremCaseData.getCcdCaseId();
+        StampType stampType = documentHelper.getStampType(finremCaseData);
 
-        ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
+        log.info("{} - Generating and preparing documents for latest consent order with stamp type {}", caseId, stampType);
+        CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService
+            .generateApprovedConsentOrderLetter(finremCaseDetails, authToken);
+        CaseDocument consentOrderAnnexStamped = genericDocumentService
+            .annexStampDocument(finremCaseData.getLatestConsentOrder(), authToken, stampType, finremCaseData.getCcdCaseType());
+
+        ApprovedOrder approvedOrder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
-            .consentOrder(consentOrderAnnexStamped);
+            .consentOrder(consentOrderAnnexStamped).build();
 
-        ApprovedOrder approvedOrder = approvedOrderBuilder.build();
-
-        if (Boolean.FALSE.equals(isPensionDocumentsEmpty(caseData))) {
+        if (!isPensionDocumentsEmpty(finremCaseData)) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for Case ID: {}",
                 caseId);
-            LocalDate approvalDate = getApprovalDate(caseData);
+            LocalDate approvalDate = getApprovalDate(finremCaseData);
             List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
-                documentHelper.getPensionDocuments(caseData), authToken, stampType, approvalDate, caseType);
-            log.info("Generated StampedPensionDocs = {} for Case ID: {}", stampedPensionDocs, caseDetails.getId());
+                nullIfEmpty(finremCaseData.getPensionCollection()), authToken, stampType, approvalDate, finremCaseData.getCcdCaseType());
+            log.info("Generated StampedPensionDocs = {} for Case ID: {}", stampedPensionDocs, finremCaseData.getCcdCaseId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
 
-        List<CollectionElement<ApprovedOrder>> approvedOrders = singletonList(CollectionElement.<ApprovedOrder>builder()
-            .value(approvedOrder).build());
-        log.info("Generated ApprovedOrders = {} for Case ID {}", approvedOrders, caseId);
-
-        caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
+        finremCaseData.setApprovedOrderCollection(singletonList(
+            ConsentOrderCollection.builder().approvedOrder(approvedOrder).build()
+        ));
 
         log.info("Successfully generated documents for 'Consent Order Approved' for Case ID {}", caseId);
 
-        if (Boolean.TRUE.equals(isPensionDocumentsEmpty(caseData))) {
-            log.info("Case ID: {} has no pension documents, updating status to {} and sending for bulk print",
-                caseId,
-                CONSENT_ORDER_MADE);
-            try {
-                // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
-                caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
-                caseDetails.setData(caseData);
-                consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore, EventType.APPROVE_ORDER, authToken);
-                caseData.put(STATE, CONSENT_ORDER_MADE.toString());
-            } catch (JsonProcessingException e) {
-                log.error("Case ID: {} Error encountered trying to update status and send for bulk print: {}", caseId, e.getMessage());
-            }
+        if (isPensionDocumentsEmpty(finremCaseData)) {
+            consentOrderPrintService.sendConsentOrderToBulkPrint(finremCaseDetails, finremCaseDetailsBefore,
+                EventType.APPROVE_ORDER, authToken);
+            finremCaseData.setState(CONSENT_ORDER_MADE.toString());
+            log.info("Case ID: {} has no pension documents. Case state updated to {} and consent order sent for bulk print.",
+                caseId, CONSENT_ORDER_MADE);
         }
     }
 
-    private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(LATEST_CONSENT_ORDER), new TypeReference<>() {
-        });
+    private CaseDocument getLatestConsentOrder(FinremCaseData finremCaseData) {
+        return finremCaseData.getLatestConsentOrder();
     }
 
-    private Boolean isPensionDocumentsEmpty(Map<String, Object> caseData) {
-        List<CaseDocument> pensionDocumentsData = documentHelper.getPensionDocumentsData(caseData);
+    private boolean isPensionDocumentsEmpty(FinremCaseData finremCaseData) {
+        List<CaseDocument> pensionDocumentsData = documentHelper.getPensionDocumentsData(finremCaseData);
         return pensionDocumentsData.isEmpty();
     }
 
-    private LocalDate getApprovalDate(Map<String, Object> caseData) {
-        return (caseData.get(CONTESTED_ORDER_DIRECTION_DATE) != null)
-            ? parseLocalDate(caseData, CONTESTED_ORDER_DIRECTION_DATE)
-            : parseLocalDate(caseData, CONSENTED_ORDER_DIRECTION_DATE);
-    }
-
-    private LocalDate parseLocalDate(Map<String, Object> caseData, String orderDirectionDateKey) {
-        if (caseData.get(orderDirectionDateKey) instanceof LocalDate) {
-            return (LocalDate) caseData.get(orderDirectionDateKey);
-        } else {
-            try {
-                return LocalDate.parse((String) caseData.get(orderDirectionDateKey));
-            } catch (Exception e) {
-                log.info("Invalid Approved date of order for key: '" + orderDirectionDateKey + "': " + e.getMessage());
-                return null;
-            }
-        }
+    private LocalDate getApprovalDate(FinremCaseData finremCaseData) {
+        ConsentOrderWrapper consentOrderWrapper = finremCaseData.getConsentOrderWrapper();
+        return consentOrderWrapper.getConsentDateOfOrder() != null
+            ? consentOrderWrapper.getConsentDateOfOrder()
+            : finremCaseData.getOrderDirectionDate();
     }
 }
