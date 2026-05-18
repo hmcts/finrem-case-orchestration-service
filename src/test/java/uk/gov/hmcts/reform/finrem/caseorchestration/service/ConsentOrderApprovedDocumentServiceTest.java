@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,15 +13,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationH
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -28,6 +35,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_TITLE;
@@ -47,8 +55,10 @@ class ConsentOrderApprovedDocumentServiceTest {
 
     @Mock
     private DocumentHelper documentHelper;
+
     @Mock
     private DocumentConfiguration documentConfiguration;
+
     @Mock
     private GenericDocumentService genericDocumentService;
 
@@ -58,134 +68,164 @@ class ConsentOrderApprovedDocumentServiceTest {
     @Mock
     private ConsentedApplicationHelper consentedApplicationHelper;
 
+    @Mock
+    private PensionAnnexDateStampService pensionAnnexDateStampService;
+
     private FinremCaseDetails finremCaseDetails;
 
     private CaseDetails detailsCopy;
 
-    @BeforeEach
-    void setUp() {
-        finremCaseDetails = spy(FinremCaseDetails.builder().build());
-        detailsCopy = CaseDetails.builder().data(new HashMap<>()).build();
-        CaseDetails mappedCaseDetails = mock(CaseDetails.class);
-        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(mappedCaseDetails);
-        when(documentHelper.deepCopy(mappedCaseDetails, CaseDetails.class)).thenReturn(detailsCopy);
+    @Mock
+    private StampType mockedStampType;
+
+    @Mock
+    private CaseType mockedCaseType;
+
+    @Nested
+    class GenerateApprovedConsentOrderLetterTests {
+
+        @BeforeEach
+        void setUp() {
+            finremCaseDetails = spy(FinremCaseDetails.builder().build());
+            detailsCopy = CaseDetails.builder().data(new HashMap<>()).build();
+            CaseDetails mappedCaseDetails = mock(CaseDetails.class);
+            when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(mappedCaseDetails);
+            when(documentHelper.deepCopy(mappedCaseDetails, CaseDetails.class)).thenReturn(detailsCopy);
+        }
+
+        @Test
+        void shouldGenerateApprovedConsentOrderLetterForConsented() {
+            when(finremCaseDetails.isConsentedApplication()).thenReturn(true);
+            when(finremCaseDetails.isContestedApplication()).thenReturn(false);
+            when(consentedApplicationHelper.isVariationOrder(finremCaseDetails.getData())).thenReturn(false);
+            when(documentConfiguration.getApprovedConsentOrderFileName()).thenReturn(FILE_NAME);
+            when(documentConfiguration.getApprovedConsentOrderTemplate(detailsCopy)).thenReturn("templateName");
+
+            CaseDocument expectedGeneratedDocument = caseDocument("expected");
+            when(genericDocumentService.generateDocument(AUTH_TOKEN, detailsCopy, "templateName",
+                FILE_NAME)).thenReturn(expectedGeneratedDocument);
+
+            // Act
+            CaseDocument actualDocument = consentOrderApprovedDocumentService
+                .generateApprovedConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
+
+            assertAll(
+                () -> assertEquals(expectedGeneratedDocument, actualDocument),
+                () -> verify(finremCaseDetailsMapper).mapToCaseDetails(finremCaseDetails),
+                () -> verify(finremCaseDetails).isConsentedApplication(),
+                () -> verify(documentConfiguration).getApprovedConsentOrderFileName(),
+                () -> verify(documentConfiguration).getApprovedConsentOrderTemplate(detailsCopy),
+                () -> verify(genericDocumentService).generateDocument(AUTH_TOKEN, detailsCopy, "templateName",
+                    FILE_NAME)
+            );
+        }
+
+        @Test
+        void shouldGenerateApprovedVariationOrderLetterForConsented() {
+            when(finremCaseDetails.isConsentedApplication()).thenReturn(true);
+            when(finremCaseDetails.isContestedApplication()).thenReturn(false);
+            when(consentedApplicationHelper.isVariationOrder(finremCaseDetails.getData())).thenReturn(true);
+            when(documentConfiguration.getApprovedVariationOrderFileName()).thenReturn(FILE_NAME);
+            when(documentConfiguration.getApprovedConsentOrderTemplate(detailsCopy)).thenReturn("templateName");
+
+            CaseDocument expectedGeneratedDocument = caseDocument("expected");
+            when(genericDocumentService.generateDocument(AUTH_TOKEN, detailsCopy, "templateName",
+                FILE_NAME)).thenReturn(expectedGeneratedDocument);
+
+            // Act
+            CaseDocument actualDocument = consentOrderApprovedDocumentService
+                .generateApprovedConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
+
+            assertAll(
+                () -> assertEquals(expectedGeneratedDocument, actualDocument),
+                () -> verify(finremCaseDetailsMapper).mapToCaseDetails(finremCaseDetails),
+                () -> verify(finremCaseDetails).isConsentedApplication(),
+                () -> verify(documentConfiguration).getApprovedVariationOrderFileName(),
+                () -> verify(documentConfiguration).getApprovedConsentOrderTemplate(detailsCopy),
+                () -> verify(genericDocumentService).generateDocument(AUTH_TOKEN, detailsCopy, "templateName",
+                    FILE_NAME)
+            );
+        }
+
+        @Test
+        void shouldGenerateApprovedConsentOrderLetterForContested() {
+            when(finremCaseDetails.isConsentedApplication()).thenReturn(false);
+            when(finremCaseDetails.isContestedApplication()).thenReturn(true);
+            when(documentConfiguration.getApprovedConsentOrderFileName()).thenReturn(FILE_NAME);
+            when(documentConfiguration.getApprovedConsentOrderTemplate(detailsCopy)).thenReturn("templateName");
+
+            detailsCopy.getData().putAll(Map.of(
+                CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "contestedFirstMiddleName",
+                CONTESTED_RESPONDENT_LAST_NAME, "contestedLastName",
+                CONTESTED_ORDER_DIRECTION_JUDGE_TITLE, "contestedJudgeTitle",
+                CONTESTED_ORDER_DIRECTION_JUDGE_NAME, "contestedJudgeName",
+                CONTESTED_ORDER_DIRECTION_DATE, "contestedDirectionDate"
+            ));
+
+            CaseDocument expectedGeneratedDocument = caseDocument("expected");
+            when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), argThat(cd ->
+                cd.getData().get(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME).equals("contestedFirstMiddleName")
+                    && cd.getData().get(CONSENTED_RESPONDENT_LAST_NAME).equals("contestedLastName")
+                    && cd.getData().get(CONSENTED_ORDER_DIRECTION_JUDGE_TITLE).equals("contestedJudgeTitle")
+                    && cd.getData().get(CONSENTED_ORDER_DIRECTION_JUDGE_NAME).equals("contestedJudgeName")
+                    && cd.getData().get(CONSENTED_ORDER_DIRECTION_DATE).equals("contestedDirectionDate")
+            ), eq("templateName"), eq(FILE_NAME))).thenReturn(expectedGeneratedDocument);
+
+            // Act
+            CaseDocument actualDocument = consentOrderApprovedDocumentService
+                .generateApprovedConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
+
+            assertAll(
+                () -> assertEquals(expectedGeneratedDocument, actualDocument),
+                () -> verify(finremCaseDetailsMapper).mapToCaseDetails(finremCaseDetails),
+                () -> verify(finremCaseDetails).isConsentedApplication(),
+                () -> verify(documentConfiguration).getApprovedConsentOrderFileName(),
+                () -> verify(documentConfiguration).getApprovedConsentOrderTemplate(detailsCopy),
+                () -> verify(genericDocumentService).generateDocument(AUTH_TOKEN, detailsCopy, "templateName",
+                    FILE_NAME)
+            );
+        }
     }
 
     @Test
-    void shouldGenerateApprovedConsentOrderLetterForConsented() {
-        when(finremCaseDetails.isConsentedApplication()).thenReturn(true);
-        when(finremCaseDetails.isContestedApplication()).thenReturn(false);
-        when(consentedApplicationHelper.isVariationOrder(finremCaseDetails.getData())).thenReturn(false);
-        when(documentConfiguration.getApprovedConsentOrderFileName()).thenReturn(FILE_NAME);
-        when(documentConfiguration.getApprovedConsentOrderTemplate(detailsCopy)).thenReturn("templateName");
+    void givenNullDocumentInPensionDocuments_whenStampingDocuments_thenTheNullValueIsIgnored() throws Exception {
+        PensionTypeCollection toBeStamped = pensionDocumentData();
+        PensionTypeCollection stamped = pensionDocumentData();
+        when(documentHelper.deepCopy(toBeStamped, PensionTypeCollection.class)).thenReturn(stamped);
 
-        CaseDocument expectedGeneratedDocument = caseDocument("expected");
-        when(genericDocumentService.generateDocument(AUTH_TOKEN, detailsCopy, "templateName",
-            FILE_NAME)).thenReturn(expectedGeneratedDocument);
+        PensionTypeCollection pensionCollectionDataWithNullDocument = pensionDocumentData();
+        pensionCollectionDataWithNullDocument.getTypedCaseDocument().setPensionDocument(null);
 
-        // Act
-        CaseDocument actualDocument = consentOrderApprovedDocumentService
-            .generateApprovedConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
+        CaseDocument stampedCaseDocument = caseDocument("stampedCaseDocument");
+        LocalDate approvalDate = mock(LocalDate.class);
+        when(genericDocumentService.stampDocument(toBeStamped.getTypedCaseDocument().getPensionDocument(), AUTH_TOKEN,
+            mockedStampType, mockedCaseType)).thenReturn(stampedCaseDocument);
+
+        doReturn(stampedCaseDocument)
+            .when(pensionAnnexDateStampService)
+            .appendApprovedDateToDocument(
+                stampedCaseDocument,
+                AUTH_TOKEN,
+                approvalDate,
+                mockedCaseType
+            );
+
+        List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService
+            .stampPensionDocuments(List.of(toBeStamped, pensionCollectionDataWithNullDocument), AUTH_TOKEN,
+                mockedStampType, approvalDate, mockedCaseType);
 
         assertAll(
-            () -> assertEquals(expectedGeneratedDocument, actualDocument),
-            () -> verify(finremCaseDetailsMapper).mapToCaseDetails(finremCaseDetails),
-            () -> verify(finremCaseDetails).isConsentedApplication(),
-            () -> verify(documentConfiguration).getApprovedConsentOrderFileName(),
-            () -> verify(documentConfiguration).getApprovedConsentOrderTemplate(detailsCopy),
-            () -> verify(genericDocumentService).generateDocument(AUTH_TOKEN, detailsCopy, "templateName",
-                FILE_NAME)
+            () -> assertThat(stampPensionDocuments).hasSize(1),
+            () -> verify(genericDocumentService).stampDocument(toBeStamped.getTypedCaseDocument().getPensionDocument(),
+                AUTH_TOKEN, mockedStampType, mockedCaseType),
+            () -> verify(pensionAnnexDateStampService).appendApprovedDateToDocument(stampedCaseDocument,
+                AUTH_TOKEN, approvalDate, mockedCaseType),
+            () -> verify(documentHelper).deepCopy(toBeStamped, PensionTypeCollection.class)
         );
     }
 
-    @Test
-    void shouldGenerateApprovedVariationOrderLetterForConsented() {
-        when(finremCaseDetails.isConsentedApplication()).thenReturn(true);
-        when(finremCaseDetails.isContestedApplication()).thenReturn(false);
-        when(consentedApplicationHelper.isVariationOrder(finremCaseDetails.getData())).thenReturn(true);
-        when(documentConfiguration.getApprovedVariationOrderFileName()).thenReturn(FILE_NAME);
-        when(documentConfiguration.getApprovedConsentOrderTemplate(detailsCopy)).thenReturn("templateName");
-
-        CaseDocument expectedGeneratedDocument = caseDocument("expected");
-        when(genericDocumentService.generateDocument(AUTH_TOKEN, detailsCopy, "templateName",
-            FILE_NAME)).thenReturn(expectedGeneratedDocument);
-
-        // Act
-        CaseDocument actualDocument = consentOrderApprovedDocumentService
-            .generateApprovedConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
-
-        assertAll(
-            () -> assertEquals(expectedGeneratedDocument, actualDocument),
-            () -> verify(finremCaseDetailsMapper).mapToCaseDetails(finremCaseDetails),
-            () -> verify(finremCaseDetails).isConsentedApplication(),
-            () -> verify(documentConfiguration).getApprovedVariationOrderFileName(),
-            () -> verify(documentConfiguration).getApprovedConsentOrderTemplate(detailsCopy),
-            () -> verify(genericDocumentService).generateDocument(AUTH_TOKEN, detailsCopy, "templateName",
-                FILE_NAME)
-        );
-    }
-
-    @Test
-    void shouldGenerateApprovedConsentOrderLetterForContested() {
-        when(finremCaseDetails.isConsentedApplication()).thenReturn(false);
-        when(finremCaseDetails.isContestedApplication()).thenReturn(true);
-        when(documentConfiguration.getApprovedConsentOrderFileName()).thenReturn(FILE_NAME);
-        when(documentConfiguration.getApprovedConsentOrderTemplate(detailsCopy)).thenReturn("templateName");
-
-        detailsCopy.getData().putAll(Map.of(
-            CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "contestedFirstMiddleName",
-            CONTESTED_RESPONDENT_LAST_NAME, "contestedLastName",
-            CONTESTED_ORDER_DIRECTION_JUDGE_TITLE, "contestedJudgeTitle",
-            CONTESTED_ORDER_DIRECTION_JUDGE_NAME, "contestedJudgeName",
-            CONTESTED_ORDER_DIRECTION_DATE, "contestedDirectionDate"
-        ));
-
-        CaseDocument expectedGeneratedDocument = caseDocument("expected");
-        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), argThat(cd ->
-            cd.getData().get(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME).equals("contestedFirstMiddleName")
-                && cd.getData().get(CONSENTED_RESPONDENT_LAST_NAME).equals("contestedLastName")
-                && cd.getData().get(CONSENTED_ORDER_DIRECTION_JUDGE_TITLE).equals("contestedJudgeTitle")
-                && cd.getData().get(CONSENTED_ORDER_DIRECTION_JUDGE_NAME).equals("contestedJudgeName")
-                && cd.getData().get(CONSENTED_ORDER_DIRECTION_DATE).equals("contestedDirectionDate")
-        ), eq("templateName"), eq(FILE_NAME))).thenReturn(expectedGeneratedDocument);
-
-        // Act
-        CaseDocument actualDocument = consentOrderApprovedDocumentService
-            .generateApprovedConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
-
-        assertAll(
-            () -> assertEquals(expectedGeneratedDocument, actualDocument),
-            () -> verify(finremCaseDetailsMapper).mapToCaseDetails(finremCaseDetails),
-            () -> verify(finremCaseDetails).isConsentedApplication(),
-            () -> verify(documentConfiguration).getApprovedConsentOrderFileName(),
-            () -> verify(documentConfiguration).getApprovedConsentOrderTemplate(detailsCopy),
-            () -> verify(genericDocumentService).generateDocument(AUTH_TOKEN, detailsCopy, "templateName",
-                FILE_NAME)
-        );
-    }
-//
 //    @Test
-//    public void givenNullDocumentInPensionDocuments_whenStampingDocuments_thenTheNullValueIsIgnored() {
-//        Mockito.reset(pdfStampingServiceMock);
-//        when(pdfStampingServiceMock.stampDocument(
-//            document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, CONTESTED))
-//            .thenReturn(document());
-//
-//        when(documentHelper.deepCopy(any(), any())).thenReturn(pensionDocumentData());
-//
-//        PensionTypeCollection pensionCollectionDataWithNullDocument = pensionDocumentData();
-//        pensionCollectionDataWithNullDocument.getTypedCaseDocument().setPensionDocument(null);
-//        List<PensionTypeCollection> pensionDocuments =
-//            asList(pensionDocumentData(), pensionCollectionDataWithNullDocument);
-//
-//        List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService
-//            .stampPensionDocuments(pensionDocuments, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, LocalDate.now(), CONTESTED);
-//
-//        assertThat(stampPensionDocuments, hasSize(1));
-//    }
-//
-//    @Test
-//    public void stampsAndPopulatesCaseDataForContestedConsentOrder() throws Exception {
+//    void stampsAndPopulatesCaseDataForContestedConsentOrder() throws Exception {
 //        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, CONTESTED))
 //            .thenReturn(document());
 //        finremCaseDetails = defaultConsentedFinremCaseDetails();
