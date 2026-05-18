@@ -65,12 +65,6 @@ public class OnStartDefaultValueService {
         }
     }
 
-    @Deprecated(forRemoval = true)
-    public void defaultConsentedOrderJudgeName(CallbackRequest callbackRequest, String userAuthorisation) {
-        callbackRequest.getCaseDetails().getData().put(CONSENTED_ORDER_DIRECTION_JUDGE_NAME,
-            idamService.getIdamSurname(userAuthorisation));
-    }
-
     /**
      * Sets the consented order direction judge name using the surname
      * retrieved from the authenticated IDAM user.
