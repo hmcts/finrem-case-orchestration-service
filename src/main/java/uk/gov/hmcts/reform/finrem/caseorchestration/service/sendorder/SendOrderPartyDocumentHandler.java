@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCol
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -135,16 +136,21 @@ public abstract class SendOrderPartyDocumentHandler {
 
     private boolean checkIfDocumentAlreadyInCollectionElement(CaseDocument document, ApprovedOrderConsolidateCollection doc) {
         return doc.getValue().getApproveOrders().stream().anyMatch(order ->
-            isAdditionalDocumentAlreadyInCollection(document, order)
+            isDocumentAlreadyInCollection(document, order)
         );
     }
 
-    private  boolean isAdditionalDocumentAlreadyInCollection(CaseDocument document, ApprovedOrderCollection order) {
-        if (order.getValue() != null && order.getValue().getCaseDocument() != null) {
-            return order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
-                && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl());
+    private boolean isDocumentAlreadyInCollection(CaseDocument document, ApprovedOrderCollection order) {
+        if (document == null) {
+            return false;
         }
-        return false;
+
+        return Optional.ofNullable(order)
+            .map(ApprovedOrderCollection::getValue)
+            .map(ApproveOrder::getCaseDocument)
+            .map(CaseDocument::getDocumentUrl)
+            .filter(existingDocumentUrl -> Objects.equals(existingDocumentUrl, document.getDocumentUrl()))
+            .isPresent();
     }
 
     protected List<ApprovedOrderConsolidateCollection> getPartyConsolidateCollection(List<ApprovedOrderConsolidateCollection> list) {
