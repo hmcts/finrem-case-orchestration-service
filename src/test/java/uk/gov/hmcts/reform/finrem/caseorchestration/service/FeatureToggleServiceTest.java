@@ -86,6 +86,11 @@ public class FeatureToggleServiceTest {
         void isFinremWorkAllocationEnabledReturnsFalse() {
             assertThat(featureToggleService.isFinremWorkAllocationEnabled()).isFalse();
         }
+
+        @Test
+        void isGlobalSearchEnabledReturnsFalse() {
+            assertThat(featureToggleService.isGlobalSearchEnabled()).isFalse();
+        }
     }
 
     @Nested

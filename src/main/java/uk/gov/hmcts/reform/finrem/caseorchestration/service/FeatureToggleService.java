@@ -22,6 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.EXPRES
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.EXUI3990_WORKAROUND_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.FINREM_CITIZEN_UI_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.FINREM_WORK_ALLOCATION_ENABLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.GLOBAL_SEARCH_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.INTERVENER_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_CASE_DOCS_DELETE_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_HEARING_ENABLED;
@@ -135,6 +136,10 @@ public class FeatureToggleService {
 
     public boolean isDeleteOldBpCoversheetEnabled() {
         return isFeatureEnabled(DELETE_OLD_BP_COVERSHEET_ENABLED);
+    }
+
+    public boolean isGlobalSearchEnabled() {
+        return isFeatureEnabled(GLOBAL_SEARCH_ENABLED);
     }
 
     /**
