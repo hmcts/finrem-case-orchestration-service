@@ -46,7 +46,7 @@ class AmendGeneralApplicationTaskTest {
             caseReferenceCsvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
         task.executeTask(finremCaseDetails);
 
-        verify(generalApplicationWrapper).setGeneralApplicationReferToJudgeEmail(null);
+        verify(generalApplicationWrapper).setGeneralApplicationReferToJudgeEmail("deprecatedby@amendcron.com");
     }
 
     @Test
