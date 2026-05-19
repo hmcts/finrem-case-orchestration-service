@@ -388,7 +388,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         );
 
         assertClearTempFields(caseData);
-        }
+    }
 
     @Test
     @SuppressWarnings("java:S5961")
