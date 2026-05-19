@@ -180,10 +180,14 @@ public abstract class SendOrderPartyDocumentHandler {
         return returnList;
     }
 
-    private ApprovedOrderConsolidateCollection getConsolidateCollection(ApproveOrdersHolder value,
-                                                                          List<ApprovedOrderCollection> orderCollection) {
-        return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
-            .approveOrders(orderCollection).orderReceivedAt(value.getOrderReceivedAt()).build()).build();
+    private ApprovedOrderConsolidateCollection getConsolidateCollection(ApproveOrdersHolder value, List<ApprovedOrderCollection> orderCollection) {
+        return ApprovedOrderConsolidateCollection.builder()
+            .value(ApproveOrdersHolder.builder()
+                .approveOrders(orderCollection)
+                .supportingDocuments(value.getSupportingDocuments())
+                .orderReceivedAt(value.getOrderReceivedAt())
+                .build())
+            .build();
     }
 
     protected ApprovedOrderConsolidateCollection getConsolidateCollection(
@@ -204,8 +208,10 @@ public abstract class SendOrderPartyDocumentHandler {
             .orElse(List.of())
             .stream()
             .filter(Objects::nonNull)
+            .map(DocumentCollectionItem::getValue)
+            .filter(Objects::nonNull)
             .map(document -> DocumentCollectionItem.builder()
-                .value(copyDocumentWithCategory(document.getValue(), getSupportingDocumentsCategoryId()))
+                .value(copyDocumentWithCategory(document, getSupportingDocumentsCategoryId()))
                 .build())
             .toList();
     }
