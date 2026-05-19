@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,5 +47,22 @@ class AmendGeneralApplicationTaskTest {
         task.executeTask(finremCaseDetails);
 
         verify(generalApplicationWrapper).setGeneralApplicationReferToJudgeEmail(null);
+    }
+
+    @Test
+    void testExecuteTaskWhenJudgeEmailNotSet() {
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        GeneralApplicationWrapper generalApplicationWrapper = mock(GeneralApplicationWrapper.class);
+
+        when(finremCaseDetails.getData()).thenReturn(caseData);
+        when(caseData.getGeneralApplicationWrapper()).thenReturn(generalApplicationWrapper);
+        when(generalApplicationWrapper.getGeneralApplicationReferToJudgeEmail()).thenReturn(null);
+
+        AmendGeneralApplicationTask task = new AmendGeneralApplicationTask(
+            caseReferenceCsvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
+        task.executeTask(finremCaseDetails);
+
+        verify(generalApplicationWrapper, never()).setGeneralApplicationReferToJudgeEmail(null);
     }
 }

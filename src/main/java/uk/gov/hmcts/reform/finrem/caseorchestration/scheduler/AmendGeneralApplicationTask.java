@@ -18,15 +18,7 @@ import java.util.List;
 import static java.util.Objects.isNull;
 
 /**
- * Scheduled task to find cases where GeneralEmailDataField is not empty and clear the field.
- * To enable the task to execute set environment variables:
- * <ul>
- *     <li>CRON_AMEND_GENERAL_EMAIL_ENABLED=true</li>
- *     <li>TASK_NAME=AmendGeneralEmailTask</li>
- *     <li>CRON_AMEND_GENERAL_EMAIL_CASE_TYPE_ID=FinancialRemedyContested | FinancialRemedyMVP2</li>
- *     <li>CRON_AMEND_GENERAL_EMAIL_BATCH_SIZE=number of cases to search for</li>
- *     <li>CRON_CSV_FILE_DECRYPT_KEY=secret key to decrypt the csv file</li>
- * </ul>
+ * This task is responsible for clearing the GeneralApplicationReferToJudgeEmail field in the GeneralApplicationWrapper
  */
 @Component
 @Slf4j
@@ -40,7 +32,7 @@ public class AmendGeneralApplicationTask extends CsvFileProcessingTask {
     private boolean taskEnabled;
     @Value("${cron.amendGeneralApplication.caseTypeId:FinancialRemedyContested}")
     private String caseTypeId;
-    @Value("${cron.amendGeneralApplication.batchSize:100}")
+    @Value("${cron.amendGeneralApplication.batchSize:1}")
     private int batchSize;
     @Value("${cron.amendGeneralApplication.caseListFileName:caserefs-encrypted.csv}")
     private String csvFile;
@@ -81,7 +73,6 @@ public class AmendGeneralApplicationTask extends CsvFileProcessingTask {
         List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(caseListFileName, secret);
 
         log.info("CaseReferences has {} cases.", caseReferences.size());
-        log.info("CaseReferences: {}", caseReferences.stream().map(CaseReference::getCaseReference).toList());
         return caseReferences;
     }
 
@@ -118,14 +109,11 @@ public class AmendGeneralApplicationTask extends CsvFileProcessingTask {
         String caseId = String.valueOf(finremCaseDetails.getId());
 
         if (!isNull(referToJudgeEmail) && !referToJudgeEmail.isEmpty()) {
-            log.info("Case {}: Clearing GeneralApplicationReferToJudgeEmail (was: {})",
-                    finremCaseDetails.getId(), referToJudgeEmail);
-
+            log.info("Case {}: Clearing GeneralApplicationReferToJudgeEmail", finremCaseDetails.getId());
             wrapper.setGeneralApplicationReferToJudgeEmail(null);
-            log.info("Case {}: GeneralApplicationReferToJudgeEmail set to null successfully", caseId);
-
+            log.info("Case {}: Cleared GeneralApplicationReferToJudgeEmail successfully", caseId);
         } else {
-            log.info("Case {} has empty GeneralApplicationReferToJudgeEmail field", caseId);
+            log.info("Case {}: Has empty GeneralApplicationReferToJudgeEmail field", caseId);
         }
     }
 }
