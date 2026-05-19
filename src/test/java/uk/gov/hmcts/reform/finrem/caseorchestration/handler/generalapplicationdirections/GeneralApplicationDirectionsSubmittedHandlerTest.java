@@ -72,7 +72,6 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
 
         // Assert
         assertThat(response.getErrors()).isNullOrEmpty();
-        assertThat(response.getData()).isEqualTo(caseDetails.getData());
         verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
         verifyNoMoreInteractions(manageHearingsCorresponder);
     }
@@ -94,7 +93,6 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
 
         // Assert
         assertThat(response.getErrors()).isNullOrEmpty();
-        assertThat(response.getData()).isEqualTo(caseDetails.getData());
         verifyNoMoreInteractions(manageHearingsCorresponder);
     }
 }

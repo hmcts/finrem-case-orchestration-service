@@ -46,8 +46,6 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremCallback
             manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .build();
+        return submittedResponse();
     }
 }
