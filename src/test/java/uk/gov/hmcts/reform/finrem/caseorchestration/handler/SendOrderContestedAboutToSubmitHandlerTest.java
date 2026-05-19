@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToSha
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
@@ -295,6 +296,101 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
+    void givenContestedCaseWithAdditionalDocuments_whenOrderSentToParties_thenSupportingDocumentsAreAddedWithPartyCategories() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        data.setPartiesOnCase(getParties());
+
+        CaseDocument additionalDocument = caseDocument(
+            "http://fakeurl/additionalDocument",
+            "additionalDocument.pdf"
+        );
+
+        OrderToShare selectedOrder = OrderToShare.builder()
+            .documentId(UUID_1)
+            .documentName("app_docs.pdf")
+            .documentToShare(YesOrNo.YES)
+            .build();
+
+        data.getSendOrderWrapper().setOrdersToSend(OrdersToSend.builder()
+            .value(List.of(OrderToShareCollection.builder().value(selectedOrder).build()))
+            .build());
+
+        data.getSendOrderWrapper().setAdditionalDocuments(List.of(
+            DocumentCollectionItem.fromCaseDocument(additionalDocument)
+        ));
+
+        data.setOrderApprovedCoverLetter(caseDocument());
+        data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
+
+        when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
+
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selectedOrder)))
+            .thenReturn(Triple.of(List.of(caseDocument()), List.of(), Map.of()));
+
+        when(documentHelper.getStampType(any(FinremCaseData.class)))
+            .thenReturn(StampType.FAMILY_COURT_STAMP);
+
+        when(genericDocumentService.stampDocument(
+            any(CaseDocument.class),
+            eq(AUTH_TOKEN),
+            eq(StampType.FAMILY_COURT_STAMP),
+            eq(CONTESTED)
+        )).thenReturn(caseDocument());
+
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(
+            additionalDocument,
+            AUTH_TOKEN,
+            CONTESTED
+        )).thenReturn(additionalDocument);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData caseData = response.getData();
+
+        assertSupportingDocument(
+            caseData.getOrderWrapper().getAppOrderCollections(),
+            additionalDocument,
+            DocumentCategory.APPLICANT_DOCUMENTS_SUPPORTING_DOCUMENTS.getDocumentCategoryId()
+        );
+
+        assertSupportingDocument(
+            caseData.getOrderWrapper().getRespOrderCollections(),
+            additionalDocument,
+            DocumentCategory.RESPONDENT_DOCUMENTS_SUPPORTING_DOCUMENTS.getDocumentCategoryId()
+        );
+
+        assertSupportingDocument(
+            caseData.getOrderWrapper().getIntv1OrderCollections(),
+            additionalDocument,
+            DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SUPPORTING_DOCUMENTS.getDocumentCategoryId()
+        );
+
+        assertSupportingDocument(
+            caseData.getOrderWrapper().getIntv2OrderCollections(),
+            additionalDocument,
+            DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_SUPPORTING_DOCUMENTS.getDocumentCategoryId()
+        );
+
+        assertSupportingDocument(
+            caseData.getOrderWrapper().getIntv3OrderCollections(),
+            additionalDocument,
+            DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SUPPORTING_DOCUMENTS.getDocumentCategoryId()
+        );
+
+        assertSupportingDocument(
+            caseData.getOrderWrapper().getIntv4OrderCollections(),
+            additionalDocument,
+            DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_SUPPORTING_DOCUMENTS.getDocumentCategoryId()
+        );
+
+        assertClearTempFields(caseData);
+        }
+
+    @Test
     @SuppressWarnings("java:S5961")
     void givenContestedCase_whenOrderAvailableToShareWithParties_thenHandlerHandleRequest() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
@@ -302,6 +398,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(getParties());
 
+        CaseDocument additionalDocument = caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf");
         OrderToShare selected1 = OrderToShare.builder().documentId(UUID_1).documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
         OrderToShare selected2 = OrderToShare.builder().documentId(UUID_2).documentName("app_docs2.pdf").documentToShare(YesOrNo.YES).build();
         OrdersToSend ordersToSend = OrdersToSend.builder()
@@ -312,7 +409,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
-        data.getSendOrderWrapper().setAdditionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(caseDocument())));
+        data.getSendOrderWrapper().setAdditionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(additionalDocument)));
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
@@ -328,7 +425,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED))).thenReturn(caseDocument());
 
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CONTESTED)))
-            .thenReturn(caseDocument());
+            .thenReturn(additionalDocument);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -420,10 +517,16 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             ))
             .build();
 
-        CaseDocument additionalDocument = caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf");
+        DocumentCollectionItem additionalDocument1 = DocumentCollectionItem.fromCaseDocument(
+            caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf")
+        );
+
+        DocumentCollectionItem additionalDocument2 = DocumentCollectionItem.fromCaseDocument(
+            caseDocument("http://fakeurl/additionalDocument2", "additionalDocument2.pdf")
+        );
+
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
-        data.getSendOrderWrapper().setAdditionalDocuments(List.of(DocumentCollectionItem
-            .fromCaseDocument(additionalDocument)));
+        data.getSendOrderWrapper().setAdditionalDocuments(List.of(additionalDocument1, additionalDocument2));
         data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "orderApprovedCoverLetter.pdf"));
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
@@ -435,8 +538,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.getStampType(data)).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(legacyApprovedOrder, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, CONTESTED))
             .thenReturn(caseDocument("http://fakeurl/stampedDocument", "stampedDocument.pdf"));
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(additionalDocument, AUTH_TOKEN, CONTESTED))
-            .thenReturn(caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf"));
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(additionalDocument1.getValue(), AUTH_TOKEN, CONTESTED))
+            .thenReturn(additionalDocument1.getValue());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(additionalDocument2.getValue(), AUTH_TOKEN, CONTESTED))
+            .thenReturn(additionalDocument2.getValue());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -444,9 +549,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .map(OrderSentToPartiesCollection::getValue)
             .map(SendOrderDocuments::getCaseDocument)
             .map(CaseDocument::getDocumentUrl)
-            .containsAnyOf("http://fakeurl/additionalDocument",
+            .containsExactlyInAnyOrder(
+                additionalDocument1.getValue().getDocumentUrl(),
+                additionalDocument2.getValue().getDocumentUrl(),
                 "http://fakeurl/1111Legacy",
-                "http://fakeurl/2222NewFlow");
+                "http://fakeurl/2222NewFlow"
+            );
         assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: ("
             + "(uuid1|order1.pdf)+[uuid3|attachment1.pdf],"
             + "(uuid2|order2.pdf)+[]"
@@ -875,5 +983,23 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .extracting(FinremCaseData::getSendOrderWrapper)
             .extracting(SendOrderWrapper::getOrdersToSend)
             .isNull();
+    }
+
+    private void assertSupportingDocument(
+        List<ApprovedOrderConsolidateCollection> orderCollections,
+        CaseDocument expectedDocument,
+        String expectedCategoryId
+    ) {
+        assertThat(orderCollections)
+            .hasSize(1);
+
+        assertThat(orderCollections.getFirst().getValue().getSupportingDocuments())
+            .hasSize(1)
+            .extracting(DocumentCollectionItem::getValue)
+            .satisfiesExactly(document -> assertThat(document)
+                .returns(expectedDocument.getDocumentUrl(), CaseDocument::getDocumentUrl)
+                .returns(expectedDocument.getDocumentFilename(), CaseDocument::getDocumentFilename)
+                .returns(expectedDocument.getDocumentBinaryUrl(), CaseDocument::getDocumentBinaryUrl)
+                .returns(expectedCategoryId, CaseDocument::getCategoryId));
     }
 }
