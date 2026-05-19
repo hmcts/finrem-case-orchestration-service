@@ -446,7 +446,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), eq(CONTESTED));
         verify(generalOrderService).isSelectedOrderMatches(any(), any());
-        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED));
         verify(documentHelper).getStampType(caseData);
         verify(dateService).addCreatedDateInFinalOrder(any(), any());
         verify(sendOrdersCategoriser).categorise(caseData);
@@ -484,7 +483,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         verify(genericDocumentService, times(1)).stampDocument(any(), any(), any(), eq(CONTESTED));
         verify(generalOrderService, times(2)).isSelectedOrderMatches(any(), any());
-        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED));
+        verify(genericDocumentService, times(2))
+            .convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CONTESTED));
         verify(documentHelper, times(1)).getStampType(caseData);
         verify(dateService, times(1)).addCreatedDateInFinalOrder(any(), any());
         verify(sendOrdersCategoriser, times(2)).categorise(caseData);
