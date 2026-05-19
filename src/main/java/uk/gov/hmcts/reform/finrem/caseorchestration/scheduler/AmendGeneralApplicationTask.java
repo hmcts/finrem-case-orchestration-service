@@ -18,7 +18,7 @@ import java.util.List;
 import static java.util.Objects.isNull;
 
 /**
- * This task is responsible for clearing the GeneralApplicationReferToJudgeEmail field in the GeneralApplicationWrapper
+ * This task is responsible for clearing the GeneralApplicationReferToJudgeEmail field in the GeneralApplicationWrapper.
  */
 @Component
 @Slf4j
