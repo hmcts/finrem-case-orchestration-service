@@ -110,7 +110,7 @@ public class AmendGeneralApplicationTask extends CsvFileProcessingTask {
 
         if (!isNull(referToJudgeEmail) && !referToJudgeEmail.isEmpty()) {
             log.info("Case {}: Clearing GeneralApplicationReferToJudgeEmail", finremCaseDetails.getId());
-            wrapper.setGeneralApplicationReferToJudgeEmail(null);
+            wrapper.setGeneralApplicationReferToJudgeEmail("deprecatedby@amendcron.com");
             log.info("Case {}: Cleared GeneralApplicationReferToJudgeEmail successfully", caseId);
         } else {
             log.info("Case {}: Has empty GeneralApplicationReferToJudgeEmail field", caseId);
