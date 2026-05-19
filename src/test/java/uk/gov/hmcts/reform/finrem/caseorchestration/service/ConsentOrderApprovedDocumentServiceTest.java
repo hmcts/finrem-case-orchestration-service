@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 
@@ -81,12 +82,23 @@ class ConsentOrderApprovedDocumentServiceTest {
     @Mock
     private CaseType mockedCaseType;
 
+    private CaseDocument pdfDocument = caseDocument("pdfDocument");
+
+    private CaseDocument stampedCaseDocument = caseDocument("pdfDocument");
+
+    private CaseDocument stampedAndAnnexedDoc = caseDocument("stampedAndAnnexedDoc");
+
+    @BeforeEach
+    void setUp() {
+        finremCaseDetails = spy(FinremCaseDetails.builder().build());
+    }
+
     @Nested
     class GenerateApprovedConsentOrderLetterTests {
 
         @BeforeEach
         void setUp() {
-            finremCaseDetails = spy(FinremCaseDetails.builder().build());
+//            finremCaseDetails = spy(FinremCaseDetails.builder().build());
             detailsCopy = CaseDetails.builder().data(new HashMap<>()).build();
             CaseDetails mappedCaseDetails = mock(CaseDetails.class);
             when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(mappedCaseDetails);
@@ -196,7 +208,6 @@ class ConsentOrderApprovedDocumentServiceTest {
         PensionTypeCollection pensionCollectionDataWithNullDocument = pensionDocumentData();
         pensionCollectionDataWithNullDocument.getTypedCaseDocument().setPensionDocument(null);
 
-        CaseDocument stampedCaseDocument = caseDocument("stampedCaseDocument");
         LocalDate approvalDate = mock(LocalDate.class);
         when(genericDocumentService.stampDocument(toBeStamped.getTypedCaseDocument().getPensionDocument(), AUTH_TOKEN,
             mockedStampType, mockedCaseType)).thenReturn(stampedCaseDocument);
@@ -224,20 +235,30 @@ class ConsentOrderApprovedDocumentServiceTest {
         );
     }
 
-//    @Test
-//    void stampsAndPopulatesCaseDataForContestedConsentOrder() throws Exception {
-//        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, CONTESTED))
-//            .thenReturn(document());
-//        finremCaseDetails = defaultConsentedFinremCaseDetails();
-//        FinremCaseData caseData = finremCaseDetails.getData();
-//        caseData.setConsentOrder(caseDocument());
-//
-//        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(finremCaseDetails, AUTH_TOKEN);
-//        assertThat(getDocumentList(caseData), hasSize(1));
-//
-//        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(finremCaseDetails, AUTH_TOKEN);
-//        assertThat(getDocumentList(caseData), hasSize(2));
-//    }
+    @Test
+    void stampsAndPopulatesCaseDataForContestedConsentOrder() {
+        CaseDocument consentOrder = caseDocument();
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
+        when(finremCaseData.getConsentOrder()).thenReturn(consentOrder);
+
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        when(finremCaseDetails.getCaseType()).thenReturn(mockedCaseType);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(consentOrder, AUTH_TOKEN, mockedCaseType))
+            .thenReturn(pdfDocument);
+        when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
+        when(genericDocumentService.stampDocument(pdfDocument, AUTH_TOKEN, mockedStampType, mockedCaseType))
+            .thenReturn(stampedCaseDocument);
+        when(genericDocumentService.annexStampDocument(stampedCaseDocument, AUTH_TOKEN, mockedStampType, mockedCaseType))
+            .thenReturn(stampedAndAnnexedDoc);
+
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(finremCaseDetails, AUTH_TOKEN);
+
+        assertThat(
+            finremCaseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders()
+        ).hasSize(1);
+
+        // TODO
+    }
 //
 //    @Test
 //    public void givenFinremCaseDetails_whenAddGenApprovedDocs_thenCaseDocsAdded() {
