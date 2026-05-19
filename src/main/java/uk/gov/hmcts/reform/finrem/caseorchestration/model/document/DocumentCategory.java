@@ -187,7 +187,7 @@ public enum DocumentCategory {
     INTERVENER_DOCUMENTS_INTERVENER_1_OTHER("intervenerDocumentsIntervener1Other"),
     INTERVENER_DOCUMENTS_INTERVENER_1_PENSION_PLAN("intervenerDocumentsIntervener1PensionPlan"),
     INTERVENER_DOCUMENTS_INTERVENER_1_COSTS_STATEMENT("intervenerDocumentsIntervener1CostsStatement"),
-    INTERVENER_DOCUMENTS_INTERVENER_1_POINTS_OF_CLAIM_OR_DEFENCE("intervenerDocumentsIntervener1SupportingDocuments"),
+    INTERVENER_DOCUMENTS_INTERVENER_1_POINTS_OF_CLAIM_OR_DEFENCE("intervenerDocumentsIntervener1PointOfClaimOrDefence"),
     INTERVENER_DOCUMENTS_INTERVENER_1_SUPPORTING_DOCUMENTS("intervenerDocumentsIntervener1SupportingDocuments"),
     INTERVENER_DOCUMENTS_INTERVENER_2("intervenerDocumentsIntervener2"),
     INTERVENER_DOCUMENTS_INTERVENER_2_FORM_E("intervenerDocumentsIntervener2FormE"),
