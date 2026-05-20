@@ -47,10 +47,10 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         if (shouldClearBinBeforeHandle()) {
             bin.clearBin();
         }
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handle(finremCallbackRequest, userAuthorisation);
         if (shouldHandleBin()) {
             handleBin(finremCaseData, userAuthorisation);
         }
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handle(finremCallbackRequest, userAuthorisation);
         if (shouldClearTemporaryFieldsAfterHandle()) {
             return removeTemporaryFieldsAfterHandled(response);
         }
