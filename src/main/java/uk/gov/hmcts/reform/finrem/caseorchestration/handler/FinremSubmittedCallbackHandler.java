@@ -50,6 +50,6 @@ public abstract class FinremSubmittedCallbackHandler extends FinremCallbackHandl
                     retryExecutor.runWithRetrySuppressException(
                         () -> evidenceManagementDeleteService.delete(url, userAuthorisation),
                         "Physical File Deletion", finremCaseData.getCcdCaseId())
-                );
+            );
     }
 }

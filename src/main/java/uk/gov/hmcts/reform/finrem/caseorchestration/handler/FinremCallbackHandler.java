@@ -85,7 +85,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
 
     /**
      * Removes all fields marked with {@link TemporaryField} from the case data
-     * in the given callback response,
+     * in the given callback response.
      *
      * <p>
      * If clearing is required, the method maps the response data into
