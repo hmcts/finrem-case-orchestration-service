@@ -707,7 +707,7 @@ public class TestSetUpUtils {
         CaseDetails toBeSanitised = CaseDetails.builder().data(temporaryFieldsMap).build();
         when(finremCaseDetailsMapper.mapToCaseDetails(argThat(a -> a.getData()
             .equals(finremCaseDetails.getData())))).thenReturn(toBeSanitised);
-        FinremCaseData sanitisedFinremCaseData= mock(FinremCaseData.class);
+        FinremCaseData sanitisedFinremCaseData = mock(FinremCaseData.class);
         when(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitised.getData())).thenReturn(sanitisedFinremCaseData);
 
         aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
