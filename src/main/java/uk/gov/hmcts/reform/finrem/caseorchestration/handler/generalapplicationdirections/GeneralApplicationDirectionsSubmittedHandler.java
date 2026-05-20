@@ -17,9 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.manag
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
 
 @Slf4j
@@ -55,20 +52,11 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmitte
 
         // Hearings are optional, so send hearing correspondence if a hearing was added in the event.
         if (generalApplicationDirectionsService.isHearingRequired(finremCaseDetails)) {
-            List<String> errors = new ArrayList<>();
-            retryExecutor.runWithRetryWithHandler(
+            retryExecutor.runWithRetrySuppressException(
                 () -> manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation),
-                "Send Hearing Correspondence (%s)".formatted(GENERAL_APPLICATION_DIRECTIONS_MH),
-                finremCaseDetails.getCaseIdAsString(),
-                (exception, actionName, caseId1) ->
-                    errors.add("Fail to send hearing correspondence.")
+                "Send Hearing Correspondence (%s)".formatted(GENERAL_APPLICATION_DIRECTIONS_MH.getCcdType()),
+                finremCaseDetails.getCaseIdAsString()
             );
-            if (!errors.isEmpty()) {
-                return submittedResponse(
-                    toConfirmationHeader("General application directions submitted with errors"),
-                    toConfirmationBody(errors.toArray(new String[0]))
-                );
-            }
         }
         return submittedResponse();
     }
