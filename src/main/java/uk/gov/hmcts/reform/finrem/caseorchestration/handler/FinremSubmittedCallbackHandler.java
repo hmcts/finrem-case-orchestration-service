@@ -47,9 +47,9 @@ public abstract class FinremSubmittedCallbackHandler extends FinremCallbackHandl
             .stream()
             .flatMap(List::stream)
             .map(DynamicListElement::getCode).forEach(url ->
-                    retryExecutor.runWithRetrySuppressException(
-                        () -> evidenceManagementDeleteService.delete(url, userAuthorisation),
-                        "Physical File Deletion", finremCaseData.getCcdCaseId())
+                retryExecutor.runWithRetrySuppressException(
+                    () -> evidenceManagementDeleteService.delete(url, userAuthorisation),
+                    "Physical File Deletion - %s".formatted(url), finremCaseData.getCcdCaseId())
             );
     }
 }
