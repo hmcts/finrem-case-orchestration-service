@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import java.util.ArrayList;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
+
 @Slf4j
 @Service
 public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmittedCallbackHandler {
@@ -41,7 +43,7 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmitte
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.GENERAL_APPLICATION_DIRECTIONS_MH.equals(eventType);
+            && GENERAL_APPLICATION_DIRECTIONS_MH.equals(eventType);
     }
 
     @Override
@@ -56,7 +58,7 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmitte
             List<String> errors = new ArrayList<>();
             retryExecutor.runWithRetryWithHandler(
                 () -> manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation),
-                "Send Hearing Correspondence",
+                "Send Hearing Correspondence (%s)".formatted(GENERAL_APPLICATION_DIRECTIONS_MH),
                 finremCaseDetails.getCaseIdAsString(),
                 (exception, actionName, caseId1) ->
                     errors.add("Fail to send hearing correspondence.")
