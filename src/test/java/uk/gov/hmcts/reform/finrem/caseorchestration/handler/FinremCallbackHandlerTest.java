@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -36,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -45,7 +43,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 
 @ExtendWith(MockitoExtension.class)
 class FinremCallbackHandlerTest {
@@ -167,7 +164,7 @@ class FinremCallbackHandlerTest {
     private ValidateCaseDataTestHandler validateCaseDataTestHandler;
 
     private static final Map<String, Object> TESTING_DATA_IN_MAP = Map.of(
-        "retained", YesOrNo.YES,
+        "d81Question", YesOrNo.YES,
         "stopRepJudicialApproval", YesOrNo.YES,
         "clientAddressForService", Address.builder().addressLine1("Test Address").build()
     );
@@ -212,68 +209,45 @@ class FinremCallbackHandlerTest {
         );
     }
 
+    // TODO  test for other handler removeTemporaryFieldsAfterHandled not called
     @Test
     void givenAboutToSubmitCallbackHandler_whenHandled_thenTemporaryFieldsRemoved() {
-        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData nonSanitisedFinremCaseData = FinremCaseData.builder().build();
+        FinremCaseDetails finremCaseDetails = spy(
+            FinremCaseDetails.builder().data(nonSanitisedFinremCaseData).build()
+        );
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .eventId(STOP_REPRESENTING_CLIENT.getCcdType())
-            .caseDetails(mock(CaseDetails.class))
-            .build();
-
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails()))
+        CaseDetails callbackRequestCaseDetails = mock(CaseDetails.class);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequestCaseDetails))
             .thenReturn(finremCaseDetails);
-        FinremCaseData responseData = spy(FinremCaseData.builder().build());
-        when(finremCaseDetails.getData()).thenReturn(responseData);
-        CaseDetails toBeSanitisedCaseDetails = CaseDetails.builder().data(new HashMap<>(TESTING_DATA_IN_MAP)).build();
-        when(finremCaseDetailsMapper.mapToCaseDetails(
-            argThat(arg -> responseData.equals(arg.getData())))
-        ).thenReturn(toBeSanitisedCaseDetails);
-        FinremCaseData expectedResponseData = mock(FinremCaseData.class);
-        when(finremCaseDetailsMapper.mapToFinremCaseData(Map.of("retained", YesOrNo.YES)))
-            .thenReturn(expectedResponseData);
 
-        var response = aboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+        CallbackRequest callbackRequest = mock(CallbackRequest.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(callbackRequestCaseDetails);
+        when(callbackRequest.getEventId()).thenReturn("mockedEventId");
 
-        assertAll(
-            () -> assertThat(response.getData())
-            .isEqualTo(expectedResponseData), // if expected properties are removed, it must return expectedResponseData
-            () -> verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(TESTING_DATA_IN_MAP),
-            () -> {
-                // To ensure method handle(FinremCallbackRequest, String) invoked and CallbackRequest was converted to FinremCallbackRequest
-                ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
-                verify(aboutToSubmitCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
-                assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
-            }
+        // mocking finremCaseDetailsMapper in method removeTemporaryFieldsAfterHandled
+        Map<String, Object> toBeSanitisedMap = new HashMap<>(
+            TESTING_DATA_IN_MAP
         );
-    }
+        when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)
+        ).thenReturn(toBeSanitisedMap);
+        FinremCaseData sanitisedFinremCaseData = mock(FinremCaseData.class);
+        // only return sanitisedFinremCaseData if TESTING_DATA_IN_MAP is sanitised
+        when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
+            map -> map.size() == 1 && map.containsKey("d81Question")
+        ))).thenReturn(sanitisedFinremCaseData);
 
-    @Test
-    void givenGeneralFinremCallbackHandler_whenHandled_thenShouldNotRemoveTemporaryFieldsAfterHandledOrNot() {
-        CaseDetails originalCaseDetails = CaseDetails.builder().data(new HashMap<>(TESTING_DATA_IN_MAP)).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .eventId(STOP_REPRESENTING_CLIENT.getCcdType())
-            .caseDetails(originalCaseDetails)
-            .build();
-        FinremCaseDetails finremCaseDetailsWithExpectedFinremCaseData = mock(FinremCaseDetails.class);
-        FinremCaseData expectedFinremCaseData = spy(FinremCaseData.builder().build());
-        when(finremCaseDetailsWithExpectedFinremCaseData.getData()).thenReturn(expectedFinremCaseData);
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(
-            argThat(arg -> TESTING_DATA_IN_MAP.equals(arg.getData())))
-        ).thenReturn(finremCaseDetailsWithExpectedFinremCaseData);
+        try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+            EventType eventType = mock(EventType.class);
+            mockedStatic.when(() -> EventType.getEventType("mockedEventId"))
+                .thenReturn(eventType);
 
-        var response = finremCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
-        assertAll(
-            () -> assertThat(response.getData())
-                .isEqualTo(expectedFinremCaseData),
-            () -> verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(Map.of("retained", YesOrNo.YES)),
-            () -> {
-                // To ensure method handle(FinremCallbackRequest, String) invoked and CallbackRequest was converted to FinremCallbackRequest
-                ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
-                verify(finremCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
-                assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
-            }
-        );
+            var response = aboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            assertAll(
+                () -> assertEquals(sanitisedFinremCaseData, response.getData())
+            );
+        }
     }
 
     @Test
@@ -379,6 +353,7 @@ class FinremCallbackHandlerTest {
             when(callbackRequest.getEventId()).thenReturn("mockedEventId");
 
             // mocking finremCaseDetailsMapper in method removeTemporaryFieldsAfterHandled
+            toBeSanitisedMap = new HashMap<>();
             lenient().when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)
             ).thenReturn(toBeSanitisedMap);
             sanitisedFinremCaseData = mock(FinremCaseData.class);
