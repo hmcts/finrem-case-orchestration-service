@@ -48,9 +48,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             bin.clearBin();
         }
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handle(finremCallbackRequest, userAuthorisation);
-        if (shouldHandleBin()) {
-            handleBin(finremCaseData, userAuthorisation);
-        }
+        handleBin(finremCaseData, userAuthorisation);
         if (shouldClearTemporaryFieldsAfterHandle()) {
             return removeTemporaryFieldsAfterHandled(response);
         }
@@ -69,10 +67,6 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             || callbackRequest.getCaseDetails().getData() == null) {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
-    }
-
-    protected boolean shouldHandleBin() {
-        return false;
     }
 
     protected boolean shouldClearBinBeforeHandle() {

@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -19,6 +22,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,9 +33,11 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -121,10 +129,12 @@ class FinremCallbackHandlerTest {
         }
     }
 
-    static class GeneralSubmittedCallbackHandler extends FinremCallbackHandler {
+    static class GeneralSubmittedCallbackHandler extends FinremSubmittedCallbackHandler {
 
-        public GeneralSubmittedCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
-            super(finremCaseDetailsMapper);
+        public GeneralSubmittedCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                               EvidenceManagementDeleteService evidenceManagementDeleteService,
+                                               RetryExecutor retryExecutor) {
+            super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
         }
 
         @Override
@@ -143,9 +153,15 @@ class FinremCallbackHandlerTest {
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    private GeneralFinremCallbackHandler generalFinremCallbackHandler;
-    private GeneralAboutToSubmitCallbackHandler generalAboutToSubmitCallbackHandler;
-    private GeneralSubmittedCallbackHandler generalSubmittedCallbackHandler;
+    @Mock
+    private EvidenceManagementDeleteService evidenceManagementDeleteService;
+
+    @Mock
+    private RetryExecutor retryExecutor;
+
+    private GeneralFinremCallbackHandler finremCallbackHandler;
+    private GeneralAboutToSubmitCallbackHandler aboutToSubmitCallbackHandler;
+    private GeneralSubmittedCallbackHandler submittedCallbackHandler;
     private ResponseWithoutWarningsTestHandler responseWithoutWarningsTestHandler;
     private ResponseTestHandler responseTestHandler;
     private ValidateCaseDataTestHandler validateCaseDataTestHandler;
@@ -158,9 +174,10 @@ class FinremCallbackHandlerTest {
 
     @BeforeEach
     void setUp() {
-        generalFinremCallbackHandler = spy(new GeneralFinremCallbackHandler(finremCaseDetailsMapper));
-        generalAboutToSubmitCallbackHandler = spy(new GeneralAboutToSubmitCallbackHandler(finremCaseDetailsMapper));
-        generalSubmittedCallbackHandler = spy(new GeneralSubmittedCallbackHandler(finremCaseDetailsMapper));
+        finremCallbackHandler = spy(new GeneralFinremCallbackHandler(finremCaseDetailsMapper));
+        aboutToSubmitCallbackHandler = spy(new GeneralAboutToSubmitCallbackHandler(finremCaseDetailsMapper));
+        submittedCallbackHandler = spy(new GeneralSubmittedCallbackHandler(finremCaseDetailsMapper,
+            evidenceManagementDeleteService, retryExecutor));
         responseWithoutWarningsTestHandler = new ResponseWithoutWarningsTestHandler(finremCaseDetailsMapper);
         responseTestHandler = new ResponseTestHandler(finremCaseDetailsMapper);
         validateCaseDataTestHandler = new ValidateCaseDataTestHandler(finremCaseDetailsMapper);
@@ -187,7 +204,7 @@ class FinremCallbackHandlerTest {
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore)).thenReturn(finremCaseDetailsBefore);
 
-        generalFinremCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+        finremCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertAll(
             () -> verify(caseData).setCcdCaseId(CASE_ID),
@@ -216,7 +233,7 @@ class FinremCallbackHandlerTest {
         when(finremCaseDetailsMapper.mapToFinremCaseData(Map.of("retained", YesOrNo.YES)))
             .thenReturn(expectedResponseData);
 
-        var response = generalAboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+        var response = aboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertAll(
             () -> assertThat(response.getData())
@@ -225,7 +242,7 @@ class FinremCallbackHandlerTest {
             () -> {
                 // To ensure method handle(FinremCallbackRequest, String) invoked and CallbackRequest was converted to FinremCallbackRequest
                 ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
-                verify(generalAboutToSubmitCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
+                verify(aboutToSubmitCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
                 assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
             }
         );
@@ -245,7 +262,7 @@ class FinremCallbackHandlerTest {
             argThat(arg -> TESTING_DATA_IN_MAP.equals(arg.getData())))
         ).thenReturn(finremCaseDetailsWithExpectedFinremCaseData);
 
-        var response = generalFinremCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+        var response = finremCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
         assertAll(
             () -> assertThat(response.getData())
                 .isEqualTo(expectedFinremCaseData),
@@ -253,7 +270,7 @@ class FinremCallbackHandlerTest {
             () -> {
                 // To ensure method handle(FinremCallbackRequest, String) invoked and CallbackRequest was converted to FinremCallbackRequest
                 ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
-                verify(generalFinremCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
+                verify(finremCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
                 assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
             }
         );
@@ -261,7 +278,7 @@ class FinremCallbackHandlerTest {
 
     @Test
     void givenGeneralSubmittedHandler_whenHandled_thenShouldPopulateConfirmationHeaderAndConfirmationBody() {
-        assertThat(generalSubmittedCallbackHandler.handle(FinremCallbackRequestFactory.from(), AUTH_TOKEN))
+        assertThat(submittedCallbackHandler.handle(FinremCallbackRequestFactory.from(), AUTH_TOKEN))
             .extracting(GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
                 GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
             .containsExactly("# TEST", "<ul><li><h2>Message One</h2></li><li><h2>Message Two</h2></li></ul>");
@@ -329,5 +346,92 @@ class FinremCallbackHandlerTest {
         assertDoesNotThrow(
             () -> validateCaseDataTestHandler.handle(validRequest, AUTH_TOKEN)
         );
+    }
+
+    @Nested
+    class ClearBinBeforeHandleTests {
+
+        Bin spiedBin;
+
+        CallbackRequest callbackRequest;
+
+        CaseDetails toBeSanitisedCaseDetails;
+
+        FinremCaseData sanitisedFinremCaseData;
+
+        FinremCaseData nonSanitisedFinremCaseData;
+
+        @BeforeEach
+        void setup() {
+            spiedBin = spy(Bin.builder().build());
+
+            nonSanitisedFinremCaseData = FinremCaseData.builder().bin(spiedBin).build();
+            FinremCaseDetails finremCaseDetails = spy(
+                FinremCaseDetails.builder().data(nonSanitisedFinremCaseData).build()
+            );
+
+            CaseDetails callbackRequestCaseDetails = mock(CaseDetails.class);
+            when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequestCaseDetails))
+                .thenReturn(finremCaseDetails);
+
+            callbackRequest = mock(CallbackRequest.class);
+            when(callbackRequest.getCaseDetails()).thenReturn(callbackRequestCaseDetails);
+            when(callbackRequest.getEventId()).thenReturn("mockedEventId");
+
+            // mocking finremCaseDetailsMapper in method removeTemporaryFieldsAfterHandled
+            toBeSanitisedCaseDetails = mock(CaseDetails.class);
+            when(toBeSanitisedCaseDetails.getData())
+                .thenReturn(new HashMap<>()); // return an empty map not to test sanitise method
+            lenient().when(finremCaseDetailsMapper.mapToCaseDetails(
+                argThat(details -> details.getData().equals(nonSanitisedFinremCaseData)))
+            ).thenReturn(toBeSanitisedCaseDetails);
+            sanitisedFinremCaseData = mock(FinremCaseData.class);
+            lenient().when(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedCaseDetails.getData()))
+                .thenReturn(sanitisedFinremCaseData);
+        }
+
+        @Test
+        void submittedHandlerShouldNotClearBin() {
+            try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+                EventType eventType = mock(EventType.class);
+                mockedStatic.when(() -> EventType.getEventType("mockedEventId"))
+                    .thenReturn(eventType);
+
+                submittedCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+                verify(spiedBin, never()).clearBin();
+            }
+        }
+
+        @Test
+        void aboutToSubmitHandlerShouldClearBin() {
+            try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+                EventType eventType = mock(EventType.class);
+                mockedStatic.when(() -> EventType.getEventType("mockedEventId"))
+                    .thenReturn(eventType);
+
+                var response = aboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+
+                assertAll(
+                    () -> verify(spiedBin).clearBin(),
+                    () -> assertEquals(sanitisedFinremCaseData, response.getData())
+                );
+            }
+        }
+
+        @Test
+        void generalHandlerShouldClearBin() {
+            try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+                EventType eventType = mock(EventType.class);
+                mockedStatic.when(() -> EventType.getEventType("mockedEventId"))
+                    .thenReturn(eventType);
+
+                var response = finremCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+
+                assertAll(
+                    () -> verify(spiedBin).clearBin(),
+                    () -> assertEquals(nonSanitisedFinremCaseData, response.getData())
+                );
+            }
+        }
     }
 }

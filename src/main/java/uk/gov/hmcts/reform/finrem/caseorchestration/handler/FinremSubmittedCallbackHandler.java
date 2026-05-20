@@ -36,11 +36,6 @@ public abstract class FinremSubmittedCallbackHandler extends FinremCallbackHandl
     }
 
     @Override
-    protected final boolean shouldHandleBin() {
-        return true;
-    }
-
-    @Override
     protected void handleBin(FinremCaseData finremCaseData, String userAuthorisation) {
         ofNullable(finremCaseData.getBin().getFileUrlsToBeDeleted())
             .map(DynamicList::getListItems)
