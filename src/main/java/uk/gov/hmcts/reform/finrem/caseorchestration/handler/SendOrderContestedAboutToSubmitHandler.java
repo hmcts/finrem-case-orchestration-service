@@ -153,7 +153,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
+        return response(caseDetails.getData());
     }
 
     private String getCaseId(FinremCaseDetails caseDetails) {
@@ -168,7 +168,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
         if (CollectionUtils.isNotEmpty(additionalDocuments)) {
             log.info("Additional uploaded documents with send order {} for Case ID: {}",
-                additionalDocuments, getCaseId(caseDetails));
+                additionalDocuments, caseDetails.getCaseIdAsString());
 
             List<DocumentCollectionItem> convertedAdditionalDocuments = additionalDocuments.stream()
                 .map(additionalDocument ->
