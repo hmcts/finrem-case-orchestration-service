@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.listener.RetryListenerSupport;
-import org.springframework.stereotype.Component;
 
 /**
  * Retry listener that logs retry attempts and final failure details.
@@ -28,7 +27,6 @@ import org.springframework.stereotype.Component;
  * </pre>
  */
 @Slf4j
-@Component("retryLogger")
 public class RetryLogger extends RetryListenerSupport {
 
     @Override
