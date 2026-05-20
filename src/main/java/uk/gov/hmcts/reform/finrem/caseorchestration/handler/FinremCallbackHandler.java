@@ -99,23 +99,18 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response) {
         FinremCaseData finremCaseData = response.getData();
 
-        CaseDetails toBeSanitisedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(
-            FinremCaseDetails.builder().data(finremCaseData).build()
-        );
+        Map<String, Object> toBeSanitisedMap = finremCaseDetailsMapper.finremCaseDataToMap(finremCaseData);
 
         Bin bin = finremCaseData.getBin();
-        sanitise(toBeSanitisedCaseDetails, bin);
+        sanitise(toBeSanitisedMap, bin);
 
-        FinremCaseData sanitisedFinremCaseData = finremCaseDetailsMapper.mapToFinremCaseData(
-            toBeSanitisedCaseDetails.getData()
-        );
+        FinremCaseData sanitisedFinremCaseData = finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedMap);
         sanitisedFinremCaseData.setBin(bin);
         return response.toBuilder().data(sanitisedFinremCaseData).build();
     }
 
-    private void sanitise(CaseDetails toBeSanitisedCaseDetails, Bin bin) {
-        Map<String, Object> dataInMap = toBeSanitisedCaseDetails.getData();
-        if (dataInMap == null) {
+    private void sanitise(Map<String, Object> toBeSanitisedMap, Bin bin) {
+        if (toBeSanitisedMap == null) {
             return;
         }
 
@@ -127,14 +122,14 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
                 .collect(Collectors.toSet());
 
         // derived map: only non-temporary CaseDocument fields
-        Map<String, Object> nonTemporaryDataMap = dataInMap.entrySet().stream()
+        Map<String, Object> nonTemporaryDataMap = toBeSanitisedMap.entrySet().stream()
             .filter(entry -> !temporaryFieldNamesWithCaseDocumentType.contains(entry.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
             getFieldsListWithAnnotation(clazz, TemporaryField.class)
                 .forEach(field -> {
-                    Object value = dataInMap.remove(field.getName());
+                    Object value = toBeSanitisedMap.remove(field.getName());
 
                     if (CaseDocument.class.isAssignableFrom(field.getType())
                         && value != null

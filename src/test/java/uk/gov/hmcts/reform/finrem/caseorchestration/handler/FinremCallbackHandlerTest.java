@@ -355,7 +355,7 @@ class FinremCallbackHandlerTest {
 
         CallbackRequest callbackRequest;
 
-        CaseDetails toBeSanitisedCaseDetails;
+        Map<String, Object> toBeSanitisedMap;
 
         FinremCaseData sanitisedFinremCaseData;
 
@@ -379,14 +379,10 @@ class FinremCallbackHandlerTest {
             when(callbackRequest.getEventId()).thenReturn("mockedEventId");
 
             // mocking finremCaseDetailsMapper in method removeTemporaryFieldsAfterHandled
-            toBeSanitisedCaseDetails = mock(CaseDetails.class);
-            when(toBeSanitisedCaseDetails.getData())
-                .thenReturn(new HashMap<>()); // return an empty map not to test sanitise method
-            lenient().when(finremCaseDetailsMapper.mapToCaseDetails(
-                argThat(details -> details.getData().equals(nonSanitisedFinremCaseData)))
-            ).thenReturn(toBeSanitisedCaseDetails);
+            lenient().when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)
+            ).thenReturn(toBeSanitisedMap);
             sanitisedFinremCaseData = mock(FinremCaseData.class);
-            lenient().when(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedCaseDetails.getData()))
+            lenient().when(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedMap))
                 .thenReturn(sanitisedFinremCaseData);
         }
 
