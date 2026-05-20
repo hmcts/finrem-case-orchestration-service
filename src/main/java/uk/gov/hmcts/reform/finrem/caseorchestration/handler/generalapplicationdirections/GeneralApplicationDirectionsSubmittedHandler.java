@@ -11,10 +11,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -45,11 +49,25 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmitte
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        // Hearings are optional, so send hearing correspondence if a hearing was added in the event.
-        if (generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())) {
-            manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
-        }
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
+        // Hearings are optional, so send hearing correspondence if a hearing was added in the event.
+        if (generalApplicationDirectionsService.isHearingRequired(finremCaseDetails)) {
+            List<String> errors = new ArrayList<>();
+            retryExecutor.runWithRetryWithHandler(
+                () -> manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation),
+                "Send Hearing Correspondence",
+                finremCaseDetails.getCaseIdAsString(),
+                (exception, actionName, caseId1) ->
+                    errors.add("Fail to send hearing correspondence.")
+            );
+            if (!errors.isEmpty()) {
+                return submittedResponse(
+                    toConfirmationHeader("General application directions submitted with errors"),
+                    toConfirmationBody(errors.toArray(new String[0]))
+                );
+            }
+        }
         return submittedResponse();
     }
 }
