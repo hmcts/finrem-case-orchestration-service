@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
@@ -36,7 +37,9 @@ public abstract class FinremSubmittedCallbackHandler extends FinremCallbackHandl
     }
 
     @Override
-    protected void handleBin(FinremCaseData finremCaseData, String userAuthorisation) {
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> postHandle(
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response,
+        FinremCaseData finremCaseData, String userAuthorisation) {
         ofNullable(finremCaseData.getBin().getFileUrlsToBeDeleted())
             .map(DynamicList::getListItems)
             .stream()
@@ -46,5 +49,6 @@ public abstract class FinremSubmittedCallbackHandler extends FinremCallbackHandl
                     () -> evidenceManagementDeleteService.delete(url, userAuthorisation),
                     "Physical File Deletion - %s".formatted(url), finremCaseData.getCcdCaseId())
             );
+        return response;
     }
 }

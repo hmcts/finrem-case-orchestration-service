@@ -48,17 +48,20 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             bin.clearBin();
         }
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handle(finremCallbackRequest, userAuthorisation);
-        handleBin(finremCaseData, userAuthorisation);
-        if (shouldClearTemporaryFieldsAfterHandle()) {
-            return removeTemporaryFieldsAfterHandled(response);
-        }
-        return response;
+        return postHandle(response, finremCaseData, userAuthorisation);
     }
 
     public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
                                                                                        String userAuthorisation);
 
-    protected void handleBin(FinremCaseData finremCaseData, String userAuthorisation) {
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> postHandle(
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response,
+        FinremCaseData finremCaseData, String userAuthorisation) {
+
+        if (shouldClearTemporaryFieldsAfterHandle()) {
+            return removeTemporaryFieldsAfterHandled(response);
+        }
+        return response;
     }
 
     protected void validateCaseData(FinremCallbackRequest callbackRequest) {
