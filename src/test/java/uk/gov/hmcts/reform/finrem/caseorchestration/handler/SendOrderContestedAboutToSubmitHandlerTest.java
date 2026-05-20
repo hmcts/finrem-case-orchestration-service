@@ -483,7 +483,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         verify(genericDocumentService, times(1)).stampDocument(any(), any(), any(), eq(CONTESTED));
         verify(generalOrderService, times(2)).isSelectedOrderMatches(any(), any());
-        verify(genericDocumentService, times(2))
+        verify(genericDocumentService, times(1))
             .convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CONTESTED));
         verify(documentHelper, times(1)).getStampType(caseData);
         verify(dateService, times(1)).addCreatedDateInFinalOrder(any(), any());
