@@ -169,11 +169,11 @@ class FinremCallbackHandlerTest {
     @Test
     void shouldPopulateCaseIdToBothFinremCaseDetails() {
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
-        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
         when(finremCaseDetails.getData()).thenReturn(caseData);
         when(finremCaseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
 
-        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+        FinremCaseData caseDataBefore = spy(FinremCaseData.builder().build());
         FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
         when(finremCaseDetailsBefore.getData()).thenReturn(caseDataBefore);
         CallbackRequest callbackRequest = mock(CallbackRequest.class);
@@ -206,7 +206,7 @@ class FinremCallbackHandlerTest {
 
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails()))
             .thenReturn(finremCaseDetails);
-        FinremCaseData responseData = mock(FinremCaseData.class);
+        FinremCaseData responseData = spy(FinremCaseData.builder().build());
         when(finremCaseDetails.getData()).thenReturn(responseData);
         CaseDetails toBeSanitisedCaseDetails = CaseDetails.builder().data(new HashMap<>(TESTING_DATA_IN_MAP)).build();
         when(finremCaseDetailsMapper.mapToCaseDetails(
@@ -239,7 +239,7 @@ class FinremCallbackHandlerTest {
             .caseDetails(originalCaseDetails)
             .build();
         FinremCaseDetails finremCaseDetailsWithExpectedFinremCaseData = mock(FinremCaseDetails.class);
-        FinremCaseData expectedFinremCaseData = mock(FinremCaseData.class);
+        FinremCaseData expectedFinremCaseData = spy(FinremCaseData.builder().build());
         when(finremCaseDetailsWithExpectedFinremCaseData.getData()).thenReturn(expectedFinremCaseData);
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(
             argThat(arg -> TESTING_DATA_IN_MAP.equals(arg.getData())))

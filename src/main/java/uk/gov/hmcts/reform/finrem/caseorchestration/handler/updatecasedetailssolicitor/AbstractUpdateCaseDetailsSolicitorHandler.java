@@ -45,7 +45,7 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
      * @return boolean.
      */
     public boolean clearsTemporaryFields() {
-        return shouldClearTemporaryFields();
+        return shouldClearTemporaryFieldsAfterHandle();
     }
 
     protected void handleLog(FinremCallbackRequest callbackRequest) {

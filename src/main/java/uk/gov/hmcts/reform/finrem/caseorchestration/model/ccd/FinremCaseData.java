@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigratio
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RefugeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
@@ -74,6 +75,9 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @NoArgsConstructor
 public class FinremCaseData implements HasCaseDocument {
 
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private Bin bin;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private CaseDataMetricsWrapper caseDataMetricsWrapper;
@@ -1181,5 +1185,13 @@ public class FinremCaseData implements HasCaseDocument {
             this.citizenDocumentWrapper = new CitizenDocumentWrapper();
         }
         return citizenDocumentWrapper;
+    }
+
+    @JsonIgnore
+    public Bin getBin() {
+        if (bin == null) {
+            this.bin = Bin.builder().build();
+        }
+        return bin;
     }
 }

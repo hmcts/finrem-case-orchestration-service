@@ -10,8 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
@@ -20,6 +22,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepres
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -36,12 +41,27 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        return removeTemporaryFieldsAfterHandled(
-            handle(mapToFinremCallbackRequest(callbackRequest), userAuthorisation));
+        FinremCallbackRequest finremCallbackRequest = mapToFinremCallbackRequest(callbackRequest);
+        FinremCaseData finremCaseData = finremCallbackRequest.getFinremCaseData();
+        Bin bin = finremCaseData.getBin();
+        if (shouldClearBinBeforeHandle()) {
+            bin.clearBin();
+        }
+        if (shouldHandleBin()) {
+            handleBin(finremCaseData, userAuthorisation);
+        }
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handle(finremCallbackRequest, userAuthorisation);
+        if (shouldClearTemporaryFieldsAfterHandle()) {
+            return removeTemporaryFieldsAfterHandled(response);
+        }
+        return response;
     }
 
     public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
                                                                                        String userAuthorisation);
+
+    protected void handleBin(FinremCaseData finremCaseData, String userAuthorisation) {
+    }
 
     protected void validateCaseData(FinremCallbackRequest callbackRequest) {
         if (callbackRequest == null
@@ -51,17 +71,21 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         }
     }
 
-    protected boolean shouldClearTemporaryFields() {
+    protected boolean shouldHandleBin() {
+        return false;
+    }
+
+    protected boolean shouldClearBinBeforeHandle() {
+        return true;
+    }
+
+    protected boolean shouldClearTemporaryFieldsAfterHandle() {
         return false;
     }
 
     /**
      * Removes all fields marked with {@link TemporaryField} from the case data
-     * in the given callback response.
-     *
-     * <p>
-     * This method first checks whether temporary fields should be cleared. If not,
-     * it returns the original response.
+     * in the given callback response,
      *
      * <p>
      * If clearing is required, the method maps the response data into
@@ -70,28 +94,66 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      * names from the case data. It then maps the cleaned data back into
      * {@link FinremCaseData} and returns a new response containing the updated data.
      *
-     * @param response the callback response containing case data to clean
+     * @param response the callback response containing case data to sanitise
      * @return a response with temporary fields removed, or the original response if
      *         clearing is not needed
      */
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> removeTemporaryFieldsAfterHandled(
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response) {
-        if (!shouldClearTemporaryFields()) {
-            return response;
+        FinremCaseData finremCaseData = response.getData();
+
+        CaseDetails toBeSanitisedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(
+            FinremCaseDetails.builder().data(finremCaseData).build()
+        );
+
+        Bin bin = finremCaseData.getBin();
+        sanitise(toBeSanitisedCaseDetails, bin);
+
+        FinremCaseData sanitisedFinremCaseData = finremCaseDetailsMapper.mapToFinremCaseData(
+            toBeSanitisedCaseDetails.getData()
+        );
+        sanitisedFinremCaseData.setBin(bin);
+        return response.toBuilder().data(sanitisedFinremCaseData).build();
+    }
+
+    private void sanitise(CaseDetails toBeSanitisedCaseDetails, Bin bin) {
+        Map<String, Object> dataInMap = toBeSanitisedCaseDetails.getData();
+        if (dataInMap == null) {
+            return;
         }
 
-        FinremCaseDetails toBeSanitised = FinremCaseDetails.builder()
-            .data(response.getData()).build();
-        CaseDetails toBeSanitisedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(toBeSanitised);
+        Set<String> temporaryFieldNamesWithCaseDocumentType =
+            getClassesWithTemporaryFieldAnnotation().stream()
+                .flatMap(clazz -> getFieldsListWithAnnotation(clazz, TemporaryField.class).stream())
+                .filter(field -> CaseDocument.class.isAssignableFrom(field.getType()))
+                .map(Field::getName)
+                .collect(Collectors.toSet());
 
-        if (toBeSanitisedCaseDetails.getData() != null) {
-            getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
-                getFieldsListWithAnnotation(clazz, TemporaryField.class).stream()
-                    .map(Field::getName)
-                    .forEach(toBeSanitisedCaseDetails.getData()::remove));
+        // derived map: only non-temporary CaseDocument fields
+        Map<String, Object> nonTemporaryDataMap = dataInMap.entrySet().stream()
+            .filter(entry -> !temporaryFieldNamesWithCaseDocumentType.contains(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
+            getFieldsListWithAnnotation(clazz, TemporaryField.class)
+                .forEach(field -> {
+                    Object value = dataInMap.remove(field.getName());
+
+                    if (CaseDocument.class.isAssignableFrom(field.getType())
+                        && value != null
+                        && !nonTemporaryDataMap.containsValue(value)) {
+
+                        binCaseDocumentIfTemporaryField(bin, value);
+                    }
+                })
+        );
+    }
+
+    private void binCaseDocumentIfTemporaryField(Bin bin, Object value) {
+        CaseDocument caseDocument = finremCaseDetailsMapper.mapToCaseDocument(value);
+        if (caseDocument != null) {
+            bin.binCaseDocument(caseDocument);
         }
-
-        return response.toBuilder().data(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedCaseDetails.getData())).build();
     }
 
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submittedResponse() {
