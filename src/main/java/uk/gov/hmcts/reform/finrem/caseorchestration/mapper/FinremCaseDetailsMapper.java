@@ -26,6 +26,16 @@ public class FinremCaseDetailsMapper {
 
     private final ObjectMapper objectMapper;
 
+    /**
+     * Converts the given object into a {@link CaseDocument}.
+     *
+     * <p>
+     * This method uses the configured {@link com.fasterxml.jackson.databind.ObjectMapper}
+     * to map the provided value into a {@link CaseDocument} instance.
+     *
+     * @param value the source object to convert
+     * @return the converted {@link CaseDocument}
+     */
     public CaseDocument mapToCaseDocument(Object value) {
         return objectMapper.convertValue(value, CaseDocument.class);
     }
