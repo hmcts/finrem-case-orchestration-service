@@ -32,11 +32,6 @@ public class SetDateOfMarriageTask extends EncryptedCsvFileProcessingTask {
         super(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
     }
 
-    /**
-     * Updates the generalApplicationReferToJudgeEmail field if it matches an incorrect value.
-     *
-     * @param finremCaseDetails the case details to process
-     */
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
