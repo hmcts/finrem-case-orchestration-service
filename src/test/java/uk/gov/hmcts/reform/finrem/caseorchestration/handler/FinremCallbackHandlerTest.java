@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -311,8 +312,58 @@ class FinremCallbackHandlerTest {
             callbackRequest = mock(CallbackRequest.class);
             when(callbackRequest.getCaseDetails()).thenReturn(callbackRequestCaseDetails);
             when(callbackRequest.getEventId()).thenReturn(MOCKED_EVENT_CCD_TYPE);
+        }
 
-            // mocking finremCaseDetailsMapper in method removeTemporaryFieldsAfterHandled
+        @Test
+        void aboutToSubmitHandlerShouldClearTemporaryFields() {
+            mockForClearTemporaryFields();
+            try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+                EventType eventType = mock(EventType.class);
+                mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
+                    .thenReturn(eventType);
+
+                var response = aboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+
+                assertAll(
+                    // only return sanitisedFinremCaseData if TESTING_DATA_IN_MAP is sanitised
+                    () -> assertEquals(sanitisedFinremCaseData, response.getData())
+                );
+            }
+        }
+
+        @Test
+        void finremCallbackHandlerShouldClearTemporaryFields() {
+            try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+                EventType eventType = mock(EventType.class);
+                mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
+                    .thenReturn(eventType);
+
+                submittedCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+
+                assertAll(
+                    () -> verify(submittedCallbackHandler, never()).shouldClearTemporaryFieldsAfterHandle(),
+                    () -> verify(submittedCallbackHandler, never()).removeTemporaryFieldsAfterHandled(any())
+                );
+            }
+        }
+
+        @Test
+        void submittedHandlerShouldNotClearTemporaryFields() {
+            try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+                EventType eventType = mock(EventType.class);
+                mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
+                    .thenReturn(eventType);
+
+                submittedCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+
+                assertAll(
+                    () -> verify(submittedCallbackHandler, never()).shouldClearTemporaryFieldsAfterHandle(),
+                    () -> verify(submittedCallbackHandler, never()).removeTemporaryFieldsAfterHandled(any())
+                );
+            }
+        }
+
+        private void mockForClearTemporaryFields() {
             toBeSanitisedMap = new HashMap<>(
                 TESTING_DATA_IN_MAP
             );
@@ -323,21 +374,6 @@ class FinremCallbackHandlerTest {
             when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
                 map -> map.size() == 1 && map.containsKey(PROPERTY_TO_BE_RETAINED)
             ))).thenReturn(sanitisedFinremCaseData);
-        }
-
-        @Test
-        void aboutToSubmitHandlerShouldClearTemporaryFields() {
-            try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
-                EventType eventType = mock(EventType.class);
-                mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
-                    .thenReturn(eventType);
-
-                var response = aboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
-
-                assertAll(
-                    () -> assertEquals(sanitisedFinremCaseData, response.getData())
-                );
-            }
         }
     }
 
