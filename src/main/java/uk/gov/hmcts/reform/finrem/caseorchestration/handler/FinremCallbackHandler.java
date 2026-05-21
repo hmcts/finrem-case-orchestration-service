@@ -109,45 +109,6 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return response.toBuilder().data(sanitisedFinremCaseData).build();
     }
 
-    private void sanitise(Map<String, Object> toBeSanitisedMap, Bin bin) {
-        if (toBeSanitisedMap == null) {
-            return;
-        }
-
-        Set<String> temporaryFieldNamesWithCaseDocumentType =
-            getClassesWithTemporaryFieldAnnotation().stream()
-                .flatMap(clazz -> getFieldsListWithAnnotation(clazz, TemporaryField.class).stream())
-                .filter(field -> CaseDocument.class.isAssignableFrom(field.getType()))
-                .map(Field::getName)
-                .collect(Collectors.toSet());
-
-        // derived map: only non-temporary CaseDocument fields
-        Map<String, Object> nonTemporaryDataMap = toBeSanitisedMap.entrySet().stream()
-            .filter(entry -> !temporaryFieldNamesWithCaseDocumentType.contains(entry.getKey()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
-            getFieldsListWithAnnotation(clazz, TemporaryField.class)
-                .forEach(field -> {
-                    Object value = toBeSanitisedMap.remove(field.getName());
-
-                    if (CaseDocument.class.isAssignableFrom(field.getType())
-                        && value != null
-                        && !nonTemporaryDataMap.containsValue(value)) {
-
-                        binCaseDocumentIfTemporaryField(bin, value);
-                    }
-                })
-        );
-    }
-
-    private void binCaseDocumentIfTemporaryField(Bin bin, Object value) {
-        CaseDocument caseDocument = finremCaseDetailsMapper.mapToCaseDocument(value);
-        if (caseDocument != null) {
-            bin.binCaseDocument(caseDocument);
-        }
-    }
-
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submittedResponse() {
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().build();
     }
@@ -214,6 +175,45 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
 
         body.append("</ul>");
         return body.toString();
+    }
+
+    private void sanitise(Map<String, Object> toBeSanitisedMap, Bin bin) {
+        if (toBeSanitisedMap == null) {
+            return;
+        }
+
+        Set<String> temporaryFieldNamesWithCaseDocumentType =
+            getClassesWithTemporaryFieldAnnotation().stream()
+                .flatMap(clazz -> getFieldsListWithAnnotation(clazz, TemporaryField.class).stream())
+                .filter(field -> CaseDocument.class.isAssignableFrom(field.getType()))
+                .map(Field::getName)
+                .collect(Collectors.toSet());
+
+        // derived map: only non-temporary CaseDocument fields
+        Map<String, Object> nonTemporaryDataMap = toBeSanitisedMap.entrySet().stream()
+            .filter(entry -> !temporaryFieldNamesWithCaseDocumentType.contains(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
+            getFieldsListWithAnnotation(clazz, TemporaryField.class)
+                .forEach(field -> {
+                    Object value = toBeSanitisedMap.remove(field.getName());
+
+                    if (CaseDocument.class.isAssignableFrom(field.getType())
+                        && value != null
+                        && !nonTemporaryDataMap.containsValue(value)) {
+
+                        binCaseDocumentIfTemporaryField(bin, value);
+                    }
+                })
+        );
+    }
+
+    private void binCaseDocumentIfTemporaryField(Bin bin, Object value) {
+        CaseDocument caseDocument = finremCaseDetailsMapper.mapToCaseDocument(value);
+        if (caseDocument != null) {
+            bin.binCaseDocument(caseDocument);
+        }
     }
 
     private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
