@@ -44,11 +44,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.MOCKED_EVENT_CCD_TYPE;
 
 @ExtendWith(MockitoExtension.class)
 class FinremCallbackHandlerTest {
 
-    private static final String MOCKED_EVENT_CCD_TYPE = "mockedEventId";
     private static final String PROPERTY_TO_BE_RETAINED = "d81Question";
     private static final String TEMP_PROPERTY_TO_BE_CLEARED_1 = "stopRepJudicialApproval";
     private static final String TEMP_PROPERTY_TO_BE_CLEARED_2 = "clientAddressForService";

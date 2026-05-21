@@ -45,6 +45,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -500,8 +501,11 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
                 .value(DynamicListElement.builder().code("a#b").build())
             .build());
 
-        verifyTemporaryFieldsWereSanitised(GENERAL_APPLICATION_DIRECTIONS_MH, aboutToSubmitHandler,
-            finremCaseDetails, finremCaseDetailsMapper, Map.of("generalApplicationDirectionsPreview", caseDocument()));
+        verifyTemporaryFieldsWereSanitised(aboutToSubmitHandler,
+            finremCaseDetails, finremCaseDetailsMapper, new HashMap<>(Map.of(
+                "generalApplicationDirectionsPreview", caseDocument()
+                ))
+        );
     }
 
     private DynamicRadioList buildDynamicIntervenerList() {

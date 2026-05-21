@@ -7,6 +7,8 @@ import feign.Request;
 import feign.Response;
 import org.assertj.core.api.Assertions;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.function.ThrowingSupplier;
 import org.springframework.web.client.HttpServerErrorException;
@@ -65,10 +67,10 @@ import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
@@ -105,6 +107,8 @@ public class TestSetUpUtils {
 
     public static final int INTERNAL_SERVER_ERROR = HttpStatus.INTERNAL_SERVER_ERROR.value();
     public static final int BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
+
+    public static final String MOCKED_EVENT_CCD_TYPE = "mockedEventId";
 
     public static FeignException feignError() {
         Response response = Response.builder().status(INTERNAL_SERVER_ERROR)
@@ -691,28 +695,35 @@ public class TestSetUpUtils {
         }
     }
   
-    public static void verifyTemporaryFieldsWereSanitised(EventType eventType,
-                                                          FinremAboutToSubmitCallbackHandler aboutToSubmitHandler,
+    public static void verifyTemporaryFieldsWereSanitised(FinremAboutToSubmitCallbackHandler aboutToSubmitHandler,
                                                           FinremCaseDetails finremCaseDetails,
                                                           FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                          Map<String, Object> temporaryFieldsWithValue) {
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(mock(CaseDetails.class))
-            .eventId(eventType.getCcdType())
-            .build();
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails()))
+                                                          Map<String, Object> temporaryFieldsMap) {
+        FinremCaseData nonSanitisedFinremCaseData = finremCaseDetails.getData();
+
+        CaseDetails callbackRequestCaseDetails = mock(CaseDetails.class);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequestCaseDetails))
             .thenReturn(finremCaseDetails);
 
-        Map<String, Object> temporaryFieldsMap = new HashMap<>(temporaryFieldsWithValue);
-        CaseDetails toBeSanitised = CaseDetails.builder().data(temporaryFieldsMap).build();
-        when(finremCaseDetailsMapper.mapToCaseDetails(argThat(a -> a.getData()
-            .equals(finremCaseDetails.getData())))).thenReturn(toBeSanitised);
+        CallbackRequest callbackRequest = mock(CallbackRequest.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(callbackRequestCaseDetails);
+        when(callbackRequest.getEventId()).thenReturn(MOCKED_EVENT_CCD_TYPE);
+
+        when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)).thenReturn(temporaryFieldsMap);
+
+        ArgumentCaptor<Map> mapCaptor = ArgumentCaptor.forClass(Map.class);
         FinremCaseData sanitisedFinremCaseData = mock(FinremCaseData.class);
-        when(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitised.getData())).thenReturn(sanitisedFinremCaseData);
+        when(finremCaseDetailsMapper.mapToFinremCaseData(mapCaptor.capture())).thenReturn(sanitisedFinremCaseData);
 
-        aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+            EventType eventType = mock(EventType.class);
+            mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
+                .thenReturn(eventType);
 
-        Assertions.assertThat(temporaryFieldsMap)
-            .doesNotContainKeys(temporaryFieldsWithValue.keySet().toArray(new String[0]));
+            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            verify(finremCaseDetailsMapper).mapToFinremCaseData(mapCaptor.capture());
+            Assertions.assertThat(mapCaptor.getValue()).isEmpty();
+        }
     }
 }
