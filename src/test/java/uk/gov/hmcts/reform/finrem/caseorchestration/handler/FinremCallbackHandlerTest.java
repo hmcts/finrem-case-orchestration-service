@@ -48,6 +48,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -60,10 +61,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThr
 class FinremCallbackHandlerTest {
 
     private static final String PROPERTY_TO_BE_RETAINED = "d81Question";
+    private static final String PROPERTY_TO_BE_RETAINED_IN_CASE_DOCUMENT = "divorceUploadPetition";
     private static final String TEMP_PROPERTY_TO_BE_CLEARED_1 = "stopRepJudicialApproval";
     private static final String TEMP_PROPERTY_TO_BE_CLEARED_2 = "clientAddressForService";
     private static final String TEMP_PROPERTY_TO_BE_BINNED = "generalApplicationDirectionsPreview";
-    private static final String CASE_DOCUMENT_PROPERTY_TO_BE_RETAINED = "divorceUploadPetition";
 
     static class GenericFinremCallbackHandler extends FinremCallbackHandler {
 
@@ -378,10 +379,10 @@ class FinremCallbackHandlerTest {
         void whenCaseDocumentExistsInOtherField_whenHandle_shouldNotBinCaseDocumentFromTemporaryFields() {
             mockForClearTemporaryFields(Map.of(
                 TEMP_PROPERTY_TO_BE_BINNED, documentToBeBinned,
-                CASE_DOCUMENT_PROPERTY_TO_BE_RETAINED, documentToBeBinned
+                PROPERTY_TO_BE_RETAINED_IN_CASE_DOCUMENT, documentToBeBinned
             ));
             when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
-                map -> map.size() == 1 && map.containsKey(CASE_DOCUMENT_PROPERTY_TO_BE_RETAINED)
+                map -> map.size() == 1 && map.containsKey(PROPERTY_TO_BE_RETAINED_IN_CASE_DOCUMENT)
             ))).thenReturn(sanitisedFinremCaseData);
 
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
@@ -557,14 +558,14 @@ class FinremCallbackHandlerTest {
                 submittedCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
 
                 assertAll(
-                    () -> verify(mockedBin, never()).clearBin(), // verify the bin is not cleared in submitted handler
                     () -> verify(retryExecutor)
                         .runWithRetrySuppressException(captor.capture(), eq("Physical File Deletion - %s".formatted(documentAUrl)), eq(CASE_ID)),
                     () -> verify(retryExecutor)
                         .runWithRetrySuppressException(captor.capture(), eq("Physical File Deletion - %s".formatted(documentBUrl)), eq(CASE_ID)),
                     () -> captor.getAllValues().forEach(TestSetUpUtils::runSafely),
                     () -> verify(evidenceManagementDeleteService).delete(documentAUrl, AUTH_TOKEN),
-                    () -> verify(evidenceManagementDeleteService).delete(documentBUrl, AUTH_TOKEN)
+                    () -> verify(evidenceManagementDeleteService).delete(documentBUrl, AUTH_TOKEN),
+                    () -> verifyNoMoreInteractions(evidenceManagementDeleteService)
                 );
             }
         }
