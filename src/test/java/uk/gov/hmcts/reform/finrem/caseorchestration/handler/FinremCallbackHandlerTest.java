@@ -175,7 +175,7 @@ class FinremCallbackHandlerTest {
     @Mock
     private RetryExecutor retryExecutor;
 
-    private CaseDocument documentToBeBinned = caseDocument();
+    private final CaseDocument documentToBeBinned = caseDocument();
 
     private GenericFinremCallbackHandler finremCallbackHandler;
     private GenericAboutToSubmitCallbackHandler aboutToSubmitCallbackHandler;
