@@ -59,9 +59,9 @@ class FinremCallbackHandlerTest {
         TEMP_PROPERTY_TO_BE_CLEARED_2, Address.builder().addressLine1("Test Address").build()
     );
 
-    static class GeneralFinremCallbackHandler extends FinremCallbackHandler {
+    static class GenericFinremCallbackHandler extends FinremCallbackHandler {
 
-        public GeneralFinremCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+        public GenericFinremCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
             super(finremCaseDetailsMapper);
         }
 
@@ -77,7 +77,7 @@ class FinremCallbackHandlerTest {
         }
     }
 
-    static class ValidateCaseDataTestHandler extends GeneralFinremCallbackHandler {
+    static class ValidateCaseDataTestHandler extends GenericFinremCallbackHandler {
         public ValidateCaseDataTestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
             super(finremCaseDetailsMapper);
         }
@@ -90,9 +90,9 @@ class FinremCallbackHandlerTest {
         }
     }
 
-    static class GeneralAboutToSubmitCallbackHandler extends FinremAboutToSubmitCallbackHandler {
+    static class GenericAboutToSubmitCallbackHandler extends FinremAboutToSubmitCallbackHandler {
 
-        public GeneralAboutToSubmitCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+        public GenericAboutToSubmitCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
             super(finremCaseDetailsMapper);
         }
 
@@ -108,7 +108,7 @@ class FinremCallbackHandlerTest {
         }
     }
 
-    static class ResponseWithoutWarningsTestHandler extends GeneralAboutToSubmitCallbackHandler {
+    static class ResponseWithoutWarningsTestHandler extends GenericAboutToSubmitCallbackHandler {
 
         public ResponseWithoutWarningsTestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
             super(finremCaseDetailsMapper);
@@ -122,7 +122,7 @@ class FinremCallbackHandlerTest {
         }
     }
 
-    static class ResponseTestHandler extends GeneralAboutToSubmitCallbackHandler {
+    static class ResponseTestHandler extends GenericAboutToSubmitCallbackHandler {
 
         public ResponseTestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
             super(finremCaseDetailsMapper);
@@ -138,9 +138,9 @@ class FinremCallbackHandlerTest {
         }
     }
 
-    static class GeneralSubmittedCallbackHandler extends FinremSubmittedCallbackHandler {
+    static class GenericSubmittedCallbackHandler extends FinremSubmittedCallbackHandler {
 
-        public GeneralSubmittedCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+        public GenericSubmittedCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                RetryExecutor retryExecutor) {
             super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
@@ -168,18 +168,18 @@ class FinremCallbackHandlerTest {
     @Mock
     private RetryExecutor retryExecutor;
 
-    private GeneralFinremCallbackHandler finremCallbackHandler;
-    private GeneralAboutToSubmitCallbackHandler aboutToSubmitCallbackHandler;
-    private GeneralSubmittedCallbackHandler submittedCallbackHandler;
+    private GenericFinremCallbackHandler finremCallbackHandler;
+    private GenericAboutToSubmitCallbackHandler aboutToSubmitCallbackHandler;
+    private GenericSubmittedCallbackHandler submittedCallbackHandler;
     private ResponseWithoutWarningsTestHandler responseWithoutWarningsTestHandler;
     private ResponseTestHandler responseTestHandler;
     private ValidateCaseDataTestHandler validateCaseDataTestHandler;
 
     @BeforeEach
     void setUp() {
-        finremCallbackHandler = spy(new GeneralFinremCallbackHandler(finremCaseDetailsMapper));
-        aboutToSubmitCallbackHandler = spy(new GeneralAboutToSubmitCallbackHandler(finremCaseDetailsMapper));
-        submittedCallbackHandler = spy(new GeneralSubmittedCallbackHandler(finremCaseDetailsMapper,
+        finremCallbackHandler = spy(new GenericFinremCallbackHandler(finremCaseDetailsMapper));
+        aboutToSubmitCallbackHandler = spy(new GenericAboutToSubmitCallbackHandler(finremCaseDetailsMapper));
+        submittedCallbackHandler = spy(new GenericSubmittedCallbackHandler(finremCaseDetailsMapper,
             evidenceManagementDeleteService, retryExecutor));
         responseWithoutWarningsTestHandler = new ResponseWithoutWarningsTestHandler(finremCaseDetailsMapper);
         responseTestHandler = new ResponseTestHandler(finremCaseDetailsMapper);
