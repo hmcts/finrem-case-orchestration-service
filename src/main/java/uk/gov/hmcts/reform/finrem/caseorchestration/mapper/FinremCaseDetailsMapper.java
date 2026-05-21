@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -25,20 +24,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toLis
 public class FinremCaseDetailsMapper {
 
     private final ObjectMapper objectMapper;
-
-    /**
-     * Converts the given object into a {@link CaseDocument}.
-     *
-     * <p>
-     * This method uses the configured {@link com.fasterxml.jackson.databind.ObjectMapper}
-     * to map the provided value into a {@link CaseDocument} instance.
-     *
-     * @param value the source object to convert
-     * @return the converted {@link CaseDocument}
-     */
-    public CaseDocument mapToCaseDocument(Object value) {
-        return objectMapper.convertValue(value, CaseDocument.class);
-    }
 
     /**
      * Converts the given {@link FinremCaseData} instance into a {@link Map}.

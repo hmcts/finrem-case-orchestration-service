@@ -351,8 +351,6 @@ class FinremCallbackHandlerTest {
         void aboutToSubmitHandlerShouldBinCaseDocumentsInTemporaryFields() {
             mockForClearTemporaryFields();
 
-            when(finremCaseDetailsMapper.mapToCaseDocument(documentToBeBinned))
-                .thenReturn(documentToBeBinned);
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
                 mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))

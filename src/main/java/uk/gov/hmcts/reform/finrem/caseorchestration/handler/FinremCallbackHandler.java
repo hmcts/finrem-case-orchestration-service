@@ -194,14 +194,13 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
                         && value != null
                         && !nonTemporaryDataMap.containsValue(value)) {
 
-                        binCaseDocumentIfTemporaryField(bin, value);
+                        binCaseDocumentIfTemporaryField(bin, (CaseDocument) value);
                     }
                 })
         );
     }
 
-    private void binCaseDocumentIfTemporaryField(Bin bin, Object value) {
-        CaseDocument caseDocument = finremCaseDetailsMapper.mapToCaseDocument(value);
+    private void binCaseDocumentIfTemporaryField(Bin bin, CaseDocument caseDocument) {
         if (nonNull(caseDocument)) {
             bin.binCaseDocument(caseDocument);
         }

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
@@ -318,14 +317,6 @@ class FinremCaseDetailsMapperTest {
         mappedCaseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails);
         assertThat(mappedCaseDetails.getData()).doesNotContainKeys(manageHearingsWrapperClassJsonProperties);
         assertThat(mappedCaseDetails.getData()).doesNotContainKeys(mhMigrationWrapperClassJsonProperties);
-    }
-
-    @Test
-    void shouldConvertCaseDocument() {
-        CaseDocument caseDocument = TestSetUpUtils.caseDocument("fileName");
-
-        CaseDocument actual = finremCaseDetailsMapper.mapToCaseDocument(caseDocument);
-        assertThat(actual).extracting(CaseDocument::getDocumentFilename).isEqualTo("fileName");
     }
 
     private void assertBatchThree(FinremCaseData caseData) {
