@@ -182,17 +182,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             return;
         }
 
-        Set<String> temporaryFieldNamesWithCaseDocumentType =
-            getClassesWithTemporaryFieldAnnotation().stream()
-                .flatMap(clazz -> getFieldsListWithAnnotation(clazz, TemporaryField.class).stream())
-                .filter(field -> CaseDocument.class.isAssignableFrom(field.getType()))
-                .map(Field::getName)
-                .collect(Collectors.toSet());
-
-        // derived map: only non-temporary CaseDocument fields
-        Map<String, Object> nonTemporaryDataMap = toBeSanitisedMap.entrySet().stream()
-            .filter(entry -> !temporaryFieldNamesWithCaseDocumentType.contains(entry.getKey()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> nonTemporaryDataMap = getNonTemporaryDataMap(toBeSanitisedMap);
 
         getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
             getFieldsListWithAnnotation(clazz, TemporaryField.class)
@@ -234,6 +224,20 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             .caseDetailsBefore(finremCaseDetailsBefore)
             .eventType(EventType.getEventType(callbackRequest.getEventId()))
             .build();
+    }
+
+    private Map<String, Object> getNonTemporaryDataMap(Map<String, Object> toBeSanitisedMap) {
+        return toBeSanitisedMap.entrySet().stream()
+            .filter(entry -> !getTemporaryFieldNamesWithCaseDocumentType().contains(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private static Set<String> getTemporaryFieldNamesWithCaseDocumentType() {
+        return getClassesWithTemporaryFieldAnnotation().stream()
+            .flatMap(clazz -> getFieldsListWithAnnotation(clazz, TemporaryField.class).stream())
+            .filter(field -> CaseDocument.class.isAssignableFrom(field.getType()))
+            .map(Field::getName)
+            .collect(Collectors.toSet());
     }
 
     /**
