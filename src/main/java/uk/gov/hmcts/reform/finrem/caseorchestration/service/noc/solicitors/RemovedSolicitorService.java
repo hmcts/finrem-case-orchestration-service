@@ -35,14 +35,17 @@ public class RemovedSolicitorService {
     private final CaseDataService caseDataService;
     private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public RemovedSolicitorService(CaseDataService caseDataService,
                                    CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService,
-                                   CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService) {
+                                   CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService,
+                                   ObjectMapper objectMapper) {
         this.caseDataService = caseDataService;
         this.checkApplicantSolicitorIsDigitalService = checkApplicantSolicitorIsDigitalService;
         this.checkRespondentSolicitorIsDigitalService = checkRespondentSolicitorIsDigitalService;
+        this.objectMapper = objectMapper;
     }
 
     public ChangedRepresentative getRemovedSolicitorAsSolicitor(CaseDetails caseDetails,
@@ -201,8 +204,8 @@ public class RemovedSolicitorService {
     private Organisation getRemovedOrganisation(CaseDetails caseDetails,
                                                 String orgPolicy,
                                                 boolean isApplicant) {
-        final OrganisationPolicy organisationPolicy = new ObjectMapper()
-            .convertValue(caseDetails.getData().get(orgPolicy),
+        final OrganisationPolicy organisationPolicy =
+            objectMapper.convertValue(caseDetails.getData().get(orgPolicy),
                 OrganisationPolicy.class);
 
         if (!isSolicitorDigital(caseDetails, isApplicant)) {
