@@ -572,7 +572,7 @@ class FinremCallbackHandlerTest {
         }
 
         @Test
-        void submittedHandlerShouldNotPurgeFileUrlsInBinWichIsStillAttached() {
+        void submittedHandlerShouldNotPurgeFileUrlsInBinWhichIsStillAttached() {
             CaseDocument binFileA = caseDocument("binFileA");
             String documentAUrl = binFileA.getDocumentUrl();
             String documentBUrl = caseDocument("fileB").getDocumentUrl();
