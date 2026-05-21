@@ -56,7 +56,7 @@ public class RemoveCaseNoteTask extends EncryptedCsvFileProcessingTask {
 
     @Override
     protected String getSummary() {
-        return "Remove erroneous case note - DFR-XXXX";
+        return "Remove erroneous case note - DFR-5077";
     }
 
     @Override
