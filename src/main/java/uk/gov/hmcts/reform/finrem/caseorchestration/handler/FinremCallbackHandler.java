@@ -91,7 +91,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      * names from the case data. It then maps the cleaned data back into
      * {@link FinremCaseData} and returns a new response containing the updated data.
      *
-     * @param response the callback response containing case data to sanitise
+     * @param response the callback response containing case data to clean
      * @return a response with temporary fields removed, or the original response if
      *         clearing is not needed
      */
