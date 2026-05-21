@@ -63,6 +63,7 @@ class FinremCallbackHandlerTest {
     private static final String TEMP_PROPERTY_TO_BE_CLEARED_1 = "stopRepJudicialApproval";
     private static final String TEMP_PROPERTY_TO_BE_CLEARED_2 = "clientAddressForService";
     private static final String TEMP_PROPERTY_TO_BE_BINNED = "generalApplicationDirectionsPreview";
+    private static final String CASE_DOCUMENT_PROPERTY_TO_BE_RETAINED = "divorceUploadPetition";
 
     static class GenericFinremCallbackHandler extends FinremCallbackHandler {
 
@@ -175,12 +176,7 @@ class FinremCallbackHandlerTest {
 
     private CaseDocument documentToBeBinned = caseDocument();
 
-    private final Map<String, Object> dataInMap = Map.of(
-        PROPERTY_TO_BE_RETAINED, YesOrNo.YES,
-        TEMP_PROPERTY_TO_BE_CLEARED_1, YesOrNo.YES,
-        TEMP_PROPERTY_TO_BE_CLEARED_2, Address.builder().addressLine1("Test Address").build(),
-        TEMP_PROPERTY_TO_BE_BINNED, documentToBeBinned
-    );
+//    private final Map<String, Object> defaultDataMapForTesting =
 
     private GenericFinremCallbackHandler finremCallbackHandler;
     private GenericAboutToSubmitCallbackHandler aboutToSubmitCallbackHandler;
@@ -332,7 +328,14 @@ class FinremCallbackHandlerTest {
 
         @Test
         void aboutToSubmitHandlerShouldClearTemporaryFields() {
-            mockForClearTemporaryFields();
+            mockForClearTemporaryFields(Map.of(
+                PROPERTY_TO_BE_RETAINED, YesOrNo.YES,
+                TEMP_PROPERTY_TO_BE_CLEARED_1, YesOrNo.YES,
+                TEMP_PROPERTY_TO_BE_CLEARED_2, Address.builder().addressLine1("Test Address").build()
+            ));
+            when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
+                map -> map.size() == 1 && map.containsKey(PROPERTY_TO_BE_RETAINED)
+            ))).thenReturn(sanitisedFinremCaseData);
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
                 mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
@@ -348,8 +351,13 @@ class FinremCallbackHandlerTest {
         }
 
         @Test
-        void aboutToSubmitHandlerShouldBinCaseDocumentsInTemporaryFields() {
-            mockForClearTemporaryFields();
+        void aboutToSubmitHandlerShouldBinCaseDocumentsFromTemporaryFields() {
+            mockForClearTemporaryFields(Map.of(
+                TEMP_PROPERTY_TO_BE_BINNED, documentToBeBinned
+            ));
+            when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
+                Map::isEmpty
+            ))).thenReturn(sanitisedFinremCaseData);
 
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
@@ -367,17 +375,26 @@ class FinremCallbackHandlerTest {
         }
 
         @Test
-        void finremCallbackHandlerShouldClearTemporaryFields() {
+        void whenCaseDocumentExistsInOtherField_whenHandle_shouldNotBinCaseDocumentFromTemporaryFields() {
+            mockForClearTemporaryFields(Map.of(
+                TEMP_PROPERTY_TO_BE_BINNED, documentToBeBinned,
+                CASE_DOCUMENT_PROPERTY_TO_BE_RETAINED, documentToBeBinned
+            ));
+            when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
+                map -> map.size() == 1 && map.containsKey(CASE_DOCUMENT_PROPERTY_TO_BE_RETAINED)
+            ))).thenReturn(sanitisedFinremCaseData);
+
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
                 mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
                     .thenReturn(eventType);
 
-                submittedCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+                var response = aboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
 
                 assertAll(
-                    () -> verify(submittedCallbackHandler, never()).shouldClearTemporaryFieldsAfterHandle(),
-                    () -> verify(submittedCallbackHandler, never()).removeTemporaryFieldsAfterHandled(any())
+                    // only return sanitisedFinremCaseData if TESTING_DATA_IN_MAP is sanitised
+                    () -> assertEquals(sanitisedFinremCaseData, response.getData()),
+                    () -> verify(mockedBin, never()).binCaseDocument(documentToBeBinned)
                 );
             }
         }
@@ -398,17 +415,11 @@ class FinremCallbackHandlerTest {
             }
         }
 
-        private void mockForClearTemporaryFields() {
-            toBeSanitisedMap = new HashMap<>(
-                dataInMap
-            );
+        private void mockForClearTemporaryFields(Map<String, Object> dataMap) {
+            toBeSanitisedMap = new HashMap<>(dataMap);
             when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)
             ).thenReturn(toBeSanitisedMap);
             sanitisedFinremCaseData = spy(FinremCaseData.builder().build());
-            // only return sanitisedFinremCaseData if TESTING_DATA_IN_MAP is sanitised
-            when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
-                map -> map.size() == 1 && map.containsKey(PROPERTY_TO_BE_RETAINED)
-            ))).thenReturn(sanitisedFinremCaseData);
         }
     }
 
