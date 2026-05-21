@@ -5,11 +5,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
@@ -59,7 +59,6 @@ class UpdateRepresentationWorkflowServiceTest {
     @Mock
     private SystemUserService systemUserService;
 
-    @InjectMocks
     private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
 
     private CaseDetails caseDetails;
@@ -70,6 +69,11 @@ class UpdateRepresentationWorkflowServiceTest {
 
     @BeforeEach
     void setUp() {
+        updateRepresentationWorkflowService = new UpdateRepresentationWorkflowService(
+            noticeOfChangeService,
+            assignCaseAccessService,
+            systemUserService,
+            TestObjectMapperFactory.createObjectMapper());
         Map<String, Object> caseData = new HashMap<>();
         caseDetails = CaseDetails.builder().data(caseData).build();
         Map<String, Object> defaultCaseData = new HashMap<>();
