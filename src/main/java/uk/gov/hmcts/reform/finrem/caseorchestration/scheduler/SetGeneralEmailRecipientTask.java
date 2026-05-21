@@ -24,7 +24,7 @@ public class SetGeneralEmailRecipientTask extends EncryptedCsvFileProcessingTask
 
     @Value("${cron.generalEmailRecipient.enabled:false}")
     private boolean taskEnabled;
-    @Value("${cron.generalApplicgeneralEmailRecipientationReferToJudgeEmail.caseTypeId:FinancialRemedyContested}")
+    @Value("${cron.generalEmailRecipient.caseTypeId:FinancialRemedyContested}")
     private String caseTypeId;
     @Value("${cron.generalEmailRecipient.caseListFileName:updateGeneralEmailRecipient-encrypted.csv}")
     private String csvFile;
@@ -45,8 +45,8 @@ public class SetGeneralEmailRecipientTask extends EncryptedCsvFileProcessingTask
             String updatedEmail = removeLeadingDot(currentEmail);
             generalEmailWrapper.setGeneralEmailRecipient(updatedEmail);
 
-            log.info("Updated generalEmailRecipient for case id {} from [{}] to [{}]",
-                finremCaseDetails.getId(), currentEmail, updatedEmail);
+            log.info("Updated generalEmailRecipient for case id {}",
+                finremCaseDetails.getId());
         }
 
         List<GeneralEmailCollection> currentEmailInCollection =
@@ -63,15 +63,13 @@ public class SetGeneralEmailRecipientTask extends EncryptedCsvFileProcessingTask
             .forEach(generalEmail -> {
                 String recipient = generalEmail.getGeneralEmailRecipient();
 
-                if (!hasLeadingDot(recipient)) {
-                    return;
+                if (hasLeadingDot(recipient)) {
+                    String updatedRecipient = removeLeadingDot(recipient);
+                    generalEmail.setGeneralEmailRecipient(updatedRecipient);
+
+                    log.info("Updated collection generalEmailRecipient for case id {}",
+                        finremCaseDetails.getId());
                 }
-
-                String updatedRecipient = removeLeadingDot(recipient);
-                generalEmail.setGeneralEmailRecipient(updatedRecipient);
-
-                log.info("Updated collection generalEmailRecipient for case id {}",
-                    finremCaseDetails.getId());
             });
     }
 
