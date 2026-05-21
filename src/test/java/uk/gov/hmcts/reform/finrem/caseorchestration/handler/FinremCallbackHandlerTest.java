@@ -416,8 +416,7 @@ class FinremCallbackHandlerTest {
 
         private void mockForClearTemporaryFields(Map<String, Object> dataMap) {
             toBeSanitisedMap = new HashMap<>(dataMap);
-            when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)
-            ).thenReturn(toBeSanitisedMap);
+            when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)).thenReturn(toBeSanitisedMap);
             sanitisedFinremCaseData = spy(FinremCaseData.builder().build());
         }
     }
@@ -553,15 +552,58 @@ class FinremCallbackHandlerTest {
 
                 ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
 
+                when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData))
+                    .thenReturn(Map.of("whatever", caseDocument()));
+
                 submittedCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
 
                 assertAll(
+                    () -> verify(finremCaseDetailsMapper).finremCaseDataToMap(nonSanitisedFinremCaseData),
                     () -> verify(retryExecutor)
-                        .runWithRetrySuppressException(captor.capture(), eq("Physical File Deletion - %s".formatted(documentAUrl)), eq(CASE_ID)),
+                        .runWithRetrySuppressException(captor.capture(), eq("EM File Deletion - %s".formatted(documentAUrl)), eq(CASE_ID)),
                     () -> verify(retryExecutor)
-                        .runWithRetrySuppressException(captor.capture(), eq("Physical File Deletion - %s".formatted(documentBUrl)), eq(CASE_ID)),
+                        .runWithRetrySuppressException(captor.capture(), eq("EM File Deletion - %s".formatted(documentBUrl)), eq(CASE_ID)),
                     () -> captor.getAllValues().forEach(TestSetUpUtils::runSafely),
                     () -> verify(evidenceManagementDeleteService).delete(documentAUrl, AUTH_TOKEN),
+                    () -> verify(evidenceManagementDeleteService).delete(documentBUrl, AUTH_TOKEN),
+                    () -> verifyNoMoreInteractions(evidenceManagementDeleteService)
+                );
+            }
+        }
+
+        @Test
+        void submittedHandlerShouldNotPurgeFileUrlsInBinWichIsStillAttached() {
+            CaseDocument binFileA = caseDocument("binFileA");
+            String documentAUrl = binFileA.getDocumentUrl();
+            String documentBUrl = caseDocument("fileB").getDocumentUrl();
+            when(mockedBin.getFileUrlsToBeDeleted())
+                .thenReturn(DynamicList.builder()
+                    .listItems(List.of(
+                        DynamicListElement.builder().code(documentAUrl).build(),
+                        DynamicListElement.builder().code(documentBUrl).build()
+                    ))
+                    .build());
+
+            try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+                EventType eventType = mock(EventType.class);
+                mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
+                    .thenReturn(eventType);
+
+                ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
+
+                when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData))
+                    .thenReturn(Map.of("whatever", binFileA));
+
+                submittedCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+
+                assertAll(
+                    () -> verify(finremCaseDetailsMapper).finremCaseDataToMap(nonSanitisedFinremCaseData),
+                    () -> verify(retryExecutor, never())
+                        .runWithRetrySuppressException(captor.capture(), eq("EM File Deletion - %s".formatted(documentAUrl)), eq(CASE_ID)),
+                    () -> verify(retryExecutor)
+                        .runWithRetrySuppressException(captor.capture(), eq("EM File Deletion - %s".formatted(documentBUrl)), eq(CASE_ID)),
+                    () -> captor.getAllValues().forEach(TestSetUpUtils::runSafely),
+                    () -> verify(evidenceManagementDeleteService, never()).delete(documentAUrl, AUTH_TOKEN),
                     () -> verify(evidenceManagementDeleteService).delete(documentBUrl, AUTH_TOKEN),
                     () -> verifyNoMoreInteractions(evidenceManagementDeleteService)
                 );
