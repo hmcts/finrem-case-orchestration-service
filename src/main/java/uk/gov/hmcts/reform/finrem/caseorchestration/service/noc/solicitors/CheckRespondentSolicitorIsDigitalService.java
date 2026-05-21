@@ -18,8 +18,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class CheckRespondentSolicitorIsDigitalService extends CheckSolicitorIsDigitalServiceBase {
 
     @Autowired
-    public CheckRespondentSolicitorIsDigitalService(CaseDataService caseDataService) {
-        super(caseDataService);
+    public CheckRespondentSolicitorIsDigitalService(CaseDataService caseDataService, ObjectMapper objectMapper) {
+        super(caseDataService, objectMapper);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class CheckRespondentSolicitorIsDigitalService extends CheckSolicitorIsDi
     }
 
     private OrganisationPolicy getRespondentOrganisationPolicy(Map<String, Object> caseData) {
-        return new ObjectMapper().convertValue(caseData.get(RESPONDENT_ORGANISATION_POLICY),
+        return objectMapper.convertValue(caseData.get(RESPONDENT_ORGANISATION_POLICY),
             OrganisationPolicy.class);
     }
 
