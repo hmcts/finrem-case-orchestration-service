@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -11,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
@@ -18,12 +20,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -44,7 +50,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.MOCKED_EVENT_CCD_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
 
 @ExtendWith(MockitoExtension.class)
 class FinremCallbackHandlerTest {
@@ -456,6 +465,68 @@ class FinremCallbackHandlerTest {
                 assertAll(
                     () -> verify(spiedBin).clearBin(),
                     () -> assertEquals(nonSanitisedFinremCaseData, response.getData())
+                );
+            }
+        }
+    }
+
+    @Nested
+    class PurgeBinAfterHandleTests {
+
+        @Mock
+        Bin mockedBin;
+
+        CallbackRequest callbackRequest;
+
+        FinremCaseData nonSanitisedFinremCaseData;
+
+        @BeforeEach
+        void setUp() {
+            nonSanitisedFinremCaseData = FinremCaseData.builder()
+                .bin(mockedBin)
+                .build();
+            FinremCaseDetails finremCaseDetails = spy(
+                FinremCaseDetails.builder().id(CASE_ID_IN_LONG).data(nonSanitisedFinremCaseData).build()
+            );
+
+            CaseDetails callbackRequestCaseDetails = mock(CaseDetails.class);
+            when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequestCaseDetails))
+                .thenReturn(finremCaseDetails);
+
+            callbackRequest = mock(CallbackRequest.class);
+            when(callbackRequest.getCaseDetails()).thenReturn(callbackRequestCaseDetails);
+            when(callbackRequest.getEventId()).thenReturn(MOCKED_EVENT_CCD_TYPE);
+        }
+
+        @Test
+        void submittedHandlerShouldPurgeFileUrlsInBin() {
+            String documentAUrl = caseDocument("fileA").getDocumentUrl();
+            String documentBUrl = caseDocument("fileB").getDocumentUrl();
+            when(mockedBin.getFileUrlsToBeDeleted())
+                .thenReturn(DynamicList.builder()
+                    .listItems(List.of(
+                        DynamicListElement.builder().code(documentAUrl).build(),
+                        DynamicListElement.builder().code(documentBUrl).build()
+                    ))
+                    .build());
+
+            try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+                EventType eventType = mock(EventType.class);
+                mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
+                    .thenReturn(eventType);
+
+                ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
+
+                submittedCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+
+                assertAll(
+                    () -> verify(retryExecutor)
+                        .runWithRetrySuppressException(captor.capture(), eq("Physical File Deletion - %s".formatted(documentAUrl)), eq(CASE_ID)),
+                    () -> verify(retryExecutor)
+                        .runWithRetrySuppressException(captor.capture(), eq("Physical File Deletion - %s".formatted(documentBUrl)), eq(CASE_ID)),
+                    () -> captor.getAllValues().forEach(TestSetUpUtils::runSafely),
+                    () -> verify(evidenceManagementDeleteService).delete(documentAUrl, AUTH_TOKEN),
+                    () -> verify(evidenceManagementDeleteService).delete(documentBUrl, AUTH_TOKEN)
                 );
             }
         }

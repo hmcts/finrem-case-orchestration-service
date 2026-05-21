@@ -80,7 +80,8 @@ public abstract class FinremSubmittedCallbackHandler extends FinremCallbackHandl
             .map(DynamicListElement::getCode).forEach(url ->
                 retryExecutor.runWithRetrySuppressException(
                     () -> evidenceManagementDeleteService.delete(url, userAuthorisation),
-                    "Physical File Deletion - %s".formatted(url), finremCaseData.getCcdCaseId())
+                    "Physical File Deletion - %s".formatted(url),
+                    finremCaseData.getCcdCaseId())
             );
         return response;
     }
