@@ -177,8 +177,6 @@ class FinremCallbackHandlerTest {
 
     private CaseDocument documentToBeBinned = caseDocument();
 
-//    private final Map<String, Object> defaultDataMapForTesting =
-
     private GenericFinremCallbackHandler finremCallbackHandler;
     private GenericAboutToSubmitCallbackHandler aboutToSubmitCallbackHandler;
     private GenericSubmittedCallbackHandler submittedCallbackHandler;
