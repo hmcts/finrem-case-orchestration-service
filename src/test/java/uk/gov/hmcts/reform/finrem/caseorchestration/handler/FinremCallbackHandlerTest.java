@@ -47,6 +47,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 @ExtendWith(MockitoExtension.class)
 class FinremCallbackHandlerTest {
 
+    private static final String MOCKED_EVENT_CCD_TYPE = "mockedEventId";
+    private static final String PROPERTY_TO_BE_RETAINED = "d81Question";
+    private static final String TEMP_PROPERTY_TO_BE_CLEARED_1 = "stopRepJudicialApproval";
+    private static final String TEMP_PROPERTY_TO_BE_CLEARED_2 = "clientAddressForService";
+
+    private static final Map<String, Object> TESTING_DATA_IN_MAP = Map.of(
+        PROPERTY_TO_BE_RETAINED, YesOrNo.YES,
+        TEMP_PROPERTY_TO_BE_CLEARED_1, YesOrNo.YES,
+        TEMP_PROPERTY_TO_BE_CLEARED_2, Address.builder().addressLine1("Test Address").build()
+    );
+
     static class GeneralFinremCallbackHandler extends FinremCallbackHandler {
 
         public GeneralFinremCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
@@ -163,12 +174,6 @@ class FinremCallbackHandlerTest {
     private ResponseTestHandler responseTestHandler;
     private ValidateCaseDataTestHandler validateCaseDataTestHandler;
 
-    private static final Map<String, Object> TESTING_DATA_IN_MAP = Map.of(
-        "d81Question", YesOrNo.YES,
-        "stopRepJudicialApproval", YesOrNo.YES,
-        "clientAddressForService", Address.builder().addressLine1("Test Address").build()
-    );
-
     @BeforeEach
     void setUp() {
         finremCallbackHandler = spy(new GeneralFinremCallbackHandler(finremCaseDetailsMapper));
@@ -209,49 +214,8 @@ class FinremCallbackHandlerTest {
         );
     }
 
-    // TODO  test for other handler removeTemporaryFieldsAfterHandled not called
     @Test
-    void givenAboutToSubmitCallbackHandler_whenHandled_thenTemporaryFieldsRemoved() {
-        FinremCaseData nonSanitisedFinremCaseData = FinremCaseData.builder().build();
-        FinremCaseDetails finremCaseDetails = spy(
-            FinremCaseDetails.builder().data(nonSanitisedFinremCaseData).build()
-        );
-
-        CaseDetails callbackRequestCaseDetails = mock(CaseDetails.class);
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequestCaseDetails))
-            .thenReturn(finremCaseDetails);
-
-        CallbackRequest callbackRequest = mock(CallbackRequest.class);
-        when(callbackRequest.getCaseDetails()).thenReturn(callbackRequestCaseDetails);
-        when(callbackRequest.getEventId()).thenReturn("mockedEventId");
-
-        // mocking finremCaseDetailsMapper in method removeTemporaryFieldsAfterHandled
-        Map<String, Object> toBeSanitisedMap = new HashMap<>(
-            TESTING_DATA_IN_MAP
-        );
-        when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)
-        ).thenReturn(toBeSanitisedMap);
-        FinremCaseData sanitisedFinremCaseData = mock(FinremCaseData.class);
-        // only return sanitisedFinremCaseData if TESTING_DATA_IN_MAP is sanitised
-        when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
-            map -> map.size() == 1 && map.containsKey("d81Question")
-        ))).thenReturn(sanitisedFinremCaseData);
-
-        try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
-            EventType eventType = mock(EventType.class);
-            mockedStatic.when(() -> EventType.getEventType("mockedEventId"))
-                .thenReturn(eventType);
-
-            var response = aboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
-
-            assertAll(
-                () -> assertEquals(sanitisedFinremCaseData, response.getData())
-            );
-        }
-    }
-
-    @Test
-    void givenGeneralSubmittedHandler_whenHandled_thenShouldPopulateConfirmationHeaderAndConfirmationBody() {
+    void givenSubmittedHandler_whenHandled_thenShouldPopulateConfirmationHeaderAndConfirmationBody() {
         assertThat(submittedCallbackHandler.handle(FinremCallbackRequestFactory.from(), AUTH_TOKEN))
             .extracting(GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
                 GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
@@ -323,6 +287,61 @@ class FinremCallbackHandlerTest {
     }
 
     @Nested
+    class ClearTemporaryFieldsTests {
+
+        CallbackRequest callbackRequest;
+
+        Map<String, Object> toBeSanitisedMap;
+
+        FinremCaseData sanitisedFinremCaseData;
+
+        FinremCaseData nonSanitisedFinremCaseData;
+
+        @BeforeEach
+        void setUp() {
+            nonSanitisedFinremCaseData = FinremCaseData.builder().build();
+            FinremCaseDetails finremCaseDetails = spy(
+                FinremCaseDetails.builder().data(nonSanitisedFinremCaseData).build()
+            );
+
+            CaseDetails callbackRequestCaseDetails = mock(CaseDetails.class);
+            when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequestCaseDetails))
+                .thenReturn(finremCaseDetails);
+
+            callbackRequest = mock(CallbackRequest.class);
+            when(callbackRequest.getCaseDetails()).thenReturn(callbackRequestCaseDetails);
+            when(callbackRequest.getEventId()).thenReturn(MOCKED_EVENT_CCD_TYPE);
+
+            // mocking finremCaseDetailsMapper in method removeTemporaryFieldsAfterHandled
+            toBeSanitisedMap = new HashMap<>(
+                TESTING_DATA_IN_MAP
+            );
+            when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)
+            ).thenReturn(toBeSanitisedMap);
+            sanitisedFinremCaseData = mock(FinremCaseData.class);
+            // only return sanitisedFinremCaseData if TESTING_DATA_IN_MAP is sanitised
+            when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
+                map -> map.size() == 1 && map.containsKey(PROPERTY_TO_BE_RETAINED)
+            ))).thenReturn(sanitisedFinremCaseData);
+        }
+
+        @Test
+        void aboutToSubmitHandlerShouldClearTemporaryFields() {
+            try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+                EventType eventType = mock(EventType.class);
+                mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
+                    .thenReturn(eventType);
+
+                var response = aboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+
+                assertAll(
+                    () -> assertEquals(sanitisedFinremCaseData, response.getData())
+                );
+            }
+        }
+    }
+
+    @Nested
     class ClearBinBeforeHandleTests {
 
         Bin spiedBin;
@@ -350,7 +369,7 @@ class FinremCallbackHandlerTest {
 
             callbackRequest = mock(CallbackRequest.class);
             when(callbackRequest.getCaseDetails()).thenReturn(callbackRequestCaseDetails);
-            when(callbackRequest.getEventId()).thenReturn("mockedEventId");
+            when(callbackRequest.getEventId()).thenReturn(MOCKED_EVENT_CCD_TYPE);
 
             // mocking finremCaseDetailsMapper in method removeTemporaryFieldsAfterHandled
             toBeSanitisedMap = new HashMap<>();
@@ -365,7 +384,7 @@ class FinremCallbackHandlerTest {
         void submittedHandlerShouldNotClearBin() {
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
-                mockedStatic.when(() -> EventType.getEventType("mockedEventId"))
+                mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
                     .thenReturn(eventType);
 
                 submittedCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -377,7 +396,7 @@ class FinremCallbackHandlerTest {
         void aboutToSubmitHandlerShouldClearBin() {
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
-                mockedStatic.when(() -> EventType.getEventType("mockedEventId"))
+                mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
                     .thenReturn(eventType);
 
                 var response = aboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -390,10 +409,10 @@ class FinremCallbackHandlerTest {
         }
 
         @Test
-        void generalHandlerShouldClearBin() {
+        void finremCallbackHandlerShouldClearBin() {
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
-                mockedStatic.when(() -> EventType.getEventType("mockedEventId"))
+                mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
                     .thenReturn(eventType);
 
                 var response = finremCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
