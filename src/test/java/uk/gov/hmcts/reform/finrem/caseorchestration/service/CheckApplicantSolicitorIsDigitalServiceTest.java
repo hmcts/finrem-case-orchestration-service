@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -34,10 +34,7 @@ class CheckApplicantSolicitorIsDigitalServiceTest {
 
     @Mock
     private CaseDataService caseDataService;
-
-    @InjectMocks
     private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
-
     private CaseDetails caseDetails;
 
     private static final OrganisationPolicy ORGANISATION_POLICY = OrganisationPolicy.builder()
@@ -47,6 +44,9 @@ class CheckApplicantSolicitorIsDigitalServiceTest {
 
     @BeforeEach
     void setUp() {
+        checkApplicantSolicitorIsDigitalService =
+            new CheckApplicantSolicitorIsDigitalService(caseDataService, TestObjectMapperFactory.createObjectMapper());
+
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         caseData.put(APPLICANT_ORGANISATION_POLICY, ORGANISATION_POLICY);
