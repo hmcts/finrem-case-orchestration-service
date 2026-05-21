@@ -40,6 +40,14 @@ public class FinremCaseDetailsMapper {
         return objectMapper.convertValue(value, CaseDocument.class);
     }
 
+    /**
+     * Converts the given {@link FinremCaseData} instance into a {@link Map}.
+     *
+     * <p>The conversion is performed using {@link ObjectMapper#convertValue(Object, Class)}.</p>
+     *
+     * @param finremCaseData the case data to convert
+     * @return a map representation of the given case data
+     */
     public Map<String, Object> finremCaseDataToMap(FinremCaseData finremCaseData) {
         return objectMapper.convertValue(finremCaseData, Map.class);
     }
