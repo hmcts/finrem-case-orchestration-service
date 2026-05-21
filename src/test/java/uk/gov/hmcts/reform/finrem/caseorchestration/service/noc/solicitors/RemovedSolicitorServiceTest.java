@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -80,7 +80,6 @@ class RemovedSolicitorServiceTest {
     @Mock
     private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
-    @InjectMocks
     private RemovedSolicitorService removedSolicitorService;
 
     private CaseDetails caseDetails;
@@ -88,6 +87,12 @@ class RemovedSolicitorServiceTest {
     @BeforeEach
     void setUp() {
         caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).id(Long.valueOf(CASE_ID)).data(new HashMap<>()).build();
+        removedSolicitorService = new RemovedSolicitorService(
+            caseDataService,
+            checkApplicantSolicitorIsDigitalService,
+            checkRespondentSolicitorIsDigitalService,
+            TestObjectMapperFactory.createObjectMapper()
+        );
     }
 
     @Test
