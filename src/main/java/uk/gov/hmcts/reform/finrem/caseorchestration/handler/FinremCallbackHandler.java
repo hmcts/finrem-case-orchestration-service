@@ -179,10 +179,6 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     }
 
     private void sanitise(Map<String, Object> toBeSanitisedMap, Bin bin) {
-        if (isNull(toBeSanitisedMap)) {
-            return;
-        }
-
         Map<String, Object> nonTemporaryDataMap = getNonTemporaryDataMap(toBeSanitisedMap);
 
         getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
