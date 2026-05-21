@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnotation;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -65,9 +66,9 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     }
 
     protected void validateCaseData(FinremCallbackRequest callbackRequest) {
-        if (callbackRequest == null
-            || callbackRequest.getCaseDetails() == null
-            || callbackRequest.getCaseDetails().getData() == null) {
+        if (isNull(callbackRequest)
+            || isNull(callbackRequest.getCaseDetails())
+            || isNull(callbackRequest.getCaseDetails().getData())) {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
     }
@@ -146,15 +147,15 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
                                                                                    String postState) {
         var builder = GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder();
         builder.data(finremCaseData);
-        if (errors != null && !errors.isEmpty()) {
-            builder.errors(errors);
-        }
-        if (warnings != null && !warnings.isEmpty()) {
-            builder.warnings(warnings);
-        }
-        if (StringUtils.isNotBlank(postState)) {
-            builder.state(postState);
-        }
+        ofNullable(errors)
+            .filter(e -> !e.isEmpty())
+            .ifPresent(builder::errors);
+        ofNullable(warnings)
+            .filter(w -> !w.isEmpty())
+            .ifPresent(builder::warnings);
+        ofNullable(postState)
+            .filter(StringUtils::isNotBlank)
+            .ifPresent(builder::state);
         return builder.build();
     }
 
@@ -165,7 +166,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     protected String toConfirmationBody(String... messages) {
         StringBuilder body = new StringBuilder("<ul>");
 
-        if (messages != null) {
+        if (nonNull(messages)) {
             for (String error : messages) {
                 if (error != null && !error.isBlank()) {
                     body.append("<li><h2>%s</h2></li>".formatted(StringEscapeUtils.escapeHtml4(error)));
@@ -178,7 +179,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     }
 
     private void sanitise(Map<String, Object> toBeSanitisedMap, Bin bin) {
-        if (toBeSanitisedMap == null) {
+        if (isNull(toBeSanitisedMap)) {
             return;
         }
 
@@ -201,7 +202,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
 
     private void binCaseDocumentIfTemporaryField(Bin bin, Object value) {
         CaseDocument caseDocument = finremCaseDetailsMapper.mapToCaseDocument(value);
-        if (caseDocument != null) {
+        if (nonNull(caseDocument)) {
             bin.binCaseDocument(caseDocument);
         }
     }
@@ -210,7 +211,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
         FinremCaseDetails finremCaseDetailsBefore = null;
         String caseId = finremCaseDetails.getCaseIdAsString();
-        if (callbackRequest.getCaseDetailsBefore() != null) {
+        if (nonNull(callbackRequest.getCaseDetailsBefore())) {
             finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
             if (nonNull(finremCaseDetailsBefore.getData())
                 && isNull(finremCaseDetailsBefore.getData().getCcdCaseId())) {
