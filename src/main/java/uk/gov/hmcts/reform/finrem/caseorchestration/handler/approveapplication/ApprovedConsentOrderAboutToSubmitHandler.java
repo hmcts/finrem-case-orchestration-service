@@ -66,7 +66,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
 
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
 
-        CaseDocument latestConsentOrder = getLatestConsentOrder(finremCaseData);
+        CaseDocument latestConsentOrder = finremCaseData.getLatestConsentOrder();
         if (nonNull(latestConsentOrder)) {
             CaseDocument pdfConsentOrder = genericDocumentService.convertDocumentIfNotPdfAlready(latestConsentOrder,
                 userAuthorisation, finremCaseData.getCcdCaseType());
@@ -120,10 +120,6 @@ public class ApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
             log.info("Case ID: {} has no pension documents. Case state updated to {} and consent order sent for bulk print.",
                 caseId, CONSENT_ORDER_MADE);
         }
-    }
-
-    private CaseDocument getLatestConsentOrder(FinremCaseData finremCaseData) {
-        return finremCaseData.getLatestConsentOrder();
     }
 
     private boolean isPensionDocumentsEmpty(FinremCaseData finremCaseData) {
