@@ -67,8 +67,10 @@ import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -714,6 +716,8 @@ public class TestSetUpUtils {
         ArgumentCaptor<Map> mapCaptor = ArgumentCaptor.forClass(Map.class);
         FinremCaseData sanitisedFinremCaseData = mock(FinremCaseData.class);
         when(finremCaseDetailsMapper.mapToFinremCaseData(mapCaptor.capture())).thenReturn(sanitisedFinremCaseData);
+        // to simulate CaseDocument field annotacted with @TemporaryField to be binned
+        lenient().when(finremCaseDetailsMapper.mapToCaseDocument(anyMap())).thenReturn(mock(CaseDocument.class));
 
         try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
             EventType eventType = mock(EventType.class);

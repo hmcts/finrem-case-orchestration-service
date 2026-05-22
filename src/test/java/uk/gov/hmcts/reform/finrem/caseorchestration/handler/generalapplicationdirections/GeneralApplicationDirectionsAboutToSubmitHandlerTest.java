@@ -501,10 +501,16 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
                 .value(DynamicListElement.builder().code("a#b").build())
             .build());
 
+        CaseDocument caseDocument = caseDocument();
+
         verifyTemporaryFieldsWereSanitised(aboutToSubmitHandler,
             finremCaseDetails, finremCaseDetailsMapper, new HashMap<>(Map.of(
-                "generalApplicationDirectionsPreview", caseDocument()
-                ))
+                "generalApplicationDirectionsPreview", Map.of(
+                    "document_url", caseDocument.getDocumentUrl(),
+                    "document_binary_url", caseDocument.getDocumentBinaryUrl(),
+                    "document_filename", caseDocument.getDocumentFilename()
+                )
+            ))
         );
     }
 
