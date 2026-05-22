@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -35,6 +36,20 @@ public class FinremCaseDetailsMapper {
      */
     public Map<String, Object> finremCaseDataToMap(FinremCaseData finremCaseData) {
         return objectMapper.convertValue(finremCaseData, Map.class);
+    }
+
+    /**
+     * Converts the given map representation of a case document into a
+     * {@link CaseDocument} instance.
+     *
+     * <p>The conversion is performed using
+     * {@link ObjectMapper#convertValue(Object, Class)}.</p>
+     *
+     * @param caseDocumentInMap the map containing case document properties
+     * @return the converted {@link CaseDocument} instance
+     */
+    public CaseDocument mapToCaseDocument(Map<String, Object> caseDocumentInMap) {
+        return objectMapper.convertValue(caseDocumentInMap, CaseDocument.class);
     }
 
     public FinremCaseDetails mapToFinremCaseDetails(CaseDetails caseDetails) {

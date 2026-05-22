@@ -18,14 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -328,9 +326,9 @@ class FinremCallbackHandlerTest {
         @Test
         void aboutToSubmitHandlerShouldClearTemporaryFields() {
             mockForClearTemporaryFields(Map.of(
-                PROPERTY_TO_BE_RETAINED, YesOrNo.YES,
-                TEMP_PROPERTY_TO_BE_CLEARED_1, YesOrNo.YES,
-                TEMP_PROPERTY_TO_BE_CLEARED_2, Address.builder().addressLine1("Test Address").build()
+                PROPERTY_TO_BE_RETAINED, "Yes",
+                TEMP_PROPERTY_TO_BE_CLEARED_1, "Yes",
+                TEMP_PROPERTY_TO_BE_CLEARED_2, Map.of("AddressLine1", "ABC")
             ));
             when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
                 map -> map.size() == 1 && map.containsKey(PROPERTY_TO_BE_RETAINED)
@@ -352,11 +350,21 @@ class FinremCallbackHandlerTest {
         @Test
         void aboutToSubmitHandlerShouldBinCaseDocumentsFromTemporaryFields() {
             mockForClearTemporaryFields(Map.of(
-                TEMP_PROPERTY_TO_BE_BINNED, documentToBeBinned
+                TEMP_PROPERTY_TO_BE_BINNED, Map.of(
+                    "document_filename", documentToBeBinned.getDocumentFilename(),
+                    "document_url", documentToBeBinned.getDocumentUrl(),
+                    "document_binary_url", documentToBeBinned.getDocumentBinaryUrl()
+                )
             ));
             when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
                 Map::isEmpty
             ))).thenReturn(sanitisedFinremCaseData);
+            CaseDocument binnedCaseDocument = mock(CaseDocument.class);
+            when(finremCaseDetailsMapper.mapToCaseDocument(Map.of(
+                "document_filename", documentToBeBinned.getDocumentFilename(),
+                "document_url", documentToBeBinned.getDocumentUrl(),
+                "document_binary_url", documentToBeBinned.getDocumentBinaryUrl()
+            ))).thenReturn(binnedCaseDocument);
 
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
@@ -368,7 +376,7 @@ class FinremCallbackHandlerTest {
                 assertAll(
                     // only return sanitisedFinremCaseData if TESTING_DATA_IN_MAP is sanitised
                     () -> assertEquals(sanitisedFinremCaseData, response.getData()),
-                    () -> verify(mockedBin).binCaseDocument(documentToBeBinned)
+                    () -> verify(mockedBin).binCaseDocument(binnedCaseDocument)
                 );
             }
         }
@@ -553,7 +561,7 @@ class FinremCallbackHandlerTest {
                 ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
 
                 when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData))
-                    .thenReturn(Map.of("whatever", caseDocument()));
+                    .thenReturn(Map.of());
 
                 submittedCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -573,8 +581,7 @@ class FinremCallbackHandlerTest {
 
         @Test
         void submittedHandlerShouldNotPurgeFileUrlsInBinWhichIsStillAttached() {
-            CaseDocument binFileA = caseDocument("binFileA");
-            String documentAUrl = binFileA.getDocumentUrl();
+            String documentAUrl = caseDocument("binFileA").getDocumentUrl();
             String documentBUrl = caseDocument("fileB").getDocumentUrl();
             when(mockedBin.getFileUrlsToBeDeleted())
                 .thenReturn(DynamicList.builder()
@@ -592,7 +599,9 @@ class FinremCallbackHandlerTest {
                 ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
 
                 when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData))
-                    .thenReturn(Map.of("whatever", binFileA));
+                    .thenReturn(Map.of(
+                        "miniFormA", Map.of("document_url", documentAUrl)
+                    ));
 
                 submittedCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
 

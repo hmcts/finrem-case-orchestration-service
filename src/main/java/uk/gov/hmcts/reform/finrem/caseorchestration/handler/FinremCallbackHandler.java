@@ -189,16 +189,19 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
                     if (CaseDocument.class.isAssignableFrom(field.getType())
                         && value != null
                         && !nonTemporaryDataMap.containsValue(value)) {
-
-                        binCaseDocumentIfTemporaryField(bin, (CaseDocument) value);
+                        binCaseDocumentIfTemporaryField(bin, value);
                     }
                 })
         );
     }
 
-    private void binCaseDocumentIfTemporaryField(Bin bin, CaseDocument caseDocument) {
-        if (nonNull(caseDocument)) {
-            bin.binCaseDocument(caseDocument);
+    private void binCaseDocumentIfTemporaryField(Bin bin, Object caseDocument) {
+        if (nonNull(caseDocument) && caseDocument instanceof Map<?, ?> map) {
+            bin.binCaseDocument(
+                finremCaseDetailsMapper.mapToCaseDocument((Map<String, Object>) map)
+            );
+        } else {
+            throw new IllegalStateException();
         }
     }
 

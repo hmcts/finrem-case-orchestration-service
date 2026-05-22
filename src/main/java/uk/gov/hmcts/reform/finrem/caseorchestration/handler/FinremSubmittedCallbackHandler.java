@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -101,12 +100,10 @@ public abstract class FinremSubmittedCallbackHandler extends FinremCallbackHandl
 
     private Set<String> extractAttachedUrls(FinremCaseData finremCaseData) {
         return finremCaseDetailsMapper.finremCaseDataToMap(finremCaseData)
-            .entrySet().stream()
-            .filter(entry -> !"fileUrlsToBeDeleted".equals(entry.getKey()))
-            .map(Map.Entry::getValue)
-            .filter(CaseDocument.class::isInstance)
-            .map(CaseDocument.class::cast)
-            .map(CaseDocument::getDocumentUrl)
+            .values().stream()
+            .filter(Map.class::isInstance)
+            .map(value -> (Map<?, ?>) value)
+            .map(map -> (String) map.get("document_url")) // Extracts the URL directly
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
     }
