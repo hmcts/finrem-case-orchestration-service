@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
@@ -52,6 +53,8 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
     private GenericDocumentService genericDocumentService;
     @Mock
     private DocumentHelper documentHelper;
+    @Mock
+    private ConsentOrderPrintService consentOrderPrintService;
 
     @Test
     void testCanHandle() {
@@ -101,7 +104,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenLatestConsentOrderProvided_whenNoPension_thenShouldUpdateStateToConsentOrderMade() {
+    void givenLatestConsentOrderProvided_whenNoPension_thenUpdateStateToConsentOrderMade() {
         CaseDocument latestConsentOrder = mock(CaseDocument.class);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
@@ -115,6 +118,24 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertEquals("CONSENT_ORDER_MADE", response.getData().getState());
+    }
+
+    @Test
+    void givenLatestConsentOrderProvided_whenNoPension_thenSendConsentOrderToBulkPrint() {
+        CaseDocument latestConsentOrder = mock(CaseDocument.class);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
+            FinremCaseData.builder()
+                .ccdCaseType(CaseType.CONSENTED)
+                .latestConsentOrder(latestConsentOrder)
+                .build()
+        );
+        mockEmptyPensionDocument(callbackRequest, true);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(callbackRequest.getCaseDetails(),
+            callbackRequest.getCaseDetailsBefore(), EventType.APPROVE_ORDER, AUTH_TOKEN);
     }
 
     @ParameterizedTest
