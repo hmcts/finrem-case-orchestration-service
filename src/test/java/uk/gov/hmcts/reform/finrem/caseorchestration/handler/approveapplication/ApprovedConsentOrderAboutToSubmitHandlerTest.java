@@ -177,15 +177,14 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
                 .containsOnlyOnce(expectedGeneratedDocument),
             () -> assertThat(response.getData().getApprovedOrderCollection())
                 .extracting("approvedOrder.consentOrder")
-                .containsOnlyOnce(expectedConsentOrderAnnexStamped)
-//            ,
-//            () -> {
-//                if (isPensionDocumentEmpty) {
-//                    assertThat(response.getData().getApprovedOrderCollection())
-//                        .extracting("approvedOrder.pensionDocuments")
-//                        .containsOnlyOnce(stampedPensionDocs);
-//                }
-//            }
+                .containsOnlyOnce(expectedConsentOrderAnnexStamped),
+            () -> {
+                if (!isPensionDocumentEmpty) {
+                    assertThat(response.getData().getApprovedOrderCollection())
+                        .extracting("approvedOrder.pensionDocuments")
+                        .containsOnlyOnce(stampedPensionDocs);
+                }
+            }
         );
     }
 
