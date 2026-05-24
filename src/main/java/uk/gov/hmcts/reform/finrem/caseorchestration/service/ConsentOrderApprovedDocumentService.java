@@ -68,11 +68,13 @@ public class ConsentOrderApprovedDocumentService {
 
     /**
      * Generates an approved consent order letter document for the given case.
+     *
      * <p>
      * Determines the appropriate document template and file name based on
      * the application type and whether the case is a variation order.
      * For variation orders, the order type is set to {@code VARIATION};
      * otherwise, it is set to {@code CONSENT}.
+     *
      * <p>
      * A deep copy of the case details is created before modifying the case data
      * used for document generation. For contested applications, additional
