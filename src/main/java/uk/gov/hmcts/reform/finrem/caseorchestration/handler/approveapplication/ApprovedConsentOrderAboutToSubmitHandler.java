@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -128,9 +127,6 @@ public class ApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
     }
 
     private LocalDate getApprovalDate(FinremCaseData finremCaseData) {
-        ConsentOrderWrapper consentOrderWrapper = finremCaseData.getConsentOrderWrapper();
-        return consentOrderWrapper.getConsentDateOfOrder() != null
-            ? consentOrderWrapper.getConsentDateOfOrder()
-            : finremCaseData.getOrderDirectionDate();
+        return finremCaseData.getOrderDirectionDate();
     }
 }
