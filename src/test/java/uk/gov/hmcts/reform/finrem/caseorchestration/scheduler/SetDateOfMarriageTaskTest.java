@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -40,13 +40,13 @@ class SetDateOfMarriageTaskTest {
     @Test
     void shouldUpdateDateOfMarriageWhenDateMatchesIncorrectValue() {
         FinremCaseData caseData = FinremCaseData.builder()
-            .dateOfMarriage(LocalDate.of(2005, 3, 25))
-            .build();
+                .dateOfMarriage(LocalDate.of(2005, 3, 25))
+                .build();
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(1234567890123456L)
-            .data(caseData)
-            .build();
+                .id(1234567890123456L)
+                .data(caseData)
+                .build();
 
         task.executeTask(caseDetails);
 
@@ -58,13 +58,13 @@ class SetDateOfMarriageTaskTest {
         LocalDate originalDate = LocalDate.of(2006, 1, 1);
 
         FinremCaseData caseData = FinremCaseData.builder()
-            .dateOfMarriage(originalDate)
-            .build();
+                .dateOfMarriage(originalDate)
+                .build();
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(1234567890123456L)
-            .data(caseData)
-            .build();
+                .id(1234567890123456L)
+                .data(caseData)
+                .build();
 
         task.executeTask(caseDetails);
 
