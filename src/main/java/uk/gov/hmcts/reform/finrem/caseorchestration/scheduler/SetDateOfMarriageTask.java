@@ -37,7 +37,7 @@ public class SetDateOfMarriageTask extends EncryptedCsvFileProcessingTask {
         FinremCaseData caseData = finremCaseDetails.getData();
         LocalDate dateOfMarriage = caseData.getDateOfMarriage();
 
-        if (dateOfMarriage.equals(LocalDate.of(2005, 3, 25))) {
+        if (LocalDate.of(2005, 3, 25).equals(dateOfMarriage)) {
             log.info("Case ID: {} - Date of Marriage found. Updating...",
                 finremCaseDetails.getId());
             caseData.setDateOfMarriage(LocalDate.of(2005, 3, 29));
