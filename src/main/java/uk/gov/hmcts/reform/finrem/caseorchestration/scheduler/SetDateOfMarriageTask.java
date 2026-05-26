@@ -42,6 +42,9 @@ public class SetDateOfMarriageTask extends EncryptedCsvFileProcessingTask {
                 finremCaseDetails.getId());
             caseData.setDateOfMarriage(LocalDate.of(2005, 3, 29));
         }
+        else {
+            log.info("No matching date of Marriage found.");
+        }
     }
 
     @Override
