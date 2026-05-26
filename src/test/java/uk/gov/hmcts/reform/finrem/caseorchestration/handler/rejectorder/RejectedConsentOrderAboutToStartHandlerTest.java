@@ -20,7 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class RejectedConsentOrderAboutToStartHandlerTest {
 
     @InjectMocks
-    private RejectedConsentOrderAboutToSartHandler handler;
+    private RejectedConsentOrderAboutToStartHandler handler;
     @Mock
     private RefusalOrderDocumentService refusalOrderDocumentService;
 

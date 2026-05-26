@@ -16,13 +16,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocument
 
 @Slf4j
 @Service
-public class RejectedConsentOrderAboutToSartHandler extends FinremCallbackHandler {
+public class RejectedConsentOrderAboutToStartHandler extends FinremCallbackHandler {
 
     private final RefusalOrderDocumentService refusalOrderDocumentService;
 
     @Autowired
-    public RejectedConsentOrderAboutToSartHandler(FinremCaseDetailsMapper mapper,
-                                                  RefusalOrderDocumentService refusalOrderDocumentService) {
+    public RejectedConsentOrderAboutToStartHandler(FinremCaseDetailsMapper mapper,
+                                                   RefusalOrderDocumentService refusalOrderDocumentService) {
         super(mapper);
         this.refusalOrderDocumentService = refusalOrderDocumentService;
     }
