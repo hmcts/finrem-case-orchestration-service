@@ -12,5 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CaseNotesCollection {
+
+    private String id;
     private CaseNotes value;
 }

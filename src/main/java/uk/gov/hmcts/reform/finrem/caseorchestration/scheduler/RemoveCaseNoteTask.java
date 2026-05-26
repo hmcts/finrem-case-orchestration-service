@@ -19,6 +19,8 @@ import java.util.List;
 @Slf4j
 public class RemoveCaseNoteTask extends EncryptedCsvFileProcessingTask {
 
+    private static final String NOTE_ID = "bf87157f-6e72-4af6-81ae-8f74df93d0f0";
+
     @Value("${cron.removeCaseNote.task.enabled:false}")
     private boolean isTaskEnabled;
 
@@ -56,7 +58,7 @@ public class RemoveCaseNoteTask extends EncryptedCsvFileProcessingTask {
 
     @Override
     protected String getSummary() {
-        return "Remove erroneous case note - DFR-5077";
+        return "Remove case note";
     }
 
     @Override
@@ -72,8 +74,13 @@ public class RemoveCaseNoteTask extends EncryptedCsvFileProcessingTask {
 
         log.info("caseNotesCollection count before: {} for case id {}", caseNotes.size(), caseId);
 
-        caseNotes.removeLast();
-        log.info("Removed last case note for case id {}", caseId);
+        boolean removed = caseNotes.removeIf(item -> NOTE_ID.equals(item.getId()));
+
+        if (removed) {
+            log.info("Removed case note for case id {}", caseId);
+        } else {
+            log.info("Case note not found for case id {}", caseId);
+        }
 
         log.info("caseNotesCollection count after: {} for case id {}", caseNotes.size(), caseId);
     }

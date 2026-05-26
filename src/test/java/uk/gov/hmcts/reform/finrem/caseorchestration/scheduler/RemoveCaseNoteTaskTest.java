@@ -23,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class RemoveCaseNoteTaskTest {
 
+    private static final String NOTE_ID = "bf87157f-6e72-4af6-81ae-8f74df93d0f0";
+
     @Mock
     private CaseReferenceCsvLoader csvLoader;
     @Mock
@@ -40,21 +42,33 @@ class RemoveCaseNoteTaskTest {
     }
 
     @Test
-    void givenMultipleNotes_whenExecuteTask_thenRemovesLastOnly() {
-        CaseNotesCollection first = noteItem("first", "Author A", LocalDate.of(2026, 2, 1));
-        CaseNotesCollection second = noteItem("second", "Author B", LocalDate.of(2026, 3, 1));
-        CaseNotesCollection third = noteItem("third", "Author C", LocalDate.of(2026, 4, 1));
+    void givenTargetNotePresent_whenExecuteTask_thenRemovesOnlyThatNote() {
+        CaseNotesCollection keeper1 = noteItem("id-1", "first", "Author A", LocalDate.of(2026, 2, 1));
+        CaseNotesCollection target = noteItem(NOTE_ID, "bad note", "Author B", LocalDate.of(2026, 5, 14));
+        CaseNotesCollection keeper2 = noteItem("id-3", "third", "Author C", LocalDate.of(2026, 4, 1));
 
-        FinremCaseDetails details = caseWithNotes(first, second, third);
+        FinremCaseDetails details = caseWithNotes(keeper1, target, keeper2);
 
         task.executeTask(details);
 
-        assertThat(details.getData().getCaseNotesCollection()).containsExactly(first, second);
+        assertThat(details.getData().getCaseNotesCollection()).containsExactly(keeper1, keeper2);
     }
 
     @Test
-    void givenSingleNote_whenExecuteTask_thenLeavesEmptyList() {
-        CaseNotesCollection only = noteItem("only", "Author", LocalDate.of(2026, 2, 1));
+    void givenTargetNoteAbsent_whenExecuteTask_thenLeavesNotesUntouched() {
+        CaseNotesCollection a = noteItem("id-1", "first", "Author A", LocalDate.of(2026, 2, 1));
+        CaseNotesCollection b = noteItem("id-2", "second", "Author B", LocalDate.of(2026, 3, 1));
+
+        FinremCaseDetails details = caseWithNotes(a, b);
+
+        task.executeTask(details);
+
+        assertThat(details.getData().getCaseNotesCollection()).containsExactly(a, b);
+    }
+
+    @Test
+    void givenOnlyTargetNote_whenExecuteTask_thenLeavesEmptyList() {
+        CaseNotesCollection only = noteItem(NOTE_ID, "bad note", "Author", LocalDate.of(2026, 5, 14));
 
         FinremCaseDetails details = caseWithNotes(only);
 
@@ -84,8 +98,9 @@ class RemoveCaseNoteTaskTest {
         assertThat(details.getData().getCaseNotesCollection()).isEmpty();
     }
 
-    private CaseNotesCollection noteItem(String text, String author, LocalDate date) {
+    private CaseNotesCollection noteItem(String id, String text, String author, LocalDate date) {
         return CaseNotesCollection.builder()
+            .id(id)
             .value(CaseNotes.builder()
                 .caseNote(text)
                 .caseNoteAuthor(author)
