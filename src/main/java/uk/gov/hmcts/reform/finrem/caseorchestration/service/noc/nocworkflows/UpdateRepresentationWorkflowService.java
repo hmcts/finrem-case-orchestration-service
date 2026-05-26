@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.utils.StringUtils;
@@ -32,6 +31,7 @@ public class UpdateRepresentationWorkflowService {
     private final NoticeOfChangeService noticeOfChangeService;
     private final AssignCaseAccessService assignCaseAccessService;
     private final SystemUserService systemUserService;
+    private final ObjectMapper objectMapper;
 
     /**
      * Prepares the change of organisation request and updates the related organisation policies.
@@ -88,7 +88,7 @@ public class UpdateRepresentationWorkflowService {
     }
 
     private boolean isNoOrganisationsToAddOrRemove(CaseDetails caseDetails) {
-        ChangeOrganisationRequest changeRequest = new ObjectMapper().registerModule(new JavaTimeModule())
+        ChangeOrganisationRequest changeRequest = objectMapper
             .convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
         return changeRequest.isNoOrganisationsToAddOrRemove();
     }

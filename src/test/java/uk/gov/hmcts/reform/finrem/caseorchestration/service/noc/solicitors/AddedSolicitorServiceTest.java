@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -76,7 +76,6 @@ class AddedSolicitorServiceTest {
     @Mock
     private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
-    @InjectMocks
     private AddedSolicitorService addedSolicitorService;
 
     private CaseDetails caseDetails;
@@ -84,6 +83,12 @@ class AddedSolicitorServiceTest {
     @BeforeEach
     void setUp() {
         caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).id(Long.valueOf(CASE_ID)).data(new HashMap<>()).build();
+        addedSolicitorService = new AddedSolicitorService(
+            caseDataService,
+            checkApplicantSolicitorIsDigitalService,
+            checkRespondentSolicitorIsDigitalService,
+            TestObjectMapperFactory.createObjectMapper()
+        );
     }
 
     @Test
