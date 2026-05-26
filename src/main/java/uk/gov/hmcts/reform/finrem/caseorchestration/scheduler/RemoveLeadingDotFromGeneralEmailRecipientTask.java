@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -18,7 +19,7 @@ import java.util.Objects;
 
 @Component
 @Slf4j
-public class SetGeneralEmailRecipientTask extends EncryptedCsvFileProcessingTask {
+public class RemoveLeadingDotFromGeneralEmailRecipientTask extends EncryptedCsvFileProcessingTask {
     private static final String TASK_NAME = "SetGeneralEmailRecipientTask";
     private static final String SUMMARY = "DFR-5061 CT Fix generalEmailRecipient";
 
@@ -29,9 +30,9 @@ public class SetGeneralEmailRecipientTask extends EncryptedCsvFileProcessingTask
     @Value("${cron.generalEmailRecipient.caseListFileName:updateGeneralEmailRecipient-encrypted.csv}")
     private String csvFile;
 
-    public SetGeneralEmailRecipientTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService,
-                                        SystemUserService systemUserService,
-                                        FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    public RemoveLeadingDotFromGeneralEmailRecipientTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService,
+                                                         SystemUserService systemUserService,
+                                                         FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
     }
 
@@ -52,7 +53,7 @@ public class SetGeneralEmailRecipientTask extends EncryptedCsvFileProcessingTask
         List<GeneralEmailCollection> currentEmailInCollection =
             generalEmailWrapper.getGeneralEmailCollection();
 
-        if (currentEmailInCollection == null) {
+        if (ListUtils.emptyIfNull(currentEmailInCollection).isEmpty()) {
             return;
         }
 

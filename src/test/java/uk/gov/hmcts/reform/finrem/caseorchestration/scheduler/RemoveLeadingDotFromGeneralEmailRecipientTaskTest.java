@@ -19,13 +19,13 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 
-class SetGeneralEmailRecipientTaskTest {
+class RemoveLeadingDotFromGeneralEmailRecipientTaskTest {
 
-    private SetGeneralEmailRecipientTask task;
+    private RemoveLeadingDotFromGeneralEmailRecipientTask task;
 
     @BeforeEach
     void setUp() {
-        task = new SetGeneralEmailRecipientTask(
+        task = new RemoveLeadingDotFromGeneralEmailRecipientTask(
             mock(CaseReferenceCsvLoader.class),
             mock(CcdService.class),
             mock(SystemUserService.class),
