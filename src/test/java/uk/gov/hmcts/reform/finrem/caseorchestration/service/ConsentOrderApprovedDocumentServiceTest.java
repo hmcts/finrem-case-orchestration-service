@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
@@ -98,10 +100,10 @@ class ConsentOrderApprovedDocumentServiceTest {
     private CaseDetails detailsCopy;
 
     @Mock
-    private StampType mockedStampType;
+    private StampType stampType;
 
     @Mock
-    private CaseType mockedCaseType;
+    private CaseType caseType;
 
     private final CaseDocument pdfDocument = caseDocument("pdfDocument");
 
@@ -233,7 +235,7 @@ class ConsentOrderApprovedDocumentServiceTest {
 
             LocalDate approvalDate = mock(LocalDate.class);
             when(genericDocumentService.stampDocument(toBeStamped.getTypedCaseDocument().getPensionDocument(), AUTH_TOKEN,
-                mockedStampType, mockedCaseType)).thenReturn(stampedCaseDocument);
+                stampType, caseType)).thenReturn(stampedCaseDocument);
 
             doReturn(stampedCaseDocument)
                 .when(pensionAnnexDateStampService)
@@ -241,19 +243,19 @@ class ConsentOrderApprovedDocumentServiceTest {
                     stampedCaseDocument,
                     AUTH_TOKEN,
                     approvalDate,
-                    mockedCaseType
+                    caseType
                 );
 
             List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService
                 .stampPensionDocuments(List.of(toBeStamped, pensionCollectionDataWithNullDocument), AUTH_TOKEN,
-                    mockedStampType, approvalDate, mockedCaseType);
+                    stampType, approvalDate, caseType);
 
             assertAll(
                 () -> assertThat(stampPensionDocuments).hasSize(1),
                 () -> verify(genericDocumentService).stampDocument(toBeStamped.getTypedCaseDocument().getPensionDocument(),
-                    AUTH_TOKEN, mockedStampType, mockedCaseType),
+                    AUTH_TOKEN, stampType, caseType),
                 () -> verify(pensionAnnexDateStampService).appendApprovedDateToDocument(stampedCaseDocument,
-                    AUTH_TOKEN, approvalDate, mockedCaseType),
+                    AUTH_TOKEN, approvalDate, caseType),
                 () -> verify(documentHelper).deepCopy(toBeStamped, PensionTypeCollection.class),
                 () -> verifyNoMoreInteractions(genericDocumentService, pensionAnnexDateStampService, documentHelper)
             );
@@ -377,12 +379,6 @@ class ConsentOrderApprovedDocumentServiceTest {
 
     @Nested
     class StampAndPopulateContestedConsentApprovedOrderCollectionTests {
-
-        @Mock
-        private CaseType caseType;
-
-        @Mock
-        private StampType stampType;
 
         @Test
         void shouldStoreStampedAnnexedDocToConsentOrderAndApproveOrder() {
@@ -572,10 +568,6 @@ class ConsentOrderApprovedDocumentServiceTest {
                     .build())
                 .build();
         }
-
-        private void stubStampType(FinremCaseData finremCaseData) {
-            when(documentHelper.getStampType(finremCaseData)).thenReturn(stampType);
-        }
     }
 
     @Nested
@@ -623,20 +615,100 @@ class ConsentOrderApprovedDocumentServiceTest {
         }
     }
 
-//
-//    @Test
-//    public void givenFinremCaseDetails_whenAddGenApprovedDocs_thenCaseDocsAdded() {
-//        when(pdfStampingServiceMock.stampDocument(
-//            any(Document.class), eq(AUTH_TOKEN), eq(false), eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED)))
-//            .thenReturn(document());
-//        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-//        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
-//        FinremCaseDetails finremCaseDetails = finremCaseDetails();
-//        consentOrderApprovedDocumentService
-//           .addGeneratedApprovedConsentOrderDocumentsToCase(AUTH_TOKEN, finremCaseDetails);
-//
-//        assertThat(finremCaseDetails.getData().getApprovedOrderCollection(), hasSize(3));
-//    }
+    @Nested
+    class AddGeneratedApprovedConsentOrderDocumentsToCaseTests {
+
+        @Test
+        void givenConsentDateOfOrderNull_shouldGenerateOrderLetterAndAnnexStampDocument() {
+            LocalDate orderDirectionDate = mock(LocalDate.class);
+            List<PensionTypeCollection> pensionCollection = mock(List.class);
+            CaseDocument latestConsentOrder = caseDocument("latestConsentOrder");
+
+            finremCaseDetails = FinremCaseDetails.builder()
+                .id(CASE_ID_IN_LONG)
+                .caseType(caseType)
+                .data(FinremCaseData.builder()
+                    .latestConsentOrder(latestConsentOrder)
+                    .pensionCollection(pensionCollection)
+                    .orderDirectionDate(orderDirectionDate)
+                    .build())
+                .build();
+            FinremCaseData finremCaseData = finremCaseDetails.getData();
+
+            stubStampType(finremCaseDetails.getData());
+
+            CaseDocument orderLetter = caseDocument("orderLetter");
+            doReturn(orderLetter).when(consentOrderApprovedDocumentService)
+                .generateApprovedConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
+            List<PensionTypeCollection> stampedPensionDocs = mock(List.class);
+            doReturn(stampedPensionDocs).when(consentOrderApprovedDocumentService)
+                .stampPensionDocuments(pensionCollection, AUTH_TOKEN, stampType, orderDirectionDate, caseType);
+            when(genericDocumentService.annexStampDocument(latestConsentOrder, AUTH_TOKEN, stampType, caseType))
+                .thenReturn(stampedAndAnnexedDoc);
+
+            consentOrderApprovedDocumentService.addGeneratedApprovedConsentOrderDocumentsToCase(AUTH_TOKEN, finremCaseDetails);
+
+            assertAll(
+                () -> verify(consentOrderApprovedDocumentService).generateApprovedConsentOrderLetter(
+                    finremCaseDetails, AUTH_TOKEN),
+                () -> verify(consentOrderApprovedDocumentService).stampPensionDocuments(
+                    pensionCollection, AUTH_TOKEN, stampType, orderDirectionDate, caseType),
+                () -> verify(genericDocumentService).annexStampDocument(latestConsentOrder, AUTH_TOKEN, stampType, caseType),
+                () -> assertThat(finremCaseData.getApprovedOrderCollection())
+                    .extracting(ConsentOrderCollection::getApprovedOrder)
+                    .extracting(ApprovedOrder::getPensionDocuments, ApprovedOrder::getOrderLetter, ApprovedOrder::getConsentOrder)
+                    .containsExactly(Tuple.tuple(stampedPensionDocs, orderLetter, stampedAndAnnexedDoc))
+            );
+        }
+
+        @Test
+        void givenConsentDateOfOrderNotNull_shouldGenerateOrderLetterAndAnnexStampDocument() {
+            LocalDate orderDirectionDate = mock(LocalDate.class);
+            LocalDate consentDateOfOrder = mock(LocalDate.class);
+            List<PensionTypeCollection> pensionCollection = mock(List.class);
+            CaseDocument latestConsentOrder = caseDocument("latestConsentOrder");
+
+            finremCaseDetails = FinremCaseDetails.builder()
+                .id(CASE_ID_IN_LONG)
+                .caseType(caseType)
+                .data(FinremCaseData.builder()
+                    .latestConsentOrder(latestConsentOrder)
+                    .pensionCollection(pensionCollection)
+                    .orderDirectionDate(orderDirectionDate)
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .consentDateOfOrder(consentDateOfOrder)
+                        .build())
+                    .build())
+                .build();
+            FinremCaseData finremCaseData = finremCaseDetails.getData();
+
+            stubStampType(finremCaseDetails.getData());
+
+            CaseDocument orderLetter = caseDocument("orderLetter");
+            doReturn(orderLetter).when(consentOrderApprovedDocumentService)
+                .generateApprovedConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
+            List<PensionTypeCollection> stampedPensionDocs = mock(List.class);
+            doReturn(stampedPensionDocs).when(consentOrderApprovedDocumentService)
+                .stampPensionDocuments(pensionCollection, AUTH_TOKEN, stampType, consentDateOfOrder, caseType);
+            when(genericDocumentService.annexStampDocument(latestConsentOrder, AUTH_TOKEN, stampType, caseType))
+                .thenReturn(stampedAndAnnexedDoc);
+
+            consentOrderApprovedDocumentService.addGeneratedApprovedConsentOrderDocumentsToCase(AUTH_TOKEN, finremCaseDetails);
+
+            assertAll(
+                () -> verify(consentOrderApprovedDocumentService).generateApprovedConsentOrderLetter(
+                    finremCaseDetails, AUTH_TOKEN),
+                () -> verify(consentOrderApprovedDocumentService).stampPensionDocuments(
+                    pensionCollection, AUTH_TOKEN, stampType, consentDateOfOrder, caseType),
+                () -> verify(genericDocumentService).annexStampDocument(latestConsentOrder, AUTH_TOKEN, stampType, caseType),
+                () -> assertThat(finremCaseData.getApprovedOrderCollection())
+                    .extracting(ConsentOrderCollection::getApprovedOrder)
+                    .extracting(ApprovedOrder::getPensionDocuments, ApprovedOrder::getOrderLetter, ApprovedOrder::getConsentOrder)
+                    .containsExactly(Tuple.tuple(stampedPensionDocs, orderLetter, stampedAndAnnexedDoc))
+            );
+        }
+    }
+
 //
 //    @Test
 //    public void givenFinremCaseDetails_whenAddApprovedConsentCoverLetter_thenCaseDocsAdded() {
@@ -714,13 +786,8 @@ class ConsentOrderApprovedDocumentServiceTest {
 //        ConsentOrderWrapper wrapper = ConsentOrderWrapper.builder().consentedNotApprovedOrders(List.of(collection)).build();
 //        assertThat(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, AUTH_TOKEN), equalTo(false));
 //    }
-//
-//    private List<ConsentOrderCollection> getDocumentList(FinremCaseData data) {
-//        return Optional.ofNullable(data.getConsentOrderWrapper().getContestedConsentedApprovedOrders()).orElse(new ArrayList<>());
-//    }
-//
-//    private FinremCaseDetails finremCaseDetails() {
-//        return TestSetUpUtils.finremCaseDetailsFromResource(
-//            "/fixtures/approvedOrder/consentedApprovedOrder.json", mapper);
-//    }
+
+    private void stubStampType(FinremCaseData finremCaseData) {
+        when(documentHelper.getStampType(finremCaseData)).thenReturn(stampType);
+    }
 }
