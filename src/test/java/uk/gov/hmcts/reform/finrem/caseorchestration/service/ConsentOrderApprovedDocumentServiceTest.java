@@ -292,9 +292,10 @@ class ConsentOrderApprovedDocumentServiceTest {
                 .build();
             when(caseDataService.isPaperApplication(finremCaseDetails.getData())).thenReturn(false);
 
-            consentOrderApprovedDocumentService.addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, recipient);
+            var result = consentOrderApprovedDocumentService.addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, recipient);
 
             assertAll(
+                () -> assertThat(result).isEmpty(),
                 () -> verify(caseDataService).isPaperApplication(finremCaseDetails.getData()),
                 () -> verifyNoInteractions(documentHelper, consentedApplicationHelper, documentConfiguration, genericDocumentService),
                 () -> verifyNoMoreInteractions(caseDataService)
