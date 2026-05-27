@@ -20,8 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApproved
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,9 +40,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 
 @ExtendWith(MockitoExtension.class)
 class ApprovedConsentOrderAboutToSubmitHandlerTest {
-
-    @TestLogs
-    private final TestLogger logs = new TestLogger(ApprovedConsentOrderAboutToSubmitHandler.class);
 
     @InjectMocks
     private ApprovedConsentOrderAboutToSubmitHandler handler;
