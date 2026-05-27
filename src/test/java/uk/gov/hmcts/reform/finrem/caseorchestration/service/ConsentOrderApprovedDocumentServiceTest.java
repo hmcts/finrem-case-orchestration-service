@@ -643,7 +643,6 @@ class ConsentOrderApprovedDocumentServiceTest {
                     .orderDirectionDate(orderDirectionDate)
                     .build())
                 .build();
-            FinremCaseData finremCaseData = finremCaseDetails.getData();
 
             stubStampType(finremCaseDetails.getData());
 
@@ -664,7 +663,7 @@ class ConsentOrderApprovedDocumentServiceTest {
                 () -> verify(consentOrderApprovedDocumentService).stampPensionDocuments(
                     pensionCollection, AUTH_TOKEN, stampType, orderDirectionDate, caseType),
                 () -> verify(genericDocumentService).annexStampDocument(latestConsentOrder, AUTH_TOKEN, stampType, caseType),
-                () -> assertThat(finremCaseData.getApprovedOrderCollection())
+                () -> assertThat(finremCaseDetails.getData().getApprovedOrderCollection())
                     .extracting(ConsentOrderCollection::getApprovedOrder)
                     .extracting(ApprovedOrder::getPensionDocuments, ApprovedOrder::getOrderLetter, ApprovedOrder::getConsentOrder)
                     .containsExactly(Tuple.tuple(stampedPensionDocs, orderLetter, stampedAndAnnexedDoc))
@@ -690,7 +689,6 @@ class ConsentOrderApprovedDocumentServiceTest {
                         .build())
                     .build())
                 .build();
-            FinremCaseData finremCaseData = finremCaseDetails.getData();
 
             stubStampType(finremCaseDetails.getData());
 
@@ -711,7 +709,7 @@ class ConsentOrderApprovedDocumentServiceTest {
                 () -> verify(consentOrderApprovedDocumentService).stampPensionDocuments(
                     pensionCollection, AUTH_TOKEN, stampType, consentDateOfOrder, caseType),
                 () -> verify(genericDocumentService).annexStampDocument(latestConsentOrder, AUTH_TOKEN, stampType, caseType),
-                () -> assertThat(finremCaseData.getApprovedOrderCollection())
+                () -> assertThat(finremCaseDetails.getData().getApprovedOrderCollection())
                     .extracting(ConsentOrderCollection::getApprovedOrder)
                     .extracting(ApprovedOrder::getPensionDocuments, ApprovedOrder::getOrderLetter, ApprovedOrder::getConsentOrder)
                     .containsExactly(Tuple.tuple(stampedPensionDocs, orderLetter, stampedAndAnnexedDoc))
