@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -27,6 +28,7 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
@@ -77,7 +79,18 @@ public class ApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
                 "Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: %s"
                     .formatted(finremCaseData.getCcdCaseId()));
         }
-        return response(finremCaseData);
+
+        State postState = calculatePostState(finremCaseData);
+
+        return response(finremCaseData, null, null,
+            ofNullable(postState).map(State::getStateId).orElse(null));
+    }
+
+    private State calculatePostState(FinremCaseData finremCaseData) {
+        if (isPensionDocumentsEmpty(finremCaseData)) {
+            return State.CLOSE;
+        }
+        return null;
     }
 
     private void generateAndPrepareDocuments(
