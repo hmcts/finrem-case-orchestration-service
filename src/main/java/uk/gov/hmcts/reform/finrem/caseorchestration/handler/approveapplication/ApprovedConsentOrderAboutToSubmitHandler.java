@@ -73,8 +73,9 @@ public class ApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
             generateAndPrepareDocuments(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(),
                 userAuthorisation);
         } else {
-            log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: {}",
-                finremCaseData.getCcdCaseId());
+            throw new IllegalStateException(
+                "Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: %s"
+                    .formatted(finremCaseData.getCcdCaseId()));
         }
         return response(finremCaseData);
     }

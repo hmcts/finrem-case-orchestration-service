@@ -29,6 +29,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -62,21 +63,21 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenLatestConsentOrderAbsent_whenHandled_thenDoNothingAndLog() {
+    void givenLatestConsentOrderAbsent_whenHandled_shouldThrowException() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
             FinremCaseData.builder()
                 .ccdCaseType(CaseType.CONSENTED)
                 .build()
         );
 
-        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> handler.handle(callbackRequest, AUTH_TOKEN));
 
         assertAll(
-            () -> assertEquals(callbackRequest.getFinremCaseData(), response.getData()),
-            () -> verifyNoInteractions(genericDocumentService),
-            () -> assertThat(logs.getInfos())
-                .contains("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: %s"
-                    .formatted(CASE_ID))
+            () -> assertThat(exception.getMessage())
+                .isEqualTo("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: %s"
+                .formatted(CASE_ID)),
+            () -> verifyNoInteractions(genericDocumentService)
         );
     }
 
