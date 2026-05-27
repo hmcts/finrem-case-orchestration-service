@@ -113,7 +113,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertEquals("CONSENT_ORDER_APPROVED", response.getData().getState());
+        assertEquals("consentOrderApproved", response.getData().getState());
     }
 
     @Test
@@ -130,7 +130,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertEquals("CLOSE", response.getData().getState());
+        assertEquals("close", response.getData().getState());
     }
 
     @Test

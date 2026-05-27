@@ -118,11 +118,11 @@ public class ApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
         if (isPensionDocumentsEmpty(finremCaseData)) {
             consentOrderPrintService.sendConsentOrderToBulkPrint(finremCaseDetails, finremCaseDetailsBefore,
                 EventType.APPROVE_ORDER, authToken);
-            finremCaseData.setState(CLOSE.toString());
+            finremCaseData.setState(CLOSE.getStateId());
             log.info("Case ID: {} has no pension documents. Case state updated to {} and consent order sent for bulk print.",
                 caseId, CLOSE);
         } else {
-            finremCaseData.setState(CONSENT_ORDER_APPROVED.toString());
+            finremCaseData.setState(CONSENT_ORDER_APPROVED.getStateId());
         }
     }
 
