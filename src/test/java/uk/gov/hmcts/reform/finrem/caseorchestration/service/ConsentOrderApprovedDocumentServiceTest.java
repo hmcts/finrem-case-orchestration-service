@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.ApprovedConsentOrderDocumentCategoriser;
 
@@ -98,6 +100,9 @@ class ConsentOrderApprovedDocumentServiceTest {
 
     @Mock
     private ApprovedConsentOrderDocumentCategoriser approvedConsentOrderCategoriser;
+
+    @Mock
+    private BulkPrintCoverLetterDetailsMapper bulkPrintLetterDetailsMapper;
 
     @Mock
     private DocumentOrderingService documentOrderingService;
@@ -779,6 +784,46 @@ class ConsentOrderApprovedDocumentServiceTest {
         private static ConsentOrderCollection toConsentOrderCollection(CaseDocument consentOrder) {
             return ConsentOrderCollection.builder()
                 .approvedOrder(ApprovedOrder.builder().consentOrder(consentOrder).build()).build();
+        }
+    }
+
+    @Nested
+    class GetPopulatedConsentCoverSheetTests {
+
+        @Test
+        void shouldGenerateBulkPrintCoverSheet() {
+            finremCaseDetails = FinremCaseDetails.builder()
+                .caseType(caseType)
+                .data(FinremCaseData.builder()
+                    .build())
+                .build();
+            DocumentHelper.PaperNotificationRecipient recipient = mock(DocumentHelper.PaperNotificationRecipient.class);
+
+            Map<String, Object> letterDetailsAsMap = mock(Map.class);
+            when(bulkPrintLetterDetailsMapper
+                .getLetterDetailsAsMap(finremCaseDetails, recipient,
+                    finremCaseDetails.getData().getRegionWrapper().getDefaultCourtList())
+            ).thenReturn(letterDetailsAsMap);
+
+
+            when(documentConfiguration.getBulkPrintTemplate()).thenReturn("template");
+            when(documentConfiguration.getBulkPrintFileName()).thenReturn("filename");
+
+            CaseDocument bulkPrintCoverSheet = caseDocument("bulkPrintCoverSheet");
+            when(genericDocumentService.generateDocumentFromPlaceholdersMap(AUTH_TOKEN, letterDetailsAsMap,
+                "template", "filename",
+                caseType)).thenReturn(bulkPrintCoverSheet);
+
+            var result = consentOrderApprovedDocumentService.getPopulatedConsentCoverSheet(finremCaseDetails, AUTH_TOKEN, recipient);
+
+            assertAll(
+                () -> assertThat(result).isEqualTo(bulkPrintCoverSheet),
+                () -> verify(bulkPrintLetterDetailsMapper)
+                    .getLetterDetailsAsMap(eq(finremCaseDetails), eq(recipient), any(DefaultCourtListWrapper.class)),
+                () -> verify(genericDocumentService).generateDocumentFromPlaceholdersMap(AUTH_TOKEN, letterDetailsAsMap,
+                    "template", "filename", caseType),
+                () -> verifyNoMoreInteractions(genericDocumentService)
+            );
         }
     }
 
