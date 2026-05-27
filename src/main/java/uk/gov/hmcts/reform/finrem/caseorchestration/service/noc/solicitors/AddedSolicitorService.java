@@ -38,6 +38,7 @@ public class AddedSolicitorService {
     private final CaseDataService caseDataService;
     private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    private final ObjectMapper objectMapper;
 
     public ChangedRepresentative getAddedSolicitorAsSolicitor(UserDetails solicitorToAdd,
                                                               ChangeOrganisationRequest changeRequest) {
@@ -105,7 +106,7 @@ public class AddedSolicitorService {
     }
 
     private Optional<OrganisationPolicy> getOrgPolicy(CaseDetails caseDetails, String orgPolicy) {
-        return Optional.ofNullable(new ObjectMapper().convertValue(caseDetails.getData().get(orgPolicy),
+        return Optional.ofNullable(objectMapper.convertValue(caseDetails.getData().get(orgPolicy),
             OrganisationPolicy.class));
     }
 
