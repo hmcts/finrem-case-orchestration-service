@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -28,8 +27,8 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.CONSENT_ORDER_MADE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.CLOSE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 @Slf4j
@@ -80,17 +79,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
                     .formatted(finremCaseData.getCcdCaseId()));
         }
 
-        State postState = calculatePostState(finremCaseData);
-
-        return response(finremCaseData, null, null,
-            ofNullable(postState).map(State::getStateId).orElse(null));
-    }
-
-    private State calculatePostState(FinremCaseData finremCaseData) {
-        if (isPensionDocumentsEmpty(finremCaseData)) {
-            return State.CLOSE;
-        }
-        return null;
+        return response(finremCaseData);
     }
 
     private void generateAndPrepareDocuments(
@@ -129,9 +118,11 @@ public class ApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
         if (isPensionDocumentsEmpty(finremCaseData)) {
             consentOrderPrintService.sendConsentOrderToBulkPrint(finremCaseDetails, finremCaseDetailsBefore,
                 EventType.APPROVE_ORDER, authToken);
-            finremCaseData.setState(CONSENT_ORDER_MADE.toString());
+            finremCaseData.setState(CLOSE.toString());
             log.info("Case ID: {} has no pension documents. Case state updated to {} and consent order sent for bulk print.",
-                caseId, CONSENT_ORDER_MADE);
+                caseId, CLOSE);
+        } else {
+            finremCaseData.setState(CONSENT_ORDER_APPROVED.toString());
         }
     }
 

@@ -100,7 +100,24 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenLatestConsentOrderProvided_whenNoPension_thenUpdateStateToConsentOrderMade() {
+    void givenLatestConsentOrderProvided_whenPensionDocumentExists_thenUpdateStateToConsentOrderApproved() {
+        CaseDocument latestConsentOrder = mock(CaseDocument.class);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
+            FinremCaseData.builder()
+                .ccdCaseType(CaseType.CONSENTED)
+                .latestConsentOrder(latestConsentOrder)
+                .build()
+        );
+        mockEmptyPensionDocument(callbackRequest, false);
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertEquals("CONSENT_ORDER_APPROVED", response.getData().getState());
+    }
+
+    @Test
+    void givenLatestConsentOrderProvided_whenNoPension_thenUpdateStateToClose() {
         CaseDocument latestConsentOrder = mock(CaseDocument.class);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
@@ -113,7 +130,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertEquals("CONSENT_ORDER_MADE", response.getData().getState());
+        assertEquals("CLOSE", response.getData().getState());
     }
 
     @Test
