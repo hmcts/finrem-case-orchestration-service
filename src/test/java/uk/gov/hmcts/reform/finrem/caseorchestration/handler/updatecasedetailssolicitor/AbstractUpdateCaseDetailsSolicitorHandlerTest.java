@@ -136,7 +136,7 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
         List<String> noErrors = new ArrayList<>();
         List<String> errors = new ArrayList<>(List.of("an error"));
 
-        when(updateRepresentationService.validateEmailActiveForOrganisation(VALID_EMAIL, CASE_ID, AUTH_TOKEN)).thenReturn(errors);
+        when(updateRepresentationService.validateEmailActiveForOrganisation(VALID_EMAIL, CASE_ID)).thenReturn(errors);
 
         // Act
         FinremCallbackRequest callbackRequest =
@@ -169,7 +169,7 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
             );
 
             verify(updateRepresentationService)
-                .validateEmailActiveForOrganisation(VALID_EMAIL, CASE_ID, AUTH_TOKEN);
+                .validateEmailActiveForOrganisation(VALID_EMAIL, CASE_ID);
         }
     }
 
@@ -188,7 +188,7 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
             );
 
             verify(updateRepresentationService)
-                .validateEmailActiveForOrganisation(VALID_EMAIL, CASE_ID, AUTH_TOKEN);
+                .validateEmailActiveForOrganisation(VALID_EMAIL, CASE_ID);
         }
     }
 

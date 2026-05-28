@@ -11,11 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 
-import java.util.Objects;
 import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy.isSameOrganisation;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.EmailUtils.areEmailsDifferent;
 
 @Data
 @Builder(toBuilder = true)
@@ -93,9 +93,7 @@ public class FinremCallbackRequest {
         String currentEmail = ofNullable(getFinremCaseData()).map(emailExtractor).orElse(null);
         String beforeEmail = ofNullable(getFinremCaseDataBefore()).map(emailExtractor).orElse(null);
 
-        boolean emailMismatch = !Objects.equals(normalizeAndLower(currentEmail), normalizeAndLower(beforeEmail));
-
-        if (emailMismatch) {
+        if (areEmailsDifferent(currentEmail, beforeEmail)) {
             return true;
         }
 
@@ -107,13 +105,5 @@ public class FinremCallbackRequest {
         }
 
         return !isSameOrganisation(currentPolicy, beforePolicy);
-    }
-
-    private String normalizeAndLower(String email) {
-        return ofNullable(email)
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
-            .map(String::toLowerCase)
-            .orElse(null);
     }
 }
