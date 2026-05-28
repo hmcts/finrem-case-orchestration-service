@@ -8,12 +8,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.SolicitorNocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorAddedLetterDetailsGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.representative.SolicitorAddedRepresentativeLetterHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -24,7 +27,12 @@ public class SolicitorAddedRepresentativeLetterHandlerTest extends LetterHandler
     @Mock
     CaseDataService caseDataService;
 
-    @InjectMocks
+    @Mock
+    CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+
+    @Mock
+    CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+
     SolicitorAddedRepresentativeLetterHandler solicitorAddedRepresentativeLetterHandler;
 
     public SolicitorAddedRepresentativeLetterHandlerTest() {
@@ -34,6 +42,15 @@ public class SolicitorAddedRepresentativeLetterHandlerTest extends LetterHandler
 
     @Before
     public void setUpTest() {
+        solicitorAddedRepresentativeLetterHandler = new SolicitorAddedRepresentativeLetterHandler(
+            (SolicitorAddedLetterDetailsGenerator) letterDetailsGenerator,
+            (SolicitorNocDocumentService) nocDocumentService,
+            bulkPrintServiceAdapter,
+            caseDataService,
+            checkApplicantSolicitorIsDigitalService,
+            checkRespondentSolicitorIsDigitalService,
+            TestObjectMapperFactory.createObjectMapper()
+        );
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(Boolean.TRUE);
     }
 

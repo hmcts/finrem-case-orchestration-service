@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.LitigantSolicitorRemovedNocDocumentService;
@@ -14,12 +16,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorRemovedApplicantLetterHandlerTest extends LetterHandlerTestBase {
 
-    @InjectMocks
     SolicitorRemovedApplicantLetterHandler solicitorRemovedApplicantLetterHandler;
 
     public SolicitorRemovedApplicantLetterHandlerTest() {
         super(Mockito.mock(SolicitorRemovedLetterDetailsGenerator.class), Mockito.mock(LitigantSolicitorRemovedNocDocumentService.class),
             NoticeType.REMOVE, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+    }
+
+    @Before
+    public void setUpTest() {
+        solicitorRemovedApplicantLetterHandler = new SolicitorRemovedApplicantLetterHandler(
+            (SolicitorRemovedLetterDetailsGenerator) letterDetailsGenerator,
+            (LitigantSolicitorRemovedNocDocumentService) nocDocumentService,
+            bulkPrintServiceAdapter,
+            TestObjectMapperFactory.createObjectMapper()
+        );
     }
 
     @Test

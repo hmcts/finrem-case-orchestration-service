@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -61,10 +62,10 @@ public class AbstractLetterDetailsGeneratorTestSetup {
     @Before
     public void setUpTest() {
         caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
-            new ObjectMapper());
+            TestObjectMapperFactory.createObjectMapper());
         caseDetailsBefore = caseDetailsFromResource(
             "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
-            new ObjectMapper());
+            TestObjectMapperFactory.createObjectMapper());
         when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn(APPLICANT_FULL_NAME);
 
         representationUpdate = buildChangeOfRepresentation();
