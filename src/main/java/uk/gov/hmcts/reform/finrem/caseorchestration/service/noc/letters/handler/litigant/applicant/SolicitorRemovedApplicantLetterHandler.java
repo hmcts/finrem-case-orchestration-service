@@ -19,6 +19,7 @@ public class SolicitorRemovedApplicantLetterHandler extends SolicitorChangedAppl
         LitigantSolicitorRemovedNocDocumentService litigantSolicitorRemovedNocDocumentService,
         BulkPrintServiceAdapter bulkPrintServiceAdapter,
         ObjectMapper objectMapper) {
-        super(noticeOfChangeLetterDetailsGenerator, litigantSolicitorRemovedNocDocumentService, bulkPrintServiceAdapter, NoticeType.REMOVE, objectMapper);
+        super(noticeOfChangeLetterDetailsGenerator, litigantSolicitorRemovedNocDocumentService, bulkPrintServiceAdapter,
+            NoticeType.REMOVE, objectMapper);
     }
 }
