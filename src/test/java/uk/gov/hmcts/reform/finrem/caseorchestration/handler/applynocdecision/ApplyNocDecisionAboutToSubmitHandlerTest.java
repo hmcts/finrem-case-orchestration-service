@@ -16,15 +16,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandleAnyCaseType;
 
@@ -73,78 +76,85 @@ class ApplyNocDecisionAboutToSubmitHandlerTest {
     }
 
     static Stream<Arguments> givenLatestApplicantRepresentationUpdateHistory_whenHandled_applicantCoversheetRegenerated() {
-        return Stream.of(
-            Arguments.of(List.of(
-                respondentRepresentationUpdateHistory(),
-                applicantRepresentationUpdateHistory()
-            )),
-            Arguments.of(List.of(
-                applicantRepresentationUpdateHistory()
-            )),
-            Arguments.of(List.of(
-                applicantRepresentationUpdateHistory(),
-                applicantRepresentationUpdateHistory()
-            )),
-            Arguments.of(List.of(
-                applicantRepresentationUpdateHistory(),
-                respondentRepresentationUpdateHistory(),
-                applicantRepresentationUpdateHistory()
-            ))
+
+        List<List<?>> histories = List.of(
+            List.of(respondentRepresentationUpdateHistory(), applicantRepresentationUpdateHistory()),
+            List.of(applicantRepresentationUpdateHistory()),
+            List.of(applicantRepresentationUpdateHistory(), applicantRepresentationUpdateHistory()),
+            List.of(applicantRepresentationUpdateHistory(), respondentRepresentationUpdateHistory(), applicantRepresentationUpdateHistory())
         );
+
+        return histories.stream()
+            .flatMap(history -> Stream.of(null, YesOrNo.NO)
+                .map(isNocRejected -> Arguments.of(history, isNocRejected)));
     }
 
     @MethodSource
     @ParameterizedTest
     void givenLatestApplicantRepresentationUpdateHistory_whenHandled_applicantCoversheetRegenerated(
-        List<RepresentationUpdateHistoryCollection> representationUpdateHistory
+        List<RepresentationUpdateHistoryCollection> representationUpdateHistory, YesOrNo isNocRejected
     ) {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .representationUpdateHistory(representationUpdateHistory)
+            .isNocRejected(isNocRejected)
             .build();
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN);
-        verify(generateCoverSheetService, never()).generateAndSetRespondentCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        assertAll(
+            () -> verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN),
+            () -> verify(generateCoverSheetService, never()).generateAndSetRespondentCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN),
+            () -> verifyNoMoreInteractions(generateCoverSheetService)
+        );
     }
 
     static Stream<Arguments> givenLatestRespondentRepresentationUpdateHistory_whenHandled_applicantCoversheetRegenerated() {
-        return Stream.of(
-            Arguments.of(List.of(
-                applicantRepresentationUpdateHistory(),
-                respondentRepresentationUpdateHistory()
-            )),
-            Arguments.of(List.of(
-                respondentRepresentationUpdateHistory()
-            )),
-            Arguments.of(List.of(
-                respondentRepresentationUpdateHistory(),
-                respondentRepresentationUpdateHistory()
-            )),
-            Arguments.of(List.of(
-                respondentRepresentationUpdateHistory(),
-                applicantRepresentationUpdateHistory(),
-                respondentRepresentationUpdateHistory()
-            ))
+        List<List<?>> histories = List.of(
+            List.of(applicantRepresentationUpdateHistory(), respondentRepresentationUpdateHistory()),
+            List.of(respondentRepresentationUpdateHistory()),
+            List.of(respondentRepresentationUpdateHistory(), respondentRepresentationUpdateHistory()),
+            List.of(respondentRepresentationUpdateHistory(), applicantRepresentationUpdateHistory(), respondentRepresentationUpdateHistory())
         );
+
+        return histories.stream()
+            .flatMap(history -> Stream.of(null, YesOrNo.NO)
+                .map(isNocRejected -> Arguments.of(history, isNocRejected)));
     }
 
     @MethodSource
     @ParameterizedTest
     void givenLatestRespondentRepresentationUpdateHistory_whenHandled_applicantCoversheetRegenerated(
-        List<RepresentationUpdateHistoryCollection> representationUpdateHistory
+        List<RepresentationUpdateHistoryCollection> representationUpdateHistory, YesOrNo isNocRejected
     ) {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .representationUpdateHistory(representationUpdateHistory)
+            .isNocRejected(isNocRejected)
             .build();
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(generateCoverSheetService, never()).generateAndSetApplicantCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN);
-        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        assertAll(
+            () -> verify(generateCoverSheetService, never()).generateAndSetApplicantCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN),
+            () -> verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN),
+            () -> verifyNoMoreInteractions(generateCoverSheetService)
+        );
+    }
+
+    @Test
+    void givenNocRejected_whenHandled_noCoversheetRegenerated() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .representationUpdateHistory(List.of(applicantRepresentationUpdateHistory()))
+            .isNocRejected(YesOrNo.YES)
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verifyNoInteractions(generateCoverSheetService);
     }
 }
