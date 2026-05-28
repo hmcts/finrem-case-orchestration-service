@@ -46,7 +46,7 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
         log.info("Check that the solicitor email address is populated for is consented {}", isConsentedApplication);
         return (isApplicantChangeOfRepresentativeWithoutSolicitorEmail(representationUpdate, caseDetailsToUse,
             isConsentedApplication, otherCaseDetails)
-            || isRespondentChangeOfRepresentativeWithoutSolcitorEmail(representationUpdate, caseDetailsToUse,
+            || isRespondentChangeOfRepresentativeWithoutSolicitorEmail(representationUpdate, caseDetailsToUse,
             otherCaseDetails));
     }
 
@@ -61,9 +61,9 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
             caseDetailsToUse, otherCaseDetails, isConsentedApplication));
     }
 
-    private boolean isRespondentChangeOfRepresentativeWithoutSolcitorEmail(RepresentationUpdate representationUpdate,
-                                                                           CaseDetails caseDetailsToUse,
-                                                                           CaseDetails otherCaseDetails) {
+    private boolean isRespondentChangeOfRepresentativeWithoutSolicitorEmail(RepresentationUpdate representationUpdate,
+                                                                            CaseDetails caseDetailsToUse,
+                                                                            CaseDetails otherCaseDetails) {
         return representationUpdate.getParty().equals(COR_RESPONDENT)
             && (!isCaseFieldPopulated(caseDetailsToUse, RESP_SOLICITOR_EMAIL)
             || !isSolicitorDigital(representationUpdate, otherCaseDetails));
