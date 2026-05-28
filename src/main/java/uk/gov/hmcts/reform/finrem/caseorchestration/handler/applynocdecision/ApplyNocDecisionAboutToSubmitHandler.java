@@ -22,6 +22,7 @@ import java.util.List;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.APPLY_NOC_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils.isNocRequestAccepted;
 
 @Slf4j
 @Service
@@ -37,8 +38,7 @@ public class ApplyNocDecisionAboutToSubmitHandler extends FinremAboutToSubmitCal
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return ABOUT_TO_SUBMIT.equals(callbackType)
-            && APPLY_NOC_DECISION.equals(eventType);
+        return ABOUT_TO_SUBMIT.equals(callbackType) && APPLY_NOC_DECISION.equals(eventType);
     }
 
     @Override
@@ -49,10 +49,12 @@ public class ApplyNocDecisionAboutToSubmitHandler extends FinremAboutToSubmitCal
         final FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         final FinremCaseData finremCaseData = finremCaseDetails.getData();
 
-        if (isApplicantSolicitorNocRequested(finremCaseData)) {
-            generateCoverSheetService.generateAndSetApplicantCoverSheet(finremCaseDetails, userAuthorisation);
-        } else if (isRespondentSolicitorNocRequested(finremCaseData)) {
-            generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
+        if (isNocRequestAccepted(finremCaseData)) {
+            if (isApplicantSolicitorNocRequested(finremCaseData)) {
+                generateCoverSheetService.generateAndSetApplicantCoverSheet(finremCaseDetails, userAuthorisation);
+            } else if (isRespondentSolicitorNocRequested(finremCaseData)) {
+                generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
+            }
         }
         
         return response(finremCaseData);

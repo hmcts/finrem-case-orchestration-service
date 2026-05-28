@@ -4,20 +4,29 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
@@ -42,19 +51,27 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG2_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
@@ -74,6 +91,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 @ExtendWith(MockitoExtension.class)
@@ -129,6 +147,9 @@ class UpdateRepresentationServiceTest {
 
     @Mock
     private BarristerRepresentationChecker barristerRepresentationChecker;
+
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     private UserDetails testAppSolicitor;
     private UserDetails testRespSolicitor;
@@ -189,6 +210,14 @@ class UpdateRepresentationServiceTest {
             .name("FRApplicantSolicitorFirm")
             .organisationIdentifier("FRApplicantSolicitorFirm")
             .build();
+
+        lenient().when(finremCaseDetailsMapper.mapToFinremCaseData(any(Map.class)))
+            .thenReturn(FinremCaseData.builder()
+                .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
+                    .caseRoleId(DynamicList.builder().value(DynamicListElement.builder().code("[APPSOLICITOR]").build()).build())
+                    .build())
+                .build());
+
     }
 
     private void setUpCaseDetails(String fileName) throws Exception {
@@ -210,7 +239,7 @@ class UpdateRepresentationServiceTest {
         initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+            .updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
 
         assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
         assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
@@ -254,7 +283,7 @@ class UpdateRepresentationServiceTest {
                 initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
                 Map<String, Object> actualData = updateRepresentationService
-                    .updateRepresentationAsSolicitor(initialDetails, "bebe");
+                    .updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
 
                 assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
                 assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
@@ -322,7 +351,7 @@ class UpdateRepresentationServiceTest {
         }
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+            .updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
 
         assertEquals(actualData.get(CONSENTED_SOLICITOR_NAME), expectedCaseData.get(CONSENTED_SOLICITOR_NAME));
         assertEquals(actualData.get(SOLICITOR_EMAIL), expectedCaseData.get(SOLICITOR_EMAIL));
@@ -348,35 +377,18 @@ class UpdateRepresentationServiceTest {
     }
 
     @Test
-    void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowException()
-        throws Exception {
-        String fixture = "consentedAppSolicitorAdding";
-        setUpExceptionMockContext(testAppSolicitor, orgResponse);
-
-        when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
-            ChangedRepresentative.builder()
-                .name(testAppSolicitor.getFullName())
-                .email(testAppSolicitor.getEmail())
-                .organisation(Organisation.builder()
-                    .organisationID("A31PTVA")
-                    .organisationName("FRApplicantSolicitorFirm")
-                    .build())
-                .build()
-        );
-        setUpCaseDetails(fixture + "/after-update-details.json");
-        try (InputStream resourceAsStream = getClass()
-            .getResourceAsStream(PATH + fixture + "/change-of-representatives-before.json")) {
-            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
-                .getCaseDetails();
-            Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData()
-                .get("changeOrganisationRequestField");
-            changeOrganisationRequestField.put("CaseRoleId", null);
-        }
+    void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowException() {
+        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+        Map mockedMap = mock(Map.class);
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        when(caseDetails.getId()).thenReturn(CASE_ID_IN_LONG);
+        when(caseDetails.getData()).thenReturn(mockedMap);
+        when(finremCaseDetailsMapper.mapToFinremCaseData(mockedMap)).thenReturn(FinremCaseData.builder().build());
 
         NoticeOfChangeInvalidRequestException ex = assertThrows(NoticeOfChangeInvalidRequestException.class, () -> updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe"));
+            .updateRepresentationAsSolicitor(caseDetails, AUTH_TOKEN));
 
-        String expectedMessage = "12345678 - unexpected empty caseRoleId";
+        String expectedMessage = "1234567890 - unexpected empty caseRoleId";
         String actualMessage = ex.getMessage();
         assertEquals(expectedMessage, actualMessage);
     }
@@ -407,7 +419,7 @@ class UpdateRepresentationServiceTest {
         }
 
         UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe"));
+            .updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN));
 
         String expectedMessage = "12345678 - Unrecognised caseRoleId: [INTVRSOLICITOR5]";
         String actualMessage = ex.getMessage();
@@ -434,7 +446,7 @@ class UpdateRepresentationServiceTest {
         initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+            .updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
 
         assertEquals(actualData.get(RESP_SOLICITOR_NAME), expectedCaseData.get(RESP_SOLICITOR_NAME));
         assertEquals(actualData.get(RESP_SOLICITOR_EMAIL), expectedCaseData.get(RESP_SOLICITOR_EMAIL));
@@ -521,23 +533,131 @@ class UpdateRepresentationServiceTest {
         assertEquals(POSTCODE, solicitorAddress.getPostCode());
     }
 
+    @Nested
+    class RejectChangeOrgRequest {
+
+        @Test
+        void givenUserHasRepresentedLitigantAsBarrister_whenUpdateRepresentation_thenRejectChangeOrgRequest() throws Exception {
+            when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+            when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
+            when(barristerRepresentationChecker.hasUserBeenBarristerOnCase(any(), eq(testAppSolicitor))).thenReturn(true);
+
+            InputStream resourceAsStream = getClass().getResourceAsStream(PATH
+                + "contestedAppSolicitorAdding/change-of-representatives-before.json");
+            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+
+            Map<String, Object> actualData = updateRepresentationService.updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
+
+            ChangeOrganisationRequest changeOrganisationRequest =
+                mapper.convertValue(actualData.get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
+
+            assertAll(
+                () -> assertThat(changeOrganisationRequest.getApprovalStatus()).isEqualTo(ChangeOrganisationApprovalStatus.REJECTED),
+                () -> assertThat(actualData).containsEntry(IS_NOC_REJECTED, YES_VALUE)
+            );
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = CaseRole.class, names = {"APP_SOLICITOR", "RESP_SOLICITOR"})
+        void givenUserHasRepresentedOtherParty_whenUpdateRepresentation_thenRejectChangeOrgRequest(CaseRole partyRequesting) {
+            // Setup
+            ChangeOrganisationRequest request = ChangeOrganisationRequest.builder()
+                .caseRoleId(DynamicList.builder()
+                    .value(DynamicListElement.builder()
+                        .code(partyRequesting.getCcdCode())
+                        .build())
+                    .build())
+                .build();
+            Map<String, Object> map = new HashMap<>(Map.of("changeOrganisationRequestField", request));
+            CaseDetails caseDetails = spy(CaseDetails.builder().build());
+            when(caseDetails.getId()).thenReturn(CASE_ID_IN_LONG);
+            when(caseDetails.getData()).thenReturn(map);
+            when(barristerRepresentationChecker.hasUserBeenBarristerOnCase(anyMap(), any(UserDetails.class)))
+                .thenReturn(false);
+
+            FinremCaseData finremCaseData = spy(FinremCaseData.builder()
+                .applicantOrganisationPolicy(OrganisationPolicy.builder()
+                    .organisation(Organisation.builder().organisationID(TEST_ORG_ID).build()).build())
+                .respondentOrganisationPolicy(OrganisationPolicy.builder()
+                    .organisation(Organisation.builder().organisationID(TEST_ORG2_ID).build()).build())
+                .changeOrganisationRequestField(request)
+                .build());
+            if (APP_SOLICITOR.equals(partyRequesting)) {
+                when(organisationService.findOrganisationIdByUserId(TEST_USER_ID)).thenReturn(Optional.of(TEST_ORG2_ID));
+            } else {
+                when(organisationService.findOrganisationIdByUserId(TEST_USER_ID)).thenReturn(Optional.of(TEST_ORG_ID));
+            }
+            when(finremCaseDetailsMapper.mapToFinremCaseData(map)).thenReturn(finremCaseData);
+
+            AuditEvent auditEvent = mock(AuditEvent.class);
+            when(auditEvent.getUserId()).thenReturn(TEST_USER_ID);
+            when(auditEventService.getLatestAuditEventByName(CASE_ID, NOC_EVENT))
+                .thenReturn(Optional.of(auditEvent));
+            UserDetails userDetails = mock(UserDetails.class);
+            when(userDetails.getId()).thenReturn(TEST_USER_ID);
+            when(idamClient.getUserByUserId(AUTH_TOKEN, TEST_USER_ID)).thenReturn(userDetails);
+
+            // Act
+            Map<String, Object> actualData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, AUTH_TOKEN);
+
+            ChangeOrganisationRequest changeOrganisationRequest =
+                mapper.convertValue(actualData.get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
+
+            // Verify
+            assertAll(
+                () -> assertThat(changeOrganisationRequest.getApprovalStatus()).isEqualTo(ChangeOrganisationApprovalStatus.REJECTED),
+                () -> assertThat(actualData).containsEntry(IS_NOC_REJECTED, YES_VALUE),
+                () -> verify(finremCaseDetailsMapper).mapToFinremCaseData(map),
+                () -> verify(barristerRepresentationChecker).hasUserBeenBarristerOnCase(anyMap(), any(UserDetails.class)),
+                () -> verify(idamClient).getUserByUserId(AUTH_TOKEN, TEST_USER_ID)
+            );
+        }
+    }
+
     @Test
-    void givenUserHasRepresentedLitigantAsBarrister_whenUpdateRepresentation_thenRejectChangeOrgRequest() throws Exception {
-        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
-        when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
-        when(barristerRepresentationChecker.hasUserBeenBarristerOnCase(any(), eq(testAppSolicitor))).thenReturn(true);
+    void validateEmailActiveForOrganisation_whenUserLinked_thenReturnNoErrors() {
+        String email = "valid@test.com";
+        String caseRef = "12345678";
 
-        InputStream resourceAsStream = getClass().getResourceAsStream(PATH
-            + "contestedAppSolicitorAdding/change-of-representatives-before.json");
-        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        when(organisationService.findUserByEmail(email)).thenReturn(Optional.of("user-id-1"));
 
-        Map<String, Object> actualData = updateRepresentationService.updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef);
 
-        ChangeOrganisationRequest changeOrganisationRequest =
-            mapper.convertValue(actualData.get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
+        assertEquals(List.of(), errors);
+        verify(organisationService).findUserByEmail(email);
+    }
 
-        assertThat(changeOrganisationRequest.getApprovalStatus(), is(ChangeOrganisationApprovalStatus.REJECTED));
-        assertThat(actualData.get(IS_NOC_REJECTED), is(YES_VALUE));
+    @Test
+    void validateEmailActiveForOrganisation_whenUserNotLinked_thenReturnNotActiveUserError() {
+        String email = "missing@test.com";
+        String caseRef = "12345678";
+
+        when(organisationService.findUserByEmail(email)).thenReturn(Optional.empty());
+
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef);
+
+        assertEquals(List.of("Email is not linked to an active User within a HMCTS organisation"), errors);
+        verify(organisationService).findUserByEmail(email);
+    }
+
+    @Test
+    void validateEmailActiveForOrganisation_whenFindUserThrows_thenReturnGenericErrorWithCaseReference() {
+        String email = "error@test.com";
+        String caseRef = "12345678";
+
+        when(organisationService.findUserByEmail(email))
+            .thenThrow(new RuntimeException("boom"));
+
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef);
+
+        assertEquals(
+            List.of("Email could not be linked to your organisation. Please check and try again Case reference: " + caseRef),
+            errors
+        );
+        verify(organisationService).findUserByEmail(email);
     }
 
     private List<Element<RepresentationUpdate>> convertToChangeOfRepresentation(Map<String, Object> data) {
@@ -598,8 +718,7 @@ class UpdateRepresentationServiceTest {
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(isConsented);
     }
 
-    private void setUpExceptionMockContext(UserDetails solicitor,
-                                  OrganisationsResponse orgResponse) {
+    private void setUpExceptionMockContext(UserDetails solicitor, OrganisationsResponse orgResponse) {
 
         when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(solicitor);
@@ -719,51 +838,5 @@ class UpdateRepresentationServiceTest {
                     .by(testAppSolicitorReplacing.getFullName())
                     .via(NOTICE_OF_CHANGE)
                     .build()))).build();
-    }
-
-    @Test
-    void validateEmailActiveForOrganisation_whenUserLinked_thenReturnNoErrors() {
-        String email = "valid@test.com";
-        String caseRef = "12345678";
-
-        when(organisationService.findUserByEmail(email, AUTH_TOKEN)).thenReturn(Optional.of("user-id-1"));
-
-        List<String> errors = updateRepresentationService
-            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
-
-        assertEquals(List.of(), errors);
-        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
-    }
-
-    @Test
-    void validateEmailActiveForOrganisation_whenUserNotLinked_thenReturnNotActiveUserError() {
-        String email = "missing@test.com";
-        String caseRef = "12345678";
-
-        when(organisationService.findUserByEmail(email, AUTH_TOKEN)).thenReturn(Optional.empty());
-
-        List<String> errors = updateRepresentationService
-            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
-
-        assertEquals(List.of("Email is not linked to an active User within a HMCTS organisation"), errors);
-        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
-    }
-
-    @Test
-    void validateEmailActiveForOrganisation_whenFindUserThrows_thenReturnGenericErrorWithCaseReference() {
-        String email = "error@test.com";
-        String caseRef = "12345678";
-
-        when(organisationService.findUserByEmail(email, AUTH_TOKEN))
-            .thenThrow(new RuntimeException("boom"));
-
-        List<String> errors = updateRepresentationService
-            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
-
-        assertEquals(
-            List.of("Email could not be linked to your organisation. Please check and try again Case reference: " + caseRef),
-            errors
-        );
-        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
     }
 }
