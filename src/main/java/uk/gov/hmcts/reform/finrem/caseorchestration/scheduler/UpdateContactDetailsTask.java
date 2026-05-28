@@ -15,15 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 import java.util.List;
 
 /**
- * Scheduled task to find cases where GeneralEmailDataField is not empty and clear the field.
- * To enable the task to execute set environment variables:
- * <ul>
- *     <li>CRON_AMEND_GENERAL_EMAIL_ENABLED=true</li>
- *     <li>TASK_NAME=AmendGeneralEmailTask</li>
- *     <li>CRON_AMEND_GENERAL_EMAIL_CASE_TYPE_ID=FinancialRemedyContested | FinancialRemedyMVP2</li>
- *     <li>CRON_AMEND_GENERAL_EMAIL_BATCH_SIZE=number of cases to search for</li>
- *     <li>CRON_CSV_FILE_DECRYPT_KEY=secret key to decrypt the csv file</li>
- * </ul>
+ * Scheduled task to clear invalid Email in Solicitor Email field.
  */
 @Component
 @Slf4j
@@ -111,7 +103,7 @@ public class UpdateContactDetailsTask extends CsvFileProcessingTask {
         FinremCaseData caseData = finremCaseDetails.getData();
 
         if (caseData.getContactDetailsWrapper().getRespondentSolicitorEmail() != null) {
-            caseData.getContactDetailsWrapper().setRespondentSolicitorEmail("deprecatedby@amendcron.com");
+            caseData.getContactDetailsWrapper().setRespondentSolicitorEmail("PLEASEUPDATE@amendedbycron.com");
             log.info("Case {} UpdateContactDetailsTask ameneded successfully", finremCaseDetails.getId());
         } else {
             log.info("Case {} has empty UpdateContactDetailsTask field", finremCaseDetails.getId());
