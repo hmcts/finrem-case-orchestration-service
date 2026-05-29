@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
@@ -20,7 +19,7 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
-@Profile("!local")
+//@Profile("!local")
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -135,6 +134,10 @@ public class EmailService {
         if (EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)) {
             templateVars.put("link_to_file", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
+            templateVars.put("link_to_file_1", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
+            templateVars.put("link_to_file_2", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
+            templateVars.put("link_to_file_3", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
+            templateVars.put("link_to_file_4", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
         }
         if (CONSENTED.equals(notificationRequest.getCaseType()) && !EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC.name().equals(templateName)) {
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
