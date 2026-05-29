@@ -25,7 +25,7 @@ public class UpdateContactDetailsTask extends CsvFileProcessingTask {
     private String secret;
     private static final String TASK_NAME = "UpdateContactDetailsTask";
     private static final String SUMMARY = "DFR-5006";
-    @Value("${cron.updateContactDetails.task.enabled:true}")
+    @Value("${cron.updateContactDetails.task.enabled:false}")
     private boolean taskEnabled;
     @Value("${cron.updateContactDetails.caseTypeId:FinancialRemedyContested}")
     private String caseTypeId;
