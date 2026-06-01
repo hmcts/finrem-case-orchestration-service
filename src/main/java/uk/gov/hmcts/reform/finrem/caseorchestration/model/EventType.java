@@ -19,6 +19,7 @@ public enum EventType {
     UPLOAD_DOCUMENT_CONSENTED("FR_uploadDocument"),
     UPLOAD_DOCUMENT_CONTESTED("FR_uploadGeneralDocument"),
     SOLICITOR_UPLOAD_DOCUMENT("FR_solUploadDocument"),
+    SOLICITOR_UPLOAD_PENSION_DOCUMENT("FR_UploadPensionDocument_Solicitor"),
     SOLICITOR_CREATE("FR_solicitorCreate"),
     UPDATE_CASE_DETAILS_SOLICITOR("FR_updateCaseDetailsSolicitor"),
     AMEND_APP_DETAILS("FR_amendApplicationDetails"),
