@@ -13,7 +13,6 @@ public class OrchestrationConstants {
     // Bulk Scan & Printing
     public static final String BULK_SCAN_CASE_REFERENCE = "bulkScanCaseReference";
     public static final String PAPER_APPLICATION = "paperApplication";
-    public static final String COURT_CONTACT_DETAILS = "courtContactDetails";
 
     // Bulk Scan & Printing Document SubTypes
     public static final String FORM_A_DOCUMENT = "FormA";
