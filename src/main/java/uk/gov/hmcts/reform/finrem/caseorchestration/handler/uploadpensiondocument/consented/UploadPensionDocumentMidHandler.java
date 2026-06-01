@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -16,8 +17,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 @Service
 public class UploadPensionDocumentMidHandler extends FinremCallbackHandler {
 
-    public UploadPensionDocumentMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final ConsentedApplicationHelper consentedApplicationHelper;
+
+    public UploadPensionDocumentMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                           ConsentedApplicationHelper consentedApplicationHelper) {
         super(finremCaseDetailsMapper);
+        this.consentedApplicationHelper = consentedApplicationHelper;
     }
 
     @Override
@@ -31,8 +36,11 @@ public class UploadPensionDocumentMidHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
+        this.validateCaseData(callbackRequest);
 
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
+
+        consentedApplicationHelper.setConsentVariationOrderLabelField(finremCaseData);
 
         return response(finremCaseData);
     }
