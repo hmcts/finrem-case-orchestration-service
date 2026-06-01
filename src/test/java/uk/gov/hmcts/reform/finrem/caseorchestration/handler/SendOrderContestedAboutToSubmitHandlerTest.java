@@ -481,12 +481,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         assertTrue(orderReceivedAtR1.isAfter(orderReceivedAtR2));
 
-        verify(genericDocumentService, times(1)).stampDocument(any(), any(), any(), eq(CONTESTED));
+        verify(genericDocumentService).stampDocument(any(), any(), any(), eq(CONTESTED));
         verify(generalOrderService, times(2)).isSelectedOrderMatches(any(), any());
-        verify(genericDocumentService, times(1))
+        verify(genericDocumentService)
             .convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CONTESTED));
-        verify(documentHelper, times(1)).getStampType(caseData);
-        verify(dateService, times(1)).addCreatedDateInFinalOrder(any(), any());
+        verify(documentHelper).getStampType(caseData);
+        verify(dateService).addCreatedDateInFinalOrder(any(), any());
         verify(sendOrdersCategoriser, times(2)).categorise(caseData);
         verify(draftOrderService, times(2)).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
     }
