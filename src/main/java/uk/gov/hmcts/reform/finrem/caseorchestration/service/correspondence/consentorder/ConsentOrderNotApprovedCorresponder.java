@@ -3,30 +3,23 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.cons
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsEmailOnlyAllSolicitorsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremEmailOnlyAllSolicitorsCorresponder;
 
 @Component
 @Slf4j
-public class ConsentOrderNotApprovedCorresponder extends CaseDetailsEmailOnlyAllSolicitorsCorresponder {
-
-    private final CaseDataService caseDataService;
+public class ConsentOrderNotApprovedCorresponder extends FinremEmailOnlyAllSolicitorsCorresponder {
 
     @Autowired
-    public ConsentOrderNotApprovedCorresponder(NotificationService notificationService,
-                                               CaseDataService caseDataService,
-                                               FinremCaseDetailsMapper finremCaseDetailsMapper) {
-        super(notificationService, finremCaseDetailsMapper);
-        this.caseDataService = caseDataService;
+    public ConsentOrderNotApprovedCorresponder(NotificationService notificationService) {
+        super(notificationService);
     }
 
     @Override
-    protected void emailApplicantSolicitor(CaseDetails caseDetails) {
-        if (caseDataService.isConsentedApplication(caseDetails)) {
+    protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
+        if (caseDetails.isConsentedApplication()) {
             log.info("Sending email notification to Applicant Solicitor for 'Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
             notificationService.sendConsentOrderNotApprovedEmailToApplicantSolicitor(caseDetails);
         } else {
@@ -36,8 +29,8 @@ public class ConsentOrderNotApprovedCorresponder extends CaseDetailsEmailOnlyAll
     }
 
     @Override
-    protected void emailRespondentSolicitor(CaseDetails caseDetails) {
-        if (caseDataService.isConsentedApplication(caseDetails)) {
+    protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
+        if (caseDetails.isConsentedApplication()) {
             log.info("Sending email notification to Respondent Solicitor for 'Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
             notificationService.sendConsentOrderNotApprovedEmailToRespondentSolicitor(caseDetails);
         } else {
@@ -47,8 +40,8 @@ public class ConsentOrderNotApprovedCorresponder extends CaseDetailsEmailOnlyAll
     }
 
     @Override
-    protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails) {
-        if (caseDataService.isContestedApplication(caseDetails)) {
+    protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        if (caseDetails.isContestedApplication()) {
             log.info("Sending email notification to Intervener Solicitor for 'Contest Order Not Approved' for Case ID: {}", caseDetails.getId());
             notificationService.sendContestOrderNotApprovedEmailIntervener(caseDetails,
                 notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
