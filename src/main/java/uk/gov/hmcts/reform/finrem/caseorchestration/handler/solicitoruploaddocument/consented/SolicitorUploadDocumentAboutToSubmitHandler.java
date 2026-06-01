@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 @Slf4j
 @Service
@@ -36,7 +37,7 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
 
         boolean isReadyToSubmit = finremCaseData.getAwaitingInformationConfirmation().isReadyToSubmit();
         if (isReadyToSubmit) {
-//            return response(finremCaseData, null, null, State.APPLICATION_SUBMITTED)
+            return response(finremCaseData, null, null, State.INFO_RECEIVED.getStateId());
         }
 
         return response(finremCaseData);
