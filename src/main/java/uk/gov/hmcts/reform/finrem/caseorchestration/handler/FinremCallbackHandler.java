@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AwaitingInformationConfirmation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCaseDocumentsWrapper;
@@ -196,7 +197,8 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             StopRepresentationWrapper.class,
             CaseDataMetricsWrapper.class,
             ContactDetailsWrapper.class,
-            ManageCaseDocumentsWrapper.class
+            ManageCaseDocumentsWrapper.class,
+            AwaitingInformationConfirmation.class
         );
     }
 }

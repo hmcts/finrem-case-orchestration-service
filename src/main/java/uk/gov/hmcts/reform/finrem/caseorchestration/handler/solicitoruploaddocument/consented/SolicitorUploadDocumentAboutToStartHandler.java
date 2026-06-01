@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadpensiondocument.consented;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitoruploaddocument.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,29 +11,46 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentCollection;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @Service
-public class UploadPensionDocumentAboutToSubmitHandler extends FinremCallbackHandler {
+public class SolicitorUploadDocumentAboutToStartHandler extends FinremCallbackHandler {
 
-    public UploadPensionDocumentAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    public SolicitorUploadDocumentAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+        return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.UPLOAD_PENSION_DOCUMENTS.equals(eventType);
+            && EventType.SOLICITOR_UPLOAD_DOCUMENT.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
 
+        if (emptyIfNull(finremCaseData.getSolUploadDocuments()).isEmpty()) {
+            prepopulateFirstSolUploadDocument(finremCaseData);
+        }
+
         return response(finremCaseData);
+    }
+
+    private void prepopulateFirstSolUploadDocument(FinremCaseData finremCaseData) {
+        finremCaseData.setSolUploadDocuments(new ArrayList<>(
+            List.of(SolUploadDocumentCollection.builder().value(SolUploadDocument.builder().build()).build())
+        ));
     }
 }

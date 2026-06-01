@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadpensiondocument.consented;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitoruploaddocument.consented;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,8 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentCollection;
 
 import java.util.List;
 
@@ -22,24 +22,24 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UploadPensionDocumentAboutToStartHandlerTest {
+class SolicitorUploadDocumentAboutToStartHandlerTest {
 
     @InjectMocks
-    private UploadPensionDocumentAboutToStartHandler underTest;
+    private SolicitorUploadDocumentAboutToStartHandler underTest;
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest, CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.UPLOAD_PENSION_DOCUMENTS);
+        assertCanHandle(underTest, CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.SOLICITOR_UPLOAD_DOCUMENT);
     }
 
     @NullAndEmptySource
     @ParameterizedTest
-    void givenNullOrEmptyPensionCollection_whenHandled_shouldPrepopulateAnEmptyEntry(
-        List<PensionTypeCollection> pensionCollection
+    void givenNullOrEmptySolUploadDocumentCollection_whenHandled_shouldPrepopulateAnEmptyEntry(
+        List<SolUploadDocumentCollection> solUploadDocumentCollections
     ) {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(
             FinremCaseData.builder()
-                .pensionCollection(pensionCollection)
+                .solUploadDocuments(solUploadDocumentCollections)
                 .build()
         );
 
@@ -47,7 +47,7 @@ class UploadPensionDocumentAboutToStartHandlerTest {
 
         assertThat(response.getData().getPensionCollection())
             .isEqualTo(List.of(
-                PensionTypeCollection.builder().typedCaseDocument(PensionType.builder().build()).build()
+                SolUploadDocumentCollection.builder().value(SolUploadDocument.builder().build()).build()
             ));
     }
 }
