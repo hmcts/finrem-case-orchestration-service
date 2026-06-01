@@ -35,7 +35,7 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
 
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
 
-        boolean isReadyToSubmit = finremCaseData.getAwaitingInformationConfirmation().isReadyToSubmit();
+        boolean isReadyToSubmit = finremCaseData.getGenericInputFields().isReadyToSubmit();
         if (isReadyToSubmit) {
             return response(finremCaseData, null, null, State.INFO_RECEIVED.getStateId());
         }

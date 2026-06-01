@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AwaitingInformationConfirmation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GenericInputFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
@@ -306,7 +306,7 @@ public class FinremCaseData implements HasCaseDocument {
     private DynamicRadioList intervenerOptionList;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
-    private AwaitingInformationConfirmation awaitingInformationConfirmation;
+    private GenericInputFields genericInputFields;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ManageCaseDocumentsWrapper manageCaseDocumentsWrapper;
@@ -1062,6 +1062,14 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     @JsonIgnore
+    public GenericInputFields getGenericInputFields() {
+        if (genericInputFields == null) {
+            this.genericInputFields = new GenericInputFields();
+        }
+        return genericInputFields;
+    }
+
+    @JsonIgnore
     public FormAScannedDocWrapper getFormAScannedDocWrapper() {
         if (formAScannedDocWrapper == null) {
             this.formAScannedDocWrapper = new FormAScannedDocWrapper();
@@ -1177,14 +1185,6 @@ public class FinremCaseData implements HasCaseDocument {
             this.manageCaseDocumentsWrapper = new ManageCaseDocumentsWrapper();
         }
         return manageCaseDocumentsWrapper;
-    }
-
-    @JsonIgnore
-    public AwaitingInformationConfirmation getAwaitingInformationConfirmation() {
-        if (awaitingInformationConfirmation == null) {
-            this.awaitingInformationConfirmation = new AwaitingInformationConfirmation();
-        }
-        return awaitingInformationConfirmation;
     }
 
     @JsonIgnore

@@ -18,13 +18,13 @@ import static java.util.Optional.ofNullable;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AwaitingInformationConfirmation {
+public class GenericInputFields {
 
     @TemporaryField
     private YesOrNo readyToSubmitDocument;
 
     @JsonIgnore
     public boolean isReadyToSubmit() {
-        return YesOrNo.isYes(ofNullable(readyToSubmitDocument).orElse(YesOrNo.YES));
+        return YesOrNo.isYes(ofNullable(readyToSubmitDocument).orElse(YesOrNo.NO));
     }
 }
