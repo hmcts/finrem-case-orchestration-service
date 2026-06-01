@@ -22,9 +22,6 @@ class UploadPensionDocumentAboutToSubmitHandlerTest {
     @InjectMocks
     private UploadPensionDocumentAboutToSubmitHandler underTest;
 
-    @Mock
-    private ConsentedApplicationHelper consentedApplicationHelper;
-
     @Test
     void testCanHandle() {
         assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_PENSION_DOCUMENTS);
