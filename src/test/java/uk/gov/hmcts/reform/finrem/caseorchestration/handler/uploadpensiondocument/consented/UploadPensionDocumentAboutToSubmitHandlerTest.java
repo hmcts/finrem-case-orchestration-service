@@ -17,24 +17,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UploadPensionDocumentMidHandlerTest {
+class UploadPensionDocumentAboutToSubmitHandlerTest {
 
     @InjectMocks
-    private UploadPensionDocumentMidHandler underTest;
+    private UploadPensionDocumentAboutToSubmitHandler underTest;
 
     @Mock
     private ConsentedApplicationHelper consentedApplicationHelper;
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest, CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.UPLOAD_PENSION_DOCUMENTS);
-    }
-
-    @Test
-    void shouldSetConsentVariationOrderLabelField() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
-        underTest.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(consentedApplicationHelper).setConsentVariationOrderLabelField(callbackRequest.getFinremCaseData());
+        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_PENSION_DOCUMENTS);
     }
 }
