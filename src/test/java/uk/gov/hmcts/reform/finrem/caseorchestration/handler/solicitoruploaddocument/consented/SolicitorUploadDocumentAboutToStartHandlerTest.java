@@ -45,7 +45,7 @@ class SolicitorUploadDocumentAboutToStartHandlerTest {
 
         var response = underTest.handle(request, AUTH_TOKEN);
 
-        assertThat(response.getData().getPensionCollection())
+        assertThat(response.getData().getSolUploadDocuments())
             .isEqualTo(List.of(
                 SolUploadDocumentCollection.builder().value(SolUploadDocument.builder().build()).build()
             ));
