@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentCollection;
 
@@ -48,6 +50,25 @@ class SolicitorUploadDocumentAboutToStartHandlerTest {
         assertThat(response.getData().getSolUploadDocuments())
             .isEqualTo(List.of(
                 SolUploadDocumentCollection.builder().value(SolUploadDocument.builder().build()).build()
+            ));
+    }
+
+    @NullAndEmptySource
+    @ParameterizedTest
+    void givenNullOrEmptyPensionCollection_whenHandled_shouldPrepopulateAnEmptyEntry(
+        List<PensionTypeCollection> pensionCollection
+    ) {
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
+            FinremCaseData.builder()
+                .pensionCollection(pensionCollection)
+                .build()
+        );
+
+        var response = underTest.handle(request, AUTH_TOKEN);
+
+        assertThat(response.getData().getPensionCollection())
+            .isEqualTo(List.of(
+                PensionTypeCollection.builder().typedCaseDocument(PensionType.builder().build()).build()
             ));
     }
 }

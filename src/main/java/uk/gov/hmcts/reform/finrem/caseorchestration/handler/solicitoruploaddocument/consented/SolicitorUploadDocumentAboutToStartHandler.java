@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentCollection;
 
@@ -41,16 +43,25 @@ public class SolicitorUploadDocumentAboutToStartHandler extends FinremCallbackHa
 
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
 
-        if (emptyIfNull(finremCaseData.getSolUploadDocuments()).isEmpty()) {
-            prepopulateFirstSolUploadDocument(finremCaseData);
-        }
+        prepopulateFirstSolUploadDocument(finremCaseData);
+        prepopulateFirstPensionCollection(finremCaseData);
 
         return response(finremCaseData);
     }
 
     private void prepopulateFirstSolUploadDocument(FinremCaseData finremCaseData) {
-        finremCaseData.setSolUploadDocuments(new ArrayList<>(
-            List.of(SolUploadDocumentCollection.builder().value(SolUploadDocument.builder().build()).build())
-        ));
+        if (emptyIfNull(finremCaseData.getSolUploadDocuments()).isEmpty()) {
+            finremCaseData.setSolUploadDocuments(new ArrayList<>(
+                List.of(SolUploadDocumentCollection.builder().value(SolUploadDocument.builder().build()).build())
+            ));
+        }
+    }
+
+    private void prepopulateFirstPensionCollection(FinremCaseData finremCaseData) {
+        if (emptyIfNull(finremCaseData.getPensionCollection()).isEmpty()) {
+            finremCaseData.setPensionCollection(new ArrayList<>(
+                List.of(PensionTypeCollection.builder().typedCaseDocument(PensionType.builder().build()).build())
+            ));
+        }
     }
 }

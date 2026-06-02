@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
@@ -36,10 +38,15 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
 
         boolean isReadyToSubmit = finremCaseData.getGenericInputFields().isReadyToSubmit();
-        if (isReadyToSubmit) {
-            return response(finremCaseData, null, null, State.INFO_RECEIVED.getStateId());
-        }
+        return response(finremCaseData, calculateWarning(isReadyToSubmit), null, calculatePostState(isReadyToSubmit));
+    }
 
-        return response(finremCaseData);
+    private String calculatePostState(boolean isReadyToSubmit) {
+        return isReadyToSubmit ? State.INFO_RECEIVED.getStateId() : null;
+    }
+
+    private List<String> calculateWarning(boolean isReadyToSubmit) {
+       return List.of(isReadyToSubmit ? "The document(s) is(are) being submitted to the court"
+           : "The documents have not been submitted to the court ");
     }
 }
