@@ -52,9 +52,9 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
     }
 
     private List<String> calculateWarning(boolean isReadyToSubmit, int numberOfDocuments) {
-       return List.of(
-           isReadyToSubmit ? readyToSubmitWarning(numberOfDocuments) : notReadyToSubmitWarning(numberOfDocuments)
-       );
+        return List.of(
+            isReadyToSubmit ? readyToSubmitWarning(numberOfDocuments) : notReadyToSubmitWarning(numberOfDocuments)
+        );
     }
 
     private String readyToSubmitWarning(int numberOfDocuments) {
