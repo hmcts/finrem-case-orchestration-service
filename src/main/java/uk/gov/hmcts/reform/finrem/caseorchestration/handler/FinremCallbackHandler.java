@@ -194,11 +194,11 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      */
     private static List<Class<?>> getClassesWithTemporaryFieldAnnotation() {
         return List.of(
+            GenericInputFields.class,
             StopRepresentationWrapper.class,
             CaseDataMetricsWrapper.class,
             ContactDetailsWrapper.class,
-            ManageCaseDocumentsWrapper.class,
-            GenericInputFields.class
+            ManageCaseDocumentsWrapper.class
         );
     }
 }
