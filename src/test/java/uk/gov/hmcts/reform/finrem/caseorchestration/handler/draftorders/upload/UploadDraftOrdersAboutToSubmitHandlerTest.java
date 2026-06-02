@@ -77,6 +77,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CA
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.APPLICATION_ISSUED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.REVIEW_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.SCHEDULING_AND_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ACCELERATED_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
@@ -292,7 +293,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnAgreedOrderByIntervener_whenHandle_shouldAppendIntvAgreedDraftOrderCollection() {
+    void givenAnAcceleratedOrderByIntervener_whenHandle_shouldAppendIntvAgreedDraftOrderCollection() {
         mockCaseRole(CASE_ID, CaseRole.INTVR_SOLICITOR_1);
 
         UploadAgreedDraftOrder uado1 = UploadAgreedDraftOrder.builder()
@@ -300,19 +301,28 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             .build();
 
         final AgreedDraftOrderCollection draftOrder1 = AgreedDraftOrderCollection.builder()
-            .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
+            .value(AgreedDraftOrder.builder()
+                .draftOrder(CaseDocument.builder().build())
+                .build())
+            .build();
 
-        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
-        builder.uploadAgreedDraftOrder(uado1);
-        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
-        builder.agreedDraftOrderCollection(new ArrayList<>());
-        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+        DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
+            .uploadAgreedDraftOrder(uado1)
+            .typeOfDraftOrder(ACCELERATED_ORDER_OPTION)
+            .agreedDraftOrderCollection(new ArrayList<>())
+            .build();
 
-        when(draftOrderService.processAgreedDraftOrders(uado1, AUTH_TOKEN)).thenReturn(List.of(draftOrder1));
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(draftOrdersWrapper)
+            .build();
+
+        when(draftOrderService.processAgreedDraftOrders(draftOrdersWrapper, AUTH_TOKEN))
+            .thenReturn(List.of(draftOrder1));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
 
+        verify(draftOrderService).processAgreedDraftOrders(draftOrdersWrapper, AUTH_TOKEN);
         verify(draftOrderService).populateDraftOrdersReviewCollection(caseData, uado1, List.of(draftOrder1));
         assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .containsAll(List.of(draftOrder1));
@@ -331,7 +341,8 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         builder.agreedDraftOrderCollection(new ArrayList<>(existingAgreedDraftOrderCollection));
         FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
 
-        when(draftOrderService.processAgreedDraftOrders(uado, AUTH_TOKEN)).thenReturn(expectedAgreedDraftOrderCollection);
+        when(draftOrderService.processAgreedDraftOrders(caseData.getDraftOrdersWrapper(), AUTH_TOKEN))
+            .thenReturn(expectedAgreedDraftOrderCollection);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
