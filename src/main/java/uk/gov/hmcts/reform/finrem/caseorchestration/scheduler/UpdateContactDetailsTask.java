@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 
 import java.util.List;
 
+import static java.util.Objects.isNull;
+
 /**
  * Scheduled task to clear invalid Email in Solicitor Email field.
  */
@@ -101,12 +103,26 @@ public class UpdateContactDetailsTask extends CsvFileProcessingTask {
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
+        log.info("Case {} Running UpdateContactDetailsTask for this case", finremCaseDetails.getId());
 
-        if (caseData.getContactDetailsWrapper().getRespondentSolicitorEmail() != null) {
-            caseData.getContactDetailsWrapper().setRespondentSolicitorEmail("PLEASEUPDATE@amendedbycron.com");
-            log.info("Case {} UpdateContactDetailsTask ameneded successfully", finremCaseDetails.getId());
+        if (!isNull(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())) {
+            if (!isNull(caseData.getRepresentationUpdateHistory())
+                && !isNull(caseData.getRepresentationUpdateHistory().getLast())) {
+                caseData.getRepresentationUpdateHistory().getLast().getValue().getAdded().setEmail("updated@amendedbycron.com");
+                caseData.getRepresentationUpdateHistory().getLast().getValue().getRemoved().setEmail("updated@amendedbycron.com");
+                log.info("Case {} has RepresentationUpdateHistory field updated successfully", finremCaseDetails.getId());
+            } else {
+                log.info("Case {} has empty RepresentationUpdateHistory field", finremCaseDetails.getId());
+            }
         } else {
-            log.info("Case {} has empty UpdateContactDetailsTask field", finremCaseDetails.getId());
+            log.info("Case {} has empty RespondentSolicitorEmail field", finremCaseDetails.getId());
+        }
+
+        if (!isNull(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())) {
+            caseData.getContactDetailsWrapper().setRespondentSolicitorEmail("pleaseupdate@amendedbycron.com");
+            log.info("Case {} RespondentSolicitorEmail field amended successfully", finremCaseDetails.getId());
+        } else {
+            log.info("Case {} has empty RespondentSolicitorEmail field", finremCaseDetails.getId());
         }
     }
 
