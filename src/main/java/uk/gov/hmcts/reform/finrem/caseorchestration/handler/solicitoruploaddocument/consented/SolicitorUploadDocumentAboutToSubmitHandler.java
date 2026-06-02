@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
+
 @Slf4j
 @Service
 public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
@@ -38,15 +40,28 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
 
         boolean isReadyToSubmit = finremCaseData.getGenericInputFields().isReadyToSubmit();
-        return response(finremCaseData, calculateWarning(isReadyToSubmit), null, calculatePostState(isReadyToSubmit));
+        int numberOfDocuments =
+            ofNullable(finremCaseData.getSolUploadDocuments()).orElse(List.of()).size()
+            + ofNullable(finremCaseData.getPensionCollection()).orElse(List.of()).size();
+        return response(finremCaseData, calculateWarning(isReadyToSubmit, numberOfDocuments), null,
+            calculatePostState(isReadyToSubmit));
     }
 
     private String calculatePostState(boolean isReadyToSubmit) {
         return isReadyToSubmit ? State.INFO_RECEIVED.getStateId() : null;
     }
 
-    private List<String> calculateWarning(boolean isReadyToSubmit) {
-       return List.of(isReadyToSubmit ? "The document(s) is(are) being submitted to the court"
-           : "The documents have not been submitted to the court ");
+    private List<String> calculateWarning(boolean isReadyToSubmit, int numberOfDocuments) {
+       return List.of(
+           isReadyToSubmit ? readyToSubmitWarning(numberOfDocuments) : notReadyToSubmitWarning(numberOfDocuments)
+       );
+    }
+
+    private String readyToSubmitWarning(int numberOfDocuments) {
+        return "The document%s being submitted to the court".formatted(numberOfDocuments > 1 ? "s are" : " is");
+    }
+
+    private String notReadyToSubmitWarning(int numberOfDocuments) {
+        return "The document%s not been submitted to the court.".formatted(numberOfDocuments > 1 ? "s have" : " has");
     }
 }
