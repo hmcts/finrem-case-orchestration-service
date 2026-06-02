@@ -46,6 +46,7 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DRAFT_ORDERS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ACCELERATED_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
 
@@ -93,7 +94,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderFiledBy);
             populateSuggestedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
             state = caseDetailsBefore.getState();
-        } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
+        } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder) || ACCELERATED_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
             populateAgreedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
             caseDetails.getData().getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(YesOrNo.YES);
@@ -132,7 +133,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         String typeOfDraftOrder = draftOrdersWrapper.getTypeOfDraftOrder();
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             return draftOrdersWrapper.getUploadSuggestedDraftOrder().getUploadParty().getValue().getCode();
-        } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
+        } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder) || ACCELERATED_ORDER_OPTION.equals(typeOfDraftOrder)) {
             return draftOrdersWrapper.getUploadAgreedDraftOrder().getUploadParty().getValue().getCode();
         } else {
             throw new IllegalArgumentException("Invalid type of draft order");
@@ -145,7 +146,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         draftOrdersWrapper.getUploadAgreedDraftOrder().setOrderFiledBy(orderFiledBy);
 
         List<AgreedDraftOrderCollection> newAgreedDraftOrderCollections = draftOrderService
-            .processAgreedDraftOrders(draftOrdersWrapper.getUploadAgreedDraftOrder(), userAuthorisation);
+            .processAgreedDraftOrders(draftOrdersWrapper, userAuthorisation);
         draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, draftOrdersWrapper.getUploadAgreedDraftOrder(),
             newAgreedDraftOrderCollections);
 

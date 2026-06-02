@@ -7,6 +7,7 @@ public class DraftOrdersConstants {
     }
 
     public static final String AGREED_DRAFT_ORDER_OPTION = "anAgreedOrderFollowingAHearing";
+    public static final String ACCELERATED_ORDER_OPTION = "acceleratedProcedureOrders14DaysBeforeHearing";
     public static final String SUGGESTED_DRAFT_ORDER_OPTION = "aSuggestedDraftOrderPriorToAListedHearing";
 
     public static final String UPLOAD_PARTY_APPLICANT = "theApplicant";
