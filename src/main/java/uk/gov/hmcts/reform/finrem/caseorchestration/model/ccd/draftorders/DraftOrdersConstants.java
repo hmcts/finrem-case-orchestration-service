@@ -16,4 +16,7 @@ public class DraftOrdersConstants {
     public static final String CONFIRM_UPLOAD_DOCUMENTS_OPTION_CODE = "1";
     public static final String ORDER_TYPE = "orders";
     public static final String PSA_TYPE = "pensionSharingAnnexes";
+
+    //Error message constants
+    public static final String FDA_HEARING_LESS_THAN_14_DAYS = "Any orders less than 14 days before the hearing must be uploaded using the create general application event";
 }
