@@ -355,8 +355,6 @@ public class CCDConfigConstant {
     public static final String GENERAL_ORDER_JUDGE_NAME = "generalOrderJudgeName";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
 
-    public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
-
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
     public static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
     public static final String CONSENT_ORDER = "consentOrder";
@@ -445,11 +443,7 @@ public class CCDConfigConstant {
     public static final String CONTESTED_AUTHORISATION_FIRM = "solicitorFirm";
 
     // Bulk Printing
-    public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
-    public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
-    public static final String BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL = "bulkPrintCoverSheetAppConfidential";
-    public static final String BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL = "bulkPrintCoverSheetResConfidential";
     public static final String UPLOAD_ORDER = "uploadOrder";
 
     //Contested Case Documents
