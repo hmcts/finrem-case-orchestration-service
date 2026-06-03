@@ -35,8 +35,8 @@ public class SolicitorUploadDocumentSubmittedHandler extends FinremSubmittedCall
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
-        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
-        FinremCaseData finremCaseDataBefore = callbackRequest.getFinremCaseDataBefore();
+        // Nothing to be implemented here. It just enables the bin to be emptied
+        // by extending FinremSubmittedCallbackHandler
         return submittedResponse();
     }
 }
