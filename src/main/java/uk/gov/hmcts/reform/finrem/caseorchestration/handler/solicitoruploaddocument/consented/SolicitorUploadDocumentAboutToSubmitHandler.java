@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
@@ -51,13 +50,10 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
         FinremCaseData finremCaseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
         boolean isReadyToSubmit = finremCaseData.getGenericInputFields().isReadyToSubmit();
-        int numberOfDocuments =
-            ofNullable(finremCaseData.getSolUploadDocuments()).orElse(List.of()).size()
-            + ofNullable(finremCaseData.getPensionCollection()).orElse(List.of()).size();
 
         binDeletedCaseDocuments(finremCaseDataBefore, finremCaseData);
 
-        return response(finremCaseData, calculateWarning(isReadyToSubmit, numberOfDocuments), null,
+        return response(finremCaseData, calculateWarning(isReadyToSubmit), null,
             calculatePostState(isReadyToSubmit));
     }
 
@@ -65,18 +61,11 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
         return isReadyToSubmit ? State.INFO_RECEIVED.getStateId() : null;
     }
 
-    private List<String> calculateWarning(boolean isReadyToSubmit, int numberOfDocuments) {
+    private List<String> calculateWarning(boolean isReadyToSubmit) {
         return List.of(
-            isReadyToSubmit ? readyToSubmitWarning(numberOfDocuments) : notReadyToSubmitWarning(numberOfDocuments)
+            isReadyToSubmit ? "Please note your documents will be submitted and you won't be able to upload any additional documents."
+                : "Please note your documents will not be submitted, to allow you upload additional documents."
         );
-    }
-
-    private String readyToSubmitWarning(int numberOfDocuments) {
-        return "The document%s being submitted to the court".formatted(numberOfDocuments > 1 ? "s are" : " is");
-    }
-
-    private String notReadyToSubmitWarning(int numberOfDocuments) {
-        return "The document%s not been submitted to the court.".formatted(numberOfDocuments > 1 ? "s have" : " has");
     }
 
     private void binDeletedCaseDocuments(FinremCaseData before, FinremCaseData current) {
