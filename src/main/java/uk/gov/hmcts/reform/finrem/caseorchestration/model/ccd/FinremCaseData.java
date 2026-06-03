@@ -1182,4 +1182,13 @@ public class FinremCaseData implements HasCaseDocument {
         }
         return citizenDocumentWrapper;
     }
+
+    @JsonProperty("caseNameHmctsInternal")
+    private String caseNameHmctsInternal;
+    @JsonProperty("caseManagementCategory")
+    private String caseManagementCategory;
+    @JsonProperty("caseManagementLocation")
+    private String caseManagementLocation;
+
+
 }
