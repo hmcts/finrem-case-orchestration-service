@@ -32,6 +32,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
@@ -64,6 +66,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -155,14 +158,6 @@ class DocumentHelperTest {
         List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(
             callbackRequest.getCaseDetailsBefore().getData());
         assertThat(pensionDocuments).isEmpty();
-    }
-
-    @Test
-    void shouldGetPensionDocumentsFinrem() throws Exception {
-        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
-        List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(pensionDocuments).hasSize(2);
     }
 
     @Test
@@ -909,6 +904,31 @@ class DocumentHelperTest {
             .returns(finalOrder, DirectionOrder::getUploadDraftDocument)
             .returns(List.of(additionalDocument), DirectionOrder::getAdditionalDocuments);
 
+    }
+
+    @Test
+    void shouldReturnOnlyNonNullPensionDocuments() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+
+        CaseDocument document = mock(CaseDocument.class);
+
+        PensionType validPensionType = mock(PensionType.class);
+        PensionType nullPensionType = mock(PensionType.class);
+
+        when(validPensionType.getPensionDocument()).thenReturn(document);
+        when(nullPensionType.getPensionDocument()).thenReturn(null);
+
+        PensionTypeCollection collection1 = mock(PensionTypeCollection.class);
+        PensionTypeCollection collection2 = mock(PensionTypeCollection.class);
+
+        when(collection1.getTypedCaseDocument()).thenReturn(validPensionType);
+        when(collection2.getTypedCaseDocument()).thenReturn(nullPensionType);
+
+        when(caseData.getPensionCollection()).thenReturn(List.of(collection1, collection2));
+
+        List<CaseDocument> result = documentHelper.getPensionDocumentsData(caseData);
+
+        assertThat(result).containsExactly(document);
     }
 
     private static Stream<Arguments> provideOrderCollections() {

@@ -290,28 +290,6 @@ public class TestSetUpUtils {
             .build();
     }
 
-    public static CaseDetails defaultConsentedCaseDetailsForVariationOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        List<String> natureOfApplication = List.of("Lump Sum Order",
-            "Periodical Payment Order",
-            "Pension Sharing Order",
-            "Pension Attachment Order",
-            "Pension Compensation Sharing Order",
-            "Pension Compensation Attachment Order",
-            "A settlement or a transfer of property",
-            "Variation Order",
-            "Property Adjustment Order");
-        caseData.put("natureOfApplication2", natureOfApplication);
-        populateApplicantNameAndAddress(caseData);
-        populateRespondentNameAndAddressConsented(caseData);
-
-        return CaseDetails.builder()
-            .caseTypeId(CaseType.CONSENTED.getCcdType())
-            .id(CASE_ID_IN_LONG)
-            .data(caseData)
-            .build();
-    }
-
     public static CaseDetails defaultContestedCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
         List<String> natureOfApplication = List.of("Lump Sum Order",
