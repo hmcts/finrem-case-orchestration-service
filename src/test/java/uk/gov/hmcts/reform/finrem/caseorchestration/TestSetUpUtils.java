@@ -687,6 +687,7 @@ public class TestSetUpUtils {
 
         CallbackRequest callbackRequest = mock(CallbackRequest.class);
         when(callbackRequest.getCaseDetails()).thenReturn(callbackRequestCaseDetails);
+        when(callbackRequest.getCaseDetailsBefore()).thenReturn(callbackRequestCaseDetails);
         when(callbackRequest.getEventId()).thenReturn(MOCKED_EVENT_CCD_TYPE);
 
         when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)).thenReturn(temporaryFieldsMap);
