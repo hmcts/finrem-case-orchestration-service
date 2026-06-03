@@ -25,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ACCELERATED_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.FDA_HEARING_LESS_THAN_14_DAYS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.ADJOURNED_FDA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.DIR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.FDA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -41,6 +42,20 @@ class UploadDraftOrdersMidHandlerTest {
     @Test
     void canHandle() {
         assertCanHandle(handler, CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.DRAFT_ORDERS);
+    }
+
+    @Test
+    void givenAcceleratedOrderAndAdjournedFdaWithin14Days_thenReturnsValidationError() {
+        FinremCaseData caseData = buildCaseDataWithTypeOfDraftOrder(ACCELERATED_ORDER_OPTION);
+
+        when(hearingService.getHearingType(any(), any())).thenReturn(ADJOURNED_FDA.getId());
+        when(hearingService.getHearingDate(any(), any())).thenReturn(LocalDate.now().plusDays(13));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
+
+        assertThat(response.getErrors())
+            .containsExactly(FDA_HEARING_LESS_THAN_14_DAYS);
     }
 
     @Test

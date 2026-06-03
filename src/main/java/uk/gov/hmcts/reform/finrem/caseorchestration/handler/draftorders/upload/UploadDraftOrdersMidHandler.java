@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.*;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.ADJOURNED_FDA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.FDA;
 
 @Slf4j
@@ -70,7 +71,8 @@ public class UploadDraftOrdersMidHandler extends FinremCallbackHandler {
                                                    String hearingType,
                                                    LocalDate hearingDate) {
         return Objects.equals(ACCELERATED_ORDER_OPTION, draftOrdersWrapper.getTypeOfDraftOrder())
-            && FDA.getId().equalsIgnoreCase(hearingType)
+            && (FDA.getId().equalsIgnoreCase(hearingType)
+            || ADJOURNED_FDA.getId().equalsIgnoreCase(hearingType))
             && ChronoUnit.DAYS.between(LocalDate.now(), hearingDate) < 14;
     }
 }
