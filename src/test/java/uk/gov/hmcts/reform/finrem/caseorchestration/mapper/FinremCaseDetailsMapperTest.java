@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantRepresentedPaper;
@@ -134,6 +135,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCou
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeValue;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.PaymentDetailsWrapper;
 
@@ -143,12 +145,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 class FinremCaseDetailsMapperTest {
 
@@ -169,6 +173,40 @@ class FinremCaseDetailsMapperTest {
     void testSetUp() {
         objectMapper = new ObjectMapper();
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));
+    }
+
+    @Test
+    void testfinremCaseDataToMap() {
+        CaseDocument caseDocument = caseDocument();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .miniFormA(caseDocument)
+            .d81Question(YesOrNo.YES)
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .clientAddressForService(Address.builder().addressLine1("ABC").build()).build())
+            .build();
+        Map<String, Object> data = finremCaseDetailsMapper.finremCaseDataToMap(finremCaseData);
+        assertThat(data)
+            .containsEntry("miniFormA", Map.of(
+                "document_url", caseDocument.getDocumentUrl(),
+                "document_filename", caseDocument.getDocumentFilename(),
+                "document_binary_url", caseDocument.getDocumentBinaryUrl()
+            ))
+            .containsEntry("d81Question", "Yes")
+            .containsEntry("clientAddressForService", Map.of(
+                "AddressLine1", "ABC"
+            ));
+    }
+
+    @Test
+    void testMapToCaseDocument() {
+        CaseDocument actual = finremCaseDetailsMapper.mapToCaseDocument(Map.of(
+            "document_url", "document_url",
+            "document_filename", "document_filename",
+            "document_binary_url", "document_binary_url"
+        ));
+        assertThat(actual)
+            .extracting(CaseDocument::getDocumentUrl, CaseDocument::getDocumentBinaryUrl, CaseDocument::getDocumentFilename)
+            .containsExactly("document_url", "document_binary_url", "document_filename");
     }
 
     @Test
