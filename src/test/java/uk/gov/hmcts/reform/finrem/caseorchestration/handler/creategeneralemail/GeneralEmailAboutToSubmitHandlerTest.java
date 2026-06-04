@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralEmailDocumentCategoriser;
 import uk.gov.service.notify.NotificationClientException;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -146,13 +147,13 @@ class GeneralEmailAboutToSubmitHandlerTest {
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
 
-        verifyTemporaryFieldsWereSanitised(EventType.CREATE_GENERAL_EMAIL, handler,
-            finremCaseDetails, finremCaseDetailsMapper, Map.of(
+        verifyTemporaryFieldsWereSanitised(handler,
+            finremCaseDetails, finremCaseDetailsMapper, new HashMap<>(Map.of(
                 "generalEmailRecipient", "generalEmailRecipient",
                 "generalEmailCreatedBy", "generalEmailCreatedBy",
                 "generalEmailBody", "generalEmailBody",
-                "generalEmailUploadedDocument", "generalEmailUploadedDocument"
-            ));
+                "generalEmailUploadedDocument", Map.of()
+            )));
     }
 
     private FinremCallbackRequest mockCallbackRequest(boolean isConsented) {
