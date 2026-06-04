@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
@@ -456,6 +457,13 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private CitizenDocumentWrapper citizenDocumentWrapper;
+
+    @JsonProperty("caseNameHmctsInternal")
+    private String caseNameHmctsInternal;
+    @JsonProperty("caseManagementCategory")
+    private String caseManagementCategory;
+    @JsonProperty("caseManagementLocation")
+    private String caseManagementLocation;
 
     @JsonIgnore
     public CaseDataMetricsWrapper getCaseDataMetricsWrapper() {
@@ -1194,12 +1202,7 @@ public class FinremCaseData implements HasCaseDocument {
         return bin;
     }
 
-    @JsonProperty("caseNameHmctsInternal")
-    private String caseNameHmctsInternal;
-    @JsonProperty("caseManagementCategory")
-    private String caseManagementCategory;
-    @JsonProperty("caseManagementLocation")
-    private String caseManagementLocation;
+
 
 
 }
