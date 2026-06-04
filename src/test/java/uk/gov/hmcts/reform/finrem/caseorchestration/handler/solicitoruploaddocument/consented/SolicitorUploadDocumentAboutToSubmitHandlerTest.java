@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -52,22 +53,32 @@ class SolicitorUploadDocumentAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenReadyToSubmit_whenHandled_thenSetInfoReceivedCaseState() {
+    void givenReadyToSubmit_whenHandled_thenSetInfoReceivedCaseStateAndWarningPopulated() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .genericInputFields(GenericInputFields.builder().readyToSubmitDocument(YesOrNo.YES).build())
             .build();
 
         var response = underTest.handle(FinremCallbackRequestFactory.from(finremCaseData), AUTH_TOKEN);
-        assertThat(response.getState()).isEqualTo("infoReceived");
+        assertAll(
+            () -> assertThat(response.getState()).isEqualTo("infoReceived"),
+            () -> assertThat(response.getWarnings()).containsOnly(
+                "Please note your documents will be submitted and you won't be able to upload any additional documents."
+            )
+        );
     }
 
     @Test
-    void givenNotReadyToSubmit_whenHandled_thenCaseStateShouldBeNull() {
+    void givenNotReadyToSubmit_whenHandled_thenCaseStateShouldBeNullAndWarningPopulated() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .genericInputFields(GenericInputFields.builder().readyToSubmitDocument(YesOrNo.NO).build())
             .build();
 
         var response = underTest.handle(FinremCallbackRequestFactory.from(finremCaseData), AUTH_TOKEN);
-        assertThat(response.getState()).isNull();
+        assertAll(
+            () -> assertThat(response.getState()).isNull(),
+            () -> assertThat(response.getWarnings()).containsOnly(
+                "Please note your documents will not be submitted, to allow you upload additional documents."
+            )
+        );
     }
 }
