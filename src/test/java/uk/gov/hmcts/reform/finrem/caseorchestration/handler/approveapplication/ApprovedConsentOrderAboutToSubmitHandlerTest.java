@@ -20,8 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApproved
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,6 +27,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -41,9 +40,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 
 @ExtendWith(MockitoExtension.class)
 class ApprovedConsentOrderAboutToSubmitHandlerTest {
-
-    @TestLogs
-    private final TestLogger logs = new TestLogger(ApprovedConsentOrderAboutToSubmitHandler.class);
 
     @InjectMocks
     private ApprovedConsentOrderAboutToSubmitHandler handler;
@@ -62,21 +58,21 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenLatestConsentOrderAbsent_whenHandled_thenDoNothingAndLog() {
+    void givenLatestConsentOrderAbsent_whenHandled_shouldThrowException() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
             FinremCaseData.builder()
                 .ccdCaseType(CaseType.CONSENTED)
                 .build()
         );
 
-        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> handler.handle(callbackRequest, AUTH_TOKEN));
 
         assertAll(
-            () -> assertEquals(callbackRequest.getFinremCaseData(), response.getData()),
-            () -> verifyNoInteractions(genericDocumentService),
-            () -> assertThat(logs.getInfos())
-                .contains("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: %s"
-                    .formatted(CASE_ID))
+            () -> assertThat(exception.getMessage())
+                .isEqualTo("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: %s"
+                .formatted(CASE_ID)),
+            () -> verifyNoInteractions(genericDocumentService)
         );
     }
 
@@ -104,7 +100,24 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenLatestConsentOrderProvided_whenNoPension_thenUpdateStateToConsentOrderMade() {
+    void givenLatestConsentOrderProvided_whenPensionDocumentExists_thenUpdateStateToConsentOrderApproved() {
+        CaseDocument latestConsentOrder = mock(CaseDocument.class);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
+            FinremCaseData.builder()
+                .ccdCaseType(CaseType.CONSENTED)
+                .latestConsentOrder(latestConsentOrder)
+                .build()
+        );
+        mockEmptyPensionDocument(callbackRequest, false);
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertEquals("consentOrderApproved", response.getData().getState());
+    }
+
+    @Test
+    void givenLatestConsentOrderProvided_whenNoPension_thenUpdateStateToClose() {
         CaseDocument latestConsentOrder = mock(CaseDocument.class);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
@@ -117,7 +130,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertEquals("CONSENT_ORDER_MADE", response.getData().getState());
+        assertEquals("close", response.getData().getState());
     }
 
     @Test
