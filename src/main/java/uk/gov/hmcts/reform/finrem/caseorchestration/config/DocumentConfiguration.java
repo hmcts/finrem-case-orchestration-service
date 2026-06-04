@@ -193,6 +193,10 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? approvedConsentOrderHighCourtTemplate : approvedConsentOrderTemplate;
     }
 
+    public String getApprovedConsentOrderTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? approvedConsentOrderHighCourtTemplate : approvedConsentOrderTemplate;
+    }
+
     public String getContestedDraftOrderNotApprovedTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? contestedDraftOrderNotApprovedHighCourtTemplate
             : contestedDraftOrderNotApprovedTemplate;
