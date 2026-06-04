@@ -5,9 +5,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
@@ -44,7 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Slf4j
 @Service
-public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
+public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService gaDirectionService;
@@ -77,9 +76,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
-        FinremCallbackRequest callbackRequest, String userAuthorisation) {
-
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
@@ -108,15 +106,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         }
 
         String postState = gaDirectionService.getEventPostState(caseDetails, userAuthorisation);
-
-        log.info("Post state {} for Case ID: {}", postState, caseDetails.getId());
         generalApplicationsCategoriser.categorise(caseData);
         if (postState != null) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
-                .errors(errors).state(postState).build();
+            return responseWithoutWarnings(caseData, errors, postState);
         }
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return responseWithoutWarnings(caseData, errors);
     }
 
     private void migrateExistingApplication(FinremCaseDetails caseDetails,
