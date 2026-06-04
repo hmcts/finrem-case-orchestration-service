@@ -113,18 +113,20 @@ public class UpdateContactDetailsTask extends CsvFileProcessingTask {
         FinremCaseData caseData = finremCaseDetails.getData();
         log.info("Case {} Running UpdateContactDetailsTask for this case", finremCaseDetails.getId());
 
-        if (!isNull(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
-            && !EmailUtils.isValidEmailAddress(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())) {
+        if (!isNull(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())) {
+            if (!EmailUtils.isValidEmailAddress(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())) {
+                // Check RepresentationUpdateHistory
+                amendRepresentationHistory(finremCaseDetails, caseData);
 
-            // Check RepresentationUpdateHistory
-            amendRepresentationHistory(finremCaseDetails, caseData);
-
-            // Update the RespondentSolicitorEmail field to a valid email address
-            log.info("Case {} Updating invalid RespondentSolicitorEmail: {}", finremCaseDetails.getId(),
-                maskEmail(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail()));
-            caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(UPDATED_EMAIL);
-            log.info("Case {} RespondentSolicitorEmail field amended successfully to: {}", finremCaseDetails.getId(),
-                caseData.getContactDetailsWrapper().getRespondentSolicitorEmail());
+                // Update the RespondentSolicitorEmail field to a valid email address
+                log.info("Case {} Updating invalid RespondentSolicitorEmail: {}", finremCaseDetails.getId(),
+                    maskEmail(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail()));
+                caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(UPDATED_EMAIL);
+                log.info("Case {} RespondentSolicitorEmail field amended successfully to: {}",
+                    finremCaseDetails.getId(), UPDATED_EMAIL);
+            } else {
+                log.info("Case {} Nothing updated. Already has valid RespondentSolicitorEmail field", finremCaseDetails.getId());
+            }
         } else {
             log.info("Case {} has empty RespondentSolicitorEmail field", finremCaseDetails.getId());
         }
