@@ -4,12 +4,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 
 public abstract class FinremAboutToSubmitCallbackHandler extends FinremCallbackHandler {
 
-    public FinremAboutToSubmitCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    protected FinremAboutToSubmitCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
     }
 
     @Override
-    protected final boolean shouldClearTemporaryFields() {
+    protected final boolean shouldClearTemporaryFieldsAfterHandle() {
         return true;
     }
 }
