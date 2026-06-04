@@ -76,6 +76,9 @@ public class FinremCaseData implements HasCaseDocument {
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
+    private Bin bin;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
     private CaseDataMetricsWrapper caseDataMetricsWrapper;
     @JsonProperty(access = WRITE_ONLY)
     private String ccdCaseId;
@@ -1181,6 +1184,14 @@ public class FinremCaseData implements HasCaseDocument {
             this.citizenDocumentWrapper = new CitizenDocumentWrapper();
         }
         return citizenDocumentWrapper;
+    }
+
+    @JsonIgnore
+    public Bin getBin() {
+        if (bin == null) {
+            this.bin = Bin.builder().build();
+        }
+        return bin;
     }
 
     @JsonProperty("caseNameHmctsInternal")
