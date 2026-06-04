@@ -27,7 +27,8 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.CONSENT_ORDER_MADE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.CLOSE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 @Slf4j
@@ -73,9 +74,11 @@ public class ApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
             generateAndPrepareDocuments(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(),
                 userAuthorisation);
         } else {
-            log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: {}",
-                finremCaseData.getCcdCaseId());
+            throw new IllegalStateException(
+                "Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for Case ID: %s"
+                    .formatted(finremCaseData.getCcdCaseId()));
         }
+
         return response(finremCaseData);
     }
 
@@ -115,9 +118,11 @@ public class ApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
         if (isPensionDocumentsEmpty(finremCaseData)) {
             consentOrderPrintService.sendConsentOrderToBulkPrint(finremCaseDetails, finremCaseDetailsBefore,
                 EventType.APPROVE_ORDER, authToken);
-            finremCaseData.setState(CONSENT_ORDER_MADE.toString());
+            finremCaseData.setState(CLOSE.getStateId());
             log.info("Case ID: {} has no pension documents. Case state updated to {} and consent order sent for bulk print.",
-                caseId, CONSENT_ORDER_MADE);
+                caseId, CLOSE);
+        } else {
+            finremCaseData.setState(CONSENT_ORDER_APPROVED.getStateId());
         }
     }
 
