@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -24,6 +25,32 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toLis
 public class FinremCaseDetailsMapper {
 
     private final ObjectMapper objectMapper;
+
+    /**
+     * Converts the given {@link FinremCaseData} instance into a {@link Map}.
+     *
+     * <p>The conversion is performed using {@link ObjectMapper#convertValue(Object, Class)}.</p>
+     *
+     * @param finremCaseData the case data to convert
+     * @return a map representation of the given case data
+     */
+    public Map<String, Object> finremCaseDataToMap(FinremCaseData finremCaseData) {
+        return objectMapper.convertValue(finremCaseData, Map.class);
+    }
+
+    /**
+     * Converts the given map representation of a case document into a
+     * {@link CaseDocument} instance.
+     *
+     * <p>The conversion is performed using
+     * {@link ObjectMapper#convertValue(Object, Class)}.</p>
+     *
+     * @param caseDocumentInMap the map containing case document properties
+     * @return the converted {@link CaseDocument} instance
+     */
+    public CaseDocument mapToCaseDocument(Map<String, Object> caseDocumentInMap) {
+        return objectMapper.convertValue(caseDocumentInMap, CaseDocument.class);
+    }
 
     public FinremCaseDetails mapToFinremCaseDetails(CaseDetails caseDetails) {
         FinremCaseData data = objectMapper.convertValue(caseDetails.getData(), FinremCaseData.class);
@@ -56,7 +83,7 @@ public class FinremCaseDetailsMapper {
     }
 
     public CaseDetails mapToCaseDetails(FinremCaseDetails caseDetails) {
-        Map<String, Object> data = objectMapper.convertValue(caseDetails.getData(), Map.class);
+        Map<String, Object> data = this.finremCaseDataToMap(caseDetails.getData());
         return CaseDetails.builder()
             .caseTypeId(Optional.ofNullable(caseDetails.getCaseType())
                 .map(CaseType::getCcdType)
