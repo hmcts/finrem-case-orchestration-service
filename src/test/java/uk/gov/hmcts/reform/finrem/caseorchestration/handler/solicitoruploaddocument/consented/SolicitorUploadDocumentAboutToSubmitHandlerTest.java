@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -17,6 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GenericInp
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -46,5 +49,25 @@ class SolicitorUploadDocumentAboutToSubmitHandlerTest {
                 "readyToSubmitDocument", YesOrNo.YES
             ))
         );
+    }
+
+    @Test
+    void givenReadyToSubmit_whenHandled_thenSetInfoReceivedCaseState() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .genericInputFields(GenericInputFields.builder().readyToSubmitDocument(YesOrNo.YES).build())
+            .build();
+
+        var response = underTest.handle(FinremCallbackRequestFactory.from(finremCaseData), AUTH_TOKEN);
+        assertThat(response.getState()).isEqualTo("infoReceived");
+    }
+
+    @Test
+    void givenNotReadyToSubmit_whenHandled_thenCaseStateShouldBeNull() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .genericInputFields(GenericInputFields.builder().readyToSubmitDocument(YesOrNo.NO).build())
+            .build();
+
+        var response = underTest.handle(FinremCallbackRequestFactory.from(finremCaseData), AUTH_TOKEN);
+        assertThat(response.getState()).isNull();
     }
 }
