@@ -68,7 +68,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class NewManageCaseDocumentsAboutToSubmitHandlerTest {
+class ManageCaseDocumentsAboutToSubmitHandlerTest {
 
     @Mock
     private FeatureToggleService featureToggleService;
@@ -79,7 +79,7 @@ class NewManageCaseDocumentsAboutToSubmitHandlerTest {
     @Mock
     private ApplicantOtherDocumentsHandler documentHandlerTwo = mock(ApplicantOtherDocumentsHandler.class);
 
-    private NewManageCaseDocumentsAboutToSubmitHandler underTest;
+    private ManageCaseDocumentsAboutToSubmitHandler underTest;
 
     @BeforeEach
     void setUp() {
@@ -87,7 +87,7 @@ class NewManageCaseDocumentsAboutToSubmitHandlerTest {
         FinremCaseDetailsMapper finremCaseDetailsMapper =
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         underTest =
-            new NewManageCaseDocumentsAboutToSubmitHandler(finremCaseDetailsMapper,
+            new ManageCaseDocumentsAboutToSubmitHandler(finremCaseDetailsMapper,
                 documentHandlers, uploadedDocumentService, featureToggleService);
     }
 

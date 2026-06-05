@@ -24,12 +24,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecased
 
 @Slf4j
 @Service
-public class NewManageCaseDocumentsMidHandler extends FinremCallbackHandler {
+public class ManageCaseDocumentsMidHandler extends FinremCallbackHandler {
 
     private final LegacyConfidentialDocumentsService legacyConfidentialDocumentsService;
 
-    public NewManageCaseDocumentsMidHandler(FinremCaseDetailsMapper mapper,
-                                            LegacyConfidentialDocumentsService legacyConfidentialDocumentsService) {
+    public ManageCaseDocumentsMidHandler(FinremCaseDetailsMapper mapper,
+                                         LegacyConfidentialDocumentsService legacyConfidentialDocumentsService) {
         super(mapper);
         this.legacyConfidentialDocumentsService = legacyConfidentialDocumentsService;
     }

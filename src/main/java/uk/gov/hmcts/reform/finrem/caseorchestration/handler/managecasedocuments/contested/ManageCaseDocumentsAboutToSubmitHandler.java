@@ -45,7 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecased
  * Handles the "about to submit" callback for managing case documents
  * in contested financial remedy cases.
  *
- * <p>This handler contains logic migrated from
+ * <p>This handler contains logic migrated from old
  * ManageCaseDocumentsContestedAboutToSubmitHandler, which is
  * scheduled for removal. It preserves the existing behaviour while
  * aligning with the updated handler structure.
@@ -58,7 +58,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecased
  */
 @Slf4j
 @Service
-public class NewManageCaseDocumentsAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
+public class ManageCaseDocumentsAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
     private static final String PARTY_NOT_PRESENT_ERROR_MESSAGE = "%s not present on the case, do you want to continue?";
     private static final String INTERVENER_1 = "Intervener 1";
     private static final String INTERVENER_2 = "Intervener 2";
@@ -78,10 +78,10 @@ public class NewManageCaseDocumentsAboutToSubmitHandler extends FinremAboutToSub
     private final FeatureToggleService featureToggleService;
 
     @Autowired
-    public NewManageCaseDocumentsAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                      List<DocumentHandler> documentHandlers,
-                                                      UploadedDocumentService uploadedDocumentService,
-                                                      FeatureToggleService featureToggleService) {
+    public ManageCaseDocumentsAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
+                                                   List<DocumentHandler> documentHandlers,
+                                                   UploadedDocumentService uploadedDocumentService,
+                                                   FeatureToggleService featureToggleService) {
         super(mapper);
         this.documentHandlers = documentHandlers;
         this.uploadedDocumentService = uploadedDocumentService;
