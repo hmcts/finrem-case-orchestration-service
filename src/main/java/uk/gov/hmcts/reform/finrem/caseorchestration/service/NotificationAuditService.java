@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +50,6 @@ public class NotificationAuditService {
         createAuditsForCorrespondence(caseDetails, hearing, eventType, emailTemplate, documentsToPost);
     }
 
-    /**
-     * Creates audit rows for a vacate/adjourn correspondence.
-     */
     public void createAuditsForVacateCorrespondence(FinremCaseDetails caseDetails,
                                                     HearingLike vacateOrAdjournedHearing,
                                                     EventType eventType,
@@ -82,7 +78,6 @@ public class NotificationAuditService {
             String role = partyItem.getValue().getRole();
             NotificationParty notificationParty = NotificationParty.getNotificationPartyFromRole(role);
             NotificationType channel = predictParty(caseDetails, notificationParty);
-
             NotificationAudit auditRow = buildAuditRow(eventType, role, channel, emailTemplate, postalDocFilenames);
             UUID rowId = UUID.randomUUID();
             audits.add(NotificationAuditCollectionItem.builder()
@@ -154,3 +149,4 @@ public class NotificationAuditService {
             .toList();
     }
 }
+

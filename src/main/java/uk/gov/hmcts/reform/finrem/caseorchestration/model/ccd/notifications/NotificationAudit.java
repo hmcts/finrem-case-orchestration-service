@@ -33,3 +33,4 @@ public class NotificationAudit {
     private String letterTemplate;
     private String attachedPostalDocs;
 }
+
