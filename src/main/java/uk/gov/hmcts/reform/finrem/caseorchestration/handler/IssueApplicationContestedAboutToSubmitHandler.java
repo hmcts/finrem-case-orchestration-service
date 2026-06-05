@@ -13,8 +13,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 @Slf4j
 @Service
@@ -22,13 +24,16 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final GenerateCoverSheetService generateCoverSheetService;
+    private final FeatureToggleService featureToggleService;
 
     public IssueApplicationContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                          OnlineFormDocumentService onlineFormDocumentService,
-                                                         GenerateCoverSheetService generateCoverSheetService) {
+                                                         GenerateCoverSheetService generateCoverSheetService,
+                                                         FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.generateCoverSheetService = generateCoverSheetService;
+        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -58,6 +63,9 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
         if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())) {
             caseData.setScheduleOneWrapper(ScheduleOneWrapper.builder()
                 .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
+        }
+        if (featureToggleService.isFinremCitizenUiEnabled()) {
+            AccessCodeGenerator.setAccessCode(caseDetails.getData());
         }
         generateCoverSheets(caseDetails, userAuthorisation);
 

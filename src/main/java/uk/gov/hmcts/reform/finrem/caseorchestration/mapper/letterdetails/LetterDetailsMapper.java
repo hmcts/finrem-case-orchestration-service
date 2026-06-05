@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLet
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
@@ -52,7 +54,24 @@ public class LetterDetailsMapper {
             .caseNumber(String.valueOf(caseDetails.getId()))
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .orderType(consentedApplicationHelper.getOrderType(caseDetails.getData()))
+            .accessCode(getAccessCode(caseDetails.getData(), recipient))
             .build();
+    }
+
+    private String getAccessCode(FinremCaseData caseData, DocumentHelper.PaperNotificationRecipient recipient) {
+        return switch (recipient) {
+            case APPLICANT -> getAccessCodeForRecipient(caseData.getApplicantAccessCodes());
+            case RESPONDENT -> getAccessCodeForRecipient(caseData.getRespondentAccessCodes());
+            default -> throw new IllegalStateException("Unsupported recipient type: " + recipient);
+        };
+    }
+
+    private String getAccessCodeForRecipient(List<AccessCodeCollection> accessCodeCollections) {
+        return accessCodeCollections.stream()
+            .filter(x -> x.getValue().getIsValid().isYes())
+            .map(x -> x.getValue().getAccessCode())
+            .findFirst()
+            .orElse(null);
     }
 
     /**
