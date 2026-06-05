@@ -1202,7 +1202,4 @@ public class FinremCaseData implements HasCaseDocument {
         return bin;
     }
 
-
-
-
 }

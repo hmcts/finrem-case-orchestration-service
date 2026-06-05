@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 @RequiredArgsConstructor
 public class GlobalSearchService {
 
-
     public void setGlobalSearchData(FinremCaseData caseData) {
         log.info("Received request to set global search fields for case with CCD ID: {}", caseData.getCcdCaseId());
         caseData.setCaseNameHmctsInternal(caseData.getFullApplicantName());

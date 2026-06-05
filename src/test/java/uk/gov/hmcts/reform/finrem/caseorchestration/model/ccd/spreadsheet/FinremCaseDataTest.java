@@ -127,7 +127,6 @@ class FinremCaseDataTest {
         return null;
     }
 
-
     @Test
     void testConsentedStateData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
