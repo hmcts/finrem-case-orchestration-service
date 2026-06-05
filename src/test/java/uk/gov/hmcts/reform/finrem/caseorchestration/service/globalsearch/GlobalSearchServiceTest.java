@@ -18,7 +18,6 @@ public class GlobalSearchServiceTest {
     @InjectMocks
     GlobalSearchService globalSearchService;
 
-
     @Test
     public void shouldSetGlobalSearchFields() {
         when(caseData.getCcdCaseId()).thenReturn(String.valueOf(12345L));
