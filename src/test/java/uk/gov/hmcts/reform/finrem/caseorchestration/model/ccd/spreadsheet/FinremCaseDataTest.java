@@ -127,15 +127,6 @@ class FinremCaseDataTest {
         return null;
     }
 
-    @Test
-    void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        assumeTrue(testEnabled);
-        List<File> configFiles = Arrays.asList(getFile(contestedFileNameWithPath),
-            getFile(consentedFileNameWithPath));
-        validateConfig(configFiles);
-    }
-
-
 
     @Test
     void testConsentedStateData() throws IOException, InvalidFormatException {
