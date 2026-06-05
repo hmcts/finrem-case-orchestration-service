@@ -15,12 +15,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
@@ -99,6 +101,15 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     @JsonIgnore
     public boolean isIntervenerSolicitorPopulated() {
         return StringUtils.isNotEmpty(nullToEmpty(this.getIntervenerSolEmail()));
+    }
+
+    @JsonIgnore
+    public String getOrganisationId(IntervenerWrapper intervenerWrapper) {
+        return Optional.ofNullable(intervenerWrapper)
+            .map(IntervenerWrapper::getIntervenerOrganisation)
+            .map(OrganisationPolicy::getOrganisation)
+            .map(Organisation::getOrganisationID)
+            .orElse(null);
     }
 
     /**

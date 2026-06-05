@@ -6,6 +6,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -23,8 +25,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ChangeOfRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UserNotFoundInOrganisationApiException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest.getIntervenerPartyByType;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
 
 @Service
 @RequiredArgsConstructor
@@ -45,10 +48,13 @@ public class IntervenerService {
 
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
-    private final SystemUserService systemUserService;
     private final ChangeOfRepresentationService changeOfRepresentationService;
     private final IdamService idamService;
     private final AssignPartiesAccessService assignPartiesAccessService;
+    private final ValidatePartiesService validatePartiesService;
+
+    static final String INTERVENER_EMAIL_NOT_IN_ORG_ERROR_MESSAGE = "%s is not a valid Email address. "
+        + "The email address must be registered to access MyHMCTS";
 
     /**
      * Revokes an intervener solicitor role for the given case.
@@ -99,8 +105,7 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
-    public IntervenerChangeDetails updateIntervenerDetails(IntervenerWrapper intervenerWrapper,
-                                                           List<String> errors,
+    public IntervenerChangeDetails updateIntervenerDetails(IntervenerWrapper intervenerWrapper, List<String> errors,
                                                            FinremCallbackRequest callbackRequest) {
         validateIntervenerCountryOfResident(intervenerWrapper, errors);
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
@@ -113,17 +118,21 @@ public class IntervenerService {
             intervenerWrapper.setIntervenerDateAdded(LocalDate.now());
         }
 
-        final String caseRole = intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         if (isRepresented(intervenerWrapper)) {
-            log.info("Add {} case role for Case ID: {}", caseRole, caseId);
-            String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
+            Organisation newOrganisation = Optional.of(intervenerWrapper)
+                .map(IntervenerWrapper::getIntervenerOrganisation)
+                .map(OrganisationPolicy::getOrganisation)
+                .orElseThrow();
+
             String email = intervenerWrapper.getIntervenerSolEmail();
-            checkIfIntervenerSolicitorDetailsChanged(intervenerWrapper, caseDetailsBefore, orgId, email, errors);
+            checkIfIntervenerSolicitorDetailsChanged(intervenerWrapper, caseDetailsBefore, newOrganisation, email, errors);
             try {
+                final String caseRole = intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode();
+                log.info("Add {} case role for Case ID: {}", caseRole, caseId);
                 assignPartiesAccessService.grantIntervenerSolicitor(caseId, intervenerWrapper);
             } catch (UserNotFoundInOrganisationApiException e) {
-                logError(caseId, errors);
+                logSolicitorEmailNotFoundError(caseId, email, errors);
             }
         } else {
             FinremCaseData beforeData = caseDetailsBefore.getData();
@@ -149,7 +158,8 @@ public class IntervenerService {
     }
 
     private boolean isRepresented(IntervenerWrapper intervenerWrapper) {
-        return YesOrNo.YES.equals(intervenerWrapper.getIntervenerRepresented());
+        return !ObjectUtils.isEmpty(intervenerWrapper)
+            && YesOrNo.YES.equals(intervenerWrapper.getIntervenerRepresented());
     }
 
     private void validateIntervenerCountryOfResident(IntervenerWrapper intervenerWrapper, List<String> errors) {
@@ -163,19 +173,59 @@ public class IntervenerService {
         }
     }
 
-    private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetailsBefore, String orgId,
-                                                          String email, List<String> errors) {
+    /**
+     * Checks if the intervener solicitor's organisation or email address has changed compared to the previous case state,
+     * and revokes the previous solicitor's case role if necessary.
+     *
+     * <p>
+     * This method compares the current and previous intervener details. If the previous intervener was represented and had
+     * a valid solicitor email address, and either the organisation or email address has changed, the previous solicitor's
+     * case role is revoked. If the previous solicitor email is invalid, no action is taken.
+     * </p>
+     *
+     * @param intervenerWrapper the current intervener details
+     * @param caseDetailsBefore the previous case details for comparison
+     * @param newOrganisation   the current organisation
+     * @param email             the current solicitor email address
+     * @param errors            the list to collect any error messages encountered during revocation
+     */
+    private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetailsBefore,
+                                                          Organisation newOrganisation,
+                                                          String email,
+                                                          List<String> errors) {
         FinremCaseData beforeData = caseDetailsBefore.getData();
         IntervenerWrapper beforeIntv = intervenerWrapper.getIntervenerWrapperFromCaseData(beforeData);
 
-        if (ObjectUtils.isNotEmpty(beforeIntv)
-            && isRepresented(beforeIntv)) {
-            String beforeOrgId = beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID();
-            if (ObjectUtils.notEqual(beforeOrgId, orgId) || !beforeIntv.getIntervenerSolEmail().equals(email)) {
-                revokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervenerSolEmail(),
+        //If there is no previous intervener/intervener solicitor
+        if (!isRepresented(beforeIntv)) {
+            return;
+        }
+
+        String previousIntervenerSolEmail = beforeIntv.getIntervenerSolEmail();
+
+        //Only revoke access to previous emails if it's valid with org. No need to stop case from processing.
+        String error = ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(beforeIntv, validatePartiesService);
+        if (!StringUtils.hasText(error)) {
+            Organisation previousOrganisation = beforeIntv.getIntervenerOrganisation().getOrganisation();
+
+            if (!isSameOrganisation(newOrganisation, previousOrganisation) || !previousIntervenerSolEmail.equals(email)) {
+                String beforeOrgId = beforeIntv.getOrganisationId(beforeIntv);
+                String ccdCode = Optional.of(intervenerWrapper)
+                    .map(IntervenerWrapper::getIntervenerSolicitorCaseRole)
+                    .map(CaseRole::getCcdCode)
+                    .orElseThrow();
+
+                revokeIntervenerRole(
+                    caseDetailsBefore.getId(),
+                    previousIntervenerSolEmail,
                     beforeOrgId,
-                    intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors, beforeIntv);
+                    ccdCode,
+                    errors,
+                    beforeIntv
+                );
             }
+        } else {
+            log.info("Invalid previous intervener email address. No revoke needed.");
         }
     }
 
@@ -235,6 +285,45 @@ public class IntervenerService {
     }
 
     /**
+     * Validates the intervener's solicitor email address and postcode information.
+     *
+     * <p>This method checks if the intervener's solicitor email address is valid and registered,
+     * and verifies that the postcode field is present for the intervener's address.
+     * Any validation errors encountered are added to the provided errors list.
+     * </p>
+     *
+     * @param intervener the {@link IntervenerWrapper} containing intervener details to validate
+     * @param errors     the list to which any validation error messages will be appended
+     */
+    public void validateIntervenerInformation(IntervenerWrapper intervener, List<String> errors) {
+        addErrorIfPresent(
+            errors,
+            ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+        );
+
+        addErrorIfPresent(
+            errors,
+            validateIntervenerPostCodeMissing(intervener)
+        );
+    }
+
+    private String validateIntervenerPostCodeMissing(IntervenerWrapper intervener) {
+        String postCode = intervener.getIntervenerAddress().getPostCode();
+
+        if (org.apache.commons.lang3.StringUtils.isBlank(postCode)) {
+            return "Postcode field is required for the intervener.";
+        }
+
+        return null;
+    }
+
+    private void addErrorIfPresent(List<String> errors, String error) {
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(error)) {
+            errors.add(error);
+        }
+    }
+
+    /**
      * Updates the representation update history when an intervener’s solicitor
      * stops representing their client.
      *
@@ -247,10 +336,10 @@ public class IntervenerService {
      * of the removed solicitor, and is appended to the existing representation
      * update history on the current {@link FinremCaseData}.</p>
      *
-     * @param finremCaseData the current case data to be updated
+     * @param finremCaseData         the current case data to be updated
      * @param originalFinremCaseData the original case data used to detect changes
-     *                                in intervener representation
-     * @param userAuthorisation the authorisation token of the user making the change
+     *                               in intervener representation
+     * @param userAuthorisation      the authorisation token of the user making the change
      */
     public void updateIntervenerSolicitorStopRepresentingHistory(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
                                                                  String userAuthorisation) {
@@ -309,20 +398,20 @@ public class IntervenerService {
         if (StringUtils.hasText(solUserID)) {
             assignCaseAccessService.removeCaseRoleToUser(caseId, solUserID, caseRole, orgId);
         } else {
-            Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
+            Optional<String> userId = organisationService.findUserByEmail(email);
             if (userId.isPresent()) {
                 assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
             } else {
-                logError(caseId, errors);
+                logSolicitorEmailNotFoundError(caseId, email, errors);
             }
         }
+
     }
 
-    private void logError(Long caseId, List<String> errors) {
-        String error = "Could not find intervener with provided email";
-        log.info("{} for caseId {}", error, caseId);
+    private void logSolicitorEmailNotFoundError(Long caseId, String email, List<String> errors) {
+        log.info("Invalid intervener email address for caseId {}", caseId);
         if (errors != null) {
-            errors.add(error);
+            errors.add(INTERVENER_EMAIL_NOT_IN_ORG_ERROR_MESSAGE.formatted(email));
         }
     }
 }
