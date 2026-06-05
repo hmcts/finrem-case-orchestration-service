@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -13,20 +14,32 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAuditCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationToBeSentCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 @Slf4j
 @Service
 public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
+
+    private static final String NOTIFICATIONS_AUDITS = "notificationsAudits";
+
+    private static final String NOTIFICATIONS_TO_BE_SENT = "notificationsToBeSent";
 
     private final RetryExecutor retryExecutor;
 
@@ -34,14 +47,22 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
 
     private final ManageHearingsCorresponder manageHearingsCorresponder;
 
+    private final CoreCaseDataService coreCaseDataService;
+
+    private final ObjectMapper objectMapper;
+
     public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                           ManageHearingsCorresponder manageHearingsCorresponder,
                                           RetryExecutor retryExecutor,
-                                          ApplicationEventPublisher applicationEventPublisher) {
+                                          ApplicationEventPublisher applicationEventPublisher,
+                                          CoreCaseDataService coreCaseDataService,
+                                          ObjectMapper objectMapper) {
         super(finremCaseDetailsMapper);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
         this.retryExecutor = retryExecutor;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.coreCaseDataService = coreCaseDataService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -73,6 +94,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             .ifPresent(event -> publishEvent(getEventDescription(actionSelection), event, errors));
 
         if (errors.isEmpty()) {
+            markPendingNotificationsAsSent(caseDetails);
             return submittedResponse();
         }
         return submittedResponse(
@@ -113,6 +135,38 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             (exception, actionName, caseId1) ->
                 errors.add(format("Notification to %s has failed. Please send notification to %s manually.",
                     notifyingPartyInString, notifyingPartyInString))
+        );
+    }
+
+    private void markPendingNotificationsAsSent(FinremCaseDetails caseDetails) {
+        coreCaseDataService.performPostSubmitCallback(
+            caseDetails.getData().getCcdCaseType(),
+            caseDetails.getId(),
+            INTERNAL_CHANGE_UPDATE_CASE.getCcdType(),
+            latestCaseDetails -> flipSentFlags(
+                finremCaseDetailsMapper.mapToFinremCaseDetails(latestCaseDetails).getData())
+        );
+    }
+    private Map<String, Object> flipSentFlags(FinremCaseData latestData) {
+
+        NotificationAuditWrapper wrapper = latestData.getNotificationAuditWrapper();
+        List<NotificationAuditCollectionItem> audits =
+            Optional.ofNullable(wrapper.getNotificationsAudits()).orElseGet(ArrayList::new);
+        List<NotificationToBeSentCollectionItem> pending =
+            Optional.ofNullable(wrapper.getNotificationsToBeSent()).orElseGet(ArrayList::new);
+
+        if (pending.isEmpty()) {
+            return Map.of();
+        }
+        pending.forEach(pendingItem ->
+            audits.stream()
+                .filter(audit -> pendingItem.getValue().equals(audit.getId()))
+                .findFirst()
+                .ifPresent(audit -> audit.getValue().setWasSent(YesOrNo.YES)));
+
+        return Map.of(
+            NOTIFICATIONS_AUDITS, objectMapper.convertValue(audits, List.class),
+            NOTIFICATIONS_TO_BE_SENT, List.of()
         );
     }
 }

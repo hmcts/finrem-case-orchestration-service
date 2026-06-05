@@ -10,13 +10,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-
 import java.time.LocalDate;
-import java.util.List;
 
-/**
- * A single audit record for one notification attempt, for one party, on one event execution.
- */
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
@@ -24,7 +19,6 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NotificationAudit {
-
 
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -37,5 +31,5 @@ public class NotificationAudit {
     private String emailTemplate;
     private String letterId;
     private String letterTemplate;
-    private List<String> attachedPostalDocs;
+    private String attachedPostalDocs;
 }

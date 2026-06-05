@@ -15,12 +15,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationToBeSentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,10 +37,10 @@ public class NotificationAuditService {
      * Creates audit rows for a new-hearing correspondence: one row per party listed on the hearing.
      * Appends both the rows and their IDs to the case wrapper.
      *
-     * @param caseDetails     the case
-     * @param hearing         the hearing whose parties drive the recipient list
-     * @param eventType       the event triggering the notification (used for the {@code event_id} field)
-     * @param emailTemplate   the email template that the listeners will use
+     * @param caseDetails the case details
+     * @param hearing     the hearing whose parties drive the recipient list
+     * @param eventType   the event triggering the notification (used for the {@code event_id} field)
+     * @param emailTemplate the email template that the listeners will use
      * @param documentsToPost the documents that will be posted to any unrepresented parties
      */
     public void createAuditsForHearingCorrespondence(FinremCaseDetails caseDetails,
@@ -76,10 +74,8 @@ public class NotificationAuditService {
             .orElseGet(ArrayList::new);
         List<NotificationToBeSentCollectionItem> pending = Optional.ofNullable(wrapper.getNotificationsToBeSent())
             .orElseGet(ArrayList::new);
-
         List<PartyOnCaseCollectionItem> partiesOnCase =
             Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
-
         List<String> postalDocFilenames = filenamesOf(documentsToPost);
 
         for (PartyOnCaseCollectionItem partyItem : partiesOnCase) {
@@ -88,7 +84,6 @@ public class NotificationAuditService {
             NotificationType channel = predictParty(caseDetails, notificationParty);
 
             NotificationAudit auditRow = buildAuditRow(eventType, role, channel, emailTemplate, postalDocFilenames);
-
             UUID rowId = UUID.randomUUID();
             audits.add(NotificationAuditCollectionItem.builder()
                 .id(rowId)
@@ -102,7 +97,6 @@ public class NotificationAuditService {
             log.info("Created notification audit row {} for party {} on case {} (channel: {})",
                 rowId, role, caseDetails.getId(), channel);
         }
-
         wrapper.setNotificationsAudits(audits);
         wrapper.setNotificationsToBeSent(pending);
     }
@@ -148,7 +142,7 @@ public class NotificationAuditService {
             builder.emailTemplate(emailTemplate == null ? null : emailTemplate.name());
         } else {
             builder.letterTemplate(FINANCIAL_REMEDY_PACK_LETTER_TYPE);
-            builder.attachedPostalDocs(postalDocFilenames);
+            builder.attachedPostalDocs(String.join(", ", postalDocFilenames));
         }
 
         return builder.build();
