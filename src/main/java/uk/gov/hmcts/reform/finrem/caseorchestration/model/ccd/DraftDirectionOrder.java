@@ -25,6 +25,9 @@ public class DraftDirectionOrder implements HasCaseDocument, HasUploadingDocumen
     @JsonProperty("uploadDraftDocument")
     CaseDocument uploadDraftDocument;
 
+    @JsonProperty("isThisFinalYN")
+    YesOrNo isThisFinalYN;
+
     @JsonProperty("additionalDocuments")
     private List<DocumentCollectionItem> additionalDocuments;
 
@@ -38,5 +41,10 @@ public class DraftDirectionOrder implements HasCaseDocument, HasUploadingDocumen
     @Override
     public CaseDocument getApprovedOrder() {
         return uploadDraftDocument;
+    }
+
+    @JsonIgnore
+    @Override
+    public YesOrNo getIsThisFinalYN() { return isThisFinalYN;
     }
 }
