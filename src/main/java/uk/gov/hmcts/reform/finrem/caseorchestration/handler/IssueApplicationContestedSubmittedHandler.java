@@ -21,9 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHandler {
 
     private final AssignPartiesAccessService assignPartiesAccessService;
-
     private final IssueApplicationContestedEmailCorresponder corresponder;
-
     private final RetryExecutor retryExecutor;
 
     public IssueApplicationContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -55,7 +53,6 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
         String assignRespondentSolicitorError = grantRespondentSolicitor(caseData);
         String sendCorrespondenceError = sendCorrespondence(caseDetails);
-
         boolean isHavingErrors = !StringUtils.isAllBlank(assignRespondentSolicitorError, sendCorrespondenceError);
 
         if (isHavingErrors) {

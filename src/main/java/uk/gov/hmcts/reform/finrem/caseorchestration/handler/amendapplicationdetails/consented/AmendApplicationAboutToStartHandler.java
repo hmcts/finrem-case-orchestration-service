@@ -1,0 +1,58 @@
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.consented;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Intention;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@Slf4j
+@Service
+public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
+
+    public AmendApplicationAboutToStartHandler(FinremCaseDetailsMapper mapper) {
+        super(mapper);
+    }
+
+    @Override
+    public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
+        return CallbackType.ABOUT_TO_START.equals(callbackType)
+            && CaseType.CONSENTED.equals(caseType)
+            && EventType.AMEND_APP_DETAILS.equals(eventType);
+    }
+
+    @Override
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
+
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
+        final Intention intention = caseData.getApplicantIntendsTo();
+
+        if (Intention.APPLY_TO_VARY.equals(intention)) {
+            List<NatureApplication> natureApplicationList =
+                Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
+            natureApplicationList.add(NatureApplication.VARIATION_ORDER);
+            caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureApplicationList);
+        }
+
+        if (caseData.getCivilPartnership() == null) {
+            caseData.setCivilPartnership(YesOrNo.NO);
+        }
+
+        return response(caseData);
+    }
+}

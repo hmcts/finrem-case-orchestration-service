@@ -5,7 +5,10 @@ import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
+import org.assertj.core.api.Assertions;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.function.ThrowingSupplier;
 import org.springframework.web.client.HttpServerErrorException;
@@ -13,8 +16,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
@@ -61,8 +67,14 @@ import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
@@ -97,6 +109,8 @@ public class TestSetUpUtils {
 
     public static final int INTERNAL_SERVER_ERROR = HttpStatus.INTERNAL_SERVER_ERROR.value();
     public static final int BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
+
+    public static final String MOCKED_EVENT_CCD_TYPE = "mockedEventId";
 
     public static FeignException feignError() {
         Response response = Response.builder().status(INTERNAL_SERVER_ERROR)
@@ -278,28 +292,6 @@ public class TestSetUpUtils {
             .caseType(CaseType.CONSENTED)
             .id(CASE_ID_IN_LONG)
             .state(State.APPLICATION_SUBMITTED)
-            .data(caseData)
-            .build();
-    }
-
-    public static CaseDetails defaultConsentedCaseDetailsForVariationOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        List<String> natureOfApplication = List.of("Lump Sum Order",
-            "Periodical Payment Order",
-            "Pension Sharing Order",
-            "Pension Attachment Order",
-            "Pension Compensation Sharing Order",
-            "Pension Compensation Attachment Order",
-            "A settlement or a transfer of property",
-            "Variation Order",
-            "Property Adjustment Order");
-        caseData.put("natureOfApplication2", natureOfApplication);
-        populateApplicantNameAndAddress(caseData);
-        populateRespondentNameAndAddressConsented(caseData);
-
-        return CaseDetails.builder()
-            .caseTypeId(CaseType.CONSENTED.getCcdType())
-            .id(CASE_ID_IN_LONG)
             .data(caseData)
             .build();
     }
@@ -673,5 +665,47 @@ public class TestSetUpUtils {
             any(),
             any()
         );
+    }
+
+    public static void assertCondition(String actual, String expect, boolean shouldContain) {
+        if (shouldContain) {
+            org.assertj.core.api.Assertions.assertThat(actual).contains(expect);
+        } else {
+            org.assertj.core.api.Assertions.assertThat(actual).doesNotContain(expect);
+        }
+    }
+  
+    public static void verifyTemporaryFieldsWereSanitised(FinremAboutToSubmitCallbackHandler aboutToSubmitHandler,
+                                                          FinremCaseDetails finremCaseDetails,
+                                                          FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                          Map<String, Object> temporaryFieldsMap) {
+        FinremCaseData nonSanitisedFinremCaseData = finremCaseDetails.getData();
+
+        CaseDetails callbackRequestCaseDetails = mock(CaseDetails.class);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequestCaseDetails))
+            .thenReturn(finremCaseDetails);
+
+        CallbackRequest callbackRequest = mock(CallbackRequest.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(callbackRequestCaseDetails);
+        when(callbackRequest.getEventId()).thenReturn(MOCKED_EVENT_CCD_TYPE);
+
+        when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)).thenReturn(temporaryFieldsMap);
+
+        ArgumentCaptor<Map> mapCaptor = ArgumentCaptor.forClass(Map.class);
+        FinremCaseData sanitisedFinremCaseData = mock(FinremCaseData.class);
+        when(finremCaseDetailsMapper.mapToFinremCaseData(mapCaptor.capture())).thenReturn(sanitisedFinremCaseData);
+        // to simulate CaseDocument field annotacted with @TemporaryField to be binned
+        lenient().when(finremCaseDetailsMapper.mapToCaseDocument(anyMap())).thenReturn(mock(CaseDocument.class));
+
+        try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
+            EventType eventType = mock(EventType.class);
+            mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
+                .thenReturn(eventType);
+
+            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            verify(finremCaseDetailsMapper).mapToFinremCaseData(mapCaptor.capture());
+            Assertions.assertThat(mapCaptor.getValue()).isEmpty();
+        }
     }
 }

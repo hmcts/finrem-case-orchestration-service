@@ -18,10 +18,12 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CfvMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CitizenDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderScannedDocWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -74,6 +76,9 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @NoArgsConstructor
 public class FinremCaseData implements HasCaseDocument {
 
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private Bin bin;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private CaseDataMetricsWrapper caseDataMetricsWrapper;
@@ -453,6 +458,10 @@ public class FinremCaseData implements HasCaseDocument {
 
     private List<AccessCodeCollection> applicantAccessCodes;
     private List<AccessCodeCollection> respondentAccessCodes;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private CitizenDocumentWrapper citizenDocumentWrapper;
 
     @JsonIgnore
     public CaseDataMetricsWrapper getCaseDataMetricsWrapper() {
@@ -1181,5 +1190,21 @@ public class FinremCaseData implements HasCaseDocument {
             this.notificationAuditWrapper = new NotificationAuditWrapper();
         }
         return notificationAuditWrapper;
+    }
+
+    @JsonIgnore
+    public CitizenDocumentWrapper getCitizenDocumentWrapper() {
+        if (citizenDocumentWrapper == null) {
+            this.citizenDocumentWrapper = new CitizenDocumentWrapper();
+        }
+        return citizenDocumentWrapper;
+    }
+
+    @JsonIgnore
+    public Bin getBin() {
+        if (bin == null) {
+            this.bin = Bin.builder().build();
+        }
+        return bin;
     }
 }

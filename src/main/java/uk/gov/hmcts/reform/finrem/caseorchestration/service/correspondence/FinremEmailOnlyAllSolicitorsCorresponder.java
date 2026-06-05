@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.util.List;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -25,6 +27,17 @@ public abstract class FinremEmailOnlyAllSolicitorsCorresponder extends EmailOnly
             log.info("Sending email correspondence to respondent for Case ID: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
         }
+        if (caseDetails.isContestedApplication()) {
+            final List<IntervenerWrapper> interveners =  caseDetails.getData().getInterveners();
+            interveners.forEach(intervenerWrapper -> {
+                if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
+                    log.info("Sending email correspondence to {} for Case ID: {}",
+                        intervenerWrapper.getIntervenerType().getTypeValue(),
+                        caseDetails.getId());
+                    this.emailIntervenerSolicitor(intervenerWrapper, caseDetails);
+                }
+            });
+        }
     }
 
     protected boolean shouldSendApplicantSolicitorEmail(FinremCaseDetails caseDetails) {
@@ -35,8 +48,7 @@ public abstract class FinremEmailOnlyAllSolicitorsCorresponder extends EmailOnly
         return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
-    protected boolean isEmailToIntervenerSolicitorRequired(FinremCaseDetails caseDetails,
-                                                           IntervenerWrapper intervenerWrapper) {
+    protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
         return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
 
@@ -44,4 +56,7 @@ public abstract class FinremEmailOnlyAllSolicitorsCorresponder extends EmailOnly
 
     protected abstract void emailRespondentSolicitor(FinremCaseDetails caseDetails);
 
+    protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
 }

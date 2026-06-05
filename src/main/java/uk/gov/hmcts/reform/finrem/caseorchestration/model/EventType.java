@@ -35,7 +35,6 @@ public enum EventType {
     GENERAL_APPLICATION("createGeneralApplication"),
     REJECT_GENERAL_APPLICATION("rejectGeneralApplication"),
     CLOSE("FR_close"),
-    MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     NEW_MANAGE_CASE_DOCUMENTS("FR_newManageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
     UPLOAD_APPROVED_ORDER_MH("FR_uploadApprovedOrderMh"),
@@ -98,8 +97,11 @@ public enum EventType {
     FR_HWF_DECISION_MADE("FR_HWFDecisionMade"),
     FR_HWF_DECISION_MADE_FROM_AWAITING_PAYMENT("FR_HWFDecisionMadeFromAwaitingPayment"),
     STOP_REPRESENTING_CLIENT("FR_stopRepresentingClient"),
+    APPLY_NOC_DECISION("applyNocDecision"),
     INVALIDATE_APPLICANT_ACCESS_CODE("CUI_invalidateApplicantAccessCode"),
     INVALIDATE_RESPONDENT_ACCESS_CODE("CUI_invalidateRespondentAccessCode"),
+    CUI_APPLICANT_DOCUMENT_UPLOAD("CUI_applicantUploadDocuments"),
+    CUI_RESPONDENT_DOCUMENT_UPLOAD("CUI_respondentUploadDocuments"),
     @JsonEnumDefaultValue
     NONE("");
 
