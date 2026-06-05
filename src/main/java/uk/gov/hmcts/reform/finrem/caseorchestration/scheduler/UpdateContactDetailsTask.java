@@ -160,7 +160,7 @@ public class UpdateContactDetailsTask extends CsvFileProcessingTask {
         if (!EmailUtils.isValidEmailAddress(added.getEmail())) {
             log.info("Case {} Found invalid added email in RepresentationUpdateHistory: {}", caseId, maskEmail(added.getEmail()));
             added.setEmail(UPDATED_EMAIL);
-            log.info("Case {} added EMAIL UPDATED TO: {}", caseId, UPDATED_EMAIL);
+            log.info("Case {} added EMAIL updated to: {}", caseId, UPDATED_EMAIL);
         }
     }
 
@@ -173,7 +173,7 @@ public class UpdateContactDetailsTask extends CsvFileProcessingTask {
         if (!EmailUtils.isValidEmailAddress(removed.getEmail())) {
             log.info("Case {} Found invalid removed email in RepresentationUpdateHistory: {}", caseId, maskEmail(removed.getEmail()));
             removed.setEmail(UPDATED_EMAIL);
-            log.info("Case {} removed EMAIL UPDATED TO: {}", caseId, UPDATED_EMAIL);
+            log.info("Case {} removed EMAIL updated to: {}", caseId, UPDATED_EMAIL);
         }
     }
 
