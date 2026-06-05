@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePostalAddressService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
@@ -93,6 +94,8 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     private HearingCorrespondenceHelper hearingCorrespondenceHelper;
     @Mock
     private PartyService partyService;
+    @Mock
+    private ValidatePostalAddressService validatePostalAddressService;
 
     private ObjectMapper objectMapper;
 
@@ -106,13 +109,17 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             assignCaseAccessService, finremCaseDetailsMapper, helper, gaDirectionService, partyService);
         aboutToSubmitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
             finremCaseDetailsMapper, helper, gaDirectionService, gaService, manageHearingActionService, generalApplicationsCategoriser,
-            hearingCorrespondenceHelper);
+            hearingCorrespondenceHelper, validatePostalAddressService);
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(
             List.of()
         ).build();
         when(partyService.getAllActivePartyList(any(FinremCaseDetails.class)))
             .thenReturn(dynamicMultiSelectList);
+        when(validatePostalAddressService.validateRequiredPostalAddresses(
+            any(FinremCaseDetails.class),
+            eq(EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
+        )).thenReturn(List.of());
     }
 
     @Test
@@ -482,6 +489,49 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             .isEqualTo(ManageHearingsAction.ADD_HEARING);
         verify(manageHearingActionService).performAddHearing(caseDetails, userAuthorisation);
         verify(manageHearingActionService).updateTabData(caseDetails.getData());
+    }
+
+    @Test
+    void givenPostalValidationErrors_whenHandle_thenResponseContainsPostalErrors() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+
+        when(validatePostalAddressService.validateRequiredPostalAddresses(
+            any(FinremCaseDetails.class),
+            eq(EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
+        )).thenReturn(List.of(
+            "Applicant address details missing. "
+                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification.",
+            "Respondent address details missing. "
+                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification."
+        ));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).containsExactlyInAnyOrder(
+            "Applicant address details missing. "
+                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification.",
+            "Respondent address details missing. "
+                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification."
+        );
+
+        verify(validatePostalAddressService).validateRequiredPostalAddresses(
+            callbackRequest.getCaseDetails(), EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
+    }
+
+    @Test
+    void givenNoPostalValidationErrors_whenHandle_thenResponseContainsEmptyErrorList() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+
+        when(validatePostalAddressService.validateRequiredPostalAddresses(
+            any(FinremCaseDetails.class),
+            eq(EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
+        )).thenReturn(List.of());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).isEmpty();
     }
 
     private DynamicRadioList buildDynamicIntervenerList() {

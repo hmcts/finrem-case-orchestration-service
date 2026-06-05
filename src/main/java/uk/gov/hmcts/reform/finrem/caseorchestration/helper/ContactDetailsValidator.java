@@ -481,4 +481,22 @@ public class ContactDetailsValidator {
     private static boolean isConsented(FinremCaseData caseData) {
         return caseData.getCcdCaseType() == CaseType.CONSENTED;
     }
+
+    public static boolean checkForApplicantPostalAddress(ContactDetailsWrapper wrapper) {
+        return postalAddressIsMissing(wrapper.getApplicantAddress());
+    }
+
+    public static boolean checkForRespondentPostalAddress(ContactDetailsWrapper wrapper) {
+        return postalAddressIsMissing(wrapper.getRespondentAddress());
+    }
+
+    private static boolean postalAddressIsMissing(Address address) {
+        if (address == null || address.isEmpty()) {
+            return true;
+        }
+
+        return isBlank(address.getAddressLine1())
+            || isBlank(address.getPostCode());
+    }
+
 }

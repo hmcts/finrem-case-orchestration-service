@@ -931,4 +931,105 @@ class ContactDetailsValidatorTest {
 
         return policy;
     }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("postalAddressScenarios")
+    void shouldCheckForMissingApplicantPostalAddress(String description, Address address, boolean expectedResult) {
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .applicantAddress(address)
+            .build();
+
+        boolean result = ContactDetailsValidator.checkForApplicantPostalAddress(wrapper);
+        assertThat(result).isEqualTo(expectedResult);
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("postalAddressScenarios")
+    void shouldCheckForMissingRespondentPostalAddress(String description, Address address, boolean expectedResult) {
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .respondentAddress(address)
+            .build();
+
+        boolean result = ContactDetailsValidator.checkForRespondentPostalAddress(wrapper);
+        assertThat(result).isEqualTo(expectedResult);
+    }
+
+    private static Stream<Arguments> postalAddressScenarios() {
+        return Stream.of(
+            Arguments.of(
+                "Valid address",
+                Address.builder()
+                    .addressLine1("AddressLine1")
+                    .addressLine2("AddressLine2")
+                    .addressLine3("AddressLine3")
+                    .county("County")
+                    .country("Country")
+                    .postTown("Town")
+                    .postCode("SW1A 1AA")
+                    .build(),
+                false
+            ),
+            Arguments.of(
+                "Null address",
+                null,
+                true
+            ),
+            Arguments.of(
+                "Empty address",
+                Address.builder()
+                    .build(),
+                true
+            ),
+            Arguments.of(
+                "Blank address line 1 field",
+                Address.builder()
+                    .addressLine1("")
+                    .addressLine2("")
+                    .addressLine3("")
+                    .county("County")
+                    .country("Country")
+                    .postTown("Town")
+                    .postCode("SW1A 1AA")
+                    .build(),
+                true
+            ),
+            Arguments.of(
+                "Missing address line 1 field",
+                Address.builder()
+                    .addressLine2("")
+                    .addressLine3("")
+                    .county("County")
+                    .country("Country")
+                    .postTown("Town")
+                    .postCode("SW1A 1AA")
+                    .build(),
+                true
+            ),
+            Arguments.of(
+                "Blank postcode field",
+                Address.builder()
+                    .addressLine1("AddressLine1")
+                    .addressLine2("AddressLine2")
+                    .addressLine3("AddressLine3")
+                    .county("County")
+                    .country("Country")
+                    .postTown("Town")
+                    .postCode("")
+                    .build(),
+                true
+            ),
+            Arguments.of(
+                "Missing postcode field",
+                Address.builder()
+                    .addressLine1("AddressLine1")
+                    .addressLine2("AddressLine2")
+                    .addressLine3("AddressLine3")
+                    .county("County")
+                    .country("Country")
+                    .postTown("Town")
+                    .build(),
+                true
+            )
+        );
+    }
 }
