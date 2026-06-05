@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecased
  * in contested financial remedy cases.
  *
  * <p>This handler contains logic migrated from
- * {@link ManageCaseDocumentsContestedAboutToSubmitHandler}, which is
+ * ManageCaseDocumentsContestedAboutToSubmitHandler, which is
  * scheduled for removal. It preserves the existing behaviour while
  * aligning with the updated handler structure.
  *
