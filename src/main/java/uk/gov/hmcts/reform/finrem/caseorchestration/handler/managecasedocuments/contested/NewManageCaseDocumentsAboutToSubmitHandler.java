@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managecasedocuments;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managecasedocuments.contested;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +27,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCase
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -56,7 +58,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecased
  */
 @Slf4j
 @Service
-public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
+public class NewManageCaseDocumentsAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
     private static final String PARTY_NOT_PRESENT_ERROR_MESSAGE = "%s not present on the case, do you want to continue?";
     private static final String INTERVENER_1 = "Intervener 1";
     private static final String INTERVENER_2 = "Intervener 2";
@@ -73,19 +75,16 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
 
     private final List<DocumentHandler> documentHandlers;
     private final UploadedDocumentService uploadedDocumentService;
-    private final EvidenceManagementDeleteService evidenceManagementDeleteService;
     private final FeatureToggleService featureToggleService;
 
     @Autowired
-    public NewManageCaseDocumentsContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                               List<DocumentHandler> documentHandlers,
-                                                               UploadedDocumentService uploadedDocumentService,
-                                                               EvidenceManagementDeleteService evidenceManagementDeleteService,
-                                                               FeatureToggleService featureToggleService) {
+    public NewManageCaseDocumentsAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
+                                                      List<DocumentHandler> documentHandlers,
+                                                      UploadedDocumentService uploadedDocumentService,
+                                                      FeatureToggleService featureToggleService) {
         super(mapper);
         this.documentHandlers = documentHandlers;
         this.uploadedDocumentService = uploadedDocumentService;
-        this.evidenceManagementDeleteService = evidenceManagementDeleteService;
         this.featureToggleService = featureToggleService;
     }
 
@@ -109,7 +108,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
         replaceManagedDocumentsInCollectionType(caseData);
         addUploadDateToNewDocuments(caseData, caseDataBefore);
         clearLegacyCollections(caseData);
-        deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
+        binRemovedDocuments(caseDataBefore, caseData);
 
         return response(caseData, warnings, null);
     }
@@ -184,24 +183,12 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
             .anyMatch(doc -> caseDocumentParty.equals(doc.getCaseDocumentParty()));
     }
 
-    private void deleteRemovedDocuments(FinremCaseData caseData,
-                                        FinremCaseData caseDataBefore,
-                                        String userAuthorisation) {
+    private void binRemovedDocuments(FinremCaseData caseDataBefore,
+                                     FinremCaseData caseData) {
         if (featureToggleService.isManageCaseDocsDeleteEnabled()) {
-            List<UploadCaseDocumentCollection> allCollectionsBefore =
-                caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
-            allCollectionsBefore.removeAll(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
-            allCollectionsBefore.stream().map(this::getDocumentUrl)
-                .forEach(docUrl -> evidenceManagementDeleteService.delete(docUrl, userAuthorisation));
+            extractDeletedCaseDocuments(caseDataBefore, caseData)
+                .forEach(doc -> caseData.getBin().binCaseDocument(doc));
         }
-    }
-
-    private String getDocumentUrl(UploadCaseDocumentCollection documentCollection) {
-        return ofNullable(documentCollection)
-            .map(UploadCaseDocumentCollection::getUploadCaseDocument)
-            .map(UploadCaseDocument::getCaseDocuments)
-            .map(CaseDocument::getDocumentUrl)
-            .orElseThrow(() -> new IllegalStateException("Document URL is missing"));
     }
 
     private void addDefaultsToAdministrativeDocuments(List<UploadCaseDocumentCollection> managedCollections) {
@@ -218,5 +205,37 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
             uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
             uploadCaseDocument.setCaseDocumentFdr(YesOrNo.YES);
         }
+    }
+
+    private List<CaseDocument> extractDeletedCaseDocuments(FinremCaseData before, FinremCaseData current) {
+        List<CaseDocument> deletedDocuments = extractDeletedDocuments(
+            emptyIfNull(before.getUploadCaseDocumentWrapper().getAllManageableCollections()).stream()
+                .map(UploadCaseDocumentCollection::getUploadCaseDocument)
+                .filter(Objects::nonNull)
+                .map(UploadCaseDocument::getCaseDocuments),
+
+            emptyIfNull(current.getUploadCaseDocumentWrapper().getAllManageableCollections()).stream()
+                .map(UploadCaseDocumentCollection::getUploadCaseDocument)
+                .filter(Objects::nonNull)
+                .map(UploadCaseDocument::getCaseDocuments)
+        );
+
+        return deletedDocuments.stream().toList();
+    }
+
+    private List<CaseDocument> extractDeletedDocuments(
+        Stream<CaseDocument> previousDocuments,
+        Stream<CaseDocument> currentDocuments
+    ) {
+        Set<String> currentDocumentUrls = currentDocuments
+            .filter(Objects::nonNull)
+            .map(CaseDocument::getDocumentUrl)
+            .collect(Collectors.toSet());
+
+        return previousDocuments
+            .filter(Objects::nonNull)
+            .filter(previousDocument ->
+                !currentDocumentUrls.contains(previousDocument.getDocumentUrl()))
+            .toList();
     }
 }

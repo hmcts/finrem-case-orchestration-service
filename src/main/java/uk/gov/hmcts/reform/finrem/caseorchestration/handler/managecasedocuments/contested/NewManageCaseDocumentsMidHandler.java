@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managecasedocuments;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managecasedocuments.contested;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,12 +24,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecased
 
 @Slf4j
 @Service
-public class NewManageCaseDocumentsContestedMidHandler extends FinremCallbackHandler {
+public class NewManageCaseDocumentsMidHandler extends FinremCallbackHandler {
 
     private final LegacyConfidentialDocumentsService legacyConfidentialDocumentsService;
 
-    public NewManageCaseDocumentsContestedMidHandler(FinremCaseDetailsMapper mapper,
-                                                     LegacyConfidentialDocumentsService legacyConfidentialDocumentsService) {
+    public NewManageCaseDocumentsMidHandler(FinremCaseDetailsMapper mapper,
+                                            LegacyConfidentialDocumentsService legacyConfidentialDocumentsService) {
         super(mapper);
         this.legacyConfidentialDocumentsService = legacyConfidentialDocumentsService;
     }
