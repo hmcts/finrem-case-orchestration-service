@@ -32,8 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -183,11 +181,12 @@ public class ManageCaseDocumentsAboutToSubmitHandler extends FinremAboutToSubmit
             .anyMatch(doc -> caseDocumentParty.equals(doc.getCaseDocumentParty()));
     }
 
-    private void binRemovedDocuments(FinremCaseData caseDataBefore,
-                                     FinremCaseData caseData) {
+    private void binRemovedDocuments(FinremCaseData beforeCaseData,
+                                     FinremCaseData currentCaseData) {
         if (featureToggleService.isManageCaseDocsDeleteEnabled()) {
-            extractDeletedCaseDocuments(caseDataBefore, caseData)
-                .forEach(doc -> caseData.getBin().binCaseDocument(doc));
+            currentCaseData.getBin().binDeletedCaseDocument(
+                extractCaseDocuments(beforeCaseData), extractCaseDocuments(currentCaseData)
+            );
         }
     }
 
@@ -207,35 +206,10 @@ public class ManageCaseDocumentsAboutToSubmitHandler extends FinremAboutToSubmit
         }
     }
 
-    private List<CaseDocument> extractDeletedCaseDocuments(FinremCaseData before, FinremCaseData current) {
-        List<CaseDocument> deletedDocuments = extractDeletedDocuments(
-            emptyIfNull(before.getUploadCaseDocumentWrapper().getAllManageableCollections()).stream()
-                .map(UploadCaseDocumentCollection::getUploadCaseDocument)
-                .filter(Objects::nonNull)
-                .map(UploadCaseDocument::getCaseDocuments),
-
-            emptyIfNull(current.getUploadCaseDocumentWrapper().getAllManageableCollections()).stream()
-                .map(UploadCaseDocumentCollection::getUploadCaseDocument)
-                .filter(Objects::nonNull)
-                .map(UploadCaseDocument::getCaseDocuments)
-        );
-
-        return deletedDocuments.stream().toList();
-    }
-
-    private List<CaseDocument> extractDeletedDocuments(
-        Stream<CaseDocument> previousDocuments,
-        Stream<CaseDocument> currentDocuments
-    ) {
-        Set<String> currentDocumentUrls = currentDocuments
+    private Stream<CaseDocument> extractCaseDocuments(FinremCaseData caseData) {
+        return emptyIfNull(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections()).stream()
+            .map(UploadCaseDocumentCollection::getUploadCaseDocument)
             .filter(Objects::nonNull)
-            .map(CaseDocument::getDocumentUrl)
-            .collect(Collectors.toSet());
-
-        return previousDocuments
-            .filter(Objects::nonNull)
-            .filter(previousDocument ->
-                !currentDocumentUrls.contains(previousDocument.getDocumentUrl()))
-            .toList();
+            .map(UploadCaseDocument::getCaseDocuments);
     }
 }

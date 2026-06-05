@@ -233,14 +233,12 @@ class ManageCaseDocumentsAboutToSubmitHandlerTest {
         when(featureToggleService.isManageCaseDocsDeleteEnabled()).thenReturn(featureToggleEnabled);
 
         CaseDocument removedDoc = caseDocument("removed.pdf");
-        CaseDocument retainedDoc = caseDocument("retained.pdf");
 
         FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .uploadCaseDocumentWrapper(wrapperWithDocuments(removedDoc, retainedDoc))
+            .uploadCaseDocumentWrapper(wrapperWithDocuments(removedDoc))
             .build();
 
         FinremCaseData caseData = FinremCaseData.builder()
-            .uploadCaseDocumentWrapper(wrapperWithDocuments(retainedDoc))
             .build();
 
         var response = underTest.handle(
