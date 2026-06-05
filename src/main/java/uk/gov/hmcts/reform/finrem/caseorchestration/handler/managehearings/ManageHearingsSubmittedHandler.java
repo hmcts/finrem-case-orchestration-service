@@ -147,6 +147,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
                 finremCaseDetailsMapper.mapToFinremCaseDetails(latestCaseDetails).getData())
         );
     }
+
     private Map<String, Object> flipSentFlags(FinremCaseData latestData) {
 
         NotificationAuditWrapper wrapper = latestData.getNotificationAuditWrapper();
