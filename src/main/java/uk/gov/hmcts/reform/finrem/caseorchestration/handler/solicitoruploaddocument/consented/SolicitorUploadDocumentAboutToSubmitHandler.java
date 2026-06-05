@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitC
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
@@ -17,12 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
@@ -69,12 +66,8 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
     }
 
     private void binDeletedCaseDocuments(FinremCaseData before, FinremCaseData current) {
-        extractDeletedCaseDocuments(before, current).forEach(del ->
-            current.getBin().binCaseDocument(del));
-    }
-
-    private List<CaseDocument> extractDeletedCaseDocuments(FinremCaseData before, FinremCaseData current) {
-        List<CaseDocument> deletedSolDocuments = extractDeletedDocuments(
+        Bin bin = current.getBin();
+        bin.binDeletedCaseDocument(
             emptyIfNull(before.getSolUploadDocuments()).stream()
                 .map(SolUploadDocumentCollection::getValue)
                 .filter(Objects::nonNull)
@@ -85,8 +78,7 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
                 .filter(Objects::nonNull)
                 .map(SolUploadDocument::getDocumentLink)
         );
-
-        List<CaseDocument> deletedPensionDocuments = extractDeletedDocuments(
+        bin.binDeletedCaseDocument(
             emptyIfNull(before.getPensionCollection()).stream()
                 .map(PensionTypeCollection::getTypedCaseDocument)
                 .filter(Objects::nonNull)
@@ -97,27 +89,5 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
                 .filter(Objects::nonNull)
                 .map(PensionType::getPensionDocument)
         );
-
-        return Stream.concat(
-                deletedSolDocuments.stream(),
-                deletedPensionDocuments.stream()
-            )
-            .toList();
-    }
-
-    private List<CaseDocument> extractDeletedDocuments(
-        Stream<CaseDocument> previousDocuments,
-        Stream<CaseDocument> currentDocuments
-    ) {
-        Set<String> currentDocumentUrls = currentDocuments
-            .filter(Objects::nonNull)
-            .map(CaseDocument::getDocumentUrl)
-            .collect(Collectors.toSet());
-
-        return previousDocuments
-            .filter(Objects::nonNull)
-            .filter(previousDocument ->
-                !currentDocumentUrls.contains(previousDocument.getDocumentUrl()))
-            .toList();
     }
 }
