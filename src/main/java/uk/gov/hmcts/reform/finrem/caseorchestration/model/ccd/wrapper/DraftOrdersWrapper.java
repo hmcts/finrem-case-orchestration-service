@@ -48,11 +48,9 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     private String consentApplicationGuidanceText;
 
     @TemporaryField
-    @JsonProperty("uploadSuggestedDraftOrder")
     private UploadSuggestedDraftOrder uploadSuggestedDraftOrder;
 
     @TemporaryField
-    @JsonProperty("uploadAgreedDraftOrder")
     private UploadAgreedDraftOrder uploadAgreedDraftOrder;
 
     @JsonProperty("draftOrdersReviewCollection")
