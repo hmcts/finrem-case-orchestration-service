@@ -38,7 +38,7 @@ class RetryExecutorIntegrationTest {
     class RunWithRetryTest {
 
         @ParameterizedTest(name = "should retry on status {0} and succeed")
-        @ValueSource(ints = {500, 503, 504})
+        @ValueSource(ints = {500, 502, 503, 504})
         void shouldRetryOnRetryableStatus(int status) throws Exception {
             AtomicInteger counter = new AtomicInteger();
 
@@ -100,7 +100,7 @@ class RetryExecutorIntegrationTest {
     class SupplyWithRetryTest {
 
         @ParameterizedTest(name = "should retry on status {0} and succeed")
-        @ValueSource(ints = {500, 503, 504})
+        @ValueSource(ints = {500, 502, 503, 504})
         void shouldRetryOnRetryableStatus(int status) throws Exception {
             AtomicInteger counter = new AtomicInteger();
 
