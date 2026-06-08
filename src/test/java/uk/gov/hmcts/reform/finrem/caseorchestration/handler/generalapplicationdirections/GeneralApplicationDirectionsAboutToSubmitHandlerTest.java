@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -121,7 +122,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             .thenReturn(dynamicMultiSelectList);
         when(validatePostalAddressService.validateRequiredPostalAddresses(
             any(FinremCaseDetails.class),
-            eq(EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
+            eq(GENERAL_APPLICATION_DIRECTIONS_MH)
         )).thenReturn(List.of());
     }
 
@@ -499,8 +500,8 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
 
         when(validatePostalAddressService.validateRequiredPostalAddresses(
-            any(FinremCaseDetails.class),
-            eq(EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
+            callbackRequest.getCaseDetails(),
+            GENERAL_APPLICATION_DIRECTIONS_MH
         )).thenReturn(List.of(
             "Applicant address details missing. "
                 + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification.",
@@ -519,7 +520,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         );
 
         verify(validatePostalAddressService).validateRequiredPostalAddresses(
-            callbackRequest.getCaseDetails(), EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
+            callbackRequest.getCaseDetails(), GENERAL_APPLICATION_DIRECTIONS_MH);
     }
 
     @Test
@@ -528,15 +529,18 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         when(validatePostalAddressService.validateRequiredPostalAddresses(
             any(FinremCaseDetails.class),
-            eq(EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
+            any(EventType.class)
         )).thenReturn(List.of());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors()).isEmpty();
+
+        verify(validatePostalAddressService).validateRequiredPostalAddresses(
+            callbackRequest.getCaseDetails(), GENERAL_APPLICATION_DIRECTIONS_MH);
     }
-  
+
     void shouldRemoveGadPreviewWhenHandled() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
