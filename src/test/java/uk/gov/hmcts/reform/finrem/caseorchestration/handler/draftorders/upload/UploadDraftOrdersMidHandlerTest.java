@@ -102,7 +102,7 @@ class UploadDraftOrdersMidHandlerTest {
     }
 
     @Test
-    void givenNonAcceleratedOrderAndFdaWithin14Days_thenNoValidationError() {
+    void givenAgreedDraftOrderAndFdaWithin14Days_thenNoValidationError() {
         FinremCaseData caseData = buildCaseDataWithTypeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
 
         when(hearingService.getHearingType(any(), any())).thenReturn(FDA.getId());
