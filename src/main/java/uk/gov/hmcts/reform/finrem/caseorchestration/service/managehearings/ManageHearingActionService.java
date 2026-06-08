@@ -128,8 +128,6 @@ public class ManageHearingActionService {
             generateOutOfCourtResolution(finremCaseDetails, authToken, documentMap);
         }
 
-        setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
-
         addDocumentsToCollection(documentMap, hearingWrapper);
         // Although the working hearing is cleared, the working hearing ID is retained for use in submitted handler.
         hearingWrapper.setWorkingHearing(null);
@@ -184,7 +182,6 @@ public class ManageHearingActionService {
         );
 
         generateVacateOrAdjournNotice(finremCaseDetails, courtregion, authToken, documentMap, action);
-        generateVacateNoticeCoverSheetIfHearingNotRelisted(hearingsWrapper, finremCaseDetails, authToken);
 
         addDocumentsToCollection(documentMap, hearingsWrapper);
 
