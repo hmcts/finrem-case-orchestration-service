@@ -933,101 +933,214 @@ class ContactDetailsValidatorTest {
     }
 
     @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("postalAddressScenarios")
-    void shouldCheckForMissingApplicantPostalAddress(String description, Address address, boolean expectedResult) {
+    @MethodSource("applicantPostalAddressScenarios")
+    void shouldCheckForMissingApplicantPostalAddress(String description, YesOrNo applicantRepresented, Address address, boolean expectedResult) {
         ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .applicantRepresented(applicantRepresented)
             .applicantAddress(address)
             .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(wrapper)
+            .build();
 
-        boolean result = ContactDetailsValidator.checkForApplicantPostalAddress(wrapper);
+        boolean result = ContactDetailsValidator.checkForApplicantPostalAddress(caseData, wrapper);
         assertThat(result).isEqualTo(expectedResult);
     }
 
     @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("postalAddressScenarios")
-    void shouldCheckForMissingRespondentPostalAddress(String description, Address address, boolean expectedResult) {
+    @MethodSource("applicantSolicitorPostalAddressScenarios")
+    void shouldCheckForMissingApplicantSolicitorPostalAddress(String description, YesOrNo applicantRepresented,
+                                                              Address address, boolean expectedResult) {
         ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
-            .respondentAddress(address)
+            .applicantRepresented(applicantRepresented)
+            .applicantSolicitorAddress(address)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(wrapper)
             .build();
 
-        boolean result = ContactDetailsValidator.checkForRespondentPostalAddress(wrapper);
+        boolean result = ContactDetailsValidator.checkForApplicantPostalAddress(caseData, wrapper);
         assertThat(result).isEqualTo(expectedResult);
     }
 
-    private static Stream<Arguments> postalAddressScenarios() {
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("respondentPostalAddressScenarios")
+    void shouldCheckForMissingRespondentPostalAddress(String description, YesOrNo applicantRepresented, Address address, boolean expectedResult) {
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .contestedRespondentRepresented(applicantRepresented)
+            .respondentAddress(address)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(wrapper)
+            .build();
+
+        boolean result = ContactDetailsValidator.checkForRespondentPostalAddress(caseData, wrapper);
+        assertThat(result).isEqualTo(expectedResult);
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("respondentSolicitorPostalAddressScenarios")
+    void shouldCheckForMissingRespondentSolicitorPostalAddress(String description, YesOrNo applicantRepresented,
+                                                               Address address, boolean expectedResult) {
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .contestedRespondentRepresented(applicantRepresented)
+            .respondentSolicitorAddress(address)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(wrapper)
+            .build();
+
+        boolean result = ContactDetailsValidator.checkForRespondentPostalAddress(caseData, wrapper);
+        assertThat(result).isEqualTo(expectedResult);
+    }
+
+    private static Stream<Arguments> applicantPostalAddressScenarios() {
+        Address validAddress = Address.builder()
+            .addressLine1("AddressLine1")
+            .addressLine2("AddressLine2")
+            .addressLine3("AddressLine3")
+            .county("County")
+            .country("Country")
+            .postTown("Town")
+            .postCode("SW1A 1AA")
+            .build();
+
+        Address invalidAddress = Address.builder()
+            .addressLine1("")
+            .postCode("")
+            .build();
+
         return Stream.of(
             Arguments.of(
-                "Valid address",
-                Address.builder()
-                    .addressLine1("AddressLine1")
-                    .addressLine2("AddressLine2")
-                    .addressLine3("AddressLine3")
-                    .county("County")
-                    .country("Country")
-                    .postTown("Town")
-                    .postCode("SW1A 1AA")
-                    .build(),
+                "Applicant not represented + Valid address",
+                YesOrNo.NO,
+                validAddress,
                 false
             ),
             Arguments.of(
-                "Null address",
+                "Applicant not represented + Missing address",
+                YesOrNo.NO,
+                invalidAddress,
+                true
+            ),
+            Arguments.of(
+                "Applicant not represented + Null address",
+                YesOrNo.NO,
                 null,
                 true
+            )
+        );
+    }
+
+    private static Stream<Arguments> applicantSolicitorPostalAddressScenarios() {
+        Address validAddress = Address.builder()
+            .addressLine1("AddressLine1")
+            .addressLine2("AddressLine2")
+            .addressLine3("AddressLine3")
+            .county("County")
+            .country("Country")
+            .postTown("Town")
+            .postCode("SW1A 1AA")
+            .build();
+
+        Address invalidAddress = Address.builder()
+            .addressLine1("")
+            .postCode("")
+            .build();
+
+        return Stream.of(
+            Arguments.of(
+                "Applicant is represented + Valid address",
+                YesOrNo.YES,
+                validAddress,
+                false
             ),
             Arguments.of(
-                "Empty address",
-                Address.builder()
-                    .build(),
+                "Applicant is represented + Missing address",
+                YesOrNo.YES,
+                invalidAddress,
                 true
             ),
             Arguments.of(
-                "Blank address line 1 field",
-                Address.builder()
-                    .addressLine1("")
-                    .addressLine2("")
-                    .addressLine3("")
-                    .county("County")
-                    .country("Country")
-                    .postTown("Town")
-                    .postCode("SW1A 1AA")
-                    .build(),
+                "Applicant is represented + Null address",
+                YesOrNo.YES,
+                null,
+                true
+            )
+        );
+    }
+
+    private static Stream<Arguments> respondentPostalAddressScenarios() {
+        Address validAddress = Address.builder()
+            .addressLine1("AddressLine1")
+            .addressLine2("AddressLine2")
+            .addressLine3("AddressLine3")
+            .county("County")
+            .country("Country")
+            .postTown("Town")
+            .postCode("SW1A 1AA")
+            .build();
+
+        Address invalidAddress = Address.builder()
+            .addressLine1("")
+            .postCode("")
+            .build();
+
+        return Stream.of(
+            Arguments.of(
+                "Respondent not represented + Valid address",
+                YesOrNo.NO,
+                validAddress,
+                false
+            ),
+            Arguments.of(
+                "Respondent not represented + Missing address",
+                YesOrNo.NO,
+                invalidAddress,
                 true
             ),
             Arguments.of(
-                "Missing address line 1 field",
-                Address.builder()
-                    .addressLine2("")
-                    .addressLine3("")
-                    .county("County")
-                    .country("Country")
-                    .postTown("Town")
-                    .postCode("SW1A 1AA")
-                    .build(),
+                "Respondent not represented + Null address",
+                YesOrNo.NO,
+                null,
+                true
+            )
+        );
+    }
+
+    private static Stream<Arguments> respondentSolicitorPostalAddressScenarios() {
+        Address validAddress = Address.builder()
+            .addressLine1("AddressLine1")
+            .addressLine2("AddressLine2")
+            .addressLine3("AddressLine3")
+            .county("County")
+            .country("Country")
+            .postTown("Town")
+            .postCode("SW1A 1AA")
+            .build();
+
+        Address invalidAddress = Address.builder()
+            .addressLine1("")
+            .postCode("")
+            .build();
+
+        return Stream.of(
+            Arguments.of(
+                "Respondent is represented + Valid address",
+                YesOrNo.YES,
+                validAddress,
+                false
+            ),
+            Arguments.of(
+                "Respondent is represented + Missing address",
+                YesOrNo.YES,
+                invalidAddress,
                 true
             ),
             Arguments.of(
-                "Blank postcode field",
-                Address.builder()
-                    .addressLine1("AddressLine1")
-                    .addressLine2("AddressLine2")
-                    .addressLine3("AddressLine3")
-                    .county("County")
-                    .country("Country")
-                    .postTown("Town")
-                    .postCode("")
-                    .build(),
-                true
-            ),
-            Arguments.of(
-                "Missing postcode field",
-                Address.builder()
-                    .addressLine1("AddressLine1")
-                    .addressLine2("AddressLine2")
-                    .addressLine3("AddressLine3")
-                    .county("County")
-                    .country("Country")
-                    .postTown("Town")
-                    .build(),
+                "Respondent is represented + Null address",
+                YesOrNo.YES,
+                null,
                 true
             )
         );

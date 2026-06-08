@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -524,12 +523,41 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     }
 
     @Test
+    void givenRepresentedPostalValidationErrors_whenHandler_thenResponseContainsPostalErrors() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+
+        when(validatePostalAddressService.validateRequiredPostalAddresses(
+            callbackRequest.getCaseDetails(),
+            GENERAL_APPLICATION_DIRECTIONS_MH
+        )).thenReturn(List.of(
+            "Applicant solicitor address details missing. "
+                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification.",
+            "Respondent solicitor address details missing. "
+                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification."
+        ));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).containsExactlyInAnyOrder(
+            "Applicant solicitor address details missing. "
+                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification.",
+            "Respondent solicitor address details missing. "
+                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification."
+        );
+
+        verify(validatePostalAddressService).validateRequiredPostalAddresses(
+            callbackRequest.getCaseDetails(), GENERAL_APPLICATION_DIRECTIONS_MH
+        );
+    }
+
+    @Test
     void givenNoPostalValidationErrors_whenHandle_thenResponseContainsEmptyErrorList() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
 
         when(validatePostalAddressService.validateRequiredPostalAddresses(
-            any(FinremCaseDetails.class),
-            any(EventType.class)
+            callbackRequest.getCaseDetails(),
+            GENERAL_APPLICATION_DIRECTIONS_MH
         )).thenReturn(List.of());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
@@ -539,6 +567,25 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         verify(validatePostalAddressService).validateRequiredPostalAddresses(
             callbackRequest.getCaseDetails(), GENERAL_APPLICATION_DIRECTIONS_MH);
+    }
+
+    @Test
+    void givenNoRepresentedValidationErrors_whenHandle_thenResponseContainsEmptyErrorList() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+
+        when(validatePostalAddressService.validateRequiredPostalAddresses(
+            callbackRequest.getCaseDetails(),
+            GENERAL_APPLICATION_DIRECTIONS_MH
+        )).thenReturn(List.of());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).isEmpty();
+
+        verify(validatePostalAddressService).validateRequiredPostalAddresses(
+            callbackRequest.getCaseDetails(), GENERAL_APPLICATION_DIRECTIONS_MH
+        );
     }
 
     void shouldRemoveGadPreviewWhenHandled() {

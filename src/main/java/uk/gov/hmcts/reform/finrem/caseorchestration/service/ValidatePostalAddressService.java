@@ -25,12 +25,20 @@ public class ValidatePostalAddressService {
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
         List<String> errors = new ArrayList<>();
 
-        if (ContactDetailsValidator.checkForApplicantPostalAddress(wrapper)) {
+        if (ContactDetailsValidator.checkForApplicantPostalAddress(caseData, wrapper) && !caseData.isApplicantRepresentedByASolicitor()) {
             errors.add(String.format(ERROR_MESSAGE, "Applicant", eventType));
         }
 
-        if (ContactDetailsValidator.checkForRespondentPostalAddress(wrapper)) {
+        if (ContactDetailsValidator.checkForApplicantPostalAddress(caseData, wrapper) && caseData.isApplicantRepresentedByASolicitor()) {
+            errors.add(String.format(ERROR_MESSAGE, "Applicant solicitor", eventType));
+        }
+
+        if (ContactDetailsValidator.checkForRespondentPostalAddress(caseData, wrapper) && !caseData.isRespondentRepresentedByASolicitor()) {
             errors.add(String.format(ERROR_MESSAGE, "Respondent", eventType));
+        }
+
+        if (ContactDetailsValidator.checkForRespondentPostalAddress(caseData, wrapper) && caseData.isRespondentRepresentedByASolicitor()) {
+            errors.add(String.format(ERROR_MESSAGE, "Respondent solicitor", eventType));
         }
 
         return errors;

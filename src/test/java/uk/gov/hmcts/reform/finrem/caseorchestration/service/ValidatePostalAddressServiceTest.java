@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -17,85 +16,139 @@ import java.util.List;
 @ExtendWith(MockitoExtension.class)
 public class ValidatePostalAddressServiceTest {
 
-    private static final EventType EVENT_NAME = EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
     private static final String ERROR_TEMPLATE =
         "%s address details missing. Unable to complete %s until party address details are added to avoid failed postal notification.";
 
-    @InjectMocks
-    ValidatePostalAddressService validatePostalAddressService;
-
+    private ValidatePostalAddressService validatePostalAddressService;
     private FinremCaseDetails caseDetails;
 
     @BeforeEach
     public void setUp() {
-        Address applicantAddress = Address.builder()
-            .addressLine1("Address Line 1")
-            .addressLine2("Address Line 2")
-            .addressLine3("Address Line 3")
-            .county("County")
-            .country("Country")
-            .postTown("Post Town")
-            .postCode("SW1A 1AA")
-            .build();
+        validatePostalAddressService = new ValidatePostalAddressService();
+        caseDetails = new FinremCaseDetails();
+        FinremCaseData caseData = new FinremCaseData();
+        ContactDetailsWrapper wrapper = new ContactDetailsWrapper();
 
-        Address respondentAddress = Address.builder()
-            .addressLine1("Address Line 1")
-            .addressLine2("Address Line 2")
-            .addressLine3("Address Line 3")
-            .county("County")
-            .country("Country")
-            .postTown("Post Town")
-            .postCode("EC1A 1AA")
-            .build();
-
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
-            .applicantAddress(applicantAddress)
-            .applicantResideOutsideUK(YesOrNo.NO)
-            .respondentAddress(respondentAddress)
-            .respondentResideOutsideUK(YesOrNo.NO)
-            .build();
-
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapper)
-            .build();
-
-        caseDetails = FinremCaseDetails.builder()
-            .data(caseData)
-            .build();
+        caseData.setContactDetailsWrapper(wrapper);
+        caseDetails.setData(caseData);
     }
 
     @Test
-    public void shouldReturnEmpty_WhenBothApplicantAndRespondentPostalAddresses_ArePresent() {
-        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EVENT_NAME);
+    public void shouldReturnNoErrors_WhenBothRepresentedAndBothPostalAddresses_ArePresent() {
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorAddress(buildValidAddress());
+        caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorAddress(buildValidAddress());
+
+        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EventType.NONE);
 
         assert errors.isEmpty();
     }
 
     @Test
-    public void shouldReturnApplicantErrorMessage_WhenApplicantPostalAddress_IsMissing() {
-        caseDetails.getData().getContactDetailsWrapper().setApplicantAddress(null);
-        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EVENT_NAME);
+    public void shouldReturnNoErrors_WhenBothNotRepresentedAndPostalAddresses_ArePresent() {
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantAddress(buildValidAddress());
+        caseDetails.getData().getContactDetailsWrapper().setRespondentAddress(buildValidAddress());
 
-        assert errors.contains(ERROR_TEMPLATE.formatted("Applicant", EVENT_NAME));
+        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EventType.NONE);
+
+        assert errors.isEmpty();
     }
 
     @Test
-    public void shouldReturnRespondentErrorMessage_WhenRespondentPostalAddress_IsMissing() {
-        caseDetails.getData().getContactDetailsWrapper().setRespondentAddress(null);
-        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EVENT_NAME);
+    public void shouldReturnApplicantError_WhenApplicantNotRepresentedAndApplicantPostalAddress_IsMissing() {
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantAddress(buildInvalidAddress());
 
-        assert errors.contains(ERROR_TEMPLATE.formatted("Respondent", EVENT_NAME));
+        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EventType.NONE);
+
+        assert errors.contains(String.format(ERROR_TEMPLATE, "Applicant", EventType.NONE));
     }
 
     @Test
-    public void shouldReturnBothErrorMessages_WhenBothApplicantAndRespondentPostalAddresses_AreMissing() {
-        caseDetails.getData().getContactDetailsWrapper().setApplicantAddress(null);
-        caseDetails.getData().getContactDetailsWrapper().setRespondentAddress(null);
-        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EVENT_NAME);
+    public void shouldReturnApplicantSolicitorError_WhenApplicantIsRepresentedAndApplicantPostalAddress_IsMissing() {
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorAddress(buildInvalidAddress());
+
+        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EventType.NONE);
+
+        assert errors.contains(String.format(ERROR_TEMPLATE, "Applicant solicitor", EventType.NONE));
+    }
+
+    @Test
+    public void shouldReturnRespondentError_WhenRespondentNotRepresentedAndRespondentPostalAddress_IsMissing() {
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+        caseDetails.getData().getContactDetailsWrapper().setRespondentAddress(buildInvalidAddress());
+
+        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EventType.NONE);
+
+        assert errors.contains(String.format(ERROR_TEMPLATE, "Respondent", EventType.NONE));
+    }
+
+    @Test
+    public void shouldReturnRespondentSolicitorError_WhenRespondentIsRepresentedAndRespondentPostalAddress_IsMissing() {
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+        caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorAddress(buildInvalidAddress());
+
+        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EventType.NONE);
+
+        assert errors.contains(String.format(ERROR_TEMPLATE, "Respondent solicitor", EventType.NONE));
+    }
+
+    @Test
+    public void shouldReturnBothErrors_WhenBothApplicantAndRespondentNotRepresentedAndBothPostalAddresses_AreMissing() {
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantAddress(buildInvalidAddress());
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+        caseDetails.getData().getContactDetailsWrapper().setRespondentAddress(buildInvalidAddress());
+
+        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EventType.NONE);
 
         assert errors.containsAll(List.of(
-            ERROR_TEMPLATE.formatted("Applicant", EVENT_NAME),
-            ERROR_TEMPLATE.formatted("Respondent", EVENT_NAME)
+                String.format(ERROR_TEMPLATE, "Applicant", EventType.NONE),
+                String.format(ERROR_TEMPLATE, "Respondent", EventType.NONE)
+            )
+        );
+    }
+
+    @Test
+    public void shouldReturnBothErrors_WhenBothApplicantAndRespondentIsRepresentedAndBothPostalAddresses_AreMissing() {
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorAddress(buildInvalidAddress());
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+        caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorAddress(buildInvalidAddress());
+
+        List<String> errors = validatePostalAddressService.validateRequiredPostalAddresses(caseDetails, EventType.NONE);
+
+        assert errors.containsAll(List.of(
+            String.format(ERROR_TEMPLATE, "Applicant solicitor", EventType.NONE),
+            String.format(ERROR_TEMPLATE, "Respondent solicitor", EventType.NONE)
         ));
+    }
+
+    private static Address buildValidAddress() {
+        return Address.builder()
+            .addressLine1("Address Line 1")
+            .addressLine2("Address Line 2")
+            .addressLine3("Address Line 3")
+            .county("County")
+            .country("Country")
+            .postTown("Post Town")
+            .postCode("Post Code")
+            .build();
+    }
+
+    private static Address buildInvalidAddress() {
+        return Address.builder()
+            .addressLine1("")
+            .addressLine2("Address Line 2")
+            .addressLine3("Address Line 3")
+            .county("County")
+            .country("Country")
+            .postTown("Town")
+            .postCode("")
+            .build();
     }
 }

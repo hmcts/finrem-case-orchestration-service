@@ -482,11 +482,17 @@ public class ContactDetailsValidator {
         return caseData.getCcdCaseType() == CaseType.CONSENTED;
     }
 
-    public static boolean checkForApplicantPostalAddress(ContactDetailsWrapper wrapper) {
+    public static boolean checkForApplicantPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper) {
+        if (caseData.isApplicantRepresentedByASolicitor()) {
+            return postalAddressIsMissing(wrapper.getApplicantSolicitorAddress());
+        }
         return postalAddressIsMissing(wrapper.getApplicantAddress());
     }
 
-    public static boolean checkForRespondentPostalAddress(ContactDetailsWrapper wrapper) {
+    public static boolean checkForRespondentPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper) {
+        if (caseData.isRespondentRepresentedByASolicitor()) {
+            return postalAddressIsMissing(wrapper.getRespondentSolicitorAddress());
+        }
         return postalAddressIsMissing(wrapper.getRespondentAddress());
     }
 
