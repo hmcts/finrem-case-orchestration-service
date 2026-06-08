@@ -212,7 +212,15 @@ class HearingsAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseData_whenHandleVacateWithRelist_thenPerformPerformAddAndVacateHearingCalled() {
-        String caseReference = TestConstants.CASE_ID;
+
+        Hearing nonNotifyingHearing = mock(Hearing.class);
+        when(nonNotifyingHearing.shouldSendNotifications()).thenReturn(false);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any()))
+            .thenReturn(nonNotifyingHearing);
+        VacateOrAdjournedHearing vacateHearing = mock(VacateOrAdjournedHearing.class);
+        when(vacateHearing.shouldSendNotifications()).thenReturn(false);
+        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any()))
+            .thenReturn(vacateHearing);
 
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
@@ -222,17 +230,7 @@ class HearingsAboutToSubmitHandlerTest {
             .build();
 
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(
-            Long.parseLong(caseReference), CaseType.CONTESTED, caseData);
-
-        Hearing nonNotifyingHearing = mock(Hearing.class);
-        when(nonNotifyingHearing.shouldSendNotifications()).thenReturn(false);
-        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any()))
-            .thenReturn(nonNotifyingHearing);
-
-        VacateOrAdjournedHearing vacateHearing = mock(VacateOrAdjournedHearing.class);
-        when(vacateHearing.shouldSendNotifications()).thenReturn(false);
-        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any()))
-            .thenReturn(vacateHearing);
+            Long.parseLong(TestConstants.CASE_ID), CaseType.CONTESTED, caseData);
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
