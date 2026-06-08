@@ -29,12 +29,12 @@ public class ValidatePostalAddressService {
             errors.add(String.format(ERROR_MESSAGE, "Applicant", eventType));
         }
 
-        if (ContactDetailsValidator.checkForApplicantPostalAddress(caseData, wrapper) && caseData.isApplicantRepresentedByASolicitor()) {
-            errors.add(String.format(ERROR_MESSAGE, "Applicant solicitor", eventType));
-        }
-
         if (ContactDetailsValidator.checkForRespondentPostalAddress(caseData, wrapper) && !caseData.isRespondentRepresentedByASolicitor()) {
             errors.add(String.format(ERROR_MESSAGE, "Respondent", eventType));
+        }
+
+        if (ContactDetailsValidator.checkForApplicantPostalAddress(caseData, wrapper) && caseData.isApplicantRepresentedByASolicitor()) {
+            errors.add(String.format(ERROR_MESSAGE, "Applicant solicitor", eventType));
         }
 
         if (ContactDetailsValidator.checkForRespondentPostalAddress(caseData, wrapper) && caseData.isRespondentRepresentedByASolicitor()) {
