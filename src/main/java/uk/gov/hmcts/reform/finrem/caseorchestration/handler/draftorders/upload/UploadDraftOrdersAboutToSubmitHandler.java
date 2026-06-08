@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -52,7 +52,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 
 @Slf4j
 @Service
-public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler {
+public class UploadDraftOrdersAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final DraftOrdersCategoriser draftOrdersCategoriser;
 
@@ -102,7 +102,6 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null);
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null);
-        clearTemporaryFields(caseDetails);
 
         if (state == null) {
             throw new IllegalStateException("Unexpected null in state");
@@ -318,10 +317,5 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
                 getUploadAgreedDraftOrderCollection(data).stream().map(UploadAgreedDraftOrderCollection::getValue),
                 getAgreedPsaCollection(data).stream().map(AgreedPensionSharingAnnexCollection::getValue)
             ).toList(), userAuthorisation));
-    }
-
-    private void clearTemporaryFields(FinremCaseDetails caseDetails) {
-        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
-        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
     }
 }
