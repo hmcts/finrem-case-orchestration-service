@@ -502,7 +502,10 @@ public class ContactDetailsValidator {
         }
 
         return isBlank(address.getAddressLine1())
-            || isBlank(address.getPostCode());
+            || isBlank(address.getAddressLine2())
+            || isBlank(address.getPostTown())
+            || isBlank(address.getCounty())
+            || isBlank(address.getPostCode())
+            || isBlank(address.getCountry());
     }
-
 }
