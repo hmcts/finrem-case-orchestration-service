@@ -45,6 +45,7 @@ public class DraftDirectionOrder implements HasCaseDocument, HasUploadingDocumen
 
     @JsonIgnore
     @Override
-    public YesOrNo getIsThisFinalYN() { return isThisFinalYN;
+    public YesOrNo getIsThisFinalYN() {
+        return isThisFinalYN;
     }
 }
