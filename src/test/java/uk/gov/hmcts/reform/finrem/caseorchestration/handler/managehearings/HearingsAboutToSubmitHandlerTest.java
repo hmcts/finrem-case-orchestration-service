@@ -285,17 +285,16 @@ class HearingsAboutToSubmitHandlerTest {
         when(hearingCorrespondenceHelper.getMiniFormAIfRequired(any(), any()))
             .thenReturn(Optional.of(miniFormA));
 
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<CaseDocument>> docsCaptor = ArgumentCaptor.forClass(List.class);
+
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
                 .build())
             .build();
-
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(
             Long.parseLong(TestConstants.CASE_ID), CaseType.CONTESTED, caseData);
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<CaseDocument>> docsCaptor = ArgumentCaptor.forClass(List.class);
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
@@ -305,7 +304,6 @@ class HearingsAboutToSubmitHandlerTest {
             any(),
             eq(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR),
             docsCaptor.capture());
-
         assertThat(docsCaptor.getValue()).contains(additionalDoc, miniFormA);
     }
 
