@@ -5,9 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
@@ -52,7 +56,7 @@ class UpdateContactDetailsTaskTest {
         List<CaseReference> caseReferences = task.getCaseReferences();
 
         assertNotNull(caseReferences);
-        assertEquals("1742295478386789", caseReferences.get(0).getCaseReference());
+        assertEquals("1742295478386789", caseReferences.getFirst().getCaseReference());
     }
 
     @Test
@@ -67,6 +71,78 @@ class UpdateContactDetailsTaskTest {
 
         task.executeTask(finremCaseDetails);
 
-        verify(contactDetailsWrapper).setRespondentSolicitorEmail("PLEASEUPDATE@amendedbycron.com");
+        verify(contactDetailsWrapper).setRespondentSolicitorEmail("updated@amendedbycron.com");
+    }
+
+    @Test
+    void testExecuteTask_updatesInvalidAddedAndRemovedEmailsInRepresentationUpdateHistory() {
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
+
+        ChangedRepresentative added = ChangedRepresentative.builder()
+            .email("invalid.@law.com")
+            .build();
+
+        ChangedRepresentative removed = ChangedRepresentative.builder()
+            .email("invalid2.@law.com")
+            .build();
+
+        RepresentationUpdate representationUpdate = RepresentationUpdate.builder()
+            .added(added)
+            .removed(removed)
+            .build();
+
+        RepresentationUpdateHistoryCollection historyItem = RepresentationUpdateHistoryCollection.builder()
+            .value(representationUpdate)
+            .build();
+
+        when(finremCaseDetails.getId()).thenReturn(TestConstants.CASE_ID_IN_LONG);
+        when(finremCaseDetails.getData()).thenReturn(caseData);
+        when(caseData.getContactDetailsWrapper()).thenReturn(contactDetailsWrapper);
+        when(contactDetailsWrapper.getRespondentSolicitorEmail()).thenReturn("invalidEmail");
+        when(caseData.getRepresentationUpdateHistory()).thenReturn(List.of(historyItem));
+
+        task.executeTask(finremCaseDetails);
+
+        assertEquals("updated@amendedbycron.com", added.getEmail());
+        assertEquals("updated@amendedbycron.com", removed.getEmail());
+        verify(contactDetailsWrapper).setRespondentSolicitorEmail("updated@amendedbycron.com");
+    }
+
+    @Test
+    void testExecuteTask_doesNotUpdateValidAddedAndRemovedEmailsInRepresentationUpdateHistory() {
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
+
+        ChangedRepresentative added = ChangedRepresentative.builder()
+            .email("valid.added@email.com")
+            .build();
+
+        ChangedRepresentative removed = ChangedRepresentative.builder()
+            .email("valid.removed@email.com")
+            .build();
+
+        RepresentationUpdate representationUpdate = RepresentationUpdate.builder()
+            .added(added)
+            .removed(removed)
+            .build();
+
+        RepresentationUpdateHistoryCollection historyItem = RepresentationUpdateHistoryCollection.builder()
+            .value(representationUpdate)
+            .build();
+
+        when(finremCaseDetails.getId()).thenReturn(TestConstants.CASE_ID_IN_LONG);
+        when(finremCaseDetails.getData()).thenReturn(caseData);
+        when(caseData.getContactDetailsWrapper()).thenReturn(contactDetailsWrapper);
+        when(contactDetailsWrapper.getRespondentSolicitorEmail()).thenReturn("invalidEmail");
+        when(caseData.getRepresentationUpdateHistory()).thenReturn(List.of(historyItem));
+
+        task.executeTask(finremCaseDetails);
+
+        assertEquals("valid.added@email.com", added.getEmail());
+        assertEquals("valid.removed@email.com", removed.getEmail());
+        verify(contactDetailsWrapper).setRespondentSolicitorEmail("updated@amendedbycron.com");
     }
 }
