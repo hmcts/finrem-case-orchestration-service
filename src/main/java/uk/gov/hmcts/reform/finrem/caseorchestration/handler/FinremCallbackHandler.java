@@ -257,7 +257,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             CaseDataMetricsWrapper.class,
             ContactDetailsWrapper.class,
             ManageCaseDocumentsWrapper.class,
-            DraftOrdersWrapper.class
+            DraftOrdersWrapper.class,
             ManageCaseDocumentsWrapper.class,
             GeneralApplicationWrapper.class,
             GeneralEmailWrapper.class
