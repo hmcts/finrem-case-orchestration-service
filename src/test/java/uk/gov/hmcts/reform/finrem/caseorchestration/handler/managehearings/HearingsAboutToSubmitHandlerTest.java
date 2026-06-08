@@ -244,6 +244,14 @@ class HearingsAboutToSubmitHandlerTest {
     void givenNotifyingAdjournHearing_whenHandleVacate_thenAdjournNoticeAuditedWithDocument() {
         CaseDocument vacateNotice = CaseDocument.builder().documentFilename("vacateNotice.pdf").build();
 
+        VacateOrAdjournedHearing vacateHearing = mock(VacateOrAdjournedHearing.class);
+        when(vacateHearing.shouldSendNotifications()).thenReturn(true);
+        when(vacateHearing.getHearingStatus()).thenReturn(VacateOrAdjournAction.ADJOURN_HEARING);
+        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any()))
+            .thenReturn(vacateHearing);
+        when(hearingCorrespondenceHelper.isVacatedAndRelistedHearing(any())).thenReturn(false);
+        when(hearingCorrespondenceHelper.getVacateHearingNotice(any())).thenReturn(vacateNotice);
+
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .manageHearingsActionSelection(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING)
@@ -252,14 +260,6 @@ class HearingsAboutToSubmitHandlerTest {
 
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(
             Long.parseLong(TestConstants.CASE_ID), CaseType.CONTESTED, caseData);
-
-        VacateOrAdjournedHearing vacateHearing = mock(VacateOrAdjournedHearing.class);
-        when(vacateHearing.shouldSendNotifications()).thenReturn(true);
-        when(vacateHearing.getHearingStatus()).thenReturn(VacateOrAdjournAction.ADJOURN_HEARING);
-        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any()))
-            .thenReturn(vacateHearing);
-        when(hearingCorrespondenceHelper.isVacatedAndRelistedHearing(any())).thenReturn(false);
-        when(hearingCorrespondenceHelper.getVacateHearingNotice(any())).thenReturn(vacateNotice);
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
@@ -276,15 +276,6 @@ class HearingsAboutToSubmitHandlerTest {
         CaseDocument additionalDoc = CaseDocument.builder().documentFilename("additional.pdf").build();
         CaseDocument miniFormA = CaseDocument.builder().documentFilename("miniFormA.pdf").build();
 
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
-                .build())
-            .build();
-
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
-            Long.parseLong(TestConstants.CASE_ID), CaseType.CONTESTED, caseData);
-
         Hearing notifyingHearing = mock(Hearing.class);
         when(notifyingHearing.shouldSendNotifications()).thenReturn(true);
         when(notifyingHearing.getAdditionalHearingDocs()).thenReturn(List.of(
@@ -293,6 +284,15 @@ class HearingsAboutToSubmitHandlerTest {
             .thenReturn(notifyingHearing);
         when(hearingCorrespondenceHelper.getMiniFormAIfRequired(any(), any()))
             .thenReturn(Optional.of(miniFormA));
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
+            Long.parseLong(TestConstants.CASE_ID), CaseType.CONTESTED, caseData);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<CaseDocument>> docsCaptor = ArgumentCaptor.forClass(List.class);
