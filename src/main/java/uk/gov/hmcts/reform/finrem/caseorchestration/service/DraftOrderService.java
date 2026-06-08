@@ -39,6 +39,7 @@ import java.util.Objects;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -82,8 +83,7 @@ public class DraftOrderService {
 
         // First check if 'order' is selected
         if (isOrdersSelected(uploadAgreedDraftOrder.getUploadOrdersOrPsas())) {
-            ofNullable(uploadAgreedDraftOrder.getUploadAgreedDraftOrderCollection())
-                .orElse(List.of())
+            emptyIfNull(uploadAgreedDraftOrder.getUploadAgreedDraftOrderCollection())
                 .stream()
                 .map(UploadAgreedDraftOrderCollection::getValue)
                 .filter(Objects::nonNull)
@@ -94,15 +94,14 @@ public class DraftOrderService {
                     orderType
                 ))
                 .map(orderDraftOrder -> AgreedDraftOrderCollection.builder()
-                .value(orderDraftOrder)
-                .build())
+                    .value(orderDraftOrder)
+                    .build())
                 .forEach(processedDraftOrders::add);
         }
 
         //check if 'psa' is selected
         if (isPsaSelected(uploadAgreedDraftOrder.getUploadOrdersOrPsas())) {
-            ofNullable(uploadAgreedDraftOrder.getAgreedPsaCollection())
-                .orElse(List.of())
+            emptyIfNull(uploadAgreedDraftOrder.getAgreedPsaCollection())
                 .stream()
                 .map(AgreedPensionSharingAnnexCollection::getValue)
                 .filter(Objects::nonNull)
