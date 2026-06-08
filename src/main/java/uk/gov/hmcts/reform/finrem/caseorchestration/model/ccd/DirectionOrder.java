@@ -31,7 +31,6 @@ public class DirectionOrder implements HasCaseDocument, WithAttachments, HasUplo
     CaseDocument originalDocument;
     @JsonProperty("additionalDocuments")
     private List<DocumentCollectionItem> additionalDocuments;
-
     @JsonProperty("isThisFinalYN")
     YesOrNo isThisFinalYN;
 
@@ -53,8 +52,8 @@ public class DirectionOrder implements HasCaseDocument, WithAttachments, HasUplo
         return uploadDraftDocument != null ? List.of(uploadDraftDocument) : List.of();
     }
 
-    @JsonIgnore
     @Override
+    @JsonIgnore
     public YesOrNo getIsThisFinalYN() {
         return isThisFinalYN;
     }
