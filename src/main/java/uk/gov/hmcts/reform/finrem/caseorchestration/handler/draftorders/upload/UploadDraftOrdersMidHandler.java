@@ -48,11 +48,9 @@ public class UploadDraftOrdersMidHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
-        List<String> errors = new ArrayList<>();
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
 
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = caseDetails.getData();
+        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
         UploadAgreedDraftOrder uploadAgreedDraftOrder = draftOrdersWrapper.getUploadAgreedDraftOrder();
 
@@ -63,6 +61,7 @@ public class UploadDraftOrdersMidHandler extends FinremCallbackHandler {
             finremCaseData, uploadAgreedDraftOrder.getHearingDetails().getValue()
         );
 
+        List<String> errors = new ArrayList<>();
         if (isAcceleratedOrderWithin14Days(draftOrdersWrapper, hearingType, hearingDate)) {
             errors.add(FDA_HEARING_LESS_THAN_14_DAYS);
         }
