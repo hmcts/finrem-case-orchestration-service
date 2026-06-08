@@ -34,7 +34,7 @@ public class UpdateCaseDetailsSolicitorAboutToSubmitHandler extends AbstractUpda
      * Generally, extending FinremAboutToSubmitCallbackHandler is better.
      * But this extends AbstractUpdateCaseDetailsSolicitorHandler, shared with the mid-handler, which depends on the fields.
      */
-    protected final boolean shouldClearTemporaryFields() {
+    protected final boolean shouldClearTemporaryFieldsAfterHandle() {
         return true;
     }
 
