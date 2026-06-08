@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetSe
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AssignToJudgeReason.DRAFT_CONSENT_ORDER;
@@ -54,21 +53,17 @@ public class IssueApplicationConsentedAboutToSubmitHandler extends FinremCallbac
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        List<String> errors = new ArrayList<>();
 
         try {
             generateCoverSheets(caseDetails, userAuthorisation);
         } catch (MissingCourtException e) {
-            errors.add(MISSING_COURT_SELECTION_ERROR);
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(errors).build();
+            return response(caseData, null, List.of(MISSING_COURT_SELECTION_ERROR));
         }
 
         caseData.setMiniFormA(onlineFormDocumentService.generateMiniFormA(userAuthorisation, caseDetails));
         populateAssignToJudgeFields(caseData);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).build();
+        return response(caseData);
     }
 
     private void populateAssignToJudgeFields(FinremCaseData caseData) {
