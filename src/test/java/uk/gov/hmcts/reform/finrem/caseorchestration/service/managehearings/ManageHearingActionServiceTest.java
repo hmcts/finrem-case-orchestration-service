@@ -160,15 +160,9 @@ class ManageHearingActionServiceTest {
             AUTH_TOKEN)).thenReturn(outOfCourtResolution);
         when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, Region.LONDON,
             AUTH_TOKEN)).thenReturn(createCaseDocument(HEARING_NOTICE_FILENAME, HEARING_NOTICE_URL));
-        when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(true);
-        when(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)).thenReturn(true);
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        verify(hearingCorrespondenceHelper).shouldPostToApplicant(finremCaseDetails);
-        verify(hearingCorrespondenceHelper).shouldPostToRespondent(finremCaseDetails);
-        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(finremCaseDetails, AUTH_TOKEN);
-        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(finremCaseDetails, AUTH_TOKEN);
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(6);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
             .extracting(item -> item.getValue().getHearingDocument())
@@ -214,8 +208,6 @@ class ManageHearingActionServiceTest {
 
         when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(pfdDocs);
-        when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(false);
-        when(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)).thenReturn(false);
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
@@ -263,8 +255,6 @@ class ManageHearingActionServiceTest {
             AUTH_TOKEN)).thenReturn(createCaseDocument("HearingNotice.pdf",
             "http://example.com/hearing-notice"));
         when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
-        when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(false);
-        when(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)).thenReturn(false);
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
@@ -308,8 +298,6 @@ class ManageHearingActionServiceTest {
         when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, Region.LONDON,
             AUTH_TOKEN)).thenReturn(createCaseDocument("HearingNotice.pdf",
             "http://example.com/hearing-notice"));
-        when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(false);
-        when(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)).thenReturn(false);
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
@@ -370,13 +358,6 @@ class ManageHearingActionServiceTest {
                 assertThat(vacatedHearing.getValue().getHearingTime()).isEqualTo("10:00");
                 assertThat(vacatedHearing.getValue().getHearingTimeEstimate()).isEqualTo("30mins");
             });
-
-        if (hearingWasRelisted == YesOrNo.NO) {
-            // As hearingToVacate wasn't relisted, performVacateHearing responsible for coversheets.
-            verify(hearingCorrespondenceHelper).shouldPostToApplicant(finremCaseDetails);
-            verify(hearingCorrespondenceHelper).shouldPostToRespondent(finremCaseDetails);
-            verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(finremCaseDetails, AUTH_TOKEN);
-        }
 
         assertThat(hearingWrapper.getWasRelistSelected()).isEqualTo(hearingWasRelisted);
 
@@ -887,8 +868,6 @@ class ManageHearingActionServiceTest {
         when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, Region.LONDON, AUTH_TOKEN))
             .thenReturn(createCaseDocument("HearingNotice.pdf",
             "http://example.com/hearing-notice"));
-        when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(false);
-        when(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)).thenReturn(false);
         when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
