@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import java.util.Map;
 import java.util.Objects;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -93,7 +95,9 @@ class GenerateCoverSheetServiceTest {
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential());
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
+            .extracting(DynamicListElement::getCode)
+            .containsExactly(OLD_COVERESHEET_URL);
     }
 
     @Test
@@ -138,7 +142,10 @@ class GenerateCoverSheetServiceTest {
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp());
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential().getDocumentFilename());
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
+            .extracting(DynamicListElement::getCode)
+            .containsExactly(OLD_COVERESHEET_URL);
+
     }
 
     @Test
@@ -155,7 +162,9 @@ class GenerateCoverSheetServiceTest {
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes().getDocumentFilename());
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential());
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
+            .extracting(DynamicListElement::getCode)
+            .containsExactly(OLD_COVERESHEET_URL);
     }
 
     @Test
@@ -172,7 +181,9 @@ class GenerateCoverSheetServiceTest {
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential().getDocumentFilename());
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
+            .extracting(DynamicListElement::getCode)
+            .containsExactly(OLD_COVERESHEET_URL);
     }
 
     @Test
@@ -205,7 +216,9 @@ class GenerateCoverSheetServiceTest {
         generateCoverSheetService.generateAndStoreIntervenerCoversheet(caseDetails, intervenerType, AUTH_TOKEN);
 
         assertEquals(TEST_DOCUMENT_FILENAME, Objects.requireNonNull(getIntervenerCoverSheet(caseDetails, intervenerType)).getDocumentFilename());
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
+            .extracting(DynamicListElement::getCode)
+            .containsExactly(OLD_COVERESHEET_URL);
     }
 
     @ParameterizedTest
@@ -220,7 +233,10 @@ class GenerateCoverSheetServiceTest {
         generateCoverSheetService.removeIntervenerCoverSheet(caseDetails, changeDetails, AUTH_TOKEN);
 
         assertNull(getIntervenerCoverSheet(caseDetails, intervenerType));
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
+            .extracting(DynamicListElement::getCode)
+            .containsExactly(OLD_COVERESHEET_URL);
     }
 
     @Test
