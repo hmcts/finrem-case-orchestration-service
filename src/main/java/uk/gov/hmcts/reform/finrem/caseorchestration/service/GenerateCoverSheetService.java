@@ -135,7 +135,7 @@ public class GenerateCoverSheetService {
     }
 
     /**
-     * Removes the intervener cover sheet with specified intervener change details.
+     * Removes the intervener cover sheet with specified intervener change details. Old Coversheet is added to Bin.
      *
      * @param finremCaseDetails       the {@link FinremCaseDetails} object containing the case information
      * @param intervenerChangeDetails The details of the intervener change, including the type of intervener.
