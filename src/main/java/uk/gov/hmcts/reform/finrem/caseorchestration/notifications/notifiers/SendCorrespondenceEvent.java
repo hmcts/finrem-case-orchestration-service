@@ -28,6 +28,18 @@ public class SendCorrespondenceEvent {
     Barrister barrister;
     boolean letterNotificationOnly;
 
+    boolean dryRun;
+    int letterCount = 0;
+    int emailCount = 0;
+
+    public void incrementLetterCount() {
+        letterCount++;
+    }
+
+    public void incrementEmailCount() {
+        emailCount++;
+    }
+
     public FinremCaseData getCaseData() {
         return Optional.ofNullable(caseDetails)
             .map(FinremCaseDetails::getData)

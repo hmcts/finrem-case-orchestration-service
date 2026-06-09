@@ -84,10 +84,17 @@ public abstract class AbstractPartyListener {
     }
 
     private void sendNotification(SendCorrespondenceEvent event) {
+        boolean dryRun = event.isDryRun();
         if (!event.isLetterNotificationOnly() && shouldSendEmailNotification(event)) {
-            enrichAndSendEmailNotification(event);
+            if (!dryRun) {
+                enrichAndSendEmailNotification(event);
+            }
+            event.incrementEmailCount();
         } else if (shouldSendPaperNotification(event)) {
-            sendPaperNotification(event);
+            if (!dryRun) {
+                sendPaperNotification(event);
+            }
+            event.incrementLetterCount();
         }
     }
 
