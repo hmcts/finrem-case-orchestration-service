@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -32,6 +33,8 @@ public class ContactDetailsValidator {
     static final String EMAIL_NOT_IN_RESPONDENT_ORG_ERROR_MESSAGE = "%s is not a valid Email address. "
         + "The email address must be registered to access MyHMCTS";
     static final String ORGANISATION_POLICY_ERROR = "Solicitor can only represent one party.";
+    static final String MISSING_ADDRESS_ERROR_MESSAGE = "%s address details missing. "
+        + "Unable to complete %s until party address details are added to avoid failed postal notification.";
 
     private ContactDetailsValidator() {
     }
@@ -391,6 +394,39 @@ public class ContactDetailsValidator {
         }
     }
 
+
+    /**
+     * Validates that the applicant and respondent have the required postal addresses.
+     *
+     * <p>
+     * This method checks the appropriate postal address for each party based on whether
+     * they are represented by a solicitor. For represented parties, the solicitor's
+     * address is validated; otherwise, the party's own address is validated.
+     * </p>
+     *
+     * <p>
+     * A validation error is generated when the relevant address:
+     * </p>
+     * <ul>
+     *   <li>Is null or empty.</li>
+     *   <li>Does not contain {@code addressLine1}.</li>
+     *   <li>Contains an invalid {@code postcode}.</li>
+     * </ul>
+     *
+     * @param caseData the {@link FinremCaseData} containing the addresses to validate
+     * @param eventType the event context to include in validation error messages
+     * @return a list of validation error messages for any missing postal addresses
+     */
+    public static List<String> validateRequiredPostalAddresses(FinremCaseData caseData, EventType eventType) {
+        List<String> errors = new ArrayList<>();
+        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
+
+        checkForMissingApplicantPostalAddress(caseData, wrapper, eventType, errors);
+        checkForMissingRespondentPostalAddress(caseData, wrapper, eventType, errors);
+
+        return errors;
+    }
+
     private static String getOrganisationId(OrganisationPolicy policy) {
         return Optional.ofNullable(policy)
             .map(OrganisationPolicy::getOrganisation)
@@ -482,18 +518,30 @@ public class ContactDetailsValidator {
         return caseData.getCcdCaseType() == CaseType.CONSENTED;
     }
 
-    public static boolean checkForApplicantPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper) {
+    private static void checkForMissingApplicantPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper, EventType eventType, List<String> errors) {
         if (caseData.isApplicantRepresentedByASolicitor()) {
-            return postalAddressIsMissing(wrapper.getApplicantSolicitorAddress());
+            if (postalAddressIsMissing(wrapper.getApplicantSolicitorAddress())) {
+                errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant solicitor", eventType));
+            }
+            return;
         }
-        return postalAddressIsMissing(wrapper.getApplicantAddress());
+
+        if (postalAddressIsMissing(wrapper.getApplicantAddress())) {;
+            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant", eventType));
+        }
     }
 
-    public static boolean checkForRespondentPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper) {
+    private static void checkForMissingRespondentPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper, EventType eventType, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()) {
-            return postalAddressIsMissing(wrapper.getRespondentSolicitorAddress());
+            if (postalAddressIsMissing(wrapper.getRespondentSolicitorAddress())) {
+                errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent solicitor", eventType));
+            }
+            return;
         }
-        return postalAddressIsMissing(wrapper.getRespondentAddress());
+
+        if (postalAddressIsMissing(wrapper.getRespondentAddress())) {;
+            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent", eventType));
+        }
     }
 
     private static boolean postalAddressIsMissing(Address address) {
@@ -502,10 +550,6 @@ public class ContactDetailsValidator {
         }
 
         return isBlank(address.getAddressLine1())
-            || isBlank(address.getAddressLine2())
-            || isBlank(address.getPostTown())
-            || isBlank(address.getCounty())
-            || isBlank(address.getPostCode())
-            || isBlank(address.getCountry());
+            || postCodeIsInvalid(address);
     }
 }

@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -27,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePostalAddressService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
@@ -52,7 +52,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
     private final ManageHearingActionService manageHearingActionService;
     private final GeneralApplicationsCategoriser generalApplicationsCategoriser;
     private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
-    private final ValidatePostalAddressService validatePostalNotificationService;
 
     public GeneralApplicationDirectionsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                             GeneralApplicationHelper helper,
@@ -60,8 +59,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
                                                             GeneralApplicationService gaService,
                                                             ManageHearingActionService manageHearingActionService,
                                                             GeneralApplicationsCategoriser generalApplicationsCategoriser,
-                                                            HearingCorrespondenceHelper hearingCorrespondenceHelper,
-                                                            ValidatePostalAddressService validatePostalAddressService) {
+                                                            HearingCorrespondenceHelper hearingCorrespondenceHelper) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.gaDirectionService = gaDirectionService;
@@ -69,7 +67,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         this.manageHearingActionService = manageHearingActionService;
         this.generalApplicationsCategoriser = generalApplicationsCategoriser;
         this.hearingCorrespondenceHelper = hearingCorrespondenceHelper;
-        this.validatePostalNotificationService = validatePostalAddressService;
     }
 
     @Override
@@ -101,8 +98,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         } else {
             updateApplications(caseDetails, documents, userAuthorisation);
         }
-        List<String> errors = new ArrayList<>(validatePostalNotificationService.validateRequiredPostalAddresses(
-            caseDetails, EventType.GENERAL_APPLICATION_DIRECTIONS_MH));
+
+        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, callbackRequest.getEventType()));
 
         try {
             gaDirectionService.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);

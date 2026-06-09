@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
@@ -38,7 +41,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePostalAddressService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
@@ -57,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -97,8 +100,6 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     private HearingCorrespondenceHelper hearingCorrespondenceHelper;
     @Mock
     private PartyService partyService;
-    @Mock
-    private ValidatePostalAddressService validatePostalAddressService;
 
     private ObjectMapper objectMapper;
 
@@ -112,17 +113,13 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             assignCaseAccessService, finremCaseDetailsMapper, helper, gaDirectionService, partyService);
         aboutToSubmitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
             finremCaseDetailsMapper, helper, gaDirectionService, gaService, manageHearingActionService, generalApplicationsCategoriser,
-            hearingCorrespondenceHelper, validatePostalAddressService);
+            hearingCorrespondenceHelper);
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(
             List.of()
         ).build();
         when(partyService.getAllActivePartyList(any(FinremCaseDetails.class)))
             .thenReturn(dynamicMultiSelectList);
-        when(validatePostalAddressService.validateRequiredPostalAddresses(
-            any(FinremCaseDetails.class),
-            eq(GENERAL_APPLICATION_DIRECTIONS_MH)
-        )).thenReturn(List.of());
     }
 
     @Test
@@ -497,95 +494,103 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     @Test
     void givenPostalValidationErrors_whenHandle_thenResponseContainsPostalErrors() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        when(validatePostalAddressService.validateRequiredPostalAddresses(
-            callbackRequest.getCaseDetails(),
-            GENERAL_APPLICATION_DIRECTIONS_MH
-        )).thenReturn(List.of(
-            "Applicant address details missing. "
-                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification.",
-            "Respondent address details missing. "
-                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification."
-        ));
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors()).containsExactlyInAnyOrder(
+        List<String> expectedErrors = List.of(
             "Applicant address details missing. "
                 + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification.",
             "Respondent address details missing. "
                 + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification."
         );
 
-        verify(validatePostalAddressService).validateRequiredPostalAddresses(
-            callbackRequest.getCaseDetails(), GENERAL_APPLICATION_DIRECTIONS_MH);
+        try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
+            contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                    caseData, callbackRequest.getEventType()))
+                .thenReturn(expectedErrors);
+
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
+        }
     }
 
     @Test
     void givenRepresentedPostalValidationErrors_whenHandler_thenResponseContainsPostalErrors() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        when(validatePostalAddressService.validateRequiredPostalAddresses(
-            callbackRequest.getCaseDetails(),
-            GENERAL_APPLICATION_DIRECTIONS_MH
-        )).thenReturn(List.of(
-            "Applicant solicitor address details missing. "
-                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification.",
-            "Respondent solicitor address details missing. "
-                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification."
-        ));
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors()).containsExactlyInAnyOrder(
+        List<String> expectedErrors = List.of(
             "Applicant solicitor address details missing. "
                 + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification.",
             "Respondent solicitor address details missing. "
                 + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification."
         );
 
-        verify(validatePostalAddressService).validateRequiredPostalAddresses(
-            callbackRequest.getCaseDetails(), GENERAL_APPLICATION_DIRECTIONS_MH
-        );
+        try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
+            contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                    caseData, callbackRequest.getEventType()))
+                .thenReturn(expectedErrors);
+
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
+        }
     }
 
     @Test
     void givenNoPostalValidationErrors_whenHandle_thenResponseContainsEmptyErrorList() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        when(validatePostalAddressService.validateRequiredPostalAddresses(
-            callbackRequest.getCaseDetails(),
-            GENERAL_APPLICATION_DIRECTIONS_MH
-        )).thenReturn(List.of());
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        List<String> expectedErrors = List.of();
 
-        assertThat(response.getErrors()).isEmpty();
+        try(MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
+            contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                caseData, callbackRequest.getEventType()))
+                .thenReturn(expectedErrors);
 
-        verify(validatePostalAddressService).validateRequiredPostalAddresses(
-            callbackRequest.getCaseDetails(), GENERAL_APPLICATION_DIRECTIONS_MH);
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            assertThat(response.getErrors()).isEmpty();
+        }
     }
 
     @Test
     void givenNoRepresentedValidationErrors_whenHandle_thenResponseContainsEmptyErrorList() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        when(validatePostalAddressService.validateRequiredPostalAddresses(
-            callbackRequest.getCaseDetails(),
-            GENERAL_APPLICATION_DIRECTIONS_MH
-        )).thenReturn(List.of());
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        List<String> expectedErrors = List.of();
 
-        assertThat(response.getErrors()).isEmpty();
+        try(MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
+            contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                    caseData, callbackRequest.getEventType()))
+                .thenReturn(expectedErrors);
 
-        verify(validatePostalAddressService).validateRequiredPostalAddresses(
-            callbackRequest.getCaseDetails(), GENERAL_APPLICATION_DIRECTIONS_MH
-        );
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            assertThat(response.getErrors()).isEmpty();
+        }
     }
 
     void shouldRemoveGadPreviewWhenHandled() {
