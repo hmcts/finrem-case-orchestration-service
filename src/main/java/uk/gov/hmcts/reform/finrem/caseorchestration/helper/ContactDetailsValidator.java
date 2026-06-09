@@ -394,7 +394,6 @@ public class ContactDetailsValidator {
         }
     }
 
-
     /**
      * Validates that the applicant and respondent have the required postal addresses.
      *
@@ -518,7 +517,8 @@ public class ContactDetailsValidator {
         return caseData.getCcdCaseType() == CaseType.CONSENTED;
     }
 
-    private static void checkForMissingApplicantPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper, EventType eventType, List<String> errors) {
+    private static void checkForMissingApplicantPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
+                                                              EventType eventType, List<String> errors) {
         if (caseData.isApplicantRepresentedByASolicitor()) {
             if (postalAddressIsMissing(wrapper.getApplicantSolicitorAddress())) {
                 errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant solicitor", eventType));
@@ -526,12 +526,13 @@ public class ContactDetailsValidator {
             return;
         }
 
-        if (postalAddressIsMissing(wrapper.getApplicantAddress())) {;
+        if (postalAddressIsMissing(wrapper.getApplicantAddress())) {
             errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant", eventType));
         }
     }
 
-    private static void checkForMissingRespondentPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper, EventType eventType, List<String> errors) {
+    private static void checkForMissingRespondentPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
+                                                               EventType eventType, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()) {
             if (postalAddressIsMissing(wrapper.getRespondentSolicitorAddress())) {
                 errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent solicitor", eventType));
@@ -539,7 +540,7 @@ public class ContactDetailsValidator {
             return;
         }
 
-        if (postalAddressIsMissing(wrapper.getRespondentAddress())) {;
+        if (postalAddressIsMissing(wrapper.getRespondentAddress())) {
             errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent", eventType));
         }
     }

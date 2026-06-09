@@ -558,7 +558,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         List<String> expectedErrors = List.of();
 
-        try(MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
+        try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
             contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
                 caseData, callbackRequest.getEventType()))
                 .thenReturn(expectedErrors);
@@ -581,7 +581,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         List<String> expectedErrors = List.of();
 
-        try(MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
+        try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
             contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
                     caseData, callbackRequest.getEventType()))
                 .thenReturn(expectedErrors);
