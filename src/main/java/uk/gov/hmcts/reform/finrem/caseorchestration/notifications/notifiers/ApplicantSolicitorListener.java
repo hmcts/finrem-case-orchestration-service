@@ -40,11 +40,6 @@ public class ApplicantSolicitorListener extends EmailNotificationOnlyListener {
     }
 
     @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.APPLICANT_SOLICITOR_ONLY);
-    }
-
-    @Override
     protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
         if (event.getCaseDetails() != null) {
             return notificationService.isApplicantSolicitorEmailPopulatedAndPresented(event.getCaseDetails());

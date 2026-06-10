@@ -27,9 +27,4 @@ public class FormerIntervenerOneSolicitorListener extends FormerIntervenerSolici
     protected String getNotificationParty() {
         return "former intervener one solicitor";
     }
-
-    @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.FORMER_INTERVENER_ONE_SOLICITOR_ONLY);
-    }
 }

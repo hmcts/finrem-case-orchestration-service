@@ -32,11 +32,6 @@ public class ApplicantPartyListener extends AbstractPartyListener {
     }
 
     @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.APPLICANT);
-    }
-
-    @Override
     protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
         return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(event.getCaseDetails());
     }

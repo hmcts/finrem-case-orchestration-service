@@ -26,9 +26,4 @@ public class FormerIntervenerFourBarristerListener extends FormerIntervenerBarri
     protected String getNotificationParty() {
         return "former intervener four barrister";
     }
-
-    @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.FORMER_INTERVENER_FOUR_BARRISTER_ONLY);
-    }
 }

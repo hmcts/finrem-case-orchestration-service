@@ -39,7 +39,9 @@ public abstract class AbstractPartyListener {
     /**
      * Should this listener handle notifications for this party/event.
      */
-    protected abstract boolean isRelevantParty(SendCorrespondenceEvent event);
+    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
+        return event.getNotificationParties().contains(getNotificationPartyEnum());
+    }
 
     /**
      * Should the email notification be sent.

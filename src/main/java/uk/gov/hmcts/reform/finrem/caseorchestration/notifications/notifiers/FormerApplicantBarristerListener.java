@@ -32,11 +32,6 @@ public class FormerApplicantBarristerListener extends EmailNotificationOnlyListe
     }
 
     @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY);
-    }
-
-    @Override
     protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
         if (event.getCaseDetailsBefore() != null) {
             Barrister barrister = event.getBarrister(); // target barrister is set in the event

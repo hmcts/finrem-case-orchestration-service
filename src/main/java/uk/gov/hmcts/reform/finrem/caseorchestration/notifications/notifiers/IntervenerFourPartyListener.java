@@ -32,11 +32,6 @@ public class IntervenerFourPartyListener extends AbstractPartyListener {
     }
 
     @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.INTERVENER_FOUR);
-    }
-
-    @Override
     protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
         return notificationService
             .isIntervenerSolicitorDigitalAndEmailPopulated(event.getCaseData().getIntervenerFour(), event.getCaseDetails());
