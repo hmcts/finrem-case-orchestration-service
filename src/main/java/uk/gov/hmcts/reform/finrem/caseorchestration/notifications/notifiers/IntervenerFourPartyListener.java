@@ -22,6 +22,11 @@ public class IntervenerFourPartyListener extends AbstractPartyListener {
     }
 
     @Override
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.INTERVENER_FOUR;
+    }
+
+    @Override
     protected String getNotificationParty() {
         return IntervenerConstant.INTERVENER_FOUR;
     }

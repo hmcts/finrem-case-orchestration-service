@@ -34,6 +34,8 @@ public abstract class AbstractPartyListener {
 
     protected abstract String getNotificationParty();
 
+    protected abstract NotificationParty getNotificationPartyEnum();
+
     /**
      * Should this listener handle notifications for this party/event.
      */
@@ -98,9 +100,6 @@ public abstract class AbstractPartyListener {
             }
             event.recordPostalNotification(notificationParty);
         }
-    }
-    private NotificationParty getNotificationPartyEnum() {
-        return NotificationParty.getNotificationPartyFromRole(getNotificationParty());
     }
 
     /**

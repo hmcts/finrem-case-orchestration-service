@@ -22,6 +22,7 @@ import java.util.Optional;
 public class SendCorrespondenceEvent {
     List<NotificationParty> notificationParties;
     /**
+     * The documents to be sent as part of the notification.
      * true = EMAIL
      * false = POSTAL
      */
@@ -61,16 +62,18 @@ public class SendCorrespondenceEvent {
     }
 
     private void recordNotificationType(NotificationParty notificationParty, boolean email) {
+        if (notificationParty == null) {
+            throw new IllegalArgumentException("Notification party is required to record notification type");
+        }
+
         int index = getNotificationParties().indexOf(notificationParty);
 
         if (index == -1) {
-            getNotificationParties().add(notificationParty);
-            getEmailOrLetters().add(email);
-            return;
+            throw new IllegalArgumentException("Notification party was not requested: " + notificationParty);
         }
 
         while (getEmailOrLetters().size() <= index) {
-            getEmailOrLetters().add(false);
+            getEmailOrLetters().add(null);
         }
 
         getEmailOrLetters().set(index, email);
@@ -79,8 +82,12 @@ public class SendCorrespondenceEvent {
     public NotificationType getNotificationTypeForParty(NotificationParty notificationParty) {
         int index = getNotificationParties().indexOf(notificationParty);
 
-        if (index == -1 || getEmailOrLetters().size() <= index) {
-            throw new IllegalStateException("Unable to resolve notification type for party: " + notificationParty);
+        if (index == -1) {
+            throw new IllegalArgumentException("Notification party was not requested: " + notificationParty);
+        }
+
+        if (getEmailOrLetters().size() <= index || getEmailOrLetters().get(index) == null) {
+            throw new IllegalStateException("No notification type recorded for party: " + notificationParty);
         }
 
         return Boolean.TRUE.equals(getEmailOrLetters().get(index))

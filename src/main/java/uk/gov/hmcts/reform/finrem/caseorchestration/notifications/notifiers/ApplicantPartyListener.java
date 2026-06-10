@@ -22,6 +22,11 @@ public class ApplicantPartyListener extends AbstractPartyListener {
     }
 
     @Override
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.APPLICANT;
+    }
+
+    @Override
     protected String getNotificationParty() {
         return APPLICANT;
     }
