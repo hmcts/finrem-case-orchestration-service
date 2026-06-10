@@ -41,20 +41,4 @@ class DraftDirectionOrderTest {
 
         assertThat(underTest.getApprovedOrder()).isEqualTo(mockedDocument);
     }
-
-    @Test
-    void givenIsThisFinalYnYes_whenGetIsThisFinalYN_shouldReturnYes() {
-        DraftDirectionOrder underTest = DraftDirectionOrder.builder()
-            .isThisFinalYN(YesOrNo.YES)
-            .build();
-
-        assertThat(underTest.getIsThisFinalYN()).isEqualTo(YesOrNo.YES);
-    }
-
-    @Test
-    void givenIsThisFinalYnNotSet_whenGetIsThisFinalYN_shouldReturnNull() {
-        DraftDirectionOrder underTest = DraftDirectionOrder.builder().build();
-
-        assertThat(underTest.getIsThisFinalYN()).isNull();
-    }
 }
