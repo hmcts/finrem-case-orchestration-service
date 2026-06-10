@@ -409,8 +409,14 @@ public class ContactDetailsValidator {
      * <ul>
      *   <li>Is null or empty.</li>
      *   <li>Does not contain {@code addressLine1}.</li>
-     *   <li>Contains an invalid {@code postcode}.</li>
+     *   <li>Does not contain {@code postcode}.</li>
      * </ul>
+     *
+     * <p>
+     * This validation is intended to be used during about-to-submit callbacks to ensure that
+     * postal notifications can be issued successfully. It assumes that a UK postcode is provided
+     * for the addresses being validated, and does not account for non-UK addresses.
+     * </p>
      *
      * @param caseData the {@link FinremCaseData} containing the addresses to validate
      * @param eventType the event context to include in validation error messages

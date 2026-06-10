@@ -497,42 +497,9 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
-
         List<String> expectedErrors = List.of(
-            "Applicant address details missing. "
-                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification.",
-            "Respondent address details missing. "
-                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification."
-        );
-
-        try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
-            contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-                    caseData, callbackRequest.getEventType()))
-                .thenReturn(expectedErrors);
-
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-            assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
-        }
-    }
-
-    @Test
-    void givenRepresentedPostalValidationErrors_whenHandler_thenResponseContainsPostalErrors() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-
-        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
-
-        List<String> expectedErrors = List.of(
-            "Applicant solicitor address details missing. "
-                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification.",
-            "Respondent solicitor address details missing. "
-                + "Unable to complete GENERAL_APPLICATION_DIRECTIONS_MH until party address details are added to avoid failed postal notification."
+            "Applicant's postal address is missing",
+            "Respondent's postal address is missing"
         );
 
         try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
@@ -553,9 +520,6 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
-
         List<String> expectedErrors = List.of();
 
         try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
@@ -571,28 +535,6 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenNoRepresentedValidationErrors_whenHandle_thenResponseContainsEmptyErrorList() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-
-        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
-
-        List<String> expectedErrors = List.of();
-
-        try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
-            contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-                    caseData, callbackRequest.getEventType()))
-                .thenReturn(expectedErrors);
-
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-            assertThat(response.getErrors()).isEmpty();
-        }
-    }
-
     void shouldRemoveGadPreviewWhenHandled() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
