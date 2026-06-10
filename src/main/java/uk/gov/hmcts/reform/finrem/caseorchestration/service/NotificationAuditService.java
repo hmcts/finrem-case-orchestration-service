@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -7,7 +8,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAuditCollectionItem;
@@ -21,15 +21,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_AUDITS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_TO_BE_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.FINANCIAL_REMEDY_PACK_LETTER_TYPE;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationAuditService {
+
+    private final ObjectMapper objectMapper;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -49,15 +54,12 @@ public class NotificationAuditService {
 
         applicationEventPublisher.publishEvent(event);
 
-        FinremCaseDetails caseDetails = event.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseData caseData = event.getCaseData();
         NotificationAuditWrapper wrapper = caseData.getNotificationAuditWrapper();
 
-        List<NotificationAuditCollectionItem> audits = Optional.ofNullable(wrapper.getNotificationsAudits())
-            .orElseGet(ArrayList::new);
+        List<NotificationAuditCollectionItem> audits = new ArrayList<>(emptyIfNull(wrapper.getNotificationsAudits()));
 
-        List<NotificationToBeSentCollectionItem> pending = Optional.ofNullable(wrapper.getNotificationsToBeSent())
-            .orElseGet(ArrayList::new);
+        List<NotificationToBeSentCollectionItem> pending = new ArrayList<>(emptyIfNull(wrapper.getNotificationsToBeSent()));
 
         List<String> postalDocFilenames = filenamesOf(event.getDocumentsToPost());
 
@@ -89,6 +91,34 @@ public class NotificationAuditService {
         wrapper.setNotificationsToBeSent(pending);
     }
 
+    public Map<String, Object> markPendingNotificationsAsSent(FinremCaseData latestData) {
+        NotificationAuditWrapper wrapper = latestData.getNotificationAuditWrapper();
+
+        List<NotificationAuditCollectionItem> audits =
+            new ArrayList<>(emptyIfNull(wrapper.getNotificationsAudits()));
+
+        List<NotificationToBeSentCollectionItem> pending =
+            emptyIfNull(wrapper.getNotificationsToBeSent());
+
+        if (pending.isEmpty()) {
+            return Map.of();
+        }
+
+        pending.stream()
+            .map(NotificationToBeSentCollectionItem::getValue)
+            .forEach(pendingItem ->
+                audits.stream()
+                    .filter(audit -> pendingItem.equals(audit.getId()))
+                    .findFirst()
+                    .ifPresent(audit -> audit.getValue().setWasSent(YesOrNo.YES))
+            );
+
+        return Map.of(
+            NOTIFICATIONS_AUDITS, objectMapper.convertValue(audits, List.class),
+            NOTIFICATIONS_TO_BE_SENT, List.of()
+        );
+    }
+
     private NotificationAudit buildAuditRow(EventType eventType,
                                             String partyRole,
                                             NotificationType channel,
@@ -113,11 +143,8 @@ public class NotificationAuditService {
     }
 
     private List<String> filenamesOf(List<CaseDocument> documents) {
-        return Optional.ofNullable(documents)
-            .orElseGet(List::of)
-            .stream()
+        return emptyIfNull(documents).stream()
             .map(CaseDocument::getDocumentFilename)
             .toList();
     }
 }
-
