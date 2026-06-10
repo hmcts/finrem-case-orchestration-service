@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -85,10 +83,8 @@ public abstract class FinremSubmittedCallbackHandler extends FinremCallbackHandl
         Set<String> attachedUrls = extractAttachedUrls(finremCaseData);
 
         ofNullable(finremCaseData.getBin().getFileUrlsToBeDeleted())
-            .map(DynamicList::getListItems)
             .stream()
             .flatMap(List::stream)
-            .map(DynamicListElement::getCode)
             .filter(url -> isNotAttachedToCase(url, attachedUrls))
             .forEach(url ->
                 retryExecutor.runWithRetrySuppressException(

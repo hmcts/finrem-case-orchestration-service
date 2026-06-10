@@ -12,9 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-
-import static java.util.Objects.isNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -25,7 +24,7 @@ import static java.util.Objects.isNull;
 public class Bin {
 
     @JsonProperty("bin_fileUrls")
-    private DynamicList fileUrlsToBeDeleted;
+    private List<String> fileUrlsToBeDeleted;
 
     /**
      * Adds the given case document URL to the bin of files scheduled for deletion.
@@ -43,15 +42,11 @@ public class Bin {
             .map(CaseDocument::getDocumentUrl)
             .ifPresent(documentUrl -> {
                 if (fileUrlsToBeDeleted == null) {
-                    fileUrlsToBeDeleted = DynamicList.builder()
-                        .listItems(new ArrayList<>())
-                        .build();
+                    fileUrlsToBeDeleted = new ArrayList<>();
                 }
-                fileUrlsToBeDeleted.getListItems()
-                    .add(DynamicListElement.builder().code(documentUrl).build());
+                fileUrlsToBeDeleted.add(documentUrl);
             });
     }
-
     /**
      * Clears all document URLs currently stored in the deletion bin.
      *
