@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -435,15 +436,8 @@ class HearingOrderServiceTest {
             }
         }
 
-        static Stream<Arguments> givenJudgeApprovedOrderWithIsFinalYN_whenStampAndStore_thenUploadHearingOrderContainsIsFinalYN() {
-            return Stream.of(
-                Arguments.of(YesOrNo.YES),
-                Arguments.of(YesOrNo.NO)
-            );
-        }
-
         @ParameterizedTest
-        @MethodSource
+        @EnumSource(value = YesOrNo.class, names = {"NO", "YES"})
         void givenJudgeApprovedOrderWithIsFinalYN_whenStampAndStore_thenUploadHearingOrderContainsIsFinalYN(YesOrNo isFinalYN) {
             FinremCaseData finremCaseData = setupFinremCaseData(
                 DraftDirectionWrapper.builder()

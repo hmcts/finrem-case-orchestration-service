@@ -51,10 +51,4 @@ public class DirectionOrder implements HasCaseDocument, WithAttachments, HasUplo
     public List<CaseDocument> getUploadingDocuments() {
         return uploadDraftDocument != null ? List.of(uploadDraftDocument) : List.of();
     }
-
-    @Override
-    @JsonIgnore
-    public YesOrNo getIsThisFinalYN() {
-        return isThisFinalYN;
-    }
 }
