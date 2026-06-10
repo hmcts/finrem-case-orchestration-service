@@ -22,6 +22,11 @@ public class FormerApplicantBarristerListener extends EmailNotificationOnlyListe
     }
 
     @Override
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
+    }
+
+    @Override
     protected String getNotificationParty() {
         return "former applicant barrister";
     }

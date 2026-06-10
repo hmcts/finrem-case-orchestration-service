@@ -17,6 +17,11 @@ public class RespondentSolicitorListener extends EmailNotificationOnlyListener {
     }
 
     @Override
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.RESPONDENT_SOLICITOR_ONLY;
+    }
+
+    @Override
     protected String getNotificationParty() {
         return "respondent solicitor";
     }

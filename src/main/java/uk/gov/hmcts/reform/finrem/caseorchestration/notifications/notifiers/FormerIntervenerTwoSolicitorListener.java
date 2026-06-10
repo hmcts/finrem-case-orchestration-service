@@ -19,6 +19,11 @@ public class FormerIntervenerTwoSolicitorListener extends FormerIntervenerSolici
     }
 
     @Override
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.FORMER_INTERVENER_TWO_SOLICITOR_ONLY;
+    }
+
+    @Override
     protected String getNotificationParty() {
         return "former intervener two solicitor";
     }

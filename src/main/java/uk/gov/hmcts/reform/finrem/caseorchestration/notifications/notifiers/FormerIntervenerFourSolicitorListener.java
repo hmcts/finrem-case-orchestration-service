@@ -19,6 +19,11 @@ public class FormerIntervenerFourSolicitorListener extends FormerIntervenerSolic
     }
 
     @Override
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.FORMER_INTERVENER_FOUR_SOLICITOR_ONLY;
+    }
+
+    @Override
     protected String getNotificationParty() {
         return "former intervener four solicitor";
     }

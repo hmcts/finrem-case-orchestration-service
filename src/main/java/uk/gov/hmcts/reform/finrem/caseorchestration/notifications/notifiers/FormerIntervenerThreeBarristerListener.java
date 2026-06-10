@@ -18,6 +18,11 @@ public class FormerIntervenerThreeBarristerListener extends FormerIntervenerBarr
     }
 
     @Override
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.FORMER_INTERVENER_THREE_BARRISTER_ONLY;
+    }
+
+    @Override
     protected String getNotificationParty() {
         return "former intervener three barrister";
     }
