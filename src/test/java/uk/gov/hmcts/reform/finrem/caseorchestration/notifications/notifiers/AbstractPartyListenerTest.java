@@ -68,6 +68,11 @@ class AbstractPartyListenerTest {
         }
 
         @Override
+        protected NotificationParty getNotificationPartyEnum() {
+            return NotificationParty.APPLICANT;
+        }
+
+        @Override
         protected String getNotificationParty() {
             return getClass().getSimpleName();
         }
