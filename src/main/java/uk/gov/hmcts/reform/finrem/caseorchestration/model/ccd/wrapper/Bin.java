@@ -12,6 +12,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 
 import java.util.ArrayList;
+import java.util.Optional;
+
+import static java.util.Objects.isNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -36,14 +39,17 @@ public class Bin {
      * @param caseDocument the case document whose document URL should be added to the deletion bin
      */
     public void binCaseDocument(CaseDocument caseDocument) {
-        if (this.fileUrlsToBeDeleted == null) {
-            this.fileUrlsToBeDeleted = DynamicList.builder()
-                .listItems(new ArrayList<>())
-                .build();
-        }
-        this.fileUrlsToBeDeleted.getListItems().add(
-            DynamicListElement.builder().code(caseDocument.getDocumentUrl()).build()
-        );
+        Optional.ofNullable(caseDocument)
+            .map(CaseDocument::getDocumentUrl)
+            .ifPresent(documentUrl -> {
+                if (fileUrlsToBeDeleted == null) {
+                    fileUrlsToBeDeleted = DynamicList.builder()
+                        .listItems(new ArrayList<>())
+                        .build();
+                }
+                fileUrlsToBeDeleted.getListItems()
+                    .add(DynamicListElement.builder().code(documentUrl).build());
+            });
     }
 
     /**
