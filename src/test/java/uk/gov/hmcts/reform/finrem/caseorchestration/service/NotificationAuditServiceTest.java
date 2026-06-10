@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -13,14 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAuditCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationToBeSentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -28,44 +28,38 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.FINANCIAL_REMEDY_PACK_LETTER_TYPE;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationAuditServiceTest {
 
-    private static final String APPLICANT_ROLE = APP_SOLICITOR.getCcdCode();
-    private static final String RESPONDENT_ROLE = RESP_SOLICITOR.getCcdCode();
-
     @Mock
-    private NotificationService notificationService;
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @InjectMocks
     private NotificationAuditService notificationAuditService;
 
     @Test
-    void givenDigitalApplicant_whenCreateAuditsForHearingCorrespondence_thenEmailAuditAndPendingNotificationCreated() {
-
-        Hearing hearing = Hearing.builder()
-            .partiesOnCase(List.of(partyOnCase(APPLICANT_ROLE)))
-            .build();
-
+    void givenEmailNotification_whenCreateAuditsForCorrespondence_thenEmailAuditAndPendingNotificationCreated() {
         FinremCallbackRequest request = buildRequest();
 
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(request.getCaseDetails()))
-            .thenReturn(true);
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .caseDetails(request.getCaseDetails())
+            .notificationParties(new ArrayList<>(List.of(NotificationParty.APPLICANT)))
+            .emailOrLetters(new ArrayList<>(List.of(true)))
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .documentsToPost(List.of())
+            .build();
 
-        notificationAuditService.createAuditsForHearingCorrespondence(
-            request.getCaseDetails(),
-            hearing,
-            EventType.MANAGE_HEARINGS,
-            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR,
-            List.of());
+        notificationAuditService.createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
+
+        verify(applicationEventPublisher).publishEvent(event);
+        assertThat(event.isDryRun()).isTrue();
 
         NotificationAuditWrapper wrapper = request.getCaseDetails().getData().getNotificationAuditWrapper();
+
         assertThat(wrapper.getNotificationsAudits()).hasSize(1);
         assertThat(wrapper.getNotificationsToBeSent()).hasSize(1);
 
@@ -76,7 +70,7 @@ class NotificationAuditServiceTest {
         assertThat(audit.getCreatedAt()).isEqualTo(LocalDate.now());
         assertThat(audit.getWasSent()).isEqualTo(YesOrNo.NO);
         assertThat(audit.getEventId()).isEqualTo(EventType.MANAGE_HEARINGS.getCcdType());
-        assertThat(audit.getParty()).isEqualTo(APPLICANT_ROLE);
+        assertThat(audit.getParty()).isEqualTo(NotificationParty.APPLICANT.name());
         assertThat(audit.getType()).isEqualTo(NotificationType.EMAIL);
         assertThat(audit.getEmailTemplate()).isEqualTo(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR.name());
         assertThat(audit.getLetterTemplate()).isNull();
@@ -87,30 +81,29 @@ class NotificationAuditServiceTest {
     }
 
     @Test
-    void givenNonDigitalRespondent_whenCreateAuditsForHearingCorrespondence_thenPostalAuditAndPendingNotificationCreated() {
-
+    void givenPostalNotification_whenCreateAuditsForCorrespondence_thenPostalAuditAndPendingNotificationCreated() {
         CaseDocument hearingNotice = CaseDocument.builder()
             .documentFilename("hearingNotice.pdf")
             .build();
+
         CaseDocument miniFormA = CaseDocument.builder()
             .documentFilename("miniFormA.pdf")
             .build();
 
-        Hearing hearing = Hearing.builder()
-            .partiesOnCase(List.of(partyOnCase(RESPONDENT_ROLE)))
-            .build();
-
         FinremCallbackRequest request = buildRequest();
 
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(request.getCaseDetails()))
-            .thenReturn(false);
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .caseDetails(request.getCaseDetails())
+            .notificationParties(new ArrayList<>(List.of(NotificationParty.RESPONDENT)))
+            .emailOrLetters(new ArrayList<>(List.of(false)))
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .documentsToPost(List.of(hearingNotice, miniFormA))
+            .build();
 
-        notificationAuditService.createAuditsForHearingCorrespondence(
-            request.getCaseDetails(),
-            hearing,
-            EventType.MANAGE_HEARINGS,
-            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR,
-            List.of(hearingNotice, miniFormA));
+        notificationAuditService.createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
+
+        verify(applicationEventPublisher).publishEvent(event);
+        assertThat(event.isDryRun()).isTrue();
 
         NotificationAuditWrapper wrapper = request.getCaseDetails().getData().getNotificationAuditWrapper();
 
@@ -124,37 +117,31 @@ class NotificationAuditServiceTest {
         assertThat(audit.getCreatedAt()).isEqualTo(LocalDate.now());
         assertThat(audit.getWasSent()).isEqualTo(YesOrNo.NO);
         assertThat(audit.getEventId()).isEqualTo(EventType.MANAGE_HEARINGS.getCcdType());
-        assertThat(audit.getParty()).isEqualTo(RESPONDENT_ROLE);
+        assertThat(audit.getParty()).isEqualTo(NotificationParty.RESPONDENT.name());
         assertThat(audit.getType()).isEqualTo(NotificationType.POSTAL);
         assertThat(audit.getLetterTemplate()).isEqualTo(FINANCIAL_REMEDY_PACK_LETTER_TYPE);
         assertThat(audit.getAttachedPostalDocs()).isEqualTo("hearingNotice.pdf, miniFormA.pdf");
         assertThat(audit.getEmailTemplate()).isNull();
+
         assertThat(wrapper.getNotificationsToBeSent().getFirst().getValue()).isEqualTo(auditItem.getId());
     }
 
     @Test
-    void givenMultipleParties_whenCreateAuditsForHearingCorrespondence_thenAuditCreatedForEachParty() {
-
-        Hearing hearing = Hearing.builder()
-            .partiesOnCase(List.of(
-                partyOnCase(APPLICANT_ROLE),
-                partyOnCase(RESPONDENT_ROLE)
-            ))
-            .build();
-
+    void givenMultipleParties_whenCreateAuditsForCorrespondence_thenAuditCreatedForEachParty() {
         FinremCallbackRequest request = buildRequest();
 
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(request.getCaseDetails()))
-            .thenReturn(true);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(request.getCaseDetails()))
-            .thenReturn(false);
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .caseDetails(request.getCaseDetails())
+            .notificationParties(new ArrayList<>(List.of(
+                NotificationParty.APPLICANT,
+                NotificationParty.RESPONDENT
+            )))
+            .emailOrLetters(new ArrayList<>(List.of(true, false)))
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .documentsToPost(List.of())
+            .build();
 
-        notificationAuditService.createAuditsForHearingCorrespondence(
-            request.getCaseDetails(),
-            hearing,
-            EventType.MANAGE_HEARINGS,
-            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR,
-            List.of());
+        notificationAuditService.createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
 
         NotificationAuditWrapper wrapper = request.getCaseDetails().getData().getNotificationAuditWrapper();
 
@@ -163,7 +150,10 @@ class NotificationAuditServiceTest {
 
         assertThat(wrapper.getNotificationsAudits())
             .extracting(item -> item.getValue().getParty())
-            .containsExactly(APPLICANT_ROLE, RESPONDENT_ROLE);
+            .containsExactly(
+                NotificationParty.APPLICANT.name(),
+                NotificationParty.RESPONDENT.name()
+            );
 
         assertThat(wrapper.getNotificationsAudits())
             .extracting(item -> item.getValue().getType())
@@ -173,13 +163,14 @@ class NotificationAuditServiceTest {
             .extracting(NotificationToBeSentCollectionItem::getValue)
             .containsExactly(
                 wrapper.getNotificationsAudits().get(0).getId(),
-                wrapper.getNotificationsAudits().get(1).getId());
+                wrapper.getNotificationsAudits().get(1).getId()
+            );
     }
 
     @Test
-    void givenExistingAudits_whenCreateAuditsForHearingCorrespondence_thenNewAuditsAreAppended() {
-
+    void givenExistingAudits_whenCreateAuditsForCorrespondence_thenNewAuditsAreAppended() {
         UUID existingAuditId = UUID.randomUUID();
+
         NotificationAuditCollectionItem existingAudit = NotificationAuditCollectionItem.builder()
             .id(existingAuditId)
             .value(NotificationAudit.builder()
@@ -187,14 +178,17 @@ class NotificationAuditServiceTest {
                 .wasSent(YesOrNo.NO)
                 .build())
             .build();
+
         NotificationToBeSentCollectionItem existingPendingNotification = NotificationToBeSentCollectionItem.builder()
             .id(UUID.randomUUID())
             .value(existingAuditId)
             .build();
+
         NotificationAuditWrapper wrapper = NotificationAuditWrapper.builder()
             .notificationsAudits(new ArrayList<>(List.of(existingAudit)))
             .notificationsToBeSent(new ArrayList<>(List.of(existingPendingNotification)))
             .build();
+
         FinremCaseData caseData = FinremCaseData.builder()
             .notificationAuditWrapper(wrapper)
             .build();
@@ -202,21 +196,18 @@ class NotificationAuditServiceTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(
             Long.parseLong(TestConstants.CASE_ID),
             CaseType.CONTESTED,
-            caseData);
+            caseData
+        );
 
-        Hearing hearing = Hearing.builder()
-            .partiesOnCase(List.of(partyOnCase(APPLICANT_ROLE)))
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .caseDetails(request.getCaseDetails())
+            .notificationParties(new ArrayList<>(List.of(NotificationParty.APPLICANT)))
+            .emailOrLetters(new ArrayList<>(List.of(true)))
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .documentsToPost(List.of())
             .build();
 
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(request.getCaseDetails()))
-            .thenReturn(true);
-
-        notificationAuditService.createAuditsForHearingCorrespondence(
-            request.getCaseDetails(),
-            hearing,
-            EventType.MANAGE_HEARINGS,
-            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR,
-            List.of());
+        notificationAuditService.createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
 
         assertThat(wrapper.getNotificationsAudits()).hasSize(2);
         assertThat(wrapper.getNotificationsToBeSent()).hasSize(2);
@@ -226,25 +217,23 @@ class NotificationAuditServiceTest {
         NotificationAuditCollectionItem newAudit = wrapper.getNotificationsAudits().get(1);
         NotificationToBeSentCollectionItem newPendingNotification = wrapper.getNotificationsToBeSent().get(1);
 
-        assertThat(newAudit.getValue().getParty()).isEqualTo(APPLICANT_ROLE);
+        assertThat(newAudit.getValue().getParty()).isEqualTo(NotificationParty.APPLICANT.name());
         assertThat(newPendingNotification.getValue()).isEqualTo(newAudit.getId());
     }
 
     @Test
-    void givenNoPartiesOnHearing_whenCreateAuditsForHearingCorrespondence_thenNoAuditsAreCreated() {
-
-        Hearing hearing = Hearing.builder()
-            .partiesOnCase(null)
-            .build();
-
+    void givenNoNotificationParties_whenCreateAuditsForCorrespondence_thenNoAuditsAreCreated() {
         FinremCallbackRequest request = buildRequest();
 
-        notificationAuditService.createAuditsForHearingCorrespondence(
-            request.getCaseDetails(),
-            hearing,
-            EventType.MANAGE_HEARINGS,
-            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR,
-            List.of());
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .caseDetails(request.getCaseDetails())
+            .notificationParties(new ArrayList<>())
+            .emailOrLetters(new ArrayList<>())
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .documentsToPost(List.of())
+            .build();
+
+        notificationAuditService.createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
 
         NotificationAuditWrapper wrapper = request.getCaseDetails().getData().getNotificationAuditWrapper();
 
@@ -253,23 +242,18 @@ class NotificationAuditServiceTest {
     }
 
     @Test
-    void givenNullPostalDocuments_whenCreateAuditsForHearingCorrespondence_thenPostalAuditHasEmptyAttachedDocs() {
-
-        Hearing hearing = Hearing.builder()
-            .partiesOnCase(List.of(partyOnCase(RESPONDENT_ROLE)))
-            .build();
-
+    void givenNullPostalDocuments_whenCreateAuditsForCorrespondence_thenPostalAuditHasEmptyAttachedDocs() {
         FinremCallbackRequest request = buildRequest();
 
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(request.getCaseDetails()))
-            .thenReturn(false);
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .caseDetails(request.getCaseDetails())
+            .notificationParties(new ArrayList<>(List.of(NotificationParty.RESPONDENT)))
+            .emailOrLetters(new ArrayList<>(List.of(false)))
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .documentsToPost(null)
+            .build();
 
-        notificationAuditService.createAuditsForHearingCorrespondence(
-            request.getCaseDetails(),
-            hearing,
-            EventType.MANAGE_HEARINGS,
-            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR,
-            null);
+        notificationAuditService.createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
 
         NotificationAudit audit = request.getCaseDetails()
             .getData()
@@ -291,15 +275,7 @@ class NotificationAuditServiceTest {
         return FinremCallbackRequestFactory.from(
             Long.parseLong(TestConstants.CASE_ID),
             CaseType.CONTESTED,
-            caseData);
-    }
-
-    private PartyOnCaseCollectionItem partyOnCase(String role) {
-        return PartyOnCaseCollectionItem.builder()
-            .value(PartyOnCase.builder()
-                .role(role)
-                .label(role)
-                .build())
-            .build();
+            caseData
+        );
     }
 }

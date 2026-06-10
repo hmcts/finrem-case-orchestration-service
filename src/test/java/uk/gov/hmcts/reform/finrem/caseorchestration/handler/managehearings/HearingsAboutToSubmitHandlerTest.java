@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -10,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -28,27 +26,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -56,8 +50,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 
 @ExtendWith(MockitoExtension.class)
 class HearingsAboutToSubmitHandlerTest {
@@ -65,14 +57,14 @@ class HearingsAboutToSubmitHandlerTest {
     @Mock
     private ManageHearingActionService manageHearingActionService;
 
-    @InjectMocks
-    private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
-
-    @Mock
-    private HearingCorrespondenceHelper hearingCorrespondenceHelper;
-
     @Mock
     private NotificationAuditService notificationAuditService;
+
+    @Mock
+    private ManageHearingsCorresponder manageHearingsCorresponder;
+
+    @InjectMocks
+    private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
 
     @Test
     void testCanHandle() {
@@ -95,12 +87,11 @@ class HearingsAboutToSubmitHandlerTest {
 
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
             CaseType.CONTESTED, caseData);
+        request.setEventType(EventType.MANAGE_HEARINGS);
 
-        Hearing nonNotifyingHearing = mock(Hearing.class);
-        when(nonNotifyingHearing.shouldSendNotifications()).thenReturn(false);
-        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any()))
-            .thenReturn(nonNotifyingHearing);
-
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN))
+            .thenReturn(event);
         doAnswer(invocation -> {
             UUID workingHearingID = UUID.randomUUID();
             ManageHearingsCollectionItem manageHearingsCollectionItem = ManageHearingsCollectionItem.builder()
@@ -185,6 +176,9 @@ class HearingsAboutToSubmitHandlerTest {
         //Assert perform tab data
         assertThat(responseManageHearingsWrapper.getApplicantHearingTabItems())
             .contains(hearingTabItem);
+
+        verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN);
+        verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
     }
 
     @Test
@@ -199,28 +193,21 @@ class HearingsAboutToSubmitHandlerTest {
 
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(
             Long.parseLong(caseReference), CaseType.CONTESTED, caseData);
+        request.setEventType(EventType.MANAGE_HEARINGS);
 
-        VacateOrAdjournedHearing vacateHearing = mock(VacateOrAdjournedHearing.class);
-        when(vacateHearing.shouldSendNotifications()).thenReturn(false);
-        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any()))
-            .thenReturn(vacateHearing);
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN))
+            .thenReturn(event);
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
         verify(manageHearingActionService).performAdjournOrVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
+        verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN);
+        verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
     }
 
     @Test
     void givenValidCaseData_whenHandleVacateWithRelist_thenPerformPerformAddAndVacateHearingCalled() {
-
-        Hearing nonNotifyingHearing = mock(Hearing.class);
-        when(nonNotifyingHearing.shouldSendNotifications()).thenReturn(false);
-        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any()))
-            .thenReturn(nonNotifyingHearing);
-        VacateOrAdjournedHearing vacateHearing = mock(VacateOrAdjournedHearing.class);
-        when(vacateHearing.shouldSendNotifications()).thenReturn(false);
-        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any()))
-            .thenReturn(vacateHearing);
 
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
@@ -231,78 +218,18 @@ class HearingsAboutToSubmitHandlerTest {
 
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(
             Long.parseLong(TestConstants.CASE_ID), CaseType.CONTESTED, caseData);
+        request.setEventType(EventType.MANAGE_HEARINGS);
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN))
+            .thenReturn(event);
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
         verify(manageHearingActionService).performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).performAdjournOrVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
-    }
-
-    @Test
-    void givenNotifyingAdjournHearing_whenHandleVacate_thenAdjournNoticeAuditedWithDocument() {
-        CaseDocument vacateNotice = CaseDocument.builder().documentFilename("vacateNotice.pdf").build();
-
-        VacateOrAdjournedHearing vacateHearing = mock(VacateOrAdjournedHearing.class);
-        when(vacateHearing.shouldSendNotifications()).thenReturn(true);
-        when(vacateHearing.getHearingStatus()).thenReturn(VacateOrAdjournAction.ADJOURN_HEARING);
-        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any()))
-            .thenReturn(vacateHearing);
-        when(hearingCorrespondenceHelper.isVacatedAndRelistedHearing(any())).thenReturn(false);
-        when(hearingCorrespondenceHelper.getVacateHearingNotice(any())).thenReturn(vacateNotice);
-
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .manageHearingsActionSelection(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING)
-                .build())
-            .build();
-
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
-            Long.parseLong(TestConstants.CASE_ID), CaseType.CONTESTED, caseData);
-
-        manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
-
-        verify(notificationAuditService).createAuditsForVacateCorrespondence(
-            eq(request.getCaseDetails()),
-            eq(vacateHearing),
-            any(),
-            eq(FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR),
-            eq(List.of(vacateNotice)));
-    }
-
-    @Test
-    void givenNotifyingHearingWithDocuments_whenHandleAdd_thenAllDocumentsAudited() {
-        CaseDocument additionalDoc = CaseDocument.builder().documentFilename("additional.pdf").build();
-        CaseDocument miniFormA = CaseDocument.builder().documentFilename("miniFormA.pdf").build();
-
-        Hearing notifyingHearing = mock(Hearing.class);
-        when(notifyingHearing.shouldSendNotifications()).thenReturn(true);
-        when(notifyingHearing.getAdditionalHearingDocs()).thenReturn(List.of(
-            DocumentCollectionItem.builder().value(additionalDoc).build()));
-        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any()))
-            .thenReturn(notifyingHearing);
-        when(hearingCorrespondenceHelper.getMiniFormAIfRequired(any(), any()))
-            .thenReturn(Optional.of(miniFormA));
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<CaseDocument>> docsCaptor = ArgumentCaptor.forClass(List.class);
-
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
-                .build())
-            .build();
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
-            Long.parseLong(TestConstants.CASE_ID), CaseType.CONTESTED, caseData);
-
-        manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
-
-        verify(notificationAuditService).createAuditsForHearingCorrespondence(
-            eq(request.getCaseDetails()),
-            eq(notifyingHearing),
-            any(),
-            eq(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR),
-            docsCaptor.capture());
-        assertThat(docsCaptor.getValue()).contains(additionalDoc, miniFormA);
+        verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN);
+        verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
     }
 
     private WorkingHearing createHearingToAdd() {

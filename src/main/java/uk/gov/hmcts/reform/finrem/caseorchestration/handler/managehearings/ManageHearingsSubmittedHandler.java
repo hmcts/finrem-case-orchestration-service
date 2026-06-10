@@ -32,14 +32,12 @@ import java.util.Optional;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_AUDITS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_TO_BE_SENT;
 
 @Slf4j
 @Service
 public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
-
-    private static final String NOTIFICATIONS_AUDITS = "notificationsAudits";
-
-    private static final String NOTIFICATIONS_TO_BE_SENT = "notificationsToBeSent";
 
     private final RetryExecutor retryExecutor;
 
@@ -78,11 +76,11 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = caseDetails.getData();
+        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
 
         log.info("Beginning hearing correspondence for {} action. Case reference: {}",
-            actionSelection.getDescription(), caseDetails.getCaseIdAsString());
+            actionSelection.getDescription(), finremCaseData.getCcdCaseId());
 
         List<String> errors = new ArrayList<>();
         SendCorrespondenceEvent correspondenceEvent = buildCorrespondenceEvent(
@@ -139,31 +137,39 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
     }
 
     private void markPendingNotificationsAsSent(FinremCaseDetails caseDetails) {
-        coreCaseDataService.performPostSubmitCallback(
-            caseDetails.getData().getCcdCaseType(),
-            caseDetails.getId(),
-            INTERNAL_CHANGE_UPDATE_CASE.getCcdType(),
-            latestCaseDetails -> flipSentFlags(
-                finremCaseDetailsMapper.mapToFinremCaseDetails(latestCaseDetails).getData())
-        );
+        Map<String, Object> updatedFields = flipSentFlags(caseDetails.getData());
+
+        if (!updatedFields.isEmpty()) {
+            coreCaseDataService.performPostSubmitCallback(
+                caseDetails.getData().getCcdCaseType(),
+                caseDetails.getId(),
+                INTERNAL_CHANGE_UPDATE_CASE.getCcdType(),
+                latestCaseDetails -> updatedFields
+            );
+        }
     }
 
     private Map<String, Object> flipSentFlags(FinremCaseData latestData) {
-
         NotificationAuditWrapper wrapper = latestData.getNotificationAuditWrapper();
+
         List<NotificationAuditCollectionItem> audits =
             Optional.ofNullable(wrapper.getNotificationsAudits()).orElseGet(ArrayList::new);
+
         List<NotificationToBeSentCollectionItem> pending =
             Optional.ofNullable(wrapper.getNotificationsToBeSent()).orElseGet(ArrayList::new);
 
         if (pending.isEmpty()) {
             return Map.of();
         }
-        pending.forEach(pendingItem ->
-            audits.stream()
-                .filter(audit -> pendingItem.getValue().equals(audit.getId()))
-                .findFirst()
-                .ifPresent(audit -> audit.getValue().setWasSent(YesOrNo.YES)));
+
+        pending.stream()
+            .map(NotificationToBeSentCollectionItem::getValue)
+            .forEach(pendingItem ->
+                audits.stream()
+                    .filter(audit -> pendingItem.equals(audit.getId()))
+                    .findFirst()
+                    .ifPresent(audit -> audit.getValue().setWasSent(YesOrNo.YES))
+            );
 
         return Map.of(
             NOTIFICATIONS_AUDITS, objectMapper.convertValue(audits, List.class),

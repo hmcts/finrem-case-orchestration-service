@@ -2,14 +2,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAuditCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationToBeSentCollectionItem;
@@ -17,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,94 +31,65 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintServ
 @Slf4j
 public class NotificationAuditService {
 
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
-     * Creates audit rows for a new-hearing correspondence: one row per party listed on the hearing.
-     * Appends both the rows and their IDs to the case wrapper.
+     * Creates notification audit rows for the correspondence event.
+     * The event is published in dry-run mode first so listeners can determine
+     * whether each party would receive correspondence by email or post.
+     * One audit row is created per notification party, and each audit row ID
+     * is added to the pending notifications list for later sent-status updates.
      *
-     * @param caseDetails the case details
-     * @param hearing     the hearing whose parties drive the recipient list
-     * @param eventType   the event triggering the notification (used for the {@code event_id} field)
-     * @param emailTemplate the email template that the listeners will use
-     * @param documentsToPost the documents that will be posted to any unrepresented parties
+     * @param event     the correspondence event containing parties, case details, template and documents
+     * @param eventType the event triggering the notification, used for the eventId field
      */
-    public void createAuditsForHearingCorrespondence(FinremCaseDetails caseDetails,
-                                                     HearingLike hearing,
-                                                     EventType eventType,
-                                                     EmailTemplateNames emailTemplate,
-                                                     List<CaseDocument> documentsToPost) {
-        createAuditsForCorrespondence(caseDetails, hearing, eventType, emailTemplate, documentsToPost);
-    }
+    public void createAuditsForCorrespondence(SendCorrespondenceEvent event,
+                                              EventType eventType) {
+        event.setDryRun(true);
 
-    public void createAuditsForVacateCorrespondence(FinremCaseDetails caseDetails,
-                                                    HearingLike vacateOrAdjournedHearing,
-                                                    EventType eventType,
-                                                    EmailTemplateNames emailTemplate,
-                                                    List<CaseDocument> documentsToPost) {
-        createAuditsForCorrespondence(caseDetails, vacateOrAdjournedHearing, eventType, emailTemplate, documentsToPost);
-    }
+        applicationEventPublisher.publishEvent(event);
 
-    private void createAuditsForCorrespondence(FinremCaseDetails caseDetails,
-                                               HearingLike hearing,
-                                               EventType eventType,
-                                               EmailTemplateNames emailTemplate,
-                                               List<CaseDocument> documentsToPost) {
+        FinremCaseDetails caseDetails = event.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
         NotificationAuditWrapper wrapper = caseData.getNotificationAuditWrapper();
 
         List<NotificationAuditCollectionItem> audits = Optional.ofNullable(wrapper.getNotificationsAudits())
             .orElseGet(ArrayList::new);
+
         List<NotificationToBeSentCollectionItem> pending = Optional.ofNullable(wrapper.getNotificationsToBeSent())
             .orElseGet(ArrayList::new);
-        List<PartyOnCaseCollectionItem> partiesOnCase =
-            Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
-        List<String> postalDocFilenames = filenamesOf(documentsToPost);
 
-        for (PartyOnCaseCollectionItem partyItem : partiesOnCase) {
-            String role = partyItem.getValue().getRole();
-            NotificationParty notificationParty = NotificationParty.getNotificationPartyFromRole(role);
-            NotificationType channel = predictParty(caseDetails, notificationParty);
-            NotificationAudit auditRow = buildAuditRow(eventType, role, channel, emailTemplate, postalDocFilenames);
+        List<String> postalDocFilenames = filenamesOf(event.getDocumentsToPost());
+
+        for (NotificationParty notificationParty : event.getNotificationParties()) {
+            NotificationType channel = event.getNotificationTypeForParty(notificationParty);
+
+            NotificationAudit auditRow = buildAuditRow(
+                eventType,
+                notificationParty.name(),
+                channel,
+                event.getEmailTemplate(),
+                postalDocFilenames
+            );
+
             UUID rowId = UUID.randomUUID();
+
             audits.add(NotificationAuditCollectionItem.builder()
                 .id(rowId)
                 .value(auditRow)
                 .build());
+
             pending.add(NotificationToBeSentCollectionItem.builder()
                 .id(UUID.randomUUID())
                 .value(rowId)
                 .build());
 
-            log.info("Created notification audit row {} for party {} on case {} (channel: {})",
-                rowId, role, caseDetails.getId(), channel);
+            log.info("Created notification audit row {} for party {} on case {} with channel {}",
+                rowId, notificationParty, caseDetails.getId(), channel);
         }
+
         wrapper.setNotificationsAudits(audits);
         wrapper.setNotificationsToBeSent(pending);
-    }
-
-    private NotificationType predictParty(FinremCaseDetails caseDetails, NotificationParty party) {
-        boolean digitalAndEmailPopulated = switch (party) {
-            case APPLICANT, APPLICANT_SOLICITOR_ONLY ->
-                notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
-            case RESPONDENT ->
-                notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
-            case INTERVENER_ONE ->
-                notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(
-                    caseDetails.getData().getIntervenerOne(), caseDetails);
-            case INTERVENER_TWO ->
-                notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(
-                    caseDetails.getData().getIntervenerTwo(), caseDetails);
-            case INTERVENER_THREE ->
-                notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(
-                    caseDetails.getData().getIntervenerThree(), caseDetails);
-            case INTERVENER_FOUR ->
-                notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(
-                    caseDetails.getData().getIntervenerFour(), caseDetails);
-            default -> false;
-        };
-
-        return digitalAndEmailPopulated ? NotificationType.EMAIL : NotificationType.POSTAL;
     }
 
     private NotificationAudit buildAuditRow(EventType eventType,
@@ -144,7 +116,9 @@ public class NotificationAuditService {
     }
 
     private List<String> filenamesOf(List<CaseDocument> documents) {
-        return Optional.ofNullable(documents).orElseGet(List::of).stream()
+        return Optional.ofNullable(documents)
+            .orElseGet(List::of)
+            .stream()
             .map(CaseDocument::getDocumentFilename)
             .toList();
     }

@@ -85,26 +85,28 @@ public abstract class AbstractPartyListener {
 
     private void sendNotification(SendCorrespondenceEvent event) {
         boolean dryRun = event.isDryRun();
+        NotificationParty notificationParty = getNotificationPartyEnum();
+
         if (!event.isLetterNotificationOnly() && shouldSendEmailNotification(event)) {
             if (!dryRun) {
                 enrichAndSendEmailNotification(event);
             }
-            event.incrementEmailCount();
+            event.recordEmailNotification(notificationParty);
         } else if (shouldSendPaperNotification(event)) {
             if (!dryRun) {
                 sendPaperNotification(event);
             }
-            event.incrementLetterCount();
+            event.recordPostalNotification(notificationParty);
         }
+    }
+    private NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.getNotificationPartyFromRole(getNotificationParty());
     }
 
     /**
      * Should the paper notification be sent.
      */
-    protected boolean shouldSendPaperNotification(SendCorrespondenceEvent event) {
-        return true;
-    }
-
+    protected abstract boolean shouldSendPaperNotification(SendCorrespondenceEvent event);
     /**
      * Enriches the email notification data with party-specific details and sends a confirmation email.
      *

@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import com.ibm.icu.text.ListFormatter;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
@@ -19,6 +21,13 @@ import java.util.Optional;
 @Builder(toBuilder = true)
 public class SendCorrespondenceEvent {
     List<NotificationParty> notificationParties;
+    /**
+     * true = EMAIL
+     * false = POSTAL
+     */
+    @Builder.Default
+    List<Boolean> emailOrLetters = new ArrayList<>();
+
     NotificationRequest emailNotificationRequest;
     EmailTemplateNames emailTemplate;
     List<CaseDocument> documentsToPost;
@@ -28,6 +37,7 @@ public class SendCorrespondenceEvent {
     Barrister barrister;
     boolean letterNotificationOnly;
 
+    @Setter
     boolean dryRun;
     int letterCount = 0;
     int emailCount = 0;
@@ -38,6 +48,44 @@ public class SendCorrespondenceEvent {
 
     public void incrementEmailCount() {
         emailCount++;
+    }
+
+    public void recordEmailNotification(NotificationParty notificationParty) {
+        recordNotificationType(notificationParty, true);
+        incrementEmailCount();
+    }
+
+    public void recordPostalNotification(NotificationParty notificationParty) {
+        recordNotificationType(notificationParty, false);
+        incrementLetterCount();
+    }
+
+    private void recordNotificationType(NotificationParty notificationParty, boolean email) {
+        int index = getNotificationParties().indexOf(notificationParty);
+
+        if (index == -1) {
+            getNotificationParties().add(notificationParty);
+            getEmailOrLetters().add(email);
+            return;
+        }
+
+        while (getEmailOrLetters().size() <= index) {
+            getEmailOrLetters().add(false);
+        }
+
+        getEmailOrLetters().set(index, email);
+    }
+
+    public NotificationType getNotificationTypeForParty(NotificationParty notificationParty) {
+        int index = getNotificationParties().indexOf(notificationParty);
+
+        if (index == -1 || getEmailOrLetters().size() <= index) {
+            throw new IllegalStateException("Unable to resolve notification type for party: " + notificationParty);
+        }
+
+        return Boolean.TRUE.equals(getEmailOrLetters().get(index))
+            ? NotificationType.EMAIL
+            : NotificationType.POSTAL;
     }
 
     public FinremCaseData getCaseData() {

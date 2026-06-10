@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -184,8 +185,7 @@ class ManageHearingsSubmittedHandlerTest {
         publishEventCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
         assertAll(
             () -> verify(applicationEventPublisher).publishEvent(event),
-            () -> verify(coreCaseDataService).performPostSubmitCallback(
-                any(), eq(CASE_ID_IN_LONG), eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()), any()),
+            () -> verify(coreCaseDataService, never()).performPostSubmitCallback(any(), any(), any(), any()),
             () -> verifyNoMoreInteractions(retryExecutor)
         );
     }
@@ -223,50 +223,63 @@ class ManageHearingsSubmittedHandlerTest {
         publishEventCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
         assertAll(
             () -> verify(applicationEventPublisher).publishEvent(event),
-            () -> verify(coreCaseDataService).performPostSubmitCallback(
-                any(), eq(CASE_ID_IN_LONG), eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()), any()),
+            () -> verify(coreCaseDataService, never()).performPostSubmitCallback(any(), any(), any(), any()),
             () -> verifyNoMoreInteractions(retryExecutor)
         );
     }
 
     @Test
-    void givenPendingNotifications_whenFlipFunctionApplied_thenMatchingRowsMarkedSentAndQueueDrained() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADD_HEARING);
+    void givenPendingNotifications_whenHandleSuccessful_thenMatchingRowsMarkedSentAndQueueDrained() {
+        UUID rowId1 = UUID.randomUUID();
+        UUID rowId2 = UUID.randomUUID();
+
+        NotificationAuditCollectionItem row1 = NotificationAuditCollectionItem.builder()
+            .id(rowId1)
+            .value(NotificationAudit.builder().wasSent(YesOrNo.NO).build())
+            .build();
+
+        NotificationAuditCollectionItem row2 = NotificationAuditCollectionItem.builder()
+            .id(rowId2)
+            .value(NotificationAudit.builder().wasSent(YesOrNo.NO).build())
+            .build();
+
+        NotificationAuditWrapper notificationAuditWrapper = NotificationAuditWrapper.builder()
+            .notificationsAudits(new ArrayList<>(List.of(row1, row2)))
+            .notificationsToBeSent(new ArrayList<>(List.of(
+                NotificationToBeSentCollectionItem.builder().id(UUID.randomUUID()).value(rowId1).build(),
+                NotificationToBeSentCollectionItem.builder().id(UUID.randomUUID()).value(rowId2).build()
+            )))
+            .build();
+
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(
+            ManageHearingsAction.ADD_HEARING,
+            notificationAuditWrapper
+        );
 
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(event.getCaseId()).thenReturn(CASE_ID);
         when(event.describeNotificationParties()).thenReturn("WHATEVER");
-        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
-
-        UUID rowId1 = UUID.randomUUID();
-        UUID rowId2 = UUID.randomUUID();
-        NotificationAuditCollectionItem row1 = NotificationAuditCollectionItem.builder()
-            .id(rowId1).value(NotificationAudit.builder().wasSent(YesOrNo.NO).build()).build();
-        NotificationAuditCollectionItem row2 = NotificationAuditCollectionItem.builder()
-            .id(rowId2).value(NotificationAudit.builder().wasSent(YesOrNo.NO).build()).build();
-        FinremCaseData latestData = FinremCaseData.builder()
-            .notificationAuditWrapper(NotificationAuditWrapper.builder()
-                .notificationsAudits(new java.util.ArrayList<>(List.of(row1, row2)))
-                .notificationsToBeSent(new java.util.ArrayList<>(List.of(
-                    NotificationToBeSentCollectionItem.builder().id(UUID.randomUUID()).value(rowId1).build(),
-                    NotificationToBeSentCollectionItem.builder().id(UUID.randomUUID()).value(rowId2).build())))
-                .build())
-            .build();
+        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN))
+            .thenReturn(event);
 
         when(objectMapper.convertValue(any(), eq(List.class)))
             .thenReturn(List.of(row1, row2));
-        CaseDetails latest = CaseDetails.builder().id(CASE_ID_IN_LONG).build();
-        FinremCaseDetails mappedLatest = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).data(latestData).build();
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(latest)).thenReturn(mappedLatest);
 
         manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> fnCaptor =
             ArgumentCaptor.forClass(Function.class);
+
         verify(coreCaseDataService).performPostSubmitCallback(
-            any(), eq(CASE_ID_IN_LONG), eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()), fnCaptor.capture());
-        Map<String, Object> updates = fnCaptor.getValue().apply(latest);
+            any(),
+            eq(CASE_ID_IN_LONG),
+            eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()),
+            fnCaptor.capture()
+        );
+
+        Map<String, Object> updates = fnCaptor.getValue()
+            .apply(CaseDetails.builder().id(CASE_ID_IN_LONG).build());
 
         assertAll(
             () -> assertThat(row1.getValue().getWasSent()).isEqualTo(YesOrNo.YES),
@@ -276,11 +289,18 @@ class ManageHearingsSubmittedHandlerTest {
     }
 
     private FinremCallbackRequest buildCallbackRequest(ManageHearingsAction action) {
+        return buildCallbackRequest(action, NotificationAuditWrapper.builder().build());
+    }
+
+    private FinremCallbackRequest buildCallbackRequest(ManageHearingsAction action,
+                                                       NotificationAuditWrapper notificationAuditWrapper) {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper
                 .builder()
                 .manageHearingsActionSelection(action)
                 .build())
+            .notificationAuditWrapper(notificationAuditWrapper)
+            .ccdCaseId(CASE_ID)
             .build();
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()

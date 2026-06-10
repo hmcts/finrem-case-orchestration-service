@@ -347,6 +347,9 @@ public class CCDConfigConstant {
     public static final String PFD_NCDR_COMPLIANCE_LETTER = "pfdNcdrComplianceLetter";
     public static final String PFD_NCDR_COVER_LETTER = "pfdNcdrCoverLetter";
 
+    public static final String NOTIFICATIONS_AUDITS = "notificationsAudits";
+    public static final String NOTIFICATIONS_TO_BE_SENT = "notificationsToBeSent";
+
     public static final String GENERAL_ORDER_PREVIEW_DOCUMENT = "generalOrderPreviewDocument";
     public static final String GENERAL_ORDER_BODY_TEXT = "generalOrderBodyText";
     public static final String GENERAL_ORDER_DATE = "generalOrderDate";
