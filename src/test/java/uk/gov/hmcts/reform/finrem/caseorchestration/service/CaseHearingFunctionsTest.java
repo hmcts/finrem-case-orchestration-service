@@ -241,7 +241,7 @@ class CaseHearingFunctionsTest {
         assertEquals("Reading County Court and Family Court", stringObjectMap.get(COURT_DETAILS_NAME_KEY));
         assertEquals("Hearing Centre, 160-163 Friar Street, Reading, RG1 1HE", stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY));
         assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
-        assertEquals("family.reading.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
+        assertEquals("FRCThamesValley@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
     }
 
     @Test
@@ -257,9 +257,7 @@ class CaseHearingFunctionsTest {
         assertEquals("Reading County Court and Family Court", stringObjectMap.get(COURT_DETAILS_NAME_KEY));
         assertEquals("Hearing Centre, 160-163 Friar Street, Reading, RG1 1HE", stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY));
         assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
-        assertEquals("family.reading.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
-        assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
-        assertEquals("family.reading.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
+        assertEquals("FRCThamesValley@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
     }
 
     @Test
