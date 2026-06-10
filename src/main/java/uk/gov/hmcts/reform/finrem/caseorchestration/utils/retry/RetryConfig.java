@@ -48,7 +48,8 @@ public class RetryConfig {
         Map<Class<? extends Throwable>, Boolean> retryableExceptions = Map.of(
             FeignException.InternalServerError.class, true,
             FeignException.ServiceUnavailable.class, true,
-            FeignException.GatewayTimeout.class, true);
+            FeignException.GatewayTimeout.class, true,
+            FeignException.BadGateway.class, true);
 
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(3, retryableExceptions);
 
