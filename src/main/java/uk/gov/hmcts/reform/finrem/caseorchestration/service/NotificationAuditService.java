@@ -83,9 +83,6 @@ public class NotificationAuditService {
                 .id(UUID.randomUUID())
                 .value(rowId)
                 .build());
-
-            log.info("Created notification audit row {} for party {} on case {} with channel {}",
-                rowId, notificationParty, caseDetails.getId(), channel);
         }
 
         wrapper.setNotificationsAudits(audits);
