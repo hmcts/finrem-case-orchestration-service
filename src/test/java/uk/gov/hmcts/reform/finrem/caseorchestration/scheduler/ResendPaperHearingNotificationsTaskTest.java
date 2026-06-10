@@ -172,7 +172,7 @@ class ResendPaperHearingNotificationsTaskTest {
 
         List<DocumentCollectionItem> additionalDocumentCollection =
             extraDocuments
-                ? buildAdditionalDocumentCollection(hearingItemId, additionalHearingDoc)
+                ? List.of(DocumentCollectionItem.fromCaseDocument(additionalHearingDoc))
                 : List.of();
 
         List<ManageHearingsCollectionItem> hearings = buildHearingsCollection(
@@ -577,16 +577,6 @@ class ResendPaperHearingNotificationsTaskTest {
                     .hearingId(hearingItemId)
                     .hearingDocument(caseDocument)
                     .build())
-                .build()
-        );
-    }
-
-    private List<DocumentCollectionItem> buildAdditionalDocumentCollection(
-        UUID hearingItemId, CaseDocument caseDocument) {
-        return List.of(
-            DocumentCollectionItem.builder()
-                .id(hearingItemId)
-                .value(caseDocument)
                 .build()
         );
     }

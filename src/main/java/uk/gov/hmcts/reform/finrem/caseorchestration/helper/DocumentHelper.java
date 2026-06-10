@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
@@ -173,9 +172,14 @@ public class DocumentHelper {
             .toList();
     }
 
+    /**
+     * Retrieves all non-null pension documents from the case data pension collection.
+     *
+     * @param caseData the financial remedy case data containing pension information
+     * @return a list of pension documents, or an empty list if no pension documents exist
+     */
     public List<CaseDocument> getPensionDocumentsData(FinremCaseData caseData) {
-        return ofNullable(caseData.getPensionCollection())
-            .orElse(emptyList())
+        return emptyIfNull(caseData.getPensionCollection())
             .stream()
             .map(PensionTypeCollection::getTypedCaseDocument)
             .map(PensionType::getPensionDocument)
@@ -343,16 +347,6 @@ public class DocumentHelper {
 
     public List<DirectionDetailsCollectionData> convertToDirectionDetailsCollectionData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
-    public List<AdditionalHearingDocumentData> convertToAdditionalHearingDocumentData(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
-    public List<PensionTypeCollection> getPensionDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION), new TypeReference<>() {
         });
     }
 
