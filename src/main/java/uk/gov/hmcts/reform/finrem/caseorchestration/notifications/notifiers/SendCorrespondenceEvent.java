@@ -43,19 +43,37 @@ public class SendCorrespondenceEvent {
     int letterCount = 0;
     int emailCount = 0;
 
-    public void incrementLetterCount() {
+    private void incrementLetterCount() {
         letterCount++;
     }
 
-    public void incrementEmailCount() {
+    private void incrementEmailCount() {
         emailCount++;
     }
 
+    /**
+     * Records that the given notification party would receive, or has received, an email notification.
+     *
+     * <p>The result is stored in the same index position as the party in {@code notificationParties},
+     * so the audit service can later resolve the notification channel for each party.</p>
+     *
+     * @param notificationParty the party whose notification channel should be recorded
+     * @throws IllegalArgumentException if the notification party is null or was not requested on this event
+     */
     public void recordEmailNotification(NotificationParty notificationParty) {
         recordNotificationType(notificationParty, true);
         incrementEmailCount();
     }
 
+    /**
+     * Records that the given notification party would receive, or has received, a postal notification.
+     *
+     * <p>The result is stored in the same index position as the party in {@code notificationParties},
+     * so the audit service can later resolve the notification channel for each party.</p>
+     *
+     * @param notificationParty the party whose notification channel should be recorded
+     * @throws IllegalArgumentException if the notification party is null or was not requested on this event
+     */
     public void recordPostalNotification(NotificationParty notificationParty) {
         recordNotificationType(notificationParty, false);
         incrementLetterCount();
@@ -79,6 +97,17 @@ public class SendCorrespondenceEvent {
         getEmailOrLetters().set(index, email);
     }
 
+    /**
+     * Returns the recorded notification type for the given party.
+     *
+     * <p>This uses the party's index in {@code notificationParties} to read the matching value from
+     * {@code emailOrLetters}. A value of {@code true} means email, and {@code false} means postal.</p>
+     *
+     * @param notificationParty the party whose notification type should be returned
+     * @return {@link NotificationType#EMAIL} if the party was recorded as email, otherwise {@link NotificationType#POSTAL}
+     * @throws IllegalArgumentException if the notification party was not requested on this event
+     * @throws IllegalStateException if no notification type has been recorded for the party
+     */
     public NotificationType getNotificationTypeForParty(NotificationParty notificationParty) {
         int index = getNotificationParties().indexOf(notificationParty);
 
