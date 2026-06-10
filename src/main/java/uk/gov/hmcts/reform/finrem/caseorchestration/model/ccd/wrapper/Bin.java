@@ -47,6 +47,7 @@ public class Bin {
                 fileUrlsToBeDeleted.add(documentUrl);
             });
     }
+
     /**
      * Clears all document URLs currently stored in the deletion bin.
      *
