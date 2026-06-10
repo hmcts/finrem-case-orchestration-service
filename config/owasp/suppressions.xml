@@ -29,4 +29,16 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
 
         <cve>CVE-2020-29582</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   Suppress Spring Framework 6.2.18 false positives / accepted risk for release
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-.*@6\.2\.18$</packageUrl>
+        <cve>CVE-2026-41842</cve>
+        <cve>CVE-2026-41850</cve>
+        <cve>CVE-2026-41851</cve>
+        <cve>CVE-2026-41840</cve>
+        <cve>CVE-2026-41841</cve>
+        <cve>CVE-2026-41843</cve>
+    </suppress>
 </suppressions>
