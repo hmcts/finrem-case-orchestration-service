@@ -23,7 +23,7 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Bin {
 
-    @JsonProperty("bin_fileUrls")
+    @JsonProperty("bin_fileUrlsCollection")
     private List<String> fileUrlsToBeDeleted;
 
     /**
