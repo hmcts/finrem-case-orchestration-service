@@ -29,4 +29,46 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
 
         <cve>CVE-2020-29582</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-aop-6.2.18.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-aop@.*$</packageUrl>
+        <cve>CVE-2026-41842</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-aop-6.2.18.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-aop@.*$</packageUrl>
+        <cve>CVE-2026-41850</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-aop-6.2.18.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-aop@.*$</packageUrl>
+        <cve>CVE-2026-41851</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-aop-6.2.18.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-aop@.*$</packageUrl>
+        <cve>CVE-2026-41840</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-aop-6.2.18.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-aop@.*$</packageUrl>
+        <cve>CVE-2026-41841</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-aop-6.2.18.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-aop@.*$</packageUrl>
+        <cve>CVE-2026-41843</cve>
+    </suppress>
 </suppressions>
