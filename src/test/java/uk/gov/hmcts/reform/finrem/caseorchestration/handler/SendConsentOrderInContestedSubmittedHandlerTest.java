@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -155,7 +156,7 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
         when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
         FinremCaseData finremData = finremCaseDetails.getData();
         finremData.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
-        finremData.getSendOrderWrapper().setAdditionalDocument(caseDocument());
+        finremData.getSendOrderWrapper().setAdditionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(caseDocument())));
         finremData.setContactDetailsWrapper(ContactDetailsWrapper.builder().respondentSolicitorEmail("res@sol.com").build());
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.RESP_SOLICITOR.getCcdCode()));

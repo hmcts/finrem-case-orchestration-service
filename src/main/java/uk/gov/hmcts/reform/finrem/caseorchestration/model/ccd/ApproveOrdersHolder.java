@@ -22,4 +22,5 @@ public class ApproveOrdersHolder implements HasCaseDocument {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime orderReceivedAt;
     private List<ApprovedOrderCollection> approveOrders;
+    private List<DocumentCollectionItem> supportingDocuments;
 }
