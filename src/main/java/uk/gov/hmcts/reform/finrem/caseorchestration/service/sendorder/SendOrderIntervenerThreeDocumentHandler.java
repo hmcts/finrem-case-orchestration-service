@@ -7,10 +7,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConso
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -81,10 +83,19 @@ public class SendOrderIntervenerThreeDocumentHandler extends SendOrderPartyDocum
 
     protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
         List<ApprovedOrderCollection> newOrderCollection = new ArrayList<>(orderCollection);
-        List<ApprovedOrderConsolidateCollection> orders
-            = getPartyConsolidateCollection(caseData.getOrderWrapper().getIntv3OrderCollections());
-        orders.add(getConsolidateCollection(newOrderCollection));
+
+        List<ApprovedOrderConsolidateCollection> orders =
+            getPartyConsolidateCollection(caseData.getOrderWrapper().getIntv3OrderCollections());
+
+        List<DocumentCollectionItem> supportingDocuments = getCategorisedSupportingDocuments(caseData);
+
+        orders.add(getConsolidateCollection(
+            newOrderCollection,
+            supportingDocuments
+        ));
+
         orders.sort((m1, m2) -> m2.getValue().getOrderReceivedAt().compareTo(m1.getValue().getOrderReceivedAt()));
+
         caseData.getOrderWrapper().setIntv3OrderCollections(orders);
         caseData.getOrderWrapper().setIntv3OrderCollection(null);
     }
@@ -92,5 +103,10 @@ public class SendOrderIntervenerThreeDocumentHandler extends SendOrderPartyDocum
     protected List<ApprovedOrderConsolidateCollection> getExistingConsolidateCollection(FinremCaseData caseData) {
         return Optional.ofNullable(caseData.getOrderWrapper().getIntv3OrderCollections())
                 .orElse(new ArrayList<>());
+    }
+
+    @Override
+    protected String getSupportingDocumentsCategoryId() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_SUPPORTING_DOCUMENTS.getDocumentCategoryId();
     }
 }
