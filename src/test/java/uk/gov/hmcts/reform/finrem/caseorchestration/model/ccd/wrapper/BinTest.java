@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 
 import java.util.List;
 
@@ -25,11 +24,10 @@ class BinTest {
             () -> assertNotNull(bin.getFileUrlsToBeDeleted())
         );
 
-        List<DynamicListElement> items = bin.getFileUrlsToBeDeleted().getListItems();
+        List<String> items = bin.getFileUrlsToBeDeleted();
 
         assertThat(items)
             .hasSize(1)
-            .extracting(DynamicListElement::getCode)
             .containsExactly(doc.getDocumentUrl());
     }
 
@@ -47,11 +45,10 @@ class BinTest {
             () -> assertNotNull(bin.getFileUrlsToBeDeleted())
         );
 
-        List<DynamicListElement> items = bin.getFileUrlsToBeDeleted().getListItems();
+        List<String> items = bin.getFileUrlsToBeDeleted();
 
         assertThat(items)
             .hasSize(2)
-            .extracting(DynamicListElement::getCode)
             .containsExactly(
                 doc1.getDocumentUrl(),
                 doc2.getDocumentUrl()

@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -95,9 +94,7 @@ class GenerateCoverSheetServiceTest {
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential());
-        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
-            .extracting(DynamicListElement::getCode)
-            .containsExactly(OLD_COVERESHEET_URL);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted()).containsExactly(OLD_COVERESHEET_URL);
     }
 
     @Test
@@ -142,10 +139,7 @@ class GenerateCoverSheetServiceTest {
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp());
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential().getDocumentFilename());
-        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
-            .extracting(DynamicListElement::getCode)
-            .containsExactly(OLD_COVERESHEET_URL);
-
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted()).containsExactly(OLD_COVERESHEET_URL);
     }
 
     @Test
@@ -162,9 +156,7 @@ class GenerateCoverSheetServiceTest {
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes().getDocumentFilename());
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential());
-        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
-            .extracting(DynamicListElement::getCode)
-            .containsExactly(OLD_COVERESHEET_URL);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted()).containsExactly(OLD_COVERESHEET_URL);
     }
 
     @Test
@@ -181,9 +173,7 @@ class GenerateCoverSheetServiceTest {
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential().getDocumentFilename());
-        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
-            .extracting(DynamicListElement::getCode)
-            .containsExactly(OLD_COVERESHEET_URL);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted()).containsExactly(OLD_COVERESHEET_URL);
     }
 
     @Test
@@ -216,9 +206,7 @@ class GenerateCoverSheetServiceTest {
         generateCoverSheetService.generateAndStoreIntervenerCoversheet(caseDetails, intervenerType, AUTH_TOKEN);
 
         assertEquals(TEST_DOCUMENT_FILENAME, Objects.requireNonNull(getIntervenerCoverSheet(caseDetails, intervenerType)).getDocumentFilename());
-        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
-            .extracting(DynamicListElement::getCode)
-            .containsExactly(OLD_COVERESHEET_URL);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted()).containsExactly(OLD_COVERESHEET_URL);
     }
 
     @ParameterizedTest
@@ -234,9 +222,7 @@ class GenerateCoverSheetServiceTest {
 
         assertNull(getIntervenerCoverSheet(caseDetails, intervenerType));
 
-        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted().getListItems())
-            .extracting(DynamicListElement::getCode)
-            .containsExactly(OLD_COVERESHEET_URL);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted()).containsExactly(OLD_COVERESHEET_URL);
     }
 
     @Test
