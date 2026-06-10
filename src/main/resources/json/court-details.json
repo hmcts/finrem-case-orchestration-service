@@ -868,21 +868,21 @@
     "courtName": "Reading County Court and Family Court",
     "courtAddress": "Hearing Centre, 160-163 Friar Street, Reading, RG1 1HE",
     "phoneNumber": "0300 123 5577",
-    "email": "family.reading.countycourt@justice.gov.uk",
+    "email": "FRCThamesValley@justice.gov.uk",
     "emailReplyToId": "8a73d88e-9a42-404e-a989-f42a56e0fc3b"
   },
   "FR_thamesvalleyList_3": {
     "courtName": "Milton Keynes County Court and Family Court",
     "courtAddress": "351 Silbury Boulevard, Witon Gate East, Central Milton Keynes, MK9 2DT",
     "phoneNumber": "0300 123 5577",
-    "email": "family.miltonkeynes.countycourt@justice.gov.uk",
+    "email": "FRCThamesValley@justice.gov.uk",
     "emailReplyToId": "1ff8c96e-ae6e-4e85-a55f-bc263f5111e4"
   },
   "FR_thamesvalleyList_4": {
     "courtName": "Slough County Court",
     "courtAddress": "The Law Courts, Windsor Road, Slough, SL1 2HE",
     "phoneNumber": "0300 123 5577",
-    "email": "family.reading.countycourt@justice.gov.uk",
+    "email": "FRCThamesValley@justice.gov.uk",
     "emailReplyToId": "8a73d88e-9a42-404e-a989-f42a56e0fc3b"
   },
   "FR_devonList_1": {
