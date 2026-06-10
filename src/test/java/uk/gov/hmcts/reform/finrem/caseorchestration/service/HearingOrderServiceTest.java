@@ -435,6 +435,31 @@ class HearingOrderServiceTest {
             }
         }
 
+        static Stream<Arguments> givenJudgeApprovedOrderWithIsFinalYN_whenStampAndStore_thenUploadHearingOrderContainsIsFinalYN() {
+            return Stream.of(
+                Arguments.of(YesOrNo.YES),
+                Arguments.of(YesOrNo.NO)
+            );
+        }
+
+        @ParameterizedTest
+        @MethodSource
+        void givenJudgeApprovedOrderWithIsFinalYN_whenStampAndStore_thenUploadHearingOrderContainsIsFinalYN(YesOrNo isFinalYN) {
+            FinremCaseData finremCaseData = setupFinremCaseData(
+                DraftDirectionWrapper.builder()
+                    .judgeApprovedOrderCollection(List.of(createJudgeApprovedOrder(uao1Docx, null, isFinalYN)))
+                    .build()
+            );
+
+            when(orderDateService.syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN))
+                .thenReturn(new ArrayList<>());
+
+            doTest(finremCaseData, JUDGE_UAO_EVENT);
+
+            assertUploadHearingOrder(finremCaseData,
+                createUploadHearingEntry(uao1Docx, null, YesOrNo.NO, isFinalYN));
+        }
+
         private void stubDocsConversionToPdf(List<Pair<CaseDocument, CaseDocument>> pairs) {
             for (Pair<CaseDocument, CaseDocument> pair : pairs) {
                 lenient().when(genericDocumentService.convertDocumentIfNotPdfAlready(pair.getLeft(), AUTH_TOKEN, CONTESTED))
@@ -491,6 +516,20 @@ class HearingOrderServiceTest {
                 .build();
         }
 
+        private DirectionOrderCollection createUploadHearingEntry(CaseDocument uploadDraftDocument,
+                                                                  List<DocumentCollectionItem> additionalDocs,
+                                                                  YesOrNo isOrderStamped,
+                                                                  YesOrNo isThisFinalYN) {
+            return DirectionOrderCollection.builder()
+                .value(DirectionOrder.builder()
+                    .uploadDraftDocument(uploadDraftDocument)
+                    .additionalDocuments(additionalDocs)
+                    .isOrderStamped(isOrderStamped)
+                    .isThisFinalYN(isThisFinalYN)
+                    .build())
+                .build();
+        }
+
         private DirectionOrderCollection createStampedDirectionOrderCollection(CaseDocument uploadDraftDocument,
                                                                                LocalDateTime orderDateTime) {
             return createStampedDirectionOrderCollection(uploadDraftDocument, orderDateTime, null);
@@ -533,6 +572,18 @@ class HearingOrderServiceTest {
                 .value(DraftDirectionOrder.builder()
                     .uploadDraftDocument(uploadDraftDocument)
                     .additionalDocuments(additionalDocs)
+                    .build())
+                .build();
+        }
+
+        private static DraftDirectionOrderCollection createJudgeApprovedOrder(CaseDocument uploadDraftDocument,
+                                                                              List<DocumentCollectionItem> additionalDocs,
+                                                                              YesOrNo isThisFinalYN) {
+            return DraftDirectionOrderCollection.builder()
+                .value(DraftDirectionOrder.builder()
+                    .uploadDraftDocument(uploadDraftDocument)
+                    .additionalDocuments(additionalDocs)
+                    .isThisFinalYN(isThisFinalYN)
                     .build())
                 .build();
         }
