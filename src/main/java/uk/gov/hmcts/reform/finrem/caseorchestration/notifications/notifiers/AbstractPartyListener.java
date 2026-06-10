@@ -106,7 +106,11 @@ public abstract class AbstractPartyListener {
     /**
      * Should the paper notification be sent.
      */
-    protected abstract boolean shouldSendPaperNotification(SendCorrespondenceEvent event);
+    @SuppressWarnings("java:S1172")
+    protected boolean shouldSendPaperNotification(SendCorrespondenceEvent event){
+        return true;
+    }
+
     /**
      * Enriches the email notification data with party-specific details and sends a confirmation email.
      *
