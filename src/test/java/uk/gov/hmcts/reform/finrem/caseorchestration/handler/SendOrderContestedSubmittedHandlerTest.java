@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -220,7 +221,7 @@ class SendOrderContestedSubmittedHandlerTest {
         data.setFinalOrderCollection(singletonList(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
         data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
-        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(caseDocument())));
 
         data.setDirectionDetailsCollection(singletonList(DirectionDetailCollection.builder()
             .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build()));
