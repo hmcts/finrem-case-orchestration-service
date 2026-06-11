@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAuditCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationToBeSentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
@@ -72,7 +73,9 @@ class NotificationAuditServiceTest {
         NotificationAudit audit = auditItem.getValue();
 
         assertThat(wrapper.getNotificationsAudits()).hasSize(1);
-        assertThat(wrapper.getNotificationsToBeSent()).containsExactly(auditItem.getId().toString());
+        assertThat(wrapper.getNotificationsToBeSent()).hasSize(1);
+        assertThat(wrapper.getNotificationsToBeSent().getFirst().getId()).isNotNull();
+        assertThat(wrapper.getNotificationsToBeSent().getFirst().getValue()).isEqualTo(auditItem.getId());
 
         assertCommonAuditFields(audit, NotificationParty.APPLICANT, NotificationType.EMAIL);
         assertThat(audit.getEmailTemplate()).isEqualTo(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR.name());
@@ -109,7 +112,9 @@ class NotificationAuditServiceTest {
         NotificationAudit audit = auditItem.getValue();
 
         assertThat(wrapper.getNotificationsAudits()).hasSize(1);
-        assertThat(wrapper.getNotificationsToBeSent()).containsExactly(auditItem.getId().toString());
+        assertThat(wrapper.getNotificationsToBeSent()).hasSize(1);
+        assertThat(wrapper.getNotificationsToBeSent().getFirst().getId()).isNotNull();
+        assertThat(wrapper.getNotificationsToBeSent().getFirst().getValue()).isEqualTo(auditItem.getId());
 
         assertCommonAuditFields(audit, NotificationParty.RESPONDENT, NotificationType.POSTAL);
         assertThat(audit.getEmailTemplate()).isNull();
@@ -129,9 +134,11 @@ class NotificationAuditServiceTest {
                 .build())
             .build();
 
+        NotificationToBeSentCollectionItem existingPendingNotification = pendingItem(existingAuditId);
+
         NotificationAuditWrapper wrapper = NotificationAuditWrapper.builder()
             .notificationsAudits(new ArrayList<>(List.of(existingAudit)))
-            .notificationsToBeSent(new ArrayList<>(List.of(existingAuditId.toString())))
+            .notificationsToBeSent(new ArrayList<>(List.of(existingPendingNotification)))
             .build();
 
         FinremCallbackRequest request = buildRequest(wrapper);
@@ -149,7 +156,7 @@ class NotificationAuditServiceTest {
         assertThat(wrapper.getNotificationsToBeSent()).hasSize(3);
 
         assertThat(wrapper.getNotificationsAudits().get(0)).isEqualTo(existingAudit);
-        assertThat(wrapper.getNotificationsToBeSent().getFirst()).isEqualTo(existingAuditId.toString());
+        assertThat(wrapper.getNotificationsToBeSent().getFirst()).isEqualTo(existingPendingNotification);
 
         NotificationAuditCollectionItem applicantAudit = wrapper.getNotificationsAudits().get(1);
         NotificationAuditCollectionItem respondentAudit = wrapper.getNotificationsAudits().get(2);
@@ -161,10 +168,11 @@ class NotificationAuditServiceTest {
         assertThat(respondentAudit.getValue().getType()).isEqualTo(NotificationType.POSTAL);
 
         assertThat(wrapper.getNotificationsToBeSent())
+            .extracting(NotificationToBeSentCollectionItem::getValue)
             .containsExactly(
-                existingAuditId.toString(),
-                applicantAudit.getId().toString(),
-                respondentAudit.getId().toString()
+                existingAuditId,
+                applicantAudit.getId(),
+                respondentAudit.getId()
             );
     }
 
@@ -228,7 +236,7 @@ class NotificationAuditServiceTest {
         FinremCaseData caseData = FinremCaseData.builder()
             .notificationAuditWrapper(NotificationAuditWrapper.builder()
                 .notificationsAudits(audits)
-                .notificationsToBeSent(new ArrayList<>(List.of(pendingAuditId.toString())))
+                .notificationsToBeSent(new ArrayList<>(List.of(pendingItem(pendingAuditId))))
                 .build())
             .build();
 
@@ -280,8 +288,8 @@ class NotificationAuditServiceTest {
         NotificationAuditWrapper wrapper = NotificationAuditWrapper.builder()
             .notificationsAudits(audits)
             .notificationsToBeSent(List.of(
-                applicantAuditId.toString(),
-                respondentAuditId.toString()
+                pendingItem(applicantAuditId),
+                pendingItem(respondentAuditId)
             ))
             .build();
 
@@ -330,6 +338,13 @@ class NotificationAuditServiceTest {
                 .party(NotificationParty.APPLICANT.name())
                 .wasSent(wasSent)
                 .build())
+            .build();
+    }
+
+    private NotificationToBeSentCollectionItem pendingItem(UUID auditId) {
+        return NotificationToBeSentCollectionItem.builder()
+            .id(UUID.randomUUID())
+            .value(auditId)
             .build();
     }
 

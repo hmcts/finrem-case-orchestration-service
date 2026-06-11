@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAuditCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationToBeSentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -58,7 +59,7 @@ public class NotificationAuditService {
 
         List<NotificationAuditCollectionItem> audits = new ArrayList<>(emptyIfNull(wrapper.getNotificationsAudits()));
 
-        List<String> pending = new ArrayList<>(emptyIfNull(wrapper.getNotificationsToBeSent()));
+        List<NotificationToBeSentCollectionItem> pending = new ArrayList<>(emptyIfNull(wrapper.getNotificationsToBeSent()));
 
         List<String> postalDocFilenames = filenamesOf(event.getDocumentsToPost());
 
@@ -80,7 +81,10 @@ public class NotificationAuditService {
                 .value(auditRow)
                 .build());
 
-            pending.add(rowId.toString());
+            pending.add(NotificationToBeSentCollectionItem.builder()
+                .id(UUID.randomUUID())
+                .value(rowId)
+                .build());
         }
 
         wrapper.setNotificationsAudits(audits);
@@ -90,8 +94,9 @@ public class NotificationAuditService {
     /**
      * Marks pending notification audit rows as sent based on the correspondence event that was actually published.
      *
-     * <p>The pending notification list stores audit row IDs as strings. For each pending ID, this method
-     * finds the matching audit row. If the corresponding party was recorded on the sent correspondence event,
+     * <p>The pending notification list stores audit row IDs inside
+     * {@link NotificationToBeSentCollectionItem#getValue()}. For each pending item, this method finds
+     * the matching audit row. If the corresponding party was recorded on the sent correspondence event,
      * the audit row is updated to {@link YesOrNo#YES}. If the party was not recorded on the event, the audit
      * row remains unchanged, usually as {@link YesOrNo#NO}.</p>
      *
@@ -108,7 +113,7 @@ public class NotificationAuditService {
         List<NotificationAuditCollectionItem> audits =
             new ArrayList<>(emptyIfNull(wrapper.getNotificationsAudits()));
 
-        List<String> pending =
+        List<NotificationToBeSentCollectionItem> pending =
             emptyIfNull(wrapper.getNotificationsToBeSent());
 
         if (pending.isEmpty()) {
@@ -118,7 +123,7 @@ public class NotificationAuditService {
         pending.forEach(pendingItem ->
             audits.stream()
                 .filter(audit -> audit.getId() != null)
-                .filter(audit -> pendingItem.equals(audit.getId().toString()))
+                .filter(audit -> audit.getId().equals(pendingItem.getValue()))
                 .findFirst()
                 .ifPresent(audit -> {
                     if (wasPartySent(sentEvent, audit)) {
