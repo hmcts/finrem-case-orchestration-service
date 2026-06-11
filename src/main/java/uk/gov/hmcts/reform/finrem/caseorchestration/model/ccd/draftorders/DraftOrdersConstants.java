@@ -20,4 +20,5 @@ public class DraftOrdersConstants {
     //Error message constants
     public static final String FDA_HEARING_LESS_THAN_14_DAYS = "Any orders less than 14 days before the hearing must be "
         + "uploaded using the create general application event";
+    public static final String FDA_HEARING_NOT_SELECTED = "Accelerated orders are only available for FDA hearings.";
 }

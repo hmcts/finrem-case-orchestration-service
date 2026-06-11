@@ -19,10 +19,10 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ACCELERATED_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.FDA_HEARING_LESS_THAN_14_DAYS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.FDA_HEARING_NOT_SELECTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.ADJOURNED_FDA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.FDA;
 
@@ -61,19 +61,28 @@ public class UploadDraftOrdersMidHandler extends FinremCallbackHandler {
         );
 
         List<String> errors = new ArrayList<>();
-        if (isAcceleratedOrderWithin14Days(draftOrdersWrapper, hearingType, hearingDate)) {
-            errors.add(FDA_HEARING_LESS_THAN_14_DAYS);
+        String typeOfDraftOrder = finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder();
+        if (ACCELERATED_ORDER_OPTION.equals(typeOfDraftOrder)) {
+            if (!isFDAHearingSelected(hearingType)) {
+                errors.add(FDA_HEARING_NOT_SELECTED);
+                log.info("Accelerated order validation failed: non-FDA hearing selected.");
+                return response(finremCaseData, null, errors);
+            }
+
+            if (isAcceleratedOrderWithin14Days(hearingDate)) {
+                log.info("Accelerated order validation failed: hearing is within 14 days.");
+                errors.add(FDA_HEARING_LESS_THAN_14_DAYS);
+            }
         }
 
         return response(finremCaseData, null, errors);
     }
 
-    private boolean isAcceleratedOrderWithin14Days(DraftOrdersWrapper draftOrdersWrapper,
-                                                   String hearingType,
-                                                   LocalDate hearingDate) {
-        return Objects.equals(ACCELERATED_ORDER_OPTION, draftOrdersWrapper.getTypeOfDraftOrder())
-            && (FDA.getId().equalsIgnoreCase(hearingType)
-            || ADJOURNED_FDA.getId().equalsIgnoreCase(hearingType))
-            && ChronoUnit.DAYS.between(LocalDate.now(), hearingDate) < 14;
+    private boolean isFDAHearingSelected(String hearingType) {
+        return (FDA.getId().equalsIgnoreCase(hearingType) || ADJOURNED_FDA.getId().equalsIgnoreCase(hearingType));
+    }
+
+    private boolean isAcceleratedOrderWithin14Days(LocalDate hearingDate) {
+        return ChronoUnit.DAYS.between(LocalDate.now(), hearingDate) < 14;
     }
 }
