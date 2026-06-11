@@ -38,7 +38,6 @@ public class CoreCaseDataService {
         return self.performPostSubmitCallback(caseType, caseId, eventName, changeFunction, false);
     }
 
-
     public CaseDetails performPostSubmitCallback(CaseType caseType,
                                                  Long caseId,
                                                  String eventName,
