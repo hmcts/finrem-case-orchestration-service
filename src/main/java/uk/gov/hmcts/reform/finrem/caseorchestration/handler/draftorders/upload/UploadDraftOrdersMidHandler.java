@@ -63,7 +63,7 @@ public class UploadDraftOrdersMidHandler extends FinremCallbackHandler {
         List<String> errors = new ArrayList<>();
         String typeOfDraftOrder = finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder();
         if (ACCELERATED_ORDER_OPTION.equals(typeOfDraftOrder)) {
-            if (!isFDAHearingSelected(hearingType)) {
+            if (!isFdaHearingSelected(hearingType)) {
                 errors.add(FDA_HEARING_NOT_SELECTED);
                 log.info("Accelerated order validation failed: non-FDA hearing selected.");
                 return response(finremCaseData, null, errors);
@@ -78,7 +78,7 @@ public class UploadDraftOrdersMidHandler extends FinremCallbackHandler {
         return response(finremCaseData, null, errors);
     }
 
-    private boolean isFDAHearingSelected(String hearingType) {
+    private boolean isFdaHearingSelected(String hearingType) {
         return (FDA.getId().equalsIgnoreCase(hearingType) || ADJOURNED_FDA.getId().equalsIgnoreCase(hearingType));
     }
 
