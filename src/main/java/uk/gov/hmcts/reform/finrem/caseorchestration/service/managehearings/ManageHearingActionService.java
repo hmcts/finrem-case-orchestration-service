@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -27,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
@@ -67,8 +65,6 @@ public class ManageHearingActionService {
     private final ManageHearingsDocumentService manageHearingsDocumentService;
     private final ExpressCaseService expressCaseService;
     private final HearingTabDataMapper hearingTabDataMapper;
-    private final GenerateCoverSheetService generateCoverSheetService;
-    private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
     private final FeatureToggleService featureToggleService;
 
     private record DocumentRecord(CaseDocument caseDocument, CaseDocumentType caseDocumentType) {

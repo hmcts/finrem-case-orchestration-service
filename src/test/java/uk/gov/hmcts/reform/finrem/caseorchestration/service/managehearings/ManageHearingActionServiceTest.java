@@ -42,7 +42,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.time.LocalDate;
@@ -87,8 +86,6 @@ class ManageHearingActionServiceTest {
     private ExpressCaseService expressCaseService;
     @Mock
     private HearingTabDataMapper hearingTabDataMapper;
-    @Mock
-    private GenerateCoverSheetService generateCoverSheetService;
     @Mock
     private HearingCorrespondenceHelper hearingCorrespondenceHelper;
     @Mock
