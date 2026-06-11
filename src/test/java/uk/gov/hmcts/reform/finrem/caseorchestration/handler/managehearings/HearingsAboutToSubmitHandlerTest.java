@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -43,8 +44,10 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -63,6 +66,9 @@ class HearingsAboutToSubmitHandlerTest {
     @Mock
     private ManageHearingsCorresponder manageHearingsCorresponder;
 
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
     @InjectMocks
     private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
 
@@ -75,7 +81,6 @@ class HearingsAboutToSubmitHandlerTest {
     @Test
     void givenValidCaseData_whenHandleAdd_thenHearingAddedToManageHearingsList() {
         // Arrange
-        String caseReference = TestConstants.CASE_ID;
         WorkingHearing hearingToAdd = createHearingToAdd();
 
         FinremCaseData caseData = FinremCaseData.builder()
@@ -85,10 +90,7 @@ class HearingsAboutToSubmitHandlerTest {
                 .build())
             .build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
-            CaseType.CONTESTED, caseData);
-        request.setEventType(EventType.MANAGE_HEARINGS);
-
+        FinremCallbackRequest request = buildRequest(caseData);
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN))
             .thenReturn(event);
@@ -176,32 +178,26 @@ class HearingsAboutToSubmitHandlerTest {
         //Assert perform tab data
         assertThat(responseManageHearingsWrapper.getApplicantHearingTabItems())
             .contains(hearingTabItem);
-
-        verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN);
-        verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
     }
 
     @Test
     void givenValidCaseData_whenHandleVacate_thenPerformVacateHearingCalled() {
-        String caseReference = TestConstants.CASE_ID;
-
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .manageHearingsActionSelection(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING)
                 .build())
             .build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
-            Long.parseLong(caseReference), CaseType.CONTESTED, caseData);
-        request.setEventType(EventType.MANAGE_HEARINGS);
-
+        FinremCallbackRequest request = buildRequest(caseData);
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN))
             .thenReturn(event);
 
+
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
         verify(manageHearingActionService).performAdjournOrVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
+        verify(manageHearingActionService).updateTabData(request.getCaseDetails().getData());
         verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN);
         verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
     }
@@ -216,10 +212,7 @@ class HearingsAboutToSubmitHandlerTest {
                 .build())
             .build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
-            Long.parseLong(TestConstants.CASE_ID), CaseType.CONTESTED, caseData);
-        request.setEventType(EventType.MANAGE_HEARINGS);
-
+        FinremCallbackRequest request = buildRequest(caseData);
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN))
             .thenReturn(event);
@@ -228,8 +221,41 @@ class HearingsAboutToSubmitHandlerTest {
 
         verify(manageHearingActionService).performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).performAdjournOrVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
+        verify(manageHearingActionService).updateTabData(request.getCaseDetails().getData());
         verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN);
         verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
+
+    }
+
+    @Test
+    void givenNoCorrespondenceEvent_whenHandle_thenDoesNotCreateNotificationAuditRows() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
+                .build())
+            .build();
+
+        FinremCallbackRequest request = buildRequest(caseData);
+
+        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN))
+            .thenReturn(null);
+
+        manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
+
+        verify(manageHearingActionService).performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
+        verify(manageHearingActionService).updateTabData(request.getCaseDetails().getData());
+        verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN);
+        verify(notificationAuditService, never()).createAuditsForCorrespondence(any(), any());
+    }
+
+    private FinremCallbackRequest buildRequest(FinremCaseData caseData) {
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
+            Long.parseLong(TestConstants.CASE_ID),
+            CaseType.CONTESTED,
+            caseData
+        );
+        request.setEventType(EventType.MANAGE_HEARINGS);
+        return request;
     }
 
     private WorkingHearing createHearingToAdd() {

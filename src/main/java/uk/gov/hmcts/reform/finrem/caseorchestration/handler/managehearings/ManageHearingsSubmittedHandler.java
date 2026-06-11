@@ -84,8 +84,11 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         ofNullable(correspondenceEvent)
             .ifPresent(event -> publishEvent(getEventDescription(actionSelection), event, errors));
 
+        if (correspondenceEvent != null) {
+            markPendingNotificationsAsSent(caseDetails, correspondenceEvent);
+        }
+
         if (errors.isEmpty()) {
-            markPendingNotificationsAsSent(caseDetails);
             return submittedResponse();
         }
         return submittedResponse(
@@ -129,15 +132,21 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         );
     }
 
-    private void markPendingNotificationsAsSent(FinremCaseDetails caseDetails) {
+    private void markPendingNotificationsAsSent(FinremCaseDetails caseDetails,
+                                                SendCorrespondenceEvent correspondenceEvent) {
         Map<String, Object> updatedFields =
-            notificationAuditService.markPendingNotificationsAsSent(caseDetails.getData());
+            notificationAuditService.markPendingNotificationsAsSent(caseDetails.getData(), correspondenceEvent);
+
         if (!updatedFields.isEmpty()) {
-            coreCaseDataService.performPostSubmitCallback(
-                caseDetails.getData().getCcdCaseType(),
-                caseDetails.getId(),
-                INTERNAL_CHANGE_UPDATE_CASE.getCcdType(),
-                latestCaseDetails -> updatedFields
+            retryExecutor.runWithRetrySuppressException(
+                () -> coreCaseDataService.performPostSubmitCallback(
+                    caseDetails.getData().getCcdCaseType(),
+                    caseDetails.getId(),
+                    INTERNAL_CHANGE_UPDATE_CASE.getCcdType(),
+                    latestCaseDetails -> updatedFields
+                ),
+                "markPendingNotificationsAsSent",
+                caseDetails.getCaseIdAsString()
             );
         }
     }

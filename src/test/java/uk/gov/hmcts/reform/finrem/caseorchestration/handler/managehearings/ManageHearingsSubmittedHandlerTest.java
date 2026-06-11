@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,14 +18,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAuditCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationToBeSentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
@@ -34,10 +31,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Function;
 
 import static java.lang.String.format;
@@ -45,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -56,6 +52,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mockRunWithRetryWithHandlerInvokesFirstErrorHandler;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_AUDITS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_TO_BE_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,12 +78,18 @@ class ManageHearingsSubmittedHandlerTest {
     private CoreCaseDataService coreCaseDataService;
 
     @Mock
-    private ObjectMapper objectMapper;
+    private NotificationAuditService notificationAuditService;
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     private final String expectedConfirmationHeader = "Manage Hearings completed with error";
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(notificationAuditService.markPendingNotificationsAsSent(any(), any()))
+            .thenReturn(Map.of());
+    }
 
     @Test
     void testCanHandle() {
@@ -116,9 +120,7 @@ class ManageHearingsSubmittedHandlerTest {
             () -> verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN),
             () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
             () -> assertThat(response.getConfirmationBody())
-                .contains("Notification to WHATEVER has failed. Please send notification to WHATEVER manually."),
-            () -> verify(coreCaseDataService, never())
-                .performPostSubmitCallback(any(), any(), any(), any())
+                .contains("Notification to WHATEVER has failed. Please send notification to WHATEVER manually.")
         );
     }
 
@@ -146,9 +148,7 @@ class ManageHearingsSubmittedHandlerTest {
             () -> verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN),
             () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
             () -> assertThat(response.getConfirmationBody())
-                .contains("Notification to WHATEVER has failed. Please send notification to WHATEVER manually."),
-            () -> verify(coreCaseDataService, never())
-                .performPostSubmitCallback(any(), any(), any(), any())
+                .contains("Notification to WHATEVER has failed. Please send notification to WHATEVER manually.")
         );
     }
 
@@ -185,7 +185,6 @@ class ManageHearingsSubmittedHandlerTest {
         publishEventCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
         assertAll(
             () -> verify(applicationEventPublisher).publishEvent(event),
-            () -> verify(coreCaseDataService, never()).performPostSubmitCallback(any(), any(), any(), any()),
             () -> verifyNoMoreInteractions(retryExecutor)
         );
     }
@@ -223,38 +222,14 @@ class ManageHearingsSubmittedHandlerTest {
         publishEventCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
         assertAll(
             () -> verify(applicationEventPublisher).publishEvent(event),
-            () -> verify(coreCaseDataService, never()).performPostSubmitCallback(any(), any(), any(), any()),
             () -> verifyNoMoreInteractions(retryExecutor)
         );
     }
 
     @Test
-    void givenPendingNotifications_whenHandleSuccessful_thenMatchingRowsMarkedSentAndQueueDrained() {
-        UUID rowId1 = UUID.randomUUID();
-        UUID rowId2 = UUID.randomUUID();
-
-        NotificationAuditCollectionItem row1 = NotificationAuditCollectionItem.builder()
-            .id(rowId1)
-            .value(NotificationAudit.builder().wasSent(YesOrNo.NO).build())
-            .build();
-
-        NotificationAuditCollectionItem row2 = NotificationAuditCollectionItem.builder()
-            .id(rowId2)
-            .value(NotificationAudit.builder().wasSent(YesOrNo.NO).build())
-            .build();
-
-        NotificationAuditWrapper notificationAuditWrapper = NotificationAuditWrapper.builder()
-            .notificationsAudits(new ArrayList<>(List.of(row1, row2)))
-            .notificationsToBeSent(new ArrayList<>(List.of(
-                NotificationToBeSentCollectionItem.builder().id(UUID.randomUUID()).value(rowId1).build(),
-                NotificationToBeSentCollectionItem.builder().id(UUID.randomUUID()).value(rowId2).build()
-            )))
-            .build();
-
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(
-            ManageHearingsAction.ADD_HEARING,
-            notificationAuditWrapper
-        );
+    void givenPendingNotificationAuditUpdates_whenHandleSuccessful_thenPerformsInternalCaseUpdate() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADD_HEARING);
 
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(event.getCaseId()).thenReturn(CASE_ID);
@@ -262,30 +237,44 @@ class ManageHearingsSubmittedHandlerTest {
         when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN))
             .thenReturn(event);
 
-        when(objectMapper.convertValue(any(), eq(List.class)))
-            .thenReturn(List.of(row1, row2));
+        Map<String, Object> updatedFields = Map.of(
+            NOTIFICATIONS_AUDITS, List.of(Map.of("wasSent", "Yes")),
+            NOTIFICATIONS_TO_BE_SENT, List.of()
+        );
 
+        when(notificationAuditService.markPendingNotificationsAsSent(callbackRequest.getCaseDetails().getData(), event))
+            .thenReturn(updatedFields);
+
+        // Act
         manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
+        // Assert
+        ArgumentCaptor<ThrowingRunnable> updateCallbackCaptor =
+            ArgumentCaptor.forClass(ThrowingRunnable.class);
+
+        verify(retryExecutor).runWithRetrySuppressException(
+            updateCallbackCaptor.capture(),
+            eq("markPendingNotificationsAsSent"),
+            eq(CASE_ID)
+        );
+
+        TestSetUpUtils.runSafely(updateCallbackCaptor.getValue());
+
         @SuppressWarnings("unchecked")
-        ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> fnCaptor =
+        ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> callbackCaptor =
             ArgumentCaptor.forClass(Function.class);
 
         verify(coreCaseDataService).performPostSubmitCallback(
-            any(),
+            eq(CaseType.CONTESTED),
             eq(CASE_ID_IN_LONG),
             eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()),
-            fnCaptor.capture()
+            callbackCaptor.capture()
         );
 
-        Map<String, Object> updates = fnCaptor.getValue()
+        Map<String, Object> callbackResult = callbackCaptor.getValue()
             .apply(CaseDetails.builder().id(CASE_ID_IN_LONG).build());
 
-        assertAll(
-            () -> assertThat(row1.getValue().getWasSent()).isEqualTo(YesOrNo.YES),
-            () -> assertThat(row2.getValue().getWasSent()).isEqualTo(YesOrNo.YES),
-            () -> assertThat((List<?>) updates.get("notificationsToBeSent")).isEmpty()
-        );
+        assertThat(callbackResult).isEqualTo(updatedFields);
     }
 
     private FinremCallbackRequest buildCallbackRequest(ManageHearingsAction action) {
@@ -301,6 +290,7 @@ class ManageHearingsSubmittedHandlerTest {
                 .build())
             .notificationAuditWrapper(notificationAuditWrapper)
             .ccdCaseId(CASE_ID)
+            .ccdCaseType(CaseType.CONTESTED)
             .build();
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()

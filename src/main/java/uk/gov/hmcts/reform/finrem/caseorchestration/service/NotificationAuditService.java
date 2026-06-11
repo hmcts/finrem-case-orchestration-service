@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAuditCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationToBeSentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -59,7 +58,7 @@ public class NotificationAuditService {
 
         List<NotificationAuditCollectionItem> audits = new ArrayList<>(emptyIfNull(wrapper.getNotificationsAudits()));
 
-        List<NotificationToBeSentCollectionItem> pending = new ArrayList<>(emptyIfNull(wrapper.getNotificationsToBeSent()));
+        List<String> pending = new ArrayList<>(emptyIfNull(wrapper.getNotificationsToBeSent()));
 
         List<String> postalDocFilenames = filenamesOf(event.getDocumentsToPost());
 
@@ -81,42 +80,72 @@ public class NotificationAuditService {
                 .value(auditRow)
                 .build());
 
-            pending.add(NotificationToBeSentCollectionItem.builder()
-                .id(UUID.randomUUID())
-                .value(rowId)
-                .build());
+            pending.add(rowId.toString());
         }
 
         wrapper.setNotificationsAudits(audits);
         wrapper.setNotificationsToBeSent(pending);
     }
 
-    public Map<String, Object> markPendingNotificationsAsSent(FinremCaseData latestData) {
+    /**
+     * Marks pending notification audit rows as sent based on the correspondence event that was actually published.
+     *
+     * <p>The pending notification list stores audit row IDs as strings. For each pending ID, this method
+     * finds the matching audit row. If the corresponding party was recorded on the sent correspondence event,
+     * the audit row is updated to {@link YesOrNo#YES}. If the party was not recorded on the event, the audit
+     * row remains unchanged, usually as {@link YesOrNo#NO}.</p>
+     *
+     * <p>The pending notification queue is cleared after processing so it is ready for the next event run.</p>
+     *
+     * @param latestData the latest case data containing notification audit rows and pending notification IDs
+     * @param sentEvent the correspondence event that was published in the submitted callback
+     * @return a map of CCD field updates, or an empty map when there are no pending notifications
+     */
+    public Map<String, Object> markPendingNotificationsAsSent(FinremCaseData latestData,
+                                                              SendCorrespondenceEvent sentEvent) {
         NotificationAuditWrapper wrapper = latestData.getNotificationAuditWrapper();
 
         List<NotificationAuditCollectionItem> audits =
             new ArrayList<>(emptyIfNull(wrapper.getNotificationsAudits()));
 
-        List<NotificationToBeSentCollectionItem> pending =
+        List<String> pending =
             emptyIfNull(wrapper.getNotificationsToBeSent());
 
         if (pending.isEmpty()) {
             return Map.of();
         }
 
-        pending.stream()
-            .map(NotificationToBeSentCollectionItem::getValue)
-            .forEach(pendingItem ->
-                audits.stream()
-                    .filter(audit -> pendingItem.equals(audit.getId()))
-                    .findFirst()
-                    .ifPresent(audit -> audit.getValue().setWasSent(YesOrNo.YES))
-            );
+        pending.forEach(pendingItem ->
+            audits.stream()
+                .filter(audit -> audit.getId() != null)
+                .filter(audit -> pendingItem.equals(audit.getId().toString()))
+                .findFirst()
+                .ifPresent(audit -> {
+                    if (wasPartySent(sentEvent, audit)) {
+                        audit.getValue().setWasSent(YesOrNo.YES);
+                    }
+                })
+        );
 
         return Map.of(
             NOTIFICATIONS_AUDITS, objectMapper.convertValue(audits, List.class),
             NOTIFICATIONS_TO_BE_SENT, List.of()
         );
+    }
+
+    private boolean wasPartySent(SendCorrespondenceEvent sentEvent,
+                                 NotificationAuditCollectionItem audit) {
+        if (sentEvent == null || audit == null || audit.getValue() == null || audit.getValue().getParty() == null) {
+            return false;
+        }
+
+        try {
+            NotificationParty notificationParty = NotificationParty.valueOf(audit.getValue().getParty());
+            sentEvent.getNotificationTypeForParty(notificationParty);
+            return true;
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            return false;
+        }
     }
 
     private NotificationAudit buildAuditRow(EventType eventType,
