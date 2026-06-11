@@ -72,12 +72,13 @@ class NotificationAuditServiceTest {
         NotificationAuditCollectionItem auditItem = wrapper.getNotificationsAudits().getFirst();
         NotificationAudit audit = auditItem.getValue();
 
+        assertCommonAuditFields(audit, NotificationParty.APPLICANT, NotificationType.EMAIL);
+
         assertThat(wrapper.getNotificationsAudits()).hasSize(1);
         assertThat(wrapper.getNotificationsToBeSent()).hasSize(1);
         assertThat(wrapper.getNotificationsToBeSent().getFirst().getId()).isNotNull();
         assertThat(wrapper.getNotificationsToBeSent().getFirst().getValue()).isEqualTo(auditItem.getId());
 
-        assertCommonAuditFields(audit, NotificationParty.APPLICANT, NotificationType.EMAIL);
         assertThat(audit.getEmailTemplate()).isEqualTo(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR.name());
         assertThat(audit.getLetterTemplate()).isNull();
         assertThat(audit.getAttachedPostalDocs()).isNull();
