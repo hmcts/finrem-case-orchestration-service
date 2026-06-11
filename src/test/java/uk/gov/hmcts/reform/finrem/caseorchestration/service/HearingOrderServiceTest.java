@@ -19,8 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -437,31 +435,6 @@ class HearingOrderServiceTest {
             }
         }
 
-        static Stream<Arguments> givenJudgeApprovedOrderWithIsFinalYN_whenStampAndStore_thenUploadHearingOrderContainsIsFinalYN() {
-            return Stream.of(
-                Arguments.of(YesOrNo.YES),
-                Arguments.of(YesOrNo.NO)
-            );
-        }
-
-        @ParameterizedTest
-        @MethodSource
-        void givenJudgeApprovedOrderWithIsFinalYN_whenStampAndStore_thenUploadHearingOrderContainsIsFinalYN(YesOrNo isFinalYN) {
-            FinremCaseData finremCaseData = setupFinremCaseData(
-                DraftDirectionWrapper.builder()
-                    .judgeApprovedOrderCollection(List.of(createJudgeApprovedOrder(uao1Docx, null, isFinalYN)))
-                    .build()
-            );
-
-            when(orderDateService.syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN))
-                .thenReturn(new ArrayList<>());
-
-            doTest(finremCaseData, JUDGE_UAO_EVENT);
-
-            assertUploadHearingOrder(finremCaseData,
-                createUploadHearingEntry(uao1Docx, null, YesOrNo.NO, isFinalYN));
-        }
-
         private void stubDocsConversionToPdf(List<Pair<CaseDocument, CaseDocument>> pairs) {
             for (Pair<CaseDocument, CaseDocument> pair : pairs) {
                 lenient().when(genericDocumentService.convertDocumentIfNotPdfAlready(pair.getLeft(), AUTH_TOKEN, CONTESTED))
@@ -518,20 +491,6 @@ class HearingOrderServiceTest {
                 .build();
         }
 
-        private DirectionOrderCollection createUploadHearingEntry(CaseDocument uploadDraftDocument,
-                                                                  List<DocumentCollectionItem> additionalDocs,
-                                                                  YesOrNo isOrderStamped,
-                                                                  YesOrNo isThisFinalYN) {
-            return DirectionOrderCollection.builder()
-                .value(DirectionOrder.builder()
-                    .uploadDraftDocument(uploadDraftDocument)
-                    .additionalDocuments(additionalDocs)
-                    .isOrderStamped(isOrderStamped)
-                    .isThisFinalYN(isThisFinalYN)
-                    .build())
-                .build();
-        }
-
         private DirectionOrderCollection createStampedDirectionOrderCollection(CaseDocument uploadDraftDocument,
                                                                                LocalDateTime orderDateTime) {
             return createStampedDirectionOrderCollection(uploadDraftDocument, orderDateTime, null);
@@ -574,18 +533,6 @@ class HearingOrderServiceTest {
                 .value(DraftDirectionOrder.builder()
                     .uploadDraftDocument(uploadDraftDocument)
                     .additionalDocuments(additionalDocs)
-                    .build())
-                .build();
-        }
-
-        private static DraftDirectionOrderCollection createJudgeApprovedOrder(CaseDocument uploadDraftDocument,
-                                                                              List<DocumentCollectionItem> additionalDocs,
-                                                                              YesOrNo isThisFinalYN) {
-            return DraftDirectionOrderCollection.builder()
-                .value(DraftDirectionOrder.builder()
-                    .uploadDraftDocument(uploadDraftDocument)
-                    .additionalDocuments(additionalDocs)
-                    .isThisFinalYN(isThisFinalYN)
                     .build())
                 .build();
         }
@@ -638,64 +585,6 @@ class HearingOrderServiceTest {
             .extracting(DraftDirectionWrapper::getJudgesAmendedOrderCollection)
             .extracting(List::getFirst)
             .extracting(DraftDirectionOrderCollection::getValue).isEqualTo(latestDraftDirectionOrder);
-    }
-
-    @Test
-    void givenJudgeApprovedOrder_whenStampAndStore_thenIsFinalYnPropagated() {
-        // Arrange
-        CaseDocument orderDoc = caseDocument("order.docx");
-        DraftDirectionWrapper draftDirectionWrapper = DraftDirectionWrapper.builder()
-            .judgeApprovedOrderCollection(List.of(
-                DraftDirectionOrderCollection.builder()
-                    .value(DraftDirectionOrder.builder()
-                        .uploadDraftDocument(orderDoc)
-                        .build())
-                    .build()
-            ))
-            .draftDirectionDetailsCollection(List.of(
-                DraftDirectionDetailsCollection.builder()
-                    .value(DraftDirectionDetailsHolder.builder()
-                        .isThisFinalYN(YesOrNo.YES)
-                        .build())
-                    .build()
-            ))
-            .build();
-        FinremCaseData finremCaseData = getFinremCaseData();
-        finremCaseData.setDraftDirectionWrapper(draftDirectionWrapper);
-
-        // Act
-        underTest.stampAndStoreJudgeApprovedOrders(FinremCaseDetails.builder().data(finremCaseData).build(), AUTH_TOKEN);
-
-        // Assert
-        List<DirectionOrderCollection> uploadHearingOrder = finremCaseData.getUploadHearingOrder();
-        assertThat(uploadHearingOrder).hasSize(1);
-        assertThat(uploadHearingOrder.get(0).getValue().getIsThisFinalYN()).isEqualTo(YesOrNo.YES);
-    }
-
-    @Test
-    void givenJudgeApprovedOrder_whenStampAndStoreWithNullDraftDirectionDetails_thenIsFinalYnIsNull() {
-        // Arrange
-        CaseDocument orderDoc = caseDocument("order.docx");
-        DraftDirectionWrapper draftDirectionWrapper = DraftDirectionWrapper.builder()
-            .judgeApprovedOrderCollection(List.of(
-                DraftDirectionOrderCollection.builder()
-                    .value(DraftDirectionOrder.builder()
-                        .uploadDraftDocument(orderDoc)
-                        .build())
-                    .build()
-            ))
-            .draftDirectionDetailsCollection(null)
-            .build();
-        FinremCaseData finremCaseData = getFinremCaseData();
-        finremCaseData.setDraftDirectionWrapper(draftDirectionWrapper);
-
-        // Act
-        underTest.stampAndStoreJudgeApprovedOrders(FinremCaseDetails.builder().data(finremCaseData).build(), AUTH_TOKEN);
-
-        // Assert
-        List<DirectionOrderCollection> uploadHearingOrder = finremCaseData.getUploadHearingOrder();
-        assertThat(uploadHearingOrder).hasSize(1);
-        assertThat(uploadHearingOrder.get(0).getValue().getIsThisFinalYN()).isNull();
     }
 
     private DraftDirectionOrder makeDraftDirectionOrder() {
