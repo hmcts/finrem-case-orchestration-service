@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -15,20 +15,29 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 
 @Slf4j
 @Service
-public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
+public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final ManageHearingActionService manageHearingActionService;
+    private final NotificationAuditService notificationAuditService;
+    private final ManageHearingsCorresponder manageHearingsCorresponder;
 
     public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                              ManageHearingActionService manageHearingActionService) {
+                                              ManageHearingActionService manageHearingActionService,
+                                              NotificationAuditService notificationAuditService,
+                                              ManageHearingsCorresponder manageHearingsCorresponder) {
         super(finremCaseDetailsMapper);
         this.manageHearingActionService = manageHearingActionService;
+        this.notificationAuditService = notificationAuditService;
+        this.manageHearingsCorresponder = manageHearingsCorresponder;
     }
 
     @Override
@@ -69,8 +78,41 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
         }
 
         manageHearingActionService.updateTabData(finremCaseData);
+        createNotificationAuditRows(callbackRequest, userAuthorisation, actionSelection);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).build();
+        return response(finremCaseData);
+    }
+
+    private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
+                                             String userAuthorisation,
+                                             ManageHearingsAction actionSelection) {
+        SendCorrespondenceEvent event = buildCorrespondenceEvent(
+            actionSelection,
+            callbackRequest,
+            userAuthorisation
+        );
+
+        if (event != null) {
+            notificationAuditService.createAuditsForCorrespondence(
+                event,
+                callbackRequest.getEventType()
+            );
+        }
+    }
+
+    private SendCorrespondenceEvent buildCorrespondenceEvent(ManageHearingsAction actionSelection,
+                                                             FinremCallbackRequest callbackRequest,
+                                                             String userAuthorisation) {
+        return switch (actionSelection) {
+            case ADD_HEARING -> manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(
+                callbackRequest,
+                userAuthorisation
+            );
+            case ADJOURN_OR_VACATE_HEARING -> manageHearingsCorresponder
+                .buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(
+                    callbackRequest,
+                    userAuthorisation
+                );
+        };
     }
 }

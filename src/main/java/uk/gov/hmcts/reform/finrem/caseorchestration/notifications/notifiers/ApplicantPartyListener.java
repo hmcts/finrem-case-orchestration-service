@@ -22,13 +22,13 @@ public class ApplicantPartyListener extends AbstractPartyListener {
     }
 
     @Override
-    protected String getNotificationParty() {
-        return APPLICANT;
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.APPLICANT;
     }
 
     @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.APPLICANT);
+    protected String getNotificationParty() {
+        return APPLICANT;
     }
 
     @Override

@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import com.ibm.icu.text.ListFormatter;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
@@ -19,6 +21,14 @@ import java.util.Optional;
 @Builder(toBuilder = true)
 public class SendCorrespondenceEvent {
     List<NotificationParty> notificationParties;
+    /**
+     * The documents to be sent as part of the notification.
+     * true = EMAIL
+     * false = POSTAL
+     */
+    @Builder.Default
+    List<Boolean> emailOrLetters = new ArrayList<>();
+
     NotificationRequest emailNotificationRequest;
     EmailTemplateNames emailTemplate;
     List<CaseDocument> documentsToPost;
@@ -27,6 +37,92 @@ public class SendCorrespondenceEvent {
     String authToken;
     Barrister barrister;
     boolean letterNotificationOnly;
+
+    @Setter
+    boolean dryRun;
+    int letterCount = 0;
+    int emailCount = 0;
+
+    private void incrementLetterCount() {
+        letterCount++;
+    }
+
+    private void incrementEmailCount() {
+        emailCount++;
+    }
+
+    /**
+     * Records that the given notification party would receive, or has received, an email notification.
+     *
+     * <p>The result is stored in the same index position as the party in {@code notificationParties},
+     * so the audit service can later resolve the notification channel for each party.</p>
+     *
+     * @param notificationParty the party whose notification channel should be recorded
+     * @throws IllegalArgumentException if the notification party is null or was not requested on this event
+     */
+    public void recordEmailNotification(NotificationParty notificationParty) {
+        recordNotificationType(notificationParty, true);
+        incrementEmailCount();
+    }
+
+    /**
+     * Records that the given notification party would receive, or has received, a postal notification.
+     *
+     * <p>The result is stored in the same index position as the party in {@code notificationParties},
+     * so the audit service can later resolve the notification channel for each party.</p>
+     *
+     * @param notificationParty the party whose notification channel should be recorded
+     * @throws IllegalArgumentException if the notification party is null or was not requested on this event
+     */
+    public void recordPostalNotification(NotificationParty notificationParty) {
+        recordNotificationType(notificationParty, false);
+        incrementLetterCount();
+    }
+
+    private void recordNotificationType(NotificationParty notificationParty, boolean email) {
+        if (notificationParty == null) {
+            throw new IllegalArgumentException("Notification party is required to record notification type");
+        }
+
+        int index = getNotificationParties().indexOf(notificationParty);
+
+        if (index == -1) {
+            throw new IllegalArgumentException("Notification party was not requested: " + notificationParty);
+        }
+
+        while (getEmailOrLetters().size() <= index) {
+            getEmailOrLetters().add(null);
+        }
+
+        getEmailOrLetters().set(index, email);
+    }
+
+    /**
+     * Returns the recorded notification type for the given party.
+     *
+     * <p>This uses the party's index in {@code notificationParties} to read the matching value from
+     * {@code emailOrLetters}. A value of {@code true} means email, and {@code false} means postal.</p>
+     *
+     * @param notificationParty the party whose notification type should be returned
+     * @return {@link NotificationType#EMAIL} if the party was recorded as email, otherwise {@link NotificationType#POSTAL}
+     * @throws IllegalArgumentException if the notification party was not requested on this event
+     * @throws IllegalStateException if no notification type has been recorded for the party
+     */
+    public NotificationType getNotificationTypeForParty(NotificationParty notificationParty) {
+        int index = getNotificationParties().indexOf(notificationParty);
+
+        if (index == -1) {
+            throw new IllegalArgumentException("Notification party was not requested: " + notificationParty);
+        }
+
+        if (getEmailOrLetters().size() <= index || getEmailOrLetters().get(index) == null) {
+            throw new IllegalStateException("No notification type recorded for party: " + notificationParty);
+        }
+
+        return Boolean.TRUE.equals(getEmailOrLetters().get(index))
+            ? NotificationType.EMAIL
+            : NotificationType.POSTAL;
+    }
 
     public FinremCaseData getCaseData() {
         return Optional.ofNullable(caseDetails)

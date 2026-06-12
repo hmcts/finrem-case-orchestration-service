@@ -34,10 +34,14 @@ public abstract class AbstractPartyListener {
 
     protected abstract String getNotificationParty();
 
+    protected abstract NotificationParty getNotificationPartyEnum();
+
     /**
      * Should this listener handle notifications for this party/event.
      */
-    protected abstract boolean isRelevantParty(SendCorrespondenceEvent event);
+    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
+        return event.getNotificationParties().contains(getNotificationPartyEnum());
+    }
 
     /**
      * Should the email notification be sent.
@@ -84,16 +88,26 @@ public abstract class AbstractPartyListener {
     }
 
     private void sendNotification(SendCorrespondenceEvent event) {
+        boolean dryRun = event.isDryRun();
+        NotificationParty notificationParty = getNotificationPartyEnum();
+
         if (!event.isLetterNotificationOnly() && shouldSendEmailNotification(event)) {
-            enrichAndSendEmailNotification(event);
+            if (!dryRun) {
+                enrichAndSendEmailNotification(event);
+            }
+            event.recordEmailNotification(notificationParty);
         } else if (shouldSendPaperNotification(event)) {
-            sendPaperNotification(event);
+            if (!dryRun) {
+                sendPaperNotification(event);
+            }
+            event.recordPostalNotification(notificationParty);
         }
     }
 
     /**
      * Should the paper notification be sent.
      */
+    @SuppressWarnings("java:S1172")
     protected boolean shouldSendPaperNotification(SendCorrespondenceEvent event) {
         return true;
     }

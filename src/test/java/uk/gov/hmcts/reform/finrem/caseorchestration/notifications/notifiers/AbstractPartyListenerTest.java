@@ -68,6 +68,11 @@ class AbstractPartyListenerTest {
         }
 
         @Override
+        protected NotificationParty getNotificationPartyEnum() {
+            return NotificationParty.APPLICANT;
+        }
+
+        @Override
         protected String getNotificationParty() {
             return getClass().getSimpleName();
         }
@@ -276,6 +281,7 @@ class AbstractPartyListenerTest {
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
             .emailTemplate(template)
             .emailNotificationRequest(nr)
+            .notificationParties(List.of(NotificationParty.APPLICANT))
             .build();
 
         sendEmailNotificationListener.handleNotification(event);
@@ -299,6 +305,7 @@ class AbstractPartyListenerTest {
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
             .emailTemplate(template)
             .emailNotificationRequest(nr)
+            .notificationParties(List.of(NotificationParty.APPLICANT))
             .build();
 
         sendEmailNotificationWithPartySpecificDetailsListener.handleNotification(event);
@@ -340,6 +347,7 @@ class AbstractPartyListenerTest {
             .authToken(AUTH_TOKEN)
             .caseDetails(caseDetails)
             .documentsToPost(documentsToPost)
+            .notificationParties(List.of(NotificationParty.APPLICANT))
             .build());
         when(event.getCaseDetails()).thenReturn(caseDetails);
         when(event.getCaseId()).thenReturn(TEST_CASE_ID);
@@ -426,6 +434,7 @@ class AbstractPartyListenerTest {
         return spy(SendCorrespondenceEvent.builder()
             .emailTemplate(mock(EmailTemplateNames.class))
             .emailNotificationRequest(NotificationRequest.builder().build())
+            .notificationParties(List.of(NotificationParty.APPLICANT))
             .authToken(AUTH_TOKEN)
             .caseDetails(caseDetails)
             .documentsToPost(expectedDocuments)

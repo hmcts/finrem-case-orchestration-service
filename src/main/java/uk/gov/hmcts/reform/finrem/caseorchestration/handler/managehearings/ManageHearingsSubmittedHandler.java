@@ -15,14 +15,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 @Slf4j
 @Service
@@ -34,14 +38,22 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
 
     private final ManageHearingsCorresponder manageHearingsCorresponder;
 
+    private final CoreCaseDataService coreCaseDataService;
+
+    private final NotificationAuditService notificationAuditService;
+
     public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                           ManageHearingsCorresponder manageHearingsCorresponder,
                                           RetryExecutor retryExecutor,
-                                          ApplicationEventPublisher applicationEventPublisher) {
+                                          ApplicationEventPublisher applicationEventPublisher,
+                                          CoreCaseDataService coreCaseDataService,
+                                          NotificationAuditService notificationAuditService) {
         super(finremCaseDetailsMapper);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
         this.retryExecutor = retryExecutor;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.coreCaseDataService = coreCaseDataService;
+        this.notificationAuditService = notificationAuditService;
     }
 
     @Override
@@ -57,11 +69,11 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = caseDetails.getData();
+        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
 
         log.info("Beginning hearing correspondence for {} action. Case reference: {}",
-            actionSelection.getDescription(), caseDetails.getCaseIdAsString());
+            actionSelection.getDescription(), finremCaseData.getCcdCaseId());
 
         List<String> errors = new ArrayList<>();
         SendCorrespondenceEvent correspondenceEvent = buildCorrespondenceEvent(
@@ -71,6 +83,10 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         );
         ofNullable(correspondenceEvent)
             .ifPresent(event -> publishEvent(getEventDescription(actionSelection), event, errors));
+
+        if (correspondenceEvent != null) {
+            markPendingNotificationsAsSent(caseDetails, correspondenceEvent);
+        }
 
         if (errors.isEmpty()) {
             return submittedResponse();
@@ -114,5 +130,24 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
                 errors.add(format("Notification to %s has failed. Please send notification to %s manually.",
                     notifyingPartyInString, notifyingPartyInString))
         );
+    }
+
+    private void markPendingNotificationsAsSent(FinremCaseDetails caseDetails,
+                                                SendCorrespondenceEvent correspondenceEvent) {
+        Map<String, Object> updatedFields =
+            notificationAuditService.markPendingNotificationsAsSent(caseDetails.getData(), correspondenceEvent);
+
+        if (!updatedFields.isEmpty()) {
+            retryExecutor.runWithRetrySuppressException(
+                () -> coreCaseDataService.performPostSubmitCallback(
+                    caseDetails.getData().getCcdCaseType(),
+                    caseDetails.getId(),
+                    INTERNAL_CHANGE_UPDATE_CASE.getCcdType(),
+                    latestCaseDetails -> updatedFields
+                ),
+                "markPendingNotificationsAsSent",
+                caseDetails.getCaseIdAsString()
+            );
+        }
     }
 }

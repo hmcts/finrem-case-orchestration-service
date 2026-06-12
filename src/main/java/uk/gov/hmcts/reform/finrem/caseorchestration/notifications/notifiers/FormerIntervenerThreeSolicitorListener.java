@@ -19,12 +19,12 @@ public class FormerIntervenerThreeSolicitorListener extends FormerIntervenerSoli
     }
 
     @Override
-    protected String getNotificationParty() {
-        return "former intervener three solicitor";
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.FORMER_INTERVENER_THREE_SOLICITOR_ONLY;
     }
 
     @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.FORMER_INTERVENER_THREE_SOLICITOR_ONLY);
+    protected String getNotificationParty() {
+        return "former intervener three solicitor";
     }
 }

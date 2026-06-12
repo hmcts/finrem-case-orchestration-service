@@ -30,13 +30,13 @@ public class ApplicantSolicitorListener extends EmailNotificationOnlyListener {
     }
 
     @Override
-    protected String getNotificationParty() {
-        return "applicant solicitor";
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.APPLICANT_SOLICITOR_ONLY;
     }
 
     @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.APPLICANT_SOLICITOR_ONLY);
+    protected String getNotificationParty() {
+        return "applicant solicitor";
     }
 
     @Override
