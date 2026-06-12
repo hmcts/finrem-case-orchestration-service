@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -21,8 +23,8 @@ import java.util.ArrayList;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Bin {
 
-    @JsonProperty("bin_fileUrls")
-    private DynamicList fileUrlsToBeDeleted;
+    @JsonProperty("bin_fileUrlsCollection")
+    private List<BinFileUrlsCollection> fileUrlsToBeDeleted;
 
     /**
      * Adds the given case document URL to the bin of files scheduled for deletion.
@@ -36,14 +38,14 @@ public class Bin {
      * @param caseDocument the case document whose document URL should be added to the deletion bin
      */
     public void binCaseDocument(CaseDocument caseDocument) {
-        if (this.fileUrlsToBeDeleted == null) {
-            this.fileUrlsToBeDeleted = DynamicList.builder()
-                .listItems(new ArrayList<>())
-                .build();
-        }
-        this.fileUrlsToBeDeleted.getListItems().add(
-            DynamicListElement.builder().code(caseDocument.getDocumentUrl()).build()
-        );
+        Optional.ofNullable(caseDocument)
+            .map(CaseDocument::getDocumentUrl)
+            .ifPresent(documentUrl -> {
+                if (fileUrlsToBeDeleted == null) {
+                    fileUrlsToBeDeleted = new ArrayList<>();
+                }
+                fileUrlsToBeDeleted.add(toBinFileUrlsCollection(caseDocument.getDocumentUrl()));
+            });
     }
 
     /**
@@ -53,5 +55,13 @@ public class Bin {
      */
     public void clearBin() {
         this.fileUrlsToBeDeleted = null;
+    }
+
+    private BinFileUrlsCollection toBinFileUrlsCollection(String documentUrl) {
+        return BinFileUrlsCollection.builder()
+                .value(BinFileUrls.builder()
+                        .binFileUrl(documentUrl)
+                        .build())
+                .build();
     }
 }

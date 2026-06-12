@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 
 import java.util.List;
 
@@ -22,15 +21,16 @@ class BinTest {
         bin.binCaseDocument(doc);
 
         assertAll(
-            () -> assertNotNull(bin.getFileUrlsToBeDeleted())
+                () -> assertNotNull(bin.getFileUrlsToBeDeleted())
         );
 
-        List<DynamicListElement> items = bin.getFileUrlsToBeDeleted().getListItems();
+        List<BinFileUrlsCollection> items = bin.getFileUrlsToBeDeleted();
 
         assertThat(items)
-            .hasSize(1)
-            .extracting(DynamicListElement::getCode)
-            .containsExactly(doc.getDocumentUrl());
+                .hasSize(1)
+                .extracting(BinFileUrlsCollection::getValue)
+                .extracting(BinFileUrls::getBinFileUrl)
+                .containsExactly(doc.getDocumentUrl());
     }
 
     @Test
@@ -44,18 +44,16 @@ class BinTest {
         bin.binCaseDocument(doc2);
 
         assertAll(
-            () -> assertNotNull(bin.getFileUrlsToBeDeleted())
+                () -> assertNotNull(bin.getFileUrlsToBeDeleted())
         );
 
-        List<DynamicListElement> items = bin.getFileUrlsToBeDeleted().getListItems();
+        List<BinFileUrlsCollection> items = bin.getFileUrlsToBeDeleted();
 
         assertThat(items)
-            .hasSize(2)
-            .extracting(DynamicListElement::getCode)
-            .containsExactly(
-                doc1.getDocumentUrl(),
-                doc2.getDocumentUrl()
-            );
+                .hasSize(2)
+                .extracting(BinFileUrlsCollection::getValue)
+                .extracting(BinFileUrls::getBinFileUrl)
+                .containsExactly(doc1.getDocumentUrl(), doc2.getDocumentUrl());
     }
 
     @Test
@@ -67,7 +65,7 @@ class BinTest {
         bin.binCaseDocument(doc);
 
         assertAll(
-            () -> assertNotNull(bin.getFileUrlsToBeDeleted())
+                () -> assertNotNull(bin.getFileUrlsToBeDeleted())
         );
 
         bin.clearBin();
