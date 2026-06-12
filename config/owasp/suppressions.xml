@@ -50,4 +50,13 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-41845</cve>
         <cve>CVE-2026-41838</cve>
     </suppress>
+    <suppress until="2026-09-01Z">
+        <notes><![CDATA[
+    CVE-2026-41007 / CVE-2026-41006 - false positive on <ARTIFACT_NAME> <VERSION>.
+    Verified against NVD: not applicable because <REASON>.
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.example/your-artifact@.*$</packageUrl>
+        <cve>CVE-2026-41007</cve>
+        <cve>CVE-2026-41006</cve>
+    </suppress>
 </suppressions>
