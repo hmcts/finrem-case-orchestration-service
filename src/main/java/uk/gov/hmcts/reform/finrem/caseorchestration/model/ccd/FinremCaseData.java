@@ -458,6 +458,13 @@ public class FinremCaseData implements HasCaseDocument {
     @Getter(AccessLevel.NONE)
     private CitizenDocumentWrapper citizenDocumentWrapper;
 
+    @JsonProperty("caseNameHmctsInternal")
+    private String caseNameHmctsInternal;
+    @JsonProperty("caseManagementCategory")
+    private String caseManagementCategory;
+    @JsonProperty("caseManagementLocation")
+    private String caseManagementLocation;
+
     @JsonIgnore
     public CaseDataMetricsWrapper getCaseDataMetricsWrapper() {
         if (caseDataMetricsWrapper == null) {
@@ -1194,4 +1201,5 @@ public class FinremCaseData implements HasCaseDocument {
         }
         return bin;
     }
+
 }
