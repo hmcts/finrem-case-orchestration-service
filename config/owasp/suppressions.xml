@@ -40,5 +40,14 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-41840</cve>
         <cve>CVE-2026-41841</cve>
         <cve>CVE-2026-41843</cve>
+        <!-- Added 2026-06-12 -->
+        <cve>CVE-2026-41844</cve>
+        <cve>CVE-2026-41007</cve>
+        <cve>CVE-2026-41852</cve>
+        <cve>CVE-2026-41006</cve>
+        <cve>CVE-2026-41848</cve>
+        <cve>CVE-2026-41846</cve>
+        <cve>CVE-2026-41845</cve>
+        <cve>CVE-2026-41838</cve>
     </suppress>
 </suppressions>
