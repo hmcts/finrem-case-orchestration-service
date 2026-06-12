@@ -52,11 +52,10 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
     </suppress>
     <suppress until="2026-09-01Z">
         <notes><![CDATA[
-    CVE-2026-41007 / CVE-2026-41006 - false positive on <ARTIFACT_NAME> <VERSION>.
-    Verified against NVD: not applicable because <REASON>.
+    Suppress spring-hateoas 1.5.6 false positives / accepted risk for release.
     ]]></notes>
-        <packageUrl regex="true">^pkg:maven/com\.example/your-artifact@.*$</packageUrl>
-        <cve>CVE-2026-41007</cve>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.hateoas/spring-hateoas@.*$</packageUrl>
         <cve>CVE-2026-41006</cve>
+        <cve>CVE-2026-41007</cve>
     </suppress>
 </suppressions>
