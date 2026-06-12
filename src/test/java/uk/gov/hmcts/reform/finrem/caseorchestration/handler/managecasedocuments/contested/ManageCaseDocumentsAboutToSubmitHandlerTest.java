@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managecasedocuments.contested;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -16,9 +16,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
@@ -35,11 +37,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantOtherDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -49,7 +51,6 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -67,20 +68,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
+class ManageCaseDocumentsAboutToSubmitHandlerTest {
 
     @Mock
     private FeatureToggleService featureToggleService;
     @Mock
     private UploadedDocumentService uploadedDocumentService;
     @Mock
-    private EvidenceManagementDeleteService evidenceManagementDeleteService;
-    @Mock
     private RespondentChronologiesStatementHandler documentHandlerOne = mock(RespondentChronologiesStatementHandler.class);
     @Mock
     private ApplicantOtherDocumentsHandler documentHandlerTwo = mock(ApplicantOtherDocumentsHandler.class);
 
-    private NewManageCaseDocumentsContestedAboutToSubmitHandler underTest;
+    private ManageCaseDocumentsAboutToSubmitHandler underTest;
 
     @BeforeEach
     void setUp() {
@@ -88,9 +87,8 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         FinremCaseDetailsMapper finremCaseDetailsMapper =
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         underTest =
-            new NewManageCaseDocumentsContestedAboutToSubmitHandler(finremCaseDetailsMapper,
-                documentHandlers, uploadedDocumentService, evidenceManagementDeleteService,
-                featureToggleService);
+            new ManageCaseDocumentsAboutToSubmitHandler(finremCaseDetailsMapper,
+                documentHandlers, uploadedDocumentService, featureToggleService);
     }
 
     @Test
@@ -231,24 +229,42 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenDeleteToggleEnabled_whenHandle_thenDeletesOnlyRemovedDocuments(boolean featureToggleEnabled) {
+    void givenDeleteToggleEnabled_whenHandle_thenBinRemovedDocumentUrls(boolean featureToggleEnabled) {
         when(featureToggleService.isManageCaseDocsDeleteEnabled()).thenReturn(featureToggleEnabled);
 
-        UploadCaseDocumentCollection removed = uploadDocument("removed.pdf");
-        UploadCaseDocumentCollection retained = uploadDocument("retained.pdf");
+        CaseDocument removedDoc = caseDocument("removed.pdf");
 
-        UploadCaseDocumentWrapper wrapperBefore = spy(UploadCaseDocumentWrapper.class);
-        lenient().when(wrapperBefore.getAllManageableCollections()).thenReturn(new ArrayList<>(List.of(removed, retained)));
+        FinremCaseData caseDataBefore = FinremCaseData.builder()
+            .uploadCaseDocumentWrapper(wrapperWithDocuments(removedDoc))
+            .build();
 
+        FinremCaseData caseData = FinremCaseData.builder()
+            .build();
+
+        var response = underTest.handle(
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseDataBefore, caseData),
+            AUTH_TOKEN
+        );
+
+        if (featureToggleEnabled) {
+            assertThat(response.getData().getBin().getFileUrlsToBeDeleted().getListItems())
+                .flatExtracting(DynamicListElement::getCode)
+                .containsOnly(removedDoc.getDocumentUrl());
+        } else {
+            assertThat(response.getData().getBin().getFileUrlsToBeDeleted()).isNull();
+        }
+    }
+
+    private UploadCaseDocumentWrapper wrapperWithDocuments(CaseDocument... documents) {
         UploadCaseDocumentWrapper wrapper = spy(UploadCaseDocumentWrapper.class);
-        lenient().when(wrapper.getAllManageableCollections()).thenReturn(new ArrayList<>(List.of(retained)));
 
-        FinremCaseData caseDataBefore = FinremCaseData.builder().uploadCaseDocumentWrapper(wrapperBefore).build();
-        FinremCaseData caseData = FinremCaseData.builder().uploadCaseDocumentWrapper(wrapper).build();
+        lenient().when(wrapper.getAllManageableCollections()).thenReturn(
+            Arrays.stream(documents)
+                .map(this::uploadDocument)
+                .collect(Collectors.toCollection(ArrayList::new))
+        );
 
-        underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseDataBefore, caseData), AUTH_TOKEN);
-        verify(evidenceManagementDeleteService, times(featureToggleEnabled ? 1 : 0))
-            .delete(removed.getUploadCaseDocument().getCaseDocuments().getDocumentUrl(), AUTH_TOKEN);
+        return wrapper;
     }
 
     @ParameterizedTest
@@ -352,10 +368,10 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             .build();
     }
 
-    private UploadCaseDocumentCollection uploadDocument(String filename) {
+    private UploadCaseDocumentCollection uploadDocument(CaseDocument caseDocument) {
         return UploadCaseDocumentCollection.builder()
             .uploadCaseDocument(UploadCaseDocument.builder()
-                .caseDocuments(caseDocument(filename))
+                .caseDocuments(caseDocument)
                 .build())
             .build();
     }
