@@ -23,6 +23,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrls;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrlsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
@@ -544,7 +546,10 @@ class FinremCallbackHandlerTest {
             String documentAUrl = caseDocument("fileA").getDocumentUrl();
             String documentBUrl = caseDocument("fileB").getDocumentUrl();
             when(mockedBin.getFileUrlsToBeDeleted())
-                .thenReturn(List.of(documentAUrl, documentBUrl));
+                .thenReturn(List.of(
+                    binFileUrlCollection(documentAUrl),
+                    binFileUrlCollection(documentBUrl)
+                ));
 
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
@@ -577,7 +582,10 @@ class FinremCallbackHandlerTest {
             String documentAUrl = caseDocument("binFileA").getDocumentUrl();
             String documentBUrl = caseDocument("fileB").getDocumentUrl();
             when(mockedBin.getFileUrlsToBeDeleted())
-                .thenReturn(List.of(documentAUrl, documentBUrl));
+                .thenReturn(List.of(
+                    binFileUrlCollection(documentAUrl),
+                    binFileUrlCollection(documentBUrl)
+                ));
 
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
@@ -605,6 +613,14 @@ class FinremCallbackHandlerTest {
                     () -> verifyNoMoreInteractions(evidenceManagementDeleteService)
                 );
             }
+        }
+
+        private BinFileUrlsCollection binFileUrlCollection(String url) {
+            return BinFileUrlsCollection.builder()
+                .value(BinFileUrls.builder()
+                    .binFileUrl(url)
+                    .build())
+                .build();
         }
     }
 }

@@ -21,14 +21,16 @@ class BinTest {
         bin.binCaseDocument(doc);
 
         assertAll(
-            () -> assertNotNull(bin.getFileUrlsToBeDeleted())
+                () -> assertNotNull(bin.getFileUrlsToBeDeleted())
         );
 
-        List<String> items = bin.getFileUrlsToBeDeleted();
+        List<BinFileUrlsCollection> items = bin.getFileUrlsToBeDeleted();
 
         assertThat(items)
-            .hasSize(1)
-            .containsExactly(doc.getDocumentUrl());
+                .hasSize(1)
+                .extracting(BinFileUrlsCollection::getValue)
+                .extracting(BinFileUrls::getBinFileUrl)
+                .containsExactly(doc.getDocumentUrl());
     }
 
     @Test
@@ -42,17 +44,16 @@ class BinTest {
         bin.binCaseDocument(doc2);
 
         assertAll(
-            () -> assertNotNull(bin.getFileUrlsToBeDeleted())
+                () -> assertNotNull(bin.getFileUrlsToBeDeleted())
         );
 
-        List<String> items = bin.getFileUrlsToBeDeleted();
+        List<BinFileUrlsCollection> items = bin.getFileUrlsToBeDeleted();
 
         assertThat(items)
-            .hasSize(2)
-            .containsExactly(
-                doc1.getDocumentUrl(),
-                doc2.getDocumentUrl()
-            );
+                .hasSize(2)
+                .extracting(BinFileUrlsCollection::getValue)
+                .extracting(BinFileUrls::getBinFileUrl)
+                .containsExactly(doc1.getDocumentUrl(), doc2.getDocumentUrl());
     }
 
     @Test
@@ -64,7 +65,7 @@ class BinTest {
         bin.binCaseDocument(doc);
 
         assertAll(
-            () -> assertNotNull(bin.getFileUrlsToBeDeleted())
+                () -> assertNotNull(bin.getFileUrlsToBeDeleted())
         );
 
         bin.clearBin();

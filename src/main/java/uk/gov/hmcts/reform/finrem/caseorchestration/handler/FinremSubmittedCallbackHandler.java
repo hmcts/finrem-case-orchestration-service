@@ -3,6 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrls;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrlsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -82,15 +85,19 @@ public abstract class FinremSubmittedCallbackHandler extends FinremCallbackHandl
     private void purgeBinFileUrls(FinremCaseData finremCaseData, String userAuthorisation) {
         Set<String> attachedUrls = extractAttachedUrls(finremCaseData);
 
-        ofNullable(finremCaseData.getBin().getFileUrlsToBeDeleted())
+        ofNullable(finremCaseData.getBin())
+            .map(Bin::getFileUrlsToBeDeleted)
             .stream()
             .flatMap(List::stream)
+            .map(BinFileUrlsCollection::getValue)
+            .filter(Objects::nonNull)
+            .map(BinFileUrls::getBinFileUrl)
+            .filter(Objects::nonNull)
             .filter(url -> isNotAttachedToCase(url, attachedUrls))
-            .forEach(url ->
-                retryExecutor.runWithRetrySuppressException(
-                    () -> evidenceManagementDeleteService.delete(url, userAuthorisation),
-                    "EM File Deletion - %s".formatted(url),
-                    finremCaseData.getCcdCaseId())
+            .forEach(url -> retryExecutor.runWithRetrySuppressException(
+                () -> evidenceManagementDeleteService.delete(url, userAuthorisation),
+                "EM File Deletion - %s".formatted(url),
+                finremCaseData.getCcdCaseId())
             );
     }
 
