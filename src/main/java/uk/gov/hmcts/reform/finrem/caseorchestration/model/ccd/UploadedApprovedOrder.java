@@ -7,4 +7,6 @@ public interface UploadedApprovedOrder {
     CaseDocument getApprovedOrder();
 
     List<DocumentCollectionItem> getAdditionalDocuments();
+
+    YesOrNo getIsThisFinalYN();
 }
