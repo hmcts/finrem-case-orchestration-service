@@ -1,3 +1,5 @@
+import uk.gov.hmcts.rse.AuthMode
+
 plugins {
     id 'application'
     id 'checkstyle'
@@ -57,7 +59,6 @@ project.ext {
 
 group = 'uk.gov.hmcts.reform.finrem'
 version = '0.0.1'
-mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 
 checkstyle {
     toolVersion = '12.3.1'
@@ -346,13 +347,13 @@ static def getCheckedOutGitCommitHash() {
     'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
 
-task fortifyScan(type: JavaExec) {
+tasks.register('fortifyScan', JavaExec) {
     mainClass.set("uk.gov.hmcts.fortifyclient.FortifyClientMainApp")
     classpath += sourceSets.test.runtimeClasspath
     jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
 
-task buildCCDXlsx(type: Exec) {
+tasks.register('buildCCDXlsx', Exec) {
     group 'ccd tasks'
     commandLine './bin/build-finrem-xlxs-definitions.sh'
 }
@@ -370,7 +371,7 @@ bootWithCCD {
     }
 
     // AAT (Local cftlib not currently supported)
-    authMode = uk.gov.hmcts.rse.AuthMode.AAT
+    authMode = AuthMode.AAT
 
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
