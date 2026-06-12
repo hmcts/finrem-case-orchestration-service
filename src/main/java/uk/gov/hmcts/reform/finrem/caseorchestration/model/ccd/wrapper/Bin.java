@@ -24,7 +24,7 @@ import java.util.Optional;
 public class Bin {
 
     @JsonProperty("bin_fileUrlsCollection")
-    private List<String> fileUrlsToBeDeleted;
+    private List<BinFileUrlsCollection> fileUrlsToBeDeleted;
 
     /**
      * Adds the given case document URL to the bin of files scheduled for deletion.
@@ -44,7 +44,7 @@ public class Bin {
                 if (fileUrlsToBeDeleted == null) {
                     fileUrlsToBeDeleted = new ArrayList<>();
                 }
-                fileUrlsToBeDeleted.add(documentUrl);
+                fileUrlsToBeDeleted.add(toBinFileUrlsCollection(caseDocument.getDocumentUrl()));
             });
     }
 
@@ -55,5 +55,13 @@ public class Bin {
      */
     public void clearBin() {
         this.fileUrlsToBeDeleted = null;
+    }
+
+    private BinFileUrlsCollection toBinFileUrlsCollection(String documentUrl) {
+        return BinFileUrlsCollection.builder()
+                .value(BinFileUrls.builder()
+                        .binFileUrl(documentUrl)
+                        .build())
+                .build();
     }
 }
