@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -48,7 +49,6 @@ public class SendCorrespondenceEvent {
      */
     public void recordEmailNotificationToSendAudit(NotificationParty notificationParty) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
-            .notificationEventId(getNotificationId())
             .eventId(this.eventId)
             .party(notificationParty.name())
             .type(NotificationType.EMAIL)
@@ -58,8 +58,7 @@ public class SendCorrespondenceEvent {
 
     public void recordEmailNotificationSentAudit(NotificationParty notificationParty) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
-            .wasSent(true)
-            .notificationEventId(getNotificationId())
+            .wasSent(YesOrNo.YES)
             .eventId(this.eventId)
             .party(notificationParty.name())
             .type(NotificationType.EMAIL)
@@ -80,7 +79,6 @@ public class SendCorrespondenceEvent {
      */
     public void recordPostalNotificationToSendAudit(NotificationParty notificationParty) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
-            .notificationEventId(getNotificationId())
             .eventId(this.eventId)
             .party(notificationParty.name())
             .type(NotificationType.POSTAL)
@@ -90,7 +88,7 @@ public class SendCorrespondenceEvent {
 
     public void recordPostalNotificationSentAudit(NotificationParty notificationParty, UUID letterId) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
-            .notificationEventId(getNotificationId())
+            .wasSent(YesOrNo.YES)
             .eventId(this.eventId)
             .party(notificationParty.name())
             .type(NotificationType.POSTAL)
@@ -124,10 +122,6 @@ public class SendCorrespondenceEvent {
         return Optional.ofNullable(getCaseData())
             .map(FinremCaseData::getCcdCaseId)
             .orElse(null);
-    }
-
-    public UUID getNotificationId() {
-        return getCaseData().getNotificationAuditWrapper().getCurrentNotificationEventId();
     }
 
     /**

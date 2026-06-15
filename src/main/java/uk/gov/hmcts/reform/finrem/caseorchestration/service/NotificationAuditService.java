@@ -7,7 +7,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAuditCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationToBeSentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_AUDITS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_TO_BE_SENT;
@@ -71,17 +74,24 @@ public class NotificationAuditService {
                 .filter(audit -> audit.getParty().equals(pendingAuditItem.getValue().getParty()))
                 .findFirst()
                 .ifPresentOrElse(
-                    audit -> audit.setWasSent(true),
+                    audit -> audit.setWasSent(YesOrNo.YES),
                     () -> {
                         NotificationAudit pendingAudit = pendingAuditItem.getValue();
-                        pendingAudit.setWasSent(false);
+                        pendingAudit.setWasSent(YesOrNo.NO);
                         audits.add(pendingAudit);
                     }
                 ));
 
+        List<NotificationAuditCollectionItem> auditItems = audits.stream()
+            .map(audit -> NotificationAuditCollectionItem.builder()
+                .id(UUID.randomUUID())
+                .value(audit)
+                .build())
+            .toList();
+
         return Map.of(
-            NOTIFICATIONS_AUDITS, objectMapper.convertValue(audits, List.class),
-            NOTIFICATIONS_TO_BE_SENT, List.of()  // Clear the pending notifications list
+            NOTIFICATIONS_AUDITS, objectMapper.convertValue(auditItems, List.class),
+            NOTIFICATIONS_TO_BE_SENT, List.of()
         );
     }
 
