@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.MANAGE_HEARINGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
@@ -235,6 +236,7 @@ public class ManageHearingsCorresponder {
             Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
 
         return SendCorrespondenceEvent.builder()
+            .eventId(MANAGE_HEARINGS.getCcdType())
             .notificationParties(partiesOnCase.stream()
                 .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
                 .toList())

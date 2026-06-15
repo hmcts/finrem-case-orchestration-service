@@ -179,7 +179,7 @@ class SendCorrespondenceEventTest {
             .notificationParties(new ArrayList<>(List.of(NotificationParty.RESPONDENT)))
             .build();
 
-        event.recordPostalNotification(NotificationParty.RESPONDENT);
+        event.recordPostalNotificationToSendAudit(NotificationParty.RESPONDENT);
 
         assertThat(event.getNotificationTypeForParty(NotificationParty.RESPONDENT))
             .isEqualTo(NotificationType.POSTAL);
@@ -199,7 +199,7 @@ class SendCorrespondenceEventTest {
             .notificationParties(new ArrayList<>(List.of(NotificationParty.RESPONDENT)))
             .build();
 
-        event.recordPostalNotification(NotificationParty.RESPONDENT, letterId);
+        event.recordPostalNotificationToSendAudit(NotificationParty.RESPONDENT, letterId);
 
         SendCorrespondenceEvent.RecordedNotification recordedNotification =
             event.getRecordedNotificationForParty(NotificationParty.RESPONDENT);
@@ -222,7 +222,7 @@ class SendCorrespondenceEventTest {
         assertThat(event.getNotificationTypeForParty(NotificationParty.RESPONDENT))
             .isEqualTo(NotificationType.EMAIL);
 
-        event.recordPostalNotification(NotificationParty.APPLICANT);
+        event.recordPostalNotificationToSendAudit(NotificationParty.APPLICANT);
 
         assertThat(event.getNotificationTypeForParty(NotificationParty.APPLICANT))
             .isEqualTo(NotificationType.POSTAL);

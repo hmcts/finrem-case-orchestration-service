@@ -8,27 +8,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 @Getter
 @Builder(toBuilder = true)
 public class SendCorrespondenceEvent {
+
     List<NotificationParty> notificationParties;
-
-    @Builder.Default
-    Map<NotificationParty, RecordedNotification> recordedNotificationsByParty =
-        new EnumMap<>(NotificationParty.class);
-
     NotificationRequest emailNotificationRequest;
     EmailTemplateNames emailTemplate;
     List<CaseDocument> documentsToPost;
@@ -38,32 +34,39 @@ public class SendCorrespondenceEvent {
     Barrister barrister;
     boolean letterNotificationOnly;
 
+    @Builder.Default
+    List<NotificationAudit> notificationAudits = new ArrayList<>();
+    String eventId;
+
     @Setter
     boolean dryRun;
-
-    public record RecordedNotification(
-        NotificationType type,
-        String letterId
-    ) {
-        public static RecordedNotification email() {
-            return new RecordedNotification(NotificationType.EMAIL, null);
-        }
-
-        public static RecordedNotification postal(UUID letterId) {
-            return new RecordedNotification(
-                NotificationType.POSTAL,
-                letterId == null ? null : letterId.toString()
-            );
-        }
-    }
 
     /**
      * Records that the given notification party would receive, or has received, an email notification.
      *
      * @param notificationParty the party whose notification channel should be recorded
      */
-    public void recordEmailNotification(NotificationParty notificationParty) {
-        recordNotification(notificationParty, RecordedNotification.email());
+    public void recordEmailNotificationToSendAudit(NotificationParty notificationParty) {
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
+            .notificationEventId(getNotificationId())
+            .eventId(this.eventId)
+            .party(notificationParty.name())
+            .type(NotificationType.EMAIL)
+            .emailTemplate(this.emailTemplate.name())
+            .build());
+    }
+
+    public void recordEmailNotificationSentAudit(NotificationParty notificationParty) {
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
+            .wasSent(true)
+            .notificationEventId(getNotificationId())
+            .eventId(this.eventId)
+            .party(notificationParty.name())
+            .type(NotificationType.EMAIL)
+            // Email ID not returned from notify API service calls
+            // .emailId(emailId.toString())
+            .emailTemplate(this.emailTemplate.name())
+            .build());
     }
 
     /**
@@ -75,61 +78,34 @@ public class SendCorrespondenceEvent {
      *
      * @param notificationParty the party whose notification channel should be recorded
      */
-    public void recordPostalNotification(NotificationParty notificationParty) {
-        recordPostalNotification(notificationParty, null);
+    public void recordPostalNotificationToSendAudit(NotificationParty notificationParty) {
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
+            .notificationEventId(getNotificationId())
+            .eventId(this.eventId)
+            .party(notificationParty.name())
+            .type(NotificationType.POSTAL)
+            .attachedPostalDocs(getDocumentsToPostFilenames())
+            .build());
     }
 
-    /**
-     * Records that the given notification party has received a postal notification.
-     *
-     * <p>
-     * This is used during the submitted callback after Bulk Print returns a real letter ID.
-     * </p>
-     *
-     * @param notificationParty the party whose notification channel should be recorded
-     * @param letterId the Bulk Print letter ID
-     */
-    public void recordPostalNotification(NotificationParty notificationParty, UUID letterId) {
-        recordNotification(notificationParty, RecordedNotification.postal(letterId));
+    public void recordPostalNotificationSentAudit(NotificationParty notificationParty, UUID letterId) {
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
+            .notificationEventId(getNotificationId())
+            .eventId(this.eventId)
+            .party(notificationParty.name())
+            .type(NotificationType.POSTAL)
+            .letterId(letterId.toString())
+            .attachedPostalDocs(getDocumentsToPostFilenames())
+            .build());
     }
 
-    private void recordNotification(NotificationParty notificationParty,
-                                    RecordedNotification recordedNotification) {
-        getRecordedNotificationsByParty().put(notificationParty, recordedNotification);
-    }
-
-    /**
-     * Returns the recorded notification type for the given party.
-     *
-     * @param notificationParty the party whose notification type should be returned
-     * @return {@link NotificationType#EMAIL} or {@link NotificationType#POSTAL}
-     */
-    public NotificationType getNotificationTypeForParty(NotificationParty notificationParty) {
-        return getRecordedNotificationForParty(notificationParty).type();
-    }
-
-    /**
-     * Returns the full recorded notification result for the given party.
-     *
-     * @param notificationParty the party whose recorded notification should be returned
-     * @return the recorded notification details
-     * @throws IllegalStateException if no notification has been recorded for the party
-     */
-    public RecordedNotification getRecordedNotificationForParty(NotificationParty notificationParty) {
-        RecordedNotification recordedNotification = getRecordedNotificationsByParty().get(notificationParty);
-
-        if (recordedNotification == null) {
-            throw new IllegalStateException("No notification recorded for party: " + notificationParty);
-        }
-
-        return recordedNotification;
-    }
-
-    public Map<NotificationParty, RecordedNotification> getRecordedNotificationsByParty() {
-        if (recordedNotificationsByParty == null) {
-            recordedNotificationsByParty = new EnumMap<>(NotificationParty.class);
-        }
-        return recordedNotificationsByParty;
+    private List<String> getDocumentsToPostFilenames() {
+        return Optional.ofNullable(documentsToPost)
+            .orElseGet(List::of)
+            .stream()
+            .map(CaseDocument::getDocumentFilename)
+            .filter(fileName -> fileName != null && !fileName.isBlank())
+            .toList();
     }
 
     public FinremCaseData getCaseData() {
@@ -148,6 +124,10 @@ public class SendCorrespondenceEvent {
         return Optional.ofNullable(getCaseData())
             .map(FinremCaseData::getCcdCaseId)
             .orElse(null);
+    }
+
+    public UUID getNotificationId() {
+        return getCaseData().getNotificationAuditWrapper().getCurrentNotificationEventId();
     }
 
     /**

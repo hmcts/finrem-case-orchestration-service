@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
+import java.util.UUID;
+
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 
 @Slf4j
@@ -78,6 +80,10 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
         }
 
         manageHearingActionService.updateTabData(finremCaseData);
+
+       // TODO get rid of tracker
+        finremCaseData.getNotificationAuditWrapper()
+            .setCurrentNotificationEventId(UUID.randomUUID());
         createNotificationAuditRows(callbackRequest, userAuthorisation, actionSelection);
 
         return response(finremCaseData);
@@ -86,6 +92,7 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
     private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
                                              String userAuthorisation,
                                              ManageHearingsAction actionSelection) {
+
         SendCorrespondenceEvent event = buildCorrespondenceEvent(
             actionSelection,
             callbackRequest,
@@ -98,6 +105,7 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
                 callbackRequest.getEventType()
             );
         }
+
     }
 
     private SendCorrespondenceEvent buildCorrespondenceEvent(ManageHearingsAction actionSelection,

@@ -295,7 +295,7 @@ class NotificationAuditServiceTest {
             .notificationParties(new ArrayList<>(List.of(NotificationParty.RESPONDENT)))
             .build();
 
-        sentEvent.recordPostalNotification(NotificationParty.RESPONDENT, letterId);
+        sentEvent.recordPostalNotificationToSendAudit(NotificationParty.RESPONDENT, letterId);
 
         Map<String, Object> result =
             notificationAuditService.markPendingNotificationsAsSent(caseData, sentEvent);
@@ -416,7 +416,7 @@ class NotificationAuditServiceTest {
             if (NotificationType.EMAIL.equals(notificationType)) {
                 event.recordEmailNotification(party);
             } else {
-                event.recordPostalNotification(party);
+                event.recordPostalNotificationToSendAudit(party);
             }
         }
 

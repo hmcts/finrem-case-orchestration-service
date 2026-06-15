@@ -76,6 +76,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             actionSelection.getDescription(), finremCaseData.getCcdCaseId());
 
         List<String> errors = new ArrayList<>();
+
         SendCorrespondenceEvent correspondenceEvent = buildCorrespondenceEvent(
             actionSelection,
             callbackRequest,
@@ -134,8 +135,9 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
 
     private void markPendingNotificationsAsSent(FinremCaseDetails caseDetails,
                                                 SendCorrespondenceEvent correspondenceEvent) {
+
         Map<String, Object> updatedFields =
-            notificationAuditService.markPendingNotificationsAsSent(caseDetails.getData(), correspondenceEvent);
+            notificationAuditService.updateSentAuditsList(correspondenceEvent);
 
         if (!updatedFields.isEmpty()) {
             retryExecutor.runWithRetrySuppressException(

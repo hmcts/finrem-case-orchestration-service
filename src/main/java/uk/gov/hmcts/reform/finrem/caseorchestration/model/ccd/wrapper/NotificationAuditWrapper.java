@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAuditCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationToBeSentCollectionItem;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder(toBuilder = true)
@@ -19,6 +20,6 @@ import java.util.List;
 public class NotificationAuditWrapper {
 
     private List<NotificationAuditCollectionItem> notificationsAudits;
-
     private List<NotificationToBeSentCollectionItem> notificationsToBeSent;
+    private UUID currentNotificationEventId;
 }

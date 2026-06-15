@@ -94,14 +94,16 @@ public abstract class AbstractPartyListener {
         if (!event.isLetterNotificationOnly() && shouldSendEmailNotification(event)) {
             if (!dryRun) {
                 enrichAndSendEmailNotification(event);
+                event.recordEmailNotificationSentAudit(notificationParty);
+            } else {
+                event.recordEmailNotificationToSendAudit(notificationParty);
             }
-            event.recordEmailNotification(notificationParty);
         } else if (shouldSendPaperNotification(event)) {
             if (!dryRun) {
                 UUID letterId = sendPaperNotification(event);
-                event.recordPostalNotification(notificationParty, letterId);
+                event.recordPostalNotificationSentAudit(notificationParty, letterId);
             } else {
-                event.recordPostalNotification(notificationParty);
+                event.recordPostalNotificationToSendAudit(notificationParty);
             }
         }
     }

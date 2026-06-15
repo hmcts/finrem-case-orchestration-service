@@ -19,5 +19,5 @@ public class NotificationToBeSentCollectionItem {
 
     private UUID id;
 
-    private UUID value;
+    private NotificationAudit value;
 }

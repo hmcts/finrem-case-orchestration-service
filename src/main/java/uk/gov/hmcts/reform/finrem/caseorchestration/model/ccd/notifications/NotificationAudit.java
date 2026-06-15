@@ -9,8 +9,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+
 import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder(toBuilder = true)
@@ -23,14 +25,13 @@ public class NotificationAudit {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate createdAt;
-    private YesOrNo wasSent;
+    private Boolean wasSent;
     private String eventId;
     private String party;
     private NotificationType type;
     private String emailId;
     private String emailTemplate;
     private String letterId;
-    private String letterTemplate;
-    private String attachedPostalDocs;
+    private List<String> attachedPostalDocs;
+    private UUID notificationEventId;
 }
-
