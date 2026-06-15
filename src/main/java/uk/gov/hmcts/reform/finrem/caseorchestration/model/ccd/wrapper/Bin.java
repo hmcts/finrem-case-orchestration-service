@@ -23,6 +23,10 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Bin {
 
+    @Deprecated
+    @JsonProperty("bin_fileUrls")
+    private DynamicList binFileUrls;
+
     @JsonProperty("bin_fileUrlsCollection")
     private List<BinFileUrlsCollection> fileUrlsToBeDeleted;
 
