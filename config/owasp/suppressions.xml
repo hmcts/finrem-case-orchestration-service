@@ -58,4 +58,13 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-41006</cve>
         <cve>CVE-2026-41007</cve>
     </suppress>
+    <suppress until="2026-09-01Z">
+        <notes><![CDATA[
+    Suppress spring-security-crypto 6.5.10 false positives / accepted risk for release.
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-crypto@.*$</packageUrl>
+        <cve>CVE-2026-40988</cve>
+        <cve>CVE-2026-41003</cve>
+        <cve>CVE-2026-41694</cve>
+    </suppress>
 </suppressions>
