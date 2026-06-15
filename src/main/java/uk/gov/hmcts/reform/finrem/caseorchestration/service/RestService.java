@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import java.net.URI;
 import java.util.Map;
 
-import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
@@ -80,6 +80,6 @@ public class RestService {
     }
 
     private URI buildUri(String url) {
-        return fromHttpUrl(url).build().toUri();
+        return fromUriString(url).build().toUri();
     }
 }

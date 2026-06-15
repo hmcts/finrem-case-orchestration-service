@@ -15,11 +15,16 @@ import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.task.ScheduledTaskRunner;
 
-@SpringBootApplication(scanBasePackages = {
-    "uk.gov.hmcts.reform.finrem", "uk.gov.hmcts.reform.bsp.common", "uk.gov.hmcts.reform.ccd.document.am.feign"
-})
+@SpringBootApplication(
+    scanBasePackages = {
+        "uk.gov.hmcts.reform.finrem", "uk.gov.hmcts.reform.bsp.common", "uk.gov.hmcts.reform.ccd.document.am.feign"
+    },
+    exclude = {
+        uk.gov.hmcts.reform.sendletter.SendLetterAutoConfiguration.class,
+        org.springdoc.core.configuration.SpringDocHateoasConfiguration.class
+    })
 @EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client", "uk.gov.hmcts.reform.finrem",
-    "uk.gov.hmcts.reform.ccd.client"},
+    "uk.gov.hmcts.reform.ccd.client", "uk.gov.hmcts.reform.sendletter"},
     basePackageClasses = {CaseDocumentClientApi.class, ServiceAuthorisationApi.class})
 @EnableCaching
 @EnableRetry
