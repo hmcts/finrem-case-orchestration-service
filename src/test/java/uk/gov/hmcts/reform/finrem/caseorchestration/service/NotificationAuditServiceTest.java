@@ -59,7 +59,7 @@ class NotificationAuditServiceTest {
         SendCorrespondenceEvent event = buildEvent(
             request,
             List.of(NotificationParty.APPLICANT),
-            List.of(true),
+            List.of(NotificationType.EMAIL),
             List.of()
         );
 
@@ -80,6 +80,7 @@ class NotificationAuditServiceTest {
         assertThat(wrapper.getNotificationsToBeSent().getFirst().getValue()).isEqualTo(auditItem.getId());
 
         assertThat(audit.getEmailTemplate()).isEqualTo(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR.name());
+        assertThat(audit.getLetterId()).isNull();
         assertThat(audit.getLetterTemplate()).isNull();
         assertThat(audit.getAttachedPostalDocs()).isNull();
     }
@@ -99,7 +100,7 @@ class NotificationAuditServiceTest {
         SendCorrespondenceEvent event = buildEvent(
             request,
             List.of(NotificationParty.RESPONDENT),
-            List.of(false),
+            List.of(NotificationType.POSTAL),
             List.of(hearingNotice, miniFormA)
         );
 
@@ -113,12 +114,14 @@ class NotificationAuditServiceTest {
         NotificationAudit audit = auditItem.getValue();
 
         assertCommonAuditFields(audit, NotificationParty.RESPONDENT, NotificationType.POSTAL);
+
         assertThat(wrapper.getNotificationsAudits()).hasSize(1);
         assertThat(wrapper.getNotificationsToBeSent()).hasSize(1);
         assertThat(wrapper.getNotificationsToBeSent().getFirst().getId()).isNotNull();
         assertThat(wrapper.getNotificationsToBeSent().getFirst().getValue()).isEqualTo(auditItem.getId());
 
         assertThat(audit.getEmailTemplate()).isNull();
+        assertThat(audit.getLetterId()).isNull();
         assertThat(audit.getLetterTemplate()).isEqualTo(FINANCIAL_REMEDY_PACK_LETTER_TYPE);
         assertThat(audit.getAttachedPostalDocs()).isEqualTo("hearingNotice.pdf, miniFormA.pdf");
     }
@@ -147,7 +150,7 @@ class NotificationAuditServiceTest {
         SendCorrespondenceEvent event = buildEvent(
             request,
             List.of(NotificationParty.APPLICANT, NotificationParty.RESPONDENT),
-            List.of(true, false),
+            List.of(NotificationType.EMAIL, NotificationType.POSTAL),
             List.of()
         );
 
@@ -184,7 +187,7 @@ class NotificationAuditServiceTest {
         SendCorrespondenceEvent event = buildEvent(
             request,
             List.of(NotificationParty.RESPONDENT),
-            List.of(false),
+            List.of(NotificationType.POSTAL),
             null
         );
 
@@ -214,9 +217,9 @@ class NotificationAuditServiceTest {
             .build();
 
         SendCorrespondenceEvent sentEvent = SendCorrespondenceEvent.builder().build();
+
         Map<String, Object> result =
             notificationAuditService.markPendingNotificationsAsSent(caseData, sentEvent);
-
 
         assertThat(result).isEmpty();
         assertThat(audit.getValue().getWasSent()).isEqualTo(YesOrNo.NO);
@@ -253,7 +256,52 @@ class NotificationAuditServiceTest {
             notificationAuditService.markPendingNotificationsAsSent(caseData, sentEvent);
 
         assertThat(pendingAudit.getValue().getWasSent()).isEqualTo(YesOrNo.YES);
+        assertThat(pendingAudit.getValue().getLetterId()).isNull();
         assertThat(nonPendingAudit.getValue().getWasSent()).isEqualTo(YesOrNo.NO);
+
+        assertThat(result)
+            .containsEntry(NOTIFICATIONS_AUDITS, convertedAudits)
+            .containsEntry(NOTIFICATIONS_TO_BE_SENT, List.of());
+    }
+
+    @Test
+    void givenPostalNotificationWasSent_whenMarkPendingNotificationsAsSent_thenAuditIsMarkedAsSentAndLetterIdIsCopied() {
+        UUID pendingAuditId = UUID.randomUUID();
+        UUID letterId = UUID.randomUUID();
+
+        NotificationAudit audit = NotificationAudit.builder()
+            .party(NotificationParty.RESPONDENT.name())
+            .type(NotificationType.POSTAL)
+            .wasSent(YesOrNo.NO)
+            .build();
+
+        NotificationAuditCollectionItem pendingAudit = NotificationAuditCollectionItem.builder()
+            .id(pendingAuditId)
+            .value(audit)
+            .build();
+
+        List<Map<String, Object>> convertedAudits = List.of(Map.of("converted", true));
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .notificationAuditWrapper(NotificationAuditWrapper.builder()
+                .notificationsAudits(new ArrayList<>(List.of(pendingAudit)))
+                .notificationsToBeSent(new ArrayList<>(List.of(pendingItem(pendingAuditId))))
+                .build())
+            .build();
+
+        when(objectMapper.convertValue(any(Object.class), eq(List.class))).thenReturn(convertedAudits);
+
+        SendCorrespondenceEvent sentEvent = SendCorrespondenceEvent.builder()
+            .notificationParties(new ArrayList<>(List.of(NotificationParty.RESPONDENT)))
+            .build();
+
+        sentEvent.recordPostalNotification(NotificationParty.RESPONDENT, letterId);
+
+        Map<String, Object> result =
+            notificationAuditService.markPendingNotificationsAsSent(caseData, sentEvent);
+
+        assertThat(audit.getWasSent()).isEqualTo(YesOrNo.YES);
+        assertThat(audit.getLetterId()).isEqualTo(letterId.toString());
 
         assertThat(result)
             .containsEntry(NOTIFICATIONS_AUDITS, convertedAudits)
@@ -318,7 +366,8 @@ class NotificationAuditServiceTest {
         assertThat(applicantAudit.getWasSent()).isEqualTo(YesOrNo.YES);
         assertThat(respondentAudit.getWasSent()).isEqualTo(YesOrNo.NO);
 
-        assertThat(result).containsEntry(NOTIFICATIONS_AUDITS, convertedAudits)
+        assertThat(result)
+            .containsEntry(NOTIFICATIONS_AUDITS, convertedAudits)
             .containsEntry(NOTIFICATIONS_TO_BE_SENT, List.of());
     }
 
@@ -351,15 +400,27 @@ class NotificationAuditServiceTest {
 
     private SendCorrespondenceEvent buildEvent(FinremCallbackRequest request,
                                                List<NotificationParty> parties,
-                                               List<Boolean> emailOrLetters,
+                                               List<NotificationType> notificationTypes,
                                                List<CaseDocument> documentsToPost) {
-        return SendCorrespondenceEvent.builder()
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
             .caseDetails(request.getCaseDetails())
             .notificationParties(new ArrayList<>(parties))
-            .emailOrLetters(new ArrayList<>(emailOrLetters))
             .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .documentsToPost(documentsToPost)
             .build();
+
+        for (int index = 0; index < parties.size(); index++) {
+            NotificationParty party = parties.get(index);
+            NotificationType notificationType = notificationTypes.get(index);
+
+            if (NotificationType.EMAIL.equals(notificationType)) {
+                event.recordEmailNotification(party);
+            } else {
+                event.recordPostalNotification(party);
+            }
+        }
+
+        return event;
     }
 
     private FinremCallbackRequest buildRequest() {

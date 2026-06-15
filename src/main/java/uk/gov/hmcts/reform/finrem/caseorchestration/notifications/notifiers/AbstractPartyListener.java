@@ -98,9 +98,11 @@ public abstract class AbstractPartyListener {
             event.recordEmailNotification(notificationParty);
         } else if (shouldSendPaperNotification(event)) {
             if (!dryRun) {
-                sendPaperNotification(event);
+                UUID letterId = sendPaperNotification(event);
+                event.recordPostalNotification(notificationParty, letterId);
+            } else {
+                event.recordPostalNotification(notificationParty);
             }
-            event.recordPostalNotification(notificationParty);
         }
     }
 
@@ -152,7 +154,7 @@ public abstract class AbstractPartyListener {
      *              such as the case details, documents to post, and authorization token.
      *              If no documents are provided, an {@link IllegalArgumentException} will be thrown.
      */
-    private void sendPaperNotification(SendCorrespondenceEvent event) {
+    private UUID sendPaperNotification(SendCorrespondenceEvent event) {
 
         log.info("Preparing paper notification for party {} on case {}", getNotificationParty(), event.getCaseId());
 
@@ -183,6 +185,7 @@ public abstract class AbstractPartyListener {
         );
 
         log.info("Completed paper notification for party {} on case {} with letter ID: {}", getNotificationParty(), event.getCaseId(), letterId);
+            return letterId;
     }
 
     protected String getBulkPrintRecipient() {

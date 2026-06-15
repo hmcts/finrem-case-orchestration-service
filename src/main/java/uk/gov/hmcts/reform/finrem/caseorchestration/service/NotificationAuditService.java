@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -125,11 +126,13 @@ public class NotificationAuditService {
                 .filter(audit -> audit.getId() != null)
                 .filter(audit -> audit.getId().equals(pendingItem.getValue()))
                 .findFirst()
-                .ifPresent(audit -> {
-                    if (wasPartySent(sentEvent, audit)) {
+                .ifPresent(audit -> getRecordedNotification(sentEvent, audit)
+                    .ifPresent(recordedNotification -> {
                         audit.getValue().setWasSent(YesOrNo.YES);
-                    }
-                })
+
+                        Optional.ofNullable(recordedNotification.letterId())
+                            .ifPresent(audit.getValue()::setLetterId);
+                    }))
         );
 
         return Map.of(
@@ -138,18 +141,19 @@ public class NotificationAuditService {
         );
     }
 
-    private boolean wasPartySent(SendCorrespondenceEvent sentEvent,
-                                 NotificationAuditCollectionItem audit) {
+    private Optional<SendCorrespondenceEvent.RecordedNotification> getRecordedNotification(
+        SendCorrespondenceEvent sentEvent,
+        NotificationAuditCollectionItem audit
+    ) {
         if (sentEvent == null || audit == null || audit.getValue() == null || audit.getValue().getParty() == null) {
-            return false;
+            return Optional.empty();
         }
 
         try {
             NotificationParty notificationParty = NotificationParty.valueOf(audit.getValue().getParty());
-            sentEvent.getNotificationTypeForParty(notificationParty);
-            return true;
+            return Optional.of(sentEvent.getRecordedNotificationForParty(notificationParty));
         } catch (IllegalArgumentException | IllegalStateException exception) {
-            return false;
+            return Optional.empty();
         }
     }
 

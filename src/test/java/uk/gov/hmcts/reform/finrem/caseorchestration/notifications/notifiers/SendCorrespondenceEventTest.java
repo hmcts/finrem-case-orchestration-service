@@ -8,11 +8,15 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -149,5 +153,92 @@ class SendCorrespondenceEventTest {
 
             assertNull(event.getCaseData());
         }
+    }
+
+    @Test
+    void givenEmailNotificationRecorded_whenGetNotificationTypeForParty_thenReturnsEmail() {
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .notificationParties(new ArrayList<>(List.of(NotificationParty.APPLICANT)))
+            .build();
+
+        event.recordEmailNotification(NotificationParty.APPLICANT);
+
+        assertThat(event.getNotificationTypeForParty(NotificationParty.APPLICANT))
+            .isEqualTo(NotificationType.EMAIL);
+
+        SendCorrespondenceEvent.RecordedNotification recordedNotification =
+            event.getRecordedNotificationForParty(NotificationParty.APPLICANT);
+
+        assertThat(recordedNotification.type()).isEqualTo(NotificationType.EMAIL);
+        assertThat(recordedNotification.letterId()).isNull();
+    }
+
+    @Test
+    void givenPostalNotificationRecordedWithoutLetterId_whenGetRecordedNotificationForParty_thenReturnsPostalWithNullLetterId() {
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .notificationParties(new ArrayList<>(List.of(NotificationParty.RESPONDENT)))
+            .build();
+
+        event.recordPostalNotification(NotificationParty.RESPONDENT);
+
+        assertThat(event.getNotificationTypeForParty(NotificationParty.RESPONDENT))
+            .isEqualTo(NotificationType.POSTAL);
+
+        SendCorrespondenceEvent.RecordedNotification recordedNotification =
+            event.getRecordedNotificationForParty(NotificationParty.RESPONDENT);
+
+        assertThat(recordedNotification.type()).isEqualTo(NotificationType.POSTAL);
+        assertThat(recordedNotification.letterId()).isNull();
+    }
+
+    @Test
+    void givenPostalNotificationRecordedWithLetterId_whenGetRecordedNotificationForParty_thenReturnsPostalWithLetterId() {
+        UUID letterId = UUID.randomUUID();
+
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .notificationParties(new ArrayList<>(List.of(NotificationParty.RESPONDENT)))
+            .build();
+
+        event.recordPostalNotification(NotificationParty.RESPONDENT, letterId);
+
+        SendCorrespondenceEvent.RecordedNotification recordedNotification =
+            event.getRecordedNotificationForParty(NotificationParty.RESPONDENT);
+
+        assertThat(recordedNotification.type()).isEqualTo(NotificationType.POSTAL);
+        assertThat(recordedNotification.letterId()).isEqualTo(letterId.toString());
+    }
+
+    @Test
+    void givenNotificationRecordedOutOfOrder_whenGetNotificationTypeForParty_thenReturnsRecordedTypeByParty() {
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .notificationParties(new ArrayList<>(List.of(
+                NotificationParty.APPLICANT,
+                NotificationParty.RESPONDENT
+            )))
+            .build();
+
+        event.recordEmailNotification(NotificationParty.RESPONDENT);
+
+        assertThat(event.getNotificationTypeForParty(NotificationParty.RESPONDENT))
+            .isEqualTo(NotificationType.EMAIL);
+
+        event.recordPostalNotification(NotificationParty.APPLICANT);
+
+        assertThat(event.getNotificationTypeForParty(NotificationParty.APPLICANT))
+            .isEqualTo(NotificationType.POSTAL);
+
+        assertThat(event.getRecordedNotificationsByParty())
+            .containsOnlyKeys(NotificationParty.APPLICANT, NotificationParty.RESPONDENT);
+    }
+
+    @Test
+    void givenNoNotificationRecorded_whenGetNotificationTypeForParty_thenThrowsException() {
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .notificationParties(new ArrayList<>(List.of(NotificationParty.APPLICANT)))
+            .build();
+
+        assertThatThrownBy(() -> event.getNotificationTypeForParty(NotificationParty.APPLICANT))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("No notification recorded for party: APPLICANT");
     }
 }
