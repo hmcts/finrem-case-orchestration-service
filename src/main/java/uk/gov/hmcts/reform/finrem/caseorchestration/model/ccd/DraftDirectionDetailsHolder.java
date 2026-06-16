@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DraftDirectionDetailsHolder {
-    private YesOrNo isThisFinalYN;
+    private YesOrNo isFinalOrder;
     private YesOrNo isAnotherHearingYN;
     private HearingTypeDirection typeOfHearing;
     private HearingTimeDirection timeEstimate;

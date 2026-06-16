@@ -834,7 +834,7 @@ class FinremCaseDetailsMapperTest {
         List<DraftDirectionDetailsCollection> expected = List.of(
             DraftDirectionDetailsCollection.builder()
                 .value(DraftDirectionDetailsHolder.builder()
-                    .isThisFinalYN(YesOrNo.YES)
+                    .isFinalOrder(YesOrNo.YES)
                     .isAnotherHearingYN(YesOrNo.YES)
                     .typeOfHearing(HearingTypeDirection.FH)
                     .timeEstimate(HearingTimeDirection.STANDARD_TIME)
