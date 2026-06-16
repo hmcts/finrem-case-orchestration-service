@@ -771,91 +771,104 @@
     "courtAddress": "Crown Buildings, Rivergate, Peterborough, PE1 1EJ",
     "phoneNumber": "0300 123 5577",
     "email": "FRC.NES.BCH@justice.gov.uk",
-    "emailReplyToId": "25dc4238-28f5-4787-af79-372627e94542"
+    "emailReplyToId": "25dc4238-28f5-4787-af79-372627e94542",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_2": {
     "courtName": "Cambridge County and Family Court",
     "courtAddress": "197 East Road, Cambridge, CB1 1BA",
     "phoneNumber": "0300 123 5577",
     "email": "FRC.NES.BCH@justice.gov.uk",
-    "emailReplyToId": "25dc4238-28f5-4787-af79-372627e94542"
+    "emailReplyToId": "25dc4238-28f5-4787-af79-372627e94542",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_3": {
     "courtName": "Bury St Edmunds County Court and Family Court",
     "courtAddress": "2nd Floor, Triton House, St Andrews Street (N), Bury St Edmunds, Suffolk, IP33 1TR",
     "phoneNumber": "0300 123 5577",
     "email": "Family.Chelmsford.Countycourt@justice.gov.uk",
-    "emailReplyToId": "490128f7-d7fd-4f92-80bb-8e58650a02cb"
+    "emailReplyToId": "490128f7-d7fd-4f92-80bb-8e58650a02cb",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_4": {
     "courtName": "Norwich Combined Court Centre",
     "courtAddress": "The Law courts, Bishopgate, Norwich, NR3 1UR",
     "phoneNumber": "0300 123 5577",
     "email": "Family.norwich.countycourt@justice.gov.uk",
-    "emailReplyToId": "1eaa8086-fbf7-4d86-954a-6e5bb48cfefe"
+    "emailReplyToId": "1eaa8086-fbf7-4d86-954a-6e5bb48cfefe",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_5": {
     "courtName": "Ipswich County Court and Family Hearing Centre",
     "courtAddress": "8 Arcade Street, Ipswich, IP1 1EJ",
     "phoneNumber": "0300 123 5577",
     "email": "Family.Chelmsford.Countycourt@justice.gov.uk",
-    "emailReplyToId": "490128f7-d7fd-4f92-80bb-8e58650a02cb"
+    "emailReplyToId": "490128f7-d7fd-4f92-80bb-8e58650a02cb",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_6": {
     "courtName": "Chelmsford Justice Centre",
     "courtAddress": "Priory Place, New London Road, Chelmsford, CM2 0PP",
     "phoneNumber": "0300 123 5577",
     "email": "Family.Chelmsford.Countycourt@justice.gov.uk",
-    "emailReplyToId": "490128f7-d7fd-4f92-80bb-8e58650a02cb"
+    "emailReplyToId": "490128f7-d7fd-4f92-80bb-8e58650a02cb",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_7": {
     "courtName": "Southend County Court and Family Hearing Centre",
     "courtAddress": "80 Victoria Avenue, Southend-On-Sea, SS2 6EU",
     "phoneNumber": "0300 123 5577",
     "email": "Family.Chelmsford.Countycourt@justice.gov.uk",
-    "emailReplyToId": "490128f7-d7fd-4f92-80bb-8e58650a02cb"
+    "emailReplyToId": "490128f7-d7fd-4f92-80bb-8e58650a02cb",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_8": {
     "courtName": "Bedford County Court and Family Hearing Centre",
     "courtAddress": "Shire Hall, 3 St Paul's square, Bedford, MK40 1SQ",
     "phoneNumber": "0300 123 5577",
     "email": "Lutoncountyfamily@Justice.gov.uk",
-    "emailReplyToId": "ec36ee15-3191-42c6-b0ee-7ce94fd0bf58"
+    "emailReplyToId": "ec36ee15-3191-42c6-b0ee-7ce94fd0bf58",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_9": {
     "courtName": "Luton Justice Centre",
     "courtAddress": "Luton Justice Centre, Floors 4&5 Arndale House, The Mall, Luton, LU1 2EN",
     "phoneNumber": "0300 123 5577",
     "email": "Lutoncountyfamily@Justice.gov.uk",
-    "emailReplyToId": "ec36ee15-3191-42c6-b0ee-7ce94fd0bf58"
+    "emailReplyToId": "ec36ee15-3191-42c6-b0ee-7ce94fd0bf58",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_10": {
     "courtName": "Hertford County Court and Family Hearing Centre",
     "courtAddress": "Shire Hall, Fore Street, Hertford, Hertfordshire, SG14 1BY",
     "phoneNumber": "0300 123 5577",
     "email": "enquiries.hertford.countycourt@justice.gov.uk",
-    "emailReplyToId": "ce7a4d93-cd18-4aa7-b9e0-e32b264790d0"
+    "emailReplyToId": "ce7a4d93-cd18-4aa7-b9e0-e32b264790d0",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_11": {
     "courtName": "Watford County Court and Family Hearing Centre",
     "courtAddress": "10 King Street, Watford, Hertfordshire, WD18 0BW",
     "phoneNumber": "0300 123 5577",
     "email": "watfordcountyfamily@justice.gov.uk",
-    "emailReplyToId": "4328732f-0e90-441d-8f23-40fd7ecb14b3"
+    "emailReplyToId": "4328732f-0e90-441d-8f23-40fd7ecb14b3",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_12": {
     "courtName": "Great Yarmouth Magistrates and Family Court",
     "courtAddress": "The Court house, North Quay, Great Yarmouth, NR30 1PW",
     "phoneNumber": "0300 123 5577",
     "email": " FRC.NES.BCH@justice.gov.uk",
-    "emailReplyToId": "25dc4238-28f5-4787-af79-372627e94542"
+    "emailReplyToId": "25dc4238-28f5-4787-af79-372627e94542",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_bedfordshireList_13": {
     "courtName": "King's Lynn Magistrates Court",
     "courtAddress": "The Courthouse, College Lane, King’s Lynn, PE30 1PQ",
     "phoneNumber": "0300 123 5577",
     "email": " FRC.NES.BCH@justice.gov.uk",
-    "emailReplyToId": "25dc4238-28f5-4787-af79-372627e94542"
+    "emailReplyToId": "25dc4238-28f5-4787-af79-372627e94542",
+    "centralFRCCourtEmail": "FRC.NES.BCH@justice.gov.uk"
   },
   "FR_thamesvalleyList_1": {
     "courtName": "Oxford Combined Court Centre",
