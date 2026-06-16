@@ -94,7 +94,7 @@ class SolicitorUploadDocumentAboutToSubmitHandlerTest {
         assertAll(
             () -> assertThat(response.getState()).isNull(),
             () -> assertThat(response.getWarnings()).containsOnly(
-                "Please note your documents will not be submitted, to allow to you upload additional documents."
+                "Please note your documents will not be submitted, to allow you to upload additional documents."
             )
         );
     }
