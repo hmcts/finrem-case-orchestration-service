@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
@@ -46,9 +47,10 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     private YesOrNo showUploadPartyQuestion;
     private String consentApplicationGuidanceText;
 
-    @JsonProperty("uploadSuggestedDraftOrder")
+    @TemporaryField
     private UploadSuggestedDraftOrder uploadSuggestedDraftOrder;
-    @JsonProperty("uploadAgreedDraftOrder")
+
+    @TemporaryField
     private UploadAgreedDraftOrder uploadAgreedDraftOrder;
 
     @JsonProperty("draftOrdersReviewCollection")

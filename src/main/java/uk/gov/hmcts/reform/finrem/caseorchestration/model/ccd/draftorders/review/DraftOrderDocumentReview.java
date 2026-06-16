@@ -29,6 +29,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, RefusalOrderConvertible, HearingInstructionProcessable {
     private CaseDocument draftOrderDocument;
+    private OrderType orderType;
     private OrderStatus orderStatus;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime submittedDate;
