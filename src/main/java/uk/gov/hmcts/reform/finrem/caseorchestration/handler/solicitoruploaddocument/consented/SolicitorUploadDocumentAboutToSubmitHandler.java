@@ -61,7 +61,7 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
     private List<String> calculateWarning(boolean isReadyToSubmit) {
         return List.of(
             isReadyToSubmit ? "Please note your documents will be submitted and you won't be able to upload any additional documents."
-                : "Please note your documents will not be submitted, to allow you upload additional documents."
+                : "Please note your documents will not be submitted, to allow you to upload additional documents."
         );
     }
 
