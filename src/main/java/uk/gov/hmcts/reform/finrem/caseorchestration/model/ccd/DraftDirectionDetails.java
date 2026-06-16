@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DraftDirectionDetails {
 
-    @JsonProperty("isThisFinalYN")
-    private String isFinal;
+    @JsonProperty("isFinalOrder")
+    private String isFinalOrder;
 
     @JsonProperty("isAnotherHearingYN")
     private String isAnotherHearing;

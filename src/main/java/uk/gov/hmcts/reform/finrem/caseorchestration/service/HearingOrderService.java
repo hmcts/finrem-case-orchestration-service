@@ -146,21 +146,18 @@ public class HearingOrderService {
     }
 
     private void appendDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument order,
-                                                    List<DocumentCollectionItem> additionalDocs, YesOrNo isOrderStamped, YesOrNo isThisFinalYN) {
-
-        DirectionOrder directionOrder = DirectionOrder.builder()
-            .uploadDraftDocument(order)
-            .additionalDocuments(additionalDocs)
-            .isOrderStamped(isOrderStamped)
-            .isThisFinalYN(isThisFinalYN)
-            .build();
-
-        List<DirectionOrderCollection> directionOrders = Optional.ofNullable(finremCaseData.getUploadHearingOrder())
-            .orElseGet(ArrayList::new);
-
-        directionOrders.add(DirectionOrderCollection.builder()
-            .value(directionOrder)
-            .build());
+                                                    List<DocumentCollectionItem> additionalDocs, YesOrNo isOrderStamped, YesOrNo isFinalOrder) {
+        List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder()).orElse(new ArrayList<>());
+        directionOrders.add(
+            DirectionOrderCollection.builder()
+                .value(DirectionOrder.builder()
+                    .uploadDraftDocument(order)
+                    .additionalDocuments(additionalDocs)
+                    .isOrderStamped(isOrderStamped)
+                    .isFinalOrder(isFinalOrder)
+                    .build())
+                .build()
+        );
         finremCaseData.setUploadHearingOrder(directionOrders);
     }
 
@@ -248,10 +245,8 @@ public class HearingOrderService {
             setLatestDraftHearingOrder(caseData, stampedDocument);
         } else {
             isOrderStamped = YesOrNo.NO;
-            // Final order is set by the Judge using the Upload Approved Order event otherwise null if approved by CW
-            YesOrNo isThisFinalYN = order.getIsThisFinalYN();
             // make the uploaded approved orders available for judge uploaded orders in Process Order event
-            appendDocumentToUploadHearingOrder(caseData, order.getApprovedOrder(), additionalDocs, isOrderStamped, isThisFinalYN);
+            appendDocumentToUploadHearingOrder(caseData, order.getApprovedOrder(), additionalDocs, isOrderStamped, order.getIsFinalOrder());
         }
     }
 

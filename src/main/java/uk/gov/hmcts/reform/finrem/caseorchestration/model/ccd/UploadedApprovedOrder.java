@@ -8,5 +8,5 @@ public interface UploadedApprovedOrder {
 
     List<DocumentCollectionItem> getAdditionalDocuments();
 
-    YesOrNo getIsThisFinalYN();
+    YesOrNo getIsFinalOrder();
 }
