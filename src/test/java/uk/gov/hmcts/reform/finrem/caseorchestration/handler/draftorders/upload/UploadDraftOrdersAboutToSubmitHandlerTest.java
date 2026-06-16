@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -51,7 +52,9 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -72,11 +75,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.APPLICATION_ISSUED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.REVIEW_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.SCHEDULING_AND_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ACCELERATED_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
@@ -107,6 +112,9 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
     @Mock
     private DocumentWarningsHelper documentWarningsHelper;
+
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Test
     void canHandle() {
@@ -292,7 +300,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnAgreedOrderByIntervener_whenHandle_shouldAppendIntvAgreedDraftOrderCollection() {
+    void givenAnAcceleratedOrderByIntervener_whenHandle_shouldAppendIntvAgreedDraftOrderCollection() {
         mockCaseRole(CASE_ID, CaseRole.INTVR_SOLICITOR_1);
 
         UploadAgreedDraftOrder uado1 = UploadAgreedDraftOrder.builder()
@@ -300,19 +308,28 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             .build();
 
         final AgreedDraftOrderCollection draftOrder1 = AgreedDraftOrderCollection.builder()
-            .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
+            .value(AgreedDraftOrder.builder()
+                .draftOrder(CaseDocument.builder().build())
+                .build())
+            .build();
 
-        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
-        builder.uploadAgreedDraftOrder(uado1);
-        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
-        builder.agreedDraftOrderCollection(new ArrayList<>());
-        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+        DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
+            .uploadAgreedDraftOrder(uado1)
+            .typeOfDraftOrder(ACCELERATED_ORDER_OPTION)
+            .agreedDraftOrderCollection(new ArrayList<>())
+            .build();
 
-        when(draftOrderService.processAgreedDraftOrders(uado1, AUTH_TOKEN)).thenReturn(List.of(draftOrder1));
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(draftOrdersWrapper)
+            .build();
+
+        when(draftOrderService.processAgreedDraftOrders(draftOrdersWrapper, AUTH_TOKEN))
+            .thenReturn(List.of(draftOrder1));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
 
+        verify(draftOrderService).processAgreedDraftOrders(draftOrdersWrapper, AUTH_TOKEN);
         verify(draftOrderService).populateDraftOrdersReviewCollection(caseData, uado1, List.of(draftOrder1));
         assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .containsAll(List.of(draftOrder1));
@@ -331,7 +348,8 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         builder.agreedDraftOrderCollection(new ArrayList<>(existingAgreedDraftOrderCollection));
         FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
 
-        when(draftOrderService.processAgreedDraftOrders(uado, AUTH_TOKEN)).thenReturn(expectedAgreedDraftOrderCollection);
+        when(draftOrderService.processAgreedDraftOrders(caseData.getDraftOrdersWrapper(), AUTH_TOKEN))
+            .thenReturn(expectedAgreedDraftOrderCollection);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
@@ -587,6 +605,36 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         assertThat(assertThrows(IllegalStateException.class, () -> handler.handle(request, AUTH_TOKEN)).getMessage())
             .isEqualTo("Unexpected null in state");
+    }
+
+    @Test
+    void givenCaseDataWithTemporaryDraftOrderFields_whenHandle_thenTemporaryFieldsAreSanitised() {
+
+        UploadAgreedDraftOrder uploadAgreedDraftOrder = UploadAgreedDraftOrder.builder()
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build();
+
+        UploadAgreedDraftOrder uploadSuggestedDraftOrder = UploadAgreedDraftOrder.builder()
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build();
+
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
+        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
+        builder.uploadAgreedDraftOrder(uploadAgreedDraftOrder);
+
+        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .state(APPLICATION_ISSUED)
+            .data(caseData).build();
+
+        verifyTemporaryFieldsWereSanitised(handler,
+            caseDetails, finremCaseDetailsMapper, new HashMap<>(Map.of(
+                "uploadSuggestedDraftOrder", uploadAgreedDraftOrder,
+                "uploadAgreedDraftOrder", uploadSuggestedDraftOrder
+            ))
+        );
     }
 
     private void mockCaseRole(String caseId, CaseRole userCaseRole) {
