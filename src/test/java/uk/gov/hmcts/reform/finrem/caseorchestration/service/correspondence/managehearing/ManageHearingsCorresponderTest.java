@@ -62,7 +62,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.manageheari
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsCorresponderTest {
 
-    private static final UUID hearingId = UUID.fromString("c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb");
+    private static final UUID hearingId = UUID.randomUUID();
     private static final Set<CaseRole> ALL_SOLICITOR_ROLES = Set.of(
         CaseRole.APP_SOLICITOR, CaseRole.RESP_SOLICITOR,
         CaseRole.INTVR_SOLICITOR_1, CaseRole.INTVR_SOLICITOR_2,
@@ -169,7 +169,7 @@ class ManageHearingsCorresponderTest {
 
         //Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-            corresponder.sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN));
+            corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN));
 
         assertTrue(exception.getMessage().contains("Hearing time must not be null"));
     }
@@ -296,10 +296,8 @@ class ManageHearingsCorresponderTest {
             .thenReturn(vacatedOrAdjournedHearing);
 
         //Act
-        corresponder.sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
-
-        //Assert
-        verifyNoInteractions(eventPublisher);
+        assertThat(corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN))
+            .isNull();
     }
 
     @Test
@@ -323,13 +321,9 @@ class ManageHearingsCorresponderTest {
         );
 
         //Act
-        corresponder.sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        SendCorrespondenceEvent actualEvent = corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
 
         // Assert
-        ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-        verify(eventPublisher).publishEvent(captor.capture());
-
-        SendCorrespondenceEvent actualEvent = captor.getValue();
         SendCorrespondenceEvent expectedEvent = getExpectedVacatedOrAdjournedHearingEvent(callbackRequest.getCaseDetails());
 
         assertThat(actualEvent.getEmailNotificationRequest())
@@ -368,12 +362,9 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.getVacateHearingNotice(callbackRequest.getCaseDetails().getData())).thenReturn(
             CaseDocument.builder().documentFilename("VacateHearingNotice.pdf").build());
 
-        corresponder.sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        SendCorrespondenceEvent actualEvent = corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
 
-        ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-        verify(eventPublisher).publishEvent(captor.capture());
-
-        assertThat(captor.getValue().getEmailTemplate())
+        assertThat(actualEvent.getEmailTemplate())
             .isEqualTo(EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR);
     }
 

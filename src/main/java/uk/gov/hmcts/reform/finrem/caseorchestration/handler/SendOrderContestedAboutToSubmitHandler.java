@@ -153,7 +153,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
+        return response(caseDetails.getData());
     }
 
     private String getCaseId(FinremCaseDetails caseDetails) {
@@ -163,13 +163,26 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void handleAdditionalDocumentUploadedInSendOrderEvent(FinremCaseDetails caseDetails,
                                                                   List<OrderSentToPartiesCollection> printOrderCollection, String userAuthorisation) {
         FinremCaseData caseData = caseDetails.getData();
-        CaseDocument document = caseData.getSendOrderWrapper().getAdditionalDocument();
-        if (document != null) {
-            log.info("Additional uploaded document with send order {} for Case ID: {}", document, getCaseId(caseDetails));
-            CaseDocument additionalUploadedOrderDoc = genericDocumentService.convertDocumentIfNotPdfAlready(document,
-                userAuthorisation, caseDetails.getCaseType());
-            printOrderCollection.add(addToPrintOrderCollection(additionalUploadedOrderDoc));
-            caseData.getSendOrderWrapper().setAdditionalDocument(additionalUploadedOrderDoc);
+
+        List<DocumentCollectionItem> additionalDocuments = caseData.getSendOrderWrapper().getAdditionalDocuments();
+
+        if (CollectionUtils.isNotEmpty(additionalDocuments)) {
+            log.info("Additional uploaded documents with send order {} for Case ID: {}",
+                additionalDocuments, caseDetails.getCaseIdAsString());
+
+            List<DocumentCollectionItem> convertedAdditionalDocuments = additionalDocuments.stream()
+                .map(additionalDocument ->
+                    DocumentCollectionItem.fromCaseDocument(genericDocumentService.convertDocumentIfNotPdfAlready(
+                    additionalDocument.getValue(),
+                    userAuthorisation,
+                    caseDetails.getCaseType())))
+                .toList();
+
+            convertedAdditionalDocuments.forEach(convertedAdditionalDocument ->
+                printOrderCollection.add(addToPrintOrderCollection(convertedAdditionalDocument.getValue()))
+            );
+
+            caseData.getSendOrderWrapper().setAdditionalDocuments(convertedAdditionalDocuments);
         }
     }
 
@@ -296,7 +309,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private void clearTemporaryFields(FinremCaseData caseData) {
-        caseData.getSendOrderWrapper().setAdditionalDocument(null);
+        caseData.getSendOrderWrapper().setAdditionalDocuments(null);
         caseData.getSendOrderWrapper().setOrdersToSend(null);
     }
 

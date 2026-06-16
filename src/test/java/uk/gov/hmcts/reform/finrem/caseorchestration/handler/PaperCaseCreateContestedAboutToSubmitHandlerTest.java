@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -224,7 +225,7 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         InOrder inOrder = Mockito.inOrder(finremCaseDetailsMapper, caseDataService);
-        inOrder.verify(finremCaseDetailsMapper).mapToCaseDetails(callbackRequest.getCaseDetails());
+        inOrder.verify(finremCaseDetailsMapper, times(2)).mapToCaseDetails(callbackRequest.getCaseDetails());
         inOrder.verify(caseDataService).setFinancialRemediesCourtDetails(oldCaseDetails);
     }
 

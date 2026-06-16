@@ -8,9 +8,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConso
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -88,6 +90,11 @@ public class SendOrderApplicantDocumentHandler extends SendOrderPartyDocumentHan
         }
     }
 
+    @Override
+    protected String getSupportingDocumentsCategoryId() {
+        return DocumentCategory.APPLICANT_DOCUMENTS_SUPPORTING_DOCUMENTS.getDocumentCategoryId();
+    }
+
     private static void setConfidentialBulkPrintFieldForApplicant(FinremCaseDetails finremCaseDetails,
                                                                   CaseDocument bulkPrintSheet,
                                                                   FinremCaseData caseData) {
@@ -98,10 +105,16 @@ public class SendOrderApplicantDocumentHandler extends SendOrderPartyDocumentHan
 
     protected void setConsolidateCollection(FinremCaseData caseData, List<ApprovedOrderCollection> orderCollection) {
         List<ApprovedOrderCollection> newOrderCollection = new ArrayList<>(orderCollection);
-        List<ApprovedOrderConsolidateCollection> orders
-            = getPartyConsolidateCollection(caseData.getOrderWrapper().getAppOrderCollections());
-        orders.add(getConsolidateCollection(newOrderCollection));
+
+        List<ApprovedOrderConsolidateCollection> orders =
+            getPartyConsolidateCollection(caseData.getOrderWrapper().getAppOrderCollections());
+
+        List<DocumentCollectionItem> supportingDocuments = getCategorisedSupportingDocuments(caseData);
+
+        orders.add(getConsolidateCollection(newOrderCollection, supportingDocuments));
+
         orders.sort((m1, m2) -> m2.getValue().getOrderReceivedAt().compareTo(m1.getValue().getOrderReceivedAt()));
+
         caseData.getOrderWrapper().setAppOrderCollections(orders);
         caseData.getOrderWrapper().setAppOrderCollection(null);
     }

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -67,13 +66,34 @@ public class ConsentOrderApprovedDocumentService {
     private final ApprovedConsentOrderDocumentCategoriser approvedConsentOrderCategoriser;
     private final PensionAnnexDateStampService pensionAnnexDateStampService;
 
-    public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
+    /**
+     * Generates an approved consent order letter document for the given case.
+     *
+     * <p>
+     * Determines the appropriate document template and file name based on
+     * the application type and whether the case is a variation order.
+     * For variation orders, the order type is set to {@code VARIATION};
+     * otherwise, it is set to {@code CONSENT}.
+     *
+     * <p>
+     * A deep copy of the case details is created before modifying the case data
+     * used for document generation. For contested applications, additional
+     * contested-specific fields are prepared before sending the request to the
+     * document generator service.
+     *
+     * @param finremCaseDetails the financial remedy case details used to generate the document
+     * @param authToken the authorisation token used to invoke the document generation service
+     * @return the generated approved consent order letter as a {@link CaseDocument}
+     */
+    public CaseDocument generateApprovedConsentOrderLetter(FinremCaseDetails finremCaseDetails, String authToken) {
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+
         String fileName;
         CaseDetails detailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = detailsCopy.getData();
 
-        if (caseDataService.isConsentedApplication(detailsCopy)
-            && Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(detailsCopy.getData()))) {
+        if (finremCaseDetails.isConsentedApplication()
+            && consentedApplicationHelper.isVariationOrder(finremCaseDetails.getData())) {
             fileName = documentConfiguration.getApprovedVariationOrderFileName();
             caseData.put(ORDER_TYPE, VARIATION);
         } else {
@@ -89,7 +109,7 @@ public class ConsentOrderApprovedDocumentService {
             detailsCopy.getId());
 
         return genericDocumentService.generateDocument(authToken,
-            caseDataService.isContestedApplication(detailsCopy)
+            finremCaseDetails.isContestedApplication()
                 ? prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(detailsCopy)
                 : detailsCopy,
             template,
@@ -97,7 +117,7 @@ public class ConsentOrderApprovedDocumentService {
     }
 
     private CaseDocument generateApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authToken,
-                                                                DocumentHelper.PaperNotificationRecipient recipient) {
+                                                                 DocumentHelper.PaperNotificationRecipient recipient) {
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
         String approvedOrderNotificationFileName;
 
@@ -171,8 +191,7 @@ public class ConsentOrderApprovedDocumentService {
     public void generateAndPopulateConsentOrderLetter(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
 
-        CaseDocument orderLetter = generateApprovedConsentOrderLetter(finremCaseDetailsMapper
-            .mapToCaseDetails(finremCaseDetails), authToken);
+        CaseDocument orderLetter = generateApprovedConsentOrderLetter(finremCaseDetails, authToken);
         List<ConsentOrderCollection> approvedOrders = getConsentInContestedApprovedOrderCollection(caseData);
         if (approvedOrders != null && !approvedOrders.isEmpty()) {
             ApprovedOrder approvedOrder = approvedOrders.getLast().getApprovedOrder();
@@ -335,15 +354,10 @@ public class ConsentOrderApprovedDocumentService {
 
         String caseId = finremCaseDetails.getId().toString();
         log.info("Generating and preparing documents for latest consent order, Case ID: {}", caseId);
-        CaseDetails generateDocumentPayload = null;
-        try {
-            generateDocumentPayload = mapper.readValue(mapper.writeValueAsString(finremCaseDetails), CaseDetails.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+
         StampType stampType = documentHelper.getStampType(finremCaseDetails.getData());
         CaseDocument approvedConsentOrderLetter =
-            generateApprovedConsentOrderLetter(generateDocumentPayload, userAuthorisation);
+            generateApprovedConsentOrderLetter(finremCaseDetails, userAuthorisation);
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         CaseDocument consentOrderAnnexStamped =
             genericDocumentService.annexStampDocument(finremCaseData.getLatestConsentOrder(),
