@@ -6,8 +6,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogge
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
 import java.util.List;
 
@@ -68,5 +70,31 @@ public class CuiRespondentDocumentUploadAboutToSubmitHandler extends CuiDocument
     @Override
     protected void handleLog(FinremCallbackRequest callbackRequest) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+    }
+
+//    @Override
+//    protected void categoriseDocuments(List<CitizenDocumentCollection> documents) {
+//        documents.forEach(doc -> {
+//            if (doc.getValue() != null && doc.getValue().getDocumentLink() != null) {
+//                CaseDocument documentCopy = new CaseDocument(doc.getValue().getDocumentLink());
+//                documentCopy.setCategoryId(
+//                    DocumentCategory.RESPONDENT_DOCUMENTS_CITIZEN.getDocumentCategoryId()
+//                );
+//                doc.getValue().setDocumentLink(documentCopy);
+//            }
+//        });
+//    }
+
+    @Override
+    protected void categoriseDocuments(FinremCaseData caseData) {
+//        documents.forEach(doc -> {
+//            if (doc.getValue() != null && doc.getValue().getDocumentLink() != null) {
+//                CaseDocument documentCopy = new CaseDocument(doc.getValue().getDocumentLink());
+//                documentCopy.setCategoryId(
+//                    DocumentCategory.RESPONDENT_DOCUMENTS_CITIZEN.getDocumentCategoryId()
+//                );
+//                doc.getValue().setDocumentLink(documentCopy);
+//            }
+//        });
     }
 }

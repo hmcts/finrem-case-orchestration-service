@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenDocumentsCategoriser;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -107,10 +108,11 @@ class CuiDocumentUploadAboutToSubmitHandlerTest {
 
     private static Stream<HandlerCase> handlers() {
         FinremCaseDetailsMapper mapper = mock(FinremCaseDetailsMapper.class);
+        CitizenDocumentsCategoriser citizenDocumentsCategoriser = mock(CitizenDocumentsCategoriser.class);
 
         return Stream.of(
             new HandlerCase(
-                new CuiApplicantDocumentUploadAboutToSubmitHandler(mapper),
+                new CuiApplicantDocumentUploadAboutToSubmitHandler(mapper, citizenDocumentsCategoriser),
                 EventType.CUI_APPLICANT_DOCUMENT_UPLOAD,
                 Party.APPLICANT
             ),

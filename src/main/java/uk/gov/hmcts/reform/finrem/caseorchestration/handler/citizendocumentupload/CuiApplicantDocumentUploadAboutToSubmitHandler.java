@@ -6,8 +6,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogge
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenDocumentsCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadGeneralDocumentsCategoriser;
 
 import java.util.List;
 
@@ -29,8 +33,11 @@ import java.util.List;
 @Service
 public class CuiApplicantDocumentUploadAboutToSubmitHandler extends CuiDocumentUploadAboutToSubmitHandler {
 
-    public CuiApplicantDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final CitizenDocumentsCategoriser citizenDocumentsCategoriser;
+
+    public CuiApplicantDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, CitizenDocumentsCategoriser citizenDocumentsCategoriser) {
         super(finremCaseDetailsMapper);
+        this.citizenDocumentsCategoriser = citizenDocumentsCategoriser;
     }
 
     /**
@@ -68,5 +75,25 @@ public class CuiApplicantDocumentUploadAboutToSubmitHandler extends CuiDocumentU
     @Override
     protected void handleLog(FinremCallbackRequest callbackRequest) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+    }
+
+//    @Override
+//    protected void categoriseDocuments(List<CitizenDocumentCollection> documents) {
+//        documents.forEach(doc -> {
+//            if (doc.getValue() != null && doc.getValue().getDocumentLink() != null) {
+//                CaseDocument documentCopy = new CaseDocument(doc.getValue().getDocumentLink());
+//                documentCopy.setCategoryId(
+//                    DocumentCategory.APPLICANT_DOCUMENTS_CITIZEN.getDocumentCategoryId()
+//                );
+//                doc.getValue().setDocumentLink(documentCopy);
+//            }
+//        });
+//
+//    }
+
+    @Override
+    protected void categoriseDocuments(FinremCaseData caseData) {
+        citizenDocumentsCategoriser.categorise(caseData);
+
     }
 }
