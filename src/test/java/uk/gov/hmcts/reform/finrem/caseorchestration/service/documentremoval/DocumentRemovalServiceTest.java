@@ -1,12 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +63,6 @@ class DocumentRemovalServiceTest {
         ObjectMapper objectMapper = JsonMapper
             .builder()
             .addModule(new JavaTimeModule())
-            .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .build();

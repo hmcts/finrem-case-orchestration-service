@@ -479,6 +479,7 @@ dependencies {
     cftlibAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 //    cftlibImplementation group: 'org.springframework', name: 'spring-aspects'
 
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
