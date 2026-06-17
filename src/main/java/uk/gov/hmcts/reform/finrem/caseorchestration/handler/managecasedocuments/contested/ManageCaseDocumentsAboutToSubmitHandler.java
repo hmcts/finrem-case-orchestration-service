@@ -1,10 +1,13 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managecasedocuments.contested;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -24,12 +27,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCase
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -40,8 +43,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecased
  * Handles the "about to submit" callback for managing case documents
  * in contested financial remedy cases.
  *
- * <p>This handler contains logic migrated from
- * {@link ManageCaseDocumentsContestedAboutToSubmitHandler}, which is
+ * <p>This handler contains logic migrated from old
+ * ManageCaseDocumentsContestedAboutToSubmitHandler, which is
  * scheduled for removal. It preserves the existing behaviour while
  * aligning with the updated handler structure.
  *
@@ -53,7 +56,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecased
  */
 @Slf4j
 @Service
-public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
+public class ManageCaseDocumentsAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
     private static final String PARTY_NOT_PRESENT_ERROR_MESSAGE = "%s not present on the case, do you want to continue?";
     private static final String INTERVENER_1 = "Intervener 1";
     private static final String INTERVENER_2 = "Intervener 2";
@@ -70,19 +73,16 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
 
     private final List<DocumentHandler> documentHandlers;
     private final UploadedDocumentService uploadedDocumentService;
-    private final EvidenceManagementDeleteService evidenceManagementDeleteService;
     private final FeatureToggleService featureToggleService;
 
     @Autowired
-    public NewManageCaseDocumentsContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                               List<DocumentHandler> documentHandlers,
-                                                               UploadedDocumentService uploadedDocumentService,
-                                                               EvidenceManagementDeleteService evidenceManagementDeleteService,
-                                                               FeatureToggleService featureToggleService) {
+    public ManageCaseDocumentsAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
+                                                   List<DocumentHandler> documentHandlers,
+                                                   UploadedDocumentService uploadedDocumentService,
+                                                   FeatureToggleService featureToggleService) {
         super(mapper);
         this.documentHandlers = documentHandlers;
         this.uploadedDocumentService = uploadedDocumentService;
-        this.evidenceManagementDeleteService = evidenceManagementDeleteService;
         this.featureToggleService = featureToggleService;
     }
 
@@ -106,7 +106,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
         replaceManagedDocumentsInCollectionType(caseData);
         addUploadDateToNewDocuments(caseData, caseDataBefore);
         clearLegacyCollections(caseData);
-        deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
+        binRemovedDocuments(caseDataBefore, caseData);
 
         return response(caseData, warnings, null);
     }
@@ -181,24 +181,13 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
             .anyMatch(doc -> caseDocumentParty.equals(doc.getCaseDocumentParty()));
     }
 
-    private void deleteRemovedDocuments(FinremCaseData caseData,
-                                        FinremCaseData caseDataBefore,
-                                        String userAuthorisation) {
+    private void binRemovedDocuments(FinremCaseData beforeCaseData,
+                                     FinremCaseData currentCaseData) {
         if (featureToggleService.isManageCaseDocsDeleteEnabled()) {
-            List<UploadCaseDocumentCollection> allCollectionsBefore =
-                caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
-            allCollectionsBefore.removeAll(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
-            allCollectionsBefore.stream().map(this::getDocumentUrl)
-                .forEach(docUrl -> evidenceManagementDeleteService.delete(docUrl, userAuthorisation));
+            currentCaseData.getBin().binDeletedCaseDocument(
+                extractCaseDocuments(beforeCaseData), extractCaseDocuments(currentCaseData)
+            );
         }
-    }
-
-    private String getDocumentUrl(UploadCaseDocumentCollection documentCollection) {
-        return ofNullable(documentCollection)
-            .map(UploadCaseDocumentCollection::getUploadCaseDocument)
-            .map(UploadCaseDocument::getCaseDocuments)
-            .map(CaseDocument::getDocumentUrl)
-            .orElseThrow(() -> new IllegalStateException("Document URL is missing"));
     }
 
     private void addDefaultsToAdministrativeDocuments(List<UploadCaseDocumentCollection> managedCollections) {
@@ -215,5 +204,12 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
             uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
             uploadCaseDocument.setCaseDocumentFdr(YesOrNo.YES);
         }
+    }
+
+    private Stream<CaseDocument> extractCaseDocuments(FinremCaseData caseData) {
+        return emptyIfNull(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections()).stream()
+            .map(UploadCaseDocumentCollection::getUploadCaseDocument)
+            .filter(Objects::nonNull)
+            .map(UploadCaseDocument::getCaseDocuments);
     }
 }

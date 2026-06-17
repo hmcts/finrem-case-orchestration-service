@@ -12,6 +12,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -44,6 +48,31 @@ public class Bin {
         this.fileUrlsToBeDeleted.getListItems().add(
             DynamicListElement.builder().code(caseDocument.getDocumentUrl()).build()
         );
+    }
+
+    /**
+     * Identifies documents that existed previously but are no longer present
+     * in the current collection, and adds them to the deletion bin.
+     *
+     * <p>Both streams are filtered to ignore {@code null} values before comparison.</p>
+     *
+     * <p>A document is considered deleted when its document URL exists in the
+     * {@code previousDocuments} stream but not in the {@code currentDocuments} stream.</p>
+     *
+     * @param previousDocuments the stream of documents that existed previously
+     * @param currentDocuments the stream of documents that currently exist
+     */
+    public void binDeletedCaseDocument(Stream<CaseDocument> previousDocuments,
+                                       Stream<CaseDocument> currentDocuments) {
+        Set<String> currentDocumentUrls = currentDocuments
+            .filter(Objects::nonNull)
+            .map(CaseDocument::getDocumentUrl)
+            .collect(Collectors.toSet());
+
+        previousDocuments
+            .filter(Objects::nonNull)
+            .filter(document -> !currentDocumentUrls.contains(document.getDocumentUrl()))
+            .forEach(this::binCaseDocument);
     }
 
     /**

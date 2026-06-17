@@ -27,6 +27,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class PsaDocumentReview implements HasCaseDocument, Reviewable, RefusalOrderConvertible, HearingInstructionProcessable {
     private CaseDocument psaDocument;
+    private OrderType orderType;
     private OrderStatus orderStatus;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime submittedDate;

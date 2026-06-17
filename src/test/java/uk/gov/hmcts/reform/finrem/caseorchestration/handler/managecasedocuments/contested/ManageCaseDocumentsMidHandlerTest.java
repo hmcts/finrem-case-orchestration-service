@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managecasedocuments.contested;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,10 +29,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class NewManageCaseDocumentsContestedMidHandlerTest {
+class ManageCaseDocumentsMidHandlerTest {
 
     @InjectMocks
-    private NewManageCaseDocumentsContestedMidHandler underTest;
+    private ManageCaseDocumentsMidHandler underTest;
 
     @Mock
     private LegacyConfidentialDocumentsService legacyConfidentialDocumentsService;
