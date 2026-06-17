@@ -41,7 +41,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -103,7 +102,11 @@ class ManageHearingsSubmittedHandlerTest {
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(event.getCaseId()).thenReturn(CASE_ID);
         when(event.describeNotificationParties()).thenReturn("WHATEVER");
-        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADD_HEARING,
+            callbackRequest,
+            AUTH_TOKEN
+        )).thenReturn(event);
 
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
@@ -116,7 +119,11 @@ class ManageHearingsSubmittedHandlerTest {
 
         // then
         assertAll(
-            () -> verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN),
+            () -> verify(manageHearingsCorresponder).buildCorrespondenceEventIfNeeded(
+                ManageHearingsAction.ADD_HEARING,
+                callbackRequest,
+                AUTH_TOKEN
+            ),
             () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
             () -> assertThat(response.getConfirmationBody())
                 .contains("Notification to WHATEVER has failed. Please send notification to WHATEVER manually.")
@@ -131,7 +138,11 @@ class ManageHearingsSubmittedHandlerTest {
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(event.getCaseId()).thenReturn(CASE_ID);
         when(event.describeNotificationParties()).thenReturn("WHATEVER");
-        when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+            callbackRequest,
+            AUTH_TOKEN
+        )).thenReturn(event);
 
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
@@ -144,7 +155,11 @@ class ManageHearingsSubmittedHandlerTest {
 
         // then
         assertAll(
-            () -> verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN),
+            () -> verify(manageHearingsCorresponder).buildCorrespondenceEventIfNeeded(
+                ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+                callbackRequest,
+                AUTH_TOKEN
+            ),
             () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
             () -> assertThat(response.getConfirmationBody())
                 .contains("Notification to WHATEVER has failed. Please send notification to WHATEVER manually.")
@@ -159,8 +174,11 @@ class ManageHearingsSubmittedHandlerTest {
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(event.getCaseId()).thenReturn(CASE_ID);
         when(event.describeNotificationParties()).thenReturn("WHATEVER");
-        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
-
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADD_HEARING,
+            callbackRequest,
+            AUTH_TOKEN
+        )).thenReturn(event);
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -170,9 +188,11 @@ class ManageHearingsSubmittedHandlerTest {
         assertThat(logs.getInfos()).contains(
             format("Beginning hearing correspondence for Hearing Added action. Case reference: %s", CASE_ID)
         );
-        verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
-        verify(manageHearingsCorresponder, never()).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
-
+        verify(manageHearingsCorresponder).buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADD_HEARING,
+            callbackRequest,
+            AUTH_TOKEN
+        );
         ArgumentCaptor<ThrowingRunnable> publishEventCaptor = getThrowingRunnableCaptor();
         verify(retryExecutor)
             .runWithRetryWithHandler(
@@ -196,7 +216,11 @@ class ManageHearingsSubmittedHandlerTest {
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(event.getCaseId()).thenReturn(CASE_ID);
         when(event.describeNotificationParties()).thenReturn("WHATEVER");
-        when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+            callbackRequest,
+            AUTH_TOKEN
+        )).thenReturn(event);
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
@@ -207,8 +231,11 @@ class ManageHearingsSubmittedHandlerTest {
         assertThat(logs.getInfos()).contains(
             format("Beginning hearing correspondence for Hearing Adjourned Or Vacated action. Case reference: %s", CASE_ID)
         );
-        verify(manageHearingsCorresponder, never()).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
-        verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+            callbackRequest,
+            AUTH_TOKEN
+        );
 
         ArgumentCaptor<ThrowingRunnable> publishEventCaptor = getThrowingRunnableCaptor();
         verify(retryExecutor)
@@ -233,8 +260,11 @@ class ManageHearingsSubmittedHandlerTest {
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(event.getCaseId()).thenReturn(CASE_ID);
         when(event.describeNotificationParties()).thenReturn("WHATEVER");
-        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN))
-            .thenReturn(event);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADD_HEARING,
+            callbackRequest,
+            AUTH_TOKEN
+        )).thenReturn(event);
 
         Map<String, Object> updatedFields = Map.of(
             NOTIFICATIONS_AUDITS, List.of(Map.of("wasSent", "Yes")),

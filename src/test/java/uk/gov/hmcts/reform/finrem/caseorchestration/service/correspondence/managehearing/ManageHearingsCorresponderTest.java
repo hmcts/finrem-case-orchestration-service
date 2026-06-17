@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.mana
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournAction;
@@ -366,6 +369,44 @@ class ManageHearingsCorresponderTest {
 
         assertThat(actualEvent.getEmailTemplate())
             .isEqualTo(EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR);
+    }
+
+    @ParameterizedTest
+    @EnumSource(ManageHearingsAction.class)
+    void givenManageHearingsAction_whenBuildCorrespondenceEventIfNeeded_thenRoutesToCorrectBuilder(
+        ManageHearingsAction action) {
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
+
+        ManageHearingsWrapper wrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
+
+        if (ManageHearingsAction.ADD_HEARING.equals(action)) {
+            wrapper.setWorkingHearingId(hearingId);
+
+            when(hearingCorrespondenceHelper.getActiveHearingInContext(
+                wrapper,
+                hearingId
+            )).thenReturn(Hearing.builder()
+                .hearingNoticePrompt(YesOrNo.NO)
+                .build());
+        } else {
+            wrapper.setWorkingVacatedHearingId(hearingId);
+
+            when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(
+                wrapper,
+                hearingId
+            )).thenReturn(VacateOrAdjournedHearing.builder()
+                .hearingNoticePrompt(YesOrNo.NO)
+                .build());
+        }
+
+        SendCorrespondenceEvent result = corresponder.buildCorrespondenceEventIfNeeded(
+            action,
+            callbackRequest,
+            AUTH_TOKEN
+        );
+
+        assertThat(result).isNull();
     }
 
     private Court buildCourt() {
