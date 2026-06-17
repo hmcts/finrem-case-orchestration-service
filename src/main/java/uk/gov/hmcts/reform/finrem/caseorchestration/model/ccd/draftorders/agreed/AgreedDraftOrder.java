@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.Approv
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.WithAttachments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Approvable, WithAttachments {
+    private OrderType orderType;
     private OrderStatus orderStatus;
     private CaseDocument draftOrder;
     private CaseDocument pensionSharingAnnex;

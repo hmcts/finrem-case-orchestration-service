@@ -49,6 +49,9 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-41846</cve>
         <cve>CVE-2026-41845</cve>
         <cve>CVE-2026-41838</cve>
+        <!-- Added 2026-06-16-->
+        <cve>CVE-2026-41854</cve>
+        <cve>CVE-2026-41853</cve>
     </suppress>
     <suppress until="2026-09-01Z">
         <notes><![CDATA[
