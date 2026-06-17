@@ -62,6 +62,7 @@ public class NotificationAuditService {
 
         wrapper.setNotificationsToBeSent(pending);
     }
+
     /**
      * Updates the notification audit history for a sent correspondence event.
      *

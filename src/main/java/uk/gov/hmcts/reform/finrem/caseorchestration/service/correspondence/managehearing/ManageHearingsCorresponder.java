@@ -247,6 +247,7 @@ public class ManageHearingsCorresponder {
             .authToken(userAuthorisation)
             .build();
     }
+
     /**
      * Builds a correspondence event for the selected manage hearings action, if correspondence is required.
      *
