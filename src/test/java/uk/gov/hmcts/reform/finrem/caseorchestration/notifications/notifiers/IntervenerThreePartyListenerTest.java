@@ -179,15 +179,13 @@ class IntervenerThreePartyListenerTest {
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))
             .thenReturn(List.of(bulkPrintCoverSheet, bulkPrintDocument1));
 
-        UUID letterId = UUID.randomUUID();
-
         when(bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             caseDetails,
             INTERVENER_THREE,
             List.of(bulkPrintCoverSheet, bulkPrintDocument1),
             false,
             AUTH_TOKEN
-        )).thenReturn(letterId);
+        )).thenReturn(UUID.randomUUID());
         intervenerThreePartyListener.handleNotification(event);
 
         verify(bulkPrintService).getIntervenerThreeCoverSheet(caseDetails, AUTH_TOKEN);

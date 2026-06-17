@@ -92,8 +92,11 @@ class HearingsAboutToSubmitHandlerTest {
 
         FinremCallbackRequest request = buildRequest(caseData);
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
-        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN))
-            .thenReturn(event);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADD_HEARING,
+            request,
+            AUTH_TOKEN
+        )).thenReturn(event);
         doAnswer(invocation -> {
             UUID workingHearingID = UUID.randomUUID();
             ManageHearingsCollectionItem manageHearingsCollectionItem = ManageHearingsCollectionItem.builder()
@@ -190,15 +193,22 @@ class HearingsAboutToSubmitHandlerTest {
 
         FinremCallbackRequest request = buildRequest(caseData);
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
-        when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN))
-            .thenReturn(event);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+            request,
+            AUTH_TOKEN
+        )).thenReturn(event);
 
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
         verify(manageHearingActionService).performAdjournOrVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(request.getCaseDetails().getData());
-        verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+            request,
+            AUTH_TOKEN
+        );
         verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
     }
 
@@ -214,15 +224,22 @@ class HearingsAboutToSubmitHandlerTest {
 
         FinremCallbackRequest request = buildRequest(caseData);
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
-        when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN))
-            .thenReturn(event);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+            request,
+            AUTH_TOKEN
+        )).thenReturn(event);
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
         verify(manageHearingActionService).performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).performAdjournOrVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(request.getCaseDetails().getData());
-        verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+            request,
+            AUTH_TOKEN
+        );
         verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
 
     }
@@ -237,14 +254,21 @@ class HearingsAboutToSubmitHandlerTest {
 
         FinremCallbackRequest request = buildRequest(caseData);
 
-        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN))
-            .thenReturn(null);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADD_HEARING,
+            request,
+            AUTH_TOKEN
+        )).thenReturn(null);
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
         verify(manageHearingActionService).performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(request.getCaseDetails().getData());
-        verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(request, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).buildCorrespondenceEventIfNeeded(
+            ManageHearingsAction.ADD_HEARING,
+            request,
+            AUTH_TOKEN
+        );
         verify(notificationAuditService, never()).createAuditsForCorrespondence(any(), any());
     }
 

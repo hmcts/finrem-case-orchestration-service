@@ -182,15 +182,13 @@ class IntervenerTwoPartyListenerTest {
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))
             .thenReturn(List.of(bulkPrintCoverSheet, bulkPrintDocument1));
 
-        UUID letterId = UUID.randomUUID();
-
         when(bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             caseDetails,
             INTERVENER_TWO,
             List.of(bulkPrintCoverSheet, bulkPrintDocument1),
             false,
             AUTH_TOKEN
-        )).thenReturn(letterId);
+        )).thenReturn(UUID.randomUUID());
         intervenerTwoPartyListener.handleNotification(event);
 
         verify(bulkPrintService).getIntervenerTwoCoverSheet(caseDetails, AUTH_TOKEN);

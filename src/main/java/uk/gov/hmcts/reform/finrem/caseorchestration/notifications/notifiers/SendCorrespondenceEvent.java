@@ -108,15 +108,6 @@ public class SendCorrespondenceEvent {
             .build());
     }
 
-    private List<String> getDocumentsToPostFilenames() {
-        return Optional.ofNullable(documentsToPost)
-            .orElseGet(List::of)
-            .stream()
-            .map(CaseDocument::getDocumentFilename)
-            .filter(fileName -> fileName != null && !fileName.isBlank())
-            .toList();
-    }
-
     public FinremCaseData getCaseData() {
         return Optional.ofNullable(caseDetails)
             .map(FinremCaseDetails::getData)
@@ -165,6 +156,15 @@ public class SendCorrespondenceEvent {
     public String describeNotificationParties() {
         return ListFormatter.getInstance(Locale.ENGLISH).format(getNotificationParties()
             .stream().map(this::describeNotificationParty).sorted().toList());
+    }
+
+    private List<String> getDocumentsToPostFilenames() {
+        return Optional.ofNullable(documentsToPost)
+            .orElseGet(List::of)
+            .stream()
+            .map(CaseDocument::getDocumentFilename)
+            .filter(fileName -> fileName != null && !fileName.isBlank())
+            .toList();
     }
 
     private String describeNotificationParty(NotificationParty notificationParty) {

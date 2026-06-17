@@ -248,6 +248,21 @@ public class ManageHearingsCorresponder {
             .build();
     }
 
+    public SendCorrespondenceEvent buildCorrespondenceEventIfNeeded(ManageHearingsAction actionSelection,
+                                                                    FinremCallbackRequest callbackRequest,
+                                                                    String userAuthorisation) {
+        return switch (actionSelection) {
+            case ADD_HEARING -> buildHearingCorrespondenceEventIfNeeded(
+                callbackRequest,
+                userAuthorisation
+            );
+            case ADJOURN_OR_VACATE_HEARING -> buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(
+                callbackRequest,
+                userAuthorisation
+            );
+        };
+    }
+
     private boolean shouldNotSendVacateOrAdjournNotification(boolean isVacatedAndRelistedHearing,
                                                           VacateOrAdjournedHearing vacateOrAdjournedHearing) {
         return !isVacatedAndRelistedHearing && !vacateOrAdjournedHearing.shouldSendNotifications();

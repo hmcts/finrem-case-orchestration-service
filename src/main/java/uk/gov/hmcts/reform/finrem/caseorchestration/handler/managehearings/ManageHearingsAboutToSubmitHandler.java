@@ -88,7 +88,7 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
                                              String userAuthorisation,
                                              ManageHearingsAction actionSelection) {
 
-        SendCorrespondenceEvent event = buildCorrespondenceEvent(
+        SendCorrespondenceEvent event = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
             actionSelection,
             callbackRequest,
             userAuthorisation
@@ -101,21 +101,5 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
             );
         }
 
-    }
-
-    private SendCorrespondenceEvent buildCorrespondenceEvent(ManageHearingsAction actionSelection,
-                                                             FinremCallbackRequest callbackRequest,
-                                                             String userAuthorisation) {
-        return switch (actionSelection) {
-            case ADD_HEARING -> manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(
-                callbackRequest,
-                userAuthorisation
-            );
-            case ADJOURN_OR_VACATE_HEARING -> manageHearingsCorresponder
-                .buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(
-                    callbackRequest,
-                    userAuthorisation
-                );
-        };
     }
 }

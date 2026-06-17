@@ -14,10 +14,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_AUDITS;
@@ -60,7 +62,26 @@ public class NotificationAuditService {
 
         wrapper.setNotificationsToBeSent(pending);
     }
-
+    /**
+     * Updates the notification audit history for a sent correspondence event.
+     *
+     * <p>This method compares the pending notifications stored on the case with the
+     * notification audits recorded on the sent event. If a pending notification has
+     * a matching sent audit, the sent audit is marked as successfully sent. If no
+     * matching sent audit is found, the pending audit is marked as not sent and added
+     * to the current event audit list.</p>
+     *
+     * <p>Existing notification audit rows already stored on the case are preserved.
+     * The returned audit collection is made up of the existing audit history plus the
+     * final audit rows for the current sent event.</p>
+     *
+     * <p>The returned map also clears the pending notifications collection. If there
+     * are no pending notifications, an empty map is returned and no case update is
+     * required.</p>
+     *
+     * @param sentEvent the correspondence event containing the notification audits recorded during sending
+     * @return a map of CCD fields to update, or an empty map if there are no pending notifications
+     */
     public Map<String, Object> updateSentAuditsList(SendCorrespondenceEvent sentEvent) {
         FinremCaseData caseData = sentEvent.getCaseData();
         NotificationAuditWrapper wrapper = caseData.getNotificationAuditWrapper();
@@ -71,6 +92,7 @@ public class NotificationAuditService {
         if (pending == null || pending.isEmpty()) {
             return Collections.emptyMap();
         }
+
 
         pending.stream()
             .map(NotificationToBeSentCollectionItem::getValue)
@@ -88,7 +110,18 @@ public class NotificationAuditService {
                     )
             );
 
-        List<NotificationAuditCollectionItem> auditItems = audits.stream()
+        List<NotificationAudit> allAudits = new ArrayList<>();
+
+        Optional.ofNullable(wrapper.getNotificationsAudits())
+            .orElseGet(List::of)
+            .stream()
+            .map(NotificationAuditCollectionItem::getValue)
+            .filter(Objects::nonNull)
+            .forEach(allAudits::add);
+
+        allAudits.addAll(audits);
+
+        List<NotificationAuditCollectionItem> auditItems = allAudits.stream()
             .map(audit -> NotificationAuditCollectionItem.builder()
                 .id(UUID.randomUUID())
                 .value(audit)

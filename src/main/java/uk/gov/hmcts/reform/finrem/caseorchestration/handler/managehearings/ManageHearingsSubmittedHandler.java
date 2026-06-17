@@ -76,7 +76,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
 
         List<String> errors = new ArrayList<>();
 
-        SendCorrespondenceEvent correspondenceEvent = buildCorrespondenceEvent(
+        SendCorrespondenceEvent correspondenceEvent = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
             actionSelection,
             callbackRequest,
             userAuthorisation
@@ -97,22 +97,6 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             toConfirmationHeader("Manage Hearings completed with error"),
             toConfirmationBody(errors.toArray(new String[0]))
         );
-    }
-
-    private SendCorrespondenceEvent buildCorrespondenceEvent(ManageHearingsAction actionSelection,
-                                                             FinremCallbackRequest callbackRequest,
-                                                             String userAuthorisation) {
-        return switch (actionSelection) {
-            case ADD_HEARING -> manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(
-                callbackRequest,
-                userAuthorisation
-            );
-            case ADJOURN_OR_VACATE_HEARING -> manageHearingsCorresponder
-                .buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(
-                    callbackRequest,
-                    userAuthorisation
-                );
-        };
     }
 
     private String getEventDescription(ManageHearingsAction actionSelection) {
