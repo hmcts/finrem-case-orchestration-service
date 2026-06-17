@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
@@ -87,7 +86,7 @@ class ManageHearingsSubmittedHandlerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(notificationAuditService.markPendingNotificationsAsSent(any(), any()))
+        lenient().when(notificationAuditService.updateSentAuditsList(any()))
             .thenReturn(Map.of());
     }
 
@@ -242,7 +241,7 @@ class ManageHearingsSubmittedHandlerTest {
             NOTIFICATIONS_TO_BE_SENT, List.of()
         );
 
-        when(notificationAuditService.markPendingNotificationsAsSent(callbackRequest.getCaseDetails().getData(), event))
+        when(notificationAuditService.updateSentAuditsList(event))
             .thenReturn(updatedFields);
 
         // Act
@@ -278,17 +277,11 @@ class ManageHearingsSubmittedHandlerTest {
     }
 
     private FinremCallbackRequest buildCallbackRequest(ManageHearingsAction action) {
-        return buildCallbackRequest(action, NotificationAuditWrapper.builder().build());
-    }
-
-    private FinremCallbackRequest buildCallbackRequest(ManageHearingsAction action,
-                                                       NotificationAuditWrapper notificationAuditWrapper) {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper
                 .builder()
                 .manageHearingsActionSelection(action)
                 .build())
-            .notificationAuditWrapper(notificationAuditWrapper)
             .ccdCaseId(CASE_ID)
             .ccdCaseType(CaseType.CONTESTED)
             .build();
@@ -300,6 +293,7 @@ class ManageHearingsSubmittedHandlerTest {
 
         return FinremCallbackRequest.builder()
             .caseDetails(caseDetails)
+            .eventType(EventType.MANAGE_HEARINGS)
             .build();
     }
 }

@@ -37,8 +37,19 @@ public class SendCorrespondenceEvent {
 
     @Builder.Default
     List<NotificationAudit> notificationAudits = new ArrayList<>();
-    String eventId;
 
+    @Setter
+    String eventId;
+    /**
+     * Indicates whether the correspondence event should run in audit-only mode.
+     *
+     * <p>When {@code true}, listeners determine which notification would be sent
+     * and record the relevant audit row, but they do not send any email or postal
+     * notification.</p>
+     *
+     * <p>When {@code false}, listeners send the actual notification and record the
+     * sent audit row.</p>
+     */
     @Setter
     boolean dryRun;
 

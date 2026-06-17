@@ -140,7 +140,7 @@ public abstract class AbstractPartyListener {
         EmailTemplateNames emailTemplate = Optional.ofNullable(event.getEmailTemplate()).orElseThrow(() ->
             new IllegalArgumentException("Email template is required for digital notifications, case ID: " + event.getCaseId()));
 
-        // Email service handles email specific exceptions - consider building in retries to email service.
+        // Email service handles email-specific exceptions - consider building in retries to email service.
         emailService.sendConfirmationEmail(emailRequest, emailTemplate);
 
         log.info("Completed email notification for party {} on case {}", getNotificationParty(), event.getCaseId());
@@ -186,8 +186,9 @@ public abstract class AbstractPartyListener {
             event.caseDetails, getBulkPrintRecipient(), bpDocs, isOutsideUK, event.authToken
         );
 
-        log.info("Completed paper notification for party {} on case {} with letter ID: {}", getNotificationParty(), event.getCaseId(), letterId);
-            return letterId;
+        log.info("Completed paper notification for party {} on case {} with letter ID: {}",
+            getNotificationParty(), event.getCaseId(), letterId);
+        return letterId;
     }
 
     protected String getBulkPrintRecipient() {

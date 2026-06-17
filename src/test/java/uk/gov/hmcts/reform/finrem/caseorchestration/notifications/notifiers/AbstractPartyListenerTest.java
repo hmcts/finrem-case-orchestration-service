@@ -22,9 +22,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -357,6 +359,14 @@ class AbstractPartyListenerTest {
         List<BulkPrintDocument> bpDocs = mock(List.class);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType))
             .thenReturn(bpDocs);
+        UUID letterId = UUID.randomUUID();
+        when(bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+            caseDetails,
+            SendPaperNotificationListener.class.getSimpleName(),
+            bpDocs,
+            isOutsideUK,
+            AUTH_TOKEN
+        )).thenReturn(letterId);
 
         // act
         if (isOutsideUK) {
@@ -391,6 +401,15 @@ class AbstractPartyListenerTest {
         List<CaseDocument> expectedDocuments = buildExpectedDocumentsWithCoversheet(documentsToPost);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType))
             .thenReturn(bpDocs);
+        UUID letterId = UUID.randomUUID();
+
+        when(bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+            caseDetails,
+            EmailOrPaperNotificationListener.class.getSimpleName(),
+            bpDocs,
+            false,
+            AUTH_TOKEN
+        )).thenReturn(letterId);
 
         // act
         emailOrPaperNotificationListener.handleNotification(event);
@@ -426,6 +445,33 @@ class AbstractPartyListenerTest {
                 NotificationRequest::getNotificationEmail,
                 NotificationRequest::getSolicitorReferenceNumber)
             .contains(RECIPIENT_NAME, RECIPIENT_EMAIL, RECIPIENT_REFERENCE);
+    }
+
+    @Test
+    void givenDryRunEmailNotification_whenHandleNotification_thenEmailIsNotSent() {
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .notificationParties(List.of(NotificationParty.APPLICANT))
+            .build();
+        event.setDryRun(true);
+
+        assertDoesNotThrow(() -> sendEmailNotificationListener.handleNotification(event));
+
+        verifyNoEmailSent();
+        verifyNoLetterSent();
+    }
+
+    @Test
+    void givenDryRunPaperNotification_whenHandleNotification_thenLetterIsNotSent() {
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .notificationParties(List.of(NotificationParty.APPLICANT))
+            .build();
+        event.setDryRun(true);
+
+        assertDoesNotThrow(() -> sendPaperNotificationListener.handleNotification(event));
+
+        verifyNoEmailSent();
+        verifyNoLetterSent();
     }
 
     private SendCorrespondenceEvent buildEventFOrEmailOrPaperNotificationListener(FinremCaseDetails caseDetails,

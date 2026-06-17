@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 @Slf4j
@@ -82,10 +81,12 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             callbackRequest,
             userAuthorisation
         );
-        ofNullable(correspondenceEvent)
-            .ifPresent(event -> publishEvent(getEventDescription(actionSelection), event, errors));
 
         if (correspondenceEvent != null) {
+            correspondenceEvent.setEventId(callbackRequest.getEventType().getCcdType());
+
+            publishEvent(getEventDescription(actionSelection), correspondenceEvent, errors);
+
             markPendingNotificationsAsSent(caseDetails, correspondenceEvent);
         }
 

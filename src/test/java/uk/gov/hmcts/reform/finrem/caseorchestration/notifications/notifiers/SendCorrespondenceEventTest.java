@@ -8,15 +8,16 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -156,89 +157,60 @@ class SendCorrespondenceEventTest {
     }
 
     @Test
-    void givenEmailNotificationRecorded_whenGetNotificationTypeForParty_thenReturnsEmail() {
+    void givenEmailNotificationToSendAuditRecorded_thenAddsEmailAudit() {
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
-            .notificationParties(new ArrayList<>(List.of(NotificationParty.APPLICANT)))
+            .emailTemplate(EmailTemplateNames.values()[0])
             .build();
 
-        event.recordEmailNotification(NotificationParty.APPLICANT);
+        event.recordEmailNotificationToSendAudit(NotificationParty.APPLICANT);
 
-        assertThat(event.getNotificationTypeForParty(NotificationParty.APPLICANT))
-            .isEqualTo(NotificationType.EMAIL);
+        NotificationAudit audit = event.getNotificationAudits().getFirst();
 
-        SendCorrespondenceEvent.RecordedNotification recordedNotification =
-            event.getRecordedNotificationForParty(NotificationParty.APPLICANT);
-
-        assertThat(recordedNotification.type()).isEqualTo(NotificationType.EMAIL);
-        assertThat(recordedNotification.letterId()).isNull();
+        assertThat(audit.getParty()).isEqualTo(NotificationParty.APPLICANT.name());
+        assertThat(audit.getType()).isEqualTo(NotificationType.EMAIL);
+        assertThat(audit.getWasSent()).isNull();
     }
 
     @Test
-    void givenPostalNotificationRecordedWithoutLetterId_whenGetRecordedNotificationForParty_thenReturnsPostalWithNullLetterId() {
+    void givenEmailNotificationSentAuditRecorded_thenAddsSentEmailAudit() {
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
-            .notificationParties(new ArrayList<>(List.of(NotificationParty.RESPONDENT)))
+            .emailTemplate(EmailTemplateNames.values()[0])
             .build();
+
+        event.recordEmailNotificationSentAudit(NotificationParty.APPLICANT);
+
+        NotificationAudit audit = event.getNotificationAudits().getFirst();
+
+        assertThat(audit.getParty()).isEqualTo(NotificationParty.APPLICANT.name());
+        assertThat(audit.getType()).isEqualTo(NotificationType.EMAIL);
+        assertThat(audit.getWasSent()).isEqualTo(YesOrNo.YES);
+    }
+
+    @Test
+    void givenPostalNotificationToSendAuditRecorded_thenAddsPostalAudit() {
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder().build();
 
         event.recordPostalNotificationToSendAudit(NotificationParty.RESPONDENT);
 
-        assertThat(event.getNotificationTypeForParty(NotificationParty.RESPONDENT))
-            .isEqualTo(NotificationType.POSTAL);
+        NotificationAudit audit = event.getNotificationAudits().getFirst();
 
-        SendCorrespondenceEvent.RecordedNotification recordedNotification =
-            event.getRecordedNotificationForParty(NotificationParty.RESPONDENT);
-
-        assertThat(recordedNotification.type()).isEqualTo(NotificationType.POSTAL);
-        assertThat(recordedNotification.letterId()).isNull();
+        assertThat(audit.getParty()).isEqualTo(NotificationParty.RESPONDENT.name());
+        assertThat(audit.getType()).isEqualTo(NotificationType.POSTAL);
+        assertThat(audit.getWasSent()).isNull();
     }
 
     @Test
-    void givenPostalNotificationRecordedWithLetterId_whenGetRecordedNotificationForParty_thenReturnsPostalWithLetterId() {
+    void givenPostalNotificationSentAuditRecorded_thenAddsSentPostalAudit() {
         UUID letterId = UUID.randomUUID();
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder().build();
 
-        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
-            .notificationParties(new ArrayList<>(List.of(NotificationParty.RESPONDENT)))
-            .build();
+        event.recordPostalNotificationSentAudit(NotificationParty.RESPONDENT, letterId);
 
-        event.recordPostalNotificationToSendAudit(NotificationParty.RESPONDENT, letterId);
+        NotificationAudit audit = event.getNotificationAudits().getFirst();
 
-        SendCorrespondenceEvent.RecordedNotification recordedNotification =
-            event.getRecordedNotificationForParty(NotificationParty.RESPONDENT);
-
-        assertThat(recordedNotification.type()).isEqualTo(NotificationType.POSTAL);
-        assertThat(recordedNotification.letterId()).isEqualTo(letterId.toString());
-    }
-
-    @Test
-    void givenNotificationRecordedOutOfOrder_whenGetNotificationTypeForParty_thenReturnsRecordedTypeByParty() {
-        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
-            .notificationParties(new ArrayList<>(List.of(
-                NotificationParty.APPLICANT,
-                NotificationParty.RESPONDENT
-            )))
-            .build();
-
-        event.recordEmailNotification(NotificationParty.RESPONDENT);
-
-        assertThat(event.getNotificationTypeForParty(NotificationParty.RESPONDENT))
-            .isEqualTo(NotificationType.EMAIL);
-
-        event.recordPostalNotificationToSendAudit(NotificationParty.APPLICANT);
-
-        assertThat(event.getNotificationTypeForParty(NotificationParty.APPLICANT))
-            .isEqualTo(NotificationType.POSTAL);
-
-        assertThat(event.getRecordedNotificationsByParty())
-            .containsOnlyKeys(NotificationParty.APPLICANT, NotificationParty.RESPONDENT);
-    }
-
-    @Test
-    void givenNoNotificationRecorded_whenGetNotificationTypeForParty_thenThrowsException() {
-        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
-            .notificationParties(new ArrayList<>(List.of(NotificationParty.APPLICANT)))
-            .build();
-
-        assertThatThrownBy(() -> event.getNotificationTypeForParty(NotificationParty.APPLICANT))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("No notification recorded for party: APPLICANT");
+        assertThat(audit.getParty()).isEqualTo(NotificationParty.RESPONDENT.name());
+        assertThat(audit.getType()).isEqualTo(NotificationType.POSTAL);
+        assertThat(audit.getWasSent()).isEqualTo(YesOrNo.YES);
+        assertThat(audit.getLetterId()).isEqualTo(letterId.toString());
     }
 }
