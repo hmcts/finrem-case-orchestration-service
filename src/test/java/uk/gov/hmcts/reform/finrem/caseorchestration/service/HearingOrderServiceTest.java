@@ -513,13 +513,13 @@ class HearingOrderServiceTest {
         private DirectionOrderCollection createUploadHearingEntry(CaseDocument uploadDraftDocument,
                                                                   List<DocumentCollectionItem> additionalDocs,
                                                                   YesOrNo isOrderStamped,
-                                                                  YesOrNo isThisFinalYN) {
+                                                                  YesOrNo isFinalOrder) {
             return DirectionOrderCollection.builder()
                 .value(DirectionOrder.builder()
                     .uploadDraftDocument(uploadDraftDocument)
                     .additionalDocuments(additionalDocs)
                     .isOrderStamped(isOrderStamped)
-                    .isThisFinalYN(isThisFinalYN)
+                    .isFinalOrder(isFinalOrder)
                     .build())
                 .build();
         }
@@ -572,12 +572,12 @@ class HearingOrderServiceTest {
 
         private static DraftDirectionOrderCollection createJudgeApprovedOrder(CaseDocument uploadDraftDocument,
                                                                               List<DocumentCollectionItem> additionalDocs,
-                                                                              YesOrNo isThisFinalYN) {
+                                                                              YesOrNo isFinalOrder) {
             return DraftDirectionOrderCollection.builder()
                 .value(DraftDirectionOrder.builder()
                     .uploadDraftDocument(uploadDraftDocument)
                     .additionalDocuments(additionalDocs)
-                    .isThisFinalYN(isThisFinalYN)
+                    .isFinalOrder(isFinalOrder)
                     .build())
                 .build();
         }
