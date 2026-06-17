@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -181,6 +182,15 @@ class IntervenerTwoPartyListenerTest {
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))
             .thenReturn(List.of(bulkPrintCoverSheet, bulkPrintDocument1));
 
+        UUID letterId = UUID.randomUUID();
+
+        when(bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+            caseDetails,
+            INTERVENER_TWO,
+            List.of(bulkPrintCoverSheet, bulkPrintDocument1),
+            false,
+            AUTH_TOKEN
+        )).thenReturn(letterId);
         intervenerTwoPartyListener.handleNotification(event);
 
         verify(bulkPrintService).getIntervenerTwoCoverSheet(caseDetails, AUTH_TOKEN);
