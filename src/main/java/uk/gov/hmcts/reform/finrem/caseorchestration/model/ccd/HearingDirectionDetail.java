@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class HearingDirectionDetail {
-    private YesOrNo isFinalOrder;
+    private YesOrNo isThisFinalYN;
     private YesOrNo isAnotherHearingYN;
     private String timeEstimate;
     private LocalDate dateOfHearing;
