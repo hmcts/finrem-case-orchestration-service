@@ -149,6 +149,7 @@ class NotificationAuditServiceTest {
 
     private NotificationAudit audit(NotificationParty party, NotificationType type) {
         return NotificationAudit.builder()
+            .wasSent(YesOrNo.NO)
             .eventId(EventType.MANAGE_HEARINGS.getCcdType())
             .party(party.name())
             .type(type)
