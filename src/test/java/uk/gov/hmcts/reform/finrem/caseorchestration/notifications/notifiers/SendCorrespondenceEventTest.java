@@ -168,7 +168,7 @@ class SendCorrespondenceEventTest {
 
         assertThat(audit.getParty()).isEqualTo(NotificationParty.APPLICANT.name());
         assertThat(audit.getType()).isEqualTo(NotificationType.EMAIL);
-        assertThat(audit.getWasSent()).isNull();
+        assertThat(audit.getWasSent()).isEqualTo(YesOrNo.NO);
     }
 
     @Test
@@ -196,7 +196,7 @@ class SendCorrespondenceEventTest {
 
         assertThat(audit.getParty()).isEqualTo(NotificationParty.RESPONDENT.name());
         assertThat(audit.getType()).isEqualTo(NotificationType.POSTAL);
-        assertThat(audit.getWasSent()).isNull();
+        assertThat(audit.getWasSent()).isEqualTo(YesOrNo.NO);
     }
 
     @Test

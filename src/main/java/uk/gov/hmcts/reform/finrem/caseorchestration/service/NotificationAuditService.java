@@ -104,10 +104,7 @@ public class NotificationAuditService {
                     .findFirst()
                     .ifPresentOrElse(
                         audit -> audit.setWasSent(YesOrNo.YES),
-                        () -> {
-                            pendingAudit.setWasSent(YesOrNo.NO);
-                            audits.add(pendingAudit);
-                        }
+                        () -> audits.add(pendingAudit)
                     )
             );
 

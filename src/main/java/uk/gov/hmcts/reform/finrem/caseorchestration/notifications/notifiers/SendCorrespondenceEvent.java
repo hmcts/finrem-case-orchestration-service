@@ -60,6 +60,7 @@ public class SendCorrespondenceEvent {
      */
     public void recordEmailNotificationToSendAudit(NotificationParty notificationParty) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
+            .wasSent(YesOrNo.NO)
             .eventId(this.eventId)
             .party(notificationParty.name())
             .type(NotificationType.EMAIL)
@@ -90,6 +91,7 @@ public class SendCorrespondenceEvent {
      */
     public void recordPostalNotificationToSendAudit(NotificationParty notificationParty) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
+            .wasSent(YesOrNo.NO)
             .eventId(this.eventId)
             .party(notificationParty.name())
             .type(NotificationType.POSTAL)
