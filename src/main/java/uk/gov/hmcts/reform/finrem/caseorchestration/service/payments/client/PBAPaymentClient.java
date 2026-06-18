@@ -23,7 +23,6 @@ import java.net.URI;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 public class PBAPaymentClient {
 
     /** Error message to be returned when the payment service encounters a client error such as invalid PBA account. */

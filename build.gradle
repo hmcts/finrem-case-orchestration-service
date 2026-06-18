@@ -407,9 +407,7 @@ dependencies {
     implementation group: 'com.ibm.icu', name: 'icu4j', version: versions.ibmIcu
     implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
-//    implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-//    implementation group: 'org.springframework', name: 'spring-aspects'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.aspectj:aspectjweaver'
@@ -442,13 +440,10 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-text', version: '1.15.0'
     implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
     implementation group: 'org.elasticsearch', name: 'elasticsearch', version: versions.elasticSearch
-//    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
+    // To configure ObjectMapper bean to include the Jackson 2 ParameterNamesModule for backward compatibility:
+    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
-//    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jacksonDatabind
-//    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versions.jacksonDatabind
-//    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jacksonDatabind
-//    implementation platform("com.fasterxml.jackson:jackson-bom:2.21.4")
-//    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.21.4'
     developmentOnly group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.loadbalancer
 
     implementation("org.apache.poi:poi:5.5.1") {
@@ -468,21 +463,17 @@ dependencies {
     // Can be removed once notifications-java-client is updated
     implementation("org.bitbucket.b_c:jose4j:0.9.6")
 
-//    developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
-
     runtimeOnly 'org.springframework.boot:spring-boot-starter-actuator'
-//    runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-web'
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
     cftlibCompileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     cftlibAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-//    cftlibImplementation group: 'org.springframework', name: 'spring-aspects'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     // to add the Jackson 2 ParameterNamesModule back only for tests,
     // since it's needed for deserializing third-party classes like CallbackRequest that rely on it:
-    testImplementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.19.2'
+    testImplementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.21.4'
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -501,8 +492,6 @@ dependencies {
     functionalImplementation sourceSets.main.runtimeClasspath
     functionalImplementation sourceSets.test.runtimeClasspath
     functionalImplementation 'io.rest-assured:rest-assured'
-//    functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-//    functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
@@ -520,7 +509,6 @@ dependencies {
 
     contractImplementation sourceSets.main.runtimeClasspath
     contractImplementation sourceSets.test.runtimeClasspath
-//    contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     contractImplementation group: 'au.com.dius.pact', name: 'consumer', version: versions.pact
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
     contractImplementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'

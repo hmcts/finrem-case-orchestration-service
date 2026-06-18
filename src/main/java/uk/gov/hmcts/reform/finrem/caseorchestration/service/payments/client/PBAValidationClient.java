@@ -26,7 +26,6 @@ import static org.springframework.http.HttpMethod.GET;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 public class PBAValidationClient {
 
     protected static final String USER_EMAIL = "UserEmail";
