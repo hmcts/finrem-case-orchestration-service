@@ -22,7 +22,6 @@ def versions = [
         commonsLang3         : '3.20.0',
         hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
-        lombok               : '1.18.46',
         mockito              : '5.21.0',
         pact                 : '4.6.20',
         pdfbox               : '3.0.7',
@@ -417,7 +416,7 @@ dependencies {
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: versions.springDoc
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
-    implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    implementation 'org.projectlombok:lombok'
     implementation group: 'com.github.hmcts', name: 'idam-java-client', version: versions.idamClient
     implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
@@ -465,17 +464,17 @@ dependencies {
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-actuator'
 
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    annotationProcessor 'org.projectlombok:lombok'
 
-    cftlibCompileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-    cftlibAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    cftlibCompileOnly 'org.projectlombok:lombok'
+    cftlibAnnotationProcessor 'org.projectlombok:lombok'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     // to add the Jackson 2 ParameterNamesModule back only for tests,
     // since it's needed for deserializing third-party classes like CallbackRequest that rely on it:
     testImplementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.21.4'
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
-    testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    testImplementation 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation('com.github.hmcts:fortify-client:1.4.10:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
@@ -483,7 +482,7 @@ dependencies {
     }
     testImplementation 'org.aspectj:aspectjweaver'
 
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
@@ -500,12 +499,12 @@ dependencies {
     functionalImplementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     functionalImplementation group: 'org.mockito', name: 'mockito-core', version: versions.mockito
     functionalImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
-    functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    functionalImplementation 'org.projectlombok:lombok'
     functionalImplementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
     functionalImplementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
     functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
 
-    functionalAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    functionalAnnotationProcessor 'org.projectlombok:lombok'
 
     contractImplementation sourceSets.main.runtimeClasspath
     contractImplementation sourceSets.test.runtimeClasspath
