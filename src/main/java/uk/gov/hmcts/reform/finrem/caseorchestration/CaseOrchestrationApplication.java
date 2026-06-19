@@ -14,7 +14,6 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.Jackson2FeignConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.task.ScheduledTaskRunner;
 import uk.gov.hmcts.reform.idam.client.IdamApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
@@ -22,7 +21,8 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 @SpringBootApplication(
     scanBasePackages = {
         "uk.gov.hmcts.reform.finrem",
-        "uk.gov.hmcts.reform.bsp.common"
+        "uk.gov.hmcts.reform.bsp.common",
+        "uk.gov.hmcts.reform.ccd.document.am.feign"
     },
     exclude = {
         uk.gov.hmcts.reform.sendletter.SendLetterAutoConfiguration.class,
@@ -41,8 +41,7 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
         CoreCaseDataApi.class,            // uk.gov.hmcts.reform.ccd.client
         SendLetterApi.class,            // uk.gov.hmcts.reform.sendletter
         CaseDocumentClientApi.class,      // uk.gov.hmcts.reform.ccd.document.am.feign
-    },
-    defaultConfiguration = Jackson2FeignConfiguration.class
+    }
 )
 @EnableCaching
 @EnableRetry
