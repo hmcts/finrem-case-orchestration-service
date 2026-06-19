@@ -9,8 +9,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
+
+import java.util.List;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
@@ -38,12 +39,12 @@ public class UploadDocumentConsentedAboutToSubmitHandler extends FinremCallbackH
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = finremCaseDetails.getData();
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, data -> emptyIfNull(data.getUploadDocuments()).stream()
-                .map(UploadDocumentCollection::getValue).toList(), userAuthorisation))
-            .data(caseData).build();
+        List<String> warnings = documentWarningsHelper.getDocumentWarnings(callbackRequest,
+            data -> emptyIfNull(data.getUploadDocuments()).stream()
+                .map(UploadDocumentCollection::getValue).toList(), userAuthorisation);
+
+        return response(caseData, warnings, null);
     }
 }
