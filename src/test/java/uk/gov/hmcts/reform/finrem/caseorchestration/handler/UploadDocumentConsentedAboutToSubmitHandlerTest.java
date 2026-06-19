@@ -1,19 +1,16 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -39,7 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class UploadDocumentConsentedAboutToSubmitHandlerTest {
 
     @TestLogs
@@ -51,14 +48,8 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
     @Mock
     private NewUploadedDocumentsService newUploadedDocumentsService;
 
+    @InjectMocks
     private UploadDocumentConsentedAboutToSubmitHandler underTest;
-
-    @BeforeEach
-    public void setUpTest() {
-        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        underTest = new UploadDocumentConsentedAboutToSubmitHandler(finremCaseDetailsMapper, new DocumentWarningsHelper(documentCheckerService,
-            newUploadedDocumentsService));
-    }
 
     @Test
     void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventUploadDocumentConsented_thenHandlerCanHandle() {
