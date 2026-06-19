@@ -237,6 +237,13 @@
     "email": "FRCNottingham@justice.gov.uk",
     "emailReplyToId": "5c727fb0-4618-4e78-ab4d-387a2ce0b728"
   },
+  "FR_birmingham_hc_list_12": {
+    "courtName": "Wolverhampton Hearing Centre",
+    "courtAddress": "Wolverhampton Magistrates court, The Law Courts, North Street, Wolverhampton, WV1 1RA",
+    "phoneNumber": "0300 123 5577",
+    "email": "FRCBirmingham@justice.gov.uk",
+    "emailReplyToId": "22a13617-b938-433e-a2d3-6390354f8c4d"
+  },
   "FR_cleaveland_hc_list_1": {
     "courtName": "Newcastle Civil and Family Courts and Tribunals Centre",
     "courtAddress": "Barras Bridge, Newcastle upon Tyne, NE18QF",
