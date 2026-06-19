@@ -1,10 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +25,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 public class ConsentHearingServiceTest extends BaseServiceTest  {
@@ -47,18 +45,12 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
     private ConsentedHearingHelper helper;
 
     private ObjectMapper objectMapper;
-    private static final String AUTH_TOKEN = "tokien:)";
     private static final String SINGLE_HEARING_TEST_PAYLOAD = "/fixtures/consented.listOfHearing/list-for-hearing.json";
     private static final String MULTIPLE_HEARING_TEST_PAYLOAD = "/fixtures/consented.listOfHearing/list-for-hearing-multiple.json";
 
     @Before
     public void setup() {
-        objectMapper = JsonMapper
-            .builder()
-            .addModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .build();
+        objectMapper = createObjectMapper();
     }
 
     @Test
@@ -76,7 +68,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
         verify(bulkPrintServiceAdapter).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseDetails.getData());
-        assertEquals("2012-05-19", hearings.get(0).getValue().getHearingDate());
+        assertEquals("2012-05-19", hearings.getFirst().getValue().getHearingDate());
     }
 
     @Test

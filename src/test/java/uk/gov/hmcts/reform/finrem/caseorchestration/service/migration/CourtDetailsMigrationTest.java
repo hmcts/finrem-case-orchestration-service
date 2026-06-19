@@ -13,6 +13,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 
 class CourtDetailsMigrationTest extends BaseServiceTest {
 
@@ -20,7 +21,7 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
     @BeforeEach
     void setup() {
-        mapper = new ObjectMapper();
+        mapper = createObjectMapper();
     }
 
     @Test

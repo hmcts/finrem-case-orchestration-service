@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.TestUtils.buildCaseDetailsFromJson;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.TestUtils.getCaseData;
 
@@ -31,7 +32,7 @@ class ContestedDraftOrderNotApprovedDetailsMapperTest {
     private ContestedDraftOrderNotApprovedDetailsMapper underTest;
 
     @Spy
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = createObjectMapper();
 
     @Spy
     private FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));

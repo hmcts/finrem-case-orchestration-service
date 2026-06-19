@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -152,6 +151,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 class FinremCaseDetailsMapperTest {
@@ -171,8 +171,8 @@ class FinremCaseDetailsMapperTest {
 
     @BeforeEach
     void testSetUp() {
-        objectMapper = new ObjectMapper();
-        finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));
+        objectMapper = createObjectMapper();
+        finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
     }
 
     @Test
