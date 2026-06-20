@@ -20,7 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 
 @Slf4j
 @Service
-public class UploadDocumentConsentedAboutToSubmitHandler extends FinremCallbackHandler {
+public class UploadDocumentConsentedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final DocumentWarningsHelper documentWarningsHelper;
 

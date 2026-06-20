@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -91,22 +92,10 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
 
         //var response =
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(response.getWarnings()).containsOnly("warningsA");
-
-        verifyWarningParameter(captor);
-    }
-
-    private void verifyWarningParameter(ArgumentCaptor<Function> captor) {
-        UploadGeneralDocument mockUploadGeneralDocument1 = mock(UploadGeneralDocument.class);
-        UploadGeneralDocument mockUploadGeneralDocument2 = mock(UploadGeneralDocument.class);
-        assertThat(
-            captor.getValue().apply(FinremCaseData.builder().uploadGeneralDocuments(
-                List.of(
-                    uploadGeneralDocumentCollection(mockUploadGeneralDocument1),
-                    uploadGeneralDocumentCollection(mockUploadGeneralDocument2)
-                )
-            ).build())
-        ).isEqualTo(List.of(mockUploadGeneralDocument1, mockUploadGeneralDocument2));
+        assertAll(
+            () -> assertThat(response.getWarnings()).containsOnly("warningsA"),
+            () -> verifyWarningParameter(captor)
+        );
     }
 
     @Test
@@ -139,5 +128,18 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         return UploadGeneralDocumentCollection.builder()
             .value(uploadGeneralDocument)
             .build();
+    }
+
+    private void verifyWarningParameter(ArgumentCaptor<Function> captor) {
+        UploadGeneralDocument mockUploadGeneralDocument1 = mock(UploadGeneralDocument.class);
+        UploadGeneralDocument mockUploadGeneralDocument2 = mock(UploadGeneralDocument.class);
+        assertThat(
+            captor.getValue().apply(FinremCaseData.builder().uploadGeneralDocuments(
+                List.of(
+                    uploadGeneralDocumentCollection(mockUploadGeneralDocument1),
+                    uploadGeneralDocumentCollection(mockUploadGeneralDocument2)
+                )
+            ).build())
+        ).isEqualTo(List.of(mockUploadGeneralDocument1, mockUploadGeneralDocument2));
     }
 }
