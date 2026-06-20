@@ -70,7 +70,6 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         when(documentWarningsHelper.getDocumentWarnings(eq(callbackRequest), captor.capture(), eq(AUTH_TOKEN)))
             .thenReturn(warnings);
 
-        //var response =
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getWarnings()).isEmpty();
 
@@ -90,7 +89,6 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         when(documentWarningsHelper.getDocumentWarnings(eq(callbackRequest), captor.capture(), eq(AUTH_TOKEN)))
             .thenReturn(List.of("warningsA"));
 
-        //var response =
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
         assertAll(
             () -> assertThat(response.getWarnings()).containsOnly("warningsA"),
