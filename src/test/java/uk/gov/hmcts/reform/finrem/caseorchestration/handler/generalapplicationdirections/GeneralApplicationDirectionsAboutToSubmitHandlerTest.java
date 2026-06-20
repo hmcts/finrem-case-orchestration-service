@@ -216,7 +216,6 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
-        CaseDetails details = buildCaseDetailsFromJson();
 
         CaseDocument generalApplicationDocument = caseDocument("GeneralApplicationDocument.pdf", "url", "binaryUrl");
         CaseDocument generalApplicationDraftOrder = caseDocument("GeneralApplicationDraft.pdf", "url", "binaryUrl");
