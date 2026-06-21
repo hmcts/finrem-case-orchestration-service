@@ -3,9 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.google.common.collect.ImmutableList;
 import org.hamcrest.Matchers;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamCheckService;
@@ -32,6 +34,9 @@ public class MiamCheckControllerTest extends BaseControllerTest {
 
     @MockitoBean
     private MiamCheckService service;
+
+    @Autowired
+    protected MockMvc mvc;
 
     @Test
     public void badRequest() throws Exception {

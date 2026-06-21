@@ -1,14 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.cache.CacheManager;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
@@ -26,7 +20,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE_COURTLIST;
@@ -57,7 +50,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.LONDON_TEMP;
 
 @WebMvcTest(CcdDataMigrationController.class)
-@Import(CcdDataMigrationControllerTest.TestConfig.class)
 public class CcdDataMigrationControllerTest extends BaseControllerTest {
 
     private static final String MIGRATE_FRC_URL = "/ccd-data-migration/migrateFrc";
@@ -67,31 +59,14 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     protected MockMvc mvc;
 
     @Autowired
-    private CcdDataMigrationController CcdDataMigrationController;
+    private CcdDataMigrationController ccdDataMigrationController;
 
     @MockitoBean
     private RemoveRespondentSolOrg removeRespondentSolOrg;
 
-    @MockitoBean
-    protected CacheManager cacheManager;
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public ObjectMapper objectMapper() {
-            return createObjectMapper();
-        }
-    }
-
-    @Override
-    @Before
-    public void setUp() {
-        // Do not call super.setUp()
-    }
-
     @Test
     public void shouldRemoveRespOrgPolicyFromCaseData() {
-        CcdDataMigrationController.migrate(authTokenGenerator.generate(), buildCallbackRequest());
+        ccdDataMigrationController.migrate(authTokenGenerator.generate(), buildCallbackRequest());
 
         verify(removeRespondentSolOrg).migrateCaseData(buildCallbackRequest().getCaseDetails().getData());
     }
