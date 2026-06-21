@@ -1,19 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.barristers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import feign.FeignException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -100,6 +98,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.barrister;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_BARRISTER_COLLECTION;
@@ -113,7 +112,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(CcdCallbackController.class)
 @ContextConfiguration(classes = {
     ManageBarristerTestConfiguration.class, PrdOrganisationService.class, PrdOrganisationConfiguration.class,
@@ -125,7 +123,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
     IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class,
     InternationalPostalService.class, CourtDetailsConfiguration.class, BarristerLetterServiceAdapter.class,
     FinremNotificationRequestMapper.class, CaseRoleService.class, NotificationRequestBuilderFactory.class})
-public class ManageBarristersITest implements IntegrationTest {
+class ManageBarristersITest implements IntegrationTest {
 
     private static final String APP_BARRISTER_EMAIL_ONE = "appbarr@gmail.com";
     private static final String APP_BARRISTER_NAME = "Barrister App";
@@ -191,16 +189,19 @@ public class ManageBarristersITest implements IntegrationTest {
     private PaperNotificationService paperNotificationService;
     @MockitoBean
     private ExpressCaseService expressCaseService;
+    @Autowired
+    private ObjectMapper objectMapper;  // satisfies PrdOrganisationService injection
 
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper testObjectMapper = createObjectMapper();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
         lenient().when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
     }
 
     @Test
-    public void givenValidRequest_whenManageBarristerAboutToStart_thenProcess() {
+    void givenValidRequest_whenManageBarristerAboutToStart_thenProcess() {
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
@@ -220,7 +221,7 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenValidRequest_whenManageBarristerMidEvent_thenProcess() {
+    void givenValidRequest_whenManageBarristerMidEvent_thenProcess() {
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
@@ -246,7 +247,7 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenBarristerIsUnregistered_whenManageBarristerMidEvent_thenReturnCorrectError() {
+    void givenBarristerIsUnregistered_whenManageBarristerMidEvent_thenReturnCorrectError() {
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
@@ -270,7 +271,7 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenBarristerAlreadyRepresentsOpposingLitigant_whenManageBarristerMidEvent_thenReturnCorrectError() {
+    void givenBarristerAlreadyRepresentsOpposingLitigant_whenManageBarristerMidEvent_thenReturnCorrectError() {
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
@@ -296,7 +297,7 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenValidRequest_whenManageBarristerAboutToSubmitAsSolicitor_thenProcess() {
+    void givenValidRequest_whenManageBarristerAboutToSubmitAsSolicitor_thenProcess() {
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(RESP_SOLICITOR_POLICY).build()))
@@ -331,7 +332,7 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenValidRequestAsCaseworker_whenManageBarristerAboutToSubmit_thenProcess() {
+    void givenValidRequestAsCaseworker_whenManageBarristerAboutToSubmit_thenProcess() {
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(RESP_SOLICITOR_POLICY).build()))
@@ -369,7 +370,7 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenValidRequest_WhenManageBarristerAddedSubmitted_thenProcess() {
+    void givenValidRequest_WhenManageBarristerAddedSubmitted_thenProcess() {
         CaseDocument addedDocument = CaseDocument.builder().documentBinaryUrl(ADDED_BIN_URL).build();
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
@@ -395,7 +396,7 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenValidRequest_WhenManageBarristerRemovedSubmitted_thenProcess() {
+    void givenValidRequest_WhenManageBarristerRemovedSubmitted_thenProcess() {
         CaseDocument removedDocument = CaseDocument.builder().documentBinaryUrl(REMOVED_BIN_URL).build();
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
@@ -421,7 +422,7 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenRepresentedApplicant_WhenManageBarristerAddedSubmitted_thenProcessWithoutLetter() {
+    void givenRepresentedApplicant_WhenManageBarristerAddedSubmitted_thenProcessWithoutLetter() {
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
@@ -445,10 +446,10 @@ public class ManageBarristersITest implements IntegrationTest {
 
     private CallbackRequest buildCallbackRequest() {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/barristers/"
-            + "manage-barrister-about-to-start.json", objectMapper);
+            + "manage-barrister-about-to-start.json", testObjectMapper);
 
         CaseDetails caseDetailsBefore = caseDetailsFromResource("/fixtures/barristers/"
-            + "manage-barrister-about-to-start.json", objectMapper);
+            + "manage-barrister-about-to-start.json", testObjectMapper);
 
         return CallbackRequest.builder()
             .eventId(EventType.MANAGE_BARRISTER.getCcdType())
