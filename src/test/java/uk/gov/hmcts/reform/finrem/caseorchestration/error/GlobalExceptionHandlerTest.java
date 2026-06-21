@@ -23,14 +23,14 @@ public class GlobalExceptionHandlerTest {
     @Test
     public void handleFeignException() {
         ResponseEntity<Object> actual = exceptionHandler.handleFeignException(feignError());
-        assertThat(actual.getStatusCode(), is(INTERNAL_SERVER_ERROR));
+        assertThat(actual.getStatusCode().value(), is(INTERNAL_SERVER_ERROR));
         assertThat(actual.getBody(), is(SERVER_ERROR_MSG));
     }
 
     @Test
     public void handleInvalidCaseDataException() {
         ResponseEntity<Object> actual = exceptionHandler.handleInvalidCaseDataException(invalidCaseDataError());
-        assertThat(actual.getStatusCode(), is(BAD_REQUEST));
+        assertThat(actual.getStatusCode().value(), is(BAD_REQUEST));
         Assert.assertNotNull(actual.getBody());
         assertThat(actual.getBody().toString(), startsWith(SERVER_ERROR_MSG));
     }
@@ -38,7 +38,7 @@ public class GlobalExceptionHandlerTest {
     @Test
     public void handleServerErrorException() {
         ResponseEntity<Object> actual = exceptionHandler.handleServerErrorException(httpServerError());
-        assertThat(actual.getStatusCode(), is(INTERNAL_SERVER_ERROR));
+        assertThat(actual.getStatusCode().value(), is(INTERNAL_SERVER_ERROR));
         assertThat(actual.getBody(), is(SERVER_ERROR_MSG));
     }
 
@@ -46,7 +46,7 @@ public class GlobalExceptionHandlerTest {
     public void handleNoSuchFieldExistsException() {
         ResponseEntity<Object> actual = exceptionHandler.handleNoSuchFieldExistsException(
             noSuchFieldExistsCaseDataError());
-        assertThat(actual.getStatusCode(), is(INTERNAL_SERVER_ERROR));
+        assertThat(actual.getStatusCode().value(), is(INTERNAL_SERVER_ERROR));
         assertThat(actual.getBody(), is(SERVER_ERROR_MSG));
     }
 
