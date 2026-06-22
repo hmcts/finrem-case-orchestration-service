@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import java.io.InputStream;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -53,8 +52,7 @@ class CreateCaseServiceTest {
 
         createCaseService.setSupplementaryData(callbackRequest, AUTH_TOKEN);
 
-        verify(coreCaseDataApi,
-            times(1)).submitSupplementaryData(any(), any(), any(), any());
+        verify(coreCaseDataApi).submitSupplementaryData(any(), any(), any(), any());
     }
 
     @Test
@@ -64,8 +62,7 @@ class CreateCaseServiceTest {
 
         createCaseService.setSupplementaryData(callbackRequest, AUTH_TOKEN);
 
-        verify(coreCaseDataApi,
-            times(1)).submitSupplementaryData(any(), any(), any(), any());
+        verify(coreCaseDataApi).submitSupplementaryData(any(), any(), any(), any());
     }
 
     private CaseDetails getCase() {
