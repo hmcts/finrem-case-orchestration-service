@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.litigant.respondent.SolicitorAddedRespondentLetterHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.litigant.respondent.SolicitorRemovedRespondentLetterHandler;
@@ -13,12 +13,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.
 import java.util.Arrays;
 
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 
-@RunWith(MockitoJUnitRunner.class)
-public class NocLetterNotificationServiceTest {
-
-    protected static final String AUTH_TOKEN = "authToken";
+@ExtendWith(MockitoExtension.class)
+class NocLetterNotificationServiceTest {
     NocLetterNotificationService noticeOfChangeLetterNotificationService;
 
     @Mock
@@ -26,23 +26,20 @@ public class NocLetterNotificationServiceTest {
     @Mock
     private SolicitorAddedRespondentLetterHandler solicitorAddedRespondentLetterHandler;
 
-    private CaseDetails caseDetails;
-    private CaseDetails caseDetailsBefore;
+    private final ObjectMapper objectMapper = createObjectMapper();
 
-    @Before
-    public void setUpTest() {
+    @BeforeEach
+    void setUpTest() {
         noticeOfChangeLetterNotificationService =
             new NocLetterNotificationService(Arrays.asList(solicitorAddedRespondentLetterHandler, solicitorRemovedRespondentLetterHandler));
     }
 
     @Test
-    public void shouldCallLetterHandlersCorrectly() {
-
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
-            new ObjectMapper());
-        caseDetailsBefore =
-            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
-                new ObjectMapper());
+    void shouldCallLetterHandlersCorrectly() {
+        CaseDetails caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
+            objectMapper);
+        CaseDetails caseDetailsBefore = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
+            objectMapper);
 
         noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
