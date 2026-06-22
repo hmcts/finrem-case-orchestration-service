@@ -1,12 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,9 +13,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
@@ -28,11 +26,12 @@ import uk.gov.service.notify.NotificationClientException;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.AssertionsKt.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -84,14 +83,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @PropertySource(value = "classpath:application.properties")
 @AutoConfigureMockMvc
 @Slf4j
-@Category(IntegrationTest.class)
-public class EmailServiceTest {
+@Tag("integration")
+class EmailServiceTest {
 
     @MockitoBean
     private EmailClient mockClient;
@@ -108,12 +107,11 @@ public class EmailServiceTest {
     @Value("#{${uk.gov.notify.email.template.vars}}")
     private Map<String, Map<String, String>> emailTemplateVars;
 
-    @Captor
-    private ArgumentCaptor<Map<String, Object>> templateFieldsArgumentCaptor;
+    private ArgumentCaptor<Map<String, Object>> templateFieldsArgumentCaptor = ArgumentCaptor.forClass(Map.class);
 
     private NotificationRequest notificationRequest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setNotificationEmail(TEST_SOLICITOR_EMAIL);
@@ -138,7 +136,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendHwfSuccessfulConfirmationEmailConsented() throws NotificationClientException {
+    void sendHwfSuccessfulConfirmationEmailConsented() throws NotificationClientException {
         setConsentedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_HWF_SUCCESSFUL.name());
@@ -158,7 +156,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendHwfSuccessfulConfirmationEmailContested() throws NotificationClientException {
+    void sendHwfSuccessfulConfirmationEmailContested() throws NotificationClientException {
         setContestedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL.name());
@@ -179,7 +177,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendHwfSuccessfulConfirmationEmailContestedForNewFRc() throws NotificationClientException {
+    void sendHwfSuccessfulConfirmationEmailContestedForNewFRc() throws NotificationClientException {
         notificationRequest.setCaseType(CONTESTED);
         notificationRequest.setSelectedCourt("dorset");
 
@@ -201,21 +199,17 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendHwfSuccessfulConfirmationEmailShouldNotPropagateNotificationClientException()
+    void sendHwfSuccessfulConfirmationEmailShouldNotPropagateNotificationClientException()
         throws NotificationClientException {
         setConsentedData();
         doThrow(new NotificationClientException(new Exception("Exception inception")))
             .when(mockClient).sendEmail(anyString(), anyString(), eq(null), anyString());
 
-        try {
-            emailService.sendConfirmationEmail(notificationRequest, FR_HWF_SUCCESSFUL);
-        } catch (Exception e) {
-            fail();
-        }
+        assertDoesNotThrow(() -> emailService.sendConfirmationEmail(notificationRequest, FR_HWF_SUCCESSFUL));
     }
 
     @Test
-    public void sendAssignedToJudgeConfirmationEmailConsented() throws NotificationClientException {
+    void sendAssignedToJudgeConfirmationEmailConsented() throws NotificationClientException {
         setConsentedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_ASSIGNED_TO_JUDGE.name());
@@ -233,7 +227,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendPrepareForHearingConfirmationEmailContested() throws NotificationClientException {
+    void sendPrepareForHearingConfirmationEmailContested() throws NotificationClientException {
         setContestedData();
         notificationRequest.setHearingType("First Directions Appointment (FDA)");
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING.name());
@@ -254,7 +248,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendPrepareForHearingConfirmationEmailContestedIntervener() throws NotificationClientException {
+    void sendPrepareForHearingConfirmationEmailContestedIntervener() throws NotificationClientException {
         setContestedData();
         notificationRequest.setHearingType("First Directions Appointment (FDA)");
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest,
@@ -276,7 +270,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendAssignedToJudgeConfirmationEmailShouldNotPropagateNotificationClientException()
+    void sendAssignedToJudgeConfirmationEmailShouldNotPropagateNotificationClientException()
         throws NotificationClientException {
         setConsentedData();
         doThrow(new NotificationClientException(new Exception("Exception inception")))
@@ -289,7 +283,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendConsentOrderMadeConfirmationEmail() throws NotificationClientException {
+    void sendConsentOrderMadeConfirmationEmail() throws NotificationClientException {
         setConsentedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONSENT_ORDER_MADE.name());
@@ -306,7 +300,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendVariationOrderMadeConfirmationEmail() throws NotificationClientException {
+    void sendVariationOrderMadeConfirmationEmail() throws NotificationClientException {
         setConsentedData();
         notificationRequest.setCaseOrderType("variation");
         notificationRequest.setCamelCaseOrderType("Variation");
@@ -325,7 +319,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendConsentOrderMadeConfirmationEmailShouldNotPropagateNotificationClientException()
+    void sendConsentOrderMadeConfirmationEmailShouldNotPropagateNotificationClientException()
         throws NotificationClientException {
         setConsentedData();
         doThrow(new NotificationClientException(new Exception("Exception inception")))
@@ -338,7 +332,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendConsentOrderNotApprovedEmail() throws NotificationClientException {
+    void sendConsentOrderNotApprovedEmail() throws NotificationClientException {
         setConsentedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED.name());
@@ -356,7 +350,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendConsentOrderNotApprovedEmailSent() throws NotificationClientException {
+    void sendConsentOrderNotApprovedEmailSent() throws NotificationClientException {
         setConsentedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT.name());
@@ -374,7 +368,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendConsentOrderNotApprovedEmailShouldNotPropagateNotificationClientException()
+    void sendConsentOrderNotApprovedEmailShouldNotPropagateNotificationClientException()
         throws NotificationClientException {
         setConsentedData();
         doThrow(new NotificationClientException(new Exception("Exception inception")))
@@ -387,7 +381,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendConsentOrderAvailableEmail() throws NotificationClientException {
+    void sendConsentOrderAvailableEmail() throws NotificationClientException {
         setConsentedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONSENT_ORDER_AVAILABLE.name());
@@ -404,7 +398,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendContestedGeneralApplicationReferToJudgeEmail() throws NotificationClientException {
+    void sendContestedGeneralApplicationReferToJudgeEmail() throws NotificationClientException {
         setContestedData();
 
         Map<String, Object> returnedTemplateVars =
@@ -422,7 +416,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void sendConsentOrderAvailableEmailShouldNotPropagateNotificationClientException()
+    void sendConsentOrderAvailableEmailShouldNotPropagateNotificationClientException()
         throws NotificationClientException {
         setConsentedData();
         doThrow(new NotificationClientException(new Exception("Exception inception")))
@@ -435,7 +429,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldBuildTemplateVarsForContested() {
+    void shouldBuildTemplateVarsForContested() {
         setContestedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL.name());
@@ -446,7 +440,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldBuildTemplateVarsWithCourtDataForContested() {
+    void shouldBuildTemplateVarsWithCourtDataForContested() {
         setContestedData();
         notificationRequest.setContactCourtEmail("contact.court@test.com");
         notificationRequest.setContactCourtName("Local Court");
@@ -459,7 +453,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldBuildTemplateVarsForConsented() {
+    void shouldBuildTemplateVarsForConsented() {
         setConsentedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_HWF_SUCCESSFUL.name());
@@ -468,7 +462,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldBuildTemplateVarsWithCourtDataForConsented() {
+    void shouldBuildTemplateVarsWithCourtDataForConsented() {
         setConsentedData();
         notificationRequest.setContactCourtEmail("contact.court@test.com");
         notificationRequest.setContactCourtName("Local Court");
@@ -480,7 +474,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldBuildTemplateVarsForGeneralEmailContested() {
+    void shouldBuildTemplateVarsForGeneralEmailContested() {
         setContestedData();
         notificationRequest.setGeneralEmailBody("test email body");
 
@@ -492,7 +486,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldBuildTemplateVarsForGeneralApplicationReferToJudge() {
+    void shouldBuildTemplateVarsForGeneralApplicationReferToJudge() {
         setContestedData();
         notificationRequest.setGeneralEmailBody("test email body");
 
@@ -506,7 +500,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldBuildTemplateVarsForGeneralEmailConsented() {
+    void shouldBuildTemplateVarsForGeneralEmailConsented() {
         setConsentedData();
         notificationRequest.setGeneralEmailBody("test email body");
 
@@ -520,7 +514,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldBuildTemplateVarsForGeneralEmailAttachmentConsented() {
+    void shouldBuildTemplateVarsForGeneralEmailAttachmentConsented() {
         setConsentedData();
         notificationRequest.setGeneralEmailBody("test email body");
         notificationRequest.setDocumentContents(new byte[5]);
@@ -536,7 +530,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldBuildTemplateVarsForGeneralEmailAttachmentContested() {
+    void shouldBuildTemplateVarsForGeneralEmailAttachmentContested() {
         setConsentedData();
         notificationRequest.setGeneralEmailBody("test email body");
         notificationRequest.setDocumentContents(new byte[5]);
@@ -552,7 +546,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldBuildTemplateVarsForTransferToLocalCourt() {
+    void shouldBuildTemplateVarsForTransferToLocalCourt() {
         setConsentedData();
         notificationRequest.setCaseReferenceNumber("123456789");
         notificationRequest.setNotificationEmail("TestCourtEmail@Test.com");
@@ -568,7 +562,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenRejectGeneralApplicationTemplate_whenPopulateTemplateVars_thenAddRejectionReasonToTemplateVars() {
+    void givenRejectGeneralApplicationTemplate_whenPopulateTemplateVars_thenAddRejectionReasonToTemplateVars() {
         setContestedData();
         notificationRequest.setGeneralApplicationRejectionReason("Test Rejection Reason");
 
@@ -580,7 +574,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenNotRejectGeneralApplication_whenPopulateTemplateVars_thenNotAddRejectionReasonToTemplateVars() {
+    void givenNotRejectGeneralApplication_whenPopulateTemplateVars_thenNotAddRejectionReasonToTemplateVars() {
         setContestedData();
         notificationRequest.setGeneralApplicationRejectionReason("Test Rejection Reason");
 
@@ -592,7 +586,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldBuildTemplateVarsForHearingEmailConsented() {
+    void shouldBuildTemplateVarsForHearingEmailConsented() {
         setConsentedData();
         notificationRequest.setSelectedCourt("nottingham");
 
@@ -605,7 +599,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenBarristerAccessAddedTemplate_whenPopulateTemplateVars_thenAddBarristerReferenceNumberToTemplateVars() {
+    void givenBarristerAccessAddedTemplate_whenPopulateTemplateVars_thenAddBarristerReferenceNumberToTemplateVars() {
         setContestedData();
         notificationRequest.setBarristerReferenceNumber("1234567890");
 
@@ -618,7 +612,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenBarristerAccessRemovedTemplate_whenPopulateTemplateVars_thenAddBarristerReferenceNumberToTemplateVars() {
+    void givenBarristerAccessRemovedTemplate_whenPopulateTemplateVars_thenAddBarristerReferenceNumberToTemplateVars() {
         setContestedData();
         notificationRequest.setBarristerReferenceNumber("1234567890");
 
@@ -631,7 +625,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenCsStopRepresentingIntervenerEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+    void givenCsStopRepresentingIntervenerEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
         setConsentedData();
         notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
         notificationRequest.setIntervenerFullName("test name");
@@ -645,7 +639,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenCtStopRepresentingIntervenerEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+    void givenCtStopRepresentingIntervenerEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
         setContestedData();
         notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
         notificationRequest.setIntervenerFullName("test name");
@@ -659,7 +653,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenIntervenerAddedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+    void givenIntervenerAddedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
         setContestedData();
         notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
         notificationRequest.setIntervenerFullName("test name");
@@ -674,7 +668,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenIntervenerSolicitorAddedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+    void givenIntervenerSolicitorAddedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
         setContestedData();
         notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
         notificationRequest.setIntervenerSolicitorFirm("test firm");
@@ -690,7 +684,8 @@ public class EmailServiceTest {
         assertEquals(PHONE_OPENING_HOURS, returnedTemplateVars.get("phoneOpeningHours"));
     }
 
-    public void givenIntervenerRemovedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+    @Test
+    void givenIntervenerRemovedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
         setContestedData();
         notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
         notificationRequest.setIntervenerFullName("test name");
@@ -705,7 +700,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenIntervenerSolicitorRemovedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+    void givenIntervenerSolicitorRemovedEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
         setContestedData();
         notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
         notificationRequest.setIntervenerSolicitorFirm("test firm");
@@ -722,7 +717,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenJudgeReadyToReviewTemplate_whenPopulateTemplateVars_thenAddHearingDateToTemplateVars() {
+    void givenJudgeReadyToReviewTemplate_whenPopulateTemplateVars_thenAddHearingDateToTemplateVars() {
         setContestedData();
         notificationRequest.setHearingDate("1 January 2024");
         notificationRequest.setNotificationEmail("judge@email.com");
@@ -739,7 +734,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenAdminReadyToReviewTemplate_whenPopulateTemplateVars_thenAddHearingDateToTemplateVars() {
+    void givenAdminReadyToReviewTemplate_whenPopulateTemplateVars_thenAddHearingDateToTemplateVars() {
         setContestedData();
         notificationRequest.setHearingDate("1 January 2024");
         notificationRequest.setNotificationEmail("admin@email.com");
@@ -756,7 +751,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void testSendConfirmationEmailForContestedDraftOrderReviewOverdue() throws NotificationClientException {
+    void testSendConfirmationEmailForContestedDraftOrderReviewOverdue() throws NotificationClientException {
         NotificationRequest nr = NotificationRequest.builder()
             .notificationEmail("recipient@test.com")
             .caseReferenceNumber("5457543354")
@@ -793,7 +788,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void testSendRefusedDraftOrderOrPsa() throws NotificationClientException {
+    void testSendRefusedDraftOrderOrPsa() throws NotificationClientException {
         NotificationRequest nr = NotificationRequest.builder()
             .notificationEmail("recipient@test.com")
             .caseReferenceNumber("5457543354")
@@ -832,7 +827,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldPopulateLinkToSmartSurveyFromApplicationProperties() throws NotificationClientException {
+    void shouldPopulateLinkToSmartSurveyFromApplicationProperties() throws NotificationClientException {
         emailService.sendConfirmationEmail(NotificationRequest.builder().build(), FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR);
 
         verify(mockClient).sendEmail(
@@ -845,7 +840,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldPopulateLinkToSmartSurveyByDefault() throws NotificationClientException {
+    void shouldPopulateLinkToSmartSurveyByDefault() throws NotificationClientException {
         EmailTemplateNames emailTemplateNames = mock(EmailTemplateNames.class);
         when(emailTemplateNames.name()).thenReturn("EMAIL_TEMPLATE_NAME");
         emailService.sendConfirmationEmail(NotificationRequest.builder().build(), emailTemplateNames);
@@ -860,7 +855,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void testSendVacateHearingNotification() throws NotificationClientException {
+    void testSendVacateHearingNotification() throws NotificationClientException {
         NotificationRequest nr = NotificationRequest.builder()
             .notificationEmail("recipient@test.com")
             .caseReferenceNumber("5457543354")
@@ -904,7 +899,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenInvalidEmail_whenSendEmail_thenExceptionThrown() throws NotificationClientException {
+    void givenInvalidEmail_whenSendEmail_thenExceptionThrown() throws NotificationClientException {
         doThrow(new NotificationClientException("email_address Not a valid email address"))
             .when(mockClient).sendEmail(any(), any(), any(), any(), any());
 
@@ -913,7 +908,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void givenSendEmailError_whenSendEmail_thenExceptionThrown() throws NotificationClientException {
+    void givenSendEmailError_whenSendEmail_thenExceptionThrown() throws NotificationClientException {
         doThrow(new NotificationClientException("Internal Server Error"))
             .when(mockClient).sendEmail(any(), any(), any(), any(), any());
 
@@ -922,7 +917,7 @@ public class EmailServiceTest {
     }
 
     @Test
-    public void shouldPopulateCourtInfoFromContestedContactedEmailsWhenSelectedCourtProvided() throws NotificationClientException {
+    void shouldPopulateCourtInfoFromContestedContactedEmailsWhenSelectedCourtProvided() throws NotificationClientException {
         final NotificationRequest nr = NotificationRequest.builder()
             .caseType("contested")
             .contactCourtEmail(null)
