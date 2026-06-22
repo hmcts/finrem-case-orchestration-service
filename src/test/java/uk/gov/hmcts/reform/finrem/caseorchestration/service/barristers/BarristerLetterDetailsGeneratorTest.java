@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -24,11 +24,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
@@ -37,8 +37,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator.LETTER_DATE_FORMAT;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BarristerLetterDetailsGeneratorTest {
+@ExtendWith(MockitoExtension.class)
+class BarristerLetterDetailsGeneratorTest {
 
     protected static final String APPLICANT_FULL_NAME = "applicantFullName";
     protected static final String RESPONDENT_FULL_NAME_CONTESTED = "respondentFullNameContested";
@@ -59,26 +59,26 @@ public class BarristerLetterDetailsGeneratorTest {
     private PrdOrganisationService prdOrganisationService;
 
     @Mock
-    private InternationalPostalService postalService;
+    private InternationalPostalService internationalPostalService;
 
     @InjectMocks
     private BarristerLetterDetailsGenerator barristerLetterDetailsGenerator;
 
     private CaseDetails caseDetails;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = createObjectMapper();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         when(documentHelper.getApplicantFullName(any())).thenReturn(APPLICANT_FULL_NAME);
         when(documentHelper.getRespondentFullNameContested(any())).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
         caseDetails = caseDetailsFromResource(
             "/fixtures/contested/generate-frc-info-letter-details.json",
-            new ObjectMapper());
+            objectMapper);
     }
 
     @Test
-    public void givenApplicant_whenGenerateLetterDetails_thenReturnCorrectDetails() {
+    void givenApplicant_whenGenerateLetterDetails_thenReturnCorrectDetails() {
         when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn(APP_FORMATTED_ADDRESS);
         when(prdOrganisationService.findOrganisationByOrgId(APP_BARR_ORG_ID))
             .thenReturn(organisationsResponse(APP_BARR_ORG_NAME));
@@ -90,15 +90,15 @@ public class BarristerLetterDetailsGeneratorTest {
         BarristerLetterDetails letterDetails = barristerLetterDetailsGenerator.generate(caseDetails, APPLICANT, barrister(APP_BARR_ORG_ID));
         assertLetterDetails(letterDetails);
         Addressee addressee = letterDetails.getAddressee();
-        assertThat(addressee.getFormattedAddress(), is(APP_FORMATTED_ADDRESS));
-        assertThat(addressee.getName(), is(APPLICANT_FULL_NAME));
-        assertThat(letterDetails.getBarristerFirmName(), is(APP_BARR_ORG_NAME));
-        assertThat(letterDetails.getReference(), is(APP_BARR_ORG_ID));
-        assertThat(letterDetails.getCaseType(), is(CaseType.CONTESTED));
+        assertEquals(APP_FORMATTED_ADDRESS, addressee.getFormattedAddress());
+        assertEquals(APPLICANT_FULL_NAME, addressee.getName());
+        assertEquals(APP_BARR_ORG_NAME, letterDetails.getBarristerFirmName());
+        assertEquals(APP_BARR_ORG_ID, letterDetails.getReference());
+        assertEquals(CaseType.CONTESTED, letterDetails.getCaseType());
     }
 
     @Test
-    public void givenRespondent_whenGenerateLetterDetails_thenReturnCorrectDetails() {
+    void givenRespondent_whenGenerateLetterDetails_thenReturnCorrectDetails() {
         when(documentHelper.formatAddressForLetterPrinting(any(), anyBoolean())).thenReturn(RESP_FORMATTED_ADDRESS);
         when(prdOrganisationService.findOrganisationByOrgId(RESP_BARR_ORG_ID))
             .thenReturn(organisationsResponse(RESP_BARR_ORG_NAME));
@@ -110,19 +110,19 @@ public class BarristerLetterDetailsGeneratorTest {
         BarristerLetterDetails letterDetails = barristerLetterDetailsGenerator.generate(caseDetails, RESPONDENT, barrister(RESP_BARR_ORG_ID));
         assertLetterDetails(letterDetails);
         Addressee addressee = letterDetails.getAddressee();
-        assertThat(addressee.getFormattedAddress(), is(RESP_FORMATTED_ADDRESS));
-        assertThat(addressee.getName(), is(RESPONDENT_FULL_NAME_CONTESTED));
-        assertThat(letterDetails.getBarristerFirmName(), is(RESP_BARR_ORG_NAME));
-        assertThat(letterDetails.getReference(), is(RESP_BARR_ORG_ID));
-        assertThat(letterDetails.getCaseType(), is(CaseType.CONTESTED));
+        assertEquals(RESP_FORMATTED_ADDRESS, addressee.getFormattedAddress());
+        assertEquals(RESPONDENT_FULL_NAME_CONTESTED, addressee.getName());
+        assertEquals(RESP_BARR_ORG_NAME, letterDetails.getBarristerFirmName());
+        assertEquals(RESP_BARR_ORG_ID, letterDetails.getReference());
+        assertEquals(CaseType.CONTESTED, letterDetails.getCaseType());
     }
 
     private void assertLetterDetails(BarristerLetterDetails barristerLetterDetails) {
-        assertThat(barristerLetterDetails.getCaseNumber(), is(caseDetails.getId().toString()));
-        assertThat(barristerLetterDetails.getDivorceCaseNumber(), is(caseDetails.getData().get(DIVORCE_CASE_NUMBER).toString()));
-        assertThat(barristerLetterDetails.getLetterDate(), is(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now())));
-        assertThat(barristerLetterDetails.getApplicantName(), is(APPLICANT_FULL_NAME));
-        assertThat(barristerLetterDetails.getRespondentName(), is(RESPONDENT_FULL_NAME_CONTESTED));
+        assertEquals(caseDetails.getId().toString(), barristerLetterDetails.getCaseNumber());
+        assertEquals(caseDetails.getData().get(DIVORCE_CASE_NUMBER).toString(), barristerLetterDetails.getDivorceCaseNumber());
+        assertEquals(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()), barristerLetterDetails.getLetterDate());
+        assertEquals(APPLICANT_FULL_NAME, barristerLetterDetails.getApplicantName());
+        assertEquals(RESPONDENT_FULL_NAME_CONTESTED, barristerLetterDetails.getRespondentName());
     }
 
     private Barrister barrister(String orgId) {
