@@ -2,14 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.noc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -65,11 +63,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
 @ContextConfiguration(classes = {NocTestConfig.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class,
     LetterAddresseeGeneratorMapper.class, ApplicantLetterAddresseeGenerator.class,
@@ -140,9 +138,10 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     ManageHearingsCorresponder manageHearingsCorresponder;
     @MockitoBean
     ExpressCaseService expressCaseService;
+    @Spy
+    private ObjectMapper objectMapper = createObjectMapper();
 
-    @Captor
-    ArgumentCaptor<Map> placeholdersMapArgumentCaptor;
+    private ArgumentCaptor<Map> placeholdersMapArgumentCaptor = ArgumentCaptor.forClass(Map.class);
 
     private CaseDetails caseDetails;
 
@@ -209,21 +208,21 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     @Override
     protected CallbackRequest buildCallbackRequest() {
         caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
-            new ObjectMapper());
+            objectMapper);
         caseDetailsBefore =
             caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
-                new ObjectMapper());
+                objectMapper);
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 
     protected CallbackRequest buildNonDigitalCallbackRequest() {
         caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/"
                 + "noc-letter-notifications-add-and-revoke-non-digital.json",
-            new ObjectMapper());
+            objectMapper);
         caseDetailsBefore =
             caseDetailsFromResource(
                 "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-non-digital-before.json",
-                new ObjectMapper());
+                objectMapper);
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 
