@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -22,11 +22,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CreateCaseServiceTest {
-
-    public static final String A_VALID_SERVICE_TOKEN = "A valid TOKEN";
+@ExtendWith(MockitoExtension.class)
+class CreateCaseServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -38,17 +37,17 @@ public class CreateCaseServiceTest {
     @InjectMocks
     private CreateCaseService createCaseService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = createObjectMapper();
 
-    @Before
-    public void setUp() {
-        when(authTokenGenerator.generate()).thenReturn(A_VALID_SERVICE_TOKEN);
+    @BeforeEach
+    void setUp() {
+        when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
         when(caseFlagsConfiguration.getHmctsId()).thenReturn("financial-remedy");
         when(coreCaseDataApi.submitSupplementaryData(any(), any(), any(), any())).thenReturn(getCase());
     }
 
     @Test
-    public void givenCallbackRequest_whenSetSupplementaryData_thenCallCcdSubmitSupplementaryData() {
+    void givenCallbackRequest_whenSetSupplementaryData_thenCallCcdSubmitSupplementaryData() {
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(getCase()).build();
 
@@ -59,7 +58,7 @@ public class CreateCaseServiceTest {
     }
 
     @Test
-    public void givenFinremCallbackRequest_whenSetSupplementaryData_thenCallCcdSubmitSupplementaryData() {
+    void givenFinremCallbackRequest_whenSetSupplementaryData_thenCallCcdSubmitSupplementaryData() {
         FinremCallbackRequest callbackRequest =
             FinremCallbackRequest.builder().caseDetails(FinremCaseDetails.builder().build()).build();
 
