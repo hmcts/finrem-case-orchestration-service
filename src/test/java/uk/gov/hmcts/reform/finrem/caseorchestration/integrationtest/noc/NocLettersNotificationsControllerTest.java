@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.noc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -47,7 +46,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintSe
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -76,8 +74,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
     InternationalPostalService.class})
 public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
-    @Autowired
-    private NocLetterNotificationService nocLetterNotificationService;
     @Autowired
     private NotificationsController notificationsController;
     @MockitoBean
@@ -138,8 +134,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     ManageHearingsCorresponder manageHearingsCorresponder;
     @MockitoBean
     ExpressCaseService expressCaseService;
-    @Spy
-    private ObjectMapper objectMapper = createObjectMapper();
+    private final ObjectMapper objectMapper = createObjectMapper();
 
     private ArgumentCaptor<Map> placeholdersMapArgumentCaptor = ArgumentCaptor.forClass(Map.class);
 
