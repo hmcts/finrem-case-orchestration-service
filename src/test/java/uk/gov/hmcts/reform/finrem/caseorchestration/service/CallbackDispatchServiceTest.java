@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
@@ -16,10 +17,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,17 +28,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class CallbackDispatchServiceTest extends BaseServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CallbackDispatchServiceTest {
     private static final String USER_AUTHORISATION = "Bearer token";
 
     @Mock
     private CallbackHandler handler1;
     @Mock
     private CallbackHandler handler2;
-
     @Mock
     private CaseDetails caseDetails;
-
     @Mock
     private CallbackRequest callbackRequest;
     @Mock
@@ -48,8 +47,8 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
 
     private CallbackDispatchService callbackDispatchService;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         callbackDispatchService = new CallbackDispatchService(
             Arrays.asList(
                 handler1,
@@ -59,7 +58,7 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenMultipleHandlers_WhenDispatchToHandlers_ThenAllErrorsCollected() {
+    void givenMultipleHandlers_WhenDispatchToHandlers_ThenAllErrorsCollected() {
 
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
         when(caseDetails.getCaseTypeId()).thenReturn(CaseType.CONTESTED.getCcdType());
@@ -74,18 +73,17 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
         when(handler2.canHandle(any(CallbackType.class), any(CaseType.class), any(EventType.class))).thenReturn(true);
         when(handler2.handle(any(CallbackRequest.class), anyString())).thenReturn(response2);
 
-        GenericAboutToStartOrSubmitCallbackResponse callbackResponse =
+        var callbackResponse =
             callbackDispatchService.dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, callbackRequest, USER_AUTHORISATION);
 
         assertNotNull(callbackResponse);
         List<String> expectedErrors = List.of("error1", "error2", "error3");
 
-        assertThat(callbackResponse.getErrors(), is(expectedErrors));
-
+        assertThat(callbackResponse.getErrors()).isEqualTo(expectedErrors);
     }
 
     @Test
-    public void givenOneHandlerCanHandle_WhenDispatchToHandlers_ThenOnlyAbleHandlerAreCalled() {
+    void givenOneHandlerCanHandle_WhenDispatchToHandlers_ThenOnlyAbleHandlerAreCalled() {
 
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
         when(caseDetails.getCaseTypeId()).thenReturn(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED.getCcdType());
@@ -103,28 +101,26 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
         assertTrue(callbackResponse.getErrors().isEmpty());
 
         verify(handler1).canHandle(any(CallbackType.class), any(CaseType.class), any(EventType.class));
-        verify(handler1, times(1)).handle(any(CallbackRequest.class), anyString());
+        verify(handler1).handle(any(CallbackRequest.class), anyString());
 
         verify(handler2).canHandle(any(CallbackType.class), any(CaseType.class), any(EventType.class));
         verify(handler2, times(0)).handle(any(CallbackRequest.class), anyString());
     }
 
     @Test
-    public void givenNoHandler_WhenDispatch_ThenNoErrors() {
+    void givenNoHandler_WhenDispatch_ThenNoErrors() {
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
         when(caseDetails.getId()).thenReturn(1L);
         when(caseDetails.getCaseTypeId()).thenReturn(CaseType.CONTESTED.getCcdType());
         when(callbackRequest.getEventId()).thenReturn(EventType.SEND_ORDER.getCcdType());
 
-
         CallbackDispatchService callbackDispatchService =
             new CallbackDispatchService(Collections.emptyList());
 
         try {
-
             when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
 
-            GenericAboutToStartOrSubmitCallbackResponse callbackResponse = callbackDispatchService
+            var callbackResponse = callbackDispatchService
                 .dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, callbackRequest, USER_AUTHORISATION);
 
             assertNotNull(callbackResponse);
@@ -135,7 +131,7 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenNullArguments_WhenDispatch_ThenThrowError() {
+    void givenNullArguments_WhenDispatch_ThenThrowError() {
 
         assertThatThrownBy(() -> callbackDispatchService
             .dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, null, USER_AUTHORISATION))
