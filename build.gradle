@@ -437,12 +437,8 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
     developmentOnly 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
 
-    implementation("org.apache.poi:poi:${versions.poi}") {
-        exclude group: "org.apache.commons", module: "commons-math3"
-    }
-    implementation("org.apache.poi:poi-ooxml:${versions.poi}") {
-        exclude group: "org.apache.commons", module: "commons-math3"
-    }
+    implementation "org.apache.poi:poi:${versions.poi}"
+    implementation "org.apache.poi:poi-ooxml:${versions.poi}"
 
     implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
 
