@@ -57,7 +57,7 @@ class PaperNotificationServiceTest {
     void setup() {
         mapper = createObjectMapper();
 
-        finremCaseDetailsMapper =  new FinremCaseDetailsMapper(mapper);
+        finremCaseDetailsMapper = new FinremCaseDetailsMapper(mapper);
     }
 
     @Test
