@@ -27,7 +27,6 @@ def versions = [
         serenity             : '4.3.4',
         serviceTokenGenerator: '6.0.0',
         springDoc            : '3.0.1',
-        wiremock             : '3.0.1',
         idamClient           : '4.0.0',
         tika                 : '3.2.3',
         amClient             : '1.60.0',
@@ -461,7 +460,7 @@ dependencies {
     // to add the Jackson 2 ParameterNamesModule back only for tests,
     // since it's needed for deserializing third-party classes like CallbackRequest that rely on it:
     testImplementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
-    testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
+    testImplementation 'com.github.tomakehurst:wiremock-standalone'
     testImplementation 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation('com.github.hmcts:fortify-client:1.4.10:all')
