@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.RemoveRespondentSolOrg;
 
@@ -11,7 +12,6 @@ import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNot.not;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -56,16 +56,19 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     private static final String MIGRATE_URL = "/ccd-data-migration/migrate";
 
     @Autowired
-    private CcdDataMigrationController CcdDataMigrationController;
+    protected MockMvc mvc;
+
+    @Autowired
+    private CcdDataMigrationController ccdDataMigrationController;
 
     @MockitoBean
     private RemoveRespondentSolOrg removeRespondentSolOrg;
 
     @Test
     public void shouldRemoveRespOrgPolicyFromCaseData() {
-        CcdDataMigrationController.migrate(authTokenGenerator.generate(), buildCallbackRequest());
+        ccdDataMigrationController.migrate(authTokenGenerator.generate(), buildCallbackRequest());
 
-        verify(removeRespondentSolOrg, times(1)).migrateCaseData(buildCallbackRequest().getCaseDetails().getData());
+        verify(removeRespondentSolOrg).migrateCaseData(buildCallbackRequest().getCaseDetails().getData());
     }
 
     @Test
@@ -73,9 +76,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
         String resourcePath = "/fixtures/migration/removeNottinghamCourtListGAMigration/ccd-migrate-remove-nottingham-court-list-ga.json";
 
         mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString(resourcePath))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString(resourcePath))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data", not(hasItem("nottinghamCourtListGA"))))
@@ -85,9 +88,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_nw_preston() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-nw-preston.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-nw-preston.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(NORTHWEST)))
@@ -100,9 +103,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_nw_burnley_to_temp() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-nw-burnley-to-temp.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-nw-burnley-to-temp.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(LONDON)))
@@ -116,9 +119,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_se_bedford() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-bedford.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-bedford.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(SOUTHEAST)))
@@ -131,9 +134,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_se_oxford() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-oxford.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-oxford.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(SOUTHEAST)))
@@ -146,9 +149,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_se_basildon_to_temp() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-basildon-to-temp.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-basildon-to-temp.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(LONDON)))
@@ -162,9 +165,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_sw_winchester() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-winchester.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-winchester.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(SOUTHWEST)))
@@ -177,9 +180,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_sw_truro() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-truro.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-truro.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(SOUTHWEST)))
@@ -192,9 +195,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_sw_salisbury() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-salisbury.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-salisbury.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(SOUTHWEST)))
@@ -207,9 +210,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_w_prestatyn() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-w-prestatyn.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-w-prestatyn.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(WALES)))
