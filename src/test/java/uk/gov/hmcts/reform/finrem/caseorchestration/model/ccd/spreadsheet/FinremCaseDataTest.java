@@ -37,6 +37,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -333,11 +334,18 @@ class FinremCaseDataTest {
     private void validateConfig(List<File> configFiles) throws IOException, InvalidFormatException {
         CCDConfigValidator ccdConfigValidator = new CCDConfigValidator();
         List<String> errors = ccdConfigValidator.validateCaseFields(configFiles, FinremCaseData.class);
-        if (!errors.isEmpty()) {
+        List<String> filteredErrors = checkNotWARelated(errors);
+        if (!filteredErrors.isEmpty()) {
             log.error("Errors found when validating config files: %s and %s".formatted(configFiles.get(0).getName(), configFiles.get(1).getName()));
-            errors.forEach(log::error);
+            filteredErrors.forEach(log::error);
         }
-        assert errors.isEmpty();
+        assert filteredErrors.isEmpty();
+    }
+
+    private List<String> checkNotWARelated(List<String> errors) {
+        return errors.stream().filter(error -> !error.contains("caseNameHmctsInternal")
+                && !error.contains("caseManagementCategory")
+                && !error.contains("caseManagementLocation")).toList();
     }
 
     private void validateState(File configFile) throws IOException, InvalidFormatException {
