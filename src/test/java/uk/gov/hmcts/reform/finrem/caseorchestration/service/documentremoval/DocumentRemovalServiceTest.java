@@ -91,10 +91,10 @@ class DocumentRemovalServiceTest {
             .build());
 
         assertEquals(1, result.size());
-        assertEquals("https://example.com/123", result.get(0).getValue().getCaseDocument().getDocumentUrl());
-        assertEquals("Form-C.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
-        assertEquals("https://example.com/binary", result.get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
-        assertEquals("123", result.get(0).getValue().getDocumentId());
+        assertEquals("https://example.com/123", result.getFirst().getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("Form-C.pdf", result.getFirst().getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example.com/binary", result.getFirst().getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("123", result.getFirst().getValue().getDocumentId());
     }
 
     @Test
@@ -115,10 +115,10 @@ class DocumentRemovalServiceTest {
             .build());
 
         assertEquals(1, result.size());
-        assertEquals("https://example.com/123", result.get(0).getValue().getCaseDocument().getDocumentUrl());
-        assertEquals("Form-C.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
-        assertEquals("https://example.com/binary", result.get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
-        assertEquals("123", result.get(0).getValue().getDocumentId());
+        assertEquals("https://example.com/123", result.getFirst().getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("Form-C.pdf", result.getFirst().getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example.com/binary", result.getFirst().getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("123", result.getFirst().getValue().getDocumentId());
     }
 
     @Test
@@ -142,10 +142,10 @@ class DocumentRemovalServiceTest {
 
         assertEquals(2, result.size());
 
-        assertEquals("https://example1.com/123", result.get(0).getValue().getCaseDocument().getDocumentUrl());
-        assertEquals("Form-C.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
-        assertEquals("https://example1.com/binary", result.get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
-        assertEquals("123", result.get(0).getValue().getDocumentId());
+        assertEquals("https://example1.com/123", result.getFirst().getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("Form-C.pdf", result.getFirst().getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example1.com/binary", result.getFirst().getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("123", result.getFirst().getValue().getDocumentId());
 
         assertEquals("https://example2.com/456", result.get(1).getValue().getCaseDocument().getDocumentUrl());
         assertEquals("Form-D.pdf", result.get(1).getValue().getCaseDocument().getDocumentFilename());
@@ -192,10 +192,10 @@ class DocumentRemovalServiceTest {
 
         assertEquals(3, result.size());
 
-        assertEquals("https://example1.com/123", result.get(0).getValue().getCaseDocument().getDocumentUrl());
-        assertEquals("Form-A.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
-        assertEquals("https://example1.com/binary", result.get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
-        assertEquals("123", result.get(0).getValue().getDocumentId());
+        assertEquals("https://example1.com/123", result.getFirst().getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("Form-A.pdf", result.getFirst().getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example1.com/binary", result.getFirst().getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("123", result.getFirst().getValue().getDocumentId());
 
         assertEquals("https://example2.com/456", result.get(1).getValue().getCaseDocument().getDocumentUrl());
         assertEquals("Form-B.pdf", result.get(1).getValue().getCaseDocument().getDocumentFilename());
@@ -271,8 +271,8 @@ class DocumentRemovalServiceTest {
 
         assertEquals(5, result.size());
 
-        assertEquals("https://example4.com/101112", result.get(0).getValue().getCaseDocument().getDocumentUrl());
-        assertEquals("FourthDoc.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example4.com/101112", result.getFirst().getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("FourthDoc.pdf", result.getFirst().getValue().getCaseDocument().getDocumentFilename());
 
         assertEquals("https://example3.com/789", result.get(1).getValue().getCaseDocument().getDocumentUrl());
         assertEquals("ThirdDoc.pdf", result.get(1).getValue().getCaseDocument().getDocumentFilename());
@@ -509,7 +509,7 @@ class DocumentRemovalServiceTest {
         FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
 
         assertEquals(1, result.getUploadDocuments().size());
-        assertEquals("Form-C.pdf", result.getUploadDocuments().get(0).getValue().getDocumentLink().getDocumentFilename());
+        assertEquals("Form-C.pdf", result.getUploadDocuments().getFirst().getValue().getDocumentLink().getDocumentFilename());
         assertNull(result.getDocumentToKeepCollection());
     }
 
@@ -547,7 +547,7 @@ class DocumentRemovalServiceTest {
         FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
 
         assertEquals(1, result.getHearingNoticeDocumentPack().size());
-        assertEquals("Additional Hearing Doc.pdf", result.getHearingNoticeDocumentPack().get(0).getValue().getDocumentFilename());
+        assertEquals("Additional Hearing Doc.pdf", result.getHearingNoticeDocumentPack().getFirst().getValue().getDocumentFilename());
         assertNull(result.getDocumentToKeepCollection());
     }
 
@@ -594,9 +594,9 @@ class DocumentRemovalServiceTest {
 
         FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
 
-        assertEquals(1, result.getOrderWrapper().getAppOrderCollections().get(0).getValue().getApproveOrders().size());
+        assertEquals(1, result.getOrderWrapper().getAppOrderCollections().getFirst().getValue().getApproveOrders().size());
         assertEquals("Additional Hearing Doc.pdf", result.getOrderWrapper().getAppOrderCollections()
-            .get(0).getValue().getApproveOrders().get(0)
+            .getFirst().getValue().getApproveOrders().getFirst()
             .getValue().getCaseDocument().getDocumentFilename());
         assertNull(result.getDocumentToKeepCollection());
     }
