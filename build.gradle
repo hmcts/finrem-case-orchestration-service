@@ -444,8 +444,6 @@ dependencies {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
 
-    implementation 'org.yaml:snakeyaml'
-
     implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-actuator'
