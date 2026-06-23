@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SOLICITOR_CREATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -52,7 +53,7 @@ class SolicitorCreateConsentedMidHandlerTest {
     @Mock
     private InternationalPostalService internationalPostalService;
     @Spy
-    private ObjectMapper objectMapper;
+    private ObjectMapper objectMapper = createObjectMapper();
     @Spy
     private ConsentedApplicationHelper consentedApplicationHelper;
     @Mock
