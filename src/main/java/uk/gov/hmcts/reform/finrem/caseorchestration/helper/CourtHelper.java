@@ -161,6 +161,8 @@ public class CourtHelper {
         .put("FR_s_NottinghamList_9", "Leicester Magistrates Court")
         .put("FR_s_NottinghamList_10", "Derby Magistrates Court")
         .put("FR_s_NottinghamList_11", "Nottingham Justice Centre")
+        .put("FR_s_NottinghamList_12", "Nuneaton County Court")
+        .put("FR_s_NottinghamList_13", "Northampton Magistrates' Court")
         .build();
     private static final Map<String, String> birminghamMap = ImmutableMap.<String, String>builder()
         .put("FR_birmingham_hc_list_1", "Birmingham Civil and Family Justice Centre")
