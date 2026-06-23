@@ -26,7 +26,7 @@ def versions = [
         reformLogging        : '8.0.0',
         serenity             : '4.3.4',
         serviceTokenGenerator: '6.0.0',
-        springDoc            : '3.0.1',
+        springDoc            : '3.0.3',
         wiremock             : '3.0.1',
         idamClient           : '4.0.0',
         tika                 : '3.2.3',
