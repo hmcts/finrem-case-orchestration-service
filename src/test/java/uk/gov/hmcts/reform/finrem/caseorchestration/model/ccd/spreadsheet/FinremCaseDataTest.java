@@ -334,7 +334,7 @@ class FinremCaseDataTest {
     private void validateConfig(List<File> configFiles) throws IOException, InvalidFormatException {
         CCDConfigValidator ccdConfigValidator = new CCDConfigValidator();
         List<String> errors = ccdConfigValidator.validateCaseFields(configFiles, FinremCaseData.class);
-        List<String> filteredErrors = checkNotWARelated(errors);
+        List<String> filteredErrors = checkNotWaRelated(errors);
         if (!filteredErrors.isEmpty()) {
             log.error("Errors found when validating config files: %s and %s".formatted(configFiles.get(0).getName(), configFiles.get(1).getName()));
             filteredErrors.forEach(log::error);
@@ -342,7 +342,7 @@ class FinremCaseDataTest {
         assert filteredErrors.isEmpty();
     }
 
-    private List<String> checkNotWARelated(List<String> errors) {
+    private List<String> checkNotWaRelated(List<String> errors) {
         return errors.stream().filter(error -> !error.contains("caseNameHmctsInternal")
                 && !error.contains("caseManagementCategory")
                 && !error.contains("caseManagementLocation")).toList();
