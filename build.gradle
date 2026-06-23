@@ -465,7 +465,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     // to add the Jackson 2 ParameterNamesModule back only for tests,
     // since it's needed for deserializing third-party classes like CallbackRequest that rely on it:
-    testImplementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.21.4'
+    testImplementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
