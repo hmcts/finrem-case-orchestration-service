@@ -144,7 +144,7 @@ tasks.withType(Test).configureEach {
 
 test {
     maxHeapSize = "2g"
-    failFast = true
+    failFast = false
 }
 
 // before committing a change, make sure task still works
