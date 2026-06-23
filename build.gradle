@@ -15,6 +15,7 @@ plugins {
 }
 
 def versions = [
+        guava                : '33.5.0-jre',
         bspCommonLib         : '0.2.0',
         ccdClient            : '6.0.0',
         commonsIo            : '2.21.0',
@@ -410,7 +411,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.aspectj:aspectjweaver'
     implementation group: 'org.springframework.retry', name: 'spring-retry', version: versions.retry
-    implementation 'com.google.guava:guava'
+    implementation group: 'com.google.guava', name: 'guava', version: versions.guava
     implementation 'com.jayway.jsonpath:json-path-assert'
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: versions.springDoc
