@@ -36,9 +36,11 @@ class NocLetterNotificationServiceTest {
 
     @Test
     void shouldCallLetterHandlersCorrectly() {
-        CaseDetails caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
+        CaseDetails caseDetails = caseDetailsFromResource(
+            "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
             objectMapper);
-        CaseDetails caseDetailsBefore = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
+        CaseDetails caseDetailsBefore = caseDetailsFromResource(
+            "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
             objectMapper);
 
         noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);
