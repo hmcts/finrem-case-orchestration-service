@@ -76,9 +76,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
         String resourcePath = "/fixtures/migration/removeNottinghamCourtListGAMigration/ccd-migrate-remove-nottingham-court-list-ga.json";
 
         mvc.perform(post(MIGRATE_URL)
-                .content(resourceContentAsString(resourcePath))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
+            .content(resourceContentAsString(resourcePath))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data", not(hasItem("nottinghamCourtListGA"))))
@@ -88,9 +88,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_nw_preston() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-nw-preston.json"))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-nw-preston.json"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(NORTHWEST)))
@@ -103,9 +103,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_nw_burnley_to_temp() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-nw-burnley-to-temp.json"))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-nw-burnley-to-temp.json"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(LONDON)))
@@ -119,9 +119,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_se_bedford() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-bedford.json"))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-bedford.json"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(SOUTHEAST)))
@@ -134,9 +134,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_se_oxford() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-oxford.json"))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-oxford.json"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(SOUTHEAST)))
@@ -149,9 +149,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_se_basildon_to_temp() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-basildon-to-temp.json"))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-basildon-to-temp.json"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(LONDON)))
@@ -165,9 +165,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_sw_winchester() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-winchester.json"))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-winchester.json"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(SOUTHWEST)))
@@ -180,9 +180,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_sw_truro() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-truro.json"))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-truro.json"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(SOUTHWEST)))
@@ -195,9 +195,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_sw_salisbury() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-salisbury.json"))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-salisbury.json"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(SOUTHWEST)))
@@ -210,9 +210,9 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_w_prestatyn() throws Exception {
         mvc.perform(post(MIGRATE_FRC_URL)
-                .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-w-prestatyn.json"))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-w-prestatyn.json"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.regionList", is(WALES)))
