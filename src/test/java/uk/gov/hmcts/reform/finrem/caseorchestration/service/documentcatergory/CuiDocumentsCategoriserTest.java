@@ -23,29 +23,45 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.CASE_SUMMARY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.CERTIFICATE_OF_SERVICE_FORM_FP6;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.CHRONOLOGY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.COMPOSITE_CASE_SUMMARY_FORM_ES1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.COMPOSITE_SCHEDULE_OF_ASSETS_AND_INCOME_FORM_ES2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.DIVORCE_APPLICATION_PETITION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.DIVORCE_CONDITIONAL_ORDER_DECREE_NISI;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.DIVORCE_FINAL_ORDER_DECREE_ABSOLUTE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.ESTIMATE_OF_COSTS_INCURRED_FORM_H;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.FINANCIAL_STATEMENT_FORM_E_E1_OR_E2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.HEARING_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.HOUSING_NEEDS_PROPERTY_PARTICULARS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.MEDICAL_REPORT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.OPEN_OFFERS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.PENSION_REPORT_EXPERT_REPORT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.POINTS_OF_CLAIM_DEFENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.POSITION_STATEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.PRE_HEARING_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.REPLY_TO_QUESTIONNAIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.RESPONSE_TO_THE_NOTICE_OF_FIRST_APPOINTMENT_FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.SCHEDULE_OF_DEFICIENCIES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.SECTION_25_STATEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.STATEMENT_OF_COSTS_FORM_H1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.STATEMENT_OF_COSTS_SUMMARY_ASSESSMENT_FORM_N260;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.STATEMENT_OF_ISSUES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.SUPPLEMENTAL_QUESTIONNAIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.WITNESS_STATEMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_DOCUMENTS_CERTIFICATES_OF_SERVICE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_DOCUMENTS_FORM_E;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.DIVORCE_DOCUMENTS_APPLICATION_OR_PETITION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.DIVORCE_DOCUMENTS_CONDITIONAL_ORDER_OR_DECREE_NISI;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.DIVORCE_DOCUMENTS_FINAL_ORDER_OR_DECREE_ABSOLUTE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS;
@@ -57,8 +73,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_REPORTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CASE_SUMMARY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CONCISE_STATEMENT_OF_ISSUES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_FM5;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_QUESTIONNAIRES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_REPLIES_TO_QUESTIONNAIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CHRONOLOGY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260;
@@ -67,7 +85,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_QUESTIONNAIRES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.REPORTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_FORM_E;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_OPEN_OFFERS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_S25_STATEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL;
@@ -307,7 +327,59 @@ class CuiDocumentsCategoriserTest {
 
             Arguments.of(POINTS_OF_CLAIM_DEFENCE, true,
                 CuiDocumentsCategoriser.Party.APPLICANT, true,
-                null)
+                null),
+
+            Arguments.of(ESTIMATE_OF_COSTS_INCURRED_FORM_H, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                HEARING_DOCUMENTS_APPLICANT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260),
+
+            Arguments.of(STATEMENT_OF_COSTS_SUMMARY_ASSESSMENT_FORM_N260, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260),
+
+            Arguments.of(SUPPLEMENTAL_QUESTIONNAIRE, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                HEARING_DOCUMENTS_APPLICANT_QUESTIONNAIRES),
+
+            Arguments.of(REPLY_TO_QUESTIONNAIRE, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE),
+
+            Arguments.of(REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                RESPONDENT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE),
+
+            Arguments.of(DIVORCE_APPLICATION_PETITION, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                DIVORCE_DOCUMENTS_APPLICATION_OR_PETITION),
+
+            Arguments.of(DIVORCE_CONDITIONAL_ORDER_DECREE_NISI, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                DIVORCE_DOCUMENTS_CONDITIONAL_ORDER_OR_DECREE_NISI),
+
+            Arguments.of(DIVORCE_FINAL_ORDER_DECREE_ABSOLUTE, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                DIVORCE_DOCUMENTS_FINAL_ORDER_OR_DECREE_ABSOLUTE),
+
+            Arguments.of(CERTIFICATE_OF_SERVICE_FORM_FP6, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                APPLICANT_DOCUMENTS_CERTIFICATES_OF_SERVICE),
+
+            Arguments.of(RESPONSE_TO_THE_NOTICE_OF_FIRST_APPOINTMENT_FORM_G, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                RESPONDENT_DOCUMENTS_FORM_G),
+
+            Arguments.of(MEDICAL_REPORT, true,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                FDR_REPORTS),
+
+            Arguments.of(MEDICAL_REPORT, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                REPORTS),
+
+            Arguments.of(SUPPLEMENTAL_QUESTIONNAIRE, true,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER)
         );
     }
 
