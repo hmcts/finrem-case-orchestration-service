@@ -274,6 +274,6 @@ public class CuiDocumentsCategoriser extends DocumentCategoriser {
     }
 
     private boolean isValid(CitizenUploadDocument doc) {
-        return doc != null && doc.getDocumentLink() != null;
+        return doc != null && doc.getDocumentLink() != null && doc.getDocumentType() != null;
     }
 }
