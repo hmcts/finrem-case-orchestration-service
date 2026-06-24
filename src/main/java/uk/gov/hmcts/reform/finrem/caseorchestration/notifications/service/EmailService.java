@@ -15,6 +15,7 @@ import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -134,7 +135,10 @@ public class EmailService {
         }
         if (EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)) {
-            templateVars.put("link_to_file", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
+            populateEmailAttachments(
+                templateVars,
+                notificationRequest.getDocumentContentsList()
+            );
         }
         if (CONSENTED.equals(notificationRequest.getCaseType()) && !EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC.name().equals(templateName)) {
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
@@ -227,6 +231,25 @@ public class EmailService {
         } catch (NotificationClientException e) {
             log.warn("Failed to send email. Reference ID: {}. Reason: {}", referenceId, e.getMessage(), e);
             notificationClientExceptionResolver.resolve(e);
+        }
+    }
+
+    private void populateEmailAttachments(
+        Map<String, Object> templateVars,
+        List<byte[]> documents
+    ) {
+        for (int i = 1; i <= 10; i++) {
+            boolean hasDocument = documents != null
+                && i <= documents.size()
+                && documents.get(i - 1) != null;
+
+            templateVars.put("has_file_" + i, hasDocument ? "yes" : "no");
+            templateVars.put(
+                "link_to_file_" + i,
+                hasDocument
+                    ? preparedForEmailAttachment(documents.get(i - 1))
+                    : ""
+            );
         }
     }
 
