@@ -59,6 +59,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.DIVORCE_DOCUMENTS_APPLICATION_OR_PETITION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.DIVORCE_DOCUMENTS_CONDITIONAL_ORDER_OR_DECREE_NISI;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.DIVORCE_DOCUMENTS_FINAL_ORDER_OR_DECREE_ABSOLUTE;
@@ -68,6 +69,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_JOINT_DOCUMENTS_CHRONOLOGY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_JOINT_DOCUMENTS_ES1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_REPORTS;
@@ -82,6 +84,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_ES2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_POSITION_STATEMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_QUESTIONNAIRES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.REPORTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_FORM_E;
@@ -161,6 +164,29 @@ class CuiDocumentsCategoriserTest {
 
         assertThatCode(() -> categoriser.categorise(caseData))
             .doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldProcessMultipleMixedDocuments() {
+        CitizenUploadDocument doc1 =
+            buildDocument(CitizenUploadDocumentType.CASE_SUMMARY, false);
+
+        CitizenUploadDocument doc2 =
+            buildDocument(CitizenUploadDocumentType.HOUSING_NEEDS_PROPERTY_PARTICULARS, true);
+
+        CitizenUploadDocument doc3 =
+            buildDocument(CitizenUploadDocumentType.PRE_HEARING_DRAFT_ORDER, false);
+
+        CuiDocumentsCategoriser categoriser =
+            new CuiDocumentsCategoriser(featureToggleService,
+                CuiDocumentsCategoriser.Party.RESPONDENT);
+
+        categoriser.categorise(buildCaseData(
+            List.of(wrap(doc1), wrap(doc2), wrap(doc3)), false));
+
+        assertThat(doc1.getDocumentLink().getCategoryId()).isNotNull();
+        assertThat(doc2.getDocumentLink().getCategoryId()).isNotNull();
+        assertThat(doc3.getDocumentLink().getCategoryId()).isNotNull();
     }
 
     @ParameterizedTest
@@ -379,7 +405,47 @@ class CuiDocumentsCategoriserTest {
 
             Arguments.of(SUPPLEMENTAL_QUESTIONNAIRE, true,
                 CuiDocumentsCategoriser.Party.RESPONDENT, false,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER)
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+
+            Arguments.of(
+                CitizenUploadDocumentType.STATEMENT_OF_ISSUES,
+                true,
+                CuiDocumentsCategoriser.Party.RESPONDENT,
+                false,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_POSITION_STATEMENTS
+            ),
+
+            Arguments.of(
+                CitizenUploadDocumentType.MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME,
+                false,
+                CuiDocumentsCategoriser.Party.APPLICANT,
+                true,
+                APPLICANT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL
+            ),
+
+            Arguments.of(
+                CitizenUploadDocumentType.HOUSING_NEEDS_PROPERTY_PARTICULARS,
+                true,
+                CuiDocumentsCategoriser.Party.APPLICANT,
+                true,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER
+            ),
+
+            Arguments.of(
+                CitizenUploadDocumentType.PRE_HEARING_DRAFT_ORDER,
+                false,
+                CuiDocumentsCategoriser.Party.RESPONDENT,
+                false,
+                HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER
+            ),
+
+            Arguments.of(
+                CitizenUploadDocumentType.FDR_BUNDLE,
+                true,
+                CuiDocumentsCategoriser.Party.RESPONDENT,
+                false,
+                FDR_BUNDLE
+            )
         );
     }
 
