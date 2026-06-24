@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -59,7 +59,7 @@ public class SendCorrespondenceEvent {
      * @param notificationParty the party whose notification channel should be recorded
      */
     public void recordEmailNotificationToSendAudit(NotificationParty notificationParty) {
-        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
             .wasSent(YesOrNo.NO)
             .eventId(this.eventId)
             .party(notificationParty.name())
@@ -69,7 +69,7 @@ public class SendCorrespondenceEvent {
     }
 
     public void recordEmailNotificationSentAudit(NotificationParty notificationParty) {
-        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
             .wasSent(YesOrNo.YES)
             .eventId(this.eventId)
             .party(notificationParty.name())
@@ -90,7 +90,7 @@ public class SendCorrespondenceEvent {
      * @param notificationParty the party whose notification channel should be recorded
      */
     public void recordPostalNotificationToSendAudit(NotificationParty notificationParty) {
-        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
             .wasSent(YesOrNo.NO)
             .eventId(this.eventId)
             .party(notificationParty.name())
@@ -100,7 +100,7 @@ public class SendCorrespondenceEvent {
     }
 
     public void recordPostalNotificationSentAudit(NotificationParty notificationParty, UUID letterId) {
-        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDate.now())
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
             .wasSent(YesOrNo.YES)
             .eventId(this.eventId)
             .party(notificationParty.name())
