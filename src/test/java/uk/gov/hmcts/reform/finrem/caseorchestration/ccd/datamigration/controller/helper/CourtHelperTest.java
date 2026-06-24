@@ -814,7 +814,7 @@ class CourtHelperTest {
             "FR_s_NottinghamList_12", "Nuneaton County Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
-            "FR_s_NottinghamList_11", "Nottingham Justice Centre");
+            "FR_s_NottinghamList_13", "Nottingham Justice Centre");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
             "INVALID", EMPTY);
