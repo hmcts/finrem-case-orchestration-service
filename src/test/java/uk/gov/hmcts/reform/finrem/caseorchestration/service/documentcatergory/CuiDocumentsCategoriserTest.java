@@ -28,31 +28,49 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUplo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.COMPOSITE_SCHEDULE_OF_ASSETS_AND_INCOME_FORM_ES2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.FINANCIAL_STATEMENT_FORM_E_E1_OR_E2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.HEARING_BUNDLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.HOUSING_NEEDS_PROPERTY_PARTICULARS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.OPEN_OFFERS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.PENSION_REPORT_EXPERT_REPORT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.POINTS_OF_CLAIM_DEFENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.POSITION_STATEMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.PRE_HEARING_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.SCHEDULE_OF_DEFICIENCIES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.SECTION_25_STATEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.STATEMENT_OF_COSTS_FORM_H1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.STATEMENT_OF_ISSUES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.WITNESS_STATEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_DOCUMENTS_FORM_E;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_DOCUMENTS_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_BUNDLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_JOINT_DOCUMENTS_CHRONOLOGY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_JOINT_DOCUMENTS_ES1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_REPORTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CASE_SUMMARY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CONCISE_STATEMENT_OF_ISSUES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_FM5;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_REPLIES_TO_QUESTIONNAIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CHRONOLOGY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_ES2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_POSITION_STATEMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_QUESTIONNAIRES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.REPORTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_FORM_E;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_OPEN_OFFERS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_S25_STATEMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL;
 
 class CuiDocumentsCategoriserTest {
 
@@ -155,17 +173,17 @@ class CuiDocumentsCategoriserTest {
     private static Stream<Arguments> documentCategoryProvider() {
         return Stream.of(
 
-            Arguments.of(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false, CuiDocumentsCategoriser.Party.APPLICANT, true,
-                APPLICANT_DOCUMENTS_FORM_E),
+            Arguments.of(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true, APPLICANT_DOCUMENTS_FORM_E),
 
-            Arguments.of(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false, CuiDocumentsCategoriser.Party.RESPONDENT, false,
-                RESPONDENT_DOCUMENTS_FORM_E),
+            Arguments.of(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false, RESPONDENT_DOCUMENTS_FORM_E),
 
-            Arguments.of(PENSION_REPORT_EXPERT_REPORT, true, CuiDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_REPORTS),
+            Arguments.of(PENSION_REPORT_EXPERT_REPORT, true,
+                CuiDocumentsCategoriser.Party.APPLICANT, true, FDR_REPORTS),
 
-            Arguments.of(PENSION_REPORT_EXPERT_REPORT, false, CuiDocumentsCategoriser.Party.APPLICANT, true,
-                REPORTS),
+            Arguments.of(PENSION_REPORT_EXPERT_REPORT, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true, REPORTS),
 
             Arguments.of(STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5,
                 false, CuiDocumentsCategoriser.Party.APPLICANT, true,
@@ -195,9 +213,21 @@ class CuiDocumentsCategoriserTest {
                 CuiDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS),
 
+            Arguments.of(POSITION_STATEMENT, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                HEARING_DOCUMENTS_RESPONDENT_POSITION_STATEMENT),
+
             Arguments.of(CHRONOLOGY, true,
                 CuiDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_JOINT_DOCUMENTS_CHRONOLOGY),
+
+            Arguments.of(CHRONOLOGY, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                HEARING_DOCUMENTS_RESPONDENT_CHRONOLOGY),
+
+            Arguments.of(STATEMENT_OF_ISSUES, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                HEARING_DOCUMENTS_APPLICANT_CONCISE_STATEMENT_OF_ISSUES),
 
             Arguments.of(COMPOSITE_CASE_SUMMARY_FORM_ES1, true,
                 CuiDocumentsCategoriser.Party.APPLICANT, true,
@@ -207,29 +237,78 @@ class CuiDocumentsCategoriserTest {
                 CuiDocumentsCategoriser.Party.RESPONDENT, false,
                 HEARING_DOCUMENTS_RESPONDENT_ES2),
 
-            Arguments.of(HEARING_BUNDLE, true,
+            Arguments.of(MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME, true,
                 CuiDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_BUNDLE),
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
 
-            Arguments.of(HEARING_BUNDLE, false,
+            Arguments.of(MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                RESPONDENT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL),
+
+            Arguments.of(HOUSING_NEEDS_PROPERTY_PARTICULARS, true,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+
+            Arguments.of(HOUSING_NEEDS_PROPERTY_PARTICULARS, false,
                 CuiDocumentsCategoriser.Party.APPLICANT, true,
-                DocumentCategory.HEARING_BUNDLE),
+                APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS),
+
+            Arguments.of(QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS, true,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
+
+            Arguments.of(QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                HEARING_DOCUMENTS_RESPONDENT_QUESTIONNAIRES),
 
             Arguments.of(SECTION_25_STATEMENT, false,
                 CuiDocumentsCategoriser.Party.RESPONDENT, false,
                 RESPONDENT_DOCUMENTS_S25_STATEMENT),
 
-            Arguments.of(WITNESS_STATEMENT, false,
+            Arguments.of(WITNESS_STATEMENT, true,
                 CuiDocumentsCategoriser.Party.APPLICANT, true,
-                APPLICANT_DOCUMENTS_WITNESS_STATEMENTS),
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
+
+            Arguments.of(WITNESS_STATEMENT, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS),
+
+            Arguments.of(WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT, true,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS),
 
             Arguments.of(WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT, false,
                 CuiDocumentsCategoriser.Party.APPLICANT, true,
                 null),
+
+            Arguments.of(OPEN_OFFERS, true,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
+
+            Arguments.of(OPEN_OFFERS, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                RESPONDENT_DOCUMENTS_OPEN_OFFERS),
+
+            Arguments.of(HEARING_BUNDLE, true,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                FDR_BUNDLE),
+
+            Arguments.of(PRE_HEARING_DRAFT_ORDER, true,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_DRAFT_ORDER),
+
+            Arguments.of(PRE_HEARING_DRAFT_ORDER, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER),
+
+            Arguments.of(POINTS_OF_CLAIM_DEFENCE, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE),
 
             Arguments.of(POINTS_OF_CLAIM_DEFENCE, true,
                 CuiDocumentsCategoriser.Party.APPLICANT, true,
                 null)
         );
     }
+
 }
