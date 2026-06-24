@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
@@ -13,11 +16,43 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCateg
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.CASE_SUMMARY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.CHRONOLOGY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.COMPOSITE_CASE_SUMMARY_FORM_ES1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.COMPOSITE_SCHEDULE_OF_ASSETS_AND_INCOME_FORM_ES2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.FINANCIAL_STATEMENT_FORM_E_E1_OR_E2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.HEARING_BUNDLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.PENSION_REPORT_EXPERT_REPORT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.POINTS_OF_CLAIM_DEFENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.POSITION_STATEMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.SCHEDULE_OF_DEFICIENCIES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.SECTION_25_STATEMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.STATEMENT_OF_COSTS_FORM_H1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.WITNESS_STATEMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_DOCUMENTS_FORM_E;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPLICANT_DOCUMENTS_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_BUNDLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_JOINT_DOCUMENTS_CHRONOLOGY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_JOINT_DOCUMENTS_ES1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.FDR_REPORTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CASE_SUMMARY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_FM5;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_APPLICANT_REPLIES_TO_QUESTIONNAIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_ES2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.REPORTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_FORM_E;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_S25_STATEMENT;
 
 class CuiDocumentsCategoriserTest {
 
@@ -59,84 +94,12 @@ class CuiDocumentsCategoriserTest {
     }
 
     @Test
-    void shouldCategoriseApplicantNonFdrFormE() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType.FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false);
-
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
-
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
-
-        assertThat(doc.getDocumentLink().getCategoryId())
-            .isEqualTo(DocumentCategory.APPLICANT_DOCUMENTS_FORM_E.getDocumentCategoryId());
-    }
-
-    @Test
-    void shouldCategoriseRespondentNonFdrFormE() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType.FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false);
-
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.RESPONDENT);
-
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), false));
-
-        assertThat(doc.getDocumentLink().getCategoryId())
-            .isEqualTo(DocumentCategory.RESPONDENT_DOCUMENTS_FORM_E.getDocumentCategoryId());
-    }
-
-    @Test
-    void shouldCategoriseFdrReportCorrectly() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType.PENSION_REPORT_EXPERT_REPORT, true);
-
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
-
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
-
-        assertThat(doc.getDocumentLink().getCategoryId())
-            .isEqualTo(DocumentCategory.FDR_REPORTS.getDocumentCategoryId());
-    }
-
-    @Test
-    void shouldCategoriseNonFdrReportCorrectly() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType.PENSION_REPORT_EXPERT_REPORT, false);
-
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
-
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
-
-        assertThat(doc.getDocumentLink().getCategoryId())
-            .isEqualTo(DocumentCategory.REPORTS.getDocumentCategoryId());
-    }
-
-    @Test
-    void shouldReturnNullCategoryForFdrPointsOfClaimDefence() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType.POINTS_OF_CLAIM_DEFENCE, true);
-
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
-
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
-
-        assertThat(doc.getDocumentLink().getCategoryId()).isNull();
-    }
-
-    @Test
     void shouldHandleEmptyDocumentsGracefully() {
         CuiDocumentsCategoriser categoriser =
             new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
 
-        FinremCaseData caseData = buildCaseData(null, true);
-
-        assertThatCode(() -> categoriser.categorise(caseData))
+        assertThatCode(() -> categoriser.categorise(buildCaseData(null, true)))
             .doesNotThrowAnyException();
-
     }
 
     @Test
@@ -152,118 +115,121 @@ class CuiDocumentsCategoriserTest {
     }
 
     @Test
-    void shouldCategoriseFm5Applicant() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType
-                .STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5, false);
-
+    void shouldHandleNullWrapper() {
         CuiDocumentsCategoriser categoriser =
             new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
 
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
+        FinremCaseData caseData = new FinremCaseData();
 
-        assertThat(doc.getDocumentLink().getCategoryId())
-            .isEqualTo(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_FM5.getDocumentCategoryId());
+        assertThatCode(() -> categoriser.categorise(caseData))
+            .doesNotThrowAnyException();
     }
 
-    @Test
-    void shouldCategoriseCostsRespondent() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType.STATEMENT_OF_COSTS_FORM_H1, false);
+    @ParameterizedTest
+    @MethodSource("documentCategoryProvider")
+    void shouldCategorise(
+        CitizenUploadDocumentType type,
+        boolean isFdr,
+        CuiDocumentsCategoriser.Party party,
+        boolean applicant,
+        DocumentCategory expected
+    ) {
+        CitizenUploadDocument doc = buildDocument(type, isFdr);
 
         CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.RESPONDENT);
+            new CuiDocumentsCategoriser(featureToggleService, party);
 
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), false));
+        FinremCaseData caseData =
+            buildCaseData(List.of(wrap(doc)), applicant);
 
-        assertThat(doc.getDocumentLink().getCategoryId())
-            .isEqualTo(
-                DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260
-                    .getDocumentCategoryId());
+        categoriser.categorise(caseData);
+
+        if (expected == null) {
+            assertThat(doc.getDocumentLink().getCategoryId()).isNull();
+        } else {
+            assertThat(doc.getDocumentLink().getCategoryId())
+                .isEqualTo(expected.getDocumentCategoryId());
+        }
     }
 
-    @Test
-    void shouldCategoriseScheduleOfDeficienciesFdr() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType.SCHEDULE_OF_DEFICIENCIES, true);
+    private static Stream<Arguments> documentCategoryProvider() {
+        return Stream.of(
 
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.RESPONDENT);
+            Arguments.of(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false, CuiDocumentsCategoriser.Party.APPLICANT, true,
+                APPLICANT_DOCUMENTS_FORM_E),
 
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), false));
+            Arguments.of(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false, CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                RESPONDENT_DOCUMENTS_FORM_E),
 
-        assertThat(doc.getDocumentLink().getCategoryId())
-            .isEqualTo(
-                DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER
-                    .getDocumentCategoryId());
-    }
+            Arguments.of(PENSION_REPORT_EXPERT_REPORT, true, CuiDocumentsCategoriser.Party.APPLICANT, true,
+                FDR_REPORTS),
 
-    @Test
-    void shouldCategoriseCaseSummaryNonFdr() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType.CASE_SUMMARY, false);
+            Arguments.of(PENSION_REPORT_EXPERT_REPORT, false, CuiDocumentsCategoriser.Party.APPLICANT, true,
+                REPORTS),
 
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
+            Arguments.of(STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5,
+                false, CuiDocumentsCategoriser.Party.APPLICANT, true,
+                HEARING_DOCUMENTS_APPLICANT_FM5),
 
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
+            Arguments.of(STATEMENT_OF_COSTS_FORM_H1, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260),
 
-        assertThat(doc.getDocumentLink().getCategoryId())
-            .isEqualTo(
-                DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CASE_SUMMARY.getDocumentCategoryId());
-    }
+            Arguments.of(SCHEDULE_OF_DEFICIENCIES, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                HEARING_DOCUMENTS_APPLICANT_REPLIES_TO_QUESTIONNAIRE),
 
-    @Test
-    void shouldCategoriseChronologyFdr() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType.CHRONOLOGY, true);
+            Arguments.of(SCHEDULE_OF_DEFICIENCIES, true,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
 
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
+            Arguments.of(CASE_SUMMARY, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                HEARING_DOCUMENTS_APPLICANT_CASE_SUMMARY),
 
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
+            Arguments.of(CASE_SUMMARY, true,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
 
-        assertThat(doc.getDocumentLink().getCategoryId())
-            .isEqualTo(DocumentCategory.FDR_JOINT_DOCUMENTS_CHRONOLOGY.getDocumentCategoryId());
-    }
+            Arguments.of(POSITION_STATEMENT, true,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS),
 
-    @Test
-    void shouldCategoriseEs1Fdr() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType.COMPOSITE_CASE_SUMMARY_FORM_ES1, true);
+            Arguments.of(CHRONOLOGY, true,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                FDR_JOINT_DOCUMENTS_CHRONOLOGY),
 
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
+            Arguments.of(COMPOSITE_CASE_SUMMARY_FORM_ES1, true,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                FDR_JOINT_DOCUMENTS_ES1),
 
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
+            Arguments.of(COMPOSITE_SCHEDULE_OF_ASSETS_AND_INCOME_FORM_ES2, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                HEARING_DOCUMENTS_RESPONDENT_ES2),
 
-        assertThat(doc.getDocumentLink().getCategoryId())
-            .isEqualTo(DocumentCategory.FDR_JOINT_DOCUMENTS_ES1.getDocumentCategoryId());
-    }
+            Arguments.of(HEARING_BUNDLE, true,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                FDR_BUNDLE),
 
-    @Test
-    void shouldCategoriseHearingBundleNonFdr() {
-        CitizenUploadDocument doc =
-            buildDocument(CitizenUploadDocumentType.HEARING_BUNDLE, false);
+            Arguments.of(HEARING_BUNDLE, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                DocumentCategory.HEARING_BUNDLE),
 
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
+            Arguments.of(SECTION_25_STATEMENT, false,
+                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                RESPONDENT_DOCUMENTS_S25_STATEMENT),
 
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
+            Arguments.of(WITNESS_STATEMENT, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                APPLICANT_DOCUMENTS_WITNESS_STATEMENTS),
 
-        assertThat(doc.getDocumentLink().getCategoryId())
-            .isEqualTo(DocumentCategory.HEARING_BUNDLE.getDocumentCategoryId());
-    }
+            Arguments.of(WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT, false,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                null),
 
-    @Test
-    void shouldDefaultToNullCategory() {
-        CitizenUploadDocument doc = buildDocument(null, false);
-
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
-
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
-
-        assertThat(doc.getDocumentLink().getCategoryId()).isNull();
+            Arguments.of(POINTS_OF_CLAIM_DEFENCE, true,
+                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                null)
+        );
     }
 }
