@@ -56,12 +56,14 @@ public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandl
     public void givenAnApplicantSolicitorHasBeenRemovedWithAnAddressLetterDocumentShouldBeSent() {
         shouldSendLetter("/fixtures/noticeOfChange/contested/noc/remove-with-no-solicitor-address-and-with-applicant-addresses.json",
             "/fixtures/noticeOfChange/contested/noc/remove-with-no-solicitor-address-and-with-applicant-addresses-before.json");
+
     }
 
     @Test
     public void givenARespondentSolicitorHasBeenAddedWithAnEmailAddressLetterDocumentShouldNotBeSent() {
         shouldNotSendLetter("/fixtures/noticeOfChange/consented/add-respondent-solicitor-with-no-respondent-address-and-with-solicitor-email.json",
             "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-no-solicitor-email-no-applicant-address-before.json");
+
     }
 
     public AbstractLetterHandler getLetterHandler() {
