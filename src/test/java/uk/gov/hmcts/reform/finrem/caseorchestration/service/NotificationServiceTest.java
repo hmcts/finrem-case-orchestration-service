@@ -763,7 +763,7 @@ class NotificationServiceTest {
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(finremCaseDetails);
         verify(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT);
-        assertThat(notificationRequest.getDocumentContentsList()) .containsExactly(documentContents);
+        assertThat(notificationRequest.getDocumentContentsList()).containsExactly(documentContents);
     }
 
     @Test
