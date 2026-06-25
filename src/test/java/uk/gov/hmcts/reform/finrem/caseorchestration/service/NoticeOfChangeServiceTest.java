@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -103,7 +102,6 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
     @Before
     public void setUp() {
-        mapper.registerModule(new JavaTimeModule());
         when(mockIdamService.getIdamFullName(AUTH_TOKEN)).thenReturn("Claire Mumford");
     }
 
