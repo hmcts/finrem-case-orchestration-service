@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.litigant.applicant;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,8 +17,9 @@ public class SolicitorAddedApplicantLetterHandler extends SolicitorChangedApplic
     public SolicitorAddedApplicantLetterHandler(
         SolicitorAddedLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
         LitigantSolicitorAddedNocDocumentService litigantSolicitorAddedNocDocumentService,
-        BulkPrintServiceAdapter bulkPrintServiceAdapter) {
-        super(noticeOfChangeLetterDetailsGenerator, litigantSolicitorAddedNocDocumentService, bulkPrintServiceAdapter, NoticeType.ADD);
+        BulkPrintServiceAdapter bulkPrintServiceAdapter,
+        ObjectMapper objectMapper) {
+        super(noticeOfChangeLetterDetailsGenerator, litigantSolicitorAddedNocDocumentService, bulkPrintServiceAdapter, NoticeType.ADD, objectMapper);
     }
 
 }
