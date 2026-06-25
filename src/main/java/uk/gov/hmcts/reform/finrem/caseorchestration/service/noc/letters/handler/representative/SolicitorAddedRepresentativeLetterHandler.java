@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.representative;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,10 +23,11 @@ public class SolicitorAddedRepresentativeLetterHandler extends RepresentativeLet
         BulkPrintServiceAdapter bulkPrintServiceAdapter,
         CaseDataService caseDataService,
         CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService,
-        CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService) {
+        CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService,
+        ObjectMapper objectMapper) {
         super(noticeOfChangeLetterDetailsGenerator, solicitorNocDocumentService,
             bulkPrintServiceAdapter, caseDataService, NoticeType.ADD, checkApplicantSolicitorIsDigitalService,
-            checkRespondentSolicitorIsDigitalService);
+            checkRespondentSolicitorIsDigitalService, objectMapper);
     }
 
 }

@@ -2,11 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -58,22 +55,6 @@ public class NoticeOfChangeService {
     private final ObjectMapper objectMapper;
     private final AddedSolicitorService addedSolicitorService;
     private final RemovedSolicitorService removedSolicitorService;
-
-    @Autowired
-    public NoticeOfChangeService(CaseDataService caseDataService,
-                                 IdamService idamService,
-                                 ChangeOfRepresentationService changeOfRepresentationService,
-                                 AddedSolicitorService addedSolicitorService,
-                                 RemovedSolicitorService removedSolicitorService) {
-        this.caseDataService = caseDataService;
-        this.idamService = idamService;
-        this.objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        this.changeOfRepresentationService = changeOfRepresentationService;
-        this.addedSolicitorService = addedSolicitorService;
-        this.removedSolicitorService = removedSolicitorService;
-    }
 
     @Deprecated
     public Map<String, Object> updateRepresentation(CaseDetails caseDetails,
