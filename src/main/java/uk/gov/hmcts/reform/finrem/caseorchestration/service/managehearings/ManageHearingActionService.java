@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -27,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
@@ -67,8 +65,6 @@ public class ManageHearingActionService {
     private final ManageHearingsDocumentService manageHearingsDocumentService;
     private final ExpressCaseService expressCaseService;
     private final HearingTabDataMapper hearingTabDataMapper;
-    private final GenerateCoverSheetService generateCoverSheetService;
-    private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
     private final FeatureToggleService featureToggleService;
 
     private record DocumentRecord(CaseDocument caseDocument, CaseDocumentType caseDocumentType) {
@@ -128,8 +124,6 @@ public class ManageHearingActionService {
             generateOutOfCourtResolution(finremCaseDetails, authToken, documentMap);
         }
 
-        setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
-
         addDocumentsToCollection(documentMap, hearingWrapper);
         // Although the working hearing is cleared, the working hearing ID is retained for use in submitted handler.
         hearingWrapper.setWorkingHearing(null);
@@ -184,7 +178,6 @@ public class ManageHearingActionService {
         );
 
         generateVacateOrAdjournNotice(finremCaseDetails, courtregion, authToken, documentMap, action);
-        generateVacateNoticeCoverSheetIfHearingNotRelisted(hearingsWrapper, finremCaseDetails, authToken);
 
         addDocumentsToCollection(documentMap, hearingsWrapper);
 
@@ -458,16 +451,6 @@ public class ManageHearingActionService {
         );
     }
 
-    private void setApplicantAndRespondentCoverSheets(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
-        if (hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)) {
-            generateCoverSheetService.generateAndSetApplicantCoverSheet(finremCaseDetails, userAuthorisation);
-        }
-
-        if (hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)) {
-            generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
-        }
-    }
-
     /*
      * Sets workingVacatedHearingId, or reassigns to a new value if vacate hearing has already run for the case.
      * @param hearingsWrapper the target to set.
@@ -481,18 +464,5 @@ public class ManageHearingActionService {
                 .map(DynamicListElement::getCode)
                 .map(UUID::fromString)
                 .orElse(null));
-    }
-
-    /* Used when Vacating a hearing to generate cover sheets for a notice if a hearing has not been relisted.
-     * If a hearing HAS been relisted, then performAddHearing generates these coversheets instead.
-     * @param hearingsWrapper which is required to see if a hearing is being relisted
-     * @param finremCaseDetails case details containing hearing and case data
-     * @param authToken         authorization token for secure resource access
-    */
-    private void generateVacateNoticeCoverSheetIfHearingNotRelisted(ManageHearingsWrapper hearingsWrapper,
-                                                                    FinremCaseDetails finremCaseDetails, String authToken) {
-        if (YesOrNo.NO.equals(hearingsWrapper.getIsRelistSelected())) {
-            setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
-        }
     }
 }
