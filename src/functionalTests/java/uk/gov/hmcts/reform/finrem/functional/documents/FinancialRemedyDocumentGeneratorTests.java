@@ -18,6 +18,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 @RunWith(SerenityRunner.class)
+@Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
 public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     private static final String APPLICANT_NAME = "Williams";
@@ -56,19 +57,16 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private String generateHearingUrl;
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyContestedDraftDocumentGenerationShouldReturnOkResponseCode() {
         utils.validatePostSuccess(generateContestedUrl, CONTESTED_HEARING_JSON, CONTESTED_DIR);
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyDocumentGenerationPostResponseContent() {
         generateDocument(MINI_FORM_A_JSON, generatorUrl, CONSENTED_DIR);
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyRejectedOrderDocumentGenerationPostResponseContent() {
 
         JsonPath jsonPathEvaluator = generateDocument("rejected-consent-order.json", documentRejectedOrderUrl, CONSENTED_DIR);
@@ -78,35 +76,30 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyContestedDocumentGenerationPostResponseContent() {
 
         generateDocument(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl, CONTESTED_DIR);
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyContestedDraftDocumentGenerationPostResponseContent() {
 
         generateDocument(MINI_FORM_A_CONTESTED_JSON, generateContestedDraftUrl, CONTESTED_DIR);
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyContestedFormCDocumentGenerationPostResponseContent() {
 
         generateDocument(CONTESTED_HEARING_JSON, generateHearingUrl, CONTESTED_DIR);
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyContestedFormGDocumentGenerationPostResponseContent() {
 
         generateDocument(CONTESTED_HEARING_JSON, generateHearingUrl, CONTESTED_DIR);
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyRejectedOrderGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
@@ -118,7 +111,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
@@ -130,7 +122,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyGeneratedContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
@@ -143,7 +134,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void downloadDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
@@ -159,7 +149,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void downloadRejectOrderDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
@@ -169,7 +158,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void downloadContestedDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
