@@ -5,6 +5,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -19,7 +20,6 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 
 public abstract class LetterHandlerTestBase {
@@ -27,7 +27,7 @@ public abstract class LetterHandlerTestBase {
     protected static final String AUTH_TOKEN = "AUTH_TOKEN";
     public static final String CASE_ID = "1234";
 
-    private final AbstractLetterDetailsGenerator letterDetailsGenerator;
+    protected final AbstractLetterDetailsGenerator letterDetailsGenerator;
     protected final NocDocumentService nocDocumentService;
     private final DocumentHelper.PaperNotificationRecipient recipient;
 
@@ -43,7 +43,7 @@ public abstract class LetterHandlerTestBase {
     @Captor
     ArgumentCaptor<DocumentHelper.PaperNotificationRecipient> paperNotificationRecipientArgumentCaptor;
 
-    public LetterHandlerTestBase(AbstractLetterDetailsGenerator letterDetailsGenerator, NocDocumentService nocDocumentService, 
+    public LetterHandlerTestBase(AbstractLetterDetailsGenerator letterDetailsGenerator, NocDocumentService nocDocumentService,
                                  DocumentHelper.PaperNotificationRecipient recipient) {
         this.letterDetailsGenerator = letterDetailsGenerator;
         this.nocDocumentService = nocDocumentService;
@@ -51,7 +51,7 @@ public abstract class LetterHandlerTestBase {
     }
 
     protected CaseDetails getCaseDetails(String resourcePath) {
-        return caseDetailsFromResource(resourcePath, createObjectMapper());
+        return caseDetailsFromResource(resourcePath, TestObjectMapperFactory.createObjectMapper());
     }
 
     protected void shouldSendLetter(String caseDetailsPath, String caseDetailsBeforePath) {
