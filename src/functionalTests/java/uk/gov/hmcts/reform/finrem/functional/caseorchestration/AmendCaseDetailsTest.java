@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 
-@Ignore("Temporarily disabled functional test")
+@Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
 @RunWith(SerenityRunner.class)
 public class AmendCaseDetailsTest extends IntegrationTestBase {
 
