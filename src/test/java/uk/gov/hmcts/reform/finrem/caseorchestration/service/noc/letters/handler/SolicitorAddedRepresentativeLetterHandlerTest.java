@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -19,8 +19,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SolicitorAddedRepresentativeLetterHandlerTest extends LetterHandlerTestBase {
+@ExtendWith(MockitoExtension.class)
+class SolicitorAddedRepresentativeLetterHandlerTest extends LetterHandlerTestBase {
 
     @Mock
     CaseDataService caseDataService;
@@ -38,8 +38,8 @@ public class SolicitorAddedRepresentativeLetterHandlerTest extends LetterHandler
             DocumentHelper.PaperNotificationRecipient.SOLICITOR);
     }
 
-    @Before
-    public void setUpTest() {
+    @BeforeEach
+    void setUpTest() {
         solicitorAddedRepresentativeLetterHandler = new SolicitorAddedRepresentativeLetterHandler(
             (SolicitorAddedLetterDetailsGenerator) letterDetailsGenerator,
             (SolicitorNocDocumentService) nocDocumentService,
@@ -53,13 +53,13 @@ public class SolicitorAddedRepresentativeLetterHandlerTest extends LetterHandler
     }
 
     @Test
-    public void givenARespondentSolicitorHasBeenAddedWithAnAddressLetterDocumentShouldBeSent() {
+    void givenARespondentSolicitorHasBeenAddedWithAnAddressLetterDocumentShouldBeSent() {
         shouldSendLetter("/fixtures/noticeOfChange/consented/add-respondent-solicitor-with-no-respondent-address-and-no-email.json",
             "/fixtures/noticeOfChange/consented/add-respondent-solicitor-with-no-respondent-address-and-no-email-before.json");
     }
 
     @Test
-    public void givenARespondentSolicitorHasBeenAddedWithAnEmailAddressLetterDocumentShouldNotBeSent() {
+    void givenARespondentSolicitorHasBeenAddedWithAnEmailAddressLetterDocumentShouldNotBeSent() {
         shouldNotSendLetter("/fixtures/noticeOfChange/consented/add-respondent-solicitor-with-no-respondent-address-and-with-solicitor-email.json",
             "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-no-solicitor-email-no-applicant-address-before.json");
     }

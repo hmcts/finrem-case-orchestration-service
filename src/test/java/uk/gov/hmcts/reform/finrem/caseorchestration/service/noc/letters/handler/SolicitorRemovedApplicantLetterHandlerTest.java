@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.LitigantSolicitorRemovedNocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorRemovedLetterDetailsGenerator;
@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.
 
 import static org.mockito.Mockito.mock;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SolicitorRemovedApplicantLetterHandlerTest extends LetterHandlerTestBase {
+@ExtendWith(MockitoExtension.class)
+class SolicitorRemovedApplicantLetterHandlerTest extends LetterHandlerTestBase {
 
     @InjectMocks
     SolicitorRemovedApplicantLetterHandler solicitorRemovedApplicantLetterHandler;
@@ -23,13 +23,13 @@ public class SolicitorRemovedApplicantLetterHandlerTest extends LetterHandlerTes
     }
 
     @Test
-    public void givenASolicitorHasBeenRemovedWithAnApplicantAddressLetterDocumentShouldBeSent() {
+    void givenASolicitorHasBeenRemovedWithAnApplicantAddressLetterDocumentShouldBeSent() {
         shouldSendLetter("/fixtures/noticeOfChange/contested/noc/remove-with-solicitor-and-applicant-addresses-and-no-emails.json",
             "/fixtures/noticeOfChange/contested/noc/remove-with-solicitor-and-applicant-addresses-and-no-emails-before.json");
     }
 
     @Test
-    public void givenASolicitorHasBeenRemovedWithNoApplicantAddressLetterDocumentShouldNotBeSent() {
+    void givenASolicitorHasBeenRemovedWithNoApplicantAddressLetterDocumentShouldNotBeSent() {
         shouldNotSendLetter("/fixtures/noticeOfChange/contested/noc/remove-with-no-solicitor-address-and-with-applicant-addresses.json",
             "/fixtures/noticeOfChange/contested/noc/remove-with-no-solicitor-address-and-with-applicant-addresses-before.json");
     }

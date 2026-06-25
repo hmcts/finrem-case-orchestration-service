@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.LitigantSolicitorRemovedNocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorRemovedLetterDetailsGenerator;
@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.
 
 import static org.mockito.Mockito.mock;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SolicitorRemovedRespondentLetterHandlerTest extends LetterHandlerTestBase {
+@ExtendWith(MockitoExtension.class)
+class SolicitorRemovedRespondentLetterHandlerTest extends LetterHandlerTestBase {
 
     @InjectMocks
     SolicitorRemovedRespondentLetterHandler solicitorRemovedRespondentLetterHandler;
@@ -23,13 +23,13 @@ public class SolicitorRemovedRespondentLetterHandlerTest extends LetterHandlerTe
     }
 
     @Test
-    public void givenASolicitorHasBeenRemovedWithARespondentAddressLetterDocumentShouldBeSent() {
+    void givenASolicitorHasBeenRemovedWithARespondentAddressLetterDocumentShouldBeSent() {
         shouldSendLetter("/fixtures/noticeOfChange/consented/remove-respondent-solicitor-with-sol-address-and-no-email.json",
             "/fixtures/noticeOfChange/consented/remove-respondent-solicitor-with-sol-address-and-no-email-before.json");
     }
 
     @Test
-    public void givenASolicitorHasBeenRemovedWithNoRespondentAddressLetterDocumentShouldNotBeSent() {
+    void givenASolicitorHasBeenRemovedWithNoRespondentAddressLetterDocumentShouldNotBeSent() {
         shouldNotSendLetter("/fixtures/noticeOfChange/consented/add-respondent-solicitor-with-no-respondent-address-and-no-email.json",
             "/fixtures/noticeOfChange/consented/add-respondent-solicitor-with-sol-address-and-no-email.json");
     }

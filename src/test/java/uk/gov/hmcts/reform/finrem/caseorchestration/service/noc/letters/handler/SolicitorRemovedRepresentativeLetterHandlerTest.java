@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -16,11 +16,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Check
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandlerTestBase {
+@ExtendWith(MockitoExtension.class)
+class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandlerTestBase {
 
     @Mock
     CaseDataService caseDataService;
@@ -38,8 +38,8 @@ public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandl
             DocumentHelper.PaperNotificationRecipient.SOLICITOR);
     }
 
-    @Before
-    public void setUpTest() {
+    @BeforeEach
+    void setUpTest() {
         solicitorRemovedRepresentativeLetterHandler = new SolicitorRemovedRepresentativeLetterHandler(
             (SolicitorRemovedLetterDetailsGenerator) letterDetailsGenerator,
             (SolicitorNocDocumentService) nocDocumentService,
@@ -49,17 +49,17 @@ public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandl
             checkRespondentSolicitorIsDigitalService,
             TestObjectMapperFactory.createObjectMapper()
         );
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(Boolean.FALSE);
+        lenient().when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(Boolean.FALSE);
     }
 
     @Test
-    public void givenAnApplicantSolicitorHasBeenRemovedWithAnAddressLetterDocumentShouldBeSent() {
+    void givenAnApplicantSolicitorHasBeenRemovedWithAnAddressLetterDocumentShouldBeSent() {
         shouldSendLetter("/fixtures/noticeOfChange/contested/noc/remove-with-no-solicitor-address-and-with-applicant-addresses.json",
             "/fixtures/noticeOfChange/contested/noc/remove-with-no-solicitor-address-and-with-applicant-addresses-before.json");
     }
 
     @Test
-    public void givenARespondentSolicitorHasBeenAddedWithAnEmailAddressLetterDocumentShouldNotBeSent() {
+    void givenARespondentSolicitorHasBeenAddedWithAnEmailAddressLetterDocumentShouldNotBeSent() {
         shouldNotSendLetter("/fixtures/noticeOfChange/consented/add-respondent-solicitor-with-no-respondent-address-and-with-solicitor-email.json",
             "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-no-solicitor-email-no-applicant-address-before.json");
     }
