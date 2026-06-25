@@ -765,6 +765,9 @@ class CourtHelperTest {
             "FR_birmingham_hc_list_11", "Warwickshire Justice Centre");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
+            "FR_birmingham_hc_list_12", "Wolverhampton Hearing Centre");
+
+        verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
             "invalid", EMPTY);
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, "invalid", BIRMINGHAM_COURTLIST,
