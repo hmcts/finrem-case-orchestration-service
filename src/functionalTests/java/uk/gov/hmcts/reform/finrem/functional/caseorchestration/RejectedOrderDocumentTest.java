@@ -26,6 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFacto
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 
 @RunWith(SerenityRunner.class)
+@Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
 public class RejectedOrderDocumentTest extends IntegrationTestBase {
 
     @Autowired
@@ -43,7 +44,6 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     private String consentOrderNotApprovedEndPoint;
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyPreviewConsentOrderNotApproved() {
 
         InputStream resourceAsStream = getClass().getResourceAsStream(consentedDir + "rejected-consent-order.json");
@@ -67,7 +67,6 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     }
 
     @Test
-    @Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
     public void verifyConsentOrderNotApproved() {
 
         InputStream resourceAsStream = getClass().getResourceAsStream(consentedDir + "rejected-consent-order.json");
