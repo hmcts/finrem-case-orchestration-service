@@ -3,15 +3,17 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.SolicitorNocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorRemovedLetterDetailsGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.representative.SolicitorRemovedRepresentativeLetterHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -23,7 +25,12 @@ public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandl
     @Mock
     CaseDataService caseDataService;
 
-    @InjectMocks
+    @Mock
+    CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+
+    @Mock
+    CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+
     SolicitorRemovedRepresentativeLetterHandler solicitorRemovedRepresentativeLetterHandler;
 
     public SolicitorRemovedRepresentativeLetterHandlerTest() {
@@ -33,6 +40,15 @@ public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandl
 
     @Before
     public void setUpTest() {
+        solicitorRemovedRepresentativeLetterHandler = new SolicitorRemovedRepresentativeLetterHandler(
+            (SolicitorRemovedLetterDetailsGenerator) letterDetailsGenerator,
+            (SolicitorNocDocumentService) nocDocumentService,
+            bulkPrintServiceAdapter,
+            caseDataService,
+            checkApplicantSolicitorIsDigitalService,
+            checkRespondentSolicitorIsDigitalService,
+            TestObjectMapperFactory.createObjectMapper()
+        );
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(Boolean.FALSE);
     }
 
