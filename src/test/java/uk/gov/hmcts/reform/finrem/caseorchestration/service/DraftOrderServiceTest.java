@@ -64,6 +64,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
@@ -130,8 +131,13 @@ class DraftOrderServiceTest {
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
 
+            DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
+                .uploadAgreedDraftOrder(uploadAgreedDraftOrder)
+                .typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION)
+                .build();
+
             // Call the method
-            List<AgreedDraftOrderCollection> result = draftOrderService.processAgreedDraftOrders(uploadAgreedDraftOrder, AUTH_TOKEN);
+            List<AgreedDraftOrderCollection> result = draftOrderService.processAgreedDraftOrders(draftOrdersWrapper, AUTH_TOKEN);
 
             assertEquals(expectedOrders.size(), result.size());
 

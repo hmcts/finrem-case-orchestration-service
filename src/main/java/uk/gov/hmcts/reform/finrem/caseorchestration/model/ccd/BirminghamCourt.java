@@ -18,6 +18,7 @@ public enum BirminghamCourt implements CourtList {
     STAFFORD_COMBINED_COURT("FR_birmingham_hc_list_9"),
     HEREFORD_COUNTY_COURT_AND_FAMILY_COURT("FR_birmingham_hc_list_10"),
     WARWICKSHIRE_JUSTICE_CENTRE("FR_birmingham_hc_list_11"),
+    WOLVERHAMPTON_HEARING_CENTRE("FR_birmingham_hc_list_12"),
     CONSENTED_BIRMINGHAM_CIVIL_AND_FAMILY_JUSTICE_CENTRE("FR_birminghamList_1"),
     CONSENTED_COVENTRY_COMBINED_COURT_CENTRE("FR_birminghamList_2"),
     CONSENTED_TELFORD_COUNTY_COURT_AND_FAMILY_COURT("FR_birminghamList_3"),
