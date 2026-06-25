@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -73,5 +75,56 @@ class BinTest {
         bin.clearBin();
 
         assertThat(bin.getFileUrlsToBeDeleted()).isNull();
+    }
+
+    @Nested
+    class BinDeletedCaseDocumentTest {
+
+        private final Bin bin = new Bin();
+        private final CaseDocument deletedDocument = caseDocument("deleted-url");
+        private final CaseDocument retainedDocument = caseDocument("retained-url");
+        private final CaseDocument newDocument = caseDocument("new-url");
+
+        @Test
+        void shouldBinDocumentsThatExistPreviouslyButNotCurrently() {
+
+            bin.binDeletedCaseDocument(
+                Stream.of(deletedDocument, retainedDocument),
+                Stream.of(retainedDocument, newDocument)
+            );
+
+            assertThat(bin.getFileUrlsToBeDeleted())
+                .isNotNull();
+
+            assertThat(bin.getFileUrlsToBeDeleted().getListItems())
+                .extracting(DynamicListElement::getCode)
+                .containsExactly(deletedDocument.getDocumentUrl());
+        }
+
+        @Test
+        void shouldIgnoreNullDocuments() {
+
+            bin.binDeletedCaseDocument(
+                Stream.of(null, deletedDocument, retainedDocument),
+                Stream.of(null, retainedDocument)
+            );
+
+            assertThat(bin.getFileUrlsToBeDeleted().getListItems())
+                .extracting(DynamicListElement::getCode)
+                .containsExactly(deletedDocument.getDocumentUrl());
+        }
+
+        @Test
+        void shouldNotBinAnyDocumentsWhenNoDocumentsWereDeleted() {
+            CaseDocument document1 = caseDocument("url-1");
+            CaseDocument document2 = caseDocument("url-2");
+
+            bin.binDeletedCaseDocument(
+                Stream.of(document1, document2),
+                Stream.of(document1, document2)
+            );
+
+            assertThat(bin.getFileUrlsToBeDeleted()).isNull();
+        }
     }
 }
