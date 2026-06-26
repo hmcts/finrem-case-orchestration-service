@@ -40,18 +40,15 @@ public class SendCorrespondenceEvent {
 
     @Setter
     String eventId;
+
     /**
-     * Indicates whether the correspondence event should run in audit-only mode.
-     *
-     * <p>When {@code true}, listeners determine which notification would be sent
-     * and record the relevant audit row, but they do not send any email or postal
-     * notification.</p>
-     *
-     * <p>When {@code false}, listeners send the actual notification and record the
-     * sent audit row.</p>
+     * Indicates whether the correspondence process is being simulated.
+     * When true, listeners determine the recipients and notification channels
+     * without sending any correspondence.
+     * When false, listeners send the correspondence and record the sent audits.
      */
     @Setter
-    boolean dryRun;
+    boolean simulatingCorrespondence;
 
     /**
      * Records that the given notification party would receive, or has received, an email notification.
@@ -67,14 +64,21 @@ public class SendCorrespondenceEvent {
             .emailTemplate(this.emailTemplate.name())
             .build());
     }
-
+    /**
+     * Records a successful email notification audit for the given party.
+     *
+     * Adds an audit with wasSent set to Yes, together with the event ID,
+     * notification party, email type and email template used.
+     *
+     * @param notificationParty the party that received the email notification
+     */
     public void recordEmailNotificationSentAudit(NotificationParty notificationParty) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
             .wasSent(YesOrNo.YES)
             .eventId(this.eventId)
             .party(notificationParty.name())
             .type(NotificationType.EMAIL)
-            // Email ID not returned from notify API service calls
+            // Email ID returned from notify API service calls
             // .emailId(emailId.toString())
             .emailTemplate(this.emailTemplate.name())
             .build());

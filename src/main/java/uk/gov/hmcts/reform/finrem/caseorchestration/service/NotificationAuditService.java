@@ -36,8 +36,8 @@ public class NotificationAuditService {
 
     /**
      * Creates notification audit rows for the correspondence event.
-     * The event is published in dry-run mode first so listeners can determine
-     * whether each party would receive correspondence by email or post.
+     * The correspondence process is simulated first so listeners can determine
+     * which parties would receive correspondence by email or post without sending it.
      * One audit row is created per notification party, and each audit row ID
      * is added to the pending notifications list for later sent-status updates.
      *
@@ -47,7 +47,7 @@ public class NotificationAuditService {
     public void createAuditsForCorrespondence(SendCorrespondenceEvent event,
                                               EventType eventType) {
         event.setEventId(eventType.getCcdType());
-        event.setDryRun(true);
+        event.setSimulatingCorrespondence(true);
         applicationEventPublisher.publishEvent(event);
 
         FinremCaseData caseData = event.getCaseData();
@@ -64,24 +64,21 @@ public class NotificationAuditService {
     }
 
     /**
-     * Updates the notification audit history for a sent correspondence event.
+     * Updates the notification audit history after correspondence has been sent.
      *
-     * <p>This method compares the pending notifications stored on the case with the
-     * notification audits recorded on the sent event. If a pending notification has
-     * a matching sent audit, the sent audit is marked as successfully sent. If no
-     * matching sent audit is found, the pending audit is marked as not sent and added
-     * to the current event audit list.</p>
+     * The pending audits created during About To Submit are compared with the audits
+     * recorded during Submitted. Successfully sent notifications are already present
+     * with wasSent set to Yes. Any pending audit without a matching sent audit is added
+     * with its existing wasSent value of No. Audits are matched using the party,
+     * notification type and event ID.
      *
-     * <p>Existing notification audit rows already stored on the case are preserved.
-     * The returned audit collection is made up of the existing audit history plus the
-     * final audit rows for the current sent event.</p>
+     * Existing audit history is preserved, the completed audits for the current event
+     * are appended, and the pending notifications collection is cleared.
      *
-     * <p>The returned map also clears the pending notifications collection. If there
-     * are no pending notifications, an empty map is returned and no case update is
-     * required.</p>
+     * Returns an empty map when there are no pending notifications to process.
      *
-     * @param sentEvent the correspondence event containing the notification audits recorded during sending
-     * @return a map of CCD fields to update, or an empty map if there are no pending notifications
+     * @param sentEvent the correspondence event containing the successfully sent notification audits
+     * @return the CCD fields containing the updated audit history and cleared pending notifications
      */
     public Map<String, Object> updateSentAuditsList(SendCorrespondenceEvent sentEvent) {
         FinremCaseData caseData = sentEvent.getCaseData();
@@ -94,19 +91,7 @@ public class NotificationAuditService {
             return Collections.emptyMap();
         }
 
-
-        pending.stream()
-            .map(NotificationToBeSentCollectionItem::getValue)
-            .filter(Objects::nonNull)
-            .forEach(pendingAudit ->
-                audits.stream()
-                    .filter(audit -> isSameNotification(pendingAudit, audit))
-                    .findFirst()
-                    .ifPresentOrElse(
-                        audit -> audit.setWasSent(YesOrNo.YES),
-                        () -> audits.add(pendingAudit)
-                    )
-            );
+        combinePendingAndSentAudits(pending, audits);
 
         List<NotificationAudit> allAudits = new ArrayList<>();
 
@@ -130,6 +115,24 @@ public class NotificationAuditService {
             NOTIFICATIONS_AUDITS, objectMapper.convertValue(auditItems, List.class),
             NOTIFICATIONS_TO_BE_SENT, List.of()
         );
+    }
+
+    private void combinePendingAndSentAudits(
+        List<NotificationToBeSentCollectionItem> pending,
+        List<NotificationAudit> audits
+    ) {
+        pending.stream()
+            .map(NotificationToBeSentCollectionItem::getValue)
+            .filter(Objects::nonNull)
+            .forEach(pendingAudit ->
+                audits.stream()
+                    .filter(sentAudit -> isSameNotification(pendingAudit, sentAudit))
+                    .findFirst()
+                    .ifPresentOrElse(
+                        sentAudit -> sentAudit.setWasSent(YesOrNo.YES),
+                        () -> audits.add(pendingAudit)
+                    )
+            );
     }
 
     private boolean isSameNotification(NotificationAudit expected,

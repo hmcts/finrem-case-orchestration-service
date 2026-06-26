@@ -88,18 +88,18 @@ public abstract class AbstractPartyListener {
     }
 
     private void sendNotification(SendCorrespondenceEvent event) {
-        boolean dryRun = event.isDryRun();
+        boolean simulatingCorrespondence = event.isSimulatingCorrespondence();
         NotificationParty notificationParty = getNotificationPartyEnum();
 
         if (!event.isLetterNotificationOnly() && shouldSendEmailNotification(event)) {
-            if (!dryRun) {
+            if (!simulatingCorrespondence) {
                 enrichAndSendEmailNotification(event);
                 event.recordEmailNotificationSentAudit(notificationParty);
             } else {
                 event.recordEmailNotificationToSendAudit(notificationParty);
             }
         } else if (shouldSendPaperNotification(event)) {
-            if (!dryRun) {
+            if (!simulatingCorrespondence) {
                 UUID letterId = sendPaperNotification(event);
                 event.recordPostalNotificationSentAudit(notificationParty, letterId);
             } else {

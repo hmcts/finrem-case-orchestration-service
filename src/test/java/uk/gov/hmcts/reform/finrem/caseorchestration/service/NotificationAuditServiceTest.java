@@ -61,7 +61,7 @@ class NotificationAuditServiceTest {
             event.getCaseData().getNotificationAuditWrapper().getNotificationsToBeSent().getFirst();
 
         verify(applicationEventPublisher).publishEvent(event);
-        assertThat(event.isDryRun()).isTrue();
+        assertThat(event.isSimulatingCorrespondence()).isTrue();
         assertThat(pending.getId()).isNotNull();
         assertThat(pending.getValue().getParty()).isEqualTo(NotificationParty.APPLICANT.name());
         assertThat(pending.getValue().getType()).isEqualTo(NotificationType.EMAIL);
@@ -100,7 +100,7 @@ class NotificationAuditServiceTest {
     }
 
     @Test
-    void givenPendingNotificationDoesNotMatchSentAudit_whenUpdateSentAuditsList_thenPendingAuditIsMarkedAsNotSent() {
+    void givenPendingNotificationDoesNotMatchSentAudit_whenUpdateSentAuditsList_thenPendingAuditIsAddedAsNotSent() {
         NotificationAudit pendingAudit = audit(NotificationParty.RESPONDENT, NotificationType.POSTAL);
         NotificationAudit sentAudit = audit(NotificationParty.RESPONDENT, NotificationType.EMAIL);
 
