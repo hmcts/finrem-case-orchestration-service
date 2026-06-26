@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCol
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -35,15 +36,18 @@ public abstract class SendOrderPartyDocumentHandler {
             final Long caseId = finremCaseDetails.getId();
             FinremCaseData caseData = finremCaseDetails.getData();
             log.info("Received request to send hearing pack to {} for Case ID: {}:", caseRoleCode,  caseId);
+
+            //This gets the party's current document collection e.g. appOrderCollection
             List<ApprovedOrderCollection> orderColl = Optional.ofNullable(getOrderCollectionForParty(caseData)).orElse(new ArrayList<>());
-            if (orderColl.isEmpty()) {
-                addAdditionalOrderDocumentToPartyCollection(caseData, orderColl);
-            }
+
             orderDocumentPack.forEach(document -> {
-                if (shouldAddDocumentToOrderColl(document, getExistingConsolidateCollection(caseData))) {
+                if (!documentAlreadyExistsInCurrentOrderCollection(document, orderColl)
+                    && !additionalHearingDocumentAlreadyExists(document, getExistingConsolidateCollection(caseData))) {
                     orderColl.add(getApprovedOrderCollection(document));
                 }
             });
+
+            //Adds to each party collection e.g. applicant, respondent, intervener etc
             addOrdersToPartyCollection(caseData, orderColl);
         }
     }
@@ -112,35 +116,48 @@ public abstract class SendOrderPartyDocumentHandler {
                 .orderReceivedAt(LocalDateTime.now()).build()).build();
     }
 
-    private void addAdditionalOrderDocumentToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> approvedOrderCollections) {
-        CaseDocument additionalDocument = caseData.getSendOrderWrapper().getAdditionalDocument();
-        if (additionalDocument != null) {
-            approvedOrderCollections.add(getApprovedOrderCollection(additionalDocument));
+    private boolean documentAlreadyExistsInCurrentOrderCollection(CaseDocument document, List<ApprovedOrderCollection> orderCollection) {
+        if (document == null) {
+            return false;
         }
+
+        return Optional.ofNullable(orderCollection).orElse(List.of()).stream()
+            .map(ApprovedOrderCollection::getValue)
+            .filter(Objects::nonNull)
+            .map(ApproveOrder::getCaseDocument)
+            .filter(Objects::nonNull)
+            .map(CaseDocument::getDocumentUrl)
+            .anyMatch(existingUrl -> Objects.equals(existingUrl, document.getDocumentUrl()));
     }
 
-    protected boolean shouldAddDocumentToOrderColl(CaseDocument document,
-                                                   List<ApprovedOrderConsolidateCollection> orderCollForRole) {
-        List<ApprovedOrderConsolidateCollection> existingCollection
-            = Optional.ofNullable(orderCollForRole).orElse(new ArrayList<>());
-        if (existingCollection.isEmpty()) {
-            return true;
+    private boolean additionalHearingDocumentAlreadyExists(
+        CaseDocument document,
+        List<ApprovedOrderConsolidateCollection> existingConsolidatedCollection
+    ) {
+        if (!isAdditionalHearingDocument(document)) {
+            return false;
         }
-        return existingCollection.stream().noneMatch(doc -> checkIfDocumentAlreadyInCollectionElement(document, doc));
+
+        return Optional.ofNullable(existingConsolidatedCollection)
+            .orElse(List.of())
+            .stream()
+            .map(ApprovedOrderConsolidateCollection::getValue)
+            .filter(Objects::nonNull)
+            .map(ApproveOrdersHolder::getApproveOrders)
+            .filter(Objects::nonNull)
+            .flatMap(List::stream)
+            .map(ApprovedOrderCollection::getValue)
+            .filter(Objects::nonNull)
+            .map(ApproveOrder::getCaseDocument)
+            .filter(Objects::nonNull)
+            .anyMatch(existingDocument ->
+                Objects.equals(existingDocument.getDocumentUrl(), document.getDocumentUrl())
+            );
     }
 
-    private boolean checkIfDocumentAlreadyInCollectionElement(CaseDocument document, ApprovedOrderConsolidateCollection doc) {
-        return doc.getValue().getApproveOrders().stream().anyMatch(order ->
-            isAdditionalDocumentAlreadyInCollection(document, order)
-        );
-    }
-
-    private  boolean isAdditionalDocumentAlreadyInCollection(CaseDocument document, ApprovedOrderCollection order) {
-        if (order.getValue() != null && order.getValue().getCaseDocument() != null) {
-            return order.getValue().getCaseDocument().getDocumentFilename().equals(ADDITIONAL_HEARING_FILE_NAME)
-                && order.getValue().getCaseDocument().getDocumentUrl().equals(document.getDocumentUrl());
-        }
-        return false;
+    private boolean isAdditionalHearingDocument(CaseDocument document) {
+        return document != null
+            && ADDITIONAL_HEARING_FILE_NAME.equals(document.getDocumentFilename());
     }
 
     protected List<ApprovedOrderConsolidateCollection> getPartyConsolidateCollection(List<ApprovedOrderConsolidateCollection> list) {
@@ -163,16 +180,52 @@ public abstract class SendOrderPartyDocumentHandler {
         return returnList;
     }
 
-    private ApprovedOrderConsolidateCollection getConsolidateCollection(ApproveOrdersHolder value,
-                                                                          List<ApprovedOrderCollection> orderCollection) {
-        return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
-            .approveOrders(orderCollection).orderReceivedAt(value.getOrderReceivedAt()).build()).build();
+    private ApprovedOrderConsolidateCollection getConsolidateCollection(ApproveOrdersHolder value, List<ApprovedOrderCollection> orderCollection) {
+        return ApprovedOrderConsolidateCollection.builder()
+            .value(ApproveOrdersHolder.builder()
+                .approveOrders(orderCollection)
+                .supportingDocuments(value.getSupportingDocuments())
+                .orderReceivedAt(value.getOrderReceivedAt())
+                .build())
+            .build();
     }
 
-    protected ApprovedOrderConsolidateCollection getConsolidateCollection(List<ApprovedOrderCollection> orderCollection) {
-        return ApprovedOrderConsolidateCollection.builder().value(ApproveOrdersHolder.builder()
-                .approveOrders(orderCollection).orderReceivedAt(LocalDateTime.now()).build()).build();
+    protected ApprovedOrderConsolidateCollection getConsolidateCollection(
+        List<ApprovedOrderCollection> orderCollection,
+        List<DocumentCollectionItem> supportingDocuments
+    ) {
+        return ApprovedOrderConsolidateCollection.builder()
+            .value(ApproveOrdersHolder.builder()
+                .approveOrders(orderCollection)
+                .supportingDocuments(supportingDocuments)
+                .orderReceivedAt(LocalDateTime.now())
+                .build())
+            .build();
     }
+
+    protected List<DocumentCollectionItem> getCategorisedSupportingDocuments(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getSendOrderWrapper().getAdditionalDocuments())
+            .orElse(List.of())
+            .stream()
+            .filter(Objects::nonNull)
+            .map(DocumentCollectionItem::getValue)
+            .filter(Objects::nonNull)
+            .map(document -> DocumentCollectionItem.builder()
+                .value(copyDocumentWithCategory(document, getSupportingDocumentsCategoryId()))
+                .build())
+            .toList();
+    }
+
+    private CaseDocument copyDocumentWithCategory(CaseDocument document, String categoryId) {
+        return CaseDocument.builder()
+            .documentUrl(document.getDocumentUrl())
+            .documentFilename(document.getDocumentFilename())
+            .documentBinaryUrl(document.getDocumentBinaryUrl())
+            .categoryId(categoryId)
+            .build();
+    }
+
+    protected abstract String getSupportingDocumentsCategoryId();
 
     protected abstract List<ApprovedOrderCollection> getOrderCollectionForParty(FinremCaseData caseData);
 
