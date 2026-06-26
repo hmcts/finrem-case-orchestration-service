@@ -238,6 +238,11 @@ public class EmailService {
         Map<String, Object> templateVars,
         List<byte[]> documents
     ) {
+        if (documents != null && documents.size() > 10) {
+            throw new IllegalArgumentException(
+                "A maximum of 10 email attachments is supported"
+            );
+        }
         for (int i = 1; i <= 10; i++) {
             boolean hasDocument = documents != null
                 && i <= documents.size()
