@@ -28,7 +28,7 @@ def versions = [
         pdfbox               : '3.0.7',
         reformLogging        : '8.0.0',
         serenity             : '4.3.4',
-        serviceTokenGenerator: '5.3.3',
+        serviceTokenGenerator: '5.3.4',
         springDoc            : '2.8.17',
         wiremock             : '3.0.1',
         apacheLogging        : '2.25.4',
