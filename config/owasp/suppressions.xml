@@ -7,7 +7,7 @@
         <packageUrl regex="true">^pkg:maven/org\.apache\.pdfbox/pdfbox@.*$</packageUrl>
         <cpe>cpe:/a:apache:pdfbox</cpe>
     </suppress>
-    <suppress until="2026-07-01Z">
+    <suppress until="2026-12-31Z">
         <notes><![CDATA[
     Updating to PDFBox v3.0.8 will resolve when available.
     ]]></notes>
