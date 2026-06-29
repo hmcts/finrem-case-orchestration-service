@@ -59,8 +59,6 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         validateCaseData(callbackRequest);
-
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
 
         List<String> errors = new ArrayList<>();
@@ -73,6 +71,7 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
         convertEmailAttachmentsToPdfIfRequired(finremCaseData, userAuthorisation);
         generalEmailService.storeGeneralEmail(finremCaseData);
 
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         sendGeneralEmail(finremCaseDetails, userAuthorisation, errors);
         if (!errors.isEmpty()) {
             return response(finremCaseData, null, errors);
