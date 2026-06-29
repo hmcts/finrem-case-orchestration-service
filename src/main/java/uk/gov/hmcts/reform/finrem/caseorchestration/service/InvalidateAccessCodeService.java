@@ -7,15 +7,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollecti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.nullsLast;
 
 /**
  * Service responsible for merging access code collections during invalidation.
@@ -38,9 +34,7 @@ public class InvalidateAccessCodeService {
      * <p>
      * All existing access codes are preserved and only the {@code isValid} flag
      * is updated for matching entries, identified by access code ID.
-     *
-     * <p>
-     * The resulting collection is sorted by creation date in descending order.
+
      *
      * @param before  the original access code collection stored in CCD
      * @param current the updated access code collection received from the Citizen UI
@@ -68,11 +62,6 @@ public class InvalidateAccessCodeService {
             }
         }
 
-        merged.sort(comparing(
-            AccessCodeCollection::getValue,
-            comparing(AccessCodeEntry::getCreatedAt, nullsLast(Comparator.reverseOrder()))
-        ));
-
         return merged;
     }
 
@@ -96,8 +85,6 @@ public class InvalidateAccessCodeService {
             .id(beforeItem.getId())
             .value(AccessCodeEntry.builder()
                 .accessCode(beforeValue.getAccessCode())
-                .createdAt(beforeValue.getCreatedAt())
-                .validUntil(beforeValue.getValidUntil())
                 .isValid(updatedValue.getIsValid())
                 .build())
             .build();
