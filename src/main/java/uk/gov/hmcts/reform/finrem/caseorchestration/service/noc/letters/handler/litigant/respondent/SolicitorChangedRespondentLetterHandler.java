@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.litigant.respondent;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
@@ -18,8 +19,9 @@ public class SolicitorChangedRespondentLetterHandler extends AbstractLetterHandl
     public SolicitorChangedRespondentLetterHandler(
         AbstractLetterDetailsGenerator letterDetailsGenerator,
         NocDocumentService nocDocumentService, BulkPrintServiceAdapter bulkPrintServiceAdapter,
-        NoticeType noticeType) {
-        super(letterDetailsGenerator, nocDocumentService, bulkPrintServiceAdapter, noticeType, RESPONDENT);
+        NoticeType noticeType,
+        ObjectMapper objectMapper) {
+        super(letterDetailsGenerator, nocDocumentService, bulkPrintServiceAdapter, noticeType, RESPONDENT, objectMapper);
     }
 
     @Override

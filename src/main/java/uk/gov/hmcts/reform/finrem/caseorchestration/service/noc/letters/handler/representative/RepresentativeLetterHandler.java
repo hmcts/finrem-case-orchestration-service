@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.representative;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
@@ -30,8 +31,9 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
         BulkPrintServiceAdapter bulkPrintServiceAdapter,
         CaseDataService caseDataService, NoticeType noticeType,
         CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService,
-        CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService) {
-        super(noticeOfChangeLetterDetailsGenerator, solicitorNocDocumentService, bulkPrintServiceAdapter, noticeType, SOLICITOR);
+        CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService,
+        ObjectMapper objectMapper) {
+        super(noticeOfChangeLetterDetailsGenerator, solicitorNocDocumentService, bulkPrintServiceAdapter, noticeType, SOLICITOR, objectMapper);
         this.caseDataService = caseDataService;
         this.checkApplicantSolicitorIsDigitalService = checkApplicantSolicitorIsDigitalService;
         this.checkRespondentSolicitorIsDigitalService = checkRespondentSolicitorIsDigitalService;
