@@ -434,6 +434,7 @@ class FinremNotificationServiceTest {
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(defaultFinremCaseData);
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails))
             .thenReturn(mock(NotificationRequest.class));
+        when(generalEmailService.getUploadedDocuments(caseDetails.getData())).thenReturn(List.of(document));
         doThrow(HttpClientErrorException.class)
             .when(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
 
