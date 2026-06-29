@@ -555,6 +555,26 @@ public class EmailServiceTest {
     }
 
     @Test
+    public void givenMoreThanTenDocuments_whenBuildTemplateVarsForGeneralEmailAttachment_thenThrowException() {
+        setConsentedData();
+        notificationRequest.setDocumentContentsList(
+            java.util.stream.IntStream.range(0, 11)
+                .mapToObj(i -> new byte[1])
+                .toList()
+        );
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> emailService.buildTemplateVars(
+                notificationRequest,
+                FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name()
+            )
+        );
+
+        assertEquals("A maximum of 10 email attachments is supported", exception.getMessage());
+    }
+
+    @Test
     public void shouldBuildTemplateVarsForTransferToLocalCourt() {
         setConsentedData();
         notificationRequest.setCaseReferenceNumber("123456789");
