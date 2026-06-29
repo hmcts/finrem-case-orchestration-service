@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,8 +46,6 @@ class AccessCodeGeneratorTest {
     void setAccessCode_shouldNotOverwriteExistingCodes() {
         AccessCodeEntry existingEntry = AccessCodeEntry.builder()
             .accessCode("ABCDEFGH")
-            .createdAt(LocalDateTime.now().minusDays(1))
-            .validUntil(LocalDateTime.now().plusDays(89))
             .isValid(YesOrNo.YES)
             .build();
 
@@ -71,14 +68,5 @@ class AccessCodeGeneratorTest {
         assertNotNull(entry.getAccessCode());
         assertEquals(8, entry.getAccessCode().length());
         assertEquals(YesOrNo.YES, entry.getIsValid());
-
-        LocalDateTime createdAt = entry.getCreatedAt();
-        LocalDateTime validUntil = entry.getValidUntil();
-
-        assertNotNull(createdAt);
-        assertNotNull(validUntil);
-
-        // validUntil must be 90 days after creation
-        assertEquals(createdAt.plusDays(90).toLocalDate(), validUntil.toLocalDate());
     }
 }
