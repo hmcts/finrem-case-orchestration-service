@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.N
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
@@ -98,7 +99,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
@@ -110,7 +110,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPDATE_CONTACT_DETAILS_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
@@ -145,7 +144,6 @@ class NotificationServiceTest {
     private static final String INTERVENER_SOL_EMAIL = "intervenerSol@email.com";
 
     private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-old-two-new-collections.json";
-    private static final String CONSENTED_HEARING_JSON = "/fixtures/consented.listOfHearing/list-for-hearing.json";
 
     @TestLogs
     private final TestLogger logs = new TestLogger(NotificationService.class);
@@ -170,6 +168,8 @@ class NotificationServiceTest {
     private CaseDataService caseDataService;
     @Mock
     private NotificationServiceConfiguration notificationServiceConfiguration;
+    @Mock
+    private GeneralEmailService generalEmailService;
 
     protected ObjectMapper mapper;
     private NotificationRequest notificationRequest;
@@ -755,13 +755,17 @@ class NotificationServiceTest {
     void shouldSendGeneralEmailWithAttachmentConsented() {
         byte[] documentContents = {1, 2, 3};
         FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONSENTED);
+        CaseDocument uploadedDocument = finremCaseDetails.getData().getGeneralEmailWrapper()
+            .getGeneralEmailUploadedDocuments().get(0).getValue();
+
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(finremCaseDetails)).thenReturn(notificationRequest);
-        when(evidenceManagementDownloadService.getByteArray(any(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(documentContents);
+        when(generalEmailService.getUploadedDocuments(finremCaseDetails.getData())).thenReturn(List.of(uploadedDocument));
+        when(evidenceManagementDownloadService.getByteArray(uploadedDocument, AUTH_TOKEN)).thenReturn(documentContents);
 
         notificationService.sendConsentGeneralEmail(finremCaseDetails, AUTH_TOKEN);
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(finremCaseDetails);
-        verify(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
+        verify(evidenceManagementDownloadService).getByteArray(uploadedDocument, AUTH_TOKEN);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT);
         assertThat(notificationRequest.getDocumentContentsList()).containsExactly(documentContents);
     }
@@ -770,13 +774,17 @@ class NotificationServiceTest {
     void shouldSendGeneralEmailWithAttachmentContested() {
         byte[] documentContents = {1, 2, 3};
         FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONTESTED);
+        CaseDocument uploadedDocument = finremCaseDetails.getData().getGeneralEmailWrapper()
+            .getGeneralEmailUploadedDocuments().get(0).getValue();
+
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(finremCaseDetails)).thenReturn(notificationRequest);
-        when(evidenceManagementDownloadService.getByteArray(any(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(documentContents);
+        when(generalEmailService.getUploadedDocuments(finremCaseDetails.getData())).thenReturn(List.of(uploadedDocument));
+        when(evidenceManagementDownloadService.getByteArray(uploadedDocument, AUTH_TOKEN)).thenReturn(documentContents);
 
         notificationService.sendContestedGeneralEmail(finremCaseDetails, AUTH_TOKEN);
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(finremCaseDetails);
-        verify(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
+        verify(evidenceManagementDownloadService).getByteArray(uploadedDocument, AUTH_TOKEN);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT);
         assertThat(notificationRequest.getDocumentContentsList())
             .containsExactly(documentContents);
@@ -1416,77 +1424,15 @@ class NotificationServiceTest {
             .build();
     }
 
-    private CallbackRequest getContestedCallbackRequestUpdateDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
-        caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Goodman");
-        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Victoria");
-        caseData.put(APPLICANT_LAST_NAME, "Goodman");
-        caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONTESTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
-        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
-        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        caseData.put(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL, TEST_JUDGE_EMAIL);
-        caseData.put(REGION, MIDLANDS);
-        caseData.put(MIDLANDS_FRC_LIST, NOTTINGHAM);
-        caseData.put(NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1");
-        caseData.put(BULK_PRINT_LETTER_ID_RES, NOTTINGHAM);
-        caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
-        return CallbackRequest.builder()
-            .eventId(UPDATE_CONTACT_DETAILS_EVENT)
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CaseType.CONTESTED.getCcdType())
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
-    }
-
-    private CallbackRequest getConsentedCallbackRequestUpdateDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
-        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Goodman");
-        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Victoria");
-        caseData.put(APPLICANT_LAST_NAME, "Goodman");
-        caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
-        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
-        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
-        List<String> natureOfApplication = List.of("Lump Sum Order",
-            "Periodical Payment Order",
-            "Pension Sharing Order",
-            "Pension Attachment Order",
-            "Pension Compensation Sharing Order",
-            "Pension Compensation Attachment Order",
-            "A settlement or a transfer of property",
-            "Property Adjustment Order");
-        caseData.put("natureOfApplication2", natureOfApplication);
-        return CallbackRequest.builder()
-            .eventId(UPDATE_CONTACT_DETAILS_EVENT)
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CaseType.CONSENTED.getCcdType())
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
-    }
-
     private FinremCaseDetails getFinremCaseDetails(CaseType caseType) {
         return FinremCaseDetails.builder()
             .data(FinremCaseData.builder()
                 .ccdCaseType(caseType)
                 .generalEmailWrapper(GeneralEmailWrapper.builder()
                     .generalEmailRecipient(APPLICANT_EMAIL)
-                    .generalEmailUploadedDocument(CaseDocument.builder()
+                    .generalEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(CaseDocument.builder()
                         .documentBinaryUrl("dummyUrl")
-                        .build())
+                        .build())))
                     .build())
                 .build())
             .caseType(caseType)
@@ -1496,14 +1442,6 @@ class NotificationServiceTest {
     private FinremCallbackRequest buildHearingFinremCallbackRequest(String payloadJson) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(payloadJson)) {
             return mapper.readValue(resourceAsStream, FinremCallbackRequest.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private CallbackRequest buildHearingCallbackRequest(String payloadJson) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(payloadJson)) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

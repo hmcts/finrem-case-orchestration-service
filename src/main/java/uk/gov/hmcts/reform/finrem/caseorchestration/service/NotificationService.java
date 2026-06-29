@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
@@ -104,6 +103,7 @@ public class NotificationService {
     private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     private final EvidenceManagementDownloadService evidenceManagementDownloadService;
     private final CourtDetailsConfiguration courtDetailsConfiguration;
+    private final GeneralEmailService generalEmailService;
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest =
@@ -400,23 +400,27 @@ public class NotificationService {
     }
 
     private boolean isGeneralEmailWithAttachment(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null;
+        return !generalEmailService.getUploadedDocuments(caseDetails.getData()).isEmpty();
     }
 
-    private void addGeneralEmailAttachment(FinremCaseDetails caseDetails, NotificationRequest notificationRequest, String auth) {
-        CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
-        if (caseDocument != null) {
-            notificationRequest.setDocumentContentsList(
-                List.of(evidenceManagementDownloadService.getByteArray(caseDocument, auth))
-            );
-        }
+    private void addGeneralEmailAttachments(FinremCaseDetails caseDetails,
+                                            NotificationRequest notificationRequest,
+                                            String auth) {
+        List<byte[]> documentContentsList = generalEmailService.getUploadedDocuments(caseDetails.getData())
+            .stream()
+            .map(document -> evidenceManagementDownloadService.getByteArray(document, auth))
+            .toList();
+
+        notificationRequest.setDocumentContentsList(documentContentsList);
     }
 
     private void sendGeneralEmail(FinremCaseDetails caseDetails, String authToken, EmailTemplateNames templateName) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails);
+
         if (isGeneralEmailWithAttachment(caseDetails)) {
-            addGeneralEmailAttachment(caseDetails, notificationRequest, authToken);
+            addGeneralEmailAttachments(caseDetails, notificationRequest, authToken);
         }
+
         emailService.sendConfirmationEmail(notificationRequest, templateName);
     }
 

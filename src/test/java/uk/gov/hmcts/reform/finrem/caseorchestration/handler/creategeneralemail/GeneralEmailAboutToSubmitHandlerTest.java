@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Ge
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,7 +72,7 @@ class GeneralEmailAboutToSubmitHandlerTest {
 
         FinremCaseData finremCaseData = spy(FinremCaseData.builder()
             .generalEmailWrapper(GeneralEmailWrapper.builder()
-                .generalEmailUploadedDocument(caseDocument1)
+                .generalEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(caseDocument1)))
                 .build())
             .build());
         CaseType caseType = mock(CaseType.class);
@@ -86,7 +88,10 @@ class GeneralEmailAboutToSubmitHandlerTest {
 
         assertAll(
             () -> verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument1, AUTH_TOKEN, caseType),
-            () -> assertThat(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument())
+            () -> assertThat(finremCaseData.getGeneralEmailWrapper()
+                .getGeneralEmailUploadedDocuments()
+                .getFirst()
+                .getValue())
                 .isEqualTo(pdf1)
         );
     }
@@ -152,7 +157,7 @@ class GeneralEmailAboutToSubmitHandlerTest {
                 "generalEmailRecipient", "generalEmailRecipient",
                 "generalEmailCreatedBy", "generalEmailCreatedBy",
                 "generalEmailBody", "generalEmailBody",
-                "generalEmailUploadedDocument", Map.of()
+                "generalEmailUploadedDocuments", List.of()
             )));
     }
 
