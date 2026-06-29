@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,17 +40,20 @@ public abstract class AbstractLetterHandler implements LetterHandler {
     protected final BulkPrintServiceAdapter bulkPrintServiceAdapter;
     private final NoticeType noticeType;
     private final DocumentHelper.PaperNotificationRecipient recipient;
+    private final ObjectMapper objectMapper;
 
     protected AbstractLetterHandler(
         AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator, NocDocumentService nocDocumentService,
         BulkPrintServiceAdapter bulkPrintServiceAdapter,
-        NoticeType noticeType, DocumentHelper.PaperNotificationRecipient recipient) {
+        NoticeType noticeType, DocumentHelper.PaperNotificationRecipient recipient,
+        ObjectMapper objectMapper) {
 
         this.noticeOfChangeLetterDetailsGenerator = noticeOfChangeLetterDetailsGenerator;
         this.bulkPrintServiceAdapter = bulkPrintServiceAdapter;
         this.noticeType = noticeType;
         this.recipient = recipient;
         this.nocDocumentService = nocDocumentService;
+        this.objectMapper = objectMapper;
     }
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
@@ -92,9 +94,8 @@ public abstract class AbstractLetterHandler implements LetterHandler {
 
     protected RepresentationUpdate getLatestRepresentationUpdate(CaseDetails caseDetails) {
         log.info("Get the latest Representation Update");
-        List<Element<RepresentationUpdate>> representationUpdates = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
+        List<Element<RepresentationUpdate>> representationUpdates =
+            objectMapper.convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
             });
         return Collections.max(representationUpdates, Comparator.comparing(
                 representationUpdate -> representationUpdate.getValue().getDate()))
