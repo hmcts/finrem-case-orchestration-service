@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.F
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -130,6 +132,8 @@ class FinremNotificationServiceTest {
     private EvidenceManagementDownloadService evidenceManagementDownloadService;
     @Mock
     private CourtDetailsConfiguration courtDetailsConfiguration;
+    @Mock
+    private GeneralEmailService generalEmailService;
 
     private final FinremCaseDetails consentedFinremCaseDetails = getConsentedFinremCaseDetails();
     private final FinremCaseDetails contestedFinremCaseDetails = getContestedFinremCaseDetails();
@@ -385,6 +389,7 @@ class FinremNotificationServiceTest {
     void sendGeneralEmailConsented() {
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(consentedFinremCaseDetails))
             .thenReturn(mock(NotificationRequest.class));
+        when(generalEmailService.getUploadedDocuments(consentedFinremCaseDetails.getData())).thenReturn(List.of());
 
         notificationService.sendConsentGeneralEmail(consentedFinremCaseDetails, anyString());
 
@@ -394,27 +399,42 @@ class FinremNotificationServiceTest {
 
     @Test
     void sendGeneralEmailConsentedWithAttachment() {
-        FinremCaseData defaultFinremCaseData = getDefaultConsentedFinremCaseData();
-        defaultFinremCaseData.getGeneralEmailWrapper()
-            .setGeneralEmailUploadedDocument(CaseDocument.builder().documentBinaryUrl("binaryUrl").build());
-        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(defaultFinremCaseData);
+        byte[] documentContents = {1, 2, 3};
+        CaseDocument document = CaseDocument.builder()
+            .documentBinaryUrl("binaryUrl")
+            .build();
+
+        FinremCaseData caseData = getDefaultConsentedFinremCaseData();
+        caseData.getGeneralEmailWrapper()
+            .setGeneralEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(document)));
+        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(caseData);
+
+        NotificationRequest notificationRequest = mock(NotificationRequest.class);
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails))
-            .thenReturn(mock(NotificationRequest.class));
+            .thenReturn(notificationRequest);
+        when(generalEmailService.getUploadedDocuments(caseData)).thenReturn(List.of(document));
+        when(evidenceManagementDownloadService.getByteArray(document, AUTH_TOKEN))
+            .thenReturn(documentContents);
 
-        notificationService.sendConsentGeneralEmail(caseDetails, anyString());
+        notificationService.sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
 
-        verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(caseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL_ATTACHMENT));
+        verify(notificationRequest).setDocumentContentsList(List.of(documentContents));
+        verify(emailService).sendConfirmationEmail(
+            notificationRequest,
+            FR_CONSENT_GENERAL_EMAIL_ATTACHMENT
+        );
     }
 
     @Test
     void shouldThrowExceptionIfDownloadGeneralEmailUploadedDocumentsFailWhenSendGeneralEmailConsented() {
         FinremCaseData defaultFinremCaseData = getDefaultConsentedFinremCaseData();
+        CaseDocument document = CaseDocument.builder().documentBinaryUrl("binaryUrl").build();
         defaultFinremCaseData.getGeneralEmailWrapper()
-            .setGeneralEmailUploadedDocument(CaseDocument.builder().documentBinaryUrl("binaryUrl").build());
+            .setGeneralEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(document)));
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(defaultFinremCaseData);
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails))
             .thenReturn(mock(NotificationRequest.class));
+        when(generalEmailService.getUploadedDocuments(caseDetails.getData())).thenReturn(List.of(document));
         doThrow(HttpClientErrorException.class)
             .when(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
 
@@ -429,6 +449,8 @@ class FinremNotificationServiceTest {
     void sendGeneralEmailContested() {
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(contestedFinremCaseDetails))
             .thenReturn(mock(NotificationRequest.class));
+        when(generalEmailService.getUploadedDocuments(contestedFinremCaseDetails.getData())).thenReturn(List.of());
+
         notificationService.sendContestedGeneralEmail(contestedFinremCaseDetails, anyString());
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(contestedFinremCaseDetails);
