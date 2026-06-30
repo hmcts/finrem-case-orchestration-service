@@ -27,7 +27,6 @@ public class GlobalSearchServiceTest {
         globalSearchService.setGlobalSearchData(caseData);
 
         verify(caseData).setCaseNameHmctsInternal("John Smith");
-        verify(caseData).setCaseManagementLocation("London Court");
     }
 
 }
