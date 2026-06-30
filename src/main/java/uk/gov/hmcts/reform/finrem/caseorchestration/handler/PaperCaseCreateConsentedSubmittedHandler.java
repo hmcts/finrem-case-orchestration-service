@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import java.util.Map;
 public class PaperCaseCreateConsentedSubmittedHandler implements CallbackHandler {
 
     private final CreateCaseService createCaseService;
+    private final GlobalSearchService globalSearchService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -36,6 +38,7 @@ public class PaperCaseCreateConsentedSubmittedHandler implements CallbackHandler
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         createCaseService.setSupplementaryData(callbackRequest, userAuthorisation);
+        globalSearchService.setGlobalSearchDataByMap(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }

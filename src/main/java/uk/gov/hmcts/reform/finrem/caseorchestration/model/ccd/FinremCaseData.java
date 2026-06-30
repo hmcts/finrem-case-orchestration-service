@@ -461,7 +461,7 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonProperty("caseNameHmctsInternal")
     private String caseNameHmctsInternal;
     @JsonProperty("caseManagementCategory")
-    private String caseManagementCategory;
+    private DynamicList caseManagementCategory;
     @JsonProperty("caseManagementLocation")
     private String caseManagementLocation;
 
