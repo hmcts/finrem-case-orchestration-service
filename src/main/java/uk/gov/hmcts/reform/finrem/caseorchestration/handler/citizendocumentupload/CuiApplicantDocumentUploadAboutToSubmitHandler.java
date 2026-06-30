@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CuiDocumentsCategoriser;
 
 import java.util.List;
 
@@ -29,8 +31,12 @@ import java.util.List;
 @Service
 public class CuiApplicantDocumentUploadAboutToSubmitHandler extends CuiDocumentUploadAboutToSubmitHandler {
 
-    public CuiApplicantDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final FeatureToggleService featureToggleService;
+
+    public CuiApplicantDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                          FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
+        this.featureToggleService = featureToggleService;
     }
 
     /**
@@ -69,4 +75,11 @@ public class CuiApplicantDocumentUploadAboutToSubmitHandler extends CuiDocumentU
     protected void handleLog(FinremCallbackRequest callbackRequest) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
     }
+
+    @Override
+    protected void categoriseDocuments(FinremCaseData caseData) {
+        new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT)
+            .categorise(caseData);
+    }
+
 }
