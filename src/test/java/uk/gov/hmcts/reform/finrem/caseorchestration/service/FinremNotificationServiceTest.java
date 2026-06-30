@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -394,17 +395,28 @@ class FinremNotificationServiceTest {
 
     @Test
     void sendGeneralEmailConsentedWithAttachment() {
-        FinremCaseData defaultFinremCaseData = getDefaultConsentedFinremCaseData();
-        defaultFinremCaseData.getGeneralEmailWrapper()
-            .setGeneralEmailUploadedDocument(CaseDocument.builder().documentBinaryUrl("binaryUrl").build());
-        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(defaultFinremCaseData);
+        byte[] documentContents = {1, 2, 3};
+        CaseDocument document = CaseDocument.builder()
+            .documentBinaryUrl("binaryUrl")
+            .build();
+
+        FinremCaseData caseData = getDefaultConsentedFinremCaseData();
+        caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(document);
+        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(caseData);
+
+        NotificationRequest notificationRequest = mock(NotificationRequest.class);
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails))
-            .thenReturn(mock(NotificationRequest.class));
+            .thenReturn(notificationRequest);
+        when(evidenceManagementDownloadService.getByteArray(document, AUTH_TOKEN))
+            .thenReturn(documentContents);
 
-        notificationService.sendConsentGeneralEmail(caseDetails, anyString());
+        notificationService.sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
 
-        verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(caseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL_ATTACHMENT));
+        verify(notificationRequest).setDocumentContentsList(List.of(documentContents));
+        verify(emailService).sendConfirmationEmail(
+            notificationRequest,
+            FR_CONSENT_GENERAL_EMAIL_ATTACHMENT
+        );
     }
 
     @Test

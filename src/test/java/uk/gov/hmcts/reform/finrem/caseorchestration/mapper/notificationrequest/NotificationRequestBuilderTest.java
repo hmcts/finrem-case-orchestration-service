@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -156,6 +157,7 @@ class NotificationRequestBuilderTest {
     @Test
     void givenAllPropertiesSet_whenBuild_thenAllPropertiesPopulated() {
         byte[] documentContents = {1, 2, 3};
+        List<byte[]> documentContentsList = List.of(documentContents);
         NotificationRequest notificationRequest = builder
             .caseReferenceNumber("123456789")
             .solicitorReferenceNumber("SOL123")
@@ -177,6 +179,7 @@ class NotificationRequestBuilderTest {
             .intervenerFullName("Intervener Name")
             .intervenerSolicitorFirm("Intervener Firm")
             .documentContents(documentContents)
+            .documentContentsList(documentContentsList)
             .isNotDigital(Boolean.TRUE)
             .hearingDate("2024-06-01")
             .judgeName("Judge Judy")
@@ -202,6 +205,7 @@ class NotificationRequestBuilderTest {
 
         // For array fields, check content equality
         assertThat(notificationRequest.getDocumentContents()).isEqualTo(documentContents);
+        assertThat(notificationRequest.getDocumentContentsList()).isEqualTo(documentContentsList);
     }
 
     @Test

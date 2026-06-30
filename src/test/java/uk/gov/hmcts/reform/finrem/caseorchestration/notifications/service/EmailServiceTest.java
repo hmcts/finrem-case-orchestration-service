@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.except
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.SendEmailException;
 import uk.gov.service.notify.NotificationClientException;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -523,7 +524,7 @@ public class EmailServiceTest {
     public void shouldBuildTemplateVarsForGeneralEmailAttachmentConsented() {
         setConsentedData();
         notificationRequest.setGeneralEmailBody("test email body");
-        notificationRequest.setDocumentContents(new byte[5]);
+        notificationRequest.setDocumentContentsList(List.of(new byte[5]));
 
         Map<String, Object> returnedTemplateVars =
 
@@ -532,14 +533,15 @@ public class EmailServiceTest {
         assertNull(returnedTemplateVars.get("courtName"));
         assertNull(returnedTemplateVars.get("courtEmail"));
         assertEquals("test email body", returnedTemplateVars.get("generalEmailBody"));
-        assertNotNull(returnedTemplateVars.get("link_to_file"));
+        assertEquals("yes", returnedTemplateVars.get("has_file_1"));
+        assertNotNull(returnedTemplateVars.get("link_to_file_1"));
     }
 
     @Test
     public void shouldBuildTemplateVarsForGeneralEmailAttachmentContested() {
         setConsentedData();
         notificationRequest.setGeneralEmailBody("test email body");
-        notificationRequest.setDocumentContents(new byte[5]);
+        notificationRequest.setDocumentContentsList(List.of(new byte[5]));
 
         Map<String, Object> returnedTemplateVars =
 
@@ -548,7 +550,28 @@ public class EmailServiceTest {
         assertNull(returnedTemplateVars.get("courtName"));
         assertNull(returnedTemplateVars.get("courtEmail"));
         assertEquals("test email body", returnedTemplateVars.get("generalEmailBody"));
-        assertNotNull(returnedTemplateVars.get("link_to_file"));
+        assertEquals("yes", returnedTemplateVars.get("has_file_1"));
+        assertNotNull(returnedTemplateVars.get("link_to_file_1"));
+    }
+
+    @Test
+    public void givenMoreThanTenDocuments_whenBuildTemplateVarsForGeneralEmailAttachment_thenThrowException() {
+        setConsentedData();
+        notificationRequest.setDocumentContentsList(
+            java.util.stream.IntStream.range(0, 11)
+                .mapToObj(i -> new byte[1])
+                .toList()
+        );
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> emailService.buildTemplateVars(
+                notificationRequest,
+                FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name()
+            )
+        );
+
+        assertEquals("A maximum of 10 email attachments is supported", exception.getMessage());
     }
 
     @Test
