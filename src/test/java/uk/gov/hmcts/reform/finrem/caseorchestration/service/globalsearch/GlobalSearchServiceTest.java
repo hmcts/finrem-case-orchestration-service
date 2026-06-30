@@ -6,6 +6,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,11 +26,21 @@ public class GlobalSearchServiceTest {
     public void shouldSetGlobalSearchFields() {
         when(caseData.getCcdCaseId()).thenReturn(String.valueOf(12345L));
         when(caseData.getFullApplicantName()).thenReturn("John Smith");
-        when(caseData.getSelectedAllocatedCourt()).thenReturn("London Court");
 
         globalSearchService.setGlobalSearchData(caseData);
 
         verify(caseData).setCaseNameHmctsInternal("John Smith");
+    }
+
+    @Test
+    public void shouldSetGlobalSearchFieldsFromMap() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("ccdCaseId", "12345");
+        caseDataMap.put("fullApplicantName", "Jane Doe");
+
+        globalSearchService.setGlobalSearchDataByMap(caseDataMap);
+
+        assertEquals("Jane Doe", caseDataMap.get("caseNameHmctsInternal"));
     }
 
 }
