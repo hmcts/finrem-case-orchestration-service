@@ -463,7 +463,7 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonProperty("caseManagementCategory")
     private DynamicList caseManagementCategory;
     @JsonProperty("caseManagementLocation")
-    private CaseManagementLocation caseManagementLocation;
+    private CaseLocation caseManagementLocation;
 
     @JsonIgnore
     public CaseDataMetricsWrapper getCaseDataMetricsWrapper() {

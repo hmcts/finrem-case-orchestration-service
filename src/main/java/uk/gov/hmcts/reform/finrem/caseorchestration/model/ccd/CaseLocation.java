@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder(toBuilder = true)
-public class CaseManagementLocation {
+public class CaseLocation {
     private final String region;
     private final String regionId;
     private final String baseLocation;
