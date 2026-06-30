@@ -68,6 +68,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
@@ -163,6 +164,8 @@ public class ManageBarristersITest implements IntegrationTest {
     private GenericDocumentService genericDocumentService;
     @MockitoBean
     private EmailService emailService;
+    @MockitoBean
+    private GeneralEmailService generalEmailService;
     @MockitoBean
     private EvidenceManagementDownloadService evidenceManagementDownloadService;
     @Captor
