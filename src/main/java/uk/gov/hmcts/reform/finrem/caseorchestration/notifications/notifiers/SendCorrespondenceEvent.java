@@ -64,6 +64,7 @@ public class SendCorrespondenceEvent {
             .emailTemplate(this.emailTemplate.name())
             .build());
     }
+
     /**
      * Records a successful email notification audit for the given party.
      *
@@ -103,6 +104,15 @@ public class SendCorrespondenceEvent {
             .build());
     }
 
+    /**
+     * Records a successful postal notification audit for the given party.
+     *
+     * Adds an audit with wasSent set to Yes, together with the event ID,
+     * notification party, postal type, Bulk Print letter ID and attached postal document filenames.
+     *
+     * @param notificationParty the party the postal notification was sent to
+     * @param letterId the Bulk Print letter ID returned after the postal notification was sent
+     */
     public void recordPostalNotificationSentAudit(NotificationParty notificationParty, UUID letterId) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
             .wasSent(YesOrNo.YES)
