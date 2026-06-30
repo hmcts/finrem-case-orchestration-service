@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -156,61 +158,85 @@ class SendCorrespondenceEventTest {
         }
     }
 
-    @Test
-    void givenEmailNotificationToSendAuditRecorded_thenAddsEmailAudit() {
+    @ParameterizedTest
+    @EnumSource(NotificationParty.class)
+    void givenEmailNotificationToSendAuditRecorded_thenAddsEmailAudit(NotificationParty notificationParty) {
+        EmailTemplateNames emailTemplate = EmailTemplateNames.values()[0];
+        String eventId = EventType.MANAGE_HEARINGS.getCcdType();
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
-            .emailTemplate(EmailTemplateNames.values()[0])
+            .emailTemplate(emailTemplate)
             .build();
+        event.setEventId(eventId);
+        event.recordEmailNotificationToSendAudit(notificationParty);
 
-        event.recordEmailNotificationToSendAudit(NotificationParty.APPLICANT);
+        assertThat(event.getNotificationAudits()).hasSize(1);
 
         NotificationAudit audit = event.getNotificationAudits().getFirst();
 
-        assertThat(audit.getParty()).isEqualTo(NotificationParty.APPLICANT.name());
-        assertThat(audit.getType()).isEqualTo(NotificationType.EMAIL);
-        assertThat(audit.getWasSent()).isEqualTo(YesOrNo.NO);
+        assertCommonAuditFields(audit, notificationParty, NotificationType.EMAIL, YesOrNo.NO, eventId);
+        assertThat(audit.getEmailTemplate()).isEqualTo(emailTemplate.name());
     }
 
-    @Test
-    void givenEmailNotificationSentAuditRecorded_thenAddsSentEmailAudit() {
+    @ParameterizedTest
+    @EnumSource(NotificationParty.class)
+    void givenEmailNotificationSentAuditRecorded_thenAddsSentEmailAudit(NotificationParty notificationParty) {
+        EmailTemplateNames emailTemplate = EmailTemplateNames.values()[0];
+        String eventId = EventType.MANAGE_HEARINGS.getCcdType();
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
-            .emailTemplate(EmailTemplateNames.values()[0])
+            .emailTemplate(emailTemplate)
             .build();
+        event.setEventId(eventId);
+        event.recordEmailNotificationSentAudit(notificationParty);
 
-        event.recordEmailNotificationSentAudit(NotificationParty.APPLICANT);
+        assertThat(event.getNotificationAudits()).hasSize(1);
 
         NotificationAudit audit = event.getNotificationAudits().getFirst();
 
-        assertThat(audit.getParty()).isEqualTo(NotificationParty.APPLICANT.name());
-        assertThat(audit.getType()).isEqualTo(NotificationType.EMAIL);
-        assertThat(audit.getWasSent()).isEqualTo(YesOrNo.YES);
+        assertCommonAuditFields(audit, notificationParty, NotificationType.EMAIL, YesOrNo.YES, eventId);
+        assertThat(audit.getEmailTemplate()).isEqualTo(emailTemplate.name());
     }
 
-    @Test
-    void givenPostalNotificationToSendAuditRecorded_thenAddsPostalAudit() {
+    @ParameterizedTest
+    @EnumSource(NotificationParty.class)
+    void givenPostalNotificationToSendAuditRecorded_thenAddsPostalAudit(NotificationParty notificationParty) {
+        String eventId = EventType.MANAGE_HEARINGS.getCcdType();
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder().build();
+        event.setEventId(eventId);
+        event.recordPostalNotificationToSendAudit(notificationParty);
 
-        event.recordPostalNotificationToSendAudit(NotificationParty.RESPONDENT);
+        assertThat(event.getNotificationAudits()).hasSize(1);
 
         NotificationAudit audit = event.getNotificationAudits().getFirst();
 
-        assertThat(audit.getParty()).isEqualTo(NotificationParty.RESPONDENT.name());
-        assertThat(audit.getType()).isEqualTo(NotificationType.POSTAL);
-        assertThat(audit.getWasSent()).isEqualTo(YesOrNo.NO);
+        assertCommonAuditFields(audit, notificationParty, NotificationType.POSTAL, YesOrNo.NO, eventId);
     }
 
-    @Test
-    void givenPostalNotificationSentAuditRecorded_thenAddsSentPostalAudit() {
+    @ParameterizedTest
+    @EnumSource(NotificationParty.class)
+    void givenPostalNotificationSentAuditRecorded_thenAddsSentPostalAudit(NotificationParty notificationParty) {
+        String eventId = EventType.MANAGE_HEARINGS.getCcdType();
         UUID letterId = UUID.randomUUID();
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder().build();
+        event.setEventId(eventId);
+        event.recordPostalNotificationSentAudit(notificationParty, letterId);
 
-        event.recordPostalNotificationSentAudit(NotificationParty.RESPONDENT, letterId);
+        assertThat(event.getNotificationAudits()).hasSize(1);
 
         NotificationAudit audit = event.getNotificationAudits().getFirst();
 
-        assertThat(audit.getParty()).isEqualTo(NotificationParty.RESPONDENT.name());
-        assertThat(audit.getType()).isEqualTo(NotificationType.POSTAL);
-        assertThat(audit.getWasSent()).isEqualTo(YesOrNo.YES);
+        assertCommonAuditFields(audit, notificationParty, NotificationType.POSTAL, YesOrNo.YES, eventId);
         assertThat(audit.getLetterId()).isEqualTo(letterId.toString());
+    }
+
+    private void assertCommonAuditFields(NotificationAudit audit,
+                                         NotificationParty notificationParty,
+                                         NotificationType type,
+                                         YesOrNo wasSent,
+                                         String eventId) {
+        assertThat(audit.getCreatedAt()).isNotNull();
+        assertThat(audit.getWasSent()).isEqualTo(wasSent);
+        assertThat(audit.getEventId()).isEqualTo(eventId);
+        assertThat(audit.getParty()).isEqualTo(notificationParty.name());
+        assertThat(audit.getType()).isEqualTo(type);
     }
 }

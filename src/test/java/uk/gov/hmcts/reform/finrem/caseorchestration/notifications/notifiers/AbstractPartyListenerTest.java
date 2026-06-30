@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
@@ -447,13 +448,14 @@ class AbstractPartyListenerTest {
             .contains(RECIPIENT_NAME, RECIPIENT_EMAIL, RECIPIENT_REFERENCE);
     }
 
-    @Test
-    void givenDryRunEmailNotification_whenHandleNotification_thenEmailIsNotSent() {
+    @ParameterizedTest
+    @EnumSource(NotificationParty.class)
+    void givenSimulatingEmailNotification_whenHandleNotification_thenEmailIsNotSent(NotificationParty notificationParty) {
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
             .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
-            .notificationParties(List.of(NotificationParty.APPLICANT))
+            .notificationParties(List.of(notificationParty))
             .build();
-        event.setDryRun(true);
+        event.setSimulatingCorrespondence(true);
 
         assertDoesNotThrow(() -> sendEmailNotificationListener.handleNotification(event));
 
@@ -461,12 +463,13 @@ class AbstractPartyListenerTest {
         verifyNoLetterSent();
     }
 
-    @Test
-    void givenDryRunPaperNotification_whenHandleNotification_thenLetterIsNotSent() {
+    @ParameterizedTest
+    @EnumSource(NotificationParty.class)
+    void givenSimulatingPaperNotification_whenHandleNotification_thenLetterIsNotSent(NotificationParty notificationParty) {
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
-            .notificationParties(List.of(NotificationParty.APPLICANT))
+            .notificationParties(List.of(notificationParty))
             .build();
-        event.setDryRun(true);
+        event.setSimulatingCorrespondence(true);
 
         assertDoesNotThrow(() -> sendPaperNotificationListener.handleNotification(event));
 

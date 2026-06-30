@@ -38,8 +38,8 @@ public class NotificationAuditService {
      * Creates notification audit rows for the correspondence event.
      * The correspondence process is simulated first so listeners can determine
      * which parties would receive correspondence by email or post without sending it.
-     * One audit row is created per notification party, and each audit row ID
-     * is added to the pending notifications list for later sent-status updates.
+     * One audit row is created per notification party, and each pending audit
+     * is stored for later sent-status updates.
      *
      * @param event     the correspondence event containing parties, case details, template and documents
      * @param eventType the event triggering the notification, used for the eventId field
@@ -93,23 +93,23 @@ public class NotificationAuditService {
 
         combinePendingAndSentAudits(pending, audits);
 
-        List<NotificationAudit> allAudits = new ArrayList<>();
+        List<NotificationAuditCollectionItem> auditItems = new ArrayList<>(
 
-        Optional.ofNullable(wrapper.getNotificationsAudits())
-            .orElseGet(List::of)
-            .stream()
-            .map(NotificationAuditCollectionItem::getValue)
+            Optional.ofNullable(wrapper.getNotificationsAudits())
+                .orElseGet(List::of)
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(item -> item.getValue() != null)
+                .toList()
+        );
+
+        audits.stream()
             .filter(Objects::nonNull)
-            .forEach(allAudits::add);
-
-        allAudits.addAll(audits);
-
-        List<NotificationAuditCollectionItem> auditItems = allAudits.stream()
             .map(audit -> NotificationAuditCollectionItem.builder()
                 .id(UUID.randomUUID())
                 .value(audit)
                 .build())
-            .toList();
+            .forEach(auditItems::add);
 
         return Map.of(
             NOTIFICATIONS_AUDITS, objectMapper.convertValue(auditItems, List.class),

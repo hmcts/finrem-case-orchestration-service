@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -23,12 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_AUDITS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_TO_BE_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
@@ -36,8 +34,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 @ExtendWith(MockitoExtension.class)
 class NotificationAuditServiceTest {
 
-    @Mock
-    private ObjectMapper objectMapper;
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
@@ -65,7 +63,10 @@ class NotificationAuditServiceTest {
         assertThat(pending.getId()).isNotNull();
         assertThat(pending.getValue().getParty()).isEqualTo(NotificationParty.APPLICANT.name());
         assertThat(pending.getValue().getType()).isEqualTo(NotificationType.EMAIL);
+        assertThat(pending.getValue().getWasSent()).isEqualTo(YesOrNo.NO);
         assertThat(pending.getValue().getEventId()).isEqualTo(EventType.MANAGE_HEARINGS.getCcdType());
+        assertThat(pending.getValue().getEmailTemplate())
+            .isEqualTo(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR.name());
     }
 
     @Test
@@ -88,15 +89,17 @@ class NotificationAuditServiceTest {
             new ArrayList<>(List.of(sentAudit))
         );
 
-        List<Map<String, Object>> convertedAudits = List.of(Map.of("converted", true));
-        when(objectMapper.convertValue(any(Object.class), eq(List.class))).thenReturn(convertedAudits);
-
         Map<String, Object> result = notificationAuditService.updateSentAuditsList(event);
 
-        assertThat(sentAudit.getWasSent()).isEqualTo(YesOrNo.YES);
-        assertThat(result)
-            .containsEntry(NOTIFICATIONS_AUDITS, convertedAudits)
-            .containsEntry(NOTIFICATIONS_TO_BE_SENT, List.of());
+        assertThat(result).containsEntry(NOTIFICATIONS_TO_BE_SENT, List.of());
+
+        Map<String, Object> audit = firstNotificationAuditValue(result);
+
+        assertThat(audit)
+            .containsEntry("party", NotificationParty.APPLICANT.name())
+            .containsEntry("type", "email")
+            .containsEntry("wasSent", "Yes")
+            .containsEntry("eventId", EventType.MANAGE_HEARINGS.getCcdType());
     }
 
     @Test
@@ -104,20 +107,22 @@ class NotificationAuditServiceTest {
         NotificationAudit pendingAudit = audit(NotificationParty.RESPONDENT, NotificationType.POSTAL);
         NotificationAudit sentAudit = audit(NotificationParty.RESPONDENT, NotificationType.EMAIL);
 
-        List<NotificationAudit> sentAudits = new ArrayList<>(List.of(sentAudit));
-
         SendCorrespondenceEvent event = buildEventWithPendingAndSentAudits(
             List.of(pendingItem(pendingAudit)),
-            sentAudits
+            new ArrayList<>(List.of(sentAudit))
         );
 
-        when(objectMapper.convertValue(any(Object.class), eq(List.class)))
-            .thenReturn(List.of(Map.of("converted", true)));
+        Map<String, Object> result = notificationAuditService.updateSentAuditsList(event);
 
-        notificationAuditService.updateSentAuditsList(event);
+        assertThat(result).containsEntry(NOTIFICATIONS_TO_BE_SENT, List.of());
 
-        assertThat(pendingAudit.getWasSent()).isEqualTo(YesOrNo.NO);
-        assertThat(sentAudits).contains(pendingAudit);
+        assertThat(notificationAuditValues(result)).anySatisfy(audit ->
+            assertThat(audit)
+                .containsEntry("party", NotificationParty.RESPONDENT.name())
+                .containsEntry("type", "postal")
+                .containsEntry("wasSent", "No")
+                .containsEntry("eventId", EventType.MANAGE_HEARINGS.getCcdType())
+        );
     }
 
     private SendCorrespondenceEvent buildEvent() {
@@ -160,5 +165,25 @@ class NotificationAuditServiceTest {
         return NotificationToBeSentCollectionItem.builder()
             .value(audit)
             .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> notificationAuditItems(Map<String, Object> result) {
+        return (List<Map<String, Object>>) result.get(NOTIFICATIONS_AUDITS);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> notificationAuditValue(Map<String, Object> auditItem) {
+        return (Map<String, Object>) auditItem.get("value");
+    }
+
+    private Map<String, Object> firstNotificationAuditValue(Map<String, Object> result) {
+        return notificationAuditValue(notificationAuditItems(result).getFirst());
+    }
+
+    private List<Map<String, Object>> notificationAuditValues(Map<String, Object> result) {
+        return notificationAuditItems(result).stream()
+            .map(this::notificationAuditValue)
+            .toList();
     }
 }
