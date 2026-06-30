@@ -67,7 +67,6 @@ public class SendCorrespondenceEvent {
 
     /**
      * Records a successful email notification audit for the given party.
-     *
      * Adds an audit with wasSent set to Yes, together with the event ID,
      * notification party, email type and email template used.
      *
@@ -106,7 +105,6 @@ public class SendCorrespondenceEvent {
 
     /**
      * Records a successful postal notification audit for the given party.
-     *
      * Adds an audit with wasSent set to Yes, together with the event ID,
      * notification party, postal type, Bulk Print letter ID and attached postal document filenames.
      *

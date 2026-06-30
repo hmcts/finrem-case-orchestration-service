@@ -65,18 +65,14 @@ public class NotificationAuditService {
 
     /**
      * Updates the notification audit history after correspondence has been sent.
-     *
      * The pending audits created during About To Submit are compared with the audits
      * recorded during Submitted. Successfully sent notifications are already present
      * with wasSent set to Yes. Any pending audit without a matching sent audit is added
      * with its existing wasSent value of No. Audits are matched using the party,
      * notification type and event ID.
-     *
      * Existing audit history is preserved, the completed audits for the current event
      * are appended, and the pending notifications collection is cleared.
-     *
      * Returns an empty map when there are no pending notifications to process.
-     *
      * @param sentEvent the correspondence event containing the successfully sent notification audits
      * @return the CCD fields containing the updated audit history and cleared pending notifications
      */
