@@ -100,7 +100,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = getCaseId(caseDetails);
+        String caseId = caseDetails.getCaseIdAsString();
 
         FinremCaseData caseData = caseDetails.getData();
         try {
@@ -145,7 +145,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         } catch (RuntimeException e) {
             // The purpose of this catch block is to make the exception message available in the error message box
             // And it doesn't let CCD to retry if we populate the exception message to `errors`
-            log.error("FAIL: {} on Case ID: {}", e.getMessage(), getCaseId(caseDetails), e);
+            log.error("FAIL: {} on Case ID: {}", e.getMessage(), caseDetails.getCaseIdAsString(), e);
 
             resetFields(caseData.getDraftOrdersWrapper());
             clearTemporaryFields(caseData);
@@ -154,10 +154,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         }
 
         return response(caseDetails.getData());
-    }
-
-    private String getCaseId(FinremCaseDetails caseDetails) {
-        return String.valueOf(caseDetails.getId());
     }
 
     private void handleAdditionalDocumentUploadedInSendOrderEvent(FinremCaseDetails caseDetails,
@@ -190,10 +186,10 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                                                                          Map<CaseDocument, List<CaseDocument>> order2AttachmentMap,
                                                                          String userAuthorisation) {
         if (!legacyHearingOrders.isEmpty()) {
-            log.info("Going to stamp legacy orders on Case ID: {}", getCaseId(caseDetails));
+            log.info("Going to stamp legacy orders on Case ID: {}", caseDetails.getCaseIdAsString());
             // stamping legacy approved orders and add it to legacy finalised collection
             legacyHearingOrders.forEach(orderToStamp -> {
-                log.info("Stamp and add to FinalOrderCollection {} for Case ID: {}, ", orderToStamp, getCaseId(caseDetails));
+                log.info("Stamp and add to FinalOrderCollection {} for Case ID: {}, ", orderToStamp, caseDetails.getCaseIdAsString());
                 stampAndAddToCollection(caseDetails, orderToStamp, order2AttachmentMap.get(orderToStamp), userAuthorisation);
             });
         }
@@ -324,7 +320,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
 
     private void setConsolidateView(FinremCaseDetails caseDetails,
                                     List<String> partyList) {
-        log.info("Setting Documents for Case ID: {}", getCaseId(caseDetails));
+        log.info("Setting Documents for Case ID: {}", caseDetails.getCaseIdAsString());
         sendOrderPartyDocumentList.forEach(handler -> handler.setUpOrderDocumentsOnPartiesTab(caseDetails, partyList));
     }
 
@@ -333,7 +329,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                                               List<String> partyList,
                                               List<OrderSentToPartiesCollection> printOrderCollection,
                                               String userAuthorisation) {
-        log.info("Share Hearing Documents for Case ID: {}", getCaseId(caseDetails));
+        log.info("Share Hearing Documents for Case ID: {}", caseDetails.getCaseIdAsString());
         List<CaseDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails, hearingOrders, userAuthorisation);
         hearingDocumentPack.forEach(doc -> printOrderCollection.add(addToPrintOrderCollection(doc)));
         sendOrderPartyDocumentList.forEach(handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, hearingDocumentPack));
@@ -342,7 +338,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
     private List<CaseDocument> createHearingDocumentPack(FinremCaseDetails caseDetails,
                                                          List<CaseDocument> hearingOrders,
                                                          String authorisationToken) {
-        log.info("Creating hearing document pack for caseId {}", getCaseId(caseDetails));
+        log.info("Creating hearing document pack for caseId {}", caseDetails.getCaseIdAsString());
         FinremCaseData caseData = caseDetails.getData();
 
         List<CaseDocument> orders = new ArrayList<>(hearingOrders);
@@ -366,7 +362,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                                                              List<String> partyList,
                                                              List<OrderToShare> selectedOrders,
                                                              List<OrderSentToPartiesCollection> printOrderCollection) {
-        log.info("Share selected 'GeneralOrder' With selected parties for Case Id:{}", getCaseId(caseDetails));
+        log.info("Share selected 'GeneralOrder' With selected parties for Case Id:{}", caseDetails.getCaseIdAsString());
 
         FinremCaseData caseData = caseDetails.getData();
 
@@ -397,15 +393,15 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                 StampType stampType = documentHelper.getStampType(caseData);
                 CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType,
                     caseDetails.getCaseType());
-                log.info("Stamped Documents = {} for caseId {}", stampedDocs, getCaseId(caseDetails));
+                log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseDetails.getCaseIdAsString());
                 finalOrderCollection.add(prepareFinalOrderList(stampedDocs, additionalAttachments));
                 log.info("If Existing final order collection = {}", finalOrderCollection);
             }
             caseData.setFinalOrderCollection(finalOrderCollection);
-            log.info("Finished stamping final order for caseId {}", getCaseId(caseDetails));
+            log.info("Finished stamping final order for caseId {}", caseDetails.getCaseIdAsString());
         } else {
             caseData.setFinalOrderCollection(finalOrderCollection);
-            log.info("Finished stamping else final order for caseId {}", getCaseId(caseDetails));
+            log.info("Finished stamping else final order for caseId {}", caseDetails.getCaseIdAsString());
         }
     }
 
