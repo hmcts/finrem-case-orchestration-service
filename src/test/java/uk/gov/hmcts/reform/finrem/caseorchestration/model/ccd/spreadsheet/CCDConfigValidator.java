@@ -10,6 +10,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 import java.io.File;
@@ -192,10 +193,12 @@ public class CCDConfigValidator {
                 log.info("Looking for FinremCaseData Field Id: {} and Field Type: {}", field.getName(), field.getType());
                 boolean found = false;
                 for (CcdFieldAttributes ccdFieldAttributes : caseFields) {
-                    if (field.getAnnotation(JsonUnwrapped.class) != null || field.getAnnotation(JsonIgnore.class) != null) {
+                    if (field.getAnnotation(JsonUnwrapped.class) != null
+                        || field.getAnnotation(JsonIgnore.class) != null
+                        || field.getAnnotation(TemporaryField.class) != null) {
                         found = true;
-                        log.info("FinremCaseData Field Id: {} and Field Type: {} are annotated with JsonUnwrapped or JsonIgnore", field.getName(),
-                            field.getType());
+                        log.info("FinremCaseData Field Id: {} and Field Type: {} are annotated with JsonUnwrapped, JsonIgnore or TemporaryField",
+                            field.getName(), field.getType());
                         break;
                     }
                     if (ccdFieldAttributes.getFieldId().equals(field.getName())) {
