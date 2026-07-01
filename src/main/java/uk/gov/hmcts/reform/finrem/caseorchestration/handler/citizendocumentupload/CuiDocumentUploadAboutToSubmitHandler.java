@@ -93,6 +93,8 @@ public abstract class CuiDocumentUploadAboutToSubmitHandler extends FinremAboutT
 
         setDocuments(currentCaseData, existingDocuments);
 
+        categoriseDocuments(currentCaseData);
+
         return response(currentCaseData);
     }
 
@@ -154,4 +156,6 @@ public abstract class CuiDocumentUploadAboutToSubmitHandler extends FinremAboutT
     );
 
     protected abstract void handleLog(FinremCallbackRequest callbackRequest);
+
+    protected abstract void categoriseDocuments(FinremCaseData caseData);
 }
