@@ -14,4 +14,20 @@
         <packageUrl regex="true">^pkg:maven/org\.apache\.pdfbox/pdfbox-io@.*$</packageUrl>
         <cpe>cpe:/a:apache:pdfbox</cpe>
     </suppress>
+    <suppress until="2026-12-31Z">
+        <notes><![CDATA[
+    CVE-2026-54515 - jackson-databind 2.21.4 false positive / accepted risk pending fix.
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson-databind@.*$</packageUrl>
+        <cve>CVE-2026-54515</cve>
+    </suppress>
+
+    <suppress until="2026-12-31Z">
+        <notes><![CDATA[
+    CVE-2026-53914 - Kotlin stdlib false positive via overly broad jetbrains:kotlin CPE mapping.
+    ]]></notes>
+        <cpe>cpe:2.3:a:jetbrains:kotlin:*:*:*:*:*:*:*:*</cpe>
+        <cpe>cpe:/a:jetbrains:kotlin</cpe>
+        <cve>CVE-2026-53914</cve>
+    </suppress>
 </suppressions>
