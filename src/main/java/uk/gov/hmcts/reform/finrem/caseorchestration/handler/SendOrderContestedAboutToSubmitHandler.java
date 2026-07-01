@@ -63,7 +63,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 
 @Slf4j
 @Service
-public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final GeneralOrderService generalOrderService;
     private final DraftOrderService draftOrderService;
