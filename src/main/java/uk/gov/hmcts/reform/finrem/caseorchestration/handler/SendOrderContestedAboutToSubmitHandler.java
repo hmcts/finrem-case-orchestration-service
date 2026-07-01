@@ -138,7 +138,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
             setConsolidateView(caseDetails, parties);
 
             resetFields(caseData.getDraftOrdersWrapper());
-            clearTemporaryFields(caseData);
             sendOrdersCategoriser.categorise(caseDetails.getData());
 
             draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
@@ -148,9 +147,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
             log.error("FAIL: {} on Case ID: {}", e.getMessage(), caseDetails.getCaseIdAsString(), e);
 
             resetFields(caseData.getDraftOrdersWrapper());
-            clearTemporaryFields(caseData);
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
+            return response(caseDetails.getData(), null, List.of(e.getMessage()));
         }
 
         return response(caseDetails.getData());
@@ -302,11 +299,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                 .coverLetter(draftOrderDocumentReview.getCoverLetter())
                 .build())
             .build();
-    }
-
-    private void clearTemporaryFields(FinremCaseData caseData) {
-        caseData.getSendOrderWrapper().setAdditionalDocuments(null);
-        caseData.getSendOrderWrapper().setOrdersToSend(null);
     }
 
     private void resetFields(DraftOrdersWrapper draftOrdersWrapper) {
