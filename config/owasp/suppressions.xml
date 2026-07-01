@@ -70,4 +70,16 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-41003</cve>
         <cve>CVE-2026-41694</cve>
     </suppress>
+    <suppress until="2026-09-01Z">
+        <notes><![CDATA[
+    jackson-databind CVEs (CWE-184 array-subtype allowlist bypass, SSRF via
+    eager DNS resolution in InetSocketAddress deserialization, and
+    CWE-915 case-insensitive-property mass-assignment bypass).
+    Fixed in 2.18.8/2.18.9, 2.21.4/2.21.5, 3.1.4. Upgrade will resolve.
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson-databind@.*$</packageUrl>
+        <cve>CVE-2026-54513</cve>
+        <cve>CVE-2026-54514</cve>
+        <cve>CVE-2026-54515</cve>
+    </suppress>
 </suppressions>
