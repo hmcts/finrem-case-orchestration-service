@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 
@@ -151,9 +152,9 @@ public class GenerateCoverSheetService {
                 intervenerChangeDetails.getIntervenerType()
             );
 
-        CaseDocument cd = mapping.oldCoverSheetSupplier().get();
-        if (cd != null && StringUtils.isNotBlank(cd.getDocumentUrl())) {
-            deleteCoverSheet(cd.getDocumentUrl(), authorisationToken);
+        CaseDocument caseDocument = mapping.oldCoverSheetSupplier().get();
+        if (nonNull(caseDocument) && StringUtils.isNotBlank(caseDocument.getDocumentUrl())) {
+            deleteCoverSheet(caseDocument.getDocumentUrl(), authorisationToken);
         } else {
             log.info("%s - old cover sheet does not exist. Skip deleting it."
                 .formatted(finremCaseDetails.getId()));
