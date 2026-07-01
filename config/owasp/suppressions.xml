@@ -78,6 +78,7 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
     Fixed in 2.18.8/2.18.9, 2.21.4/2.21.5, 3.1.4. Upgrade will resolve.
     ]]></notes>
         <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson-databind@.*$</packageUrl>
+        <cve>CVE-2026-54512</cve>
         <cve>CVE-2026-54513</cve>
         <cve>CVE-2026-54514</cve>
         <cve>CVE-2026-54515</cve>
