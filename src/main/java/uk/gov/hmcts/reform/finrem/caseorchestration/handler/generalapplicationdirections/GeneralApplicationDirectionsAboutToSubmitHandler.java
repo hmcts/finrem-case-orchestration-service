@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -97,7 +98,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         } else {
             updateApplications(caseDetails, documents, userAuthorisation);
         }
-        List<String> errors = new ArrayList<>();
+
+        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, callbackRequest.getEventType()));
 
         try {
             gaDirectionService.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -56,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -485,6 +488,49 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             .isEqualTo(ManageHearingsAction.ADD_HEARING);
         verify(manageHearingActionService).performAddHearing(caseDetails, userAuthorisation);
         verify(manageHearingActionService).updateTabData(caseDetails.getData());
+    }
+
+    @Test
+    void givenPostalValidationErrors_whenHandle_thenResponseContainsPostalErrors() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        List<String> expectedErrors = List.of(
+            "Applicant's postal address is missing",
+            "Respondent's postal address is missing"
+        );
+
+        try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
+            contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                    caseData, callbackRequest.getEventType()))
+                .thenReturn(expectedErrors);
+
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
+        }
+    }
+
+    @Test
+    void givenNoPostalValidationErrors_whenHandle_thenResponseContainsEmptyErrorList() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        List<String> expectedErrors = List.of();
+
+        try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
+            contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                caseData, callbackRequest.getEventType()))
+                .thenReturn(expectedErrors);
+
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            assertThat(response.getErrors()).isEmpty();
+        }
     }
 
     @Test
