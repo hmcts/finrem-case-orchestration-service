@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FinRemBulkScanFormValidatorFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,8 @@ public class BulkScanService {
 
     private final FormAValidator formAValidator;
 
+    private final GlobalSearchService globalSearchService;
+
     public OcrValidationResult validateBulkScanForm(String formType, List<OcrDataField> ocrDataFields) throws UnsupportedFormTypeException {
         BulkScanFormValidator formValidator = finRemBulkScanFormValidatorFactory.getValidator(formType);
         return formValidator.validateBulkScanForm(ocrDataFields);
@@ -50,6 +53,7 @@ public class BulkScanService {
         Map<String, Object> transformIntoCaseData = bulkScanFormTransformer.transformIntoCaseData(exceptionRecord);
         Map<String, Object> caseData = new HashMap<>(transformIntoCaseData);
         addChangeOrganisationRequestAndDefaultOrganisationPolicies(caseData);
+        globalSearchService.setGlobalSearchDataByMap(caseData);
         return caseData;
     }
 

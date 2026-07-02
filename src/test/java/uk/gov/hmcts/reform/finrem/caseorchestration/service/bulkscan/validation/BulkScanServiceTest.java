@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,9 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_UNSUPPORTED_FORM_TYPE;
@@ -57,6 +60,9 @@ public class BulkScanServiceTest {
 
     @Mock
     private FormAValidator formAValidator;
+
+    @Mock
+    private GlobalSearchService globalSearchService;
 
     @Mock
     private FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
@@ -109,6 +115,7 @@ public class BulkScanServiceTest {
 
         verify(finRemBulkScanFormTransformerFactory).getTransformer(TEST_FORM_TYPE);
         verify(bulkScanFormTransformer).transformIntoCaseData(exceptionRecord);
+        verify(globalSearchService, times(1)).setGlobalSearchDataByMap(anyMap());
     }
 
     @Test
@@ -136,5 +143,6 @@ public class BulkScanServiceTest {
 
         verify(finRemBulkScanFormTransformerFactory, never()).getTransformer(TEST_FORM_TYPE);
         verify(bulkScanFormTransformer, never()).transformIntoCaseData(exceptionRecord);
+        verify(globalSearchService, times(1)).setGlobalSearchDataByMap(anyMap());
     }
 }
