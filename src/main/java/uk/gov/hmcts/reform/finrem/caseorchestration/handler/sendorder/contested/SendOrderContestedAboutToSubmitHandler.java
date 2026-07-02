@@ -338,11 +338,11 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
             .filter(Objects::nonNull)
             .forEach(contestedGeneralOrder -> {
                 if (contestedGeneralOrder.getAdditionalDocument() != null) {
-                    CaseDocument generalOrder = contestedGeneralOrder.getAdditionalDocument();
+                    CaseDocument additionalDocument = contestedGeneralOrder.getAdditionalDocument();
                     if (generalOrderService.isSelectedOrderMatches(selectedOrders, contestedGeneralOrder)) {
                         sendOrderPartyDocumentList.forEach(
-                            handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, List.of(generalOrder)));
-                        printOrderCollection.add(addToPrintOrderCollection(generalOrder));
+                            handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, List.of(additionalDocument)));
+                        printOrderCollection.add(addToPrintOrderCollection(additionalDocument));
                     }
                 }
             });
