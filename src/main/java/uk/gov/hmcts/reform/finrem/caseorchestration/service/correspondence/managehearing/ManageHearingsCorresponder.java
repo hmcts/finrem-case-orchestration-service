@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.MANAGE_HEARINGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
@@ -235,6 +236,7 @@ public class ManageHearingsCorresponder {
             Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
 
         return SendCorrespondenceEvent.builder()
+            .eventId(MANAGE_HEARINGS.getCcdType())
             .notificationParties(partiesOnCase.stream()
                 .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
                 .toList())
@@ -244,6 +246,33 @@ public class ManageHearingsCorresponder {
             .caseDetails(caseDetails)
             .authToken(userAuthorisation)
             .build();
+    }
+
+    /**
+     * Builds a correspondence event for the selected manage hearings action, if correspondence is required.
+     *
+     * <p>This method routes the selected action to the appropriate correspondence builder.
+     * Add hearing actions use the hearing correspondence builder, while adjourn or vacate
+     * actions use the adjourned or vacated hearing correspondence builder.</p>
+     *
+     * @param actionSelection   the manage hearings action selected by the user
+     * @param callbackRequest   the callback request containing the case details and hearing data
+     * @param userAuthorisation the authorisation token used when building correspondence
+     * @return a {@link SendCorrespondenceEvent}, or {@code null} if no correspondence is required
+     */
+    public SendCorrespondenceEvent buildCorrespondenceEventIfNeeded(ManageHearingsAction actionSelection,
+                                                                    FinremCallbackRequest callbackRequest,
+                                                                    String userAuthorisation) {
+        return switch (actionSelection) {
+            case ADD_HEARING -> buildHearingCorrespondenceEventIfNeeded(
+                callbackRequest,
+                userAuthorisation
+            );
+            case ADJOURN_OR_VACATE_HEARING -> buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(
+                callbackRequest,
+                userAuthorisation
+            );
+        };
     }
 
     private boolean shouldNotSendVacateOrAdjournNotification(boolean isVacatedAndRelistedHearing,

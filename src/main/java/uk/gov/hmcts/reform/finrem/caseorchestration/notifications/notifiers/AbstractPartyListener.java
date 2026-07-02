@@ -34,10 +34,14 @@ public abstract class AbstractPartyListener {
 
     protected abstract String getNotificationParty();
 
+    protected abstract NotificationParty getNotificationPartyEnum();
+
     /**
      * Should this listener handle notifications for this party/event.
      */
-    protected abstract boolean isRelevantParty(SendCorrespondenceEvent event);
+    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
+        return event.getNotificationParties().contains(getNotificationPartyEnum());
+    }
 
     /**
      * Should the email notification be sent.
@@ -84,16 +88,30 @@ public abstract class AbstractPartyListener {
     }
 
     private void sendNotification(SendCorrespondenceEvent event) {
+        boolean simulatingCorrespondence = event.isSimulatingCorrespondence();
+        NotificationParty notificationParty = getNotificationPartyEnum();
+
         if (!event.isLetterNotificationOnly() && shouldSendEmailNotification(event)) {
-            enrichAndSendEmailNotification(event);
+            if (!simulatingCorrespondence) {
+                enrichAndSendEmailNotification(event);
+                event.recordEmailNotificationSentAudit(notificationParty);
+            } else {
+                event.recordEmailNotificationToSendAudit(notificationParty);
+            }
         } else if (shouldSendPaperNotification(event)) {
-            sendPaperNotification(event);
+            if (!simulatingCorrespondence) {
+                UUID letterId = sendPaperNotification(event);
+                event.recordPostalNotificationSentAudit(notificationParty, letterId);
+            } else {
+                event.recordPostalNotificationToSendAudit(notificationParty);
+            }
         }
     }
 
     /**
      * Should the paper notification be sent.
      */
+    @SuppressWarnings("java:S1172")
     protected boolean shouldSendPaperNotification(SendCorrespondenceEvent event) {
         return true;
     }
@@ -122,7 +140,7 @@ public abstract class AbstractPartyListener {
         EmailTemplateNames emailTemplate = Optional.ofNullable(event.getEmailTemplate()).orElseThrow(() ->
             new IllegalArgumentException("Email template is required for digital notifications, case ID: " + event.getCaseId()));
 
-        // Email service handles email specific exceptions - consider building in retries to email service.
+        // Email service handles email-specific exceptions - consider building in retries to email service.
         emailService.sendConfirmationEmail(emailRequest, emailTemplate);
 
         log.info("Completed email notification for party {} on case {}", getNotificationParty(), event.getCaseId());
@@ -138,7 +156,7 @@ public abstract class AbstractPartyListener {
      *              such as the case details, documents to post, and authorization token.
      *              If no documents are provided, an {@link IllegalArgumentException} will be thrown.
      */
-    private void sendPaperNotification(SendCorrespondenceEvent event) {
+    private UUID sendPaperNotification(SendCorrespondenceEvent event) {
 
         log.info("Preparing paper notification for party {} on case {}", getNotificationParty(), event.getCaseId());
 
@@ -168,7 +186,9 @@ public abstract class AbstractPartyListener {
             event.caseDetails, getBulkPrintRecipient(), bpDocs, isOutsideUK, event.authToken
         );
 
-        log.info("Completed paper notification for party {} on case {} with letter ID: {}", getNotificationParty(), event.getCaseId(), letterId);
+        log.info("Completed paper notification for party {} on case {} with letter ID: {}",
+            getNotificationParty(), event.getCaseId(), letterId);
+        return letterId;
     }
 
     protected String getBulkPrintRecipient() {
