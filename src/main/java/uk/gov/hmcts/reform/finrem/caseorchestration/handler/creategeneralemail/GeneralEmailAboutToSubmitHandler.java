@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @Service
@@ -85,8 +85,7 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
     }
 
     private void convertEmailAttachmentsToPdfIfRequired(FinremCaseData finremCaseData, String userAuthorisation) {
-        ofNullable(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocuments())
-            .orElse(List.of())
+        emptyIfNull(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocuments())
             .stream()
             .filter(Objects::nonNull)
             .filter(documentItem -> documentItem.getValue() != null)
