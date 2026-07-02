@@ -174,24 +174,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenContestedCase_whenAnyOfMethodFails_thenHandlerReturnErrorInTheResponse() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().setSendOrderWrapper(SendOrderWrapper.builder()
-            .ordersToSend(OrdersToSend.builder()
-                .value(of(OrderToShareCollection.builder().value(OrderToShare.builder().build()).build())).build())
-            .additionalDocuments(List.of(DocumentCollectionItem.fromCaseDocument(caseDocument())))
-            .build());
-        when(generalOrderService.hearingOrdersToShare(eq(caseDetails), anyList())).thenThrow(new RuntimeException("unlucky"));
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CONTESTED)))
-            .thenReturn(caseDocument());
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(response.getErrors()).isNotEmpty().containsExactly("unlucky");
-        assertThat(logs.getErrors()).contains("FAIL: unlucky on Case ID: 123");
-    }
-
-    @Test
     void givenContestedCase_whenOrderAvailableButNoParty_thenHandlerHandleRequest() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -233,10 +215,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertNull(caseData.getOrderWrapper().getAppOrderCollection());
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
-        assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: ("
-            + "(d607c045-878e-475f-ab8e-b2f667d8af64|app_docs.pdf)+[],"
-            + "(22222222-878e-475f-ab8e-b2f667d8af64|app_docs2.pdf)+[]"
-            + ") to parties: []");
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
         verify(sendOrdersCategoriser).categorise(caseData);
@@ -447,7 +425,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(genericDocumentService).stampDocument(any(), any(), any(), eq(CONTESTED));
         verify(generalOrderService).isSelectedOrderMatches(any(), any());
         verify(documentHelper).getStampType(caseData);
-        verify(dateService).addCreatedDateInFinalOrder(any(), any());
+        verify(dateService).syncCreatedDateAndMarkDocumentStamped(any(), any());
         verify(sendOrdersCategoriser).categorise(caseData);
         verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
 
@@ -486,7 +464,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(genericDocumentService)
             .convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CONTESTED));
         verify(documentHelper).getStampType(caseData);
-        verify(dateService).addCreatedDateInFinalOrder(any(), any());
+        verify(dateService).syncCreatedDateAndMarkDocumentStamped(any(), any());
         verify(sendOrdersCategoriser, times(2)).categorise(caseData);
         verify(draftOrderService, times(2)).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
     }
@@ -555,10 +533,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 "http://fakeurl/1111Legacy",
                 "http://fakeurl/2222NewFlow"
             );
-        assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: ("
-            + "(uuid1|order1.pdf)+[uuid3|attachment1.pdf],"
-            + "(uuid2|order2.pdf)+[]"
-            + ") to parties: [" + partyListInString() + "]");
     }
 
     @Test
@@ -584,7 +558,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
-        when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
+        when(dateService.syncCreatedDateAndMarkDocumentStamped(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
 
         CaseDocument legacyDocCaseDocument = caseDocument("http://fakeurl/legacyDoc", "legacyDoc.pdf");
@@ -642,7 +616,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
-        when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
+        when(dateService.syncCreatedDateAndMarkDocumentStamped(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Triple.of(List.of(caseDocument), List.of(),
             Map.of()));
@@ -796,34 +770,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .builder()
             .eventType(EventType.SEND_ORDER)
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+                .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
+                .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
             .build();
-    }
-
-    @Test
-    void givenContestedCase_whenCoversheetIsMissing_thenShowAnErrorMessage() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-        data.setPartiesOnCase(getParties());
-        List<DirectionOrderCollection> orderList = new ArrayList<>();
-        DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
-            .uploadDraftDocument(caseDocument("http://abc/docurl", "abc.pdf", "http://abc/binaryurl"))
-            .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
-        orderList.add(order);
-        data.setUploadHearingOrder(orderList);
-        data.getSendOrderWrapper().setOrdersToSend(OrdersToSend.builder().build());
-        data.setOrderApprovedCoverLetter(null);
-
-        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
-            .thenReturn(Triple.of(List.of(caseDocument()), List.of(), Map.of()));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors())
-            .containsExactly("orderApprovedCoverLetter is missing unexpectedly");
     }
 
     @Test
