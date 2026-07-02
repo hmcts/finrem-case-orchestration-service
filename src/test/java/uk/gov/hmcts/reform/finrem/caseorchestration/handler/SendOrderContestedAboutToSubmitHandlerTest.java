@@ -72,6 +72,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -92,6 +93,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -972,6 +974,24 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .coverLetter(coverLetter1)
                 .build()).build());
         verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
+    }
+
+    @Test
+    void shouldRemoveTemporaryFieldsWhenHandled() {
+        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
+            .thenReturn(Triple.of(
+                List.of(), List.of(), Map.of()
+            ));
+
+        FinremCaseData finremCaseData = FinremCaseData.builder().build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .data(finremCaseData).build();
+
+        verifyTemporaryFieldsWereSanitised(handler,
+            finremCaseDetails, finremCaseDetailsMapper, new HashMap<>(Map.of(
+                "additionalDocuments", List.of(),
+                "ordersToSend", Map.of()
+            )));
     }
 
     private void assertSupportingDocument(
