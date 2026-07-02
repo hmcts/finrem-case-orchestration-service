@@ -50,7 +50,7 @@ def versions = [
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
     springCloudBomVersion = "2025.0.0"
-    restAssuredBomVersion = "5.5.7"
+    restAssuredBomVersion = "6.0.0"
     // Tomcat bump to address CVEs.  Remove when upgrading SpringBoot to version 4.
     set('tomcat.version', '10.1.55')
 }
