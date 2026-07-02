@@ -157,8 +157,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     void givenContestedCase_whenNoOrderAvailable_thenHandlerDoNothing() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
-        when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(), List.of()))
-            .thenReturn(Triple.of(List.of(), List.of(), Map.of()));
+        mockEmptyHearingOrdersToShare(callbackRequest.getCaseDetails());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
@@ -929,20 +928,22 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
     @Test
     void shouldRemoveTemporaryFieldsWhenHandled() {
-        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
-            .thenReturn(Triple.of(
-                List.of(), List.of(), Map.of()
-            ));
-
-        FinremCaseData finremCaseData = FinremCaseData.builder().build();
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
-            .data(finremCaseData).build();
+            .data(FinremCaseData.builder().build()).build();
+        mockEmptyHearingOrdersToShare(finremCaseDetails);
 
         verifyTemporaryFieldsWereSanitised(handler,
             finremCaseDetails, finremCaseDetailsMapper, new HashMap<>(Map.of(
                 "additionalDocuments", List.of(),
                 "ordersToSend", Map.of()
             )));
+    }
+
+    private void mockEmptyHearingOrdersToShare(FinremCaseDetails finremCaseDetails) {
+        when(generalOrderService.hearingOrdersToShare(eq(finremCaseDetails), anyList()))
+            .thenReturn(Triple.of(
+                List.of(), List.of(), Map.of()
+            ));
     }
 
     private void assertSupportingDocument(
