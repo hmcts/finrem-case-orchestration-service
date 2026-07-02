@@ -106,10 +106,10 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         List<String> parties = generalOrderService.getParties(caseDetails);
         List<OrderToShare> selectedOrders = getSelectedOrders(caseData);
 
-        List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
+        List<OrderSentToPartiesCollection> ordersSentToPartiesCollection = new ArrayList<>();
 
-        handleAdditionalDocumentUploadedInSendOrderEvent(caseData, printOrderCollection, userAuthorisation);
-        processGeneralOrderAdditionalDocument(caseDetails, parties, selectedOrders, printOrderCollection);
+        handleAdditionalDocumentsUploadedAndPrint(caseData, ordersSentToPartiesCollection, userAuthorisation);
+        setUpGeneralOrderAdditionalDocumentOnCaseAndPrint(caseDetails, parties, selectedOrders, ordersSentToPartiesCollection);
 
         Triple<List<CaseDocument>, List<CaseDocument>, Map<CaseDocument, List<CaseDocument>>> hearingOrders
             = generalOrderService.hearingOrdersToShare(caseDetails, selectedOrders);
@@ -123,16 +123,16 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                 order2AttachmentMap.values().stream().flatMap(List::stream)
             ).toList();
 
-            // Add order approved cover letter and add orders (legacy and new) to printOrderCollection
-            shareAndSendHearingDocuments(caseDetails, caseDocumentsToShare, parties, printOrderCollection, userAuthorisation);
+            // Add order approved cover letter and add orders (legacy and new) to ordersSentToPartiesCollection
+            setUpHearingDocumentPackOnCaseAndPrint(caseDetails, caseDocumentsToShare, parties, ordersSentToPartiesCollection, userAuthorisation);
 
             stampLegacyHearingOrdersAndPopulateFinalOrderCollection(caseDetails, legacyHearingOrders, order2AttachmentMap, userAuthorisation);
 
             // handling processed orders
             moveApprovedDocumentsToFinalisedOrder(caseData, newProcessedOrders);
         }
-        caseData.setOrdersSentToPartiesCollection(printOrderCollection);
-        setConsolidateView(caseDetails, parties);
+        caseData.setOrdersSentToPartiesCollection(ordersSentToPartiesCollection); // will be sent in the submitted event
+        setUpOrderDocumentsOnPartiesTab(caseDetails, parties);
 
         resetFields(caseData.getDraftOrdersWrapper());
         sendOrdersCategoriser.categorise(caseDetails.getData());
@@ -142,8 +142,9 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         return response(caseDetails.getData());
     }
 
-    private void handleAdditionalDocumentUploadedInSendOrderEvent(FinremCaseData caseData,
-                                                                  List<OrderSentToPartiesCollection> printOrderCollection, String userAuthorisation) {
+    private void handleAdditionalDocumentsUploadedAndPrint(FinremCaseData caseData,
+                                                           List<OrderSentToPartiesCollection> ordersSentToPartiesCollection,
+                                                           String userAuthorisation) {
         List<DocumentCollectionItem> convertedAdditionalDocuments = emptyIfNull(caseData.getSendOrderWrapper().getAdditionalDocuments())
             .stream()
             .map(additionalDocument ->
@@ -154,7 +155,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
             .toList();
 
         convertedAdditionalDocuments.forEach(convertedAdditionalDocument ->
-            printOrderCollection.add(addToPrintOrderCollection(convertedAdditionalDocument.getValue()))
+            ordersSentToPartiesCollection.add(toOrderSentToPartiesCollection(convertedAdditionalDocument.getValue()))
         );
         caseData.getSendOrderWrapper().setAdditionalDocuments(convertedAdditionalDocuments);
     }
@@ -162,9 +163,9 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
     private void stampLegacyHearingOrdersAndPopulateFinalOrderCollection(FinremCaseDetails caseDetails, List<CaseDocument> legacyHearingOrders,
                                                                          Map<CaseDocument, List<CaseDocument>> order2AttachmentMap,
                                                                          String userAuthorisation) {
-        // stamping legacy approved orders and add it to legacy finalised collection
         emptyIfNull(legacyHearingOrders).forEach(orderToStamp -> {
-            log.info("Stamp and add to FinalOrderCollection {} for Case ID: {}, ", orderToStamp, caseDetails.getCaseIdAsString());
+            log.info("Stamping legacy hearing orders and add to FinalOrderCollection {} for Case ID: {}, ",
+                orderToStamp, caseDetails.getCaseIdAsString());
             stampAndAddToCollection(caseDetails, orderToStamp, order2AttachmentMap.get(orderToStamp), userAuthorisation);
         });
     }
@@ -287,26 +288,24 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         }
     }
 
-    private void setConsolidateView(FinremCaseDetails caseDetails,
-                                    List<String> partyList) {
+    private void setUpOrderDocumentsOnPartiesTab(FinremCaseDetails caseDetails,
+                                                 List<String> partyList) {
         sendOrderPartyDocumentList.forEach(handler -> handler.setUpOrderDocumentsOnPartiesTab(caseDetails, partyList));
     }
 
-    private void shareAndSendHearingDocuments(FinremCaseDetails caseDetails,
-                                              List<CaseDocument> hearingOrders,
-                                              List<String> partyList,
-                                              List<OrderSentToPartiesCollection> printOrderCollection,
-                                              String userAuthorisation) {
-        log.info("Share Hearing Documents for Case ID: {}", caseDetails.getCaseIdAsString());
+    private void setUpHearingDocumentPackOnCaseAndPrint(FinremCaseDetails caseDetails,
+                                                        List<CaseDocument> hearingOrders,
+                                                        List<String> partyList,
+                                                        List<OrderSentToPartiesCollection> ordersSentToPartiesCollection,
+                                                        String userAuthorisation) {
         List<CaseDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails, hearingOrders, userAuthorisation);
-        hearingDocumentPack.forEach(doc -> printOrderCollection.add(addToPrintOrderCollection(doc)));
+        hearingDocumentPack.forEach(doc -> ordersSentToPartiesCollection.add(toOrderSentToPartiesCollection(doc)));
         sendOrderPartyDocumentList.forEach(handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, hearingDocumentPack));
     }
 
     private List<CaseDocument> createHearingDocumentPack(FinremCaseDetails caseDetails,
                                                          List<CaseDocument> hearingOrders,
                                                          String authorisationToken) {
-        log.info("Creating hearing document pack for caseId {}", caseDetails.getCaseIdAsString());
         FinremCaseData caseData = caseDetails.getData();
 
         List<CaseDocument> orders = new ArrayList<>(hearingOrders);
@@ -326,10 +325,10 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         return orders;
     }
 
-    private void processGeneralOrderAdditionalDocument(FinremCaseDetails caseDetails,
-                                                       List<String> partyList,
-                                                       List<OrderToShare> selectedOrders,
-                                                       List<OrderSentToPartiesCollection> printOrderCollection) {
+    private void setUpGeneralOrderAdditionalDocumentOnCaseAndPrint(FinremCaseDetails caseDetails,
+                                                                   List<String> partyList,
+                                                                   List<OrderToShare> selectedOrders,
+                                                                   List<OrderSentToPartiesCollection> ordersSentToPartiesCollection) {
         FinremCaseData caseData = caseDetails.getData();
 
         List<ContestedGeneralOrderCollection> generalOrders = caseData.getGeneralOrderWrapper().getGeneralOrders();
@@ -342,7 +341,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                     if (generalOrderService.isSelectedOrderMatches(selectedOrders, contestedGeneralOrder)) {
                         sendOrderPartyDocumentList.forEach(
                             handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, List.of(additionalDocument)));
-                        printOrderCollection.add(addToPrintOrderCollection(additionalDocument));
+                        ordersSentToPartiesCollection.add(toOrderSentToPartiesCollection(additionalDocument));
                     }
                 }
             });
@@ -363,12 +362,9 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                 finalOrderCollection.add(prepareFinalOrderList(stampedDocs, additionalAttachments));
                 log.info("If Existing final order collection = {}", finalOrderCollection);
             }
-            caseData.setFinalOrderCollection(finalOrderCollection);
-            log.info("Finished stamping final order for caseId {}", caseDetails.getCaseIdAsString());
-        } else {
-            caseData.setFinalOrderCollection(finalOrderCollection);
-            log.info("Finished stamping else final order for caseId {}", caseDetails.getCaseIdAsString());
         }
+        caseData.setFinalOrderCollection(finalOrderCollection);
+        log.info("Finished stamping else final order for caseId {}", caseDetails.getCaseIdAsString());
     }
 
     private AtomicReference<YesOrNo> isOrderAlreadyStamped(FinremCaseData caseData, CaseDocument latestHearingOrder) {
@@ -386,7 +382,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         return result;
     }
 
-    private OrderSentToPartiesCollection addToPrintOrderCollection(CaseDocument document) {
+    private OrderSentToPartiesCollection toOrderSentToPartiesCollection(CaseDocument document) {
         return OrderSentToPartiesCollection.builder()
             .value(SendOrderDocuments.builder().caseDocument(document).build())
             .build();
