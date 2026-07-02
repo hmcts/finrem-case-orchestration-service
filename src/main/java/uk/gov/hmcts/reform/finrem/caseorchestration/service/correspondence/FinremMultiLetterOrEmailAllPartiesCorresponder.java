@@ -56,8 +56,7 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
         interveners.forEach(intervenerWrapper -> {
             log.info("Intervener type {}, communication enabled {}, Case ID:{}", intervenerWrapper.getIntervenerType(),
                 intervenerWrapper.getIntervenerCorrespondenceEnabled(), caseDetails.getId());
-            if (intervenerWrapper.getIntervenerCorrespondenceEnabled() == null
-                || Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
+            if (Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
                 List<CaseDocument> caseDocuments = returnAndAddCaseDocumentsToIntervenerHearingNotices(caseDetails, intervenerWrapper);
                 if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
                     log.info("Sending email correspondence to {} for Case ID: {}",
