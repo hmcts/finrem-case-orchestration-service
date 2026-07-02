@@ -765,6 +765,9 @@ class CourtHelperTest {
             "FR_birmingham_hc_list_11", "Warwickshire Justice Centre");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
+            "FR_birmingham_hc_list_12", "Wolverhampton Hearing Centre");
+
+        verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
             "invalid", EMPTY);
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, "invalid", BIRMINGHAM_COURTLIST,
@@ -809,6 +812,12 @@ class CourtHelperTest {
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
             "FR_s_NottinghamList_11", "Nottingham Justice Centre");
+
+        verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
+            "FR_s_NottinghamList_12", "Nuneaton County Court");
+
+        verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
+            "FR_s_NottinghamList_13", "Northampton Magistrates' Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
             "INVALID", EMPTY);

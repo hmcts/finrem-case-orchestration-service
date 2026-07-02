@@ -26,6 +26,8 @@ import java.time.LocalDateTime;
 public class CitizenUploadDocument implements HasCaseDocument {
     @JsonProperty("DocumentType")
     private CitizenUploadDocumentType documentType;
+    @JsonProperty("isFDR")
+    private YesOrNo isFdr;
     @JsonProperty("DocumentEmailContent")
     private String documentEmailContent;
     @JsonProperty("DocumentLink")

@@ -805,7 +805,6 @@ class ConsentOrderApprovedDocumentServiceTest {
                     finremCaseDetails.getData().getRegionWrapper().getDefaultCourtList())
             ).thenReturn(letterDetailsAsMap);
 
-
             when(documentConfiguration.getBulkPrintTemplate()).thenReturn("template");
             when(documentConfiguration.getBulkPrintFileName()).thenReturn("filename");
 
