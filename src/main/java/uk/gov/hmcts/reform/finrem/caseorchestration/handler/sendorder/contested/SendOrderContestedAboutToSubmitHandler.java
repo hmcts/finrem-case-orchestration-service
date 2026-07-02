@@ -121,13 +121,12 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                 concat(legacyHearingOrders.stream(), newProcessedOrders.stream()),
                 order2AttachmentMap.values().stream().flatMap(List::stream)
             ).toList();
-
             // Add order approved cover letter and add orders (legacy and new) to ordersSentToPartiesCollection
             setUpHearingDocumentPackOnCaseAndPrint(caseDetails, caseDocumentsToShare, parties, ordersSentToPartiesCollection, userAuthorisation);
 
+            // Handle legacy documents
             stampLegacyHearingOrdersAndPopulateFinalOrderCollection(caseDetails, legacyHearingOrders, order2AttachmentMap, userAuthorisation);
-
-            // handling processed orders
+            // Handle documents uploaded by upload draft order event
             moveApprovedDocumentsToFinalisedOrder(caseData, newProcessedOrders);
         }
         caseData.setOrdersSentToPartiesCollection(ordersSentToPartiesCollection); // will be sent in the submitted event
