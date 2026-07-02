@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
@@ -33,6 +35,8 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
     private static final String EM_CLIENT_UPLOAD_URL = "http://localhost/case-orchestration/emclientapi/upload";
     public static final String CASE_ID = "123123123";
 
+    @Autowired
+    protected MockMvc mvc;
     @MockitoBean
     private EvidenceManagementUploadService emUploadService;
     private static final String CASE_ID_HEADER = "caseTypeId";
@@ -57,7 +61,7 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$[0].lastModifiedBy", is("testuser")))
             .andExpect(jsonPath("$[0].modifiedOn", is("2017-09-01T13:12:36.862")))
             .andExpect(jsonPath("$[0].mimeType", is(MediaType.TEXT_PLAIN_VALUE)))
-            .andExpect(jsonPath("$[0].status", is("OK")));
+            .andExpect(jsonPath("$[0].status", is("200 OK")));
 
         verify(emUploadService).upload(multipartFileList, CaseType.CONSENTED, AUTH_TOKEN);
     }

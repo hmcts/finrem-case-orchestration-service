@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -28,6 +30,9 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
 
     @MockitoBean
     private IdamService idamService;
+
+    @Autowired
+    protected MockMvc mvc;
 
     @MockitoBean
     private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
