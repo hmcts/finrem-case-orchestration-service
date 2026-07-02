@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -50,6 +51,7 @@ public class NotificationRequestBuilder {
     private String intervenerFullName;
     private String intervenerSolicitorFirm;
     private byte[] documentContents;
+    private List<byte[]> documentContentsList;
     private Boolean isNotDigital;
     private String hearingDate;
     private String judgeName;
@@ -189,7 +191,7 @@ public class NotificationRequestBuilder {
      * @return a NotificationRequest
      */
     public NotificationRequest build() {
-        NotificationRequest notificationRequest = NotificationRequest.builder().build();;
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setCaseReferenceNumber(caseReferenceNumber);
         notificationRequest.setSolicitorReferenceNumber(solicitorReferenceNumber);
         notificationRequest.setDivorceCaseNumber(divorceCaseNumber);
@@ -210,6 +212,7 @@ public class NotificationRequestBuilder {
         notificationRequest.setIntervenerFullName(intervenerFullName);
         notificationRequest.setIntervenerSolicitorFirm(intervenerSolicitorFirm);
         notificationRequest.setDocumentContents(documentContents);
+        notificationRequest.setDocumentContentsList(documentContentsList);
         notificationRequest.setIsNotDigital(isNotDigital);
         notificationRequest.setHearingDate(hearingDate);
         notificationRequest.setJudgeName(judgeName);
@@ -323,6 +326,11 @@ public class NotificationRequestBuilder {
 
     public NotificationRequestBuilder documentContents(byte[] documentContents) {
         this.documentContents = documentContents;
+        return this;
+    }
+
+    public NotificationRequestBuilder documentContentsList(List<byte[]> documentContentsList) {
+        this.documentContentsList = documentContentsList;
         return this;
     }
 
