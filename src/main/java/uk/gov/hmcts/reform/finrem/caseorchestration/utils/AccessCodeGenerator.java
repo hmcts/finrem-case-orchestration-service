@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.security.SecureRandom;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -45,8 +44,6 @@ public final class AccessCodeGenerator {
 
             AccessCodeEntry entry = AccessCodeEntry.builder()
                 .accessCode(generateAccessCode())
-                .createdAt(LocalDateTime.now())
-                .validUntil(setValidUntilDate(LocalDateTime.now()))
                 .isValid(YesOrNo.YES)
                 .build();
 
@@ -58,7 +55,4 @@ public final class AccessCodeGenerator {
         }
     }
 
-    private static LocalDateTime setValidUntilDate(LocalDateTime createdAt) {
-        return createdAt.plusDays(90);
-    }
 }
