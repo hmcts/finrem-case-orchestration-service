@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
@@ -54,9 +53,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.ListUtils.defaultIfNull;
@@ -415,25 +412,4 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
             .filter(orderToShare -> YesOrNo.isYes(orderToShare.getDocumentToShare()))
             .toList();
     }
-
-    private String formatSelectedAttachment(OrderToShare o) {
-        return emptyIfNull(o.getAttachmentsToShare()).stream()
-            .map(AttachmentToShareCollection::getValue)
-            .filter(a -> YesOrNo.isYes(a.getDocumentToShare()))
-            .map(a -> a.getDocumentId() + "|" + a.getAttachmentName())
-            .collect(Collectors.joining(","));
-    }
-
-    private String formatOrderToShare(OrderToShare o) {
-        return format("(%s|%s)+[%s]", o.getDocumentId(), o.getDocumentName(), formatSelectedAttachment(o));
-    }
-
-//    private String formatOrderToShareList(List<OrderToShare> selectedOrders) {
-//        return selectedOrders.stream().map(this::formatOrderToShare).collect(Collectors.joining(","));
-//    }
-
-//    private void logSelectedPartiesAndOrders(List<String> parties, List<OrderToShare> selectedOrders, String caseId) {
-//        log.info("FR_sendOrder({}) - sending orders: ({}) to parties: {}", caseId, formatOrderToShareList(selectedOrders), parties);
-//        //FR_sendOrder(1724073634045967) - sending orders: ((e459063c-a944-4f79-8478-ecd49f859ca5|Case documents tab [Approved Order] - Trading212_3rd party disclosure order 1.docx)+[],(3efbd11c-9faf-4cc3-a290-aaada34248d3|Case documents tab [Approved Order] - Nationwide_3rd party discv2 pcw amends.docx)+[],(c87d4f7f-ebcd-4ec0-b794-50aedf23edd0|Approved order - Approved order v8.pdf)+[]) to parties: [[APPSOLICITOR], [RESPSOLICITOR]]
-//    }
 }
