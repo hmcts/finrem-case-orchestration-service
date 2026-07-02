@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.sendorder.contested.SendOrderContestedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import static org.hamcrest.Matchers.endsWith;
