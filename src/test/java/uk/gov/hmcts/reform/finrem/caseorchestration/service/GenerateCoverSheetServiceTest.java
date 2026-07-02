@@ -20,14 +20,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.util.Map;
 import java.util.Objects;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -42,6 +46,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 
 @ExtendWith(MockitoExtension.class)
 class GenerateCoverSheetServiceTest {
+
+    @TestLogs
+    private final TestLogger logs = new TestLogger(GenerateCoverSheetService.class);
 
     private static final String BULK_PRINT_TEMPLATE = "bulk-print-template";
     private static final String BULK_PRINT_FILE_NAME = "bulk-print.pdf";
@@ -206,6 +213,23 @@ class GenerateCoverSheetServiceTest {
 
         assertEquals(TEST_DOCUMENT_FILENAME, Objects.requireNonNull(getIntervenerCoverSheet(caseDetails, intervenerType)).getDocumentFilename());
         verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+    }
+
+    @ParameterizedTest
+    @EnumSource(IntervenerType.class)
+    void givenNullCoversheet_shouldRemoveIntervenerCoverSheet(IntervenerType intervenerType) {
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
+        setIntervenerCoverSheet(caseDetails, intervenerType, null);
+
+        IntervenerChangeDetails changeDetails = new IntervenerChangeDetails();
+        changeDetails.setIntervenerType(intervenerType);
+
+        generateCoverSheetService.removeIntervenerCoverSheet(caseDetails, changeDetails, AUTH_TOKEN);
+
+        assertThat(logs.getInfos()).contains(
+            "1234567890 - old cover sheet does not exist. Skip deleting it."
+        );
+        verify(genericDocumentService, never()).deleteDocument(anyString(), eq(AUTH_TOKEN));
     }
 
     @ParameterizedTest

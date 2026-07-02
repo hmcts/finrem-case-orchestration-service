@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -19,6 +20,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 
@@ -150,7 +152,13 @@ public class GenerateCoverSheetService {
                 intervenerChangeDetails.getIntervenerType()
             );
 
-        deleteCoverSheet(mapping.oldCoverSheetSupplier().get().getDocumentUrl(), authorisationToken);
+        CaseDocument caseDocument = mapping.oldCoverSheetSupplier().get();
+        if (nonNull(caseDocument) && StringUtils.isNotBlank(caseDocument.getDocumentUrl())) {
+            deleteCoverSheet(caseDocument.getDocumentUrl(), authorisationToken);
+        } else {
+            log.info("%s - old cover sheet does not exist. Skip deleting it."
+                .formatted(finremCaseDetails.getId()));
+        }
         mapping.setter().accept(null);
     }
 
