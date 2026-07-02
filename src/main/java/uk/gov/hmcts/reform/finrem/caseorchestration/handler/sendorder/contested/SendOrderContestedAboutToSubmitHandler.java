@@ -351,7 +351,8 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
     private void stampAndAddToCollection(FinremCaseDetails caseDetails, CaseDocument latestHearingOrder, List<CaseDocument> additionalAttachments,
                                          String authToken) {
         FinremCaseData caseData = caseDetails.getData();
-        List<DirectionOrderCollection> finalOrderCollection = dateService.syncCreatedDateAndMarkDocumentStamped(caseData.getFinalOrderCollection(), authToken);
+        List<DirectionOrderCollection> finalOrderCollection = dateService
+            .syncCreatedDateAndMarkDocumentStamped(caseData.getFinalOrderCollection(), authToken);
         if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, latestHearingOrder)) {
             AtomicReference<YesOrNo> result = isOrderAlreadyStamped(caseData, latestHearingOrder);
             if (result.get() == null || result.get().equals(YesOrNo.NO)) {
