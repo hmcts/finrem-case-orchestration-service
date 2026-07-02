@@ -35,7 +35,7 @@ def versions = [
         idamClient           : '3.0.5',
         springHateoas        : '1.5.6',
         tika                 : '3.2.3',
-        amClient             : '1.59.2',
+        amClient             : '1.60.0',
         sendLetterClient     : '5.1.1',
         elasticSearch        : '8.19.17',
         jacksonDatabind      : '2.19.2',
