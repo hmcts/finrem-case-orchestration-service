@@ -109,7 +109,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
 
         handleAdditionalDocumentUploadedInSendOrderEvent(caseData, printOrderCollection, userAuthorisation);
-        shareAndSendGeneralOrderWithSelectedParties(caseDetails, parties, selectedOrders, printOrderCollection);
+        processGeneralOrderAdditionalDocument(caseDetails, parties, selectedOrders, printOrderCollection);
 
         Triple<List<CaseDocument>, List<CaseDocument>, Map<CaseDocument, List<CaseDocument>>> hearingOrders
             = generalOrderService.hearingOrdersToShare(caseDetails, selectedOrders);
@@ -326,10 +326,10 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         return orders;
     }
 
-    private void shareAndSendGeneralOrderWithSelectedParties(FinremCaseDetails caseDetails,
-                                                             List<String> partyList,
-                                                             List<OrderToShare> selectedOrders,
-                                                             List<OrderSentToPartiesCollection> printOrderCollection) {
+    private void processGeneralOrderAdditionalDocument(FinremCaseDetails caseDetails,
+                                                       List<String> partyList,
+                                                       List<OrderToShare> selectedOrders,
+                                                       List<OrderSentToPartiesCollection> printOrderCollection) {
         FinremCaseData caseData = caseDetails.getData();
 
         List<ContestedGeneralOrderCollection> generalOrders = caseData.getGeneralOrderWrapper().getGeneralOrders();
