@@ -41,7 +41,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 
@@ -163,11 +162,10 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
     private void stampLegacyHearingOrdersAndPopulateFinalOrderCollection(FinremCaseDetails caseDetails, List<CaseDocument> legacyHearingOrders,
                                                                          Map<CaseDocument, List<CaseDocument>> order2AttachmentMap,
                                                                          String userAuthorisation) {
-        emptyIfNull(legacyHearingOrders).forEach(orderToStamp -> {
-            log.info("Stamping legacy hearing orders and add to FinalOrderCollection {} for Case ID: {}, ",
-                orderToStamp, caseDetails.getCaseIdAsString());
-            stampAndAddToCollection(caseDetails, orderToStamp, order2AttachmentMap.get(orderToStamp), userAuthorisation);
-        });
+        emptyIfNull(legacyHearingOrders).forEach(legacyHearingOrder ->
+            stampLegacyHearingOrderAndPopulateFinalOrderCollection(caseDetails, legacyHearingOrder,
+                order2AttachmentMap.get(legacyHearingOrder), userAuthorisation)
+        );
     }
 
     private boolean hasApprovedOrdersToBeSent(List<CaseDocument> legacyHearingOrders, List<CaseDocument> newProcessedOrders) {
@@ -347,24 +345,24 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
             });
     }
 
-    private void stampAndAddToCollection(FinremCaseDetails caseDetails, CaseDocument latestHearingOrder, List<CaseDocument> additionalAttachments,
-                                         String authToken) {
+    private void stampLegacyHearingOrderAndPopulateFinalOrderCollection(FinremCaseDetails caseDetails, CaseDocument legacyHearingOrder,
+                                                                        List<CaseDocument> attachments, String authToken) {
         FinremCaseData caseData = caseDetails.getData();
         List<DirectionOrderCollection> finalOrderCollection = dateService
             .syncCreatedDateAndMarkDocumentStamped(caseData.getFinalOrderCollection(), authToken);
-        if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, latestHearingOrder)) {
-            AtomicReference<YesOrNo> result = isOrderAlreadyStamped(caseData, latestHearingOrder);
-            if (result.get() == null || result.get().equals(YesOrNo.NO)) {
-                StampType stampType = documentHelper.getStampType(caseData);
-                CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType,
-                    caseDetails.getCaseType());
-                log.info("Stamped Documents = {} for caseId {}", stampedDocs, caseDetails.getCaseIdAsString());
-                finalOrderCollection.add(prepareFinalOrderList(stampedDocs, additionalAttachments));
-                log.info("If Existing final order collection = {}", finalOrderCollection);
+        String caseId = caseDetails.getCaseIdAsString();
+
+        if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, legacyHearingOrder)) {
+            log.info("{} - Legacy hearing order does not exist in final order collection", caseId);
+            AtomicReference<YesOrNo> result = isOrderAlreadyStamped(caseData, legacyHearingOrder);
+            if (YesOrNo.isNoOrNull(result.get())) {
+                log.info("{} - Going to stamp the legacy hearing order because it is not stamped.", caseId);
+                CaseDocument stampedDocs = genericDocumentService.stampDocument(legacyHearingOrder, authToken,
+                    documentHelper.getStampType(caseData), caseDetails.getCaseType());
+                finalOrderCollection.add(prepareFinalOrderList(stampedDocs, attachments));
             }
         }
         caseData.setFinalOrderCollection(finalOrderCollection);
-        log.info("Finished stamping else final order for caseId {}", caseDetails.getCaseIdAsString());
     }
 
     private AtomicReference<YesOrNo> isOrderAlreadyStamped(FinremCaseData caseData, CaseDocument latestHearingOrder) {
