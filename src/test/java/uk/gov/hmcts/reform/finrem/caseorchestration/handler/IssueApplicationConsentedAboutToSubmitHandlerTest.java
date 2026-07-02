@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -20,7 +21,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentSe
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -40,6 +43,8 @@ class IssueApplicationConsentedAboutToSubmitHandlerTest {
     private DefaultsConfiguration defaultsConfiguration;
     @Mock
     private GenerateCoverSheetService generateCoverSheetService;
+
+    private static final String MISSING_COURT_SELECTION_ERROR = "Case cannot be issued as court selection is missing.";
 
     @Test
     void testCanHandle() {
@@ -81,5 +86,20 @@ class IssueApplicationConsentedAboutToSubmitHandlerTest {
             .containsExactly(
                 fixedLocalDate,
                 "consent for approval");
+    }
+
+    @Test
+    void givenCourtSelectionMissingFromCase_whenHandle_thenShouldAddingMissingCourtErrorResponse() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
+
+        doThrow(new MissingCourtException("Court selection is missing"))
+            .when(generateCoverSheetService).generateAndSetApplicantCoverSheet(request.getCaseDetails(), AUTH_TOKEN);
+
+        var response = handler.handle(request, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).containsExactly(MISSING_COURT_SELECTION_ERROR);
+        verifyNoInteractions(onlineFormDocumentService);
+        verifyNoMoreInteractions(defaultsConfiguration);
     }
 }
