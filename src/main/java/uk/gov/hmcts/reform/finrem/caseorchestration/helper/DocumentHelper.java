@@ -119,7 +119,7 @@ public class DocumentHelper {
 
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
-    private final GenericDocumentService service;
+    private final GenericDocumentService genericDocumentService;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final LetterAddresseeGeneratorMapper letterAddresseeGenerator;
     private final InternationalPostalService postalService;
@@ -602,7 +602,7 @@ public class DocumentHelper {
         if (!documentCollectionItems.isEmpty()) {
             documentCollectionItems.forEach(doc -> {
                 CaseDocument caseDocument = doc.getValue();
-                CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken,
+                CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken,
                     caseDetails.getCaseType());
                 pdfDocuments.add(DocumentCollectionItem.builder().value(pdfDocument).build());
                 documents.add(pdfDocument);
