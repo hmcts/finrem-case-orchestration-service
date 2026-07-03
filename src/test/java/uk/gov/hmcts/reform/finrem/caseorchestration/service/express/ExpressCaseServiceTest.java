@@ -7,11 +7,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCaseAmendment;
@@ -68,9 +71,18 @@ class ExpressCaseServiceTest {
         ReflectionTestUtils.setField(expressCaseService, "expressCaseFrcs", List.of("FR_s_NottinghamList_1", "FR_s_NottinghamList_2"));
     }
 
-    @Test
-    void setExpressCaseEnrollmentStatus_shouldEnrollInExpressPilot_WhenCaseDataMeetsRequirements() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void setExpressCaseEnrollmentStatus_shouldEnrollInExpressPilot_WhenCaseDataMeetsRequirements(Boolean isAssetsChecklistV3) {
         FinremCaseData caseData = createCaseData();
+
+        if (isAssetsChecklistV3) {
+            caseData.setEstimatedAssetsChecklistV3(EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
+        } else {
+            caseData.setEstimatedAssetsChecklistV2(EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
+        }
+
+        caseData.setEstimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
         assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
@@ -167,6 +179,19 @@ class ExpressCaseServiceTest {
                                                                               boolean expected) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(isExpressPilotEnabled);
         assertEquals(expected, expressCaseService.isExpressCase(caseData));
+    }
+
+    @Test
+    void setExpressCaseEnrollmentStatus_shouldNotEnrollInExpressPilot_WhenNoAssetValueExists() {
+        FinremCaseData caseData = createCaseData();
+
+        // Explicitly setting these values to null for test clarity.
+        caseData.setEstimatedAssetsChecklistV2(null);
+        caseData.setEstimatedAssetsChecklistV3(null);
+
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+        assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
     private static Stream<Arguments> provideIsExpressCase() {
