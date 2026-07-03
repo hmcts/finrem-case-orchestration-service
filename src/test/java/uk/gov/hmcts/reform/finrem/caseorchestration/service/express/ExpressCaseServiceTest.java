@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNABLE_TO_QUANTIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3.OVER_TWENTY_MILLION_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.WITHDRAWN;
@@ -74,7 +75,7 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void setExpressCaseEnrollmentStatus_shouldEnrollInExpressPilot_WhenCaseDataMeetsRequirements(Boolean isAssetsChecklistV3) {
-        FinremCaseData caseData = createCaseData();
+        FinremCaseData caseData = createCaseData(isAssetsChecklistV3);
 
         if (isAssetsChecklistV3) {
             caseData.setEstimatedAssetsChecklistV3(EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
@@ -88,16 +89,18 @@ class ExpressCaseServiceTest {
         assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
-    @Test
-    void shouldSetExpressEnrollmentStatusToWithdrawn() {
-        FinremCaseData caseData = createCaseData();
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldSetExpressEnrollmentStatusToWithdrawn(Boolean isAssetsChecklistV3) {
+        FinremCaseData caseData = createCaseData(isAssetsChecklistV3);
         expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
         assertEquals(WITHDRAWN, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
-    @Test
-    void shouldNotEnrollInExpressPilot_WhenFeatureGateOff() {
-        FinremCaseData caseData = createCaseData();
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldNotEnrollInExpressPilot_WhenFeatureGateOff(Boolean isAssetsChecklistV3) {
+        FinremCaseData caseData = createCaseData(isAssetsChecklistV3);
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
         assertNull(caseData.getExpressCaseWrapper().getExpressCaseParticipation());
@@ -183,7 +186,9 @@ class ExpressCaseServiceTest {
 
     @Test
     void setExpressCaseEnrollmentStatus_shouldNotEnrollInExpressPilot_WhenNoAssetValueExists() {
-        FinremCaseData caseData = createCaseData();
+
+        Boolean assertValueIrrelevant = true; // This value is irrelevant to the test, but required to call createCaseData
+        FinremCaseData caseData = createCaseData(assertValueIrrelevant);
 
         // Explicitly setting these values to null for test clarity.
         caseData.setEstimatedAssetsChecklistV2(null);
@@ -213,34 +218,42 @@ class ExpressCaseServiceTest {
     }
 
     private static Stream<FinremCaseData> provideInvalidCaseData() {
-        FinremCaseData hasVariationOrder = createCaseData();
+
+        Boolean v3AssetsChecklist = true;
+        Boolean v2AssetsChecklist = false;
+
+        FinremCaseData hasVariationOrder = createCaseData(v3AssetsChecklist);
         hasVariationOrder.getNatureApplicationWrapper()
             .setNatureOfApplicationChecklist(List.of(CONTESTED_VARIATION_ORDER));
 
-        FinremCaseData isNotInParticipatingFRC = createCaseData();
+        FinremCaseData isNotInParticipatingFRC = createCaseData(v3AssetsChecklist);
         isNotInParticipatingFRC.getRegionWrapper().getAllocatedRegionWrapper()
             .getDefaultCourtListWrapper().setNottinghamCourtList(BOSTON_COUNTY_COURT_AND_FAMILY_COURT);
 
-        FinremCaseData isNotUnder250k = createCaseData();
-        isNotUnder250k.setEstimatedAssetsChecklistV2(UNABLE_TO_QUANTIFY);
+        FinremCaseData isNotUnder250kForV2 = createCaseData(v2AssetsChecklist);
+        isNotUnder250kForV2.setEstimatedAssetsChecklistV2(UNABLE_TO_QUANTIFY);
 
-        FinremCaseData isFastTrackApplication = createCaseData();
+        FinremCaseData isNotUnder250kForV3 = createCaseData(v3AssetsChecklist);
+        isNotUnder250kForV3.setEstimatedAssetsChecklistV3(OVER_TWENTY_MILLION_POUNDS);
+
+        FinremCaseData isFastTrackApplication = createCaseData(v3AssetsChecklist);
         isFastTrackApplication.setFastTrackDecision(YesOrNo.YES);
 
-        FinremCaseData isNotMatrimonialApplication = createCaseData();
+        FinremCaseData isNotMatrimonialApplication = createCaseData(v3AssetsChecklist);
         isNotMatrimonialApplication.getScheduleOneWrapper().setTypeOfApplication(SCHEDULE_1_CHILDREN_ACT_1989);
 
         return Stream.of(
             hasVariationOrder,
             isNotInParticipatingFRC,
-            isNotUnder250k,
+            isNotUnder250kForV2,
+            isNotUnder250kForV3,
             isFastTrackApplication,
             isNotMatrimonialApplication
         );
     }
 
-    private static FinremCaseData createCaseData() {
-        return FinremCaseData.builder()
+    private static FinremCaseData createCaseData(Boolean isAssetsChecklistV3) {
+        FinremCaseData data =  FinremCaseData.builder()
             .scheduleOneWrapper(ScheduleOneWrapper.builder()
                 .typeOfApplication(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS)
                 .build())
@@ -267,8 +280,14 @@ class ExpressCaseServiceTest {
                 ))
                 .build())
             .fastTrackDecision(YesOrNo.NO)
-            .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
             .build();
+
+        if (isAssetsChecklistV3) {
+            data.setEstimatedAssetsChecklistV3(EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
+        } else {
+            data.setEstimatedAssetsChecklistV2(EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
+        }
+        return data;
     }
 
     /*
