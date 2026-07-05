@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
@@ -243,7 +244,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
         when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
-        when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(any())).thenReturn(List.of(BulkPrintDocument
+        when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(any(), any(CaseType.class), eq(AUTH_TOKEN))).thenReturn(List.of(BulkPrintDocument
                 .builder()
                 .binaryFileUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
                 .build(),

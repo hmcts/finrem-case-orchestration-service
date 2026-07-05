@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -40,6 +41,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
@@ -126,7 +128,8 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         BulkPrintDocument bulkPrintDocument = BulkPrintDocument.builder().fileName("file1").binaryFileUrl("binurl1").build();
         BulkPrintDocument bulkPrintDocument2 = BulkPrintDocument.builder().fileName("file2").binaryFileUrl("binurl2").build();
         when(documentHelper.mapToBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
-        when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(any())).thenReturn(List.of(bulkPrintDocument2));
+        when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(any(), any(CaseType.class), eq(AUTH_TOKEN)))
+            .thenReturn(List.of(bulkPrintDocument2));
         when(documentOrderingService.isDocumentModifiedLater(any(), any(), anyString())).thenReturn(true);
         when(documentHelper.convertToContestedConsentOrderData(any())).thenReturn(convertToContestedConsentOrderData(List.of(collection2)));
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
@@ -154,7 +157,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         when(documentHelper.getLatestGeneralOrder(any(FinremCaseData.class))).thenReturn(null);
         when(genericDocumentService.generateDocument(anyString(), any(CaseDetails.class), anyString(), anyString())).thenReturn(caseDocument);
         when(documentHelper.mapToBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
-        when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(any())).thenReturn(List.of(bulkPrintDocument2));
+        when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(any(), any(CaseType.class), eq(AUTH_TOKEN))).thenReturn(List.of(bulkPrintDocument2));
         when(documentOrderingService.isDocumentModifiedLater(any(), any(), anyString())).thenReturn(true);
         when(documentHelper.convertToContestedConsentOrderData(any())).thenReturn(convertToContestedConsentOrderData(List.of(collection2)));
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(

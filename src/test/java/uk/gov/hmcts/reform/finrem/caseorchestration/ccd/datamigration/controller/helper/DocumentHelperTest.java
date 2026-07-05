@@ -79,7 +79,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetailsWithNonUkRespondent;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
@@ -95,8 +94,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_NAME;
@@ -469,31 +466,6 @@ class DocumentHelperTest {
     }
 
     @Test
-    void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated() {
-        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
-
-        when(letterAddresseeGenerator.generate(preparedCaseDetails, APPLICANT)).thenReturn(
-            AddresseeDetails.builder()
-                .addresseeName("addresseeName")
-                .reference("reference")
-                .addressToSendTo(buildAddress()).build());
-        preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), APPLICANT);
-
-        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
-            .serviceCentre(CTSC_SERVICE_CENTRE)
-            .careOf(CTSC_CARE_OF)
-            .poBox(CTSC_PO_BOX)
-            .town(CTSC_TOWN)
-            .postcode(CTSC_POSTCODE)
-            .emailAddress(CTSC_EMAIL_ADDRESS)
-            .phoneNumber(CTSC_PHONE_NUMBER)
-            .openingHours(CTSC_OPENING_HOURS)
-            .build();
-
-        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
-    }
-
-    @Test
     void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated_finrem() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
 
@@ -510,33 +482,6 @@ class DocumentHelperTest {
                 .finremAddressToSendTo(buildFinremAddress()).build());
 
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(finremCaseDetails, APPLICANT);
-
-        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
-            .serviceCentre(CTSC_SERVICE_CENTRE)
-            .careOf(CTSC_CARE_OF)
-            .poBox(CTSC_PO_BOX)
-            .town(CTSC_TOWN)
-            .postcode(CTSC_POSTCODE)
-            .emailAddress(CTSC_EMAIL_ADDRESS)
-            .phoneNumber(CTSC_PHONE_NUMBER)
-            .openingHours(CTSC_OPENING_HOURS)
-            .build();
-
-        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
-    }
-
-    @Test
-    void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated() {
-
-        CaseDetails caseDetails = defaultConsentedCaseDetails();
-
-        when(letterAddresseeGenerator.generate(caseDetails, RESPONDENT)).thenReturn(
-            AddresseeDetails.builder()
-                .addresseeName("addresseeName")
-                .reference("reference")
-                .addressToSendTo(buildAddress()).build());
-
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(caseDetails, RESPONDENT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
@@ -769,35 +714,11 @@ class DocumentHelperTest {
     }
 
     @Test
-    void shouldReturnTrueWhenCourtIsHighCourt() {
-        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
-        preparedCaseDetails.getData().put(HIGHCOURT_COURTLIST, "highcourt");
-        boolean isHighCourt = documentHelper.isHighCourtSelected(preparedCaseDetails.getData());
-        assertTrue(isHighCourt);
-    }
-
-    @Test
     void shouldReturnTrueWhenCourtIsHighCourtInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
         preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
         boolean isHighCourt = documentHelper.isHighCourtSelected(preparedCaseDetails.getData());
         assertTrue(isHighCourt);
-    }
-
-    @Test
-    void shouldReturnHighCourtStampWhenCourtIsHighCourt() {
-        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
-        preparedCaseDetails.getData().put(HIGHCOURT_COURTLIST, "highcourt");
-        StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
-        assertEquals(StampType.HIGH_COURT_STAMP, actualStampType);
-    }
-
-    @Test
-    void shouldReturnFamilyCourtStampWhenCourtIsLondon() {
-        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
-        preparedCaseDetails.getData().put(LONDON_COURTLIST, "london");
-        StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
-        assertEquals(StampType.FAMILY_COURT_STAMP, actualStampType);
     }
 
     @Test

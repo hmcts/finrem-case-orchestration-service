@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderOtherDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderOtherDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
@@ -49,6 +50,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddresseeGeneratorUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -90,7 +92,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
@@ -393,83 +394,12 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-    /**
-     * Return CaseDetails Object for given Case with the given indentation used.
-     *
-     * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, PaperNotificationRecipient)}</p>
-     * @param caseDetails the casedetails
-     * @param recipient instance of PaperNotificationRecipient
-     * @return CaseDetails Object
-     * @deprecated Use {@link FinremCaseDetails caseDetails, PaperNotificationRecipient recipient}
-     */
-    @Deprecated(since = "15-june-2023")
-    @SuppressWarnings("java:S1133")
-    public CaseDetails prepareLetterTemplateData(CaseDetails caseDetails, PaperNotificationRecipient recipient) {
-        // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
-        CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
-        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
-        AddresseeDetails addresseeDetails = letterAddresseeGenerator.generate(caseDetailsCopy, recipient);
-        boolean recipientResideOutsideOfUK = postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient.toString());
-        return prepareLetterTemplateData(caseDetailsCopy, nullToEmpty(addresseeDetails.getReference()), addresseeDetails.getAddresseeName(),
-            addresseeDetails.getAddressToSendTo(), isConsentedApplication, recipientResideOutsideOfUK);
-    }
-
     public CaseDetails prepareLetterTemplateData(FinremCaseDetails caseDetails, PaperNotificationRecipient recipient) {
 
         AddresseeDetails addresseeDetails = letterAddresseeGenerator.generate(caseDetails, recipient);
         boolean recipientResideOutsideOfUK = postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient.toString());
         return prepareLetterTemplateData(caseDetails, nullToEmpty(addresseeDetails.getReference()), addresseeDetails.getAddresseeName(),
             addresseeDetails.getFinremAddressToSendTo(), recipientResideOutsideOfUK);
-    }
-
-    /**
-     * Return CaseDetails Object for given Case with the given indentation used.
-     *
-     * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, String, String, Address, boolean)}</p>
-     *
-     * @param caseDetailsCopy the casedetails
-     * @param reference String
-     * @param addresseeName String
-     * @param addressToSendTo map
-     * @param isConsentedApplication boolean
-     * @return CaseDetails Object
-     * @deprecated Use {@link CaseDetails caseDetails, String reference, String addresseeName,
-     *                                                   Address addressToSendTo}
-     */
-    @Deprecated(since = "15-june-2023")
-    @SuppressWarnings("java:S1133")
-    private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName,
-                                                  Map<String, Object> addressToSendTo,
-                                                  boolean isConsentedApplication,
-                                                  boolean isInternational) {
-
-        Map<String, Object> caseData = caseDetailsCopy.getData();
-
-        String ccdNumber = nullToEmpty((caseDetailsCopy.getId()));
-        String applicantName = getApplicantFullName(caseDetailsCopy);
-        String respondentName = getRespondentFullName(caseDetailsCopy, isConsentedApplication);
-
-        if (caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
-            Addressee addressee = Addressee.builder()
-                .name(addresseeName)
-                .formattedAddress(formatAddressForLetterPrinting(addressToSendTo, isInternational))
-                .build();
-
-            caseData.put(CASE_NUMBER, ccdNumber);
-            caseData.put("reference", reference);
-            caseData.put(ADDRESSEE, addressee);
-            caseData.put("letterDate", String.valueOf(LocalDate.now()));
-            caseData.put("applicantName", applicantName);
-            caseData.put("respondentName", respondentName);
-            caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
-            caseData.put("courtDetails", buildFrcCourtDetails(caseData));
-        } else {
-            log.info("Failed to prepare template data as not all required address details were present for Case ID: {}", ccdNumber);
-            throw new IllegalArgumentException("DocumentHelper CaseDetails Mandatory data missing from address when "
-                + "trying to generate document for caseId " + ccdNumber);
-        }
-
-        return caseDetailsCopy;
     }
 
     private CaseDetails prepareLetterTemplateData(FinremCaseDetails finremCaseDetails, String reference, String addresseeName,
@@ -585,11 +515,47 @@ public class DocumentHelper {
             .build();
     }
 
-    public List<BulkPrintDocument> getCaseDocumentsAsBulkPrintDocuments(List<CaseDocument> caseDocuments) {
+    /**
+     * Converts a list of {@link CaseDocument}s into a list of {@link BulkPrintDocument}s, ensuring
+     * every resulting document is a PDF.
+     *
+     * <p>For each supplied {@link CaseDocument}, this method checks whether the document is
+     * already a PDF using {@link FileUtils#isPdf(CaseDocument)}. If it is not, the document is
+     * converted to PDF via
+     * {@link GenericDocumentService#convertDocumentIfNotPdfAlready(CaseDocument, String, CaseType)}
+     * before being wrapped as a {@link BulkPrintDocument}. Whether a given document required
+     * conversion is recorded via {@link BulkPrintDocument.BulkPrintDocumentBuilder#convertedToPdf(boolean)}.
+     *
+     * @param caseDocuments the list of case documents to convert
+     * @param caseType the {@link CaseType} of the case the documents belong to, required for
+     *     document conversion
+     * @param userAuthorisation the authenticated user's authorisation token, required for
+     *     document conversion
+     * @return a list of {@link BulkPrintDocument}s built from the binary URL and filename of each
+     *     case document, with all documents guaranteed to be in PDF format and flagged to
+     *     indicate whether they were converted to PDF
+     */
+    public List<BulkPrintDocument> getCaseDocumentsAsBulkPrintDocuments(List<CaseDocument> caseDocuments,
+                                                                        CaseType caseType,
+                                                                        String userAuthorisation) {
         return caseDocuments.stream()
-            .map(caseDocument -> BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
-                .fileName(caseDocument.getDocumentFilename())
-                .build())
+            .map(caseDocument -> {
+                CaseDocument pdfCaseDocument;
+                boolean convertedToPdf = false;
+                if (FileUtils.isPdf(caseDocument)) {
+                    pdfCaseDocument = caseDocument;
+                } else {
+                    pdfCaseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
+                        caseDocument, userAuthorisation, caseType
+                    );
+                    convertedToPdf = true;
+                }
+                return BulkPrintDocument.builder()
+                    .binaryFileUrl(pdfCaseDocument.getDocumentBinaryUrl())
+                    .fileName(pdfCaseDocument.getDocumentFilename())
+                    .convertedToPdf(convertedToPdf)
+                    .build();
+            })
             .toList();
     }
 
@@ -628,11 +594,6 @@ public class DocumentHelper {
 
     public String getApplicantFullName(CaseDetails caseDetails) {
         return caseDataService.buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
-    }
-
-    private String getRespondentFullName(CaseDetails caseDetails, boolean isConsentedApplication) {
-        return isConsentedApplication
-            ? getRespondentFullNameConsented(caseDetails) : getRespondentFullNameContested(caseDetails);
     }
 
     public String getRespondentFullNameConsented(CaseDetails caseDetails) {
@@ -679,17 +640,9 @@ public class DocumentHelper {
         return null;
     }
 
-    public boolean isHighCourtSelected(Map<String, Object> caseData) {
-        return caseData != null && caseData.get(HIGHCOURT_COURTLIST) != null;
-    }
-
     public boolean isHighCourtSelected(FinremCaseData caseData) {
         Region region = caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList();
         return Region.HIGHCOURT.equals(region);
-    }
-
-    public StampType getStampType(Map<String, Object> caseData) {
-        return isHighCourtSelected(caseData) ? StampType.HIGH_COURT_STAMP : StampType.FAMILY_COURT_STAMP;
     }
 
     public StampType getStampType(FinremCaseData caseData) {

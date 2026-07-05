@@ -43,7 +43,7 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
                     .getAdditionalHearingDocumentDate(), Comparator.nullsLast(Comparator.reverseOrder())));
 
             AdditionalHearingDocumentCollection additionalHearingDocumentCollection =
-                additionalHearingDocuments.get(0);
+                additionalHearingDocuments.getFirst();
             documents.add(additionalHearingDocumentCollection.getValue().getDocument());
         }
 

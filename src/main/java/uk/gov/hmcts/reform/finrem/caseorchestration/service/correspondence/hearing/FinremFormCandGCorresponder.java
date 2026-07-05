@@ -40,7 +40,7 @@ public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
             .ifPresent(caseDocuments::add);
 
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
-            documentHelper.getCaseDocumentsAsBulkPrintDocuments(caseDocuments));
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(caseDocuments, caseDetails.getCaseType(), authorisationToken));
     }
 
     private List<CaseDocument> getHearingCaseDocuments(FinremCaseData caseData, String caseId) {
