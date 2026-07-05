@@ -334,7 +334,6 @@ public class CCDConfigConstant {
     public static final String FORMA_SCANNED_DATE = "formAScannedDate";
     public static final String FORMA_DELIVERY_DATE = "formADeliveryDate";
     public static final String FORMA_EXCEPTIONAL_RECORD_REFERENCE = "formAExceptionRecordReference";
-    public static final String FORM_A_COLLECTION = "copyOfPaperFormA";
     public static final String FORM_C = "formC";
     public static final String FORM_G = "formG";
     public static final String HEARING_NOTICE_DOCUMENT = "hearingNotice";
@@ -370,7 +369,6 @@ public class CCDConfigConstant {
     public static final String AMENDED_CONSENT_ORDER_COLLECTION = "amendedConsentOrderCollection";
     public static final String ORDER_REFUSAL_PREVIEW_COLLECTION = "orderRefusalPreviewDocument";
     public static final String CONTESTED_CONSENT_ORDER_COLLECTION = "Contested_ConsentedApprovedOrders";
-    public static final String CONTESTED_CONSENT_PENSION_COLLECTION = "consentPensionCollection";
     public static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION = "consentedNotApprovedOrders";
     public static final String CONSENTED_ORDER_DIRECTION_JUDGE_TITLE = "orderDirectionJudge";
     public static final String CONTESTED_ORDER_DIRECTION_JUDGE_TITLE = "consentSelectJudge";
