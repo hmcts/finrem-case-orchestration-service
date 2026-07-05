@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -75,7 +74,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE;
@@ -87,11 +85,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
@@ -230,27 +225,6 @@ public class DocumentHelper {
             .toList();
     }
 
-    /**
-     * Return List Object for given Case with the given indentation used.
-     *
-     * <p>Please use @{@link #getFormADocumentsData(FinremCaseData)}</p>
-     * @param caseData instance of Map
-     * @return List Object
-     * @deprecated Use {@link Map caseData}
-     */
-    @Deprecated(since = "15-june-2023")
-    @SuppressWarnings("java:S1133")
-    public List<CaseDocument> getFormADocumentsData(Map<String, Object> caseData) {
-        return ofNullable(caseData.get(FORM_A_COLLECTION))
-            .map(this::convertToPaymentDocumentCollectionList)
-            .orElse(List.of())
-            .stream()
-            .map(PaymentDocumentCollection::getValue)
-            .map(PaymentDocument::getUploadedDocument)
-            .filter(Objects::nonNull)
-            .toList();
-    }
-
     public List<CaseDocument> getFormADocumentsData(FinremCaseData caseData) {
         return ofNullable(caseData.getCopyOfPaperFormA())
             .map(this::convertToPaymentDocumentCollectionList)
@@ -260,27 +234,6 @@ public class DocumentHelper {
             .map(PaymentDocument::getUploadedDocument)
             .filter(Objects::nonNull)
             .toList();
-    }
-
-    public List<CaseDocument> getConsentedInContestedPensionDocumentsData(Map<String, Object> caseData) {
-        return ofNullable(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))
-            .map(this::convertToPensionCollectionDataList)
-            .orElse(List.of())
-            .stream()
-            .map(PensionTypeCollection::getTypedCaseDocument)
-            .map(PensionType::getPensionDocument)
-            .filter(Objects::nonNull)
-            .toList();
-    }
-
-    public boolean hasAnotherHearing(Map<String, Object> caseData) {
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList =
-            convertToDirectionDetailsCollectionData(caseData
-                .get(DIRECTION_DETAILS_COLLECTION_CT));
-
-        // use a utility to handle directionDetailsCollectionList being null as well as empty
-        return !CollectionUtils.isEmpty(directionDetailsCollectionList) && YES_VALUE.equalsIgnoreCase(
-            nullToEmpty(directionDetailsCollectionList.getFirst().getDirectionDetailsCollection().getIsAnotherHearingYN()));
     }
 
     public boolean hasAnotherHearing(FinremCaseData caseData) {
@@ -351,6 +304,7 @@ public class DocumentHelper {
         });
     }
 
+    @Deprecated(forRemoval = true)
     public Optional<CaseDocument> getLatestRespondToOrderDocuments(Map<String, Object> caseData) {
         Optional<RespondToOrderData> respondToOrderData = ofNullable(caseData.get(RESPOND_TO_ORDER_DOCUMENTS))
             .map(this::convertToRespondToOrderDataList)

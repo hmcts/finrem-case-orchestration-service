@@ -182,27 +182,6 @@ class DocumentHelperTest {
     }
 
     @Test
-    void hasAnotherHearingFalse() {
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().id(123L).data(new HashMap<>()).build()).build();
-        assertFalse(documentHelper.hasAnotherHearing(callbackRequest.getCaseDetails().getData()));
-    }
-
-    @Test
-    void hasAnotherHearingTrue() {
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().id(123L).data(new HashMap<>()).build()).build();
-
-        DirectionDetailsCollection ddc = DirectionDetailsCollection.builder().isAnotherHearingYN("Yes").build();
-        DirectionDetailsCollectionData dt = DirectionDetailsCollectionData.builder().directionDetailsCollection(ddc).build();
-        List<DirectionDetailsCollectionData> list = new ArrayList<>();
-        list.add(dt);
-        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
-        data.put(DIRECTION_DETAILS_COLLECTION_CT, list);
-        assertTrue(documentHelper.hasAnotherHearing(data));
-    }
-
-    @Test
     void castToList() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
         List<String> natureList = documentHelper.convertToList(
@@ -211,25 +190,9 @@ class DocumentHelperTest {
     }
 
     @Test
-    void shouldGetFormADocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
-        List<CaseDocument> formADocuments = documentHelper.getFormADocumentsData(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(formADocuments).hasSize(2);
-    }
-
-    @Test
     void shouldGetFormADocumentsFinrem() throws Exception {
         FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(pensionDocuments).hasSize(2);
-    }
-
-    @Test
-    void shouldGetConsentedInContestedPensionDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("consented-in-consented.json");
-        List<CaseDocument> pensionDocuments = documentHelper.getConsentedInContestedPensionDocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments).hasSize(2);
     }
