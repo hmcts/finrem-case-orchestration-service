@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremSubmittedCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -16,14 +16,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPost
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremContestedSendOrderCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.List;
 
 @Slf4j
 @Service
-public class SendOrderContestedSubmittedHandler extends FinremSubmittedCallbackHandler {
+public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     private final GeneralOrderService generalOrderService;
     private final CcdService ccdService;
     private final FinremContestedSendOrderCorresponder contestedSendOrderCorresponder;
@@ -31,10 +29,8 @@ public class SendOrderContestedSubmittedHandler extends FinremSubmittedCallbackH
     public SendOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               GeneralOrderService generalOrderService,
                                               CcdService ccdService,
-                                              FinremContestedSendOrderCorresponder contestedSendOrderCorresponder,
-                                              EvidenceManagementDeleteService evidenceManagementDeleteService,
-                                              RetryExecutor retryExecutor) {
-        super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
+                                              FinremContestedSendOrderCorresponder contestedSendOrderCorresponder) {
+        super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.ccdService = ccdService;
         this.contestedSendOrderCorresponder = contestedSendOrderCorresponder;
@@ -60,7 +56,8 @@ public class SendOrderContestedSubmittedHandler extends FinremSubmittedCallbackH
 
         updateCaseWithPostStateOption(caseDetails, userAuthorisation);
 
-        return response(caseDetails.getData());
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseDetails.getData()).build();
     }
 
     private void updateCaseWithPostStateOption(FinremCaseDetails caseDetails, String userAuthorisation) {
