@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class FinremAdditionalHearingCorresponderTest extends FinremHearingCorrespondenceBaseTest {
 
     @BeforeEach
-    public void setUpTest() {
+    void setUpTest() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         applicantAndRespondentMultiLetterCorresponder =
