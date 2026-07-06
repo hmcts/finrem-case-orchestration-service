@@ -20,12 +20,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrls;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrlsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -247,8 +248,9 @@ class ManageCaseDocumentsAboutToSubmitHandlerTest {
         );
 
         if (featureToggleEnabled) {
-            assertThat(response.getData().getBin().getFileUrlsToBeDeleted().getListItems())
-                .flatExtracting(DynamicListElement::getCode)
+            assertThat(response.getData().getBin().getFileUrlsToBeDeleted().stream())
+                .extracting(BinFileUrlsCollection::getValue)
+                .extracting(BinFileUrls::getBinFileUrl)
                 .containsOnly(removedDoc.getDocumentUrl());
         } else {
             assertThat(response.getData().getBin().getFileUrlsToBeDeleted()).isNull();
