@@ -130,11 +130,10 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
             moveApprovedDocumentsToFinalisedOrder(caseData, newProcessedOrders);
         }
         caseData.setOrdersSentToPartiesCollection(ordersSentToPartiesCollection); // will be sent in the submitted event
-        setUpOrderDocumentsOnPartiesTab(caseDetails, parties);
 
+        setUpOrderDocumentsOnPartiesTab(caseDetails, parties);
         resetFields(caseData.getDraftOrdersWrapper());
         sendOrdersCategoriser.categorise(caseDetails.getData());
-
         draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
 
         return response(caseDetails.getData());
