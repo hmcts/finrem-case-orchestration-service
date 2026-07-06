@@ -1,38 +1,40 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SolicitorRemovedLetterDetailsGeneratorTest extends AbstractLetterDetailsGeneratorTestSetup {
+@ExtendWith(MockitoExtension.class)
+class SolicitorRemovedLetterDetailsGeneratorTest extends AbstractLetterDetailsGeneratorTestSetup {
 
     @InjectMocks
     private SolicitorRemovedLetterDetailsGenerator solicitorRemovedLetterDetailsGenerator;
 
-    @Before
-    public void setUpTest() {
+    @BeforeEach
+    @Override
+    void setUpTest() {
         super.setUpTest();
-        when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
-        when(documentHelper.getRespondentFullNameConsented(any(CaseDetails.class))).thenReturn(RESPONDENT_FULL_NAME_CONSENTED);
+        lenient().when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
+        lenient().when(documentHelper.getRespondentFullNameConsented(any(CaseDetails.class))).thenReturn(RESPONDENT_FULL_NAME_CONSENTED);
     }
 
     @Test
-    public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorRemoved() {
+    void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorRemoved() {
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.TRUE);
+        when(caseDataService.isConsentedApplication(caseDetailsBefore)).thenReturn(Boolean.TRUE);
         when(addresseeGeneratorService.generateAddressee(caseDetails, changedRepresentativeRemoved,
             DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
@@ -45,14 +47,13 @@ public class SolicitorRemovedLetterDetailsGeneratorTest extends AbstractLetterDe
         assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.REMOVE, Boolean.TRUE);
         assertConsentedCourtDetails(noticeOfChangeLetterDetails);
         assertAddresseeDetails(noticeOfChangeLetterDetails);
-
-
     }
 
     @Test
-    public void shouldGenerateNoticeOfChangeLetterDetailsForSolicitorWhenRemoved() {
+    void shouldGenerateNoticeOfChangeLetterDetailsForSolicitorWhenRemoved() {
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
+        when(caseDataService.isConsentedApplication(caseDetailsBefore)).thenReturn(Boolean.FALSE);
         when(addresseeGeneratorService.generateAddressee(caseDetailsBefore, changedRepresentativeRemoved,
             DocumentHelper.PaperNotificationRecipient.SOLICITOR, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
@@ -65,9 +66,8 @@ public class SolicitorRemovedLetterDetailsGeneratorTest extends AbstractLetterDe
         assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.REMOVE, Boolean.FALSE);
         assertContestedCourtDetails(noticeOfChangeLetterDetails);
         assertAddresseeDetails(noticeOfChangeLetterDetails);
-        assertThat(noticeOfChangeLetterDetails.getNoticeOfChangeText(),
-            is("You've completed notice of acting on this, your access to this case has now been revoked."));
-
+        assertEquals(
+            "You've completed notice of acting on this, your access to this case has now been revoked.",
+            noticeOfChangeLetterDetails.getNoticeOfChangeText());
     }
-
 }

@@ -4,15 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
@@ -42,6 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
@@ -50,9 +48,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaul
 public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest {
 
     private static final String COVER_LETTER_URL = "cover_letter_url";
-
-    private static final String COVER_LETTER_BINARY_URL = "cover_letter_url/binary";
-    private static final String GENERAL_ORDER_URL = "general_letter_url";
 
     @MockitoBean
     private DocumentOrderingService documentOrderingService;
@@ -63,19 +58,16 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     @MockitoBean
     private GenericDocumentService genericDocumentService;
 
-    @InjectMocks
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = createObjectMapper();
 
-    @Mock
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Autowired
+    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
 
-    @Autowired private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    @Autowired
+    private EvidenceManagementUploadService evidenceManagementUploadService;
 
-    @Autowired private EvidenceManagementUploadService evidenceManagementUploadService;
-
-    @Autowired private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
-
-    @Autowired private CaseDataService caseDataService;
+    @Autowired
+    private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
 
     private FinremCaseDetails finremCaseDetails;
     private CaseDetails caseDetails;
