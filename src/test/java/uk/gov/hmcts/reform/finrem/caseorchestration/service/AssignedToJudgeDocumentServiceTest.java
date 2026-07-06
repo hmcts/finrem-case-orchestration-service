@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -56,8 +55,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
     private FinremCaseDetails frCaseDetails;
 
-    @Captor
-    private ArgumentCaptor<Map> mapArgumentCaptor;
+    private ArgumentCaptor<Map> mapArgumentCaptor = ArgumentCaptor.forClass(Map.class);
 
     @Before
     public void setUp() {

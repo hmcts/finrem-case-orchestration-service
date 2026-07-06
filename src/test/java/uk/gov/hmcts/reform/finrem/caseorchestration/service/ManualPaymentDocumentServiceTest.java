@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
@@ -41,8 +40,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
     private ObjectMapper mapper;
     @MockitoBean
     private GenericDocumentService genericDocumentService;
-    @Captor
-    ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
+    ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor = ArgumentCaptor.forClass(CaseDetails.class);
 
     private FinremCaseDetails finremCaseDetails;
 

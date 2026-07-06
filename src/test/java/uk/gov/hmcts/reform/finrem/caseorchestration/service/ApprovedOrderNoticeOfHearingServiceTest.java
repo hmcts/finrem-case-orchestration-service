@@ -6,7 +6,6 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -96,10 +95,9 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @MockitoBean
     private DocumentHelper documentHelper;
 
-    @Captor
-    ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor;
-    @Captor
-    ArgumentCaptor<List<BulkPrintDocument>> printDocumentsRequestDocumentListCaptor;
+    ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor = ArgumentCaptor.forClass(Map.class);
+
+    ArgumentCaptor<List<BulkPrintDocument>> printDocumentsRequestDocumentListCaptor = ArgumentCaptor.forClass(List.class);
 
     private CaseDetails caseDetails;
 
