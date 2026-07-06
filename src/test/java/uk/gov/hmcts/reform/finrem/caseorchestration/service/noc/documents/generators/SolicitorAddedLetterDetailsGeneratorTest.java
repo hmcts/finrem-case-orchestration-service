@@ -1,36 +1,35 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SolicitorAddedLetterDetailsGeneratorTest extends AbstractLetterDetailsGeneratorTestSetup {
+@ExtendWith(MockitoExtension.class)
+class SolicitorAddedLetterDetailsGeneratorTest extends AbstractLetterDetailsGeneratorTestSetup {
 
     @InjectMocks
     private SolicitorAddedLetterDetailsGenerator solicitorAddedLetterDetailsGenerator;
 
-    @Before
-    public void setUpTest() {
+    @BeforeEach
+    @Override
+    void setUpTest() {
         super.setUpTest();
         when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
     }
 
     @Test
-    public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorAdded() {
-
+    void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorAdded() {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
         when(addresseeGeneratorService.generateAddressee(caseDetailsBefore, changedRepresentativeAdded,
             DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant"))
@@ -44,12 +43,10 @@ public class SolicitorAddedLetterDetailsGeneratorTest extends AbstractLetterDeta
         assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.ADD, Boolean.FALSE);
         assertContestedCourtDetails(noticeOfChangeLetterDetails);
         assertAddresseeDetails(noticeOfChangeLetterDetails);
-
     }
 
     @Test
-    public void shouldGenerateNoticeOfChangeLetterDetailsForSolicitorWhenAdded() {
-
+    void shouldGenerateNoticeOfChangeLetterDetailsForSolicitorWhenAdded() {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
         when(addresseeGeneratorService.generateAddressee(caseDetails, changedRepresentativeAdded,
             DocumentHelper.PaperNotificationRecipient.SOLICITOR, "applicant"))
@@ -63,8 +60,8 @@ public class SolicitorAddedLetterDetailsGeneratorTest extends AbstractLetterDeta
         assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.ADD, Boolean.FALSE);
         assertContestedCourtDetails(noticeOfChangeLetterDetails);
         assertAddresseeDetails(noticeOfChangeLetterDetails);
-        assertThat(noticeOfChangeLetterDetails.getNoticeOfChangeText(),
-            is("Your notice of change has been completed successfully. You can now view your client's case."));
-
+        assertEquals(
+            "Your notice of change has been completed successfully. You can now view your client's case.",
+            noticeOfChangeLetterDetails.getNoticeOfChangeText());
     }
 }

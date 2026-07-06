@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +28,7 @@ public class BaseHandlerTestSetup {
     protected ObjectMapper objectMapper = JsonMapper
         .builder()
         .addModule(new JavaTimeModule())
-        .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+        .addModule(new ParameterNamesModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         .build();
