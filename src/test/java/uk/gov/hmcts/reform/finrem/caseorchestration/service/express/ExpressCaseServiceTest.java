@@ -37,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNABLE_TO_QUANTIFY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3.OVER_TWENTY_MILLION_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
@@ -75,7 +74,7 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void setExpressCaseEnrollmentStatus_shouldEnrollInExpressPilot_WhenCaseDataMeetsRequirements(Boolean isAssetsChecklistV3) {
-        FinremCaseData caseData = createCaseData(isAssetsChecklistV3);
+        FinremCaseData caseData = createExpressCaseWithAssertV3(isAssetsChecklistV3);
 
         if (isAssetsChecklistV3) {
             caseData.setEstimatedAssetsChecklistV3(EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
@@ -83,7 +82,6 @@ class ExpressCaseServiceTest {
             caseData.setEstimatedAssetsChecklistV2(EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
         }
 
-        caseData.setEstimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
         assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
@@ -92,7 +90,7 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldSetExpressEnrollmentStatusToWithdrawn(Boolean isAssetsChecklistV3) {
-        FinremCaseData caseData = createCaseData(isAssetsChecklistV3);
+        FinremCaseData caseData = createExpressCaseWithAssertV3(isAssetsChecklistV3);
         expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
         assertEquals(WITHDRAWN, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
@@ -100,7 +98,7 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldNotEnrollInExpressPilot_WhenFeatureGateOff(Boolean isAssetsChecklistV3) {
-        FinremCaseData caseData = createCaseData(isAssetsChecklistV3);
+        FinremCaseData caseData = createExpressCaseWithAssertV3(isAssetsChecklistV3);
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
         assertNull(caseData.getExpressCaseWrapper().getExpressCaseParticipation());
@@ -187,10 +185,9 @@ class ExpressCaseServiceTest {
     @Test
     void setExpressCaseEnrollmentStatus_shouldNotEnrollInExpressPilot_WhenNoAssetValueExists() {
 
-        Boolean assertValueIrrelevant = true; // This value is irrelevant to the test, but required to call createCaseData
-        FinremCaseData caseData = createCaseData(assertValueIrrelevant);
+        FinremCaseData caseData = createCaseData();
 
-        // Explicitly setting these values to null for test clarity.
+        // Explicitly setting both of these values to null for test clarity.
         caseData.setEstimatedAssetsChecklistV2(null);
         caseData.setEstimatedAssetsChecklistV3(null);
 
@@ -219,27 +216,27 @@ class ExpressCaseServiceTest {
 
     private static Stream<FinremCaseData> provideInvalidCaseData() {
 
-        Boolean v3AssetsChecklist = true;
-        Boolean v2AssetsChecklist = false;
+        Boolean useV3 = true;
+        Boolean useV2 = false;
 
-        FinremCaseData hasVariationOrder = createCaseData(v3AssetsChecklist);
+        FinremCaseData hasVariationOrder = createExpressCaseWithAssertV3(useV3);
         hasVariationOrder.getNatureApplicationWrapper()
             .setNatureOfApplicationChecklist(List.of(CONTESTED_VARIATION_ORDER));
 
-        FinremCaseData isNotInParticipatingFRC = createCaseData(v3AssetsChecklist);
+        FinremCaseData isNotInParticipatingFRC = createExpressCaseWithAssertV3(useV3);
         isNotInParticipatingFRC.getRegionWrapper().getAllocatedRegionWrapper()
             .getDefaultCourtListWrapper().setNottinghamCourtList(BOSTON_COUNTY_COURT_AND_FAMILY_COURT);
 
-        FinremCaseData isNotUnder250kForV2 = createCaseData(v2AssetsChecklist);
+        FinremCaseData isNotUnder250kForV2 = createExpressCaseWithAssertV3(useV2);
         isNotUnder250kForV2.setEstimatedAssetsChecklistV2(UNABLE_TO_QUANTIFY);
 
-        FinremCaseData isNotUnder250kForV3 = createCaseData(v3AssetsChecklist);
+        FinremCaseData isNotUnder250kForV3 = createExpressCaseWithAssertV3(useV3);
         isNotUnder250kForV3.setEstimatedAssetsChecklistV3(OVER_TWENTY_MILLION_POUNDS);
 
-        FinremCaseData isFastTrackApplication = createCaseData(v3AssetsChecklist);
+        FinremCaseData isFastTrackApplication = createExpressCaseWithAssertV3(useV3);
         isFastTrackApplication.setFastTrackDecision(YesOrNo.YES);
 
-        FinremCaseData isNotMatrimonialApplication = createCaseData(v3AssetsChecklist);
+        FinremCaseData isNotMatrimonialApplication = createExpressCaseWithAssertV3(useV3);
         isNotMatrimonialApplication.getScheduleOneWrapper().setTypeOfApplication(SCHEDULE_1_CHILDREN_ACT_1989);
 
         return Stream.of(
@@ -252,8 +249,8 @@ class ExpressCaseServiceTest {
         );
     }
 
-    private static FinremCaseData createCaseData(Boolean isAssetsChecklistV3) {
-        FinremCaseData data =  FinremCaseData.builder()
+    private static FinremCaseData createCaseData() {
+        return FinremCaseData.builder()
             .scheduleOneWrapper(ScheduleOneWrapper.builder()
                 .typeOfApplication(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS)
                 .build())
@@ -281,7 +278,10 @@ class ExpressCaseServiceTest {
                 .build())
             .fastTrackDecision(YesOrNo.NO)
             .build();
+    }
 
+    private static FinremCaseData createExpressCaseWithAssertV3(Boolean isAssetsChecklistV3) {
+        FinremCaseData data = createCaseData();
         if (isAssetsChecklistV3) {
             data.setEstimatedAssetsChecklistV3(EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
         } else {
