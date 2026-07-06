@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 
 public class PBAPaymentServiceTest extends BaseServiceTest {
 
@@ -47,7 +48,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
 
     @Before
     public void setupCaseData() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = createObjectMapper();
         callbackRequest = mapper.readValue(new File(getClass()
             .getResource("/fixtures/pba-payment.json").toURI()), CallbackRequest.class);
     }

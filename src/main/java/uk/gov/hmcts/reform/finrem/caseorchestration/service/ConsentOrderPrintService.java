@@ -56,18 +56,6 @@ public class ConsentOrderPrintService {
         }
     }
 
-    public FinremCaseDetails sendConsentOrderToBulkPrint(CaseDetails caseDetails,
-                                                         CaseDetails caseDetailsBefore,
-                                                         EventType eventType,
-                                                         String authorisationToken) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        FinremCaseDetails finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore);
-
-        sendConsentOrderToBulkPrint(finremCaseDetails, finremCaseDetailsBefore, eventType, authorisationToken);
-
-        return finremCaseDetails;
-    }
-
     private void generateCoversheetForRespondentAndSendOrders(FinremCaseDetails finremCaseDetails,
                                                               FinremCaseDetails caseDetailsBefore,
                                                               EventType eventType,
