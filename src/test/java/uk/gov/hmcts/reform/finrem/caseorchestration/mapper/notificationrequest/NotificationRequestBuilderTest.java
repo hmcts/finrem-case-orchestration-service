@@ -178,7 +178,6 @@ class NotificationRequestBuilderTest {
             .intervenerSolicitorReferenceNumber("INT123")
             .intervenerFullName("Intervener Name")
             .intervenerSolicitorFirm("Intervener Firm")
-            .documentContents(documentContents)
             .documentContentsList(documentContentsList)
             .isNotDigital(Boolean.TRUE)
             .hearingDate("2024-06-01")
@@ -204,7 +203,6 @@ class NotificationRequestBuilderTest {
             .doesNotContainNull();
 
         // For array fields, check content equality
-        assertThat(notificationRequest.getDocumentContents()).isEqualTo(documentContents);
         assertThat(notificationRequest.getDocumentContentsList()).isEqualTo(documentContentsList);
     }
 

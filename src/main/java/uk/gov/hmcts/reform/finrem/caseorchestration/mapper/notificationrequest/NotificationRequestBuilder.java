@@ -50,7 +50,6 @@ public class NotificationRequestBuilder {
     private String intervenerSolicitorReferenceNumber;
     private String intervenerFullName;
     private String intervenerSolicitorFirm;
-    private byte[] documentContents;
     private List<byte[]> documentContentsList;
     private Boolean isNotDigital;
     private String hearingDate;
@@ -211,7 +210,6 @@ public class NotificationRequestBuilder {
         notificationRequest.setIntervenerSolicitorReferenceNumber(intervenerSolicitorReferenceNumber);
         notificationRequest.setIntervenerFullName(intervenerFullName);
         notificationRequest.setIntervenerSolicitorFirm(intervenerSolicitorFirm);
-        notificationRequest.setDocumentContents(documentContents);
         notificationRequest.setDocumentContentsList(documentContentsList);
         notificationRequest.setIsNotDigital(isNotDigital);
         notificationRequest.setHearingDate(hearingDate);
@@ -321,11 +319,6 @@ public class NotificationRequestBuilder {
 
     public NotificationRequestBuilder intervenerSolicitorFirm(String intervenerSolicitorFirm) {
         this.intervenerSolicitorFirm = intervenerSolicitorFirm;
-        return this;
-    }
-
-    public NotificationRequestBuilder documentContents(byte[] documentContents) {
-        this.documentContents = documentContents;
         return this;
     }
 

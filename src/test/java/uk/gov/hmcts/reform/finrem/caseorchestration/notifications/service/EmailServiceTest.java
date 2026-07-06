@@ -575,6 +575,29 @@ public class EmailServiceTest {
     }
 
     @Test
+    public void givenZeroToTenDocuments_whenBuildTemplateVarsForGeneralEmailAttachment_thenFilesAreHandled() {
+        setConsentedData();
+
+        Map<String, Object> returnedTemplateVars =
+            emailService.buildTemplateVars(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name());
+
+        assertAttachmentPlaceholders(returnedTemplateVars, 0);
+
+        for (int numberOfDocuments = 0; numberOfDocuments <= 10; numberOfDocuments++) {
+            notificationRequest.setDocumentContentsList(
+                java.util.stream.IntStream.range(0, numberOfDocuments)
+                    .mapToObj(i -> new byte[5])
+                    .toList()
+            );
+
+            returnedTemplateVars =
+                emailService.buildTemplateVars(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name());
+
+            assertAttachmentPlaceholders(returnedTemplateVars, numberOfDocuments);
+        }
+    }
+
+    @Test
     public void shouldBuildTemplateVarsForTransferToLocalCourt() {
         setConsentedData();
         notificationRequest.setCaseReferenceNumber("123456789");
@@ -1027,5 +1050,17 @@ public class EmailServiceTest {
         assertNull(returnedTemplateVars.get("courtName"));
         assertNull(returnedTemplateVars.get("courtEmail"));
         assertNull(returnedTemplateVars.get("generalEmailBody"));
+    }
+
+    private void assertAttachmentPlaceholders(Map<String, Object> templateVars, int numberOfDocuments) {
+        for (int i = 1; i <= 10; i++) {
+            assertEquals(i <= numberOfDocuments ? "yes" : "no", templateVars.get("has_file_" + i));
+
+            if (i <= numberOfDocuments) {
+                assertNotNull(templateVars.get("link_to_file_" + i));
+            } else {
+                assertEquals("", templateVars.get("link_to_file_" + i));
+            }
+        }
     }
 }
