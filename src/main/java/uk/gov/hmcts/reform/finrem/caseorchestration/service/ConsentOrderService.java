@@ -20,9 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_RESPOND_TO_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 
 @Service
 @RequiredArgsConstructor
@@ -58,26 +56,9 @@ public class ConsentOrderService {
         return errors;
     }
 
-    public CaseDocument getLatestConsentOrderData(CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        return getCaseDocument(caseDetails, callbackRequest.getEventId());
-    }
-
     public CaseDocument getLatestConsentOrderData(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         return getCaseDocument(caseDetails, callbackRequest.getEventType().getCcdType());
-    }
-
-    private CaseDocument getCaseDocument(CaseDetails caseDetails, String eventId) {
-        Map<String, Object> caseData = caseDetails.getData();
-        if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
-            return documentHelper.getLatestRespondToOrderDocuments(caseData)
-                .orElseGet(() -> documentHelper.convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));
-        } else if (AMEND_CONSENT_ORDER.getCcdType().equalsIgnoreCase(eventId)) {
-            return documentHelper.getLatestAmendedConsentOrder(caseData);
-        } else {
-            return documentHelper.convertToCaseDocument(caseData.get(CONSENT_ORDER));
-        }
     }
 
     private CaseDocument getCaseDocument(FinremCaseDetails caseDetails, String eventId) {

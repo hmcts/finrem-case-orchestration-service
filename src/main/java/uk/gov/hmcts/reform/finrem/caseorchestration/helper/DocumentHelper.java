@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationOrderType;
@@ -88,7 +87,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
@@ -291,27 +289,6 @@ public class DocumentHelper {
     public List<String> convertToList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
-    }
-
-    private List<RespondToOrderData> convertToRespondToOrderDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
-    @Deprecated(forRemoval = true)
-    public Optional<CaseDocument> getLatestRespondToOrderDocuments(Map<String, Object> caseData) {
-        Optional<RespondToOrderData> respondToOrderData = ofNullable(caseData.get(RESPOND_TO_ORDER_DOCUMENTS))
-            .map(this::convertToRespondToOrderDataList)
-            .orElse(emptyList())
-            .stream()
-            .filter(caseDataService::isAmendedConsentOrderType)
-            .reduce((first, second) -> second);
-        if (respondToOrderData.isPresent()) {
-            return respondToOrderData
-                .map(respondToOrderData1 -> respondToOrderData.get().getRespondToOrder().getDocumentLink());
-        }
-
-        return Optional.empty();
     }
 
     public Optional<CaseDocument> getLatestRespondToOrderDocuments(FinremCaseData caseData) {

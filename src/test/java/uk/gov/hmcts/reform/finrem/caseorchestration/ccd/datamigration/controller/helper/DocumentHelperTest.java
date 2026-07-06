@@ -271,29 +271,12 @@ class DocumentHelperTest {
     }
 
     @Test
-    void shouldGetRespondToOrderDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
-        Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(latestRespondToOrderDocuments).isPresent();
-        assertThat(latestRespondToOrderDocuments.get().getDocumentBinaryUrl()).isEqualTo("http://doc2/binary");
-    }
-
-    @Test
     void shouldGetFinremRespondToOrderDocuments() throws Exception {
         FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
             callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments).isPresent();
         assertThat(latestRespondToOrderDocuments.get().getDocumentBinaryUrl()).isEqualTo("http://doc2/binary");
-    }
-
-    @Test
-    void shouldNotGetRespondToOrderDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
-        Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(latestRespondToOrderDocuments).isNotPresent();
     }
 
     @Test
