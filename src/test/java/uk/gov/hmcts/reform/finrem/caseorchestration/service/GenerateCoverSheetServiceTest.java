@@ -52,7 +52,7 @@ class GenerateCoverSheetServiceTest {
 
     private static final String BULK_PRINT_TEMPLATE = "bulk-print-template";
     private static final String BULK_PRINT_FILE_NAME = "bulk-print.pdf";
-    public static final String OLD_COVERESHEET_URL = "http://dm-store:8080/documents/old-app-cover-sheet";
+    public static final String OLD_COVERSHEET_URL = "http://dm-store:8080/documents/old-app-cover-sheet";
 
     @Mock
     private GenericDocumentService genericDocumentService;
@@ -92,7 +92,7 @@ class GenerateCoverSheetServiceTest {
         when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(
-            caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
+            caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME)
         );
 
         generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
@@ -100,7 +100,9 @@ class GenerateCoverSheetServiceTest {
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential());
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted())
+            .extracting(item -> item.getValue().getBinFileUrl())
+            .containsExactly(OLD_COVERSHEET_URL);
     }
 
     @Test
@@ -137,7 +139,7 @@ class GenerateCoverSheetServiceTest {
         when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.YES, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(
-            caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
+            caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME)
         );
 
         generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
@@ -145,7 +147,9 @@ class GenerateCoverSheetServiceTest {
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp());
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential().getDocumentFilename());
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted())
+            .extracting(item -> item.getValue().getBinFileUrl())
+            .containsExactly(OLD_COVERSHEET_URL);
     }
 
     @Test
@@ -154,7 +158,7 @@ class GenerateCoverSheetServiceTest {
         when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(
-            caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
+            caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME)
         );
 
         generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
@@ -162,7 +166,9 @@ class GenerateCoverSheetServiceTest {
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes().getDocumentFilename());
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential());
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted())
+            .extracting(item -> item.getValue().getBinFileUrl())
+            .containsExactly(OLD_COVERSHEET_URL);
     }
 
     @Test
@@ -171,7 +177,7 @@ class GenerateCoverSheetServiceTest {
         when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.YES);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(
-            caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
+            caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME)
         );
 
         generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
@@ -179,7 +185,9 @@ class GenerateCoverSheetServiceTest {
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential().getDocumentFilename());
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted())
+            .extracting(item -> item.getValue().getBinFileUrl())
+            .containsExactly(OLD_COVERSHEET_URL);
     }
 
     @Test
@@ -207,12 +215,14 @@ class GenerateCoverSheetServiceTest {
         setUpDocGenerationMocks();
         when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
-        setIntervenerCoverSheet(caseDetails, intervenerType, caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME));
+        setIntervenerCoverSheet(caseDetails, intervenerType, caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME));
 
         generateCoverSheetService.generateAndStoreIntervenerCoversheet(caseDetails, intervenerType, AUTH_TOKEN);
 
         assertEquals(TEST_DOCUMENT_FILENAME, Objects.requireNonNull(getIntervenerCoverSheet(caseDetails, intervenerType)).getDocumentFilename());
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted())
+            .extracting(item -> item.getValue().getBinFileUrl())
+            .containsExactly(OLD_COVERSHEET_URL);
     }
 
     @ParameterizedTest
@@ -236,7 +246,7 @@ class GenerateCoverSheetServiceTest {
     @EnumSource(IntervenerType.class)
     void shouldRemoveIntervenerCoverSheet(IntervenerType intervenerType) {
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
-        setIntervenerCoverSheet(caseDetails, intervenerType, caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME));
+        setIntervenerCoverSheet(caseDetails, intervenerType, caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME));
 
         IntervenerChangeDetails changeDetails = new IntervenerChangeDetails();
         changeDetails.setIntervenerType(intervenerType);
@@ -244,7 +254,10 @@ class GenerateCoverSheetServiceTest {
         generateCoverSheetService.removeIntervenerCoverSheet(caseDetails, changeDetails, AUTH_TOKEN);
 
         assertNull(getIntervenerCoverSheet(caseDetails, intervenerType));
-        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+
+        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted())
+            .extracting(item -> item.getValue().getBinFileUrl())
+            .containsExactly(OLD_COVERSHEET_URL);
     }
 
     @Test
