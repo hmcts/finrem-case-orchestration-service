@@ -1,13 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,9 +17,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -52,8 +44,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseD
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -85,6 +75,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
@@ -98,7 +89,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
@@ -110,7 +100,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPDATE_CONTACT_DETAILS_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
@@ -143,17 +132,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 class NotificationServiceTest {
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
     private static final String INTERVENER_SOL_EMAIL = "intervenerSol@email.com";
-
     private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-old-two-new-collections.json";
-    private static final String CONSENTED_HEARING_JSON = "/fixtures/consented.listOfHearing/list-for-hearing.json";
 
-    @TestLogs
-    private final TestLogger logs = new TestLogger(NotificationService.class);
     @InjectMocks
     private NotificationService notificationService;
     @Mock
     private EmailService emailService;
-    private ConsentedHearingHelper helper;
     @Mock
     private CourtDetailsConfiguration courtDetailsConfiguration;
     @Mock
@@ -168,8 +152,6 @@ class NotificationServiceTest {
     private EvidenceManagementDownloadService evidenceManagementDownloadService;
     @Mock
     private CaseDataService caseDataService;
-    @Mock
-    private NotificationServiceConfiguration notificationServiceConfiguration;
 
     protected ObjectMapper mapper;
     private NotificationRequest notificationRequest;
@@ -193,14 +175,7 @@ class NotificationServiceTest {
             any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
         lenient().when(evidenceManagementDownloadService.downloadInResponseEntity(anyString(), anyString()))
             .thenReturn(ResponseEntity.status(HttpStatus.OK).body(new ByteArrayResource(new byte[2048])));
-        mapper = JsonMapper
-            .builder()
-            .addModule(new JavaTimeModule())
-            .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .build();
-        helper = new ConsentedHearingHelper(mapper);
+        mapper = createObjectMapper();
     }
 
     @Test
@@ -912,7 +887,6 @@ class NotificationServiceTest {
     void shouldNotEmailIfIntervenerOneSolicitorIsNotPopulated() {
         FinremCaseData caseData = FinremCaseData.builder().intervenerOne(
             IntervenerOne.builder().intervenerRepresented(YesOrNo.NO).build()).build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOne()));
     }
@@ -1409,68 +1383,6 @@ class NotificationServiceTest {
             .build();
     }
 
-    private CallbackRequest getContestedCallbackRequestUpdateDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
-        caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Goodman");
-        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Victoria");
-        caseData.put(APPLICANT_LAST_NAME, "Goodman");
-        caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONTESTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
-        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
-        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        caseData.put(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL, TEST_JUDGE_EMAIL);
-        caseData.put(REGION, MIDLANDS);
-        caseData.put(MIDLANDS_FRC_LIST, NOTTINGHAM);
-        caseData.put(NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1");
-        caseData.put(BULK_PRINT_LETTER_ID_RES, NOTTINGHAM);
-        caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
-        return CallbackRequest.builder()
-            .eventId(UPDATE_CONTACT_DETAILS_EVENT)
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CaseType.CONTESTED.getCcdType())
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
-    }
-
-    private CallbackRequest getConsentedCallbackRequestUpdateDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
-        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Goodman");
-        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Victoria");
-        caseData.put(APPLICANT_LAST_NAME, "Goodman");
-        caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
-        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
-        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
-        List<String> natureOfApplication = List.of("Lump Sum Order",
-            "Periodical Payment Order",
-            "Pension Sharing Order",
-            "Pension Attachment Order",
-            "Pension Compensation Sharing Order",
-            "Pension Compensation Attachment Order",
-            "A settlement or a transfer of property",
-            "Property Adjustment Order");
-        caseData.put("natureOfApplication2", natureOfApplication);
-        return CallbackRequest.builder()
-            .eventId(UPDATE_CONTACT_DETAILS_EVENT)
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CaseType.CONSENTED.getCcdType())
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
-    }
-
     private FinremCaseDetails getFinremCaseDetails(CaseType caseType) {
         return FinremCaseDetails.builder()
             .data(FinremCaseData.builder()
@@ -1489,14 +1401,6 @@ class NotificationServiceTest {
     private FinremCallbackRequest buildHearingFinremCallbackRequest(String payloadJson) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(payloadJson)) {
             return mapper.readValue(resourceAsStream, FinremCallbackRequest.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private CallbackRequest buildHearingCallbackRequest(String payloadJson) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(payloadJson)) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
