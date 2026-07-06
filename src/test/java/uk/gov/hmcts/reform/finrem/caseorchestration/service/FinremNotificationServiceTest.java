@@ -405,14 +405,12 @@ class FinremNotificationServiceTest {
             .build();
 
         FinremCaseData caseData = getDefaultConsentedFinremCaseData();
-        caseData.getGeneralEmailWrapper()
-            .setGeneralEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(document)));
+        caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(document);
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(caseData);
 
         NotificationRequest notificationRequest = mock(NotificationRequest.class);
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails))
             .thenReturn(notificationRequest);
-        when(generalEmailService.getUploadedDocuments(caseData)).thenReturn(List.of(document));
         when(evidenceManagementDownloadService.getByteArray(document, AUTH_TOKEN))
             .thenReturn(documentContents);
 

@@ -49,8 +49,6 @@ public class NotificationRequest {
     private String intervenerFullName;
     @JsonProperty("intervenerSolicitorFirm")
     private String intervenerSolicitorFirm;
-    @JsonProperty("")
-    private byte[] documentContents;
     @JsonProperty("isNotDigital")
     private Boolean isNotDigital;
     @JsonProperty("hearingDate")

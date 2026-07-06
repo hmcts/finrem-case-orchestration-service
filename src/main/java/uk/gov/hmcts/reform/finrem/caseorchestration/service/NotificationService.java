@@ -403,15 +403,13 @@ public class NotificationService {
         return !generalEmailService.getUploadedDocuments(caseDetails.getData()).isEmpty();
     }
 
-    private void addGeneralEmailAttachments(FinremCaseDetails caseDetails,
-                                            NotificationRequest notificationRequest,
-                                            String auth) {
-        List<byte[]> documentContentsList = generalEmailService.getUploadedDocuments(caseDetails.getData())
-            .stream()
-            .map(document -> evidenceManagementDownloadService.getByteArray(document, auth))
-            .toList();
-
-        notificationRequest.setDocumentContentsList(documentContentsList);
+    private void addGeneralEmailAttachment(FinremCaseDetails caseDetails, NotificationRequest notificationRequest, String auth) {
+        CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
+        if (caseDocument != null) {
+            notificationRequest.setDocumentContentsList(
+                List.of(evidenceManagementDownloadService.getByteArray(caseDocument, auth))
+            );
+        }
     }
 
     private void sendGeneralEmail(FinremCaseDetails caseDetails, String authToken, EmailTemplateNames templateName) {
