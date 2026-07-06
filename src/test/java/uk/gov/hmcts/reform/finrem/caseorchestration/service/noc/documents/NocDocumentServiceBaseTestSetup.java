@@ -76,7 +76,6 @@ public class NocDocumentServiceBaseTestSetup {
             .addressee(Addressee.builder().formattedAddress(FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build())
             .build();
 
-
     }
 
     protected void assertAndVerifyDocumentsAreGenerated(CaseDocument caseDocument) {
@@ -106,5 +105,3 @@ public class NocDocumentServiceBaseTestSetup {
         assertThat(addresseeMap.get("formattedAddress"), is("formattedAddress"));
     }
 }
-
-
