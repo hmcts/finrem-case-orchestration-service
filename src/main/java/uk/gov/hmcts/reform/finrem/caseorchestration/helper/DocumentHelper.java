@@ -448,8 +448,7 @@ public class DocumentHelper {
      * already a PDF using {@link FileUtils#isPdf(CaseDocument)}. If it is not, the document is
      * converted to PDF via
      * {@link GenericDocumentService#convertDocumentIfNotPdfAlready(CaseDocument, String, CaseType)}
-     * before being wrapped as a {@link BulkPrintDocument}. Whether a given document required
-     * conversion is recorded via {@link BulkPrintDocument.BulkPrintDocumentBuilder#convertedToPdf(boolean)}.
+     * before being wrapped as a {@link BulkPrintDocument}.
      *
      * @param caseDocuments the list of case documents to convert
      * @param caseType the {@link CaseType} of the case the documents belong to, required for
@@ -466,19 +465,16 @@ public class DocumentHelper {
         return caseDocuments.stream()
             .map(caseDocument -> {
                 CaseDocument pdfCaseDocument;
-                boolean convertedToPdf = false;
                 if (FileUtils.isPdf(caseDocument)) {
                     pdfCaseDocument = caseDocument;
                 } else {
                     pdfCaseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
                         caseDocument, userAuthorisation, caseType
                     );
-                    convertedToPdf = true;
                 }
                 return BulkPrintDocument.builder()
                     .binaryFileUrl(pdfCaseDocument.getDocumentBinaryUrl())
                     .fileName(pdfCaseDocument.getDocumentFilename())
-                    .convertedToPdf(convertedToPdf)
                     .build();
             })
             .toList();

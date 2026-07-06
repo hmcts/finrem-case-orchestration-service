@@ -13,5 +13,4 @@ public class BulkPrintDocument {
 
     private String binaryFileUrl;
     private String fileName;
-    private boolean convertedToPdf;
 }
