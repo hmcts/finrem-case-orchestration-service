@@ -52,7 +52,7 @@ project.ext {
     springCloudBomVersion = "2025.0.0"
     restAssuredBomVersion = "5.5.7"
     // Tomcat bump to address CVEs.  Remove when upgrading SpringBoot to version 4.
-    set('tomcat.version', '10.1.55')
+    set('tomcat.version', '10.1.56')
 }
 
 group = 'uk.gov.hmcts.reform.finrem'
