@@ -1,12 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -45,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
@@ -361,13 +356,7 @@ class GeneralApplicationHelperTest {
 
     @Test
     void givenGeneralApplications_checkForDuplicates() {
-        ObjectMapper objectMapper = JsonMapper
-            .builder()
-            .addModule(new JavaTimeModule())
-            .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .build();
+        ObjectMapper objectMapper = createObjectMapper();
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/general-application-duplicate.json", objectMapper);
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         assertEquals(3, caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplications().size());

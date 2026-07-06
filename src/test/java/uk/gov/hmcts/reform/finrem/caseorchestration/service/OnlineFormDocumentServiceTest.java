@@ -47,6 +47,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_AUTHORISATION_FIRM;
@@ -102,7 +103,7 @@ class OnlineFormDocumentServiceTest {
     @BeforeEach
     void setUp() {
         optionIdToValueTranslator = spy(new OptionIdToValueTranslator("/options/options-id-value-transform.json",
-            new ObjectMapper()));
+            createObjectMapper()));
         optionIdToValueTranslator.initOptionValueMap();
         ReflectionTestUtils.setField(onlineFormDocumentService, "optionIdToValueTranslator", optionIdToValueTranslator);
     }
@@ -440,7 +441,7 @@ class OnlineFormDocumentServiceTest {
     private CaseDetails consentedInContestedCaseDetails(String payload) {
         try {
             try (InputStream resourceAsStream = getClass().getResourceAsStream(payload)) {
-                return new ObjectMapper().readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+                return createObjectMapper().readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
             }
         } catch (Exception e) {
             throw new IllegalStateException("Fail to load payload.", e);
