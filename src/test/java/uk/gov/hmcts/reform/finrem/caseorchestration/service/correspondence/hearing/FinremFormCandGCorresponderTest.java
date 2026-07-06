@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -15,12 +14,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,22 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
-class FinremFormCandGCorresponderTest {
-
-    @Mock
-    private BulkPrintService bulkPrintService;
-
-    @Mock
-    private NotificationService notificationService;
-
-    @Mock
-    private DocumentHelper documentHelper;
-
-    @Spy
-    @InjectMocks
-    private FinremFormCandGCorresponder underTest;
-
-    private FinremCaseDetails caseDetails;
+class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTest {
 
     @Mock
     private CaseType caseType;
@@ -72,10 +55,15 @@ class FinremFormCandGCorresponderTest {
     @Mock
     private CaseDocument miniFormADocument;
 
+    @Spy
+    @InjectMocks
+    private FinremFormCandGCorresponder underTest;
+
     @BeforeEach
     void setUp() {
+        super.setUnderTest(underTest);
         caseDetails = caseDetails();
-        when(documentHelper.getFormADocumentsData(caseDetails.getData()))
+        lenient().when(documentHelper.getFormADocumentsData(caseDetails.getData()))
             .thenReturn(List.of(formACaseDocumentA));
     }
 
