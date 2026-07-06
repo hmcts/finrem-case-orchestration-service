@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.sendorder.contested
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -366,7 +365,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         );
     }
 
-    @Disabled("rewrite")
     @Test
     @SuppressWarnings("java:S5961")
     void givenContestedCase_whenOrderAvailableToShareWithParties_thenHandlerHandleRequest() {
