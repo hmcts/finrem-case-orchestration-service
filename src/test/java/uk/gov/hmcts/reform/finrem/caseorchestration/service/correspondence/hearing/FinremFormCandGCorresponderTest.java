@@ -191,7 +191,7 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
     void getDocumentsToPrint_pfdNcdrCoverLetterIsNeverIncluded() {
         List<CaseDocument> documentsToPrint = underTest.getCaseDocuments(caseDetails);
 
-        assertThat(documentsToPrint).doesNotContain(pfdNcdrCoverLetter);
+        assertThat(documentsToPrint).isNotEmpty().doesNotContain(pfdNcdrCoverLetter);
     }
 
     @Test
