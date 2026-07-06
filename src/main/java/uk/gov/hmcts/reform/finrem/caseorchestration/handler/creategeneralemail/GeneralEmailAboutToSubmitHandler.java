@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentConversionException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -34,6 +35,8 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
     private final GeneralEmailService generalEmailService;
     private final GenericDocumentService genericDocumentService;
     private final GeneralEmailDocumentCategoriser generalEmailCategoriser;
+
+    private static final String DOCUMENT_CONVERSION_ERROR = "Unable to convert a provided attachment to PDF";
 
     @Autowired
     public GeneralEmailAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
@@ -68,7 +71,14 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
             return response(finremCaseData, null, errors);
         }
 
-        convertEmailAttachmentsToPdfIfRequired(finremCaseData, userAuthorisation);
+        try {
+            convertEmailAttachmentsToPdfIfRequired(finremCaseData, userAuthorisation);
+        } catch (DocumentConversionException e) {
+            log.error("Unable to convert general email attachment to PDF", e);
+            errors.add(DOCUMENT_CONVERSION_ERROR);
+            return response(finremCaseData, null, errors);
+        }
+
         generalEmailService.storeGeneralEmail(finremCaseData);
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();

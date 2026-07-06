@@ -49,6 +49,7 @@ public class EmailService {
     private static final String HEARING_DATE = "hearingDate";
     private static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
     private static final String DEFAULT_LINK_TO_SMART_SURVEY = "http://www.smartsurvey.co.uk/s/KCECE/";
+    private static final int MAX_EMAIL_ATTACHMENTS = 10;
 
     /**
      * Orchestrates sending an email based on the provided notification request and template.
@@ -238,22 +239,26 @@ public class EmailService {
         Map<String, Object> templateVars,
         List<byte[]> documents
     ) {
-        if (documents != null && documents.size() > 10) {
+        List<byte[]> safeDocuments = documents == null ? List.of() : documents;
+
+        if (safeDocuments.size() > MAX_EMAIL_ATTACHMENTS) {
             throw new IllegalArgumentException(
-                "A maximum of 10 email attachments is supported"
+                "A maximum of " + MAX_EMAIL_ATTACHMENTS + " email attachments is supported"
             );
         }
-        for (int i = 1; i <= 10; i++) {
-            boolean hasDocument = documents != null
-                && i <= documents.size()
-                && documents.get(i - 1) != null;
 
-            templateVars.put("has_file_" + i, hasDocument ? "yes" : "no");
+        for (int index = 0; index < MAX_EMAIL_ATTACHMENTS; index++) {
+            byte[] document = index < safeDocuments.size()
+                ? safeDocuments.get(index)
+                : null;
+
+            int fileNumber = index + 1;
+            boolean hasDocument = document != null;
+
+            templateVars.put("has_file_" + fileNumber, hasDocument ? "yes" : "no");
             templateVars.put(
-                "link_to_file_" + i,
-                hasDocument
-                    ? preparedForEmailAttachment(documents.get(i - 1))
-                    : ""
+                "link_to_file_" + fileNumber,
+                hasDocument ? preparedForEmailAttachment(document) : ""
             );
         }
     }

@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentConversionException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -159,6 +160,31 @@ class GeneralEmailAboutToSubmitHandlerTest {
                 "generalEmailBody", "generalEmailBody",
                 "generalEmailUploadedDocuments", List.of()
             )));
+    }
+
+    @Test
+    void givenDocumentConversionException_whenHandled_thenReturnError() {
+        CaseDocument caseDocument = caseDocument("a.doc");
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder()
+            .generalEmailWrapper(GeneralEmailWrapper.builder()
+                .generalEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(caseDocument)))
+                .build())
+            .build());
+
+        CaseType caseType = mock(CaseType.class);
+        when(finremCaseData.getCcdCaseType()).thenReturn(caseType);
+
+        doThrow(new DocumentConversionException("Conversion failed", new RuntimeException()))
+            .when(genericDocumentService)
+            .convertDocumentIfNotPdfAlready(caseDocument, AUTH_TOKEN, caseType);
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(finremCaseData);
+
+        var response = handler.handle(request, AUTH_TOKEN);
+
+        assertThat(response.getErrors())
+            .containsOnly("Unable to convert a provided attachment to PDF");
     }
 
     private FinremCallbackRequest mockCallbackRequest(boolean isConsented) {
