@@ -391,7 +391,7 @@ class FinremNotificationServiceTest {
             .thenReturn(mock(NotificationRequest.class));
         when(generalEmailService.getUploadedDocuments(consentedFinremCaseDetails.getData())).thenReturn(List.of());
 
-        notificationService.sendConsentGeneralEmail(consentedFinremCaseDetails, anyString());
+        notificationService.sendConsentGeneralEmail(consentedFinremCaseDetails, AUTH_TOKEN);
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL));
@@ -405,12 +405,15 @@ class FinremNotificationServiceTest {
             .build();
 
         FinremCaseData caseData = getDefaultConsentedFinremCaseData();
-        caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(document);
+        caseData.getGeneralEmailWrapper()
+            .setGeneralEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(document)));
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(caseData);
 
         NotificationRequest notificationRequest = mock(NotificationRequest.class);
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails))
             .thenReturn(notificationRequest);
+        when(generalEmailService.getUploadedDocuments(caseDetails.getData()))
+            .thenReturn(List.of(document));
         when(evidenceManagementDownloadService.getByteArray(document, AUTH_TOKEN))
             .thenReturn(documentContents);
 
@@ -440,7 +443,7 @@ class FinremNotificationServiceTest {
             .isInstanceOf(HttpClientErrorException.class);
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(caseDetails);
-        verify(emailService, never()).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL));
+        verify(emailService, never()).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL_ATTACHMENT));
     }
 
     @Test
@@ -449,7 +452,7 @@ class FinremNotificationServiceTest {
             .thenReturn(mock(NotificationRequest.class));
         when(generalEmailService.getUploadedDocuments(contestedFinremCaseDetails.getData())).thenReturn(List.of());
 
-        notificationService.sendContestedGeneralEmail(contestedFinremCaseDetails, anyString());
+        notificationService.sendContestedGeneralEmail(contestedFinremCaseDetails, AUTH_TOKEN);
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_EMAIL));

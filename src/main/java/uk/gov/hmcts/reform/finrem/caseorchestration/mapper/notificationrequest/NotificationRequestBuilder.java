@@ -327,11 +327,6 @@ public class NotificationRequestBuilder {
         return this;
     }
 
-    public NotificationRequestBuilder documentContentsList(List<byte[]> documentContentsList) {
-        this.documentContentsList = documentContentsList;
-        return this;
-    }
-
     public NotificationRequestBuilder isNotDigital(Boolean isNotDigital) {
         this.isNotDigital = isNotDigital;
         return this;

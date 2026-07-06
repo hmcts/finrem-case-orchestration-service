@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
@@ -739,6 +740,7 @@ class NotificationServiceTest {
             .getGeneralEmailUploadedDocuments().get(0).getValue();
 
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(finremCaseDetails)).thenReturn(notificationRequest);
+        when(generalEmailService.getUploadedDocuments(finremCaseDetails.getData())).thenReturn(List.of(uploadedDocument));
         when(evidenceManagementDownloadService.getByteArray(any(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(documentContents);
 
         notificationService.sendConsentGeneralEmail(finremCaseDetails, AUTH_TOKEN);
@@ -757,6 +759,7 @@ class NotificationServiceTest {
             .getGeneralEmailUploadedDocuments().get(0).getValue();
 
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(finremCaseDetails)).thenReturn(notificationRequest);
+        when(generalEmailService.getUploadedDocuments(finremCaseDetails.getData())).thenReturn(List.of(uploadedDocument));
         when(evidenceManagementDownloadService.getByteArray(any(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(documentContents);
 
         notificationService.sendContestedGeneralEmail(finremCaseDetails, AUTH_TOKEN);
