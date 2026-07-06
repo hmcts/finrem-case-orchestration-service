@@ -154,10 +154,9 @@ public class GenerateCoverSheetService {
 
         CaseDocument oldCoverSheet = mapping.oldCoverSheetSupplier().get();
         if (nonNull(oldCoverSheet) && StringUtils.isNotBlank(oldCoverSheet.getDocumentUrl())) {
-            caseData.getBin().binCaseDocument(oldCoverSheet);
+            finremCaseDetails.getData().getBin().binCaseDocument(oldCoverSheet);
         } else {
-            log.info("%s - old cover sheet does not exist. Skip deleting it."
-                .formatted(finremCaseDetails.getId()));
+            log.info("{} - old cover sheet does not exist. Skip deleting it.", finremCaseDetails.getId());
         }
         mapping.setter().accept(null);
     }
