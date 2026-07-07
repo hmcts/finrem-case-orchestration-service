@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderOtherDocumentCollection;
@@ -78,14 +77,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
@@ -128,17 +125,6 @@ public class DocumentHelper {
             .phoneNumber(CTSC_PHONE_NUMBER)
             .openingHours(CTSC_OPENING_HOURS)
             .build();
-    }
-
-    public CaseDocument getLatestAmendedConsentOrder(Map<String, Object> caseData) {
-        Optional<AmendedConsentOrderData> reduce = ofNullable(caseData.get(AMENDED_CONSENT_ORDER_COLLECTION))
-            .map(this::convertToAmendedConsentOrderDataList)
-            .orElse(emptyList())
-            .stream()
-            .reduce((first, second) -> second);
-        return reduce
-            .map(consentOrderData -> consentOrderData.getConsentOrder().getAmendedConsentOrder())
-            .orElseGet(() -> convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));
     }
 
     public CaseDocument getLatestAmendedConsentOrder(FinremCaseData caseData) {
@@ -249,21 +235,8 @@ public class DocumentHelper {
         return caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
     }
 
-    public CaseDocument convertToCaseDocumentIfObjNotNull(Object object) {
-        return object != null ? objectMapper.convertValue(object, CaseDocument.class) : null;
-    }
-
     public CaseDocument convertToCaseDocument(Object object) {
         return objectMapper.convertValue(object, CaseDocument.class);
-    }
-
-    public CaseDocument convertToCaseDocument(Object object, Class<CaseDocument> toValueType) {
-        return objectMapper.convertValue(object, toValueType);
-    }
-
-    private List<AmendedConsentOrderData> convertToAmendedConsentOrderDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
     }
 
     private List<PensionTypeCollection> convertToPensionCollectionDataList(Object object) {
@@ -282,11 +255,6 @@ public class DocumentHelper {
     }
 
     private List<PaymentDocumentCollection> convertToPaymentDocumentCollectionList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
-    public List<String> convertToList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }

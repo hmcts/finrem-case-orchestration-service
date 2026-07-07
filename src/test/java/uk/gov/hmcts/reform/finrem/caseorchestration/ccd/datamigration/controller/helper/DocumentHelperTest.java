@@ -97,7 +97,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_NAME;
@@ -125,15 +124,6 @@ class DocumentHelperTest {
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
         documentHelper = new DocumentHelper(objectMapper, caseDataService,
             genericDocumentService, finremCaseDetailsMapper, letterAddresseeGenerator, postalService);
-    }
-
-    @Test
-    void shouldGetLatestAmendedConsentOrder() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
-        CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl())
-            .isEqualTo("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary");
     }
 
     @Test
@@ -183,14 +173,6 @@ class DocumentHelperTest {
         List<CaseDocument> pensionDocuments1 = documentHelper.getConsentOrderOtherDocumentsData(
             callbackRequest.getCaseDetailsBefore().getData());
         assertThat(pensionDocuments1).isEmpty();
-    }
-
-    @Test
-    void castToList() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
-        List<String> natureList = documentHelper.convertToList(
-            callbackRequest.getCaseDetails().getData().get("natureOfApplication6"));
-        assertThat(natureList).hasSize(2);
     }
 
     @Test
@@ -685,39 +667,6 @@ class DocumentHelperTest {
         preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.LONDON);
         StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
         assertEquals(StampType.FAMILY_COURT_STAMP, actualStampType);
-    }
-
-    @Test
-    void convertToCaseDocumentIfObjNotNull() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> data = caseDetails.getData();
-        CaseDocument caseDocument = documentHelper.convertToCaseDocumentIfObjNotNull(data.get(CONSENT_ORDER));
-
-        assertThat(caseDocument.getDocumentBinaryUrl()).isEqualTo("http://file1.binary");
-        assertThat(caseDocument.getDocumentUrl()).isEqualTo("http://file1");
-        assertThat(caseDocument.getDocumentFilename()).isEqualTo("file1");
-    }
-
-    @Test
-    void convertToCaseDocumentIfObjNotNullIfNullReturnNull() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> data = caseDetails.getData();
-        CaseDocument caseDocument = documentHelper.convertToCaseDocumentIfObjNotNull(data.get(GENERAL_ORDER_PREVIEW_DOCUMENT));
-        assertNull(caseDocument);
-    }
-
-    @Test
-    void convertToCaseDocument() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> data = caseDetails.getData();
-        CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER), CaseDocument.class);
-
-        assertThat(caseDocument.getDocumentBinaryUrl()).isEqualTo("http://file1.binary");
-        assertThat(caseDocument.getDocumentUrl()).isEqualTo("http://file1");
-        assertThat(caseDocument.getDocumentFilename()).isEqualTo("file1");
     }
 
     @Test
