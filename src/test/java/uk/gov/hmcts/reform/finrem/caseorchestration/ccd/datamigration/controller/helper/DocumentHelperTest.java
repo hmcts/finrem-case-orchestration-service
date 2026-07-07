@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controller.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,6 +61,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -778,8 +778,8 @@ class DocumentHelperTest {
             assertThat(actual)
                 .extracting(BulkPrintDocument::getBinaryFileUrl, BulkPrintDocument::getFileName)
                 .contains(
-                    Tuple.tuple("convertedBinaryUrl", "convertedFilename"),
-                    Tuple.tuple("existingPdfBinaryUrl", "existingPdfFilename")
+                    tuple("convertedBinaryUrl", "convertedFilename"),
+                    tuple("existingPdfBinaryUrl", "existingPdfFilename")
                 );
         }
     }
