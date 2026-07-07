@@ -44,10 +44,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderP
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderRespondentDocumentHandler;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -57,6 +59,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -64,7 +67,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class SendOrderContestedAboutToSubmitHandlerTest {
 
-    private SendOrderContestedAboutToSubmitHandler handler;
+    private SendOrderContestedAboutToSubmitHandler underTest;
     @Mock
     private GeneralOrderService generalOrderService;
     @Mock
@@ -113,7 +116,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             = spy(new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService,
             notificationService));
 
-        handler = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper,
+        underTest = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper,
             generalOrderService,
             draftOrderService,
             genericDocumentService,
@@ -135,28 +138,15 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SEND_ORDER);
+        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SEND_ORDER);
     }
 
     @Test
     void givenEmptyApprovedOrdersToBeSent_whenHandled_shouldNotStampAnyDocumentAndSetUpHearingDocumentPack() {
-        OrderToShare selectedOts = OrderToShare.builder().documentToShare(YesOrNo.YES).build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
-            caseType,
-            FinremCaseData.builder()
-                .sendOrderWrapper(SendOrderWrapper.builder()
-                    .ordersToSend(OrdersToSend.builder()
-                        .value(List.of(
-                            OrderToShareCollection.builder()
-                                .value(selectedOts)
-                                .build()
-                        ))
-                        .build())
-                    .build())
-                .build()
-        );
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseType,
+            spy(FinremCaseData.class));
 
-        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         assertAll(
             () -> assertEquals(callbackRequest.getFinremCaseData(), response.getData()),
@@ -176,7 +166,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .data(FinremCaseData.builder().build())
             .build();
 
-        handler.handle(FinremCallbackRequestFactory.from(finremCaseDetails), AUTH_TOKEN);
+        underTest.handle(FinremCallbackRequestFactory.from(finremCaseDetails), AUTH_TOKEN);
 
         verifySetupDocumentOnPartiesTabs(finremCaseDetails);
     }
@@ -194,7 +184,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .build()
             );
 
-            var response = handler.handle(callbackRequest, AUTH_TOKEN);
+            var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
             assertThat(response.getData()).extracting(FinremCaseData::getDraftOrdersWrapper)
                 .extracting(DraftOrdersWrapper::getFinalisedOrdersCollection).isNull();
@@ -211,7 +201,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .build()
             );
 
-            var response = handler.handle(callbackRequest, AUTH_TOKEN);
+            var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
             assertThat(response.getData())
                 .extracting(FinremCaseData::getDraftOrdersWrapper)
@@ -230,7 +220,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .build()
             );
 
-            var response = handler.handle(callbackRequest, AUTH_TOKEN);
+            var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
             assertThat(response.getData()).extracting(FinremCaseData::getDraftOrdersWrapper)
                 .extracting(DraftOrdersWrapper::getAgreedDraftOrderCollection).isNull();
@@ -247,7 +237,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .build()
             );
 
-            var response = handler.handle(callbackRequest, AUTH_TOKEN);
+            var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
             assertThat(response.getData())
                 .extracting(FinremCaseData::getDraftOrdersWrapper)
@@ -261,7 +251,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     void givenAnyCase_whenHandled_shouldCallCategoriser() {
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
 
-        handler.handle(FinremCallbackRequestFactory.from(finremCaseData), AUTH_TOKEN);
+        underTest.handle(FinremCallbackRequestFactory.from(finremCaseData), AUTH_TOKEN);
 
         verify(sendOrdersCategoriser).categorise(finremCaseData);
     }
@@ -270,9 +260,44 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     void givenAnyCase_whenHandled_shouldClearEmptyOrdersInDraftOrdersReviewCollection() {
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
 
-        handler.handle(FinremCallbackRequestFactory.from(finremCaseData), AUTH_TOKEN);
+        underTest.handle(FinremCallbackRequestFactory.from(finremCaseData), AUTH_TOKEN);
 
         verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(finremCaseData);
+    }
+
+    @Test
+    void givenApprovedOrdersExist_whenHandledWithCoversheetMissing_shouldThrowException() {
+        List<OrderToShareCollection> selectedOrders = List.of(
+            toSelectedOrderToShare("DOC_1.pdf")
+        );
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+            caseType,
+            FinremCaseData.builder()
+                .sendOrderWrapper(SendOrderWrapper.builder()
+                    .ordersToSend(OrdersToSend.builder()
+                        .value(selectedOrders)
+                        .build())
+                    .build())
+                .build()
+        );
+
+        List<CaseDocument> legacyHearingOrders = mock(List.class);
+        List<CaseDocument> newProcessedOrders = mock(List.class);
+        Map<CaseDocument, List<CaseDocument>> order2AttachmentMap = mock(Map.class);
+
+        when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(),
+            selectedOrders.stream().map(OrderToShareCollection::getValue).toList()))
+            .thenReturn(Triple.of(legacyHearingOrders, newProcessedOrders, order2AttachmentMap));
+
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> underTest.handle(callbackRequest, AUTH_TOKEN));
+            assertThat(e).extracting(Throwable::getMessage).isEqualTo("orderApprovedCoverLetter is missing unexpectedly");
+    }
+
+
+    private OrderToShareCollection toSelectedOrderToShare(String documentName) {
+        return OrderToShareCollection.builder().value(
+            OrderToShare.builder().documentName(documentName).documentToShare(YesOrNo.YES).build()
+        ).build();
     }
 
     private void verifySetupDocumentOnPartiesTabs(FinremCaseDetails finremCaseDetails) {
