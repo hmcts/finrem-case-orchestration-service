@@ -834,18 +834,6 @@ class DocumentHelperTest {
         }
     }
 
-    private static Map<String, Object> buildAddress() {
-        Map<String, Object> solicitorAddress = new HashMap<>();
-        solicitorAddress.put("AddressLine1", "First Address Line");
-        solicitorAddress.put("AddressLine2", "Second Address Line");
-        solicitorAddress.put("AddressLine3", "Third Address Line");
-        solicitorAddress.put("County", "London");
-        solicitorAddress.put("Country", "England");
-        solicitorAddress.put("PostTown", "London");
-        solicitorAddress.put("PostCode", "SE1");
-        return solicitorAddress;
-    }
-
     private static Address buildFinremAddress() {
         return buildFinremAddress("SE1");
     }
