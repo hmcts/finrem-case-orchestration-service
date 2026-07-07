@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -40,6 +42,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
@@ -63,6 +66,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderR
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -216,7 +220,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAdditionalDocumentsInSendOrder_whenHandled_shouldConvertPdfIfNotPdfAlready() {
+    void givenAdditionalDocumentsInSendOrder_whenHandled_shouldConvertPdfIfNotPdfAlreadyAndPrint() {
         CaseDocument additionalDocument1 = mock(CaseDocument.class);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseType,
@@ -237,10 +241,60 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getData().getOrdersSentToPartiesCollection())
-            .extracting(OrderSentToPartiesCollection::getValue)
-            .extracting(SendOrderDocuments::getCaseDocument)
+        // To verify the converted pdf will be put to ordersSentToPartiesCollection for printing
+        verifyInPrintCollection(response.getData(), additionalDocument2InPdf);
+        // To verify the converted pdf will be stored back to additionalDocuments
+        assertThat(response.getData().getSendOrderWrapper().getAdditionalDocuments())
+            .extracting(DocumentCollectionItem::getValue)
             .contains(additionalDocument2InPdf);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenGeneralOrderWithAdditionalDocument_whenHandled_shouldSetupAdditionalDocumentOnCaseAndPrint(boolean isSelectedOrderMatches) {
+        CaseDocument generalOrderAdditionalDocument = mock(CaseDocument.class);
+
+        List<OrderToShareCollection> selectedOrders = List.of(
+            toSelectedOrderToShare("DOC_1.pdf")
+        );
+
+        ContestedGeneralOrder contestedGeneralOrder;
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseType,
+            FinremCaseData.builder()
+                .sendOrderWrapper(SendOrderWrapper.builder()
+                    .ordersToSend(OrdersToSend.builder()
+                        .value(selectedOrders)
+                        .build())
+                    .build())
+                .generalOrderWrapper(GeneralOrderWrapper.builder()
+                    .generalOrders(List.of(
+                        ContestedGeneralOrderCollection.builder()
+                            .value(contestedGeneralOrder = ContestedGeneralOrder.builder()
+                                .additionalDocument(generalOrderAdditionalDocument)
+                                .build())
+                            .build()
+                    ))
+                    .build())
+                .build()
+        );
+
+        when(generalOrderService.isSelectedOrderMatches(selectedOrders.stream().map(OrderToShareCollection::getValue).toList(),
+            contestedGeneralOrder)).thenReturn(isSelectedOrderMatches);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        if (isSelectedOrderMatches) {
+            verifySetUpOrderDocumentsOnCase(callbackRequest.getCaseDetails(), List.of(generalOrderAdditionalDocument));
+            // To verify the converted pdf will be put to ordersSentToPartiesCollection for printing
+            verifyInPrintCollection(response.getData(), generalOrderAdditionalDocument);
+        } else {
+            verifyNeverSetupDocumentOnPartiesTabs(callbackRequest.getCaseDetails());
+            assertThat(callbackRequest.getFinremCaseData().getOrdersSentToPartiesCollection())
+                .extracting(OrderSentToPartiesCollection::getValue)
+                .extracting(SendOrderDocuments::getCaseDocument)
+                .doesNotContain(generalOrderAdditionalDocument);
+        }
     }
 
     @Nested
@@ -413,10 +467,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         verifySetUpOrderDocumentsOnCase(callbackRequest.getCaseDetails(), expectedHearingDocumentPack);
-        assertThat(response.getData().getOrdersSentToPartiesCollection())
-            .extracting(OrderSentToPartiesCollection::getValue)
-            .extracting(SendOrderDocuments::getCaseDocument)
-            .containsAll(expectedHearingDocumentPack);
+        verifyInPrintCollection(response.getData(), expectedHearingDocumentPack.toArray(new CaseDocument[0]));
     }
 
     private static Stream<Arguments> orderDocumentsOnCaseScenarios() {
@@ -718,16 +769,23 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 parties));
     }
 
-    private void verifySetUpOrderDocumentsOnCase(FinremCaseDetails finremCaseDetails, List<CaseDocument> hearingDocumentPack) {
+    private void verifySetUpOrderDocumentsOnCase(FinremCaseDetails finremCaseDetails, List<CaseDocument> expectedDocuments) {
         handlers.forEach(handler ->
             verify(handler).setUpOrderDocumentsOnCase(eq(finremCaseDetails),
-                eq(parties), argThat(a -> a.containsAll(hearingDocumentPack))));
+                eq(parties), argThat(a -> a.containsAll(expectedDocuments))));
     }
 
     private void verifyNeverSetupDocumentOnPartiesTabs(FinremCaseDetails finremCaseDetails) {
         handlers.forEach(handler ->
             verify(handler, never()).setUpOrderDocumentsOnCase(eq(finremCaseDetails),
                 eq(parties), anyList()));
+    }
+
+    private void verifyInPrintCollection(FinremCaseData finremCaseData, CaseDocument... caseDocuments) {
+        assertThat(finremCaseData.getOrdersSentToPartiesCollection())
+            .extracting(OrderSentToPartiesCollection::getValue)
+            .extracting(SendOrderDocuments::getCaseDocument)
+            .containsAll(Arrays.asList(caseDocuments));
     }
 
     private DirectionOrderCollection toDirectionOrderCollection(String filename, boolean stamped) {
