@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.creategeneralemail;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -38,7 +37,6 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
 
     private static final String DOCUMENT_CONVERSION_ERROR = "Unable to convert a provided attachment to PDF";
 
-    @Autowired
     public GeneralEmailAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                             NotificationService notificationService,
                                             GeneralEmailService generalEmailService,

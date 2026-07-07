@@ -8,12 +8,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
+import java.util.Objects;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Component
 @Slf4j
@@ -26,24 +30,17 @@ public class GeneralEmailDocumentCategoriser extends DocumentCategoriser {
 
     @Override
     protected void categoriseDocuments(FinremCaseData finremCaseData) {
-        log.info("Categorising general email documents for case with Case ID: {}", finremCaseData.getCcdCaseId());
-
-        List<GeneralEmailCollection> generalEmails = finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection();
-
-        if (CollectionUtils.isEmpty(generalEmails)) {
-            return;
-        }
-
-        generalEmails.forEach(generalEmail -> categoriseGeneralEmailDocuments(generalEmail, finremCaseData));
+        emptyIfNull(finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection())
+            .stream()
+            .map(GeneralEmailCollection::getValue)
+            .filter(Objects::nonNull)
+            .forEach(generalEmail -> categoriseGeneralEmailDocuments(generalEmail, finremCaseData));
     }
 
-    private void categoriseGeneralEmailDocuments(GeneralEmailCollection generalEmail, FinremCaseData finremCaseData) {
-        if (generalEmail == null || generalEmail.getValue() == null) {
-            return;
-        }
-
-        String recipient = generalEmail.getValue().getGeneralEmailRecipient();
-        List<DocumentCollectionItem> documents = generalEmail.getValue().getGeneralEmailUploadedDocuments();
+    private void categoriseGeneralEmailDocuments(GeneralEmailHolder generalEmail,
+                                                 FinremCaseData finremCaseData) {
+        String recipient = generalEmail.getGeneralEmailRecipient();
+        List<DocumentCollectionItem> documents = generalEmail.getGeneralEmailUploadedDocuments();
 
         if (recipient == null || CollectionUtils.isEmpty(documents)) {
             return;

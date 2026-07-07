@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.creategeneralemail;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -23,7 +22,6 @@ public class GeneralEmailMidHandler extends FinremCallbackHandler {
 
     private final GeneralEmailService generalEmailService;
 
-    @Autowired
     public GeneralEmailMidHandler(FinremCaseDetailsMapper mapper,
                                   GeneralEmailService generalEmailService) {
         super(mapper);

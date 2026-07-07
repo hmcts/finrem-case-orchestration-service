@@ -18,7 +18,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
-import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Service
 @RequiredArgsConstructor
@@ -71,8 +71,7 @@ public class GeneralEmailService {
     }
 
     public List<CaseDocument> getUploadedDocuments(FinremCaseData finremCaseData) {
-        return ofNullable(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocuments())
-            .orElse(List.of())
+        return emptyIfNull(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocuments())
             .stream()
             .filter(Objects::nonNull)
             .map(DocumentCollectionItem::getValue)
