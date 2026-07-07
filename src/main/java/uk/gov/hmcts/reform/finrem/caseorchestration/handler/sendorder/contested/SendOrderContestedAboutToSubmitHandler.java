@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
@@ -167,7 +168,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
     }
 
     private boolean hasApprovedOrdersToBeSent(List<CaseDocument> legacyHearingOrders, List<CaseDocument> newProcessedOrders) {
-        return (legacyHearingOrders != null && !legacyHearingOrders.isEmpty()) || (newProcessedOrders != null && !newProcessedOrders.isEmpty());
+        return !emptyIfNull(legacyHearingOrders).isEmpty() || !emptyIfNull(newProcessedOrders).isEmpty();
     }
 
     private Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removeDocumentFromDraftOrderReview(FinremCaseData caseData,
@@ -216,23 +217,29 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         collection.removeAll(toRemove);
     }
 
-    private void removeDocumentFromsAgreedDraftOrderCollection(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
+    private void removeDocumentFromsAgreedDraftOrderCollection(FinremCaseData caseData, List<CaseDocument> approvedDocuments) {
         List<AgreedDraftOrderCollection> updatedCollection = emptyIfNull(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .stream()
-            .filter(d -> !hearingOrders.contains(d.getValue().getTargetDocument()))
+            .filter(d -> !ofNullable(d.getValue())
+                .map(AgreedDraftOrder::getTargetDocument)
+                .map(approvedDocuments::contains)
+                .orElse(false))
             .toList();
         caseData.getDraftOrdersWrapper().setAgreedDraftOrderCollection(updatedCollection);
 
         updatedCollection = emptyIfNull(caseData.getDraftOrdersWrapper().getIntvAgreedDraftOrderCollection())
             .stream()
-            .filter(d -> !hearingOrders.contains(d.getValue().getTargetDocument()))
+            .filter(d -> !ofNullable(d.getValue())
+            .map(AgreedDraftOrder::getTargetDocument)
+            .map(approvedDocuments::contains)
+            .orElse(false))
             .toList();
         caseData.getDraftOrdersWrapper().setIntvAgreedDraftOrderCollection(updatedCollection);
     }
 
-    private void moveApprovedDocumentsToFinalisedOrder(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
-        removeDocumentFromsAgreedDraftOrderCollection(caseData, hearingOrders);
-        Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removed = removeDocumentFromDraftOrderReview(caseData, hearingOrders);
+    private void moveApprovedDocumentsToFinalisedOrder(FinremCaseData caseData, List<CaseDocument> approvedDocuments) {
+        removeDocumentFromsAgreedDraftOrderCollection(caseData, approvedDocuments);
+        Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removed = removeDocumentFromDraftOrderReview(caseData, approvedDocuments);
         populateRemovedOrdersToFinalisedOrder(caseData, removed);
     }
 

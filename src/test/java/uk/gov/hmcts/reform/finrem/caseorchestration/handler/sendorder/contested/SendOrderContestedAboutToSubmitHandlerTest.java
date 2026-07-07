@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.sendorder.contested
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,11 +23,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
@@ -49,6 +59,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderI
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderRespondentDocumentHandler;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -314,7 +325,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("orderDocumentsOnCaseScenarios")
-    void givenApprovedOrdersExist_whenHandled_shouldSetUpOrderDocumentsOnCase(
+    void givenApprovedOrdersExist_whenHandled_shouldSetUpOrderDocumentsOnCaseAndPrint(
         String scenarioName,
         List<CaseDocument> legacyHearingOrders,
         List<CaseDocument> newProcessedOrders,
@@ -350,7 +361,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.getHearingDocumentsAsPdfDocuments(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(otherHearingDocuments);
 
-        underTest.handle(callbackRequest, AUTH_TOKEN);
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         List<CaseDocument> expectedHearingDocumentPack = new ArrayList<>();
         expectedHearingDocumentPack.addAll(legacyHearingOrders);
@@ -358,8 +369,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         order2AttachmentMap.values().forEach(expectedHearingDocumentPack::addAll);
         latestAdditionalHearingDocument.ifPresent(expectedHearingDocumentPack::add);
         expectedHearingDocumentPack.addAll(otherHearingDocuments);
-
         verifySetUpOrderDocumentsOnCase(callbackRequest.getCaseDetails(), expectedHearingDocumentPack);
+
+        assertThat(response.getData().getOrdersSentToPartiesCollection())
+            .extracting(OrderSentToPartiesCollection::getValue)
+            .extracting(SendOrderDocuments::getCaseDocument)
+            .containsAll(expectedHearingDocumentPack);
     }
 
     private static Stream<Arguments> orderDocumentsOnCaseScenarios() {
@@ -427,22 +442,24 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 false,
                 Optional.empty(),
                 List.of()
+            ),
+            Arguments.of(
+                "legacy orders only, no attachments, minimal pack",
+                List.of(legacyHearingOrder),
+                List.of(),
+                Map.of(),
+                false,
+                Optional.empty(),
+                List.of()
             )
         );
     }
 
-    private DirectionOrderCollection toDirectionOrderCollection(String filename, boolean stamped) {
-        return DirectionOrderCollection.builder()
-            .value(DirectionOrder.builder()
-                .uploadDraftDocument(caseDocument(filename))
-                .isOrderStamped(YesOrNo.forValue(stamped))
-                .build())
-            .build();
-    }
-
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenLegacyHearingOrdersExist_whenHandled_shouldStampDocumentIfNecessary(boolean isOrderAlreadyStamped) {
+    void givenLegacyHearingOrdersExist_whenHandled_shouldStampLegacyDocumentIfNecessaryAndPopulateToFinalOrderCollection(
+        boolean isOrderAlreadyStamped) {
+
         List<OrderToShareCollection> selectedOrders = List.of(
             toSelectedOrderToShare("DOC_1.pdf")
         );
@@ -489,6 +506,93 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         }
     }
 
+    @Test
+    void givenAgreedDraftOrdersSelected_whenHandled_shouldPopulateToFinalisedOrderCollection() {
+        List<OrderToShareCollection> selectedOrders = List.of(
+            toSelectedOrderToShare("agreedDraftOrder")
+        );
+
+        final CaseDocument newProcessedOrder = caseDocument("agreedDraftOrder");
+        final List<DocumentCollectionItem> attachments = mock(List.class);
+        final LocalDateTime submittedDate = mock(LocalDateTime.class);
+        final String submittedBy = "Claire Mumford";
+        final YesOrNo finalOrder = mock(YesOrNo.class);
+        final LocalDateTime approvalDate = mock(LocalDateTime.class);
+        final String approvalJudge = "Peter Chapman";
+        final CaseDocument coversheet = caseDocument("coversheet");
+
+        AgreedDraftOrder agreedDraftOrder = mock(AgreedDraftOrder.class);
+        when(agreedDraftOrder.getTargetDocument()).thenReturn(newProcessedOrder);
+
+        AgreedDraftOrderCollection remainedAgreedDraftOrderCollection = mock(AgreedDraftOrderCollection.class);
+        when(remainedAgreedDraftOrderCollection.getValue()).thenReturn(new AgreedDraftOrder());
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+            caseType,
+            FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        DraftOrdersReviewCollection.builder()
+                            .value(DraftOrdersReview.builder()
+                                .draftOrderDocReviewCollection(new ArrayList<>(List.of(
+                                    DraftOrderDocReviewCollection.builder()
+                                        .value(
+                                            DraftOrderDocumentReview.builder()
+                                                .attachments(attachments)
+                                                .draftOrderDocument(newProcessedOrder)
+                                                .submittedDate(submittedDate)
+                                                .submittedBy(submittedBy)
+                                                .finalOrder(finalOrder)
+                                                .approvalDate(approvalDate)
+                                                .approvalJudge(approvalJudge)
+                                                .coverLetter(coversheet)
+                                            .build()
+                                        )
+                                        .build()
+                                )))
+                                .build())
+                            .build()
+                    ))
+                    .agreedDraftOrderCollection(List.of(
+                        remainedAgreedDraftOrderCollection,
+                        AgreedDraftOrderCollection.builder()
+                            .value(agreedDraftOrder)
+                            .build()
+                    ))
+                    .build())
+                .orderApprovedCoverLetter(orderApprovedCoverLetter)
+                .sendOrderWrapper(SendOrderWrapper.builder()
+                    .ordersToSend(OrdersToSend.builder()
+                        .value(selectedOrders)
+                        .build())
+                    .build())
+                .build()
+        );
+
+        when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(),
+            selectedOrders.stream().map(OrderToShareCollection::getValue).toList()))
+            .thenReturn(Triple.of(List.of(), List.of(newProcessedOrder), Map.of()));
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection()).containsOnly(remainedAgreedDraftOrderCollection);
+        assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
+            .extracting(FinalisedOrderCollection::getValue)
+            .extracting(
+                FinalisedOrder::getAttachments,
+                FinalisedOrder::getFinalisedDocument,
+                FinalisedOrder::getSubmittedDate,
+                FinalisedOrder::getSubmittedBy,
+                FinalisedOrder::getFinalOrder,
+                FinalisedOrder::getApprovalDate,
+                FinalisedOrder::getApprovalJudge,
+                FinalisedOrder::getCoverLetter
+            )
+            .contains(Tuple.tuple(attachments,
+                newProcessedOrder, submittedDate, submittedBy, finalOrder, approvalDate, approvalJudge,
+                coversheet));
+    }
+
     private OrderToShareCollection toSelectedOrderToShare(String documentName) {
         return OrderToShareCollection.builder().value(
             OrderToShare.builder().documentName(documentName).documentToShare(YesOrNo.YES).build()
@@ -511,5 +615,14 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         handlers.forEach(handler ->
             verify(handler, never()).setUpOrderDocumentsOnCase(eq(finremCaseDetails),
                 eq(parties), anyList()));
+    }
+
+    private DirectionOrderCollection toDirectionOrderCollection(String filename, boolean stamped) {
+        return DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(caseDocument(filename))
+                .isOrderStamped(YesOrNo.forValue(stamped))
+                .build())
+            .build();
     }
 }
