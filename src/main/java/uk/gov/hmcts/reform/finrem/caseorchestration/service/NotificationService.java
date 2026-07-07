@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -405,7 +406,9 @@ public class NotificationService {
     private void addGeneralEmailAttachment(FinremCaseDetails caseDetails, NotificationRequest notificationRequest, String auth) {
         CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         if (caseDocument != null) {
-            notificationRequest.setDocumentContents(evidenceManagementDownloadService.getByteArray(caseDocument, auth));
+            notificationRequest.setDocumentContentsList(
+                List.of(evidenceManagementDownloadService.getByteArray(caseDocument, auth))
+            );
         }
     }
 

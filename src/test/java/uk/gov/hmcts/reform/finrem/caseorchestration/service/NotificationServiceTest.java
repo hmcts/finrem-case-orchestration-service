@@ -728,26 +728,33 @@ class NotificationServiceTest {
 
     @Test
     void shouldSendGeneralEmailWithAttachmentConsented() {
+        byte[] documentContents = {1, 2, 3};
         FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONSENTED);
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(finremCaseDetails)).thenReturn(notificationRequest);
+        when(evidenceManagementDownloadService.getByteArray(any(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(documentContents);
 
         notificationService.sendConsentGeneralEmail(finremCaseDetails, AUTH_TOKEN);
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(finremCaseDetails);
         verify(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT);
+        assertThat(notificationRequest.getDocumentContentsList()).containsExactly(documentContents);
     }
 
     @Test
     void shouldSendGeneralEmailWithAttachmentContested() {
+        byte[] documentContents = {1, 2, 3};
         FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONTESTED);
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(finremCaseDetails)).thenReturn(notificationRequest);
+        when(evidenceManagementDownloadService.getByteArray(any(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(documentContents);
 
         notificationService.sendContestedGeneralEmail(finremCaseDetails, AUTH_TOKEN);
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(finremCaseDetails);
         verify(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT);
+        assertThat(notificationRequest.getDocumentContentsList())
+            .containsExactly(documentContents);
     }
 
     @Test
