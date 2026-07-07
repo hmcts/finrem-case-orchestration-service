@@ -309,7 +309,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .thenReturn(Triple.of(legacyHearingOrders, newProcessedOrders, order2AttachmentMap));
 
         IllegalStateException e = assertThrows(IllegalStateException.class, () -> underTest.handle(callbackRequest, AUTH_TOKEN));
-            assertThat(e).extracting(Throwable::getMessage).isEqualTo("orderApprovedCoverLetter is missing unexpectedly");
+        assertThat(e).extracting(Throwable::getMessage).isEqualTo("orderApprovedCoverLetter is missing unexpectedly");
     }
 
     @ParameterizedTest(name = "{0}")
