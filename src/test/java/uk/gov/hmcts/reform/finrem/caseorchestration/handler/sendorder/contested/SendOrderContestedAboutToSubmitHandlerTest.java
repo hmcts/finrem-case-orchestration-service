@@ -409,10 +409,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         order2AttachmentMap.values().forEach(expectedHearingDocumentPack::addAll);
         latestAdditionalHearingDocument.ifPresent(expectedHearingDocumentPack::add);
         expectedHearingDocumentPack.addAll(otherHearingDocuments);
-        verifySetUpOrderDocumentsOnCase(callbackRequest.getCaseDetails(), expectedHearingDocumentPack);
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
+        verifySetUpOrderDocumentsOnCase(callbackRequest.getCaseDetails(), expectedHearingDocumentPack);
         assertThat(response.getData().getOrdersSentToPartiesCollection())
             .extracting(OrderSentToPartiesCollection::getValue)
             .extracting(SendOrderDocuments::getCaseDocument)
