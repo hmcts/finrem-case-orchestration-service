@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.sendorder.contested
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -73,6 +72,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -606,12 +606,16 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         );
 
         final CaseDocument newProcessedOrder = caseDocument("agreedDraftOrder");
+        final CaseDocument newProcessedOrderForIntv = caseDocument("intvAgreedDraftOrder");
 
         AgreedDraftOrder agreedDraftOrder = mock(AgreedDraftOrder.class);
         when(agreedDraftOrder.getTargetDocument()).thenReturn(newProcessedOrder);
+        AgreedDraftOrder intvAgreedDraftOrder = mock(AgreedDraftOrder.class);
+        when(intvAgreedDraftOrder.getTargetDocument()).thenReturn(newProcessedOrderForIntv);
 
-        AgreedDraftOrderCollection remainedAgreedDraftOrderCollection = mock(AgreedDraftOrderCollection.class);
-        when(remainedAgreedDraftOrderCollection.getValue()).thenReturn(new AgreedDraftOrder());
+        AgreedDraftOrderCollection retainedAgreedDraftOrderCollection = mock(AgreedDraftOrderCollection.class);
+        AgreedDraftOrderCollection retainedIntvAgreedDraftOrderCollection = mock(AgreedDraftOrderCollection.class);
+        when(retainedAgreedDraftOrderCollection.getValue()).thenReturn(new AgreedDraftOrder());
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
             caseType,
@@ -640,9 +644,15 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                             .build()
                     ))
                     .agreedDraftOrderCollection(List.of(
-                        remainedAgreedDraftOrderCollection,
+                        retainedAgreedDraftOrderCollection,
                         AgreedDraftOrderCollection.builder()
                             .value(agreedDraftOrder)
+                            .build()
+                    ))
+                    .intvAgreedDraftOrderCollection(List.of(
+                        retainedIntvAgreedDraftOrderCollection,
+                        AgreedDraftOrderCollection.builder()
+                            .value(intvAgreedDraftOrder)
                             .build()
                     ))
                     .build())
@@ -657,11 +667,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(),
             selectedOrders.stream().map(OrderToShareCollection::getValue).toList()))
-            .thenReturn(Triple.of(List.of(), List.of(newProcessedOrder), Map.of()));
+            .thenReturn(Triple.of(List.of(), List.of(newProcessedOrder, newProcessedOrderForIntv), Map.of()));
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection()).containsOnly(remainedAgreedDraftOrderCollection);
+        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection()).containsOnly(retainedAgreedDraftOrderCollection);
+        assertThat(response.getData().getDraftOrdersWrapper().getIntvAgreedDraftOrderCollection()).containsOnly(retainedIntvAgreedDraftOrderCollection);
         assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
             .extracting(FinalisedOrderCollection::getValue)
             .extracting(
@@ -674,9 +685,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 FinalisedOrder::getApprovalJudge,
                 FinalisedOrder::getCoverLetter
             )
-            .contains(Tuple.tuple(attachments,
-                newProcessedOrder, submittedDate, submittedBy, finalOrder, approvalDate, approvalJudge,
-                coversheet));
+            .contains(tuple(attachments,
+                newProcessedOrder, submittedDate, submittedBy, finalOrder, approvalDate, approvalJudge, coversheet));
     }
 
     @Test
@@ -752,7 +762,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 FinalisedOrder::getApprovalJudge,
                 FinalisedOrder::getCoverLetter
             )
-            .contains(Tuple.tuple(
+            .contains(tuple(
                 newProcessedOrder, submittedDate, submittedBy, finalOrder, approvalDate, approvalJudge,
                 coversheet));
     }

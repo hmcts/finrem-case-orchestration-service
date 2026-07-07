@@ -172,7 +172,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
     }
 
     private Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removeDocumentFromDraftOrderReview(FinremCaseData caseData,
-                                                                                                             List<CaseDocument> hearingOrders) {
+                                                                                                             List<CaseDocument> approvedDocuments) {
 
         List<PsaDocumentReview> removedPsaDocuments = new ArrayList<>();
         List<DraftOrderDocumentReview> removedDraftOrderDocuments = new ArrayList<>();
@@ -183,7 +183,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                 return;
             }
 
-            hearingOrders.forEach(targetDocument -> {
+            approvedDocuments.forEach(targetDocument -> {
                 removeMatchingDocuments(draftReview.getPsaDocReviewCollection(),
                     PsaDocReviewCollection::getValue,
                     PsaDocumentReview::getPsaDocument,
