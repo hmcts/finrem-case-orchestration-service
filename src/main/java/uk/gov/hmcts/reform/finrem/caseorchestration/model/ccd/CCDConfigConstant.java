@@ -468,7 +468,6 @@ public class CCDConfigConstant {
     //scheduled hearings
     public static final String HEARING_TYPE = "hearingType";
     public static final String HEARING_DATE = "hearingDate";
-    public static final String DIRECTION_DETAILS_COLLECTION_CT = "directionDetailsCollection";
 
     //transfer to local courts
     public static final String TRANSFER_COURTS_COLLECTION = "transferLocalCourtEmailCollection";
