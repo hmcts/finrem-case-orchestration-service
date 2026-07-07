@@ -37,6 +37,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
@@ -121,6 +123,18 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private CaseDocument orderApprovedCoverLetter;
     @Mock
     private CaseDocument stampedDoc;
+    @Mock
+    private List<DocumentCollectionItem> attachments;
+    @Mock
+    private LocalDateTime submittedDate;
+    @Mock
+    private YesOrNo finalOrder;
+    @Mock
+    private LocalDateTime approvalDate;
+    final String submittedBy = "Claire Mumford";
+    final String approvalJudge = "Peter Chapman";
+    @Mock
+    private CaseDocument coversheet;
 
     private List<SendOrderPartyDocumentHandler> handlers;
 
@@ -199,6 +213,34 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         underTest.handle(FinremCallbackRequestFactory.from(finremCaseDetails), AUTH_TOKEN);
 
         verifySetupDocumentOnPartiesTabs(finremCaseDetails);
+    }
+
+    @Test
+    void givenAdditionalDocumentsInSendOrder_whenHandled_shouldConvertPdfIfNotPdfAlready() {
+        CaseDocument additionalDocument1 = mock(CaseDocument.class);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseType,
+            FinremCaseData.builder()
+                .sendOrderWrapper(SendOrderWrapper.builder()
+                    .additionalDocuments(List.of(
+                        DocumentCollectionItem.builder()
+                            .value(additionalDocument1)
+                            .build()
+                    ))
+                    .build())
+                .build()
+        );
+
+        CaseDocument additionalDocument2InPdf = mock(CaseDocument.class);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(additionalDocument1, AUTH_TOKEN, caseType))
+            .thenReturn(additionalDocument2InPdf);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getData().getOrdersSentToPartiesCollection())
+            .extracting(OrderSentToPartiesCollection::getValue)
+            .extracting(SendOrderDocuments::getCaseDocument)
+            .contains(additionalDocument2InPdf);
     }
 
     @Nested
@@ -513,13 +555,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         );
 
         final CaseDocument newProcessedOrder = caseDocument("agreedDraftOrder");
-        final List<DocumentCollectionItem> attachments = mock(List.class);
-        final LocalDateTime submittedDate = mock(LocalDateTime.class);
-        final String submittedBy = "Claire Mumford";
-        final YesOrNo finalOrder = mock(YesOrNo.class);
-        final LocalDateTime approvalDate = mock(LocalDateTime.class);
-        final String approvalJudge = "Peter Chapman";
-        final CaseDocument coversheet = caseDocument("coversheet");
 
         AgreedDraftOrder agreedDraftOrder = mock(AgreedDraftOrder.class);
         when(agreedDraftOrder.getTargetDocument()).thenReturn(newProcessedOrder);
@@ -589,6 +624,84 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 FinalisedOrder::getCoverLetter
             )
             .contains(Tuple.tuple(attachments,
+                newProcessedOrder, submittedDate, submittedBy, finalOrder, approvalDate, approvalJudge,
+                coversheet));
+    }
+
+    @Test
+    void givenAgreedPsasSelected_whenHandled_shouldPopulateToFinalisedOrderCollection() {
+        List<OrderToShareCollection> selectedOrders = List.of(
+            toSelectedOrderToShare("agreedPsa")
+        );
+
+        final CaseDocument newProcessedOrder = caseDocument("agreedPsa");
+
+        AgreedDraftOrder agreedDraftOrder = mock(AgreedDraftOrder.class);
+        when(agreedDraftOrder.getTargetDocument()).thenReturn(newProcessedOrder);
+
+        AgreedDraftOrderCollection remainedAgreedDraftOrderCollection = mock(AgreedDraftOrderCollection.class);
+        when(remainedAgreedDraftOrderCollection.getValue()).thenReturn(new AgreedDraftOrder());
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+            caseType,
+            FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        DraftOrdersReviewCollection.builder()
+                            .value(DraftOrdersReview.builder()
+                                .psaDocReviewCollection(new ArrayList<>(List.of(
+                                    PsaDocReviewCollection.builder()
+                                        .value(
+                                            PsaDocumentReview.builder()
+                                                .psaDocument(newProcessedOrder)
+                                                .submittedDate(submittedDate)
+                                                .submittedBy(submittedBy)
+                                                .finalOrder(finalOrder)
+                                                .approvalDate(approvalDate)
+                                                .approvalJudge(approvalJudge)
+                                                .coverLetter(coversheet)
+                                                .build()
+                                        )
+                                        .build()
+                                )))
+                                .build())
+                            .build()
+                    ))
+                    .agreedDraftOrderCollection(List.of(
+                        remainedAgreedDraftOrderCollection,
+                        AgreedDraftOrderCollection.builder()
+                            .value(agreedDraftOrder)
+                            .build()
+                    ))
+                    .build())
+                .orderApprovedCoverLetter(orderApprovedCoverLetter)
+                .sendOrderWrapper(SendOrderWrapper.builder()
+                    .ordersToSend(OrdersToSend.builder()
+                        .value(selectedOrders)
+                        .build())
+                    .build())
+                .build()
+        );
+
+        when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(),
+            selectedOrders.stream().map(OrderToShareCollection::getValue).toList()))
+            .thenReturn(Triple.of(List.of(), List.of(newProcessedOrder), Map.of()));
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection()).containsOnly(remainedAgreedDraftOrderCollection);
+        assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
+            .extracting(FinalisedOrderCollection::getValue)
+            .extracting(
+                FinalisedOrder::getFinalisedDocument,
+                FinalisedOrder::getSubmittedDate,
+                FinalisedOrder::getSubmittedBy,
+                FinalisedOrder::getFinalOrder,
+                FinalisedOrder::getApprovalDate,
+                FinalisedOrder::getApprovalJudge,
+                FinalisedOrder::getCoverLetter
+            )
+            .contains(Tuple.tuple(
                 newProcessedOrder, submittedDate, submittedBy, finalOrder, approvalDate, approvalJudge,
                 coversheet));
     }
