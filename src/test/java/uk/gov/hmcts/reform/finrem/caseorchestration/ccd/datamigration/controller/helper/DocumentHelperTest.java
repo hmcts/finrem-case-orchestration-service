@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controller.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +9,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
@@ -22,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
@@ -37,12 +41,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -75,6 +81,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
@@ -102,7 +109,7 @@ class DocumentHelperTest {
     private ObjectMapper objectMapper;
     private DocumentHelper documentHelper;
     @Mock
-    private GenericDocumentService service;
+    private GenericDocumentService genericDocumentService;
 
     @Mock
     private LetterAddresseeGeneratorMapper letterAddresseeGenerator;
@@ -117,7 +124,7 @@ class DocumentHelperTest {
         CaseDataService caseDataService = new CaseDataService(objectMapper);
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
         documentHelper = new DocumentHelper(objectMapper, caseDataService,
-            service, finremCaseDetailsMapper, letterAddresseeGenerator, postalService);
+            genericDocumentService, finremCaseDetailsMapper, letterAddresseeGenerator, postalService);
     }
 
     @Test
@@ -261,13 +268,13 @@ class DocumentHelperTest {
         documentCollectionItems.add(dc);
         caseData.setHearingOrderOtherDocuments(documentCollectionItems);
 
-        when(service.convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED))).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED))).thenReturn(caseDocument());
 
         List<CaseDocument> hearingDocuments2 = documentHelper.getHearingDocumentsAsPdfDocuments(caseDetails, AUTHORIZATION_HEADER);
         assertEquals("app_docs.pdf", hearingDocuments2.getFirst().getDocumentFilename());
         assertEquals(BINARY_URL, hearingDocuments2.getFirst().getDocumentBinaryUrl());
 
-        verify(service).convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED));
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED));
     }
 
     @Test
@@ -767,7 +774,6 @@ class DocumentHelperTest {
             .returns(YesOrNo.YES, DirectionOrder::getIsOrderStamped)
             .returns(finalOrder, DirectionOrder::getUploadDraftDocument)
             .returns(List.of(additionalDocument), DirectionOrder::getAdditionalDocuments);
-
     }
 
     @Test
@@ -793,6 +799,40 @@ class DocumentHelperTest {
         List<CaseDocument> result = documentHelper.getPensionDocumentsData(caseData);
 
         assertThat(result).containsExactly(document);
+    }
+
+    @Test
+    void givenNonPdfCaseDocument_whenGetCaseDocumentsAsBulkPrintDocuments_shouldConvertToPdf() {
+        CaseDocument nonPdfCaseDocument = mock(CaseDocument.class);
+        CaseDocument existingPdfCaseDocument = mock(CaseDocument.class);
+        when(existingPdfCaseDocument.getDocumentBinaryUrl()).thenReturn("existingPdfBinaryUrl");
+        when(existingPdfCaseDocument.getDocumentFilename()).thenReturn("existingPdfFilename");
+        List<CaseDocument> allCaseDocuments = List.of(nonPdfCaseDocument, existingPdfCaseDocument);
+        CaseType caseType = mock(CaseType.class);
+
+        CaseDocument convertedDocument = mock(CaseDocument.class);
+        when(convertedDocument.getDocumentBinaryUrl()).thenReturn("convertedBinaryUrl");
+        when(convertedDocument.getDocumentFilename()).thenReturn("convertedFilename");
+
+        try (MockedStatic<FileUtils> mockedFileUtils = Mockito.mockStatic(FileUtils.class)) {
+            when(genericDocumentService.convertDocumentIfNotPdfAlready(nonPdfCaseDocument, AUTH_TOKEN,
+                caseType)).thenReturn(convertedDocument);
+
+            mockedFileUtils.when(() -> FileUtils.isPdf(nonPdfCaseDocument))
+                .thenReturn(false);
+            mockedFileUtils.when(() -> FileUtils.isPdf(existingPdfCaseDocument))
+                .thenReturn(true);
+
+            List<BulkPrintDocument> actual =
+                documentHelper.getCaseDocumentsAsBulkPrintDocuments(allCaseDocuments, caseType, AUTH_TOKEN);
+
+            assertThat(actual)
+                .extracting(BulkPrintDocument::getBinaryFileUrl, BulkPrintDocument::getFileName)
+                .contains(
+                    Tuple.tuple("convertedBinaryUrl", "convertedFilename"),
+                    Tuple.tuple("existingPdfBinaryUrl", "existingPdfFilename")
+                );
+        }
     }
 
     private static Stream<Arguments> provideOrderCollections() {

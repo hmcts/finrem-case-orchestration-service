@@ -403,8 +403,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.getHearingDocumentsAsPdfDocuments(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(otherHearingDocuments);
 
-        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
-
         List<CaseDocument> expectedHearingDocumentPack = new ArrayList<>();
         expectedHearingDocumentPack.addAll(legacyHearingOrders);
         expectedHearingDocumentPack.addAll(newProcessedOrders);
@@ -412,6 +410,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         latestAdditionalHearingDocument.ifPresent(expectedHearingDocumentPack::add);
         expectedHearingDocumentPack.addAll(otherHearingDocuments);
         verifySetUpOrderDocumentsOnCase(callbackRequest.getCaseDetails(), expectedHearingDocumentPack);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData().getOrdersSentToPartiesCollection())
             .extracting(OrderSentToPartiesCollection::getValue)
