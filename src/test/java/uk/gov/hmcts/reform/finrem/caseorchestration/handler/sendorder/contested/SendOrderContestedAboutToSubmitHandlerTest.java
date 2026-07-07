@@ -671,8 +671,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection()).containsOnly(retainedAgreedDraftOrderCollection);
-        assertThat(response.getData().getDraftOrdersWrapper().getIntvAgreedDraftOrderCollection()).containsOnly(retainedIntvAgreedDraftOrderCollection);
+        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
+            .containsOnly(retainedAgreedDraftOrderCollection);
+        assertThat(response.getData().getDraftOrdersWrapper().getIntvAgreedDraftOrderCollection())
+            .containsOnly(retainedIntvAgreedDraftOrderCollection);
         assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
             .extracting(FinalisedOrderCollection::getValue)
             .extracting(
