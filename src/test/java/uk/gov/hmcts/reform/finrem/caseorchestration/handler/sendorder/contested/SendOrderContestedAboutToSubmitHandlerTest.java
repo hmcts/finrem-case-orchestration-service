@@ -6,6 +6,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
@@ -16,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -43,8 +49,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderI
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderRespondentDocumentHandler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -52,16 +61,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -92,6 +104,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private List<String> parties;
     @Mock
     private CaseType caseType;
+    @Mock
+    private StampType stampType;
+    @Mock
+    private CaseDocument orderApprovedCoverLetter;
+    @Mock
+    private CaseDocument stampedDoc;
 
     private List<SendOrderPartyDocumentHandler> handlers;
 
@@ -134,6 +152,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         lenient().when(generalOrderService.getParties(any(FinremCaseDetails.class))).thenReturn(parties);
         lenient().when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
             .thenReturn(mock(Triple.class));
+        lenient().when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(stampType);
     }
 
     @Test
@@ -293,6 +312,182 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             assertThat(e).extracting(Throwable::getMessage).isEqualTo("orderApprovedCoverLetter is missing unexpectedly");
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("orderDocumentsOnCaseScenarios")
+    void givenApprovedOrdersExist_whenHandled_shouldSetUpOrderDocumentsOnCase(
+        String scenarioName,
+        List<CaseDocument> legacyHearingOrders,
+        List<CaseDocument> newProcessedOrders,
+        Map<CaseDocument, List<CaseDocument>> order2AttachmentMap,
+        boolean hasAnotherHearing,
+        Optional<CaseDocument> latestAdditionalHearingDocument,
+        List<CaseDocument> otherHearingDocuments) {
+
+        List<OrderToShareCollection> selectedOrders = List.of(
+            toSelectedOrderToShare("DOC_1.pdf")
+        );
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+            caseType,
+            FinremCaseData.builder()
+                .orderApprovedCoverLetter(orderApprovedCoverLetter)
+                .sendOrderWrapper(SendOrderWrapper.builder()
+                    .ordersToSend(OrdersToSend.builder()
+                        .value(selectedOrders)
+                        .build())
+                    .build())
+                .build()
+        );
+        final FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
+
+        when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(),
+            selectedOrders.stream().map(OrderToShareCollection::getValue).toList()))
+            .thenReturn(Triple.of(legacyHearingOrders, newProcessedOrders, order2AttachmentMap));
+
+        when(documentHelper.hasAnotherHearing(finremCaseData)).thenReturn(hasAnotherHearing);
+        lenient().when(documentHelper.getLatestAdditionalHearingDocument(finremCaseData))
+            .thenReturn(latestAdditionalHearingDocument);
+
+        when(documentHelper.getHearingDocumentsAsPdfDocuments(callbackRequest.getCaseDetails(), AUTH_TOKEN))
+            .thenReturn(otherHearingDocuments);
+
+        underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        List<CaseDocument> expectedHearingDocumentPack = new ArrayList<>();
+        expectedHearingDocumentPack.addAll(legacyHearingOrders);
+        expectedHearingDocumentPack.addAll(newProcessedOrders);
+        order2AttachmentMap.values().forEach(expectedHearingDocumentPack::addAll);
+        latestAdditionalHearingDocument.ifPresent(expectedHearingDocumentPack::add);
+        expectedHearingDocumentPack.addAll(otherHearingDocuments);
+
+        verifySetUpOrderDocumentsOnCase(callbackRequest.getCaseDetails(), expectedHearingDocumentPack);
+    }
+
+    private static Stream<Arguments> orderDocumentsOnCaseScenarios() {
+        CaseDocument legacyHearingOrder = caseDocument("legacyHearingOrder");
+        CaseDocument newProcessedOrder = caseDocument("newProcessedOrder");
+        CaseDocument orderAttachmentA = caseDocument("orderAttachmentA");
+        CaseDocument orderAttachmentB = caseDocument("orderAttachmentB");
+        CaseDocument latestAdditionalHearingDocument = caseDocument("latestAdditionalHearingDocument");
+        CaseDocument otherHearingDocument = caseDocument("otherHearingDocument");
+
+        return Stream.of(
+            Arguments.of(
+                "all documents present, single attachment",
+                List.of(legacyHearingOrder),
+                List.of(newProcessedOrder),
+                Map.of(mock(CaseDocument.class), List.of(orderAttachmentA)),
+                true,
+                Optional.of(latestAdditionalHearingDocument),
+                List.of(otherHearingDocument)
+            ),
+            Arguments.of(
+                "no additional hearing",
+                List.of(legacyHearingOrder),
+                List.of(newProcessedOrder),
+                Map.of(mock(CaseDocument.class), List.of(orderAttachmentA)),
+                false,
+                Optional.empty(),
+                List.of(otherHearingDocument)
+            ),
+            Arguments.of(
+                "hasAnotherHearing true but no document returned",
+                List.of(legacyHearingOrder),
+                List.of(newProcessedOrder),
+                Map.of(),
+                true,
+                Optional.empty(),
+                List.of(otherHearingDocument)
+            ),
+            Arguments.of(
+                "no other hearing documents",
+                List.of(legacyHearingOrder),
+                List.of(newProcessedOrder),
+                Map.of(mock(CaseDocument.class), List.of(orderAttachmentA)),
+                true,
+                Optional.of(latestAdditionalHearingDocument),
+                List.of()
+            ),
+            Arguments.of(
+                "multiple orders each with multiple attachments",
+                List.of(legacyHearingOrder, caseDocument("legacyHearingOrder2")),
+                List.of(newProcessedOrder, caseDocument("newProcessedOrder2")),
+                Map.of(
+                    mock(CaseDocument.class), List.of(orderAttachmentA, orderAttachmentB),
+                    mock(CaseDocument.class), List.of(caseDocument("orderAttachmentC"))
+                ),
+                true,
+                Optional.of(latestAdditionalHearingDocument),
+                List.of(otherHearingDocument, caseDocument("otherHearingDocument2"))
+            ),
+            Arguments.of(
+                "no legacy orders, no attachments, minimal pack",
+                List.of(),
+                List.of(newProcessedOrder),
+                Map.of(),
+                false,
+                Optional.empty(),
+                List.of()
+            )
+        );
+    }
+
+    private DirectionOrderCollection toDirectionOrderCollection(String filename, boolean stamped) {
+        return DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(caseDocument(filename))
+                .isOrderStamped(YesOrNo.forValue(stamped))
+                .build())
+            .build();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenLegacyHearingOrdersExist_whenHandled_shouldStampDocumentIfNecessary(boolean isOrderAlreadyStamped) {
+        List<OrderToShareCollection> selectedOrders = List.of(
+            toSelectedOrderToShare("DOC_1.pdf")
+        );
+        List<DirectionOrderCollection> finalOrderCollection = mock(List.class);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+            caseType,
+            FinremCaseData.builder()
+                .uploadHearingOrder(List.of(
+                    toDirectionOrderCollection("legacyHearingOrder", isOrderAlreadyStamped)
+                ))
+                .finalOrderCollection(finalOrderCollection)
+                .orderApprovedCoverLetter(orderApprovedCoverLetter)
+                .sendOrderWrapper(SendOrderWrapper.builder()
+                    .ordersToSend(OrdersToSend.builder()
+                        .value(selectedOrders)
+                        .build())
+                    .build())
+                .build()
+        );
+
+        CaseDocument legacyHearingOrder = caseDocument("legacyHearingOrder");
+        CaseDocument attachmentA = caseDocument("attachmentA");
+        Map<CaseDocument, List<CaseDocument>> order2AttachmentMap = Map.of(legacyHearingOrder, List.of(attachmentA));
+
+        when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(),
+            selectedOrders.stream().map(OrderToShareCollection::getValue).toList()))
+            .thenReturn(Triple.of(List.of(legacyHearingOrder), List.of(), order2AttachmentMap));
+
+        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(finalOrderCollection, AUTH_TOKEN))
+            .thenReturn(finalOrderCollection);
+        when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, legacyHearingOrder))
+            .thenReturn(Boolean.FALSE);
+        lenient().when(genericDocumentService.stampDocument(legacyHearingOrder, AUTH_TOKEN, stampType, caseType)).thenReturn(stampedDoc);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(genericDocumentService, times(isOrderAlreadyStamped ? 0 : 1)).stampDocument(legacyHearingOrder, AUTH_TOKEN, stampType, caseType);
+        verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(finalOrderCollection, AUTH_TOKEN);
+        if (isOrderAlreadyStamped) {
+            assertThat(response.getData().getFinalOrderCollection()).isEqualTo(finalOrderCollection);
+        } else {
+            // To verify a stamped document is added to finalOrderCollection
+            verify(finalOrderCollection).add(argThat(f -> f.getValue().getUploadDraftDocument().equals(stampedDoc)));
+        }
+    }
 
     private OrderToShareCollection toSelectedOrderToShare(String documentName) {
         return OrderToShareCollection.builder().value(
@@ -304,6 +499,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         handlers.forEach(handler ->
             verify(handler).setUpOrderDocumentsOnPartiesTab(finremCaseDetails,
                 parties));
+    }
+
+    private void verifySetUpOrderDocumentsOnCase(FinremCaseDetails finremCaseDetails, List<CaseDocument> hearingDocumentPack) {
+        handlers.forEach(handler ->
+            verify(handler).setUpOrderDocumentsOnCase(eq(finremCaseDetails),
+                eq(parties), argThat(a -> a.containsAll(hearingDocumentPack))));
     }
 
     private void verifyNeverSetupDocumentOnPartiesTabs(FinremCaseDetails finremCaseDetails) {

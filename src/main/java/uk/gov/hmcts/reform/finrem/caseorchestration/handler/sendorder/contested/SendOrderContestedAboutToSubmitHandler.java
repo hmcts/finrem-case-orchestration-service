@@ -70,7 +70,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList;
-    private final OrderDateService dateService;
+    private final OrderDateService orderDateService;
     private final SendOrdersCategoriser sendOrdersCategoriser;
 
     public SendOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -78,7 +78,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
                                                   GenericDocumentService genericDocumentService,
                                                   DocumentHelper documentHelper,
                                                   List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList,
-                                                  OrderDateService dateService,
+                                                  OrderDateService orderDateService,
                                                   SendOrdersCategoriser sendOrdersCategoriser) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
@@ -86,7 +86,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
         this.sendOrderPartyDocumentList = sendOrderPartyDocumentList;
-        this.dateService = dateService;
+        this.orderDateService = orderDateService;
         this.sendOrdersCategoriser = sendOrdersCategoriser;
     }
 
@@ -290,11 +290,11 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
     }
 
     private void setUpHearingDocumentPackOnCaseAndPrint(FinremCaseDetails caseDetails,
-                                                        List<CaseDocument> hearingOrders,
+                                                        List<CaseDocument> caseDocumentsToShare,
                                                         List<String> partyList,
                                                         List<OrderSentToPartiesCollection> ordersSentToPartiesCollection,
                                                         String userAuthorisation) {
-        List<CaseDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails, hearingOrders, userAuthorisation);
+        List<CaseDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails, caseDocumentsToShare, userAuthorisation);
         hearingDocumentPack.forEach(doc -> ordersSentToPartiesCollection.add(toOrderSentToPartiesCollection(doc)));
         sendOrderPartyDocumentList.forEach(handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, hearingDocumentPack));
     }
@@ -346,7 +346,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
     private void stampLegacyHearingOrderAndPopulateFinalOrderCollection(FinremCaseDetails caseDetails, CaseDocument legacyHearingOrder,
                                                                         List<CaseDocument> attachments, String authToken) {
         FinremCaseData caseData = caseDetails.getData();
-        List<DirectionOrderCollection> finalOrderCollection = dateService
+        List<DirectionOrderCollection> finalOrderCollection = orderDateService
             .syncCreatedDateAndMarkDocumentStamped(caseData.getFinalOrderCollection(), authToken);
         String caseId = caseDetails.getCaseIdAsString();
 
@@ -355,9 +355,9 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
             AtomicReference<YesOrNo> result = isOrderAlreadyStamped(caseData, legacyHearingOrder);
             if (YesOrNo.isNoOrNull(result.get())) {
                 log.info("{} - Going to stamp the legacy hearing order because it is not stamped.", caseId);
-                CaseDocument stampedDocs = genericDocumentService.stampDocument(legacyHearingOrder, authToken,
+                CaseDocument stampedDoc = genericDocumentService.stampDocument(legacyHearingOrder, authToken,
                     documentHelper.getStampType(caseData), caseDetails.getCaseType());
-                finalOrderCollection.add(prepareFinalOrderList(stampedDocs, attachments));
+                finalOrderCollection.add(prepareFinalOrderList(stampedDoc, attachments));
             }
         }
         caseData.setFinalOrderCollection(finalOrderCollection);
