@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.EstimatedAssetsChecklistWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.FormAScannedDocWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
@@ -457,6 +458,10 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private CitizenDocumentWrapper citizenDocumentWrapper;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private EstimatedAssetsChecklistWrapper estimatedAssetsChecklistWrapper;
 
     @JsonIgnore
     public CaseDataMetricsWrapper getCaseDataMetricsWrapper() {
@@ -1186,6 +1191,15 @@ public class FinremCaseData implements HasCaseDocument {
         }
         return citizenDocumentWrapper;
     }
+
+    @JsonIgnore
+    public EstimatedAssetsChecklistWrapper getEstimatedAssetsChecklistWrapper() {
+        if (estimatedAssetsChecklistWrapper == null) {
+            this.estimatedAssetsChecklistWrapper = new EstimatedAssetsChecklistWrapper();
+        }
+        return estimatedAssetsChecklistWrapper;
+    }
+
 
     @JsonIgnore
     public Bin getBin() {

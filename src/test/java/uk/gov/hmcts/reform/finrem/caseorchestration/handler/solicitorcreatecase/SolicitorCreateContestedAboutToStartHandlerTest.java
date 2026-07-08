@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
 import static org.mockito.Mockito.mock;
@@ -31,10 +32,13 @@ class SolicitorCreateContestedAboutToStartHandlerTest {
     @Mock
     private OnStartDefaultValueService onStartDefaultValueService;
 
+    @Mock
+    private FeatureToggleService featureToggleService;
+
     @BeforeEach
     void setup() {
         underTest =  new SolicitorCreateContestedAboutToStartHandler(finremCaseDetailsMapper,
-            onStartDefaultValueService);
+            onStartDefaultValueService, featureToggleService);
     }
 
     @Test

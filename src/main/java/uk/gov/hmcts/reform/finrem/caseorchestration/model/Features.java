@@ -21,7 +21,8 @@ public enum Features {
     MANAGE_CASE_DOCS_DELETE_ENABLED("manage_case_docs_delete_enabled"),
     DELETE_OLD_BP_COVERSHEET_ENABLED("delete_old_bp_coversheet_enabled"),
     FINREM_CITIZEN_UI_ENABLED("finrem_citizen_ui_enabled"),
-    FINREM_WORK_ALLOCATION_ENABLED("finrem_work_allocation_enabled");
+    FINREM_WORK_ALLOCATION_ENABLED("finrem_work_allocation_enabled"),
+    USE_ESTIMATED_ASSETS_CHECKLIST_V3("use_estimatedAssetsChecklistV3");
 
     private final String name;
 }
