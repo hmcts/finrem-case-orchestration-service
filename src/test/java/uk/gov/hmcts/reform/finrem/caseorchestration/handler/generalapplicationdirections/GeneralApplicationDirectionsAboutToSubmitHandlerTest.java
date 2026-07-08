@@ -542,7 +542,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             .build();
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
 
-        when(helper.getGeneralApplicationList(finremCaseData, AUTH_TOKEN)).thenReturn(List.of());
+        when(helper.getGeneralApplicationList(finremCaseData, GENERAL_APPLICATION_COLLECTION)).thenReturn(List.of());
         when(helper.objectToDynamicList(any())).thenReturn(DynamicList.builder()
                 .value(DynamicListElement.builder().code("a#b").build())
             .build());
