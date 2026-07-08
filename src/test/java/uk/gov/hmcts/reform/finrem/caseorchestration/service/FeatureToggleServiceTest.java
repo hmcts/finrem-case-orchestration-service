@@ -86,13 +86,20 @@ public class FeatureToggleServiceTest {
         void isFinremWorkAllocationEnabledReturnsFalse() {
             assertThat(featureToggleService.isFinremWorkAllocationEnabled()).isFalse();
         }
+
+        @Test
+        void isEstimatedAssetsChecklistV3EnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).isFalse();
+        }
     }
 
     @Nested
     @TestPropertySource(properties = {
         "feature.toggle.send_to_frc=true",
         "feature.toggle.assign_case_access=true",
-        "feature.toggle.pba_case_type=true"
+        "feature.toggle.pba_case_type=true",
+        "feature.toggle.estimated_assets_checklist_V3_enabled=true"
     })
     class ApprovedConsentOrderNotificationSwitchedOn {
 
@@ -112,6 +119,11 @@ public class FeatureToggleServiceTest {
         @Test
         void isPbaToggleEnabledReturnsTrue() {
             assertThat(featureToggleService.isPBAUsingCaseTypeEnabled()).isTrue();
+        }
+
+        @Test
+        void isEstimatedAssetsChecklistV3EnabledReturnsTrue() {
+            assertThat(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).isTrue();
         }
     }
 
@@ -198,6 +210,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void isFinremCitizenUiEnabled() {
             assertThat(featureToggleService.isFinremCitizenUiEnabled()).isFalse();
+        }
+
+        @Test
+        public void isEstimatedAssetsChecklistV3EnabledReturnsFalse() {
+            assertThat(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).isFalse();
         }
     }
 }

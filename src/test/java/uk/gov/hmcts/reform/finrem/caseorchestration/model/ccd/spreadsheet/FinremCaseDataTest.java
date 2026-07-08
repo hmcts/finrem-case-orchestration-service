@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ClevelandCourt;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Wor
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.EstimatedAssetsChecklistWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -493,5 +495,25 @@ class FinremCaseDataTest {
             .build();
 
         assertNull(caseData.getRespSolicitorEmailIfRepresented());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = EstimatedAssetsChecklistVersion.class)
+    void givenContestedCase_whenEstimatedAssetsChecklistVersionChecked_thenValuesValid(
+        EstimatedAssetsChecklistVersion version
+    ) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .estimatedAssetsChecklistWrapper(
+                EstimatedAssetsChecklistWrapper.builder()
+                    .estimatedAssetsChecklistVersion(version)
+                    .build()
+            )
+            .build();
+
+        assertEquals(
+            version,
+            caseData.getEstimatedAssetsChecklistWrapper().getEstimatedAssetsChecklistVersion()
+        );
     }
 }
