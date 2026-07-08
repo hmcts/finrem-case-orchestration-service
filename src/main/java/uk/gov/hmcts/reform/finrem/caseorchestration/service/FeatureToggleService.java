@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMEN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_LETTER_RECIPIENT_CHECK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.USE_ESTIMATED_ASSETS_CHECKLIST_V3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.VACATE_HEARING_ENABLED;
 
 /**
@@ -138,8 +138,8 @@ public class FeatureToggleService {
         return isFeatureEnabled(DELETE_OLD_BP_COVERSHEET_ENABLED);
     }
 
-    public boolean use_estimatedAssetsChecklistV3() {
-        return isFeatureEnabled(USE_ESTIMATED_ASSETS_CHECKLIST_V3);
+    public boolean isEstimatedAssetsChecklistV3Enabled() {
+        return isFeatureEnabled(ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED);
     }
 
     /**
