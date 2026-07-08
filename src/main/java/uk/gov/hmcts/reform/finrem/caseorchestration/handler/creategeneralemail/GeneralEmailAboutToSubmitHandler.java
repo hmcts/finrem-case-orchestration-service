@@ -72,7 +72,8 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
         try {
             convertEmailAttachmentsToPdfIfRequired(finremCaseData, userAuthorisation);
         } catch (DocumentConversionException e) {
-            log.error("Unable to convert general email attachment to PDF", e);
+            log.error("Unable to convert general email attachment to PDF for case {}",
+                callbackRequest.getCaseDetails().getId(), e);
             errors.add(DOCUMENT_CONVERSION_ERROR);
             return response(finremCaseData, null, errors);
         }
