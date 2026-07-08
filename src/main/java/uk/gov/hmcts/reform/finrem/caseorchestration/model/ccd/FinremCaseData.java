@@ -210,6 +210,7 @@ public class FinremCaseData implements HasCaseDocument {
     private Complexity addToComplexityListOfCourts;
     private List<EstimatedAsset> estimatedAssetsChecklist;
     private EstimatedAssetV2 estimatedAssetsChecklistV2;
+    private EstimatedAssetV3 estimatedAssetsChecklistV3;
     private String netValueOfHome;
     private List<PotentialAllegation> potentialAllegationChecklist;
     private String detailPotentialAllegation;
