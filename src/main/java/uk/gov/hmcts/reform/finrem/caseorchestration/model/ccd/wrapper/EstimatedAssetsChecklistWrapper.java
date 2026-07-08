@@ -16,7 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EstimatedAssetsChecklistWrapper {
-    //use_estimatedAssetsChecklistV3 is used by EXUI to determine which version of the checklist to display.
+    // use_estimatedAssetsChecklistV* values are used by EXUI to determine which version of the checklist to display.
     @TemporaryField
     private Boolean use_estimatedAssetsChecklistV3;
+    @TemporaryField
+    private Boolean estimatedAssetsChecklistVersion; // = v2 v3 etc
 }
