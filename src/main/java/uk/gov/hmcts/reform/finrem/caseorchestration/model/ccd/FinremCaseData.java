@@ -1201,7 +1201,6 @@ public class FinremCaseData implements HasCaseDocument {
         return estimatedAssetsChecklistWrapper;
     }
 
-
     @JsonIgnore
     public Bin getBin() {
         if (bin == null) {

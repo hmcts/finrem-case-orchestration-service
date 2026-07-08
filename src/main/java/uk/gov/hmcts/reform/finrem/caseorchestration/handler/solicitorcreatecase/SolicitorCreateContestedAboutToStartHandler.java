@@ -51,7 +51,9 @@ public class SolicitorCreateContestedAboutToStartHandler extends FinremCallbackH
 
     /**
      * This method sets the version of the Estimated Assets Checklist to be used in the case data based on a feature toggle.
-     * If the feature toggle is enabled, it sets the version to V3; otherwise, it defaults to V2.
+     * Since these are new cases, we want to use the new version of the checklist once the feature toggle is enabled.
+     * So, the feature toggle is enabled, the new case uses the V3 list; otherwise the new case will use the V2 list.
+     *
      *
      * @param callbackRequest The callback request containing the case data.
      */

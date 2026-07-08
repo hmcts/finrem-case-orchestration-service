@@ -70,9 +70,9 @@ class SolicitorCreateContestedAboutToStartHandlerTest {
 
         underTest.handle(callbackRequest, AUTH_TOKEN);
 
+        assertEquals(caseData.getEstimatedAssetsChecklistWrapper().getEstimatedAssetsChecklistVersion(), expectedVersion);
         verify(onStartDefaultValueService).defaultCivilPartnershipField(callbackRequest);
         verify(onStartDefaultValueService).defaultTypeOfApplication(callbackRequest);
         verify(onStartDefaultValueService).defaultUrgencyQuestion(callbackRequest);
-        assertEquals(caseData.getEstimatedAssetsChecklistWrapper().getEstimatedAssetsChecklistVersion(), expectedVersion);
     }
 }

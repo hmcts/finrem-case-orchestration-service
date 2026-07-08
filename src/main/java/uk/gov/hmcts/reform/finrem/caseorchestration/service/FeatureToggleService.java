@@ -18,6 +18,7 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASE_FILE_VIEW_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.DELETE_OLD_BP_COVERSHEET_ENABLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.EXPRESS_PILOT_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.EXUI3990_WORKAROUND_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.FINREM_CITIZEN_UI_ENABLED;
@@ -29,7 +30,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMEN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_LETTER_RECIPIENT_CHECK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.VACATE_HEARING_ENABLED;
 
 /**

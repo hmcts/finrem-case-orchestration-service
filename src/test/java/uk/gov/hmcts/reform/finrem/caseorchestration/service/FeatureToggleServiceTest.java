@@ -211,10 +211,5 @@ public class FeatureToggleServiceTest {
         public void isFinremCitizenUiEnabled() {
             assertThat(featureToggleService.isFinremCitizenUiEnabled()).isFalse();
         }
-
-        @Test
-        public void isEstimatedAssetsChecklistV3EnabledReturnsFalse() {
-            assertThat(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).isFalse();
-        }
     }
 }

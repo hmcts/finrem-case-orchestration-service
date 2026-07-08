@@ -1,8 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -22,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.EstimatedAssetsChecklistWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
@@ -40,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -49,6 +56,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.APPLICATION_ISSUED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -105,6 +114,8 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         when(createCaseMandatoryDataValidator.validate(finremCallbackRequest.getCaseDetails().getData()))
             .thenReturn(Collections.emptyList());
 
+        stubTemporaryFieldsForSanitisingMapper();
+
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
         expectedAdminResponseCaseData(responseCaseData);
@@ -123,6 +134,8 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             any(FinremCaseDetails.class))).thenReturn(caseDocument());
         when(createCaseMandatoryDataValidator.validate(finremCallbackRequest.getCaseDetails().getData()))
             .thenReturn(Collections.emptyList());
+
+        stubTemporaryFieldsForSanitisingMapper();
 
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
@@ -197,6 +210,35 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         }
     }
 
+    /*
+     * Any value can be used in place of listVersion, at the time of writing.
+     * Just preferred to use correct enums, to cover logic changing later.
+     */
+    @ParameterizedTest
+    @EnumSource(value = EstimatedAssetsChecklistVersion.class)
+    void givenCaseDataWithTemporaryEstimatedAssetsChecklistVersion_whenHandle_thenTemporaryFieldSanitised(
+        EstimatedAssetsChecklistVersion listVersion) {
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .estimatedAssetsChecklistWrapper(
+                EstimatedAssetsChecklistWrapper.builder()
+                    .estimatedAssetsChecklistVersion(listVersion)
+                    .build()
+            )
+            .build();
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .state(APPLICATION_ISSUED)
+            .data(caseData).build();
+
+        verifyTemporaryFieldsWereSanitised(handler,
+            caseDetails, finremCaseDetailsMapper, new HashMap<>(Map.of(
+                "estimatedAssetsChecklistVersion", listVersion
+            ))
+        );
+    }
+
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {
         assertEquals(YesOrNo.NO, responseCaseData.getCivilPartnership());
         assertEquals(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS,
@@ -237,4 +279,38 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
         return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
     }
+
+    private void stubTemporaryFieldsForSanitisingMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        when(finremCaseDetailsMapper.finremCaseDataToMap(any(FinremCaseData.class)))
+            .thenAnswer(invocation -> convertFinremCaseDataToMap(
+                objectMapper,
+                invocation.getArgument(0)
+            ));
+
+        when(finremCaseDetailsMapper.mapToFinremCaseData(anyMap()))
+            .thenAnswer(invocation -> convertMapToFinremCaseData(
+                objectMapper,
+                invocation.getArgument(0)
+            ));
+    }
+
+    private Map<String, Object> convertFinremCaseDataToMap(
+        ObjectMapper objectMapper,
+        FinremCaseData caseData
+    ) {
+        return objectMapper.convertValue(
+            caseData,
+            new TypeReference<Map<String, Object>>() {}
+        );
+    }
+
+    private FinremCaseData convertMapToFinremCaseData(
+        ObjectMapper objectMapper,
+        Map<String, Object> caseDataMap
+    ) {
+        return objectMapper.convertValue(caseDataMap, FinremCaseData.class);
+    }
 }
+
