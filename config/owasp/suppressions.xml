@@ -21,7 +21,6 @@
         <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson-databind@.*$</packageUrl>
         <cve>CVE-2026-54515</cve>
     </suppress>
-
     <suppress until="2026-12-31Z">
         <notes><![CDATA[
     CVE-2026-53914 - Kotlin stdlib false positive via overly broad jetbrains:kotlin CPE mapping.
@@ -29,5 +28,18 @@
         <cpe>cpe:2.3:a:jetbrains:kotlin:*:*:*:*:*:*:*:*</cpe>
         <cpe>cpe:/a:jetbrains:kotlin</cpe>
         <cve>CVE-2026-53914</cve>
+    </suppress>
+    <suppress until="2026-12-31Z">
+        <notes><![CDATA[
+    Suppress Tomcat 11.0.22 false positives / accepted risk pending fix.
+    Version is managed by Spring Boot 4.1.0 BOM.
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-.*@.*$</packageUrl>
+        <cve>CVE-2026-53434</cve>
+        <cve>CVE-2026-55276</cve>
+        <cve>CVE-2026-53404</cve>
+        <cve>CVE-2026-55955</cve>
+        <cve>CVE-2026-55956</cve>
+        <cve>CVE-2026-50229</cve>
     </suppress>
 </suppressions>
