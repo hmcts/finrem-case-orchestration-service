@@ -42,4 +42,15 @@
         <cve>CVE-2026-55956</cve>
         <cve>CVE-2026-50229</cve>
     </suppress>
+    <suppress until="2026-12-31Z">
+        <notes><![CDATA[
+    Suppress httpcore 4.4.16 CVEs. Transitive dependency via httpclient 4.5.14,
+    pulled in by multiple HMCTS libraries (notifications-java-client, core-case-data-store-client,
+    service-auth-provider-java-client, ccd-case-document-am-client, idam-java-client).
+    Cannot be upgraded directly until upstream HMCTS libraries migrate to httpclient 5.x.
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.httpcomponents/httpcore@.*$</packageUrl>
+        <cve>CVE-2026-54399</cve>
+        <cve>CVE-2026-54428</cve>
+    </suppress>
 </suppressions>
