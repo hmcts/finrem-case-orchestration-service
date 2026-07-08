@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationd
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -107,6 +108,8 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
     private static final String GA_JSON = "/fixtures/contested/general-application-details.json";
 
+    private MockedStatic<ContactDetailsValidator> contactDetailsValidatorMockedStatic;
+
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
@@ -122,6 +125,16 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         ).build();
         lenient().when(partyService.getAllActivePartyList(any(FinremCaseDetails.class)))
             .thenReturn(dynamicMultiSelectList);
+
+        contactDetailsValidatorMockedStatic = mockStatic(ContactDetailsValidator.class);
+        contactDetailsValidatorMockedStatic
+            .when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(any(), any()))
+            .thenReturn(List.of());
+    }
+
+    @AfterEach
+    void tearDown() {
+        contactDetailsValidatorMockedStatic.close();
     }
 
     @Test
@@ -502,16 +515,14 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             "Respondent's postal address is missing"
         );
 
-        try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
-            contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-                    caseData, callbackRequest.getEventType()))
-                .thenReturn(expectedErrors);
+        contactDetailsValidatorMockedStatic.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                caseData, callbackRequest.getEventType()))
+            .thenReturn(expectedErrors);
 
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-            assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
-        }
+        assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
 
         verify(gaDirectionService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
         verify(gaDirectionService, never()).getEventPostState(any(), any());
@@ -526,16 +537,14 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         List<String> expectedErrors = List.of();
 
-        try (MockedStatic<ContactDetailsValidator> contactDetailsValidatorMocked = mockStatic(ContactDetailsValidator.class)) {
-            contactDetailsValidatorMocked.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+        contactDetailsValidatorMockedStatic.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
                 caseData, callbackRequest.getEventType()))
-                .thenReturn(expectedErrors);
+            .thenReturn(expectedErrors);
 
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-            assertThat(response.getErrors()).isEmpty();
-        }
+        assertThat(response.getErrors()).isEmpty();
 
         verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any());
         verify(gaDirectionService).getEventPostState(any(), any());
@@ -553,7 +562,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         when(helper.getGeneralApplicationList(finremCaseData, GENERAL_APPLICATION_COLLECTION)).thenReturn(List.of());
         when(helper.objectToDynamicList(any())).thenReturn(DynamicList.builder()
-                .value(DynamicListElement.builder().code("a#b").build())
+            .value(DynamicListElement.builder().code("a#b").build())
             .build());
 
         CaseDocument caseDocument = caseDocument();
