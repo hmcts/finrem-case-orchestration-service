@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogge
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -55,8 +56,12 @@ public class SolicitorCreateContestedAboutToStartHandler extends FinremCallbackH
      * @param callbackRequest The callback request containing the case data.
      */
     private void setEstimatedAssetsChecklistVersion(FinremCallbackRequest callbackRequest) {
-        Boolean shouldUseV2EstimatedAssetsChecklist = featureToggleService.use_estimatedAssetsChecklistV3();
+        Boolean useV3EstimatedAssetsChecklist = featureToggleService.use_estimatedAssetsChecklistV3();
         FinremCaseData caseData = callbackRequest.getFinremCaseData();
-        caseData.getEstimatedAssetsChecklistWrapper().setUse_estimatedAssetsChecklistV3(shouldUseV2EstimatedAssetsChecklist);
+        if (useV3EstimatedAssetsChecklist) {
+            caseData.getEstimatedAssetsChecklistWrapper().setEstimatedAssetsChecklistVersion(EstimatedAssetsChecklistVersion.V3);
+        } else {
+            caseData.getEstimatedAssetsChecklistWrapper().setEstimatedAssetsChecklistVersion(EstimatedAssetsChecklistVersion.V2);
+        }
     }
 }
