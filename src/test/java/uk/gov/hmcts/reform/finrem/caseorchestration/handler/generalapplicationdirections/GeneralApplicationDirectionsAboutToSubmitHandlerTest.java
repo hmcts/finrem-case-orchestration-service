@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -58,11 +58,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
@@ -76,7 +78,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
     private GeneralApplicationDirectionsAboutToStartHandler startHandler;
@@ -107,7 +109,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
-        objectMapper = new ObjectMapper();
+        objectMapper = createObjectMapper();
         startHandler = new GeneralApplicationDirectionsAboutToStartHandler(
             assignCaseAccessService, finremCaseDetailsMapper, helper, gaDirectionService, partyService);
         aboutToSubmitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
@@ -117,7 +119,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(
             List.of()
         ).build();
-        when(partyService.getAllActivePartyList(any(FinremCaseDetails.class)))
+        lenient().when(partyService.getAllActivePartyList(any(FinremCaseDetails.class)))
             .thenReturn(dynamicMultiSelectList);
     }
 
@@ -217,7 +219,6 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
-        CaseDetails details = buildCaseDetailsFromJson();
 
         CaseDocument generalApplicationDocument = caseDocument("GeneralApplicationDocument.pdf", "url", "binaryUrl");
         CaseDocument generalApplicationDraftOrder = caseDocument("GeneralApplicationDraft.pdf", "url", "binaryUrl");
@@ -231,7 +232,6 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
                 .generalApplicationDraftOrder(generalApplicationDraftOrder)
                 .build();
 
-        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
         when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(generalApplicationItems);
         when(gaDirectionService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true); //Hearing is required
         when(helper.getPdfDocument(any(CaseDocument.class), any(String.class), any(CaseType.class)))

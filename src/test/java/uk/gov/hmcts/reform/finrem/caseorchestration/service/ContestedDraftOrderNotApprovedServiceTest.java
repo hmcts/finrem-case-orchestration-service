@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -48,8 +47,7 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
     @MockitoBean
     private GenericDocumentService genericDocumentService;
 
-    @Captor
-    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor = ArgumentCaptor.forClass(CaseDetails.class);
 
     @Before
     public void setUp() {
@@ -90,7 +88,6 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
             is("refusalOrderTestFilename.pdf"));
         assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-
 
         CaseDocument latestRefusalOrder = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT);
         assertThat(latestRefusalOrder.getDocumentUrl(),

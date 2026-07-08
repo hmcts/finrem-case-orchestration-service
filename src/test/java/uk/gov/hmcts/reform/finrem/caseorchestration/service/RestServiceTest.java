@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -42,10 +41,9 @@ public class RestServiceTest extends BaseServiceTest {
     @MockitoBean
     private RestTemplate restTemplate;
 
-    @Captor
-    private ArgumentCaptor<URI> uriCaptor;
-    @Captor
-    private ArgumentCaptor<HttpEntity> authRequestCaptor;
+    private ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
+
+    private ArgumentCaptor<HttpEntity> authRequestCaptor = ArgumentCaptor.forClass(HttpEntity.class);
 
     private AssignCaseAccessRequest body;
     private ResponseEntity<Map> mockResponse;

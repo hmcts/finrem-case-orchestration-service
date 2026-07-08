@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -38,12 +37,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_OTHER_DOC_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_CAMELCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_LOWERCASE_LABEL_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 public class ConsentOrderServiceTest extends BaseServiceTest {
 
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
-    private static final String AUTH_TOKEN = "token-;";
 
     @Autowired
     private ConsentOrderService consentOrderService;
@@ -56,7 +56,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream(PATH + fileName)) {
-            callbackRequest = new ObjectMapper().readValue(resourceAsStream, CallbackRequest.class);
+            callbackRequest = createObjectMapper().readValue(resourceAsStream, CallbackRequest.class);
             callbackRequest.setCaseDetailsBefore(CaseDetails.builder().id(123L).data(new HashMap<>()).build());
         }
     }
@@ -76,14 +76,12 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         setUpCaseDetails("draft-consent-order.json");
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
 
-
         List<VariationOrderCollection> variationList = new ArrayList<>();
 
         VariationOrderCollection orderCollection = getObj(VariationTypeOfDocument.ORIGINAL_ORDER, true);
 
         variationList.add(orderCollection);
         VariationOrderCollection orderCollection2 = getObj(VariationTypeOfDocument.OTHER_DOCUMENTS, false);
-
 
         variationList.add(orderCollection2);
         data.put("otherVariationCollection", variationList);
@@ -190,7 +188,6 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     public void given_case_checkIfUploadedConsentOrderIsNotEncrypted() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
-        Map<String, Object> dataBefore = new HashMap<>();
         List<String> orderList = List.of("Variation Order", "Property Adjustment Order");
         data.put("natureOfApplication2", orderList);
         data.put("consentOrder", caseDocument());

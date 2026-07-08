@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -37,16 +36,13 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     @Autowired private GenericDocumentService genericDocumentService;
     @Autowired private BulkPrintDocumentGeneratorService bulkPrintDocumentGeneratorService;
 
-    @Autowired private BulkPrintDocumentService bulkPrintDocumentService;
     @Autowired private EvidenceManagementUploadService evidenceManagementUploadService;
     @Autowired private EvidenceManagementDeleteService evidenceManagementDeleteService;
 
-    @Autowired private IdamAuthService idamAuthService;
     @Autowired private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
 
     @Autowired private PdfStampingService pdfStampingServiceMock;
-    @Captor
-    private ArgumentCaptor<String> templateNameCaptor;
+    private ArgumentCaptor<String> templateNameCaptor = ArgumentCaptor.forClass(String.class);
 
     @Test
     public void shouldStampDocument() {
@@ -91,7 +87,6 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
         assertCaseDocument(document);
         verify(docmosisPdfGenerationServiceMock).generateDocFrom(templateNameCaptor.capture(), any());
-
 
         assertThat(templateNameCaptor.getValue(), is(templateName));
         caseDetails.getData().put(DocumentHelper.CASE_NUMBER, caseDetails.getId());

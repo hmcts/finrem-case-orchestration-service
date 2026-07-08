@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class AccessCodeEntry {
+@NoArgsConstructor
+public class BinFileUrls {
 
-    private String accessCode;
-    private YesOrNo isValid;
+    private String binFileUrl;
 }
