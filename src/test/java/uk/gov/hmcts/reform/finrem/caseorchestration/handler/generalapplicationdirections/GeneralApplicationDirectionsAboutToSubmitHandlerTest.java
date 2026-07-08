@@ -60,6 +60,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -511,6 +512,10 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
             assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
         }
+
+        verify(gaDirectionService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(gaDirectionService, never()).getEventPostState(any(), any());
+        verify(generalApplicationsCategoriser, never()).categorise(any());
     }
 
     @Test
@@ -531,6 +536,10 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
             assertThat(response.getErrors()).isEmpty();
         }
+
+        verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(gaDirectionService).getEventPostState(any(), any());
+        verify(generalApplicationsCategoriser).categorise(any());
     }
 
     @Test

@@ -99,7 +99,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             updateApplications(caseDetails, documents, userAuthorisation);
         }
 
-        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, callbackRequest.getEventType()));
+        final List<String> errors = validatePostalAddressErrors(caseData, callbackRequest.getEventType());
+
+        if (!errors.isEmpty()) {
+            return responseWithoutWarnings(caseData, errors);
+        }
 
         try {
             gaDirectionService.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);
@@ -113,6 +117,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             return responseWithoutWarnings(caseData, errors, postState);
         }
         return responseWithoutWarnings(caseData, errors);
+    }
+
+    private List<String> validatePostalAddressErrors(FinremCaseData caseData, EventType eventType) {
+        return new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
     }
 
     private void migrateExistingApplication(FinremCaseDetails caseDetails,

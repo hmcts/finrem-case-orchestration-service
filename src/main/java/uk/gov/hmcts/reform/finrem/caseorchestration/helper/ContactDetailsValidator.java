@@ -527,13 +527,13 @@ public class ContactDetailsValidator {
                                                               EventType eventType, List<String> errors) {
         if (caseData.isApplicantRepresentedByASolicitor()) {
             if (postalAddressIsMissing(wrapper.getApplicantSolicitorAddress())) {
-                errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant solicitor", eventType));
+                errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant solicitor", eventType.getCcdType()));
             }
             return;
         }
 
         if (postalAddressIsMissing(wrapper.getApplicantAddress())) {
-            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant", eventType));
+            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant", eventType.getCcdType()));
         }
     }
 
@@ -541,13 +541,13 @@ public class ContactDetailsValidator {
                                                                EventType eventType, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()) {
             if (postalAddressIsMissing(wrapper.getRespondentSolicitorAddress())) {
-                errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent solicitor", eventType));
+                errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent solicitor", eventType.getCcdType()));
             }
             return;
         }
 
         if (postalAddressIsMissing(wrapper.getRespondentAddress())) {
-            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent", eventType));
+            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent", eventType.getCcdType()));
         }
     }
 
