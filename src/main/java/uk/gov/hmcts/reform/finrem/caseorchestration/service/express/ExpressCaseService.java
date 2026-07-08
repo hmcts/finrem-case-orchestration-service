@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCaseAmendment;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.WITHDRAWN;
@@ -134,13 +134,30 @@ public class ExpressCaseService {
 
         Schedule1OrMatrimonialAndCpList typeOfApplication = caseData.getScheduleOneWrapper().getTypeOfApplication();
 
-        EstimatedAssetV2 assetValue = caseData.getEstimatedAssetsChecklistV2();
+        EstimatedAssetV2 v2assetValue = caseData.getEstimatedAssetsChecklistV2();
+        EstimatedAssetV3 v3assetValue = caseData.getEstimatedAssetsChecklistV3();
 
         return caseHasExpressParticipatingCourt(caseData)
             && MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.equals(typeOfApplication)
-            && UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(assetValue)
+            && isExpressPilotAssetValue(v2assetValue, v3assetValue)
             && !ListUtils.emptyIfNull(natureOfApplicationCheckList).contains(CONTESTED_VARIATION_ORDER)
             && YesOrNo.isNoOrNull(caseData.getFastTrackDecision());
+    }
+
+    /**
+     * Returns true if either Estimated Asset Value field is under £250k.
+     *
+     * <p>Handlers ensure that only one of the two Estimated Asset Value fields is set,
+     * so both fields can be checked safely. This method is null-safe and returns false
+     * if both values are null.</p>
+     *
+     * @param v2assetValue the value from the older EstimatedAssetV2 enum
+     * @param v3assetValue the value from the newer EstimatedAssetV3 enum
+     * @return true if the asset value qualifies for express case participation, false otherwise
+     */
+    private boolean isExpressPilotAssetValue(EstimatedAssetV2 v2assetValue, EstimatedAssetV3 v3assetValue) {
+        return EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v2assetValue)
+            || EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v3assetValue);
     }
 
     /* Checks that a region has been selected before calling getSelectedAllocatedCourt, as an indication
