@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadGeneralDocumentsCategoriser;
@@ -28,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 
 @Slf4j
 @Service
-public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class UploadDocumentContestedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final DocumentWarningsHelper documentWarningsHelper;
     private final UploadGeneralDocumentsCategoriser uploadGeneralDocumentsCategoriser;
@@ -49,12 +48,11 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = finremCaseDetails.getData();
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
 
         // Do sorting
-        List<UploadGeneralDocumentCollection> uploadedDocuments = new ArrayList<>(ofNullable(caseData.getUploadGeneralDocuments())
-            .orElse(List.of()));
+        List<UploadGeneralDocumentCollection> uploadedDocuments = ofNullable(caseData.getUploadGeneralDocuments())
+            .orElse(new ArrayList<>());
         uploadedDocuments.sort(comparing(UploadGeneralDocumentCollection::getValue,
             comparing(UploadGeneralDocument::getGeneralDocumentUploadDateTime, nullsLast(Comparator.reverseOrder()))));
         caseData.setUploadGeneralDocuments(uploadedDocuments);
@@ -62,10 +60,10 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
         // Execute the categoriser for CFV
         uploadGeneralDocumentsCategoriser.categorise(caseData);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, data -> emptyIfNull(data.getUploadGeneralDocuments()).stream()
-                .map(UploadGeneralDocumentCollection::getValue).toList(), userAuthorisation))
-            .data(caseData).build();
-    }
+        List<String> warnings = documentWarningsHelper.getDocumentWarnings(callbackRequest,
+            data -> emptyIfNull(data.getUploadGeneralDocuments()).stream()
+                .map(UploadGeneralDocumentCollection::getValue).toList(), userAuthorisation);
 
+        return response(caseData, warnings, null);
+    }
 }

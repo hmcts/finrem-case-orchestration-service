@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.70'
     id 'au.com.dius.pact' version '4.6.20'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.2220'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.2240'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -37,7 +37,7 @@ def versions = [
         tika                 : '3.2.3',
         amClient             : '1.59.2',
         sendLetterClient     : '5.1.1',
-        elasticSearch        : '8.19.17',
+        elasticSearch        : '8.19.18',
         jacksonDatabind      : '2.19.2',
         retry                : '1.3.4',
         snakeyaml            : '2.5',
@@ -52,7 +52,7 @@ project.ext {
     springCloudBomVersion = "2025.0.0"
     restAssuredBomVersion = "5.5.7"
     // Tomcat bump to address CVEs.  Remove when upgrading SpringBoot to version 4.
-    set('tomcat.version', '10.1.55')
+    set('tomcat.version', '10.1.56')
 }
 
 group = 'uk.gov.hmcts.reform.finrem'

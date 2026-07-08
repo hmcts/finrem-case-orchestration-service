@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static io.restassured.RestAssured.given;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {SmokeTestConfiguration.class})
@@ -38,7 +39,7 @@ public class CaseOrchestrationSmokeTests {
     private int connectionManagerTimeOut;
 
     private RestAssuredConfig config;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = createObjectMapper();
 
     @Before
     public void setUp() {
