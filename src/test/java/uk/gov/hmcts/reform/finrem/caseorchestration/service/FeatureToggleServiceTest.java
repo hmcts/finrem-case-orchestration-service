@@ -86,13 +86,19 @@ public class FeatureToggleServiceTest {
         void isFinremWorkAllocationEnabledReturnsFalse() {
             assertThat(featureToggleService.isFinremWorkAllocationEnabled()).isFalse();
         }
+        @Test
+        void isGlobalSearchEnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isGlobalSearchEnabled()).isFalse();
+        }
     }
 
     @Nested
     @TestPropertySource(properties = {
         "feature.toggle.send_to_frc=true",
         "feature.toggle.assign_case_access=true",
-        "feature.toggle.pba_case_type=true"
+        "feature.toggle.pba_case_type=true",
+        "feature.toggle.global_search_enabled=true"
     })
     class ApprovedConsentOrderNotificationSwitchedOn {
 
@@ -113,6 +119,11 @@ public class FeatureToggleServiceTest {
         void isPbaToggleEnabledReturnsTrue() {
             assertThat(featureToggleService.isPBAUsingCaseTypeEnabled()).isTrue();
         }
+
+        @Test
+        void isGlobalSearchEnabledReturnsTrue() {
+            assertThat(featureToggleService.isGlobalSearchEnabled()).isTrue();
+        }
     }
 
     @Nested
@@ -120,6 +131,7 @@ public class FeatureToggleServiceTest {
         "feature.toggle.send_to_frc=false",
         "feature.toggle.assign_case_access=false",
         "feature.toggle.pba_case_type=false",
+        "feature.toggle.global_search_enabled=false",
         "feature.toggle.send_letter_recipient_check=false",
         "feature.toggle.secure_doc_enabled=false",
         "feature.toggle.intervener_enabled=false",
@@ -158,6 +170,11 @@ public class FeatureToggleServiceTest {
         @Test
         void isPbaToggleEnabledReturnsFalse() {
             assertThat(featureToggleService.isPBAUsingCaseTypeEnabled()).isFalse();
+        }
+
+        @Test
+        void isGlobalSearchEnabledReturnsFalse() {
+            assertThat(featureToggleService.isGlobalSearchEnabled()).isFalse();
         }
 
         @Test
