@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +44,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -107,14 +104,13 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
                 DocumentCategory.APPLICATIONS_MAIN_APPLICATION.getDocumentCategoryId()));
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
             .thenReturn(finremCallbackRequest.getCaseDetails());
+        when(finremCaseDetailsMapper.mapToFinremCaseData(any()))
+            .thenReturn(finremCallbackRequest.getFinremCaseData());
         when(idamService.isUserRoleAdmin(anyString())).thenReturn(true);
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(anyString(),
             any(FinremCaseDetails.class))).thenReturn(caseDocument());
         when(createCaseMandatoryDataValidator.validate(finremCallbackRequest.getCaseDetails().getData()))
             .thenReturn(Collections.emptyList());
-
-        stubTemporaryFieldsForSanitisingMapper();
-
         CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
@@ -128,13 +124,13 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
             .thenReturn(finremCallbackRequest.getCaseDetails());
+        when(finremCaseDetailsMapper.mapToFinremCaseData(any()))
+            .thenReturn(finremCallbackRequest.getFinremCaseData());
         when(idamService.isUserRoleAdmin(anyString())).thenReturn(false);
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(anyString(),
             any(FinremCaseDetails.class))).thenReturn(caseDocument());
         when(createCaseMandatoryDataValidator.validate(finremCallbackRequest.getCaseDetails().getData()))
             .thenReturn(Collections.emptyList());
-
-        stubTemporaryFieldsForSanitisingMapper();
 
         CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
@@ -279,38 +275,4 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
         return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
     }
-
-    private void stubTemporaryFieldsForSanitisingMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        when(finremCaseDetailsMapper.finremCaseDataToMap(any(FinremCaseData.class)))
-            .thenAnswer(invocation -> convertFinremCaseDataToMap(
-                objectMapper,
-                invocation.getArgument(0)
-            ));
-
-        when(finremCaseDetailsMapper.mapToFinremCaseData(anyMap()))
-            .thenAnswer(invocation -> convertMapToFinremCaseData(
-                objectMapper,
-                invocation.getArgument(0)
-            ));
-    }
-
-    private Map<String, Object> convertFinremCaseDataToMap(
-        ObjectMapper objectMapper,
-        FinremCaseData caseData
-    ) {
-        return objectMapper.convertValue(
-            caseData,
-            new TypeReference<Map<String, Object>>() {}
-        );
-    }
-
-    private FinremCaseData convertMapToFinremCaseData(
-        ObjectMapper objectMapper,
-        Map<String, Object> caseDataMap
-    ) {
-        return objectMapper.convertValue(caseDataMap, FinremCaseData.class);
-    }
 }
-
