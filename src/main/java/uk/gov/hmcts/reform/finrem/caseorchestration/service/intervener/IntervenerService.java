@@ -144,17 +144,23 @@ public class IntervenerService {
                 revokeIntervenerRole(caseId, beforeIntv.getIntervenerSolEmail(),
                     beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID(),
                     intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors, beforeIntv);
-                intervenerWrapper.setIntervenerSolEmail(null);
-                intervenerWrapper.setIntervenerSolName(null);
-                intervenerWrapper.setIntervenerSolPhone(null);
-                intervenerWrapper.setIntervenerSolicitorFirm(null);
-                intervenerWrapper.setIntervenerSolicitorReference(null);
             }
+
+            clearIntervenerSolicitorDetails(intervenerWrapper);
+
             log.info("{} add default case role and organisation for Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
             setDefaultOrgForintervener(intervenerWrapper);
         }
         intervenerChangeDetails.setIntervenerDetails(intervenerWrapper);
         return intervenerChangeDetails;
+    }
+
+    private void clearIntervenerSolicitorDetails(IntervenerWrapper intervenerWrapper) {
+        intervenerWrapper.setIntervenerSolEmail(null);
+        intervenerWrapper.setIntervenerSolName(null);
+        intervenerWrapper.setIntervenerSolPhone(null);
+        intervenerWrapper.setIntervenerSolicitorFirm(null);
+        intervenerWrapper.setIntervenerSolicitorReference(null);
     }
 
     private boolean isRepresented(IntervenerWrapper intervenerWrapper) {
