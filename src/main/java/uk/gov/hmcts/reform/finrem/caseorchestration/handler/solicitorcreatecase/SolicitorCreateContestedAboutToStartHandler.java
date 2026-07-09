@@ -58,7 +58,7 @@ public class SolicitorCreateContestedAboutToStartHandler extends FinremCallbackH
      * @param callbackRequest The callback request containing the case data.
      */
     private void setEstimatedAssetsChecklistVersion(FinremCallbackRequest callbackRequest) {
-        Boolean useV3EstimatedAssetsChecklist = featureToggleService.isEstimatedAssetsChecklistV3Enabled();
+        boolean useV3EstimatedAssetsChecklist = featureToggleService.isEstimatedAssetsChecklistV3Enabled();
         FinremCaseData caseData = callbackRequest.getFinremCaseData();
         if (useV3EstimatedAssetsChecklist) {
             caseData.getEstimatedAssetsChecklistWrapper().setEstimatedAssetsChecklistVersion(EstimatedAssetsChecklistVersion.V3);
