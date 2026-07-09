@@ -32,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
 @ExtendWith(MockitoExtension.class)
 class OnStartDefaultValueServiceTest {
@@ -105,14 +104,6 @@ class OnStartDefaultValueServiceTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         service.defaultContestedOrderDate(callbackRequest);
         assertNotNull(callbackRequest.getCaseDetails().getData().get(CONTESTED_ORDER_APPROVED_DATE));
-    }
-
-    @Test
-    void setDefaultUrgencyQuestion() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        service.defaultUrgencyQuestion(callbackRequest);
-        assertNotNull(callbackRequest.getCaseDetails().getData().get(URGENT_CASE_QUESTION));
-        assertEquals(NO_VALUE, callbackRequest.getCaseDetails().getData().get(URGENT_CASE_QUESTION));
     }
 
     @Test

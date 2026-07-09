@@ -33,10 +33,6 @@ public class OnStartDefaultValueService {
         }
     }
 
-    public void defaultUrgencyQuestion(CallbackRequest callbackRequest) {
-        callbackRequest.getCaseDetails().getData().putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
-    }
-
     public void defaultUrgencyQuestion(FinremCallbackRequest callbackRequest) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         if (caseData.getPromptForUrgentCaseQuestion() == null) {
