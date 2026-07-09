@@ -9,12 +9,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy.getDefaultOrganisationPolicy;
 
 @Slf4j
 @Service
@@ -40,24 +37,14 @@ public class PaperCaseCreateContestedAboutToStartHandler extends FinremCallbackH
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
-        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
-
         validateCaseData(callbackRequest);
-        setOrganisationPolicyForNewPaperCase(finremCaseData);
 
+        onStartDefaultValueService.defaultApplicantOrganisationPolicy(callbackRequest);
+        onStartDefaultValueService.defaultRespondentOrganisationPolicy(callbackRequest);
         onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
         onStartDefaultValueService.defaultTypeOfApplication(callbackRequest);
         onStartDefaultValueService.defaultUrgencyQuestion(callbackRequest);
 
-        return response(finremCaseData);
-    }
-
-    private void setOrganisationPolicyForNewPaperCase(FinremCaseData finremCaseData) {
-        finremCaseData.setApplicantOrganisationPolicy(
-            getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR)
-        );
-        finremCaseData.setRespondentOrganisationPolicy(
-            getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR)
-        );
+        return response(callbackRequest.getFinremCaseData());
     }
 }

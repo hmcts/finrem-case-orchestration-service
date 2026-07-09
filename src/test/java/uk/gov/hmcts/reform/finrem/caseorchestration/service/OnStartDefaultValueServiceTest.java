@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -43,6 +45,12 @@ class OnStartDefaultValueServiceTest {
 
     @Mock
     private IdamService idamService;
+
+    @Mock
+    private OrganisationPolicy applicantDefaultOrganisationPolicy;
+
+    @Mock
+    private OrganisationPolicy respondentDefaultOrganisationPolicy;
 
     @Test
     void setDefaultDate() {
@@ -135,7 +143,7 @@ class OnStartDefaultValueServiceTest {
     }
 
     @Test
-    void tsetDefaultConsentedOrderDate() {
+    void testDefaultConsentedOrderDate() {
         FinremCaseData caseData = mock(FinremCaseData.class);
 
         try (MockedStatic<LocalDate> mockedStatic = Mockito.mockStatic(LocalDate.class)) {
@@ -143,6 +151,30 @@ class OnStartDefaultValueServiceTest {
 
             service.defaultConsentedOrderDate(caseData);
             verify(caseData).setOrderDirectionDate(FIXED_DATE);
+        }
+    }
+
+    @Test
+    void testDefaultApplicantOrganisationPolicy() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+
+        try (MockedStatic<OrganisationPolicy> mockedStatic = Mockito.mockStatic(OrganisationPolicy.class)) {
+            service.defaultApplicantOrganisationPolicy(callbackRequest);
+            mockedStatic.when(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR))
+                .thenReturn(applicantDefaultOrganisationPolicy);
+            mockedStatic.verify(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
+        }
+    }
+
+    @Test
+    void testDefaultRespondentOrganisationPolicy() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+
+        try (MockedStatic<OrganisationPolicy> mockedStatic = Mockito.mockStatic(OrganisationPolicy.class)) {
+            service.defaultRespondentOrganisationPolicy(callbackRequest);
+            mockedStatic.when(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR))
+                .thenReturn(respondentDefaultOrganisationPolicy);
+            mockedStatic.verify(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
         }
     }
 
