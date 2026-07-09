@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
@@ -22,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrls;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrlsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GenericInputFields;
 
 import java.util.HashMap;
@@ -123,16 +124,17 @@ class SolicitorUploadDocumentAboutToSubmitHandlerTest {
 
         var data = response.getData();
         var bin = data != null ? data.getBin() : null;
-        var fileUrls = bin != null ? bin.getFileUrlsToBeDeleted() : null;
+        List<BinFileUrlsCollection> fileUrls = bin != null ? bin.getFileUrlsToBeDeleted() : null;
 
         assertAll(
             () -> assertThat(data).isNotNull(),
             () -> assertThat(bin).isNotNull(),
             () -> assertThat(fileUrls).isNotNull()
         );
-        assertThat(fileUrls.getListItems())
+        assertThat(fileUrls)
             .isNotNull()
-            .extracting(DynamicListElement::getCode)
+            .extracting(BinFileUrlsCollection::getValue)
+            .extracting(BinFileUrls::getBinFileUrl)
             .containsExactly(
                 expectedDeletedCaseDocuments.stream()
                     .map(CaseDocument::getDocumentUrl)
