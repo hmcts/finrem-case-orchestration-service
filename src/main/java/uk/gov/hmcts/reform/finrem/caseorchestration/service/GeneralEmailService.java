@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailHolder;
@@ -18,7 +17,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
-import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +64,7 @@ public class GeneralEmailService {
      * @param errors the list of validation errors
      */
     public void validateUploadedDocuments(FinremCaseData finremCaseData, String userAuthorisation, List<String> errors) {
-        List<CaseDocument> uploadedDocuments = getUploadedDocuments(finremCaseData);
+        List<CaseDocument> uploadedDocuments = finremCaseData.getGeneralEmailWrapper().getUploadedDocuments();
 
         if (uploadedDocuments.size() > MAX_ATTACHMENTS) {
             addError(errors, TOO_MANY_ATTACHMENTS_ERROR);
@@ -75,21 +73,6 @@ public class GeneralEmailService {
         uploadedDocuments.forEach(document ->
             validateUploadedDocument(document, finremCaseData.getCcdCaseId(), userAuthorisation, errors)
         );
-    }
-
-    /**
-     * Returns the uploaded general email documents from the case data.
-     *
-     * @param finremCaseData the case data
-     * @return the list of uploaded documents, or an empty list if none exist
-     */
-    public List<CaseDocument> getUploadedDocuments(FinremCaseData finremCaseData) {
-        return emptyIfNull(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocuments())
-            .stream()
-            .filter(Objects::nonNull)
-            .map(DocumentCollectionItem::getValue)
-            .filter(Objects::nonNull)
-            .toList();
     }
 
     private void validateUploadedDocument(CaseDocument document,
@@ -101,10 +84,6 @@ public class GeneralEmailService {
             return;
         }
 
-        if (isFileOverSizeLimit(document, userAuthorisation)) {
-            addError(errors, FILE_TOO_LARGE_ERROR);
-        }
-
         if (!errors.contains(FILE_TOO_LARGE_ERROR)) {
             bulkPrintDocumentService.validateEncryptionOnUploadedDocument(
                 document,
@@ -112,6 +91,10 @@ public class GeneralEmailService {
                 errors,
                 userAuthorisation
             );
+        }
+
+        if (isFileOverSizeLimit(document, userAuthorisation)) {
+            addError(errors, FILE_TOO_LARGE_ERROR);
         }
     }
 

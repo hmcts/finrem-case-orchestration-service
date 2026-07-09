@@ -101,7 +101,6 @@ public class NotificationService {
     private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     private final EvidenceManagementDownloadService evidenceManagementDownloadService;
     private final CourtDetailsConfiguration courtDetailsConfiguration;
-    private final GeneralEmailService generalEmailService;
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest =
@@ -398,13 +397,14 @@ public class NotificationService {
     }
 
     private boolean isGeneralEmailWithAttachment(FinremCaseDetails caseDetails) {
-        return !generalEmailService.getUploadedDocuments(caseDetails.getData()).isEmpty();
+        return !caseDetails.getData().getGeneralEmailWrapper().getUploadedDocuments().isEmpty();
     }
 
     private void addGeneralEmailAttachments(FinremCaseDetails caseDetails,
                                             NotificationRequest notificationRequest,
                                             String auth) {
-        List<byte[]> documentContentsList = generalEmailService.getUploadedDocuments(caseDetails.getData())
+        List<byte[]> documentContentsList = caseDetails.getData().getGeneralEmailWrapper()
+            .getUploadedDocuments()
             .stream()
             .map(document -> evidenceManagementDownloadService.getByteArray(document, auth))
             .toList();
@@ -985,7 +985,7 @@ public class NotificationService {
         //Overwrite the email, set to the court provided, and use general body to include the Events "Free Text" field
         notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().get(TRANSFER_COURTS_EMAIL)));
         notificationRequest.setGeneralEmailBody("The Judge has also ordered that:\n"
-            + caseDetails.getData().get(TRANSFER_COURTS_INSTRUCTIONS));
+            + Objects.toString(caseDetails.getData().get(TRANSFER_COURTS_INSTRUCTIONS)));
 
         log.info("Received request for notification email for consented transfer to local court email Notification request : {}",
             notificationRequest);

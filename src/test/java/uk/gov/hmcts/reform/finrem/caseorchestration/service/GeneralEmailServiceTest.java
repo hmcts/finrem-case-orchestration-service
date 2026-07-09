@@ -131,7 +131,7 @@ class GeneralEmailServiceTest {
                 .build())
             .build();
 
-        assertThat(generalEmailService.getUploadedDocuments(finremCaseData))
+        assertThat(finremCaseData.getGeneralEmailWrapper().getUploadedDocuments())
             .containsExactly(attachment, secondAttachment);
     }
 
@@ -199,11 +199,11 @@ class GeneralEmailServiceTest {
         generalEmailService.validateUploadedDocuments(finremCaseData, "authToken", errors);
 
         assertThat(errors).containsOnly("You attached a document which exceeds the size limit: 2MB");
-        verify(bulkPrintDocumentService, never()).validateEncryptionOnUploadedDocument(
-            any(CaseDocument.class),
+        verify(bulkPrintDocumentService).validateEncryptionOnUploadedDocument(
+            eq(largeDocument),
             any(),
             anyList(),
-            anyString()
+            eq("authToken")
         );
         verify(evidenceManagementDownloadService).getByteArray(largeDocument, "authToken");
     }
