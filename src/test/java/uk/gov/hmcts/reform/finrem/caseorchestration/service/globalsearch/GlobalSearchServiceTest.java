@@ -53,7 +53,7 @@ public class GlobalSearchServiceTest {
     }
 
     @Test
-    public void shouldSetGlobalSearchFieldsFeatureOFF() {
+    public void shouldSetGlobalSearchFieldsFeatureOff() {
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(false);
 
         globalSearchService.setGlobalSearchData(caseData);
@@ -62,7 +62,7 @@ public class GlobalSearchServiceTest {
     }
 
     @Test
-    public void shouldSetGlobalSearchFieldsFromMapFeatureOFF() {
+    public void shouldSetGlobalSearchFieldsFromMapFeatureOff() {
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(false);
 
         Map<String, Object> caseDataMap = new HashMap<>();

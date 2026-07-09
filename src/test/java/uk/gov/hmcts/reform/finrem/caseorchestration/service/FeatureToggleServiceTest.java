@@ -86,6 +86,7 @@ public class FeatureToggleServiceTest {
         void isFinremWorkAllocationEnabledReturnsFalse() {
             assertThat(featureToggleService.isFinremWorkAllocationEnabled()).isFalse();
         }
+
         @Test
         void isGlobalSearchEnabledReturnsTrue() {
             // default value is defined in src/test/resources/application.properties
