@@ -57,6 +57,7 @@ public class GeneralEmailService {
 
         generalEmailCollection.add(collection);
     }
+
     /**
      * Validates the uploaded general email documents and adds any validation errors to the provided list.
      *
@@ -75,6 +76,7 @@ public class GeneralEmailService {
             validateUploadedDocument(document, finremCaseData.getCcdCaseId(), userAuthorisation, errors)
         );
     }
+
     /**
      * Returns the uploaded general email documents from the case data.
      *
