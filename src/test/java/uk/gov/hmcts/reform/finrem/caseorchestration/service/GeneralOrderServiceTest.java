@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,6 +70,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
@@ -85,7 +85,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 class GeneralOrderServiceTest {
 
     @Spy
-    private ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private ObjectMapper objectMapper = createObjectMapper();
     @Mock
     private DocumentConfiguration documentConfiguration;
     @Mock
