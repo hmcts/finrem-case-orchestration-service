@@ -109,7 +109,7 @@ public class RefusalOrderDocumentService {
         return finremCaseData;
     }
 
-    public CaseDocument generateRefusalOrder(FinremCaseDetails finremCaseDetails, String authorisationToken) {
+    private CaseDocument generateRefusalOrder(FinremCaseDetails finremCaseDetails, String authorisationToken) {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         String rejectOrderFileName;
         if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(finremCaseData))) {
