@@ -32,8 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,22 +72,6 @@ class OnStartDefaultValueServiceTest {
         callbackRequest.getCaseDetails().getData().setCivilPartnership(YesOrNo.YES);
         service.defaultCivilPartnershipField(callbackRequest);
         assertEquals(YES_VALUE, callbackRequest.getCaseDetails().getData().getCivilPartnership().getYesOrNo());
-    }
-
-    @Test
-    void defaultTypeOfApplication_defaultValue() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        service.defaultTypeOfApplication(callbackRequest);
-        assertEquals(TYPE_OF_APPLICATION_DEFAULT_TO,callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION));
-    }
-
-    @Test
-    void defaultTypeOfApplication_userValue() {
-        var schedule1 = "Under paragraph 1 or 2 of schedule 1 children act 1989";
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(TYPE_OF_APPLICATION, schedule1);
-        service.defaultTypeOfApplication(callbackRequest);
-        assertEquals(schedule1,callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION));
     }
 
     @Test
