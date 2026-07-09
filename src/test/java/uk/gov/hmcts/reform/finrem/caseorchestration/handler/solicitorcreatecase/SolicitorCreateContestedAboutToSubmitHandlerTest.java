@@ -101,7 +101,6 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenContestedCase_whenHandledAndUserIsAdminAndCaseFileViewEnabled_thenReturnExpectedResponseCaseData() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         finremCallbackRequest.getCaseDetails().getData().getUploadAdditionalDocument().forEach(ad ->
             ad.getValue().getAdditionalDocuments().setCategoryId(
@@ -116,6 +115,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
         stubTemporaryFieldsForSanitisingMapper();
 
+        CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
         expectedAdminResponseCaseData(responseCaseData);
@@ -125,7 +125,6 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenContestedCase_whenHandledAndUserIsNotAdminAndCaseFileViewDisabled_thenReturnExpectedResponseCaseData() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
             .thenReturn(finremCallbackRequest.getCaseDetails());
@@ -137,6 +136,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
         stubTemporaryFieldsForSanitisingMapper();
 
+        CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
         expectedNonAdminResponseCaseData(responseCaseData);
