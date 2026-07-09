@@ -57,7 +57,13 @@ public class GeneralEmailService {
 
         generalEmailCollection.add(collection);
     }
-
+    /**
+     * Validates the uploaded general email documents and adds any validation errors to the provided list.
+     *
+     * @param finremCaseData the case data containing the uploaded documents
+     * @param userAuthorisation the user authorisation token
+     * @param errors the list of validation errors
+     */
     public void validateUploadedDocuments(FinremCaseData finremCaseData, String userAuthorisation, List<String> errors) {
         List<CaseDocument> uploadedDocuments = getUploadedDocuments(finremCaseData);
 
@@ -69,7 +75,12 @@ public class GeneralEmailService {
             validateUploadedDocument(document, finremCaseData.getCcdCaseId(), userAuthorisation, errors)
         );
     }
-
+    /**
+     * Returns the uploaded general email documents from the case data.
+     *
+     * @param finremCaseData the case data
+     * @return the list of uploaded documents, or an empty list if none exist
+     */
     public List<CaseDocument> getUploadedDocuments(FinremCaseData finremCaseData) {
         return emptyIfNull(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocuments())
             .stream()
@@ -88,15 +99,17 @@ public class GeneralEmailService {
             return;
         }
 
-        bulkPrintDocumentService.validateEncryptionOnUploadedDocument(
-            document,
-            caseId,
-            errors,
-            userAuthorisation
-        );
-
         if (isFileOverSizeLimit(document, userAuthorisation)) {
             addError(errors, FILE_TOO_LARGE_ERROR);
+        }
+
+        if (!errors.contains(FILE_TOO_LARGE_ERROR)) {
+            bulkPrintDocumentService.validateEncryptionOnUploadedDocument(
+                document,
+                caseId,
+                errors,
+                userAuthorisation
+            );
         }
     }
 

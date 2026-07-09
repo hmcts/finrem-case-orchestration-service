@@ -7,7 +7,6 @@ import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -95,7 +94,6 @@ public class NotificationService {
     private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
     private static final String HWF_LOG = "Received request for notification email for HWFSuccessful. Case ID : {}";
     private static final String BARRISTER_ACCESS_LOG = "Received request for notification email for Barrister Access Added event. Case ID : {}";
-    private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final FeatureToggleService featureToggleService;
     private final NotificationRequestMapper notificationRequestMapper;
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
@@ -987,7 +985,7 @@ public class NotificationService {
         //Overwrite the email, set to the court provided, and use general body to include the Events "Free Text" field
         notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().get(TRANSFER_COURTS_EMAIL)));
         notificationRequest.setGeneralEmailBody("The Judge has also ordered that:\n"
-            + Objects.toString(caseDetails.getData().get(TRANSFER_COURTS_INSTRUCTIONS)));
+            + caseDetails.getData().get(TRANSFER_COURTS_INSTRUCTIONS));
 
         log.info("Received request for notification email for consented transfer to local court email Notification request : {}",
             notificationRequest);
