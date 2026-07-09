@@ -84,16 +84,14 @@ public class GeneralEmailService {
             return;
         }
 
-        if (!errors.contains(FILE_TOO_LARGE_ERROR)) {
-            bulkPrintDocumentService.validateEncryptionOnUploadedDocument(
-                document,
-                caseId,
-                errors,
-                userAuthorisation
-            );
-        }
+        bulkPrintDocumentService.validateEncryptionOnUploadedDocument(
+            document,
+            caseId,
+            errors,
+            userAuthorisation
+        );
 
-        if (isFileOverSizeLimit(document, userAuthorisation)) {
+        if (!errors.contains(FILE_TOO_LARGE_ERROR) && isFileOverSizeLimit(document, userAuthorisation)) {
             addError(errors, FILE_TOO_LARGE_ERROR);
         }
     }
