@@ -23,8 +23,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
@@ -39,11 +45,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -92,8 +97,9 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     @EnumSource(CaseType.class)
     void givenNoRepresentationChangeAndNoHiddenAddresses_handle(CaseType caseType) {
 
-        FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder()
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .regionWrapper(validRegionWrapper())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
                 .nocParty(NoticeOfChangeParty.APPLICANT)
                 .updateIncludesRepresentativeChange(YesOrNo.NO)
                 .build()).build();
@@ -118,7 +124,9 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     @EnumSource(CaseType.class)
     void givenNoRepresentationChangeAndRespondentHasHiddenAddresses_handle(CaseType caseType) {
 
-        FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .regionWrapper(validRegionWrapper())
+            .contactDetailsWrapper(
             ContactDetailsWrapper.builder()
                 .respondentAddressHiddenFromApplicant(YesOrNo.YES)
                 .nocParty(NoticeOfChangeParty.APPLICANT)
@@ -147,8 +155,9 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     @EnumSource(CaseType.class)
     void givenNoRepresentationChangeAndApplicantHasHiddenAddresses_handle(CaseType caseType) {
 
-        FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder()
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .regionWrapper(validRegionWrapper())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
                 .applicantAddressHiddenFromRespondent(YesOrNo.YES)
                 .nocParty(NoticeOfChangeParty.APPLICANT)
                 .updateIncludesRepresentativeChange(YesOrNo.NO)
@@ -177,8 +186,9 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     @EnumSource(CaseType.class)
     void shouldHandleRepresentationChangeAndHiddenAddresses(CaseType caseType) {
 
-        FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder()
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .regionWrapper(validRegionWrapper())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
                 .nocParty(NoticeOfChangeParty.APPLICANT)
                 .applicantAddressHiddenFromRespondent(YesOrNo.YES)
                 .respondentAddressHiddenFromApplicant(YesOrNo.YES)
@@ -228,11 +238,15 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
 
     @Test
     void givenInvalidOrganisationPolicy_whenHandle_thenReturnsValidationError() {
-        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
-        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        FinremCaseData finremCaseData = spy(FinremCaseData.class);
-        when(caseDetails.getData()).thenReturn(finremCaseData);
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .regionWrapper(validRegionWrapper())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder().build())
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
+            Long.valueOf(CASE_ID), CaseType.CONSENTED, finremCaseData);
+
+        when(internationalPostalService.validate(finremCaseData)).thenReturn(List.of());
 
         try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class)) {
             mockedStatic.when(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData))
@@ -276,6 +290,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     @Test
     void givenSameCaseDetailsForBeforeAndAfter_generateCoverSheetsNotCalled() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
+            .regionWrapper(validRegionWrapper())
             .contactDetailsWrapper(ContactDetailsWrapper.builder().build())
             .build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
@@ -305,6 +320,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     @Test
     void givenApplicantAddressChange_generateApplicantCoverSheetCalled() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
+            .regionWrapper(validRegionWrapper())
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
                 .applicantAddress(buildAddress(
                     "New Address Line 1", "New Address Line 2", "SW1A 1AA"))
@@ -318,6 +334,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
             .build();
 
         FinremCaseData finremCaseDatabefore = FinremCaseData.builder()
+            .regionWrapper(validRegionWrapper())
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
                 .applicantAddress(buildAddress(
                     "Old Address Line 1", "Old Address Line 2", "Old 1AA"))
@@ -345,6 +362,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     @Test
     void givenRespondentAddressChange_generateRespondentCoverSheetCalled() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
+            .regionWrapper(validRegionWrapper())
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
                 .respondentAddress(buildAddress(
                     "New Address Line 1", "New Address Line 2", "SW1A 1AA"))
@@ -358,6 +376,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
             .build();
 
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+            .regionWrapper(validRegionWrapper())
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
                 .respondentAddress(buildAddress(
                     "Old Address Line 1", "Old Address Line 2", "Old 1AA"))
@@ -382,6 +401,68 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
     }
 
+    @Test
+    void givenMissingRegionList_whenHandle_thenReturnsFrcCourtSelectionMissingError() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .regionWrapper(RegionWrapper.builder()
+                .allocatedRegionWrapper(AllocatedRegionWrapper.builder().build())
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CaseType.CONSENTED, finremCaseData);
+        request.setCaseDetailsBefore(FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().regionWrapper(validRegionWrapper()).build())
+            .build());
+
+        when(internationalPostalService.validate(finremCaseData)).thenReturn(List.of());
+
+        try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class)) {
+            mockedStatic.when(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData)).thenReturn(List.of());
+            mockedStatic.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData)).thenReturn(List.of());
+            mockedStatic.when(() -> ContactDetailsValidator.validatePostcodesByRepresentation(request.getCaseDetails())).thenReturn(List.of());
+
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
+
+            assertThat(response.getErrors())
+                .containsExactly(UpdateContactDetailsAboutToSubmitHandler.FRC_COURT_SELECTION_MISSING_ERROR);
+        }
+
+        verifyNoInteractions(updateContactDetailsService, nocWorkflowService, generateCoverSheetService, onlineFormDocumentService);
+    }
+
+    @Test
+    void givenRegionSelectedButCourtNotSelected_whenHandle_thenReturnsFrcCourtSelectionMissingError() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .regionWrapper(RegionWrapper.builder()
+                .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
+                    .regionList(Region.LONDON)
+                    .londonFrcList(RegionLondonFrc.LONDON)
+                    .build())
+                .build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder().build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CaseType.CONSENTED, finremCaseData);
+        request.setCaseDetailsBefore(FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().regionWrapper(validRegionWrapper()).build())
+            .build());
+
+        when(internationalPostalService.validate(finremCaseData)).thenReturn(List.of());
+
+        try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class)) {
+            mockedStatic.when(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData)).thenReturn(List.of());
+            mockedStatic.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData)).thenReturn(List.of());
+            mockedStatic.when(() -> ContactDetailsValidator.validatePostcodesByRepresentation(request.getCaseDetails())).thenReturn(List.of());
+
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
+
+            assertThat(response.getErrors())
+                .containsExactly(UpdateContactDetailsAboutToSubmitHandler.FRC_COURT_SELECTION_MISSING_ERROR);
+        }
+
+        verifyNoInteractions(updateContactDetailsService, nocWorkflowService, generateCoverSheetService, onlineFormDocumentService);
+    }
+
     private Address buildAddress(String addressLine1, String addressLine2, String postCode) {
         return Address.builder()
             .addressLine1(addressLine1)
@@ -395,16 +476,16 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
             .builder()
             .eventType(EventType.UPDATE_CONTACT_DETAILS)
             .caseDetails(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID))
-                .data(new FinremCaseData()).build())
+                .data(FinremCaseData.builder().regionWrapper(validRegionWrapper()).build()).build())
             .caseDetailsBefore(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID))
-                .data(new FinremCaseData()).build())
+                .data(FinremCaseData.builder().regionWrapper(validRegionWrapper()).build()).build())
             .build();
     }
 
     private FinremCallbackRequest createRequest(CaseType caseType, FinremCaseData finremCaseData) {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, finremCaseData);
         request.setCaseDetailsBefore(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder().build())
+            .data(FinremCaseData.builder().regionWrapper(validRegionWrapper()).build())
             .build());
         return request;
     }
@@ -420,5 +501,19 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         } else {
             verify(onlineFormDocumentService, never()).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
         }
+    }
+
+    private RegionWrapper validRegionWrapper() {
+        AllocatedRegionWrapper allocatedRegionWrapper = AllocatedRegionWrapper.builder()
+            .regionList(Region.MIDLANDS)
+            .midlandsFrcList(RegionMidlandsFrc.NOTTINGHAM)
+            .build();
+
+        allocatedRegionWrapper.getDefaultCourtListWrapper()
+            .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
+
+        return RegionWrapper.builder()
+            .allocatedRegionWrapper(allocatedRegionWrapper)
+            .build();
     }
 }

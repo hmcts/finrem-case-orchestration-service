@@ -16,7 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
@@ -39,6 +41,7 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final InternationalPostalService internationalPostalService;
     private final GenerateCoverSheetService generateCoverSheetService;
+    static final String FRC_COURT_SELECTION_MISSING_ERROR = "Case cannot be issued as court selection is missing.";
 
     public UpdateContactDetailsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     UpdateContactDetailsService updateContactDetailsService,
@@ -72,6 +75,8 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
         errors.addAll(validatePostCodeAndEmailAddresses(finremCaseDetails));
+        errors.addAll(validateFrcCourt(finremCaseDetails));
+
         if (!errors.isEmpty()) {
             return response(finremCaseData, null, errors);
         }
@@ -155,5 +160,26 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
         if (ContactDetailsWrapper.hasRespondentAddressDetailsChanged(caseDetails.getData().getContactDetailsWrapper(), contactDetailsBefore)) {
             generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, userAuthorisation);
         }
+    }
+
+    private List<String> validateFrcCourt(FinremCaseDetails finremCaseDetails) {
+        List<String> errors = new ArrayList<>();
+        boolean isRegionMissing = Optional.ofNullable(finremCaseDetails)
+            .map(FinremCaseDetails::getData)
+            .map(FinremCaseData::getRegionWrapper)
+            .map(RegionWrapper::getAllocatedRegionWrapper)
+            .map(AllocatedRegionWrapper::getRegionList)
+            .isEmpty();
+
+        boolean isSelectedCourtMissing = Optional.ofNullable(finremCaseDetails)
+            .map(FinremCaseDetails::getData)
+            .map(FinremCaseData::getSelectedAllocatedCourt)
+            .filter(selectedCourt -> !selectedCourt.isBlank())
+            .isEmpty();
+
+        if (isRegionMissing || isSelectedCourtMissing) {
+            errors.add(FRC_COURT_SELECTION_MISSING_ERROR);
+        }
+        return errors;
     }
 }
