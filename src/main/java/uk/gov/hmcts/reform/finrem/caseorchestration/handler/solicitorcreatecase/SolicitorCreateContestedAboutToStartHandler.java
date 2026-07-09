@@ -19,14 +19,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 @Service
 public class SolicitorCreateContestedAboutToStartHandler extends FinremCallbackHandler {
 
-    private final OnStartDefaultValueService service;
+    private final OnStartDefaultValueService onStartDefaultValueService;
     private final FeatureToggleService featureToggleService;
 
     public SolicitorCreateContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                       OnStartDefaultValueService service,
+                                                       OnStartDefaultValueService onStartDefaultValueService,
                                                        FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.onStartDefaultValueService = onStartDefaultValueService;
         this.featureToggleService = featureToggleService;
     }
 
@@ -41,9 +41,9 @@ public class SolicitorCreateContestedAboutToStartHandler extends FinremCallbackH
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
-        service.defaultCivilPartnershipField(callbackRequest);
-        service.defaultTypeOfApplication(callbackRequest);
-        service.defaultUrgencyQuestion(callbackRequest);
+        onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
+        onStartDefaultValueService.defaultTypeOfApplication(callbackRequest);
+        onStartDefaultValueService.defaultUrgencyQuestion(callbackRequest);
         setEstimatedAssetsChecklistVersion(callbackRequest);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData()).build();
