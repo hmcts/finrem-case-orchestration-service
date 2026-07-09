@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -41,6 +42,7 @@ public class GeneralEmailWrapper implements HasCaseDocument {
      *
      * @return the uploaded documents, or an empty list if none exist
      */
+    @JsonIgnore
     public List<CaseDocument> getUploadedDocuments() {
         return emptyIfNull(generalEmailUploadedDocuments)
             .stream()

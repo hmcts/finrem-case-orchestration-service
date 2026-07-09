@@ -731,14 +731,12 @@ class NotificationServiceTest {
     void shouldSendGeneralEmailWithAttachmentConsented() {
         byte[] documentContents = {1, 2, 3};
         FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONSENTED);
-        CaseDocument uploadedDocument = finremCaseDetails.getData().getGeneralEmailWrapper()
-            .getGeneralEmailUploadedDocuments().get(0).getValue();
-
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(finremCaseDetails)).thenReturn(notificationRequest);
         when(evidenceManagementDownloadService.getByteArray(any(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(documentContents);
 
         notificationService.sendConsentGeneralEmail(finremCaseDetails, AUTH_TOKEN);
-
+        CaseDocument uploadedDocument = finremCaseDetails.getData().getGeneralEmailWrapper()
+            .getGeneralEmailUploadedDocuments().get(0).getValue();
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(finremCaseDetails);
         verify(evidenceManagementDownloadService).getByteArray(uploadedDocument, AUTH_TOKEN);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT);
@@ -749,14 +747,12 @@ class NotificationServiceTest {
     void shouldSendGeneralEmailWithAttachmentContested() {
         byte[] documentContents = {1, 2, 3};
         FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONTESTED);
-        CaseDocument uploadedDocument = finremCaseDetails.getData().getGeneralEmailWrapper()
-            .getGeneralEmailUploadedDocuments().get(0).getValue();
-
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(finremCaseDetails)).thenReturn(notificationRequest);
         when(evidenceManagementDownloadService.getByteArray(any(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(documentContents);
 
         notificationService.sendContestedGeneralEmail(finremCaseDetails, AUTH_TOKEN);
-
+        CaseDocument uploadedDocument = finremCaseDetails.getData().getGeneralEmailWrapper()
+            .getGeneralEmailUploadedDocuments().get(0).getValue();
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(finremCaseDetails);
         verify(evidenceManagementDownloadService).getByteArray(uploadedDocument, AUTH_TOKEN);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT);
