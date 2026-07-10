@@ -1,18 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
 
@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 
 public abstract class LetterHandlerTestBase {
@@ -30,7 +31,6 @@ public abstract class LetterHandlerTestBase {
 
     protected final AbstractLetterDetailsGenerator letterDetailsGenerator;
     protected final NocDocumentService nocDocumentService;
-    private final NoticeType noticeType;
     private final DocumentHelper.PaperNotificationRecipient recipient;
 
     @Mock
@@ -44,17 +44,18 @@ public abstract class LetterHandlerTestBase {
     ArgumentCaptor<RepresentationUpdate> representationUpdateArgumentCaptor;
     @Captor
     ArgumentCaptor<DocumentHelper.PaperNotificationRecipient> paperNotificationRecipientArgumentCaptor;
+    @Spy
+    private ObjectMapper objectMapper = createObjectMapper();
 
-    public LetterHandlerTestBase(AbstractLetterDetailsGenerator letterDetailsGenerator, NocDocumentService nocDocumentService, NoticeType noticeType,
+    public LetterHandlerTestBase(AbstractLetterDetailsGenerator letterDetailsGenerator, NocDocumentService nocDocumentService, 
                                  DocumentHelper.PaperNotificationRecipient recipient) {
         this.letterDetailsGenerator = letterDetailsGenerator;
         this.nocDocumentService = nocDocumentService;
-        this.noticeType = noticeType;
         this.recipient = recipient;
     }
 
     protected CaseDetails getCaseDetails(String resourcePath) {
-        return caseDetailsFromResource(resourcePath, TestObjectMapperFactory.createObjectMapper());
+        return caseDetailsFromResource(resourcePath, createObjectMapper());
     }
 
     protected void shouldSendLetter(String caseDetailsPath, String caseDetailsBeforePath) {

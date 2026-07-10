@@ -88,6 +88,12 @@ public class FeatureToggleServiceTest {
         }
 
         @Test
+        void isEstimatedAssetsChecklistV3EnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).isFalse();
+        }
+
+        @Test
         void isGlobalSearchEnabledReturnsTrue() {
             // default value is defined in src/test/resources/application.properties
             assertThat(featureToggleService.isGlobalSearchEnabled()).isFalse();
@@ -99,6 +105,7 @@ public class FeatureToggleServiceTest {
         "feature.toggle.send_to_frc=true",
         "feature.toggle.assign_case_access=true",
         "feature.toggle.pba_case_type=true",
+        "feature.toggle.estimated_assets_checklist_V3_enabled=true"
         "feature.toggle.global_search_enabled=true"
     })
     class ApprovedConsentOrderNotificationSwitchedOn {
@@ -119,6 +126,11 @@ public class FeatureToggleServiceTest {
         @Test
         void isPbaToggleEnabledReturnsTrue() {
             assertThat(featureToggleService.isPBAUsingCaseTypeEnabled()).isTrue();
+        }
+
+        @Test
+        void isEstimatedAssetsChecklistV3EnabledReturnsTrue() {
+            assertThat(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).isTrue();
         }
 
         @Test

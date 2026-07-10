@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -48,8 +47,7 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
     @MockitoBean
     private GenericDocumentService genericDocumentService;
 
-    @Captor
-    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor = ArgumentCaptor.forClass(CaseDetails.class);
 
     @Before
     public void setUp() {

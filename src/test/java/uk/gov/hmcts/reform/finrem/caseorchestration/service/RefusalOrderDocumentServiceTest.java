@@ -6,7 +6,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -50,6 +49,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
     @Autowired
     private RefusalOrderDocumentService refusalOrderDocumentService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -59,8 +59,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
     @MockitoBean
     private IdamService idamService;
 
-    @Captor
-    private ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor;
+    private final ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor = ArgumentCaptor.forClass(CaseDetails.class);
 
     @Before
     public void setUp() {

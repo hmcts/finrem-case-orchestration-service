@@ -18,6 +18,7 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASE_FILE_VIEW_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.DELETE_OLD_BP_COVERSHEET_ENABLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.EXPRESS_PILOT_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.EXUI3990_WORKAROUND_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.FINREM_CITIZEN_UI_ENABLED;
@@ -140,6 +141,10 @@ public class FeatureToggleService {
 
     public boolean isDeleteOldBpCoversheetEnabled() {
         return isFeatureEnabled(DELETE_OLD_BP_COVERSHEET_ENABLED);
+    }
+
+    public boolean isEstimatedAssetsChecklistV3Enabled() {
+        return isFeatureEnabled(ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED);
     }
 
     /**

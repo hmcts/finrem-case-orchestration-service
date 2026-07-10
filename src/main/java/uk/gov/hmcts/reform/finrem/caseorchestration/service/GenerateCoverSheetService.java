@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -19,6 +20,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 
@@ -57,9 +59,9 @@ public class GenerateCoverSheetService {
         logCoverSheetGenerationAndStorage(APPLICANT, caseDetails.getCaseIdAsString());
 
         replaceAndStoreCoverSheet(
+            caseData,
             generateApplicantCoverSheet(caseDetails, authorisationToken),
             caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent(),
-            authorisationToken,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetApp,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetAppConfidential,
             caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetApp,
@@ -85,9 +87,9 @@ public class GenerateCoverSheetService {
         logCoverSheetGenerationAndStorage(RESPONDENT, caseDetails.getCaseIdAsString());
 
         replaceAndStoreCoverSheet(
+            caseData,
             generateRespondentCoverSheet(caseDetails, authorisationToken),
             caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant(),
-            authorisationToken,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetRes,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetResConfidential,
             caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetRes,
@@ -127,15 +129,15 @@ public class GenerateCoverSheetService {
 
         logCoverSheetGenerationAndStorage(mapping.recipient(), caseDetails.getCaseIdAsString());
         replaceAndStoreIntervenerCoverSheet(
+            caseData,
             generateIntervenerCoverSheet(caseDetails, authorisationToken, mapping.recipient()),
-            authorisationToken,
             mapping.oldCoverSheetSupplier(),
             mapping.setter()
         );
     }
 
     /**
-     * Removes the intervener cover sheet with specified intervener change details.
+     * Removes the intervener cover sheet with specified intervener change details. Old Coversheet is added to Bin.
      *
      * @param finremCaseDetails       the {@link FinremCaseDetails} object containing the case information
      * @param intervenerChangeDetails The details of the intervener change, including the type of intervener.
@@ -150,7 +152,12 @@ public class GenerateCoverSheetService {
                 intervenerChangeDetails.getIntervenerType()
             );
 
-        deleteCoverSheet(mapping.oldCoverSheetSupplier().get().getDocumentUrl(), authorisationToken);
+        CaseDocument oldCoverSheet = mapping.oldCoverSheetSupplier().get();
+        if (nonNull(oldCoverSheet) && StringUtils.isNotBlank(oldCoverSheet.getDocumentUrl())) {
+            finremCaseDetails.getData().getBin().binCaseDocument(oldCoverSheet);
+        } else {
+            log.info("{} - old cover sheet does not exist. Skip deleting it.", finremCaseDetails.getId());
+        }
         mapping.setter().accept(null);
     }
 
@@ -188,17 +195,23 @@ public class GenerateCoverSheetService {
         throw new IllegalArgumentException("Invalid intervener type: " + intervenerType);
     }
 
-    private void replaceAndStoreIntervenerCoverSheet(CaseDocument coverSheet,
-                                                     String authToken,
+    private void replaceAndStoreIntervenerCoverSheet(FinremCaseData caseData, CaseDocument coverSheet,
                                                      Supplier<CaseDocument> oldCoverSheetSupplier,
                                                      Consumer<CaseDocument> publicSetter) {
-        replaceAndStoreCoverSheet(coverSheet, null, authToken, oldCoverSheetSupplier, () -> null, publicSetter, caseDocument -> {
-        });
+        replaceAndStoreCoverSheet(
+            caseData,
+            coverSheet,
+            null,
+            oldCoverSheetSupplier,
+            () -> null,
+            publicSetter,
+            caseDocument -> {}
+        );
     }
 
-    private void replaceAndStoreCoverSheet(CaseDocument coverSheet,
+    private void replaceAndStoreCoverSheet(FinremCaseData caseData,
+                                           CaseDocument coverSheet,
                                            YesOrNo hiddenFlag,
-                                           String authToken,
                                            Supplier<CaseDocument> oldCoverSheetSupplier,
                                            Supplier<CaseDocument> oldCoverSheetConfidentialSupplier,
                                            Consumer<CaseDocument> publicSetter,
@@ -209,16 +222,12 @@ public class GenerateCoverSheetService {
             : oldCoverSheetSupplier.get());
 
         if (featureToggleService.isDeleteOldBpCoversheetEnabled() && oldCoverSheet.isPresent()) {
-            log.info("Deleting old cover sheet with url: {}", oldCoverSheet.get().getDocumentUrl());
-            deleteCoverSheet(oldCoverSheet.get().getDocumentUrl(), authToken);
+            log.info("Adding old cover sheet to deletion bin with url: {}", oldCoverSheet.get().getDocumentUrl());
+            caseData.getBin().binCaseDocument(oldCoverSheet.get());
         }
 
         publicSetter.accept(isHiddenFromPublic ? null : coverSheet);
         confidentialSetter.accept(isHiddenFromPublic ? coverSheet : null);
-    }
-
-    private void deleteCoverSheet(String coverSheetUrl, String authToken) {
-        genericDocumentService.deleteDocument(coverSheetUrl, authToken);
     }
 
     private CaseDocument generateCoverSheet(FinremCaseDetails caseDetails,

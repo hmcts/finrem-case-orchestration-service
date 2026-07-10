@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
@@ -105,8 +104,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     FinremCaseDetails generalLetterCaseDetails;
     FinremCaseDetails generalLetterContestedCaseDetails;
 
-    @Captor
-    ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
+    ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor = ArgumentCaptor.forClass(CaseDetails.class);
 
     @Before
     public void setup() {

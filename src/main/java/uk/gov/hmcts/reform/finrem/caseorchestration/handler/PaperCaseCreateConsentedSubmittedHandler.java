@@ -26,7 +26,7 @@ public class PaperCaseCreateConsentedSubmittedHandler implements CallbackHandler
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.NEW_PAPER_CASE.equals(eventType));
+            && EventType.NEW_PAPER_CASE.equals(eventType);
     }
 
     @Override

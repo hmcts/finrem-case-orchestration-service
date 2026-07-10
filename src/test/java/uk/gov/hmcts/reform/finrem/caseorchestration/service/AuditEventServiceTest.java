@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseDataApiV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEventsResponse;
@@ -20,8 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 
-public class AuditEventServiceTest extends BaseServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AuditEventServiceTest {
 
     private static final String USER_TOKEN = "USER_TOKEN";
     private static final String SERVICE_TOKEN = "SERVICE_TOKEN";
@@ -46,8 +49,8 @@ public class AuditEventServiceTest extends BaseServiceTest {
 
     private static final LocalDateTime A_LOCAL_DATE_TIME = LocalDateTime.now();
 
-    @Before
-    public void setUp() throws IOException {
+    @BeforeEach
+    void setUp() throws IOException {
         when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
         when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
         when(mockCaseDataApi.getAuditEvents(USER_TOKEN, SERVICE_TOKEN, false, CASE_ID))
@@ -55,7 +58,7 @@ public class AuditEventServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldGetAuditEventByName() throws IOException {
+    void shouldGetAuditEventByName() throws IOException {
         AuditEvent expectedAuditEvent = buildAuditEvent(NOC_EVENT, A_LOCAL_DATE_TIME);
         when(mockCaseDataApi.getAuditEvents(USER_TOKEN, SERVICE_TOKEN, false, CASE_ID))
             .thenReturn(generateAuditEventsResponse());
@@ -71,7 +74,7 @@ public class AuditEventServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldGetLatestAuditEventWithGivenName() {
+    void shouldGetLatestAuditEventWithGivenName() {
         AuditEvent expectedAuditEvent = buildAuditEvent(NOC_EVENT, A_LOCAL_DATE_TIME);
 
         List<AuditEvent> auditEventList = List.of(
@@ -88,7 +91,7 @@ public class AuditEventServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldReturnEmptyOptionalIfAuditEventWithNameCannotBeFound() {
+    void shouldReturnEmptyOptionalIfAuditEventWithNameCannotBeFound() {
         List<AuditEvent> auditEventList = List.of(
             buildAuditEvent("FR_updateContactDetails", A_LOCAL_DATE_TIME),
             buildAuditEvent("FR_createCase", A_LOCAL_DATE_TIME));
@@ -113,7 +116,7 @@ public class AuditEventServiceTest extends BaseServiceTest {
     private AuditEventsResponse generateAuditEventsResponse() throws IOException {
         try (InputStream resourceAsStream = getClass()
             .getResourceAsStream(fixture)) {
-            return mapper.readValue(resourceAsStream, AuditEventsResponse.class);
+            return createObjectMapper().readValue(resourceAsStream, AuditEventsResponse.class);
         }
     }
 }

@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -24,9 +24,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PaperCaseCreateConsentedSubmittedHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class PaperCaseCreateConsentedSubmittedHandlerTest {
 
     @InjectMocks
     private PaperCaseCreateConsentedSubmittedHandler handler;
@@ -37,30 +39,21 @@ public class PaperCaseCreateConsentedSubmittedHandlerTest {
     @Mock
     private GlobalSearchService globalSearchService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = createObjectMapper();
 
     @Test
-    public void givenACcdCallbackSolicitorCreateConsentedCase_WhenCanHandleCalled_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.NEW_PAPER_CASE),
-            is(true));
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.NEW_PAPER_CASE);
     }
 
     @Test
-    public void givenACcdCallbackAboutToSubmit_WhenCanHandleCalled_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.NEW_PAPER_CASE),
-            is(false));
-    }
-
-    @Test
-    public void givenACcdCallbackSolicitorCreateContestedCase_WhenHandle_thenAddSupplementary() {
+    void givenACcdCallbackSolicitorCreateContestedCase_WhenHandle_thenAddSupplementary() {
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(getCase()).build();
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(createCaseService, times(1)).setSupplementaryData(eq(callbackRequest), any());
+        verify(createCaseService).setSupplementaryData(callbackRequest, AUTH_TOKEN);
         verify(globalSearchService, times(1)).setGlobalSearchDataByMap(anyMap());
     }
 
