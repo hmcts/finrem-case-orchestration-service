@@ -105,7 +105,7 @@ public class FeatureToggleServiceTest {
         "feature.toggle.send_to_frc=true",
         "feature.toggle.assign_case_access=true",
         "feature.toggle.pba_case_type=true",
-        "feature.toggle.estimated_assets_checklist_V3_enabled=true"
+        "feature.toggle.estimated_assets_checklist_V3_enabled=true",
         "feature.toggle.global_search_enabled=true"
     })
     class ApprovedConsentOrderNotificationSwitchedOn {
