@@ -29,17 +29,6 @@ public class GlobalSearchServiceTest {
     GlobalSearchService globalSearchService;
 
     @Test
-    public void shouldSetGlobalSearchFields() {
-        when(caseData.getCcdCaseId()).thenReturn(String.valueOf(12345L));
-        when(caseData.getFullApplicantName()).thenReturn("John Smith");
-        when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
-
-        globalSearchService.setGlobalSearchData(caseData);
-
-        verify(caseData).setCaseNameHmctsInternal("John Smith");
-    }
-
-    @Test
     public void shouldSetGlobalSearchFieldsFromMap() {
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
 
@@ -50,15 +39,6 @@ public class GlobalSearchServiceTest {
         globalSearchService.setGlobalSearchDataByMap(caseDataMap);
 
         assertEquals("Jane Doe", caseDataMap.get("caseNameHmctsInternal"));
-    }
-
-    @Test
-    public void shouldSetGlobalSearchFieldsFeatureOff() {
-        when(featureToggleService.isGlobalSearchEnabled()).thenReturn(false);
-
-        globalSearchService.setGlobalSearchData(caseData);
-
-        verify(caseData, times(0)).setCaseNameHmctsInternal("John Smith");
     }
 
     @Test

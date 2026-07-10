@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
 
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
-    private final GlobalSearchService globalSearchService;
     private final CaseFlagsService caseFlagsService;
     private final CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
     private final UpdateRepresentationWorkflowService representationWorkflowService;
@@ -39,7 +37,6 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
     public SolicitorCreateConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         ConsentOrderService consentOrderService,
                                                         IdamService idamService,
-                                                        GlobalSearchService globalSearchService,
                                                         CaseFlagsService caseFlagsService,
                                                         CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator,
                                                         UpdateRepresentationWorkflowService representationWorkflowService) {
@@ -47,7 +44,6 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
         this.consentOrderService = consentOrderService;
         this.idamService = idamService;
         this.caseFlagsService = caseFlagsService;
-        this.globalSearchService = globalSearchService;
         this.createCaseMandatoryDataValidator = createCaseMandatoryDataValidator;
         this.representationWorkflowService = representationWorkflowService;
     }
@@ -76,7 +72,7 @@ public class SolicitorCreateConsentedAboutToSubmitHandler extends FinremCallback
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.setLatestConsentOrder(caseDocument);
         caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
-        globalSearchService.setGlobalSearchData(callbackRequest.getCaseDetails().getData());
+
         if (!idamService.isUserRoleAdmin(userAuthorisation)) {
             caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         }

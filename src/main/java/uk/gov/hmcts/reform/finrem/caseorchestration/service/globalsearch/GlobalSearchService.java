@@ -15,13 +15,6 @@ public class GlobalSearchService {
 
     private final FeatureToggleService featureToggleService;
 
-    public void setGlobalSearchData(FinremCaseData caseData) {
-        if (featureToggleService.isGlobalSearchEnabled()) {
-            log.info("setGlobalSearchData::Received request to set global search fields for case with CCD ID: {}", caseData.getCcdCaseId());
-            caseData.setCaseNameHmctsInternal(caseData.getFullApplicantName());
-        }
-    }
-
     public void setGlobalSearchDataByMap(Map<String, Object> caseData) {
         if (featureToggleService.isGlobalSearchEnabled()) {
             log.info("setGlobalSearchDataByMap::Received request to set global search fields for case with CCD ID: {}", caseData.get("ccdCaseId"));

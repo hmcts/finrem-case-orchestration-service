@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.Collections;
@@ -54,8 +53,6 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
     private IdamService idamService;
     @Mock
     private CaseFlagsService caseFlagsService;
-    @Mock
-    private GlobalSearchService globalSearchService;
     @Mock
     private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
     @Mock
