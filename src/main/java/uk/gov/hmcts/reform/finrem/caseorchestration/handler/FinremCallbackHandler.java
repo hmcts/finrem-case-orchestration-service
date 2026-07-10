@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.EstimatedAssetsChecklistWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCaseDocumentsWrapper;
@@ -261,7 +262,8 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             ManageCaseDocumentsWrapper.class,
             DraftOrdersWrapper.class,
             GeneralApplicationWrapper.class,
-            GeneralEmailWrapper.class
+            GeneralEmailWrapper.class,
+            EstimatedAssetsChecklistWrapper.class
         );
     }
 }
