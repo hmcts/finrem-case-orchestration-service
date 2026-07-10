@@ -157,4 +157,12 @@ public class CcdService {
             idamToken.getServiceAuthorization(), caseType.getCcdType(), esQueryString);
     }
 
+    public boolean contestedCaseExistsWithReference(String divorceCaseNumber, String authorisation) {
+        SearchSourceBuilder searchBuilder = new SearchSourceBuilder();
+        String escapeValue = StringEscapeUtils.escapeJava(StringEscapeUtils.escapeJson(divorceCaseNumber));
+        searchBuilder.query(QueryBuilders.boolQuery()
+            .must(QueryBuilders.matchQuery("reference", escapeValue).operator(Operator.AND)));
+
+        return esSearchCases(CaseType.CONTESTED, searchBuilder.toString(), authorisation).getTotal() > 0;
+    }
 }

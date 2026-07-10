@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
@@ -21,16 +22,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.produceMapWithoutEmptyEntries;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_CASE_NUMBER;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
 public class BulkScanService {
+
+    private static final String CONSENTED_IN_CONTESTED_WARNING =
+        "A Contested Financial Remedy case already exists for the supplied divorce case number. "
+        + "Consented within Contested applications must be progressed on the existing Contested case.";
+    private static final String CCD_CASE_REFERENCE_REGEX = "\\d{16}";
 
     private final FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
 
@@ -38,15 +46,21 @@ public class BulkScanService {
 
     private final FormAValidator formAValidator;
 
+    private final CcdService ccdService;
+
+    private final SystemUserService systemUserService;
+
     public OcrValidationResult validateBulkScanForm(String formType, List<OcrDataField> ocrDataFields) throws UnsupportedFormTypeException {
         BulkScanFormValidator formValidator = finRemBulkScanFormValidatorFactory.getValidator(formType);
         return formValidator.validateBulkScanForm(ocrDataFields);
     }
 
-    public Map<String, Object> transformBulkScanForm(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException, InvalidDataException {
+    public Map<String, Object> transformBulkScanForm(ExceptionRecord exceptionRecord)
+        throws UnsupportedFormTypeException, InvalidDataException {
         validateForTransformation(exceptionRecord);
 
-        BulkScanFormTransformer bulkScanFormTransformer = finRemBulkScanFormTransformerFactory.getTransformer(exceptionRecord.getFormType());
+        BulkScanFormTransformer bulkScanFormTransformer =
+            finRemBulkScanFormTransformerFactory.getTransformer(exceptionRecord.getFormType());
         Map<String, Object> transformIntoCaseData = bulkScanFormTransformer.transformIntoCaseData(exceptionRecord);
         Map<String, Object> caseData = new HashMap<>(transformIntoCaseData);
         addChangeOrganisationRequestAndDefaultOrganisationPolicies(caseData);
@@ -82,23 +96,22 @@ public class BulkScanService {
         OcrValidationResult ocrDataFieldsValidationResult
             = validateBulkScanForm(exceptionRecord.getFormType(), exceptionRecord.getOcrDataFields());
 
-        log.info("OCR Data Fields Validation Result: {}", ocrDataFieldsValidationResult.getStatus());
+        if (!ocrDataFieldsValidationResult.getStatus().equals(ValidationStatus.SUCCESS)) {
+            throwInvalidDataException(exceptionRecord, ocrDataFieldsValidationResult);
+        }
+
+        String divorceCaseNumber = produceMapWithoutEmptyEntries(exceptionRecord.getOcrDataFields()).get(DIVORCE_CASE_NUMBER);
+
+        if (isCcdCaseReference(divorceCaseNumber)
+            && ccdService.contestedCaseExistsWithReference(divorceCaseNumber, systemUserService.getSysUserToken())) {
+            ocrDataFieldsValidationResult = addContestedRefWarning(ocrDataFieldsValidationResult);
+        }
 
         if (!ocrDataFieldsValidationResult.getStatus().equals(ValidationStatus.SUCCESS)) {
-            String ocrValidationError = String.format("Validation of Exception Record %s finished with status %s",
-                exceptionRecord.getId(), ocrDataFieldsValidationResult.getStatus());
-
-            log.info(ocrValidationError);
-            throw new InvalidDataException(
-                ocrValidationError,
-                ocrDataFieldsValidationResult.getWarnings(),
-                ocrDataFieldsValidationResult.getErrors()
-            );
+            throwInvalidDataException(exceptionRecord, ocrDataFieldsValidationResult);
         }
 
         OcrValidationResult bulkScanFormsValidationResult = formAValidator.validateFormAScannedDocuments(exceptionRecord);
-
-        log.info("OCR Data Fields Validation Result: {}", ocrDataFieldsValidationResult.getStatus());
 
         if (!bulkScanFormsValidationResult.getStatus().equals(ValidationStatus.SUCCESS)) {
             String docValidationError = String.format("Validation of Exception Record attached documents %s finished with status %s",
@@ -110,5 +123,28 @@ public class BulkScanService {
                 bulkScanFormsValidationResult.getErrors()
             );
         }
+    }
+
+    private OcrValidationResult addContestedRefWarning(OcrValidationResult validationResult) {
+        OcrValidationResult.Builder builder = OcrValidationResult.builder();
+        validationResult.getWarnings().forEach(builder::addWarning);
+        validationResult.getErrors().forEach(builder::addError);
+        return builder.addWarning(BulkScanService.CONSENTED_IN_CONTESTED_WARNING).build();
+    }
+
+    private boolean isCcdCaseReference(String caseReference) {
+        return StringUtils.isNotBlank(caseReference) && caseReference.matches(CCD_CASE_REFERENCE_REGEX);
+    }
+
+    private void throwInvalidDataException(ExceptionRecord exceptionRecord, OcrValidationResult validationResult) {
+        String ocrValidationError = String.format("Validation of Exception Record %s finished with status %s",
+            exceptionRecord.getId(), validationResult.getStatus());
+
+        log.info(ocrValidationError);
+        throw new InvalidDataException(
+            ocrValidationError,
+            validationResult.getWarnings(),
+            validationResult.getErrors()
+        );
     }
 }

@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.authorisation.validators.AuthTokenValidator;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
 
 import java.util.Arrays;
@@ -25,6 +27,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -52,6 +55,12 @@ public class TransformationBulkScanTest extends BaseTest {
     @MockitoBean
     FormAValidator bulkScanFormValidator;
 
+    @MockitoBean
+    CcdService ccdService;
+
+    @MockitoBean
+    SystemUserService systemUserService;
+
     @Before
     public void setup() {
         when(authTokenValidator.getServiceName(any())).thenReturn("bulk_scan_orchestrator");
@@ -64,6 +73,30 @@ public class TransformationBulkScanTest extends BaseTest {
 
         when(bulkScanFormValidator.validateBulkScanForm(any()))
             .thenReturn(OcrValidationResult.builder().addWarning(warningMsg).build());
+
+        mockMvc.perform(
+            post(TRANSFORMATION_URL)
+                .contentType(APPLICATION_JSON)
+                .content(jsonPayload)
+                .header(SERVICE_AUTHORISATION_HEADER, "I'm whitelisted service")
+        )
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(content().string(hasErrorWithMessageCopiedFromWarning(warningMsg)));
+    }
+
+    @Test
+    public void shouldReturnErrorResponseForContestedCaseReferenceInDivorceCaseNumber() throws Exception {
+        String contestedCaseReference = "1234123412341234";
+        String systemUserToken = "system-user-token";
+        String jsonPayload = loadResourceAsString(FORM_A_JSON_PATH)
+            .replace("DD12D12345", contestedCaseReference);
+        String warningMsg = "A Contested Financial Remedy case already exists for the supplied divorce case number. "
+            + "Consented within Contested applications must be progressed on the existing Contested case.";
+
+        when(bulkScanFormValidator.validateBulkScanForm(any()))
+            .thenReturn(OcrValidationResult.builder().build());
+        when(systemUserService.getSysUserToken()).thenReturn(systemUserToken);
+        when(ccdService.contestedCaseExistsWithReference(eq(contestedCaseReference), eq(systemUserToken))).thenReturn(true);
 
         mockMvc.perform(
             post(TRANSFORMATION_URL)

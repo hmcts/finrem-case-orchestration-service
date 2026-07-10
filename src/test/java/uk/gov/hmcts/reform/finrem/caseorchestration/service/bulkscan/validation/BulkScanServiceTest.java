@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
 
 import java.util.List;
@@ -25,7 +27,9 @@ import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -35,10 +39,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BU
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FORM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FORM_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_CASE_NUMBER;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BulkScanServiceTest {
@@ -60,6 +66,12 @@ public class BulkScanServiceTest {
 
     @Mock
     private FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
+
+    @Mock
+    private CcdService ccdService;
+
+    @Mock
+    private SystemUserService systemUserService;
 
     @InjectMocks
     private BulkScanService bulkScanService;
@@ -133,6 +145,34 @@ public class BulkScanServiceTest {
         when(bulkScanFormValidator.validateBulkScanForm(any())).thenReturn(validatedWithWarn);
 
         bulkScanService.transformBulkScanForm(exceptionRecord);
+
+        verify(finRemBulkScanFormTransformerFactory, never()).getTransformer(TEST_FORM_TYPE);
+        verify(bulkScanFormTransformer, never()).transformIntoCaseData(exceptionRecord);
+    }
+
+    @Test
+    public void shouldThrowInvalidDataExceptionWhenContestedCaseExistsForReferenceInDivorceCaseNumberField()
+        throws UnsupportedFormTypeException {
+        String contestedCaseReference = "1234123412341234";
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder()
+            .formType(TEST_FORM_TYPE)
+            .ocrDataFields(singletonList(new OcrDataField(DIVORCE_CASE_NUMBER, contestedCaseReference)))
+            .build();
+
+        when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);
+        when(bulkScanFormValidator.validateBulkScanForm(any())).thenReturn(OcrValidationResult.builder().build());
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+        when(ccdService.contestedCaseExistsWithReference(contestedCaseReference, TEST_SYSTEM_TOKEN)).thenReturn(true);
+
+        try {
+            bulkScanService.transformBulkScanForm(exceptionRecord);
+            fail("Expected InvalidDataException");
+        } catch (InvalidDataException exception) {
+            assertThat(exception.getWarnings(), hasItem(
+                "A Contested Financial Remedy case already exists for the supplied divorce case number. "
+                    + "Consented within Contested applications must be progressed on the existing Contested case."
+            ));
+        }
 
         verify(finRemBulkScanFormTransformerFactory, never()).getTransformer(TEST_FORM_TYPE);
         verify(bulkScanFormTransformer, never()).transformIntoCaseData(exceptionRecord);
