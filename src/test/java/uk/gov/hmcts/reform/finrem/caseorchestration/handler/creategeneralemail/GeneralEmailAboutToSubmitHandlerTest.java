@@ -9,11 +9,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentConversionException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Ge
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,7 +73,7 @@ class GeneralEmailAboutToSubmitHandlerTest {
 
         FinremCaseData finremCaseData = spy(FinremCaseData.builder()
             .generalEmailWrapper(GeneralEmailWrapper.builder()
-                .generalEmailUploadedDocument(caseDocument1)
+                .generalEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(caseDocument1)))
                 .build())
             .build());
         CaseType caseType = mock(CaseType.class);
@@ -86,7 +89,10 @@ class GeneralEmailAboutToSubmitHandlerTest {
 
         assertAll(
             () -> verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument1, AUTH_TOKEN, caseType),
-            () -> assertThat(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument())
+            () -> assertThat(finremCaseData.getGeneralEmailWrapper()
+                .getGeneralEmailUploadedDocuments()
+                .getFirst()
+                .getValue())
                 .isEqualTo(pdf1)
         );
     }
@@ -152,8 +158,33 @@ class GeneralEmailAboutToSubmitHandlerTest {
                 "generalEmailRecipient", "generalEmailRecipient",
                 "generalEmailCreatedBy", "generalEmailCreatedBy",
                 "generalEmailBody", "generalEmailBody",
-                "generalEmailUploadedDocument", Map.of()
+                "generalEmailUploadedDocuments", List.of()
             )));
+    }
+
+    @Test
+    void givenDocumentConversionException_whenHandled_thenReturnError() {
+        CaseDocument caseDocument = caseDocument("a.doc");
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder()
+            .generalEmailWrapper(GeneralEmailWrapper.builder()
+                .generalEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(caseDocument)))
+                .build())
+            .build());
+
+        CaseType caseType = mock(CaseType.class);
+        when(finremCaseData.getCcdCaseType()).thenReturn(caseType);
+
+        doThrow(new DocumentConversionException("Conversion failed", new RuntimeException()))
+            .when(genericDocumentService)
+            .convertDocumentIfNotPdfAlready(caseDocument, AUTH_TOKEN, caseType);
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(finremCaseData);
+
+        var response = handler.handle(request, AUTH_TOKEN);
+
+        assertThat(response.getErrors())
+            .containsOnly("Unable to convert a provided attachment to PDF");
     }
 
     private FinremCallbackRequest mockCallbackRequest(boolean isConsented) {

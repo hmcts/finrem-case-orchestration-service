@@ -7,11 +7,9 @@ import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
@@ -96,7 +94,6 @@ public class NotificationService {
     private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
     private static final String HWF_LOG = "Received request for notification email for HWFSuccessful. Case ID : {}";
     private static final String BARRISTER_ACCESS_LOG = "Received request for notification email for Barrister Access Added event. Case ID : {}";
-    private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final FeatureToggleService featureToggleService;
     private final NotificationRequestMapper notificationRequestMapper;
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
@@ -400,23 +397,28 @@ public class NotificationService {
     }
 
     private boolean isGeneralEmailWithAttachment(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null;
+        return !caseDetails.getData().getGeneralEmailWrapper().getUploadedDocuments().isEmpty();
     }
 
-    private void addGeneralEmailAttachment(FinremCaseDetails caseDetails, NotificationRequest notificationRequest, String auth) {
-        CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
-        if (caseDocument != null) {
-            notificationRequest.setDocumentContentsList(
-                List.of(evidenceManagementDownloadService.getByteArray(caseDocument, auth))
-            );
-        }
+    private void addGeneralEmailAttachments(FinremCaseDetails caseDetails,
+                                            NotificationRequest notificationRequest,
+                                            String auth) {
+        List<byte[]> documentContentsList = caseDetails.getData().getGeneralEmailWrapper()
+            .getUploadedDocuments()
+            .stream()
+            .map(document -> evidenceManagementDownloadService.getByteArray(document, auth))
+            .toList();
+
+        notificationRequest.setDocumentContentsList(documentContentsList);
     }
 
     private void sendGeneralEmail(FinremCaseDetails caseDetails, String authToken, EmailTemplateNames templateName) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails);
+
         if (isGeneralEmailWithAttachment(caseDetails)) {
-            addGeneralEmailAttachment(caseDetails, notificationRequest, authToken);
+            addGeneralEmailAttachments(caseDetails, notificationRequest, authToken);
         }
+
         emailService.sendConfirmationEmail(notificationRequest, templateName);
     }
 

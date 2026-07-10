@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.N
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
@@ -734,9 +735,10 @@ class NotificationServiceTest {
         when(evidenceManagementDownloadService.getByteArray(any(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(documentContents);
 
         notificationService.sendConsentGeneralEmail(finremCaseDetails, AUTH_TOKEN);
-
+        CaseDocument uploadedDocument = finremCaseDetails.getData().getGeneralEmailWrapper()
+            .getGeneralEmailUploadedDocuments().get(0).getValue();
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(finremCaseDetails);
-        verify(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
+        verify(evidenceManagementDownloadService).getByteArray(uploadedDocument, AUTH_TOKEN);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT);
         assertThat(notificationRequest.getDocumentContentsList()).containsExactly(documentContents);
     }
@@ -749,9 +751,10 @@ class NotificationServiceTest {
         when(evidenceManagementDownloadService.getByteArray(any(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(documentContents);
 
         notificationService.sendContestedGeneralEmail(finremCaseDetails, AUTH_TOKEN);
-
+        CaseDocument uploadedDocument = finremCaseDetails.getData().getGeneralEmailWrapper()
+            .getGeneralEmailUploadedDocuments().get(0).getValue();
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(finremCaseDetails);
-        verify(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
+        verify(evidenceManagementDownloadService).getByteArray(uploadedDocument, AUTH_TOKEN);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT);
         assertThat(notificationRequest.getDocumentContentsList())
             .containsExactly(documentContents);
@@ -1396,9 +1399,9 @@ class NotificationServiceTest {
                 .ccdCaseType(caseType)
                 .generalEmailWrapper(GeneralEmailWrapper.builder()
                     .generalEmailRecipient(APPLICANT_EMAIL)
-                    .generalEmailUploadedDocument(CaseDocument.builder()
+                    .generalEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(CaseDocument.builder()
                         .documentBinaryUrl("dummyUrl")
-                        .build())
+                        .build())))
                     .build())
                 .build())
             .caseType(caseType)

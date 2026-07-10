@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.creategeneralemail;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentConversionException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -22,8 +22,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Ge
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @Service
@@ -34,7 +35,8 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
     private final GenericDocumentService genericDocumentService;
     private final GeneralEmailDocumentCategoriser generalEmailCategoriser;
 
-    @Autowired
+    private static final String DOCUMENT_CONVERSION_ERROR = "Unable to convert a provided attachment to PDF";
+
     public GeneralEmailAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                             NotificationService notificationService,
                                             GeneralEmailService generalEmailService,
@@ -58,14 +60,27 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         validateCaseData(callbackRequest);
-
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
 
-        convertEmailAttachmentToPdfIfRequired(finremCaseData, userAuthorisation);
+        List<String> errors = new ArrayList<>();
+        generalEmailService.validateUploadedDocuments(finremCaseData, userAuthorisation, errors);
+
+        if (!errors.isEmpty()) {
+            return response(finremCaseData, null, errors);
+        }
+
+        try {
+            convertEmailAttachmentsToPdfIfRequired(finremCaseData, userAuthorisation);
+        } catch (DocumentConversionException e) {
+            log.error("Unable to convert general email attachment to PDF for case {}",
+                callbackRequest.getCaseDetails().getId(), e);
+            errors.add(DOCUMENT_CONVERSION_ERROR);
+            return response(finremCaseData, null, errors);
+        }
+
         generalEmailService.storeGeneralEmail(finremCaseData);
 
-        List<String> errors = new ArrayList<>();
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         sendGeneralEmail(finremCaseDetails, userAuthorisation, errors);
         if (!errors.isEmpty()) {
             return response(finremCaseData, null, errors);
@@ -78,14 +93,18 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
         return response(finremCaseData);
     }
 
-    private void convertEmailAttachmentToPdfIfRequired(FinremCaseData finremCaseData, String userAuthorisation) {
-        ofNullable(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument())
-            .map(document -> genericDocumentService.convertDocumentIfNotPdfAlready(
-                document,
-                userAuthorisation,
-                finremCaseData.getCcdCaseType()
-            ))
-            .ifPresent(finremCaseData.getGeneralEmailWrapper()::setGeneralEmailUploadedDocument);
+    private void convertEmailAttachmentsToPdfIfRequired(FinremCaseData finremCaseData, String userAuthorisation) {
+        emptyIfNull(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocuments())
+            .stream()
+            .filter(Objects::nonNull)
+            .filter(documentItem -> documentItem.getValue() != null)
+            .forEach(documentItem -> documentItem.setValue(
+                genericDocumentService.convertDocumentIfNotPdfAlready(
+                    documentItem.getValue(),
+                    userAuthorisation,
+                    finremCaseData.getCcdCaseType()
+                )
+            ));
     }
 
     private void sendGeneralEmail(FinremCaseDetails finremCaseDetails, String userAuthorisation, List<String> errors) {

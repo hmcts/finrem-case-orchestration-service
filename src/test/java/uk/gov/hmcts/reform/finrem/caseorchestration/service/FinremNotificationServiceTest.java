@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.F
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
@@ -387,7 +388,7 @@ class FinremNotificationServiceTest {
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(consentedFinremCaseDetails))
             .thenReturn(mock(NotificationRequest.class));
 
-        notificationService.sendConsentGeneralEmail(consentedFinremCaseDetails, anyString());
+        notificationService.sendConsentGeneralEmail(consentedFinremCaseDetails, AUTH_TOKEN);
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL));
@@ -401,7 +402,8 @@ class FinremNotificationServiceTest {
             .build();
 
         FinremCaseData caseData = getDefaultConsentedFinremCaseData();
-        caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(document);
+        caseData.getGeneralEmailWrapper()
+            .setGeneralEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(document)));
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(caseData);
 
         NotificationRequest notificationRequest = mock(NotificationRequest.class);
@@ -422,8 +424,9 @@ class FinremNotificationServiceTest {
     @Test
     void shouldThrowExceptionIfDownloadGeneralEmailUploadedDocumentsFailWhenSendGeneralEmailConsented() {
         FinremCaseData defaultFinremCaseData = getDefaultConsentedFinremCaseData();
+        CaseDocument document = CaseDocument.builder().documentBinaryUrl("binaryUrl").build();
         defaultFinremCaseData.getGeneralEmailWrapper()
-            .setGeneralEmailUploadedDocument(CaseDocument.builder().documentBinaryUrl("binaryUrl").build());
+            .setGeneralEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(document)));
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(defaultFinremCaseData);
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails))
             .thenReturn(mock(NotificationRequest.class));
@@ -434,14 +437,15 @@ class FinremNotificationServiceTest {
             .isInstanceOf(HttpClientErrorException.class);
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(caseDetails);
-        verify(emailService, never()).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL));
+        verify(emailService, never()).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL_ATTACHMENT));
     }
 
     @Test
     void sendGeneralEmailContested() {
         when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(contestedFinremCaseDetails))
             .thenReturn(mock(NotificationRequest.class));
-        notificationService.sendContestedGeneralEmail(contestedFinremCaseDetails, anyString());
+
+        notificationService.sendContestedGeneralEmail(contestedFinremCaseDetails, AUTH_TOKEN);
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_EMAIL));
