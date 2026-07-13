@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.AdditionalDocumentsCollection;
@@ -38,9 +39,12 @@ import java.util.Objects;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ACCELERATED_ORDER_OPTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
 
@@ -71,34 +75,61 @@ public class DraftOrderService {
         return ofNullable(uploadOrdersOrPsas).orElse(List.of()).contains(PSA_TYPE);
     }
 
-    public List<AgreedDraftOrderCollection> processAgreedDraftOrders(UploadAgreedDraftOrder uploadAgreedDraftOrder, String userAuthorisation) {
-        List<AgreedDraftOrderCollection> ret = new ArrayList<>();
+    public List<AgreedDraftOrderCollection> processAgreedDraftOrders(DraftOrdersWrapper draftOrdersWrapper, String userAuthorisation) {
+        OrderType orderType = getOrderType(draftOrdersWrapper.getTypeOfDraftOrder());
+
+        List<AgreedDraftOrderCollection> processedDraftOrders = new ArrayList<>();
+        UploadAgreedDraftOrder uploadAgreedDraftOrder = draftOrdersWrapper.getUploadAgreedDraftOrder();
 
         // First check if 'order' is selected
         if (isOrdersSelected(uploadAgreedDraftOrder.getUploadOrdersOrPsas())) {
-            ofNullable(uploadAgreedDraftOrder.getUploadAgreedDraftOrderCollection()).orElse(List.of()).stream()
+            emptyIfNull(uploadAgreedDraftOrder.getUploadAgreedDraftOrderCollection())
+                .stream()
                 .map(UploadAgreedDraftOrderCollection::getValue)
                 .filter(Objects::nonNull)
-                .map(udo -> mapToAgreedDraftOrder(udo, uploadAgreedDraftOrder, userAuthorisation))
+                .map(uploadedOrder -> mapToAgreedDraftOrder(
+                    uploadedOrder,
+                    uploadAgreedDraftOrder,
+                    userAuthorisation,
+                    orderType
+                ))
                 .map(orderDraftOrder -> AgreedDraftOrderCollection.builder()
                     .value(orderDraftOrder)
                     .build())
-                .forEach(ret::add);
+                .forEach(processedDraftOrders::add);
         }
 
         //check if 'psa' is selected
         if (isPsaSelected(uploadAgreedDraftOrder.getUploadOrdersOrPsas())) {
-            ofNullable(uploadAgreedDraftOrder.getAgreedPsaCollection()).orElse(List.of()).stream()
+            emptyIfNull(uploadAgreedDraftOrder.getAgreedPsaCollection())
+                .stream()
                 .map(AgreedPensionSharingAnnexCollection::getValue)
                 .filter(Objects::nonNull)
-                .map(uploadPsa -> mapToAgreedDraftOrderForPsa(uploadPsa, uploadAgreedDraftOrder, userAuthorisation))
+                .map(uploadPsa -> mapToAgreedDraftOrderForPsa(
+                    uploadPsa,
+                    uploadAgreedDraftOrder,
+                    userAuthorisation,
+                    orderType
+                ))
                 .map(psaDraftOrder -> AgreedDraftOrderCollection.builder()
                     .value(psaDraftOrder)
                     .build())
-                .forEach(ret::add);
+                .forEach(processedDraftOrders::add);
         }
 
-        return ret;
+        return processedDraftOrders;
+    }
+
+    private OrderType getOrderType(String typeOfDraftOrder) {
+
+        return switch (typeOfDraftOrder) {
+            case AGREED_DRAFT_ORDER_OPTION -> OrderType.AGREED_ORDER;
+            case ACCELERATED_ORDER_OPTION -> OrderType.ACCELERATED_PROCEDURE_ORDER;
+            default -> throw new InvalidCaseDataException(
+                BAD_REQUEST.value(),
+                format("Unsupported draft order type: %s", typeOfDraftOrder)
+            );
+        };
     }
 
     private void setUploadedOnBehalfOf(UploadAgreedDraftOrder uploadAgreedDraftOrder,
@@ -112,7 +143,7 @@ public class DraftOrderService {
 
     private AgreedDraftOrder mapToAgreedDraftOrder(
         uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder uploadDraftOrder,
-        UploadAgreedDraftOrder uploadAgreedDraftOrder, String userAuthorisation) {
+        UploadAgreedDraftOrder uploadAgreedDraftOrder, String userAuthorisation, OrderType orderType) {
 
         AgreedDraftOrder.AgreedDraftOrderBuilder builder = AgreedDraftOrder.builder();
 
@@ -131,13 +162,14 @@ public class DraftOrderService {
             builder.attachments(attachments);
         }
 
+        builder.orderType(orderType);
         builder.resubmission(YesOrNo.forValue(ofNullable(uploadDraftOrder.getResubmission()).orElse(List.of()).contains(YES_VALUE)));
         builder.orderStatus(OrderStatus.TO_BE_REVIEWED);
         return applySubmittedInfo(userAuthorisation, builder.build());
     }
 
     private AgreedDraftOrder mapToAgreedDraftOrderForPsa(
-        AgreedPensionSharingAnnex uploadPsa, UploadAgreedDraftOrder uploadAgreedDraftOrder, String userAuthorisation) {
+        AgreedPensionSharingAnnex uploadPsa, UploadAgreedDraftOrder uploadAgreedDraftOrder, String userAuthorisation, OrderType orderType) {
 
         AgreedDraftOrder.AgreedDraftOrderBuilder builder = AgreedDraftOrder.builder();
 
@@ -146,6 +178,7 @@ public class DraftOrderService {
         // Map the PSA document
         ofNullable(uploadPsa).map(AgreedPensionSharingAnnex::getAgreedPensionSharingAnnexes).ifPresent(builder::pensionSharingAnnex);
 
+        builder.orderType(orderType);
         builder.orderStatus(OrderStatus.TO_BE_REVIEWED);
         return applySubmittedInfo(userAuthorisation, builder.build());
     }
@@ -211,6 +244,7 @@ public class DraftOrderService {
             .map(ado -> DraftOrderDocReviewCollection.builder()
                 .value(DraftOrderDocumentReview.builder()
                     .hearingType(hearingType)
+                    .orderType(ado.getOrderType())
                     .orderStatus(ado.getOrderStatus())
                     .draftOrderDocument(ado.getDraftOrder())
                     .submittedBy(ado.getSubmittedBy())
@@ -234,6 +268,7 @@ public class DraftOrderService {
             .map(ado -> PsaDocReviewCollection.builder()
                 .value(PsaDocumentReview.builder()
                     .hearingType(hearingType)
+                    .orderType(ado.getOrderType())
                     .orderStatus(ado.getOrderStatus())
                     .psaDocument(ado.getPensionSharingAnnex())
                     .submittedBy(ado.getSubmittedBy())

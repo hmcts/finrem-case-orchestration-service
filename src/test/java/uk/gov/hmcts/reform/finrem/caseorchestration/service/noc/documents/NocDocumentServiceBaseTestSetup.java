@@ -7,6 +7,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
@@ -36,7 +37,7 @@ public class NocDocumentServiceBaseTestSetup {
     @Mock
     protected GenericDocumentService genericDocumentService;
 
-    protected ObjectMapper objectMapper = new ObjectMapper();
+    protected ObjectMapper objectMapper = TestObjectMapperFactory.createObjectMapper();
 
     protected static final String AUTH_TOKEN = "authToken";
     protected static final String DOC_TEMPLATE = "docTemplate";
@@ -75,7 +76,6 @@ public class NocDocumentServiceBaseTestSetup {
             .addressee(Addressee.builder().formattedAddress(FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build())
             .build();
 
-
     }
 
     protected void assertAndVerifyDocumentsAreGenerated(CaseDocument caseDocument) {
@@ -105,5 +105,3 @@ public class NocDocumentServiceBaseTestSetup {
         assertThat(addresseeMap.get("formattedAddress"), is("formattedAddress"));
     }
 }
-
-

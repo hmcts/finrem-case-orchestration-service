@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -19,10 +18,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
@@ -58,13 +57,14 @@ public class AbstractLetterDetailsGeneratorTestSetup {
     protected ChangedRepresentative changedRepresentativeRemoved;
     protected ChangedRepresentative changedRepresentativeAdded;
 
-    @Before
-    public void setUpTest() {
+    private final ObjectMapper objectMapper = createObjectMapper();
+
+    void setUpTest() {
         caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
-            new ObjectMapper());
+            objectMapper);
         caseDetailsBefore = caseDetailsFromResource(
             "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
-            new ObjectMapper());
+            objectMapper);
         when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn(APPLICANT_FULL_NAME);
 
         representationUpdate = buildChangeOfRepresentation();
@@ -72,41 +72,43 @@ public class AbstractLetterDetailsGeneratorTestSetup {
 
     protected void assertLetterDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
                                        NoticeType noticeType, boolean isConsented) {
-        assertThat(noticeOfChangeLetterDetails.getCaseNumber(), is(caseDetails.getId().toString()));
-        assertThat(noticeOfChangeLetterDetails.getReference(), is(caseDetails.getData().get(SOLICITOR_REFERENCE).toString()));
-        assertThat(noticeOfChangeLetterDetails.getReference(), is(caseDetails.getData().get(SOLICITOR_REFERENCE).toString()));
-        assertThat(noticeOfChangeLetterDetails.getDivorceCaseNumber(), is(caseDetails.getData().get(DIVORCE_CASE_NUMBER).toString()));
-        assertThat(noticeOfChangeLetterDetails.getLetterDate(), is(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now())));
-        assertThat(noticeOfChangeLetterDetails.getApplicantName(), is(APPLICANT_FULL_NAME));
-        assertThat(noticeOfChangeLetterDetails.getRespondentName(),
-            is(isConsented ? RESPONDENT_FULL_NAME_CONSENTED : RESPONDENT_FULL_NAME_CONTESTED));
+        assertEquals(caseDetails.getId().toString(), noticeOfChangeLetterDetails.getCaseNumber());
+        assertEquals(caseDetails.getData().get(SOLICITOR_REFERENCE).toString(), noticeOfChangeLetterDetails.getReference());
+        assertEquals(caseDetails.getData().get(DIVORCE_CASE_NUMBER).toString(), noticeOfChangeLetterDetails.getDivorceCaseNumber());
+        assertEquals(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()),
+            noticeOfChangeLetterDetails.getLetterDate());
+        assertEquals(APPLICANT_FULL_NAME, noticeOfChangeLetterDetails.getApplicantName());
+        assertEquals(
+            isConsented ? RESPONDENT_FULL_NAME_CONSENTED : RESPONDENT_FULL_NAME_CONTESTED,
+            noticeOfChangeLetterDetails.getRespondentName());
 
-        assertThat(noticeOfChangeLetterDetails.getSolicitorFirmName(), is(noticeType == NoticeType.ADD
+        assertEquals(noticeType == NoticeType.ADD
             ? ORGANISATION_ADDED_NAME
-            : ORGANISATION_REMOVED_NAME));
+            : ORGANISATION_REMOVED_NAME,
+            noticeOfChangeLetterDetails.getSolicitorFirmName());
     }
 
     protected void assertContestedCourtDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
         Map<String, Object> courtDetails = noticeOfChangeLetterDetails.getCourtDetails();
-        assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is("Central Family Court"));
-        assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY),
-            is("Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP"));
-        assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is("0300 123 5577"));
-        assertThat(courtDetails.get(COURT_DETAILS_EMAIL_KEY), is("FRCLondon@justice.gov.uk"));
+        assertEquals("Central Family Court", courtDetails.get(COURT_DETAILS_NAME_KEY));
+        assertEquals("Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP",
+            courtDetails.get(COURT_DETAILS_ADDRESS_KEY));
+        assertEquals("0300 123 5577", courtDetails.get(COURT_DETAILS_PHONE_KEY));
+        assertEquals("FRCLondon@justice.gov.uk", courtDetails.get(COURT_DETAILS_EMAIL_KEY));
     }
 
     protected void assertConsentedCourtDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
         Map<String, Object> courtDetails = noticeOfChangeLetterDetails.getCourtDetails();
-        assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is("Family Court at the Courts and Tribunal Service Centre"));
-        assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY), is("PO Box 12746, Harlow, CM20 9QZ"));
-        assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
-        assertThat(courtDetails.get(COURT_DETAILS_EMAIL_KEY), is("contactFinancialRemedy@justice.gov.uk"));
+        assertEquals("Family Court at the Courts and Tribunal Service Centre", courtDetails.get(COURT_DETAILS_NAME_KEY));
+        assertEquals("PO Box 12746, Harlow, CM20 9QZ", courtDetails.get(COURT_DETAILS_ADDRESS_KEY));
+        assertEquals("0300 303 0642", courtDetails.get(COURT_DETAILS_PHONE_KEY));
+        assertEquals("contactFinancialRemedy@justice.gov.uk", courtDetails.get(COURT_DETAILS_EMAIL_KEY));
     }
 
     protected void assertAddresseeDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
         Addressee addressee = noticeOfChangeLetterDetails.getAddressee();
-        assertThat(addressee.getFormattedAddress(), is(FORMATTED_ADDRESS));
-        assertThat(addressee.getName(), is(ADDRESSEE_NAME));
+        assertEquals(FORMATTED_ADDRESS, addressee.getFormattedAddress());
+        assertEquals(ADDRESSEE_NAME, addressee.getName());
     }
 
     protected RepresentationUpdate buildChangeOfRepresentation() {
