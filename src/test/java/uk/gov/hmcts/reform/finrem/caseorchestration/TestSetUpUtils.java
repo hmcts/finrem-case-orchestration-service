@@ -674,7 +674,7 @@ public class TestSetUpUtils {
             org.assertj.core.api.Assertions.assertThat(actual).doesNotContain(expect);
         }
     }
-  
+
     public static void verifyTemporaryFieldsWereSanitised(FinremAboutToSubmitCallbackHandler aboutToSubmitHandler,
                                                           FinremCaseDetails finremCaseDetails,
                                                           FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -694,7 +694,7 @@ public class TestSetUpUtils {
         ArgumentCaptor<Map> mapCaptor = ArgumentCaptor.forClass(Map.class);
         FinremCaseData sanitisedFinremCaseData = mock(FinremCaseData.class);
         when(finremCaseDetailsMapper.mapToFinremCaseData(mapCaptor.capture())).thenReturn(sanitisedFinremCaseData);
-        // to simulate CaseDocument field annotacted with @TemporaryField to be binned
+        // to simulate CaseDocument field annotated with @TemporaryField to be binned
         lenient().when(finremCaseDetailsMapper.mapToCaseDocument(anyMap())).thenReturn(mock(CaseDocument.class));
 
         try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
