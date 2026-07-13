@@ -33,6 +33,8 @@ public class GeneralEmailWrapper implements HasCaseDocument {
     private String generalEmailBody;
     @TemporaryField
     private List<DocumentCollectionItem> generalEmailUploadedDocuments;
+    @TemporaryField
+    private List<DocumentCollectionItem> generalEmailUploadedDocument;
 
     // It stores the emails sent
     private List<GeneralEmailCollection> generalEmailCollection;
