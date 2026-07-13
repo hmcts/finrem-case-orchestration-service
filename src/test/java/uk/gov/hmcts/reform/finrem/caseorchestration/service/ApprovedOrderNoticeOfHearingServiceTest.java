@@ -176,7 +176,6 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-
         data.getContactDetailsWrapper().setApplicantFmName("Poor");
         data.getContactDetailsWrapper().setApplicantLname("Poor");
         data.getContactDetailsWrapper().setAppRespondentFmName("Poor2");

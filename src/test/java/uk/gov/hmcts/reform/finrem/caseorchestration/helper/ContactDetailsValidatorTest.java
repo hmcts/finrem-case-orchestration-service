@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.MockedStatic;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -44,6 +45,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetails
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.RESPONDENT_SOLICITOR_POSTCODE_ERROR;
 
 class ContactDetailsValidatorTest {
+
+    private static final EventType TEST_EVENT = EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
 
     private static final String INVALID_EMAIL = "invalid-email";
     private static final String VALID_EMAIL = "valid@email.com";
@@ -930,5 +933,204 @@ class ContactDetailsValidatorTest {
         when(policy.getOrganisation()).thenReturn(organisation);
 
         return policy;
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("applicantPostalAddressScenarios")
+    void shouldCheckForMissingApplicantPostalAddress(String description, YesOrNo applicantRepresented, Address address,
+                                                     EventType eventType, List<String> expectedResult) {
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .applicantRepresented(applicantRepresented)
+            .applicantAddress(address)
+            .contestedRespondentRepresented(YesOrNo.NO)
+            .respondentAddress(getValidAddress())
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(wrapper)
+            .build();
+
+        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
+        assertThat(errors).isEqualTo(expectedResult);
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("applicantSolicitorPostalAddressScenarios")
+    void shouldCheckForMissingApplicantSolicitorPostalAddress(String description, YesOrNo applicantRepresented, Address address,
+                                                              EventType eventType, List<String> expectedResult) {
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .applicantRepresented(applicantRepresented)
+            .applicantSolicitorAddress(address)
+            .contestedRespondentRepresented(YesOrNo.NO)
+            .respondentAddress(getValidAddress())
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(wrapper)
+            .build();
+
+        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
+        assertThat(errors).isEqualTo(expectedResult);
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("respondentPostalAddressScenarios")
+    void shouldCheckForMissingRespondentPostalAddress(String description, YesOrNo applicantRepresented, Address address,
+                                                      EventType eventType, List<String> expectedResult) {
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.NO)
+            .applicantAddress(getValidAddress())
+            .contestedRespondentRepresented(applicantRepresented)
+            .respondentAddress(address)
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(wrapper)
+            .build();
+
+        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
+        assertThat(errors).isEqualTo(expectedResult);
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("respondentSolicitorPostalAddressScenarios")
+    void shouldCheckForMissingRespondentSolicitorPostalAddress(String description, YesOrNo applicantRepresented, Address address,
+                                                               EventType eventType, List<String> expectedResult) {
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.NO)
+            .applicantAddress(getValidAddress())
+            .contestedRespondentRepresented(applicantRepresented)
+            .respondentSolicitorAddress(address)
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(wrapper)
+            .build();
+
+        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
+        assertThat(errors).isEqualTo(expectedResult);
+    }
+
+    private static Stream<Arguments> applicantPostalAddressScenarios() {
+        return Stream.of(
+            Arguments.of(
+                "Applicant not represented + Valid address",
+                YesOrNo.NO,
+                getValidAddress(),
+                TEST_EVENT,
+                List.of()
+            ),
+            Arguments.of(
+                "Applicant not represented + Missing address",
+                YesOrNo.NO,
+                getInvalidAddress(),
+                TEST_EVENT,
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant", TEST_EVENT.getCcdType()))
+            ),
+            Arguments.of(
+                "Applicant not represented + Null address",
+                YesOrNo.NO,
+                null,
+                TEST_EVENT,
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant", TEST_EVENT.getCcdType()))
+            )
+        );
+    }
+
+    private static Stream<Arguments> applicantSolicitorPostalAddressScenarios() {
+        return Stream.of(
+            Arguments.of(
+                "Applicant is represented + Valid address",
+                YesOrNo.YES,
+                getValidAddress(),
+                TEST_EVENT,
+                List.of()
+            ),
+            Arguments.of(
+                "Applicant is represented + Missing address",
+                YesOrNo.YES,
+                getInvalidAddress(),
+                TEST_EVENT,
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant solicitor", TEST_EVENT.getCcdType()))
+            ),
+            Arguments.of(
+                "Applicant is represented + Null address",
+                YesOrNo.YES,
+                null,
+                TEST_EVENT,
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant solicitor", TEST_EVENT.getCcdType()))
+            )
+        );
+    }
+
+    private static Stream<Arguments> respondentPostalAddressScenarios() {
+        return Stream.of(
+            Arguments.of(
+                "Respondent not represented + Valid address",
+                YesOrNo.NO,
+                getValidAddress(),
+                TEST_EVENT,
+                List.of()
+            ),
+            Arguments.of(
+                "Respondent not represented + Missing address",
+                YesOrNo.NO,
+                getInvalidAddress(),
+                TEST_EVENT,
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent", TEST_EVENT.getCcdType()))
+            ),
+            Arguments.of(
+                "Respondent not represented + Null address",
+                YesOrNo.NO,
+                null,
+                TEST_EVENT,
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent", TEST_EVENT.getCcdType()))
+            )
+        );
+    }
+
+    private static Stream<Arguments> respondentSolicitorPostalAddressScenarios() {
+        return Stream.of(
+            Arguments.of(
+                "Respondent is represented + Valid address",
+                YesOrNo.YES,
+                getValidAddress(),
+                TEST_EVENT,
+                List.of()
+            ),
+            Arguments.of(
+                "Respondent is represented + Missing address",
+                YesOrNo.YES,
+                getInvalidAddress(),
+                TEST_EVENT,
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent solicitor", TEST_EVENT.getCcdType()))
+            ),
+            Arguments.of(
+                "Respondent is represented + Null address",
+                YesOrNo.YES,
+                null,
+                TEST_EVENT,
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent solicitor", TEST_EVENT.getCcdType()))
+            )
+        );
+    }
+
+    private static Address getValidAddress() {
+        return Address.builder()
+            .addressLine1("AddressLine1")
+            .addressLine2("AddressLine2")
+            .addressLine3("AddressLine3")
+            .county("County")
+            .country("Country")
+            .postTown("Town")
+            .postCode("SW1A 1AA")
+            .build();
+    }
+
+    private static Address getInvalidAddress() {
+        return Address.builder()
+            .addressLine1("")
+            .postCode("")
+            .build();
     }
 }

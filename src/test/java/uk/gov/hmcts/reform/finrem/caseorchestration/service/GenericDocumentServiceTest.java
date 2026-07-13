@@ -88,7 +88,6 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(document);
         verify(docmosisPdfGenerationServiceMock).generateDocFrom(templateNameCaptor.capture(), any());
 
-
         assertThat(templateNameCaptor.getValue(), is(templateName));
         caseDetails.getData().put(DocumentHelper.CASE_NUMBER, caseDetails.getId());
     }

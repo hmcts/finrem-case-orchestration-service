@@ -2,10 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationd
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -13,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -57,6 +60,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -103,6 +108,8 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
     private static final String GA_JSON = "/fixtures/contested/general-application-details.json";
 
+    private MockedStatic<ContactDetailsValidator> contactDetailsValidatorMockedStatic;
+
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
@@ -118,6 +125,16 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         ).build();
         lenient().when(partyService.getAllActivePartyList(any(FinremCaseDetails.class)))
             .thenReturn(dynamicMultiSelectList);
+
+        contactDetailsValidatorMockedStatic = mockStatic(ContactDetailsValidator.class);
+        contactDetailsValidatorMockedStatic
+            .when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(any(), any()))
+            .thenReturn(List.of());
+    }
+
+    @AfterEach
+    void tearDown() {
+        contactDetailsValidatorMockedStatic.close();
     }
 
     @Test
@@ -488,6 +505,53 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     }
 
     @Test
+    void givenPostalValidationErrors_whenHandle_thenResponseContainsPostalErrors() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        List<String> expectedErrors = List.of(
+            "Applicant's postal address is missing",
+            "Respondent's postal address is missing"
+        );
+
+        contactDetailsValidatorMockedStatic.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                caseData, callbackRequest.getEventType()))
+            .thenReturn(expectedErrors);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
+
+        verify(gaDirectionService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(gaDirectionService, never()).getEventPostState(any(), any());
+        verify(generalApplicationsCategoriser, never()).categorise(any());
+    }
+
+    @Test
+    void givenNoPostalValidationErrors_whenHandle_thenResponseContainsEmptyErrorList() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        List<String> expectedErrors = List.of();
+
+        contactDetailsValidatorMockedStatic.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                caseData, callbackRequest.getEventType()))
+            .thenReturn(expectedErrors);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).isEmpty();
+
+        verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(gaDirectionService).getEventPostState(any(), any());
+        verify(generalApplicationsCategoriser).categorise(any());
+    }
+
+    @Test
     void shouldRemoveGadPreviewWhenHandled() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
@@ -496,8 +560,9 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             .build();
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
 
+        when(helper.getGeneralApplicationList(finremCaseData, GENERAL_APPLICATION_COLLECTION)).thenReturn(List.of());
         when(helper.objectToDynamicList(any())).thenReturn(DynamicList.builder()
-                .value(DynamicListElement.builder().code("a#b").build())
+            .value(DynamicListElement.builder().code("a#b").build())
             .build());
 
         CaseDocument caseDocument = caseDocument();
