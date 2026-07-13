@@ -33,10 +33,16 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -145,6 +151,24 @@ class GeneralEmailAboutToSubmitHandlerTest {
         FinremCallbackRequest request = isConsented ? mockConsentedCallbackRequest() : mockContestedCallbackRequest();
         handler.handle(request, AUTH_TOKEN);
         verify(generalEmailService).storeGeneralEmail(request.getFinremCaseData());
+    }
+
+    @Test
+    void shouldReturnWhenDocumentValidationFails() {
+        FinremCallbackRequest request = mockConsentedCallbackRequest();
+        FinremCaseData caseData = request.getFinremCaseData();
+
+        doAnswer(invocation -> {
+            List<String> errors = invocation.getArgument(2);
+            errors.add("Validation error");
+            return null;
+        }).when(generalEmailService)
+            .validateUploadedDocuments(same(caseData), eq(AUTH_TOKEN), anyList());
+
+        var response = handler.handle(request, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).containsOnly("Validation error");
+        verify(generalEmailService, never()).storeGeneralEmail(any());
     }
 
     @Test
