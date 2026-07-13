@@ -44,6 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_VA
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService.CONSENTED_IN_CONTESTED_MESSAGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_CASE_NUMBER;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -87,6 +88,23 @@ public class BulkScanServiceTest {
 
         verify(bulkScanFormValidator).validateBulkScanForm(ocrDataFields);
         assertThat(returnedResult, equalTo(resultFromValidator));
+    }
+
+    @Test
+    public void shouldAddContestedCaseReferenceWarningWhenValidatingBulkScanForm() throws UnsupportedFormTypeException {
+        String contestedCaseReference = "1234123412341234";
+        List<OcrDataField> ocrDataFields = singletonList(new OcrDataField(DIVORCE_CASE_NUMBER, contestedCaseReference));
+
+        when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM)).thenReturn(bulkScanFormValidator);
+        when(bulkScanFormValidator.validateBulkScanForm(ocrDataFields)).thenReturn(OcrValidationResult.builder().build());
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+        when(ccdService.contestedCaseExistsWithReference(contestedCaseReference, TEST_SYSTEM_TOKEN)).thenReturn(true);
+
+        OcrValidationResult returnedResult = bulkScanService.validateBulkScanForm(TEST_FORM, ocrDataFields);
+
+        assertThat(returnedResult.getWarnings(), hasItem(
+            CONSENTED_IN_CONTESTED_MESSAGE
+        ));
     }
 
     @Test
@@ -169,8 +187,7 @@ public class BulkScanServiceTest {
             fail("Expected InvalidDataException");
         } catch (InvalidDataException exception) {
             assertThat(exception.getWarnings(), hasItem(
-                "A Contested Financial Remedy case already exists for the supplied divorce case number. "
-                    + "Consented within Contested applications must be progressed on the existing Contested case."
+                CONSENTED_IN_CONTESTED_MESSAGE
             ));
         }
 

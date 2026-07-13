@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 @Slf4j
 public class BulkScanService {
 
-    private static final String CONSENTED_IN_CONTESTED_WARNING =
+    public static final String CONSENTED_IN_CONTESTED_MESSAGE =
         "A Contested Financial Remedy case already exists for the supplied divorce case number. "
         + "Consented within Contested applications must be progressed on the existing Contested case.";
     private static final String CCD_CASE_REFERENCE_REGEX = "\\d{16}";
@@ -52,7 +52,8 @@ public class BulkScanService {
 
     public OcrValidationResult validateBulkScanForm(String formType, List<OcrDataField> ocrDataFields) throws UnsupportedFormTypeException {
         BulkScanFormValidator formValidator = finRemBulkScanFormValidatorFactory.getValidator(formType);
-        return formValidator.validateBulkScanForm(ocrDataFields);
+        OcrValidationResult ocrValidationResult = formValidator.validateBulkScanForm(ocrDataFields);
+        return addContestedRefWarningIfApplicable(ocrValidationResult, ocrDataFields);
     }
 
     public Map<String, Object> transformBulkScanForm(ExceptionRecord exceptionRecord)
@@ -100,17 +101,6 @@ public class BulkScanService {
             throwInvalidDataException(exceptionRecord, ocrDataFieldsValidationResult);
         }
 
-        String divorceCaseNumber = produceMapWithoutEmptyEntries(exceptionRecord.getOcrDataFields()).get(DIVORCE_CASE_NUMBER);
-
-        if (isCcdCaseReference(divorceCaseNumber)
-            && ccdService.contestedCaseExistsWithReference(divorceCaseNumber, systemUserService.getSysUserToken())) {
-            ocrDataFieldsValidationResult = addContestedRefWarning(ocrDataFieldsValidationResult);
-        }
-
-        if (!ocrDataFieldsValidationResult.getStatus().equals(ValidationStatus.SUCCESS)) {
-            throwInvalidDataException(exceptionRecord, ocrDataFieldsValidationResult);
-        }
-
         OcrValidationResult bulkScanFormsValidationResult = formAValidator.validateFormAScannedDocuments(exceptionRecord);
 
         if (!bulkScanFormsValidationResult.getStatus().equals(ValidationStatus.SUCCESS)) {
@@ -125,11 +115,23 @@ public class BulkScanService {
         }
     }
 
+    private OcrValidationResult addContestedRefWarningIfApplicable(OcrValidationResult validationResult,
+                                                                   List<OcrDataField> ocrDataFields) {
+        String divorceCaseNumber = produceMapWithoutEmptyEntries(ocrDataFields).get(DIVORCE_CASE_NUMBER);
+
+        if (isCcdCaseReference(divorceCaseNumber)
+            && ccdService.contestedCaseExistsWithReference(divorceCaseNumber, systemUserService.getSysUserToken())) {
+            return addContestedRefWarning(validationResult);
+        }
+
+        return validationResult;
+    }
+
     private OcrValidationResult addContestedRefWarning(OcrValidationResult validationResult) {
         OcrValidationResult.Builder builder = OcrValidationResult.builder();
         validationResult.getWarnings().forEach(builder::addWarning);
         validationResult.getErrors().forEach(builder::addError);
-        return builder.addWarning(BulkScanService.CONSENTED_IN_CONTESTED_WARNING).build();
+        return builder.addWarning(BulkScanService.CONSENTED_IN_CONTESTED_MESSAGE).build();
     }
 
     private boolean isCcdCaseReference(String caseReference) {
