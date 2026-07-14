@@ -42,6 +42,7 @@ public class AmendPaperApplicationContestedAboutToStartHandler extends FinremCal
         onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
         onStartDefaultValueService.defaultTypeOfApplication(callbackRequest);
         onStartDefaultValueService.defaultUrgencyQuestion(callbackRequest);
+        onStartDefaultValueService.setEstimatedAssetsChecklistVersion(callbackRequest);
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         RefugeWrapperUtils.populateApplicantInRefugeQuestion(caseDetails);
