@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
@@ -45,7 +47,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,6 +63,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
@@ -85,6 +90,8 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
     private ExpressCaseService expressCaseService;
     @Mock
     private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Test
     void testCanHandle() {
@@ -935,6 +942,22 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         assertThat(response.getErrors()).hasSize(1);
         assertThat(response.getErrors().getFirst()).isEqualTo("Validation failed");
         assertThat(response.getData()).isNotNull();
+    }
+
+    /*
+     * Any value can be used in place of listVersion, at the time of writing.
+     * Just preferred to use correct enums, to cover logic changing later.
+     */
+    @ParameterizedTest
+    @EnumSource(value = EstimatedAssetsChecklistVersion.class)
+    void givenCaseDataWithTemporaryEstimatedAssetsChecklistVersion_whenHandle_thenTemporaryFieldSanitised(
+        EstimatedAssetsChecklistVersion listVersion) {
+
+        verifyTemporaryFieldsWereSanitised(handler,
+            finremCaseDetailsMapper, new HashMap<>(Map.of(
+                "estimatedAssetsChecklistVersion", listVersion
+            ))
+        );
     }
 
     private <T> void assertContainsOnlyNulls(T target, List<?> functions) {
