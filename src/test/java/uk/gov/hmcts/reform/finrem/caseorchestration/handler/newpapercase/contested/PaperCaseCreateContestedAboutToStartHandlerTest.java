@@ -17,8 +17,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion.V2;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion.V3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.NEW_PAPER_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -67,8 +65,7 @@ class PaperCaseCreateContestedAboutToStartHandlerTest {
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData()).isEqualTo(callbackRequest.getFinremCaseData());
-        assertThat(response.getData().getEstimatedAssetsChecklistWrapper()
-            .getEstimatedAssetsChecklistVersion()).isEqualTo(useV3EstimatedAssetsChecklist ? V3 : V2);
+        verify(onStartDefaultValueService).setEstimatedAssetsChecklistVersion(callbackRequest);
         verify(onStartDefaultValueService).defaultApplicantOrganisationPolicy(callbackRequest);
         verify(onStartDefaultValueService).defaultRespondentOrganisationPolicy(callbackRequest);
         verify(onStartDefaultValueService).defaultCivilPartnershipField(callbackRequest);

@@ -31,7 +31,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 
@@ -57,13 +56,6 @@ class OnStartDefaultValueServiceTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
         service.defaultIssueDate(callbackRequest);
         assertNotNull(callbackRequest.getCaseDetails().getData().getIssueDate());
-    }
-
-    @Test
-    void defaultCivilPartnershipField() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        service.defaultCivilPartnershipField(callbackRequest);
-        assertEquals(NO_VALUE, callbackRequest.getCaseDetails().getData().get(CIVIL_PARTNERSHIP));
     }
 
     @Test

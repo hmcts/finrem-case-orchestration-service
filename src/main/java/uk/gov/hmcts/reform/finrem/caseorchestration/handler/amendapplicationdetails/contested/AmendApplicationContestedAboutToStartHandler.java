@@ -76,6 +76,8 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
             userAuthorisation);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
+        onStartDefaultValueService.setEstimatedAssetsChecklistVersion(callbackRequest);
+
         return response(callbackRequest.getCaseDetails().getData(), warnings, null);
     }
 
