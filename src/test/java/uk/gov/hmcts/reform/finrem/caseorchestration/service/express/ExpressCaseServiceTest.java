@@ -196,6 +196,26 @@ class ExpressCaseServiceTest {
         assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
+    /*
+     * Do not maintain this test after V3 Asset values are known to work.
+     * This is covers an edge-case.  This is a scenario where both EstimatedAssetV2 and EstimatedAssetV3 are set.
+     * This can happen if the case was drafted with a V2 asset value, and amended the case with a V3 asset value.
+     * When available V3 asset values are given preference. This will best support post-submission events, related to Express.
+     */
+    @Test
+    void whenExpressCaseEnrollmentStatus_ifTwoAssetVersions_thenLatestAssetUsed() {
+
+        FinremCaseData caseData = createCaseData();
+
+        // The V3 asset should be the one chosen, so the case should qualify for Express; so show as ENROLLED
+        caseData.setEstimatedAssetsChecklistV2(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS);
+        caseData.setEstimatedAssetsChecklistV3(EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
+
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+        assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
+    }
+
     private static Stream<Arguments> provideIsExpressCase() {
         return Stream.of(
             Arguments.of(false, createCaseDetailsWithParticipation(ENROLLED), false),

@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdet
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -9,12 +11,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
@@ -50,6 +54,9 @@ class AmendApplicationContestedAboutToStartHandlerTest {
 
     @Mock
     private MiamLegacyExemptionsService miamLegacyExemptionsService;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     @Test
     void testHandlerCanHandle() {
@@ -131,5 +138,20 @@ class AmendApplicationContestedAboutToStartHandlerTest {
             () -> verify(assignCaseAccessService).getActiveUser(CASE_ID, AUTH_TOKEN),
             () -> verifyNoMoreInteractions(assignCaseAccessService)
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenCaseWithValidLegacyMiamExemptions_whenHandledasqwwqs_thenPrepopulateFieldsAndNoWarnings(Boolean isV3) {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(caseData);
+
+        when(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).thenReturn(isV3);
+        EstimatedAssetsChecklistVersion expectedVersion = isV3
+            ? EstimatedAssetsChecklistVersion.V3 : EstimatedAssetsChecklistVersion.V2;
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertEquals(caseData.getEstimatedAssetsChecklistWrapper().getEstimatedAssetsChecklistVersion(), expectedVersion);
     }
 }
