@@ -70,7 +70,7 @@ public class BulkScanService {
      *
      * @param exceptionRecord the exception record containing form type and OCR data to be transformed
      * @return a mutable map of transformed case data including change organisation request and default
-     * organisation policies
+     *      organisation policies
      */
     public Map<String, Object> transformBulkScanForm(ExceptionRecord exceptionRecord) {
         validateForTransformation(exceptionRecord);
