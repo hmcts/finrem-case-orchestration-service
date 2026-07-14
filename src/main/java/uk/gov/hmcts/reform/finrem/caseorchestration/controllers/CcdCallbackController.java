@@ -79,7 +79,7 @@ public class CcdCallbackController {
             callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
-        saveGlobalSearchData(callbackRequest);
+        globalSearchService.setGlobalSearchDataByMap(callbackRequest.getCaseDetails().getData());;
 
         return performRequest(ABOUT_TO_SUBMIT, callbackRequest, authorisationToken);
     }
@@ -132,14 +132,6 @@ public class CcdCallbackController {
             || callbackRequest.getCaseDetails() == null
             || callbackRequest.getCaseDetails().getData() == null) {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from CallbackRequest.");
-        }
-    }
-
-    private void saveGlobalSearchData(CallbackRequest callbackRequest) {
-        if (callbackRequest != null
-            && callbackRequest.getCaseDetails() != null
-            && callbackRequest.getCaseDetails().getData() != null) {
-            globalSearchService.setGlobalSearchDataByMap(callbackRequest.getCaseDetails().getData());
         }
     }
 
