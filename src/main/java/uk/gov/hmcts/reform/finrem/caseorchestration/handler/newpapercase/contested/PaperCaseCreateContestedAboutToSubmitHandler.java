@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.newpapercase.contes
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
@@ -71,7 +70,7 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremAboutToS
         caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
 
         if (idamService.isUserRoleAdmin(userAuthorisation)) {
             caseData.getContactDetailsWrapper().setIsAdmin(YES_VALUE);
@@ -101,21 +100,14 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremAboutToS
         RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
 
-        CaseDetails oldCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
-
         // Call to caseDataService to set PowerBI tracking fields.
-        caseDataService.setFinancialRemediesCourtDetails(oldCaseDetails);
-
-        caseData = finremCaseDetailsMapper.mapToFinremCaseData(oldCaseDetails.getData());
+        caseDataService.setFinancialRemediesCourtDetails(caseDetails);
 
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(caseData));
         errors.addAll(applicantSolicitorDetailsValidator.validate(caseData));
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData)
-            .errors(errors)
-            .build();
+        return responseWithoutWarnings(caseData, errors);
     }
 }
