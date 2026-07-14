@@ -76,9 +76,7 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
             userAuthorisation);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
-        onStartDefaultValueService.setEstimatedAssetsChecklistVersion(callbackRequest);
-
-        return response(caseData, warnings, null);
+        return response(callbackRequest.getCaseDetails().getData(), warnings, null);
     }
 
     private List<String> getMiamInvalidLegacyExemptionWarnings(MiamWrapper miamWrapper) {
