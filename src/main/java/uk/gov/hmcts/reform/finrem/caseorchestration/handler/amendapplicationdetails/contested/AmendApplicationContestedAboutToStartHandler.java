@@ -78,7 +78,7 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
 
         onStartDefaultValueService.setEstimatedAssetsChecklistVersion(callbackRequest);
 
-        return response(callbackRequest.getCaseDetails().getData(), warnings, null);
+        return response(caseData, warnings, null);
     }
 
     private List<String> getMiamInvalidLegacyExemptionWarnings(MiamWrapper miamWrapper) {
