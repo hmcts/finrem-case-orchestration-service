@@ -609,26 +609,6 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
     @Test
     void givenCaseDataWithTemporaryDraftOrderFields_whenHandle_thenTemporaryFieldsAreSanitised() {
-
-//        UploadAgreedDraftOrder uploadAgreedDraftOrder = UploadAgreedDraftOrder.builder()
-//            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
-//            .build();
-//
-//        UploadAgreedDraftOrder uploadSuggestedDraftOrder = UploadAgreedDraftOrder.builder()
-//            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
-//            .build();
-//
-//        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
-//        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
-//        builder.uploadAgreedDraftOrder(uploadAgreedDraftOrder);
-//
-//        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
-//
-//        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-//            .id(Long.valueOf(CASE_ID))
-//            .state(APPLICATION_ISSUED)
-//            .data(caseData).build();
-
         verifyTemporaryFieldsWereSanitised(handler,
             finremCaseDetailsMapper, new HashMap<>(Map.of(
                 "uploadSuggestedDraftOrder", Map.of("uploadParty", Map.of("abc", "def")),
