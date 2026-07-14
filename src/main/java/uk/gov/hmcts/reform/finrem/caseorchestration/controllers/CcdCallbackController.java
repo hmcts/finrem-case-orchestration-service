@@ -79,7 +79,7 @@ public class CcdCallbackController {
             callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
-        globalSearchService.setGlobalSearchDataByMap(callbackRequest.getCaseDetails().getData());;
+        globalSearchService.setGlobalSearchDataByMap(callbackRequest.getCaseDetails().getData());
 
         return performRequest(ABOUT_TO_SUBMIT, callbackRequest, authorisationToken);
     }
