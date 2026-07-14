@@ -680,19 +680,21 @@ public class TestSetUpUtils {
      *
      * <p>
      * The supplied map represents fields annotated with {@code @TemporaryField}. The method
-     * invokes the callback handler and asserts that these fields are sanitised before the
+     * invokes the callback handler and asserts that these fields are removed before the
      * case data is mapped back into a {@link FinremCaseData} instance.
      *
      * @param aboutToSubmitHandler the callback handler under test
      * @param finremCaseDetailsMapper the mapper used to convert between CCD and domain objects
      * @param temporaryFieldsMap a map containing temporary fields that are expected to be removed
+     * @param optionalFinremCaseDetails optional case details to use instead of creating a default
+     *                                  empty {@link FinremCaseDetails} instance
      */
     public static void verifyTemporaryFieldsWereSanitised(FinremAboutToSubmitCallbackHandler aboutToSubmitHandler,
                                                           FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                          Map<String, Object> temporaryFieldsMap) {
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(
-            FinremCaseData.builder().build()
-        ).build();
+                                                          Map<String, Object> temporaryFieldsMap, FinremCaseDetails... optionalFinremCaseDetails) {
+        FinremCaseDetails finremCaseDetails = (optionalFinremCaseDetails == null || optionalFinremCaseDetails.length == 0)
+            ? FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build()
+            : optionalFinremCaseDetails[0];
         FinremCaseData nonSanitisedFinremCaseData = finremCaseDetails.getData();
 
         CaseDetails callbackRequestCaseDetails = mock(CaseDetails.class);

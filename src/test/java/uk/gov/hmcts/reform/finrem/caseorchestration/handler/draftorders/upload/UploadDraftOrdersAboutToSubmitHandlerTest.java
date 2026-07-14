@@ -77,6 +77,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.APPLICATION_ISSUED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.REVIEW_ORDER;
@@ -209,7 +210,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     private static Stream<Arguments> provideSuggestedDraftOrders() {
         return Stream.of(
             // Applicant/respondent solicitors and barristers
-            Arguments.of(CaseRole.APP_SOLICITOR, null, "Hamzah@hamzah.com"),
+            Arguments.of(APP_SOLICITOR, null, "Hamzah@hamzah.com"),
             Arguments.of(CaseRole.APP_BARRISTER, null, "Hamzah@hamzah.com"),
             Arguments.of(CaseRole.RESP_SOLICITOR, null, "Hamzah@hamzah.com"),
             Arguments.of(CaseRole.RESP_BARRISTER, null, "Hamzah@hamzah.com"),
@@ -609,11 +610,16 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
     @Test
     void givenCaseDataWithTemporaryDraftOrderFields_whenHandle_thenTemporaryFieldsAreSanitised() {
+        when(caseRoleService.getUserOrCaseworkerCaseRole(any(), eq(AUTH_TOKEN))).thenReturn(APP_SOLICITOR);
         verifyTemporaryFieldsWereSanitised(handler,
             finremCaseDetailsMapper, new HashMap<>(Map.of(
                 "uploadSuggestedDraftOrder", Map.of("uploadParty", Map.of("abc", "def")),
                 "uploadAgreedDraftOrder", Map.of("uploadSuggestedDraftOrder", Map.of("ghi", "jkl"))
-            ))
+            )),
+            FinremCaseDetails.builder()
+                    .state(APPLICATION_ISSUED)
+                    .data(FinremCaseData.builder().build())
+                .build()
         );
     }
 
