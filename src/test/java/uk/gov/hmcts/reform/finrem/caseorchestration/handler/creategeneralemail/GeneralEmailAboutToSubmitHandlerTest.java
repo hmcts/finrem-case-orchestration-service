@@ -143,12 +143,8 @@ class GeneralEmailAboutToSubmitHandlerTest {
 
     @Test
     void shouldRemoveTemporaryFieldsWhenHandled() {
-        FinremCaseData finremCaseData = FinremCaseData.builder().build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
-            .data(finremCaseData).build();
-
         verifyTemporaryFieldsWereSanitised(handler,
-            finremCaseDetails, finremCaseDetailsMapper, new HashMap<>(Map.of(
+            finremCaseDetailsMapper, new HashMap<>(Map.of(
                 "generalEmailRecipient", "generalEmailRecipient",
                 "generalEmailCreatedBy", "generalEmailCreatedBy",
                 "generalEmailBody", "generalEmailBody",
