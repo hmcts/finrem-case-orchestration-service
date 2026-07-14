@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -308,7 +308,7 @@ class AssignPartiesAccessServiceTest {
         }
 
         @Test
-        void givenUserFound_thenRevokeAccess() throws Exception {
+        void givenUserFound_thenRevokeAccess() {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
             when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
@@ -320,18 +320,33 @@ class AssignPartiesAccessServiceTest {
         }
 
         @Test
-        void givenUserNotFound_thenThrowWithMessage() {
+        void givenUserNotFound_thenDoNotRevokeAccessAndDoNotThrow() {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
             when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
             when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
             when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
             when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(Optional.empty());
-            UserNotFoundInOrganisationApiException ex = assertThrows(UserNotFoundInOrganisationApiException.class,
-                () -> assignPartiesAccessService.revokeApplicantSolicitor(caseData));
-            assertThat(ex.getMessage())
-                .isNotNull()
-                .contains(CASE_ID, CaseRole.APP_SOLICITOR.getCcdCode());
+
+            assertDoesNotThrow(() -> assignPartiesAccessService.revokeApplicantSolicitor(caseData));
+
+            verify(assignCaseAccessService, never())
+                .removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void givenMissingEmail_thenDoNotRevokeAccessAndDoNotThrow() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getAppSolicitorEmail()).thenReturn(null);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            assertDoesNotThrow(() -> assignPartiesAccessService.revokeApplicantSolicitor(caseData));
+
+            verify(prdOrganisationService, never()).findUserByEmail(anyString());
+            verify(assignCaseAccessService, never())
+                .removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
         }
     }
 
@@ -354,7 +369,7 @@ class AssignPartiesAccessServiceTest {
         }
 
         @Test
-        void givenUserFound_thenRevokeAccess() throws Exception {
+        void givenUserFound_thenRevokeAccess() {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
             when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
@@ -366,18 +381,33 @@ class AssignPartiesAccessServiceTest {
         }
 
         @Test
-        void givenUserNotFound_thenThrowWithMessage() {
+        void givenUserNotFound_thenDoNotRevokeAccessAndDoNotThrow() {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
             when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
             when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
             when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
             when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(Optional.empty());
-            UserNotFoundInOrganisationApiException ex = assertThrows(UserNotFoundInOrganisationApiException.class,
-                () -> assignPartiesAccessService.revokeRespondentSolicitor(caseData));
-            assertThat(ex.getMessage())
-                .isNotNull()
-                .contains(CASE_ID, CaseRole.RESP_SOLICITOR.getCcdCode());
+
+            assertDoesNotThrow(() -> assignPartiesAccessService.revokeRespondentSolicitor(caseData));
+
+            verify(assignCaseAccessService, never())
+                .removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void givenMissingEmail_thenDoNotRevokeAccessAndDoNotThrow() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getRespondentSolicitorEmail()).thenReturn(null);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            assertDoesNotThrow(() -> assignPartiesAccessService.revokeRespondentSolicitor(caseData));
+
+            verify(prdOrganisationService, never()).findUserByEmail(anyString());
+            verify(assignCaseAccessService, never())
+                .removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
         }
     }
 
