@@ -57,7 +57,6 @@ public class BulkScanService {
      * @param ocrDataFields the OCR data fields extracted from the scanned form
      * @return the OCR validation result containing validation status, warnings, and errors
      */
-
     public OcrValidationResult validateBulkScanForm(String formType, List<OcrDataField> ocrDataFields) {
         BulkScanFormValidator formValidator = finRemBulkScanFormValidatorFactory.getValidator(formType);
         OcrValidationResult ocrValidationResult = formValidator.validateBulkScanForm(ocrDataFields);
