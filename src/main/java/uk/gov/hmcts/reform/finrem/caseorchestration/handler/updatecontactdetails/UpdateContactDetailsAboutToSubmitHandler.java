@@ -75,7 +75,7 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
         errors.addAll(validatePostCodeAndEmailAddresses(finremCaseDetails));
-        errors.addAll(validateFrcCourt(finremCaseDetails));
+        errors.addAll(validateFrcCourt(finremCaseDetails.getData()));
 
         if (!errors.isEmpty()) {
             return response(finremCaseData, null, errors);
@@ -162,17 +162,15 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
         }
     }
 
-    private List<String> validateFrcCourt(FinremCaseDetails finremCaseDetails) {
+    private List<String> validateFrcCourt(FinremCaseData finremCaseData) {
         List<String> errors = new ArrayList<>();
-        boolean isRegionMissing = Optional.ofNullable(finremCaseDetails)
-            .map(FinremCaseDetails::getData)
+        boolean isRegionMissing = Optional.ofNullable(finremCaseData)
             .map(FinremCaseData::getRegionWrapper)
             .map(RegionWrapper::getAllocatedRegionWrapper)
             .map(AllocatedRegionWrapper::getRegionList)
             .isEmpty();
 
-        boolean isSelectedCourtMissing = Optional.ofNullable(finremCaseDetails)
-            .map(FinremCaseDetails::getData)
+        boolean isSelectedCourtMissing = Optional.ofNullable(finremCaseData)
             .map(FinremCaseData::getSelectedAllocatedCourt)
             .filter(selectedCourt -> !selectedCourt.isBlank())
             .isEmpty();

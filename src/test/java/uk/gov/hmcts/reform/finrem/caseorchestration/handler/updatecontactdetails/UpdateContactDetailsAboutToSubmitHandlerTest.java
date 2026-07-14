@@ -421,7 +421,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
             mockedStatic.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData)).thenReturn(List.of());
             mockedStatic.when(() -> ContactDetailsValidator.validatePostcodesByRepresentation(request.getCaseDetails())).thenReturn(List.of());
 
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
+            var response = handler.handle(request, AUTH_TOKEN);
 
             assertThat(response.getErrors())
                 .containsExactly(UpdateContactDetailsAboutToSubmitHandler.FRC_COURT_SELECTION_MISSING_ERROR);
