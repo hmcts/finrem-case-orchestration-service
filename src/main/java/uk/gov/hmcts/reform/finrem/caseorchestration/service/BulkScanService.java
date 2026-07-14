@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
-import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
@@ -37,7 +36,7 @@ public class BulkScanService {
 
     public static final String CONSENTED_IN_CONTESTED_MESSAGE =
         "A Contested Financial Remedy case already exists for the supplied divorce case number. "
-        + "Consented within Contested applications must be progressed on the existing Contested case.";
+            + "Consented within Contested applications must be progressed on the existing Contested case.";
     private static final String CCD_CASE_REFERENCE_REGEX = "\\d{16}";
 
     private final FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
@@ -50,14 +49,30 @@ public class BulkScanService {
 
     private final SystemUserService systemUserService;
 
-    public OcrValidationResult validateBulkScanForm(String formType, List<OcrDataField> ocrDataFields) throws UnsupportedFormTypeException {
+    /**
+     * /** Validates OCR data extracted from a bulk scan form for the supplied form type.
+     * Adds a warning when a valid divorce case reference matches an existing contested case.
+     *
+     * @param formType      the bulk scan form type to validate
+     * @param ocrDataFields the OCR data fields extracted from the scanned form
+     * @return the OCR validation result containing validation status, warnings, and errors
+     */
+
+    public OcrValidationResult validateBulkScanForm(String formType, List<OcrDataField> ocrDataFields) {
         BulkScanFormValidator formValidator = finRemBulkScanFormValidatorFactory.getValidator(formType);
         OcrValidationResult ocrValidationResult = formValidator.validateBulkScanForm(ocrDataFields);
         return addContestedRefWarningIfApplicable(ocrValidationResult, ocrDataFields);
     }
 
-    public Map<String, Object> transformBulkScanForm(ExceptionRecord exceptionRecord)
-        throws UnsupportedFormTypeException, InvalidDataException {
+    /**
+     * Transforms a validated bulk scan exception record into CCD case data and enriches it with default
+     * organisation policy metadata.     *
+     *
+     * @param exceptionRecord the exception record containing form type and OCR data to be transformed
+     * @return a mutable map of transformed case data including change organisation request and default
+     * organisation policies
+     */
+    public Map<String, Object> transformBulkScanForm(ExceptionRecord exceptionRecord) {
         validateForTransformation(exceptionRecord);
 
         BulkScanFormTransformer bulkScanFormTransformer =
@@ -92,7 +107,7 @@ public class BulkScanService {
         caseData.put(RESPONDENT_ORGANISATION_POLICY, respondentOrganisationPolicy);
     }
 
-    private void validateForTransformation(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException, InvalidDataException {
+    private void validateForTransformation(ExceptionRecord exceptionRecord) {
 
         OcrValidationResult ocrDataFieldsValidationResult
             = validateBulkScanForm(exceptionRecord.getFormType(), exceptionRecord.getOcrDataFields());
