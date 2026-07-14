@@ -163,21 +163,21 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     }
 
     private List<String> validateFrcCourt(FinremCaseData finremCaseData) {
-        List<String> errors = new ArrayList<>();
-        boolean isRegionMissing = Optional.ofNullable(finremCaseData)
+        Optional<FinremCaseData> caseData = Optional.ofNullable(finremCaseData);
+
+        boolean isRegionMissing = caseData
             .map(FinremCaseData::getRegionWrapper)
             .map(RegionWrapper::getAllocatedRegionWrapper)
             .map(AllocatedRegionWrapper::getRegionList)
             .isEmpty();
 
-        boolean isSelectedCourtMissing = Optional.ofNullable(finremCaseData)
+        boolean isSelectedCourtMissing = caseData
             .map(FinremCaseData::getSelectedAllocatedCourt)
             .filter(selectedCourt -> !selectedCourt.isBlank())
             .isEmpty();
 
-        if (isRegionMissing || isSelectedCourtMissing) {
-            errors.add(FRC_COURT_SELECTION_MISSING_ERROR);
-        }
-        return errors;
+        return (isRegionMissing || isSelectedCourtMissing)
+            ? List.of(FRC_COURT_SELECTION_MISSING_ERROR)
+            : List.of();
     }
 }
