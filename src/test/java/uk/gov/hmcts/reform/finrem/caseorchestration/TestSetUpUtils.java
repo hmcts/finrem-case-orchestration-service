@@ -677,6 +677,7 @@ public class TestSetUpUtils {
 
     /**
      * Verifies that all temporary fields are removed during the {@code aboutToSubmit} callback.
+     *
      * <p>
      * The supplied map represents fields annotated with {@code @TemporaryField}. The method
      * invokes the callback handler and asserts that these fields are removed before the
