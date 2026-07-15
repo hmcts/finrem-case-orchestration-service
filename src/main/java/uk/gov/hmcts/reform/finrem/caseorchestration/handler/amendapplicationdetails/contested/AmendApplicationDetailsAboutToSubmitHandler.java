@@ -98,6 +98,8 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremAboutToSu
             expressCaseService.setExpressCaseEnrollmentStatus(caseDetails.getData());
         }
 
+        expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
+
         List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
         if (!mandatoryDataErrors.isEmpty()) {
             return responseWithoutWarnings(caseData, mandatoryDataErrors);

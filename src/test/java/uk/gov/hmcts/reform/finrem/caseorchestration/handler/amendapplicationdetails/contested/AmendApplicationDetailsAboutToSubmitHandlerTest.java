@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
@@ -114,7 +114,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN, finremCaseDetails))
             .thenReturn(generatedMiniFormA);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(FinremCaseData::getMiniFormA).isEqualTo(generatedMiniFormA);
         verify(onlineFormDocumentService).generateDraftContestedMiniFormA(AUTH_TOKEN, finremCaseDetails);
         verify(caseFlagsService).setCaseFlagInformation(finremCaseDetails);
@@ -172,7 +172,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
             FinremCaseData::getDivorceUploadEvidence2,
             FinremCaseData::getDivorceDecreeAbsoluteDate,
@@ -210,7 +210,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
             FinremCaseData::getDivorceUploadPetition,
             FinremCaseData::getDivorceUploadEvidence1,
@@ -242,7 +242,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
             FinremCaseData::getDivorceUploadEvidence1,
             FinremCaseData::getDivorceUploadEvidence2,
@@ -295,7 +295,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
             FinremCaseData::getPropertyAddress,
             FinremCaseData::getMortgageDetail,
@@ -344,7 +344,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
             FinremCaseData::getPropertyAddress,
             FinremCaseData::getMortgageDetail
@@ -389,7 +389,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         ObjectEnumerableAssert respondentSolicitorContactFields = assertThat(contactDetailsWrapper).extracting(
             ContactDetailsWrapper::getRespondentSolicitorName,
@@ -472,7 +472,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(FinremCaseData::getPaymentForChildrenDecision).isNull();
         if (typeOfApplication == MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS) {
             assertThat(response.getData())
@@ -540,7 +540,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         List<Function<FinremCaseData, ?>> fieldsAreNullExtractors = List.of();
         List<Function<FinremCaseData, ?>> fieldsAreNotNullExtractors = List.of(
@@ -619,7 +619,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setFastTrackDecision(fastTrackDecision);
         finremCaseData.setFastTrackDecisionReason(fastTrackDecisionReason);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         if (YesOrNo.NO.equals(fastTrackDecision)) {
             assertThat(response.getData()).extracting(FinremCaseData::getFastTrackDecisionReason)
                 .isNull();
@@ -646,7 +646,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setOtherReasonForComplexity(otherReasonForComplexity);
         finremCaseData.setOtherReasonForComplexityText(otherReasonForComplexityText);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         if (YesOrNo.NO.equals(otherReasonForComplexity)) {
             assertThat(response.getData()).extracting(FinremCaseData::getOtherReasonForComplexityText)
                 .isNull();
@@ -673,7 +673,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setIsApplicantsHomeCourt(isApplicantsHomeCourt);
         finremCaseData.setReasonForLocalCourt(reasonForLocalCourt);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         if (YesOrNo.NO.equals(isApplicantsHomeCourt)) {
             assertThat(response.getData()).extracting(FinremCaseData::getReasonForLocalCourt)
                 .isNull();
@@ -701,7 +701,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setAllocatedToBeHeardAtHighCourtJudgeLevel(allocatedToBeHeardAtHighCourtJudgeLevel);
         finremCaseData.setAllocatedToBeHeardAtHighCourtJudgeLevelText(allocatedToBeHeardAtHighCourtJudgeLevelText);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         if (YesOrNo.NO.equals(allocatedToBeHeardAtHighCourtJudgeLevel)) {
             assertThat(response.getData()).extracting(FinremCaseData::getAllocatedToBeHeardAtHighCourtJudgeLevelText)
                 .isNull();
@@ -729,7 +729,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setFamilyMediatorServiceName1("familyMediatorServiceName1");
         finremCaseData.setMediatorRegistrationNumber1("mediatorRegistrationNumber1");
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData().getMiamWrapper())
             .extracting(
                 MiamWrapper::getFamilyMediatorMiam,
@@ -779,7 +779,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setMediatorRegistrationNumber("mediatorRegistrationNumber");
         finremCaseData.setUploadMediatorDocument(mock(CaseDocument.class));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         final List<Function<MiamWrapper, ?>> fieldsAreNotNullExtractors = List.of();
         final List<Function<FinremCaseData, ?>> finremCaseDataFieldsAreNullExtractors = List.of(
@@ -840,7 +840,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setMediatorRegistrationNumber("mediatorRegistrationNumber");
         finremCaseData.setUploadMediatorDocument(mock(CaseDocument.class));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         // Setting to null
         final List<Function<MiamWrapper, ?>> fieldsAreNullExtractors = List.of(
@@ -889,7 +889,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
 
         finremCaseData.setUploadAdditionalDocument(mock(List.class));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         if (promptForAnyDocument == YesOrNo.YES) {
             assertThat(response.getData()).extracting(FinremCaseData::getUploadAdditionalDocument)
@@ -913,7 +913,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             mockedStatic.when(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData))
                 .thenReturn(List.of("VALIDATION FAILED"));
 
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+            var response = handler.handle(callbackRequest, AUTH_TOKEN);
             mockedStatic.verify(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
             assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
         }
@@ -938,7 +938,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
             .thenReturn(List.of("Validation failed"));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).hasSize(1);
         assertThat(response.getErrors().getFirst()).isEqualTo("Validation failed");
         assertThat(response.getData()).isNotNull();
@@ -959,6 +959,16 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             ))
         );
     }
+
+    @Test
+    void givenAnyCase_whenHandled_shouldClearUnusedEstimatedAssetsChecklist() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(callbackRequest.getFinremCaseData());
+    }
+
 
     private <T> void assertContainsOnlyNulls(T target, List<?> functions) {
         if (!functions.isEmpty()) {
