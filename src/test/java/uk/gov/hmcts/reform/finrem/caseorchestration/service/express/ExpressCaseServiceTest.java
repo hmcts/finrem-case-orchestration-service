@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNABLE_TO_QUANTIFY;
@@ -194,6 +195,30 @@ class ExpressCaseServiceTest {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
         assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
+    }
+
+    @Test
+    void givenV3ValueExists_clearUnusedEstimatedAssetsChecklist() {
+        EstimatedAssetV3 v3Value = mock(EstimatedAssetV3.class);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .estimatedAssetsChecklistV3(v3Value)
+            .estimatedAssetsChecklistV2(mock(EstimatedAssetV2.class))
+            .build();
+        expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
+
+        assertNull(caseData.getEstimatedAssetsChecklistV2());
+        assertEquals(v3Value, caseData.getEstimatedAssetsChecklistV3());
+    }
+
+    @Test
+    void givenV3ValueDoesNotExist_clearUnusedEstimatedAssetsChecklist() {
+        EstimatedAssetV2 v2Value = mock(EstimatedAssetV2.class);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .estimatedAssetsChecklistV2(v2Value)
+            .build();
+        expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
+
+        assertEquals(v2Value, caseData.getEstimatedAssetsChecklistV2());
     }
 
     private static Stream<Arguments> provideIsExpressCase() {
