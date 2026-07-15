@@ -23,18 +23,6 @@ public final class AccessCodeGenerator {
         return RandomStringUtils.random(8, 0, ALLOWED_CHARS.length(), false, false, ALLOWED_CHARS.toCharArray(), new SecureRandom());
     }
 
-    public static void setAccessCode(FinremCaseData caseData) {
-        ensureAccessCodePresent(
-            caseData::getApplicantAccessCodes,
-            caseData::setApplicantAccessCodes
-        );
-
-        ensureAccessCodePresent(
-            caseData::getRespondentAccessCodes,
-            caseData::setRespondentAccessCodes
-        );
-    }
-
     public static void setApplicantAccessCode(FinremCaseData caseData) {
         ensureAccessCodePresent(
             caseData::getApplicantAccessCodes,
