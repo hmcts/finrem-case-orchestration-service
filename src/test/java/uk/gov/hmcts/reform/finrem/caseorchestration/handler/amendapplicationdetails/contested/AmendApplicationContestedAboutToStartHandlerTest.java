@@ -142,7 +142,7 @@ class AmendApplicationContestedAboutToStartHandlerTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenCaseWithAnyAssetListVersion_whenHandled_thenCaseDataPopulatedWithßCorrectVersion(Boolean isV3) {
+    void givenCaseWithAnyAssetListVersion_whenHandled_thenCaseDataPopulatedWithCorrectVersion(Boolean isV3) {
         FinremCaseData caseData = FinremCaseData.builder().build();
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(caseData);
 
