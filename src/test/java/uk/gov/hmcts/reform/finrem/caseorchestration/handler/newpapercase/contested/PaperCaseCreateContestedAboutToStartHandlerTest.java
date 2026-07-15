@@ -9,12 +9,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.NEW_PAPER_CASE;
@@ -29,9 +27,6 @@ class PaperCaseCreateContestedAboutToStartHandlerTest {
 
     @Mock
     private OnStartDefaultValueService onStartDefaultValueService;
-
-    @Mock
-    private FeatureToggleService featureToggleService;
 
     @Test
     void testCanHandle() {
@@ -59,7 +54,6 @@ class PaperCaseCreateContestedAboutToStartHandlerTest {
     void givenAnyCase_whenHandled_thenSetEstimatedAssetsChecklistVersion(boolean useV3EstimatedAssetsChecklist) {
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
-        when(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).thenReturn(useV3EstimatedAssetsChecklist);
 
         // Mock static methods
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
