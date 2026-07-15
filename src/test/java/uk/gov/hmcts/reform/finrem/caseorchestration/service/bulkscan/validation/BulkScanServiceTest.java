@@ -1,12 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
@@ -15,6 +13,8 @@ import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
 
 import java.util.List;
@@ -25,8 +25,9 @@ import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.rules.ExpectedException.none;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -35,16 +36,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BU
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FORM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FORM_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService.CONSENTED_IN_CONTESTED_MESSAGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_CASE_NUMBER;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BulkScanServiceTest {
-
-    @Rule
-    public ExpectedException expectedException = none();
+@ExtendWith(MockitoExtension.class)
+class BulkScanServiceTest {
 
     @Mock
     private FinRemBulkScanFormTransformerFactory finRemBulkScanFormTransformerFactory;
@@ -61,11 +62,17 @@ public class BulkScanServiceTest {
     @Mock
     private FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
 
+    @Mock
+    private CcdService ccdService;
+
+    @Mock
+    private SystemUserService systemUserService;
+
     @InjectMocks
     private BulkScanService bulkScanService;
 
     @Test
-    public void shouldCallReturnedValidator() throws UnsupportedFormTypeException {
+    void shouldCallReturnedValidator() throws UnsupportedFormTypeException {
         OcrValidationResult resultFromValidator = OcrValidationResult.builder().build();
         List<OcrDataField> ocrDataFields = singletonList(new OcrDataField(TEST_KEY, TEST_VALUE));
         when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM)).thenReturn(bulkScanFormValidator);
@@ -78,16 +85,33 @@ public class BulkScanServiceTest {
     }
 
     @Test
-    public void shouldRethrowUnsupportedFormTypeExceptionFromFactory() {
-        expectedException.expect(UnsupportedFormTypeException.class);
-        List<OcrDataField> ocrDataFields = singletonList(new OcrDataField(TEST_KEY, TEST_VALUE));
-        when(finRemBulkScanFormValidatorFactory.getValidator(TEST_BULK_UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
+    void shouldAddContestedCaseReferenceWarningWhenValidatingBulkScanForm() throws UnsupportedFormTypeException {
+        String contestedCaseReference = "1234123412341234";
+        List<OcrDataField> ocrDataFields = singletonList(new OcrDataField(DIVORCE_CASE_NUMBER, contestedCaseReference));
 
-        bulkScanService.validateBulkScanForm(TEST_BULK_UNSUPPORTED_FORM_TYPE, ocrDataFields);
+        when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM)).thenReturn(bulkScanFormValidator);
+        when(bulkScanFormValidator.validateBulkScanForm(ocrDataFields)).thenReturn(OcrValidationResult.builder().build());
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+        when(ccdService.contestedCaseExistsWithReference(contestedCaseReference, TEST_SYSTEM_TOKEN)).thenReturn(true);
+
+        OcrValidationResult returnedResult = bulkScanService.validateBulkScanForm(TEST_FORM, ocrDataFields);
+
+        assertThat(returnedResult.getWarnings(), hasItem(
+            CONSENTED_IN_CONTESTED_MESSAGE
+        ));
     }
 
     @Test
-    public void shouldCallReturnedTransformer() throws UnsupportedFormTypeException {
+    void shouldRethrowUnsupportedFormTypeExceptionFromFactory() {
+        List<OcrDataField> ocrDataFields = singletonList(new OcrDataField(TEST_KEY, TEST_VALUE));
+        when(finRemBulkScanFormValidatorFactory.getValidator(TEST_BULK_UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
+
+        assertThrows(UnsupportedFormTypeException.class,
+            () -> bulkScanService.validateBulkScanForm(TEST_BULK_UNSUPPORTED_FORM_TYPE, ocrDataFields));
+    }
+
+    @Test
+    void shouldCallReturnedTransformer() throws UnsupportedFormTypeException {
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
             .formType(TEST_FORM_TYPE)
             .ocrDataFields(singletonList(new OcrDataField(TEST_KEY, TEST_VALUE)))
@@ -112,17 +136,16 @@ public class BulkScanServiceTest {
     }
 
     @Test
-    public void shouldRethrowUnsupportedFormTypeExceptionFromFormTransformerFactory() {
-        expectedException.expect(UnsupportedFormTypeException.class);
-
+    void shouldRethrowUnsupportedFormTypeExceptionFromFormTransformerFactory() {
         ExceptionRecord exceptionRecord = ExceptionRecord.builder().formType(TEST_BULK_UNSUPPORTED_FORM_TYPE).build();
         when(finRemBulkScanFormValidatorFactory.getValidator(TEST_BULK_UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
 
-        bulkScanService.transformBulkScanForm(exceptionRecord);
+        assertThrows(UnsupportedFormTypeException.class,
+            () -> bulkScanService.transformBulkScanForm(exceptionRecord));
     }
 
-    @Test(expected = InvalidDataException.class)
-    public void shouldThrowInvalidDataExceptionForTransformer() {
+    @Test
+    void shouldThrowInvalidDataExceptionForTransformer() {
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
             .formType(TEST_FORM_TYPE)
             .ocrDataFields(singletonList(new OcrDataField(TEST_KEY, TEST_VALUE)))
@@ -132,7 +155,32 @@ public class BulkScanServiceTest {
         when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);
         when(bulkScanFormValidator.validateBulkScanForm(any())).thenReturn(validatedWithWarn);
 
-        bulkScanService.transformBulkScanForm(exceptionRecord);
+        assertThrows(InvalidDataException.class,
+            () -> bulkScanService.transformBulkScanForm(exceptionRecord));
+
+        verify(finRemBulkScanFormTransformerFactory, never()).getTransformer(TEST_FORM_TYPE);
+        verify(bulkScanFormTransformer, never()).transformIntoCaseData(exceptionRecord);
+    }
+
+    @Test
+    void shouldThrowInvalidDataExceptionWhenContestedCaseExistsForReferenceInDivorceCaseNumberField()
+        throws UnsupportedFormTypeException {
+        String contestedCaseReference = "1234123412341234";
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder()
+            .formType(TEST_FORM_TYPE)
+            .ocrDataFields(singletonList(new OcrDataField(DIVORCE_CASE_NUMBER, contestedCaseReference)))
+            .build();
+
+        when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);
+        when(bulkScanFormValidator.validateBulkScanForm(any())).thenReturn(OcrValidationResult.builder().build());
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+        when(ccdService.contestedCaseExistsWithReference(contestedCaseReference, TEST_SYSTEM_TOKEN)).thenReturn(true);
+
+        InvalidDataException exception = assertThrows(InvalidDataException.class,
+            () -> bulkScanService.transformBulkScanForm(exceptionRecord));
+        assertThat(exception.getWarnings(), hasItem(
+            CONSENTED_IN_CONTESTED_MESSAGE
+        ));
 
         verify(finRemBulkScanFormTransformerFactory, never()).getTransformer(TEST_FORM_TYPE);
         verify(bulkScanFormTransformer, never()).transformIntoCaseData(exceptionRecord);

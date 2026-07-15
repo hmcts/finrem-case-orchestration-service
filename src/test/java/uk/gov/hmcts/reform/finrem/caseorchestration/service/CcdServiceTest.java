@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -21,8 +22,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -89,6 +95,23 @@ public class CcdServiceTest {
         ccdService.getCaseByCaseId("123", CaseType.CONTESTED, AUTH_TOKEN);
 
         verify(coreCaseDataApi).searchCases(any(), any(), any(), any());
+    }
+
+    @Test
+    public void shouldReturnTrueWhenContestedCaseExistsWithReference() {
+        String contestedCaseReference = "1234123412341234";
+        when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
+        when(coreCaseDataApi.searchCases(any(), any(), eq(CONTESTED.getCcdType()), any())).thenReturn(SearchResult.builder()
+            .total(1)
+            .build());
+
+        boolean result = ccdService.contestedCaseExistsWithReference(contestedCaseReference, AUTH_TOKEN);
+
+        assertThat(result, is(true));
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        verify(coreCaseDataApi).searchCases(any(), any(), eq(CONTESTED.getCcdType()), queryCaptor.capture());
+        assertThat(queryCaptor.getValue(), containsString("\"reference\""));
+        assertThat(queryCaptor.getValue(), not(containsString("data.divorceCaseNumber")));
     }
 
     private CaseDetails buildCaseDetails() {
