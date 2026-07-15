@@ -13,17 +13,23 @@ import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.TestUtils;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -48,6 +54,9 @@ class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
     @Mock
     private CourtDetailsMapper courtDetailsMapper;
 
+    @Mock
+    private FeatureToggleService featureToggleService;
+
     private LetterDetailsMapper letterDetailsMapper;
 
     private CourtDetailsTemplateFields mockedCourtDetailsTemplateFields;
@@ -58,7 +67,7 @@ class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
         mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         setFinremCaseDetails(TEST_JSON_CONTESTED);
 
-        letterDetailsMapper = new LetterDetailsMapper(mapper, courtDetailsMapper, consentedApplicationHelper);
+        letterDetailsMapper = new LetterDetailsMapper(mapper, courtDetailsMapper, consentedApplicationHelper, featureToggleService);
         mockedCourtDetailsTemplateFields = mock(CourtDetailsTemplateFields.class);
 
         when(courtDetailsMapper.getCourtDetails(caseDetails.getData().getRegionWrapper().getDefaultCourtList()))
@@ -159,6 +168,69 @@ class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
         );
     }
 
+    @Test
+    void givenApplicantRecipientWithValidAccessCode_whenBuildLetterDetails_thenReturnAccessCode() {
+
+        caseDetails.getData().setApplicantAccessCodes(List.of(
+            accessCode("K93VKS6G", YesOrNo.YES)
+        ));
+
+        BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(
+            caseDetails,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+        assertEquals("K93VKS6G", actual.getAccessCode());
+    }
+
+    @Test
+    void givenRespondentRecipientWithValidAccessCode_whenBuildLetterDetails_thenReturnAccessCode() {
+
+        caseDetails.getData().setRespondentAccessCodes(List.of(
+            accessCode("K93VKS6L", YesOrNo.YES)
+        ));
+
+        BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(
+            caseDetails,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+        assertEquals("K93VKS6L", actual.getAccessCode());
+    }
+
+    @Test
+    void givenMultipleAccessCodes_whenBuildLetterDetails_thenReturnFirstValidAccessCode() {
+
+        caseDetails.getData().setApplicantAccessCodes(List.of(
+            accessCode("K93VKS6L", YesOrNo.NO),
+            accessCode("L93VKS6L", YesOrNo.YES),
+            accessCode("M93VKS6L", YesOrNo.NO)
+        ));
+
+        BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(
+            caseDetails,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+        assertEquals("L93VKS6L", actual.getAccessCode());
+    }
+
+    @Test
+    void givenNoValidAccessCodes_whenBuildLetterDetails_thenReturnNullAccessCode() {
+
+        caseDetails.getData().setApplicantAccessCodes(List.of(
+            accessCode("L93VKS6L", YesOrNo.NO),
+            accessCode("M93VKS6L", YesOrNo.NO)
+        ));
+
+        BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(
+            caseDetails,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+        assertNull(actual.getAccessCode());
+    }
+
     private BasicLetterDetails getExpectedBasicLetterDetails(String name,
                                                              String addressLine1,
                                                              DocumentHelper.PaperNotificationRecipient recipient,
@@ -217,4 +289,17 @@ class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
             .openingHours(CTSC_OPENING_HOURS)
             .build();
     }
+
+    private AccessCodeCollection accessCode(String accessCode, YesOrNo isValid) {
+        return AccessCodeCollection.builder()
+            .id(UUID.randomUUID())
+            .value(
+                AccessCodeEntry.builder()
+                    .accessCode(accessCode)
+                    .isValid(isValid)
+                    .build()
+            )
+            .build();
+    }
 }
+

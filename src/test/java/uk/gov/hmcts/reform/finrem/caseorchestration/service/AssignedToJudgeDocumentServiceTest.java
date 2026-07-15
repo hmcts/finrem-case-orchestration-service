@@ -27,6 +27,7 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -59,6 +60,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
     @Before
     public void setUp() {
+        FeatureToggleService featureToggleService = mock(FeatureToggleService.class);
         when(idamAuthService.getUserDetails(any())).thenReturn(UserDetails.builder().id("ID").build());
         when(docmosisPdfGenerationServiceMock.generateDocFrom(any(), any()))
             .thenReturn("".getBytes(StandardCharsets.UTF_8));
@@ -68,7 +70,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
                     .fileName("app_docs.pdf")
                     .fileUrl("http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64")
                     .build()));
-        DocumentConfiguration config = new DocumentConfiguration();
+        DocumentConfiguration config = new DocumentConfiguration(featureToggleService);
         config.setAssignedToJudgeNotificationTemplate("FL-FRM-LET-ENG-00318.docx");
         config.setAssignedToJudgeNotificationFileName("AssignedToJudgeNotificationLetter.pdf");
         config.setConsentInContestedAssignedToJudgeNotificationFileName("FL-FRM-LET-ENG-00578.docx");

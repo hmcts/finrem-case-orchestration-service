@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.generalapplication.GeneralApplicationRejectionLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.generators.GeneralApplicationRejectionLetterGenerator;
 
@@ -26,6 +27,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -53,12 +55,13 @@ public class RejectGeneralApplicationDocumentServiceTest extends BaseServiceTest
 
     @Before
     public void setUp() {
+        FeatureToggleService featureToggleService = mock(FeatureToggleService.class);
         caseDetails = CaseDetails.builder()
             .id(Long.valueOf(caseId))
             .caseTypeId(CONTESTED.getCcdType())
             .data(new HashMap<>())
             .build();
-        documentConfiguration = new DocumentConfiguration();
+        documentConfiguration = new DocumentConfiguration(featureToggleService);
 
         rejectGeneralApplicationDocumentService = new RejectGeneralApplicationDocumentService(generalApplicationRejectionLetterGenerator,
             genericDocumentService,

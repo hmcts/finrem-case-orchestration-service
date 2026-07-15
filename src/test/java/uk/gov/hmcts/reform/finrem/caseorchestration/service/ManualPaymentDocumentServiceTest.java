@@ -23,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,7 +47,8 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
     @Before
     public void setUp() {
-        DocumentConfiguration config = new DocumentConfiguration();
+        FeatureToggleService featureToggleService = mock(FeatureToggleService.class);
+        DocumentConfiguration config = new DocumentConfiguration(featureToggleService);
         config.setHelpWithFeesSuccessfulNotificationTemplate("FL-FRM-LET-ENG-00552.docx");
         config.setHelpWithFeesSuccessfulNotificationFileName("ManualPaymentLetter.pdf");
     }

@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOn
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 @Slf4j
 @Service
@@ -63,10 +62,6 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
         if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())) {
             caseData.setScheduleOneWrapper(ScheduleOneWrapper.builder()
                 .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
-        }
-
-        if (featureToggleService.isFinremCitizenUiEnabled()) {
-            AccessCodeGenerator.setAccessCode(caseDetails.getData());
         }
 
         generateCoverSheets(caseDetails, userAuthorisation);

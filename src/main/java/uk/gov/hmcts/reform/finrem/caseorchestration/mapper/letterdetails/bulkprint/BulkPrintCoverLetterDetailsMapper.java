@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
@@ -20,8 +21,9 @@ public class BulkPrintCoverLetterDetailsMapper extends LetterDetailsMapper {
 
     public BulkPrintCoverLetterDetailsMapper(ObjectMapper objectMapper,
                                              CourtDetailsMapper courtDetailsMapper,
-                                             ConsentedApplicationHelper consentedApplicationHelper) {
-        super(objectMapper, courtDetailsMapper, consentedApplicationHelper);
+                                             ConsentedApplicationHelper consentedApplicationHelper,
+                                             FeatureToggleService featureToggleService) {
+        super(objectMapper, courtDetailsMapper, consentedApplicationHelper, featureToggleService);
     }
 
     @Override

@@ -35,6 +35,20 @@ public final class AccessCodeGenerator {
         );
     }
 
+    public static void setApplicantAccessCode(FinremCaseData caseData) {
+        ensureAccessCodePresent(
+            caseData::getApplicantAccessCodes,
+            caseData::setApplicantAccessCodes
+        );
+    }
+
+    public static void setRespondentAccessCode(FinremCaseData caseData) {
+        ensureAccessCodePresent(
+            caseData::getRespondentAccessCodes,
+            caseData::setRespondentAccessCodes
+        );
+    }
+
     private static void ensureAccessCodePresent(
         Supplier<List<AccessCodeCollection>> getter,
         Consumer<List<AccessCodeCollection>> setter) {

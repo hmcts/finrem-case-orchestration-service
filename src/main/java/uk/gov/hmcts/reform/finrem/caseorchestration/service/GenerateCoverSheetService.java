@@ -242,7 +242,7 @@ public class GenerateCoverSheetService {
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
             authorisationToken,
             placeholdersMap,
-            documentConfiguration.getBulkPrintTemplate(),
+            documentConfiguration.getBulkPrintTemplate(caseDetails, recipient),
             documentConfiguration.getBulkPrintFileName(),
             caseDetails.getCaseType()
         );

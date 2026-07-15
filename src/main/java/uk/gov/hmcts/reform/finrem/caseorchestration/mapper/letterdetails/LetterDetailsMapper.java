@@ -2,20 +2,27 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
@@ -25,6 +32,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddresseeGeneratorUtils.generateAddressee;
 
@@ -37,6 +46,7 @@ public class LetterDetailsMapper {
     private final ObjectMapper objectMapper;
     private final CourtDetailsMapper courtDetailsMapper;
     private final ConsentedApplicationHelper consentedApplicationHelper;
+    private final FeatureToggleService featureToggleService;
 
     public BasicLetterDetails buildLetterDetails(FinremCaseDetails caseDetails,
                                                  DocumentHelper.PaperNotificationRecipient recipient,
@@ -52,6 +62,7 @@ public class LetterDetailsMapper {
             .caseNumber(String.valueOf(caseDetails.getId()))
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
             .orderType(consentedApplicationHelper.getOrderType(caseDetails.getData()))
+            .accessCode(getAccessCodeForRecipient(caseDetails, recipient))
             .build();
     }
 
@@ -119,6 +130,93 @@ public class LetterDetailsMapper {
             .phoneNumber(CTSC_PHONE_NUMBER)
             .openingHours(CTSC_OPENING_HOURS)
             .build();
+    }
+
+    private List<AccessCodeCollection> getRecipientAccessCode(
+        FinremCaseData caseData,
+        DocumentHelper.PaperNotificationRecipient recipient) {
+
+        return switch (recipient) {
+            case APPLICANT -> caseData.getApplicantAccessCodes();
+            case RESPONDENT -> caseData.getRespondentAccessCodes();
+            default -> throw new IllegalStateException(
+                "Unsupported recipient type: " + recipient);
+        };
+    }
+
+    private String getAccessCodeForRecipient(
+        FinremCaseDetails caseDetails,
+        DocumentHelper.PaperNotificationRecipient recipient) {
+
+        FinremCaseData caseData = caseDetails.getData();
+
+        if (shouldGenerateAccessCode(caseDetails, recipient)) {
+            generateAccessCode(caseData, recipient);
+        }
+
+        List<AccessCodeCollection> accessCodes =
+            getRecipientAccessCode(caseData, recipient);
+
+        return Optional.ofNullable(accessCodes)
+            .orElse(List.of())
+            .stream()
+            .filter(accessCode -> accessCode.getValue().getIsValid().isYes())
+            .map(accessCode -> accessCode.getValue().getAccessCode())
+            .findFirst()
+            .orElse(null);
+    }
+
+    private boolean shouldGenerateAccessCode(
+        FinremCaseDetails caseDetails,
+        DocumentHelper.PaperNotificationRecipient recipient) {
+
+        return featureToggleService.isFinremCitizenUiEnabled()
+            && isContestedCase(caseDetails)
+            && isSupportedRecipient(recipient)
+            && isNotRepresented(caseDetails.getData(), recipient)
+            && hasNoAccessCode(caseDetails.getData(), recipient);
+    }
+
+    private boolean isContestedCase(FinremCaseDetails caseDetails) {
+        return CaseType.CONTESTED.getCcdType()
+            .equalsIgnoreCase(Strings.nullToEmpty(caseDetails.getCaseType().getCcdType()));
+    }
+
+    private boolean isSupportedRecipient(DocumentHelper.PaperNotificationRecipient recipient) {
+        return recipient == APPLICANT || recipient == RESPONDENT;
+    }
+
+    private boolean isNotRepresented(
+        FinremCaseData caseData,
+        DocumentHelper.PaperNotificationRecipient recipient) {
+
+        return switch (recipient) {
+            case APPLICANT -> !caseData.isApplicantRepresentedByASolicitor();
+            case RESPONDENT -> !caseData.isRespondentRepresentedByASolicitor();
+            default -> false;
+        };
+    }
+
+    private boolean hasNoAccessCode(
+        FinremCaseData caseData,
+        DocumentHelper.PaperNotificationRecipient recipient) {
+
+        List<AccessCodeCollection> accessCodes =
+            getRecipientAccessCode(caseData, recipient);
+
+        return accessCodes == null || accessCodes.isEmpty();
+    }
+
+    private void generateAccessCode(
+        FinremCaseData caseData,
+        DocumentHelper.PaperNotificationRecipient recipient) {
+
+        switch (recipient) {
+            case APPLICANT -> AccessCodeGenerator.setApplicantAccessCode(caseData);
+            case RESPONDENT -> AccessCodeGenerator.setRespondentAccessCode(caseData);
+            default -> throw new IllegalArgumentException(
+                "Access code generation is not supported for recipient: " + recipient);
+        }
     }
 
 }

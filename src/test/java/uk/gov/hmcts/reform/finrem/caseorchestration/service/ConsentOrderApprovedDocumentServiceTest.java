@@ -793,7 +793,7 @@ class ConsentOrderApprovedDocumentServiceTest {
         @Test
         void shouldGenerateBulkPrintCoverSheet() {
             finremCaseDetails = FinremCaseDetails.builder()
-                .caseType(caseType)
+                .caseType(CaseType.CONSENTED)
                 .data(FinremCaseData.builder()
                     .build())
                 .build();
@@ -805,13 +805,15 @@ class ConsentOrderApprovedDocumentServiceTest {
                     finremCaseDetails.getData().getRegionWrapper().getDefaultCourtList())
             ).thenReturn(letterDetailsAsMap);
 
-            when(documentConfiguration.getBulkPrintTemplate()).thenReturn("template");
+            when(documentConfiguration.getBulkPrintTemplate(finremCaseDetails, recipient))
+                .thenReturn("template");
+
             when(documentConfiguration.getBulkPrintFileName()).thenReturn("filename");
 
             CaseDocument bulkPrintCoverSheet = caseDocument("bulkPrintCoverSheet");
             when(genericDocumentService.generateDocumentFromPlaceholdersMap(AUTH_TOKEN, letterDetailsAsMap,
                 "template", "filename",
-                caseType)).thenReturn(bulkPrintCoverSheet);
+                CaseType.CONSENTED)).thenReturn(bulkPrintCoverSheet);
 
             var result = consentOrderApprovedDocumentService.getPopulatedConsentCoverSheet(finremCaseDetails, AUTH_TOKEN, recipient);
 
@@ -820,7 +822,7 @@ class ConsentOrderApprovedDocumentServiceTest {
                 () -> verify(bulkPrintLetterDetailsMapper)
                     .getLetterDetailsAsMap(eq(finremCaseDetails), eq(recipient), any(DefaultCourtListWrapper.class)),
                 () -> verify(genericDocumentService).generateDocumentFromPlaceholdersMap(AUTH_TOKEN, letterDetailsAsMap,
-                    "template", "filename", caseType),
+                    "template", "filename", CaseType.CONSENTED),
                 () -> verifyNoMoreInteractions(genericDocumentService)
             );
         }
