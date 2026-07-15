@@ -50,7 +50,6 @@
     Cannot be upgraded directly until upstream HMCTS libraries migrate to httpclient 5.x.
     ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.httpcomponents/httpcore@.*$</packageUrl>
-        <cpe>cpe:2.3:a:apache:httpcomponents_core:*:*:*:*:*:*:*:*</cpe>
         <cve>CVE-2026-54399</cve>
         <cve>CVE-2026-54428</cve>
     </suppress>
