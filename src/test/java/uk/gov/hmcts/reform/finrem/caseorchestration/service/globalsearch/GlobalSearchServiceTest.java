@@ -1,33 +1,30 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GlobalSearchServiceTest {
-    @Mock
-    private FinremCaseData caseData;
+@ExtendWith(MockitoExtension.class)
+class GlobalSearchServiceTest {
 
     @Mock
     private FeatureToggleService featureToggleService;
 
     @InjectMocks
-    GlobalSearchService globalSearchService;
+    private GlobalSearchService globalSearchService;
 
     @Test
-    public void shouldSetGlobalSearchFieldsFromMap() {
+    void shouldSetGlobalSearchFieldsFromMap() {
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
 
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -40,7 +37,7 @@ public class GlobalSearchServiceTest {
     }
 
     @Test
-    public void shouldSetGlobalSearchFieldsFromMapFeatureOff() {
+    void shouldNotSetGlobalSearchFieldsWhenFeatureIsDisabled() {
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(false);
 
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -51,5 +48,4 @@ public class GlobalSearchServiceTest {
 
         assertNull(caseDataMap.get("caseNameHmctsInternal"));
     }
-
 }
