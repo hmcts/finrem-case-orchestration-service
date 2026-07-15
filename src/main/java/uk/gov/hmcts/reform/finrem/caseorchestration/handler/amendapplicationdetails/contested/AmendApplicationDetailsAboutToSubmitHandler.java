@@ -118,10 +118,8 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremAboutToSu
      * @param caseData The case data.
      */
     private void clearUnusedEstimatedAssetsChecklist(FinremCaseData caseData) {
-
-        EstimatedAssetV3 v3assetValue = caseData.getEstimatedAssetsChecklistV3();
-
-        if (v3assetValue != null) {
+        EstimatedAssetV3 latestAssetValue = caseData.getEstimatedAssetsChecklistV3();
+        if (latestAssetValue != null) {
             clearOutdatedEstimatedAssetsChecklists(caseData);
         }
     }
