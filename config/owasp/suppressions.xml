@@ -41,6 +41,8 @@
         <cve>CVE-2026-55955</cve>
         <cve>CVE-2026-55956</cve>
         <cve>CVE-2026-50229</cve>
+        <cve>CVE-2026-59083</cve>
+        <cve>CVE-2026-59084</cve>
     </suppress>
     <suppress until="2026-12-31Z">
         <notes><![CDATA[
@@ -52,5 +54,13 @@
         <packageUrl regex="true">^pkg:maven/org\.apache\.httpcomponents/httpcore@.*$</packageUrl>
         <cve>CVE-2026-54399</cve>
         <cve>CVE-2026-54428</cve>
+    </suppress>
+    <suppress until="2026-12-31Z">
+        <notes><![CDATA[
+    CVE-2026-49844 - log4j 2.25.4 false positive / accepted risk pending fix.
+    Version managed by Spring Boot 4.1.0 BOM.
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j-.*@.*$</packageUrl>
+        <cve>CVE-2026-49844</cve>
     </suppress>
 </suppressions>
