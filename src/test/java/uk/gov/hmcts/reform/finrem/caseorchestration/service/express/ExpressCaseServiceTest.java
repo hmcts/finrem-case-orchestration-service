@@ -199,7 +199,7 @@ class ExpressCaseServiceTest {
 
     @Test
     void givenV3ValueExists_clearUnusedEstimatedAssetsChecklist() {
-        EstimatedAssetV3 v3Value = EstimatedAssetV3.BETWEEN_FIVE_HUNDRED_THOUSAND_TO_ONE_MILLION_POUNDS
+        EstimatedAssetV3 v3Value = EstimatedAssetV3.BETWEEN_FIVE_HUNDRED_THOUSAND_TO_ONE_MILLION_POUNDS;
         FinremCaseData caseData = FinremCaseData.builder()
             .estimatedAssetsChecklistV3(v3Value)
             .estimatedAssetsChecklistV2(mock(EstimatedAssetV2.class))
