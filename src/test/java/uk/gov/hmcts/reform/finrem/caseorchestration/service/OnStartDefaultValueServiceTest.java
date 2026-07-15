@@ -160,9 +160,11 @@ class OnStartDefaultValueServiceTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
         try (MockedStatic<OrganisationPolicy> mockedStatic = Mockito.mockStatic(OrganisationPolicy.class)) {
-            service.defaultApplicantOrganisationPolicy(callbackRequest);
             mockedStatic.when(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR))
                 .thenReturn(applicantDefaultOrganisationPolicy);
+
+            service.defaultApplicantOrganisationPolicy(callbackRequest);
+
             mockedStatic.verify(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
         }
     }
@@ -172,9 +174,11 @@ class OnStartDefaultValueServiceTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
         try (MockedStatic<OrganisationPolicy> mockedStatic = Mockito.mockStatic(OrganisationPolicy.class)) {
-            service.defaultRespondentOrganisationPolicy(callbackRequest);
             mockedStatic.when(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR))
                 .thenReturn(respondentDefaultOrganisationPolicy);
+
+            service.defaultRespondentOrganisationPolicy(callbackRequest);
+
             mockedStatic.verify(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
         }
     }
