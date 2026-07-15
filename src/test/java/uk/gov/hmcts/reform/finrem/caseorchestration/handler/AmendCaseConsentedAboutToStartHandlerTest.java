@@ -25,7 +25,6 @@ class AmendCaseConsentedAboutToStartHandlerTest {
     @Mock
     private OnStartDefaultValueService onStartDefaultValueService;
 
-
     @Test
     void testHandlerCanHandle() {
         assertCanHandle(handler, CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.AMEND_CASE);

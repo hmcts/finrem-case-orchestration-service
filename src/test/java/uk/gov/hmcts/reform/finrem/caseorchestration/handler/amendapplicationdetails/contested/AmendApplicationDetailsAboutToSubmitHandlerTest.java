@@ -969,7 +969,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(callbackRequest.getFinremCaseData());
     }
 
-
     private <T> void assertContainsOnlyNulls(T target, List<?> functions) {
         if (!functions.isEmpty()) {
             assertThat(target).extracting(functions.toArray(new Function[0]))
