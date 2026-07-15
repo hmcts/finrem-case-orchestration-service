@@ -19,11 +19,10 @@ public class GlobalSearchService {
     private final FeatureToggleService featureToggleService;
 
     /**
-     * Sets fields required for global search on the provided case data map.
-     * No changes are made if the global search feature is disabled.
+     * Sets the fields required for global search on the provided case data map.
+     * If the global search feature is disabled, this method does nothing.
      *
-     * @param caseData
-     *
+     * @param caseData the case data map to update
      */
     public void setGlobalSearchDataByMap(Map<String, Object> caseData) {
         if (featureToggleService.isGlobalSearchEnabled()) {
