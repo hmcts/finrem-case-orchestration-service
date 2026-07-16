@@ -99,6 +99,33 @@ public class ManageHearingsCorresponder {
         );
     }
 
+    public List<SendCorrespondenceEvent> buildHearingCorrespondenceEventsIfNeeded(
+        FinremCallbackRequest callbackRequest, String userAuthorisation) {
+
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
+        ManageHearingsWrapper wrapper = finremCaseData.getManageHearingsWrapper();
+        Hearing hearing = hearingCorrespondenceHelper.getActiveHearingInContext(wrapper, wrapper.getWorkingHearingId());
+
+        if (!hearing.shouldSendNotifications()) {
+            return null;
+        }
+
+        List<CaseDocument> documentsToPost = getAdditionalHearingDocs(hearing);
+        hearingCorrespondenceHelper.getMiniFormAIfRequired(finremCaseData, hearing)
+            .ifPresent(documentsToPost::add);
+        documentsToPost.addAll(wrapper.getAssociatedWorkingHearingDocuments());
+
+        return buildSendCorrespondenceEvents(
+            finremCaseDetails,
+            hearing,
+            ManageHearingsAction.ADD_HEARING,
+            userAuthorisation,
+            documentsToPost,
+            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
+        );
+    }
+
     /**
      * Builds a {@link SendCorrespondenceEvent} to notify the solicitor when a hearing
      * is adjourned or vacated, if notification is required.
@@ -246,8 +273,29 @@ public class ManageHearingsCorresponder {
             .build();
     }
 
+    private List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(FinremCaseDetails caseDetails,
+                                                                        HearingLike hearing,
+                                                                        ManageHearingsAction action,
+                                                                        String userAuthorisation,
+                                                                        List<CaseDocument> documentsToPost,
+                                                                        EmailTemplateNames templateName) {
+
+        List<PartyOnCaseCollectionItem> partiesOnCase =
+            Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
+        return partiesOnCase.stream().map(party ->
+            SendCorrespondenceEvent.builder()
+                .notificationParties(List.of(getNotificationPartyFromRole(party.getValue().getRole())))
+                .emailNotificationRequest(buildNotificationRequest(caseDetails.getData(), action, hearing))
+                .emailTemplate(templateName)
+                .documentsToPost(documentsToPost)
+                .caseDetails(caseDetails)
+                .authToken(userAuthorisation)
+                .build()
+        ).toList();
+    }
+
     private boolean shouldNotSendVacateOrAdjournNotification(boolean isVacatedAndRelistedHearing,
-                                                          VacateOrAdjournedHearing vacateOrAdjournedHearing) {
+                                                             VacateOrAdjournedHearing vacateOrAdjournedHearing) {
         return !isVacatedAndRelistedHearing && !vacateOrAdjournedHearing.shouldSendNotifications();
     }
 }
