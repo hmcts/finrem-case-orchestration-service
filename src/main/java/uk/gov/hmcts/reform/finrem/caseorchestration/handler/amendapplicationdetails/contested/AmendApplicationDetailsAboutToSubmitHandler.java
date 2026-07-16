@@ -120,19 +120,8 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremAboutToSu
     private void clearUnusedEstimatedAssetsChecklist(FinremCaseData caseData) {
         EstimatedAssetV3 latestAssetValue = caseData.getEstimatedAssetsChecklistV3();
         if (latestAssetValue != null) {
-            clearOutdatedEstimatedAssetsChecklists(caseData);
+            expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
         }
-    }
-
-    /*
-     * This method is used to clear the outdated estimated assets checklist when a new version is introduced.
-     * Summer 2026: The Estimated Assets Checklist V3 is introduced.
-     * V2 checklist is removed from drafted case data.
-     *
-     * @param caseData The case data.
-     */
-    private void clearOutdatedEstimatedAssetsChecklists(FinremCaseData caseData) {
-        caseData.setEstimatedAssetsChecklistV2(null);
     }
 
     private void generateMiniFormA(FinremCaseDetails finremCaseDetails, String userAuthorisation) {

@@ -940,6 +940,11 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         assertThat(response.getData()).isNotNull();
     }
 
+    /*
+     * The Express Case must be Mocked for other tests (Spy not appropriate)
+     * Use the genuine ExpressCaseService.clearUnusedEstimatedAssetsChecklist method, for data amendment
+     * then verify that the mocked version of clearUnusedEstimatedAssetsChecklist is called.
+     */
     @Test
     void whenHandled_ifV3Asset_thenAnyV2AssetCleared() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
@@ -948,8 +953,12 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             .build();
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
 
+        ExpressCaseService realExpressCaseService = new ExpressCaseService(featureToggleService);
+        realExpressCaseService.clearUnusedEstimatedAssetsChecklist(finremCaseData);
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
+        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(finremCaseData);
         assertThat(response.getData()).extracting(FinremCaseData::getEstimatedAssetsChecklistV2).isNull();
     }
 
