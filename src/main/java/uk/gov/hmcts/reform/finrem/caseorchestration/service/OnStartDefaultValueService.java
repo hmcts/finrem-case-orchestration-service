@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -13,9 +14,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy.getDefaultOrganisationPolicy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
 
 @Service
@@ -23,6 +22,30 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1Or
 public class OnStartDefaultValueService {
 
     private final IdamService idamService;
+
+    /**
+     * Sets the applicant's organisation policy to the default policy
+     * for the applicant solicitor case role.
+     *
+     * @param callbackRequest the callback request containing the case data to update
+     */
+    public void defaultApplicantOrganisationPolicy(FinremCallbackRequest callbackRequest) {
+        callbackRequest.getFinremCaseData().setApplicantOrganisationPolicy(
+            getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR)
+        );
+    }
+
+    /**
+     * Sets the respondent's organisation policy to the default policy
+     * for the respondent solicitor case role.
+     *
+     * @param callbackRequest the callback request containing the case data to update
+     */
+    public void defaultRespondentOrganisationPolicy(FinremCallbackRequest callbackRequest) {
+        callbackRequest.getFinremCaseData().setRespondentOrganisationPolicy(
+            getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR)
+        );
+    }
 
     public void defaultCivilPartnershipField(CallbackRequest callbackRequest) {
         callbackRequest.getCaseDetails().getData().putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
@@ -35,19 +58,11 @@ public class OnStartDefaultValueService {
         }
     }
 
-    public void defaultUrgencyQuestion(CallbackRequest callbackRequest) {
-        callbackRequest.getCaseDetails().getData().putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
-    }
-
     public void defaultUrgencyQuestion(FinremCallbackRequest callbackRequest) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         if (caseData.getPromptForUrgentCaseQuestion() == null) {
             caseData.setPromptForUrgentCaseQuestion(YesOrNo.NO);
         }
-    }
-
-    public void defaultTypeOfApplication(CallbackRequest callbackRequest) {
-        callbackRequest.getCaseDetails().getData().putIfAbsent(TYPE_OF_APPLICATION, TYPE_OF_APPLICATION_DEFAULT_TO);
     }
 
     public void defaultTypeOfApplication(FinremCallbackRequest callbackRequest) {
