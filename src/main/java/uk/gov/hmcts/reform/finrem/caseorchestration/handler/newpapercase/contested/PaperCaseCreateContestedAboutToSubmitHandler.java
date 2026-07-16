@@ -69,7 +69,7 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremAboutToS
         validateCaseData(callbackRequest);
         caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
 
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        final FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = callbackRequest.getFinremCaseData();
 
         if (idamService.isUserRoleAdmin(userAuthorisation)) {
