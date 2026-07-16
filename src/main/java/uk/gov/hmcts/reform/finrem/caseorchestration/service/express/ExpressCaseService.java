@@ -116,6 +116,33 @@ public class ExpressCaseService {
             && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
     }
 
+    /*
+     * This method checks to see if the case is using the most up-to-date asset check list.
+     * If it is, then it calls clearOutdatedEstimatedAssetsChecklists, to remove older checklists.
+     *
+     * At the time of writing, the most up-to-date checklist is V3.
+     *
+     * @param caseData The case data.
+     */
+    public void clearUnusedEstimatedAssetsChecklist(FinremCaseData caseData) {
+        EstimatedAssetV3 latestAssetValue = caseData.getEstimatedAssetsChecklistV3();
+        if (latestAssetValue != null) {
+            clearOutdatedEstimatedAssetsChecklists(caseData);
+        }
+    }
+
+    /*
+     * This method is used to clear the outdated estimated assets checklist when a new version is introduced.
+     * Summer 2026: The Estimated Assets Checklist V3 is introduced.
+     * V2 checklist is removed from drafted case data.
+     *
+     * @param caseData The case data.
+     */
+    private void clearOutdatedEstimatedAssetsChecklists(FinremCaseData caseData) {
+        caseData.setEstimatedAssetsChecklist(null);
+        caseData.setEstimatedAssetsChecklistV2(null);
+    }
+
     /**
      * Determines if the case qualifies for express case participation based on several conditions.
      *  - is within a participating FRC

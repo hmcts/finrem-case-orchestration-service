@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNABLE_TO_QUANTIFY;
@@ -126,7 +127,7 @@ class ExpressCaseServiceTest {
 
         expressCaseService.setWhichExpressCaseAmendmentLabelToShow(caseDataOnceAmended, caseDataBeforeAmending);
         assertEquals(LabelForExpressCaseAmendment.UNSUITABLE_FOR_EXPRESS_LABEL,
-                caseDataOnceAmended.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
+            caseDataOnceAmended.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
     }
 
     /*
@@ -136,7 +137,7 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideAmendedExpressCaseSuitableScenarios")
     void setWhichExpressCaseAmendmentLabelToShow_shouldSetSuitable_WhenCaseAmendmentDoesNotDisqualify(
-            Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
+        Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
 
         FinremCaseData dataBeforeAmending = caseDataBeforeAndAfterAmending.getLeft();
         FinremCaseData amendedData = caseDataBeforeAndAfterAmending.getRight();
@@ -154,7 +155,7 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideAmendedExpressCaseScenariosNeedingNoLabel")
     void setWhetherDisqualifiedFromExpress_shouldSetNoLabel_WhenCaseRemainsUnsuitableForExpress(
-            Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
+        Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
 
         FinremCaseData dataBeforeAmending = caseDataBeforeAndAfterAmending.getLeft();
         FinremCaseData amendedData = caseDataBeforeAndAfterAmending.getRight();
@@ -167,8 +168,8 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideIsExpressCase")
     void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabledCaseDetails(boolean isExpressPilotEnabled,
-                                                                         CaseDetails caseDetails,
-                                                                         boolean expected) {
+                                                                                         CaseDetails caseDetails,
+                                                                                         boolean expected) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(isExpressPilotEnabled);
         assertEquals(expected, expressCaseService.isExpressCase(caseDetails));
     }
@@ -176,8 +177,8 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideIsExpressCaseFinRemCaseData")
     void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabledFinRemCaseData(boolean isExpressPilotEnabled,
-                                                                              FinremCaseData caseData,
-                                                                              boolean expected) {
+                                                                                            FinremCaseData caseData,
+                                                                                            boolean expected) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(isExpressPilotEnabled);
         assertEquals(expected, expressCaseService.isExpressCase(caseData));
     }
@@ -196,24 +197,28 @@ class ExpressCaseServiceTest {
         assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
-    /*
-     * Do not maintain this test after V3 Asset values are known to work.
-     * This is covers an edge-case.  This is a scenario where both EstimatedAssetV2 and EstimatedAssetV3 are set.
-     * This can happen if the case was drafted with a V2 asset value, and amended the case with a V3 asset value.
-     * When available V3 asset values are given preference. This will best support post-submission events, related to Express.
-     */
     @Test
-    void whenExpressCaseEnrollmentStatus_ifTwoAssetVersions_thenLatestAssetUsed() {
+    void givenV3ValueExists_clearUnusedEstimatedAssetsChecklist() {
+        EstimatedAssetV3 v3Value = EstimatedAssetV3.BETWEEN_FIVE_HUNDRED_THOUSAND_TO_ONE_MILLION_POUNDS;
+        FinremCaseData caseData = FinremCaseData.builder()
+            .estimatedAssetsChecklistV3(v3Value)
+            .estimatedAssetsChecklistV2(mock(EstimatedAssetV2.class))
+            .build();
+        expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
 
-        FinremCaseData caseData = createCaseData();
+        assertNull(caseData.getEstimatedAssetsChecklistV2());
+        assertEquals(v3Value, caseData.getEstimatedAssetsChecklistV3());
+    }
 
-        // The V3 asset should be the one chosen, so the case should qualify for Express; so show as ENROLLED
-        caseData.setEstimatedAssetsChecklistV2(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS);
-        caseData.setEstimatedAssetsChecklistV3(EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS);
+    @Test
+    void givenV3ValueDoesNotExist_clearUnusedEstimatedAssetsChecklist() {
+        EstimatedAssetV2 v2Value = EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
+        FinremCaseData caseData = FinremCaseData.builder()
+            .estimatedAssetsChecklistV2(v2Value)
+            .build();
+        expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
 
-        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
-        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
-        assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
+        assertEquals(v2Value, caseData.getEstimatedAssetsChecklistV2());
     }
 
     private static Stream<Arguments> provideIsExpressCase() {
@@ -335,9 +340,9 @@ class ExpressCaseServiceTest {
         Pair<FinremCaseData, FinremCaseData> amendedWasNullNowQualifies = Pair.of(nullEnrollmentData, dataQualifies);
 
         return Stream.of(
-                amendedStillEnrolled,
-                amendedNowQualifies,
-                amendedWasNullNowQualifies
+            amendedStillEnrolled,
+            amendedNowQualifies,
+            amendedWasNullNowQualifies
         );
     }
 
@@ -362,8 +367,8 @@ class ExpressCaseServiceTest {
 
         // Case did not qualify for enrollment, and still doesn't upon amendment
         return Stream.of(
-                amendedStillDoesNotQualify,
-                amendedWasNullStillDoesNotQualify
+            amendedStillDoesNotQualify,
+            amendedWasNullStillDoesNotQualify
         );
     }
 
