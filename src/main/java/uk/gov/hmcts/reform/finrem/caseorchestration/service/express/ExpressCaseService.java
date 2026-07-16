@@ -172,19 +172,23 @@ public class ExpressCaseService {
     }
 
     /**
-     * Returns true if either Estimated Asset Value field is under £250k.
+     * Returns true if the latest populated Estimated Asset Value field is under £250k.
      *
-     * <p>Handlers ensure that only one of the two Estimated Asset Value fields is set,
-     * so both fields can be checked safely. This method is null-safe and returns false
-     * if both values are null.</p>
+     * <p>V3 is newer than V2, so when a V3 value is present it takes precedence.
+     * The isEstimatedAssetsChecklistV3Enabled feature toggle is not considered, this is so existing V3 cases can
+     * still be processed after submission if Service decide to toggle off V3 case creation.
+     * This method is null-safe and returns false if both values are null.</p>
      *
      * @param v2assetValue the value from the older EstimatedAssetV2 enum
      * @param v3assetValue the value from the newer EstimatedAssetV3 enum
-     * @return true if the asset value qualifies for express case participation, false otherwise
+     * @return true if the latest populated asset value qualifies for express case participation, false otherwise
      */
     private boolean isExpressPilotAssetValue(EstimatedAssetV2 v2assetValue, EstimatedAssetV3 v3assetValue) {
-        return EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v2assetValue)
-            || EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v3assetValue);
+        if (v3assetValue != null) {
+            return EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v3assetValue);
+        }
+
+        return EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v2assetValue);
     }
 
     /* Checks that a region has been selected before calling getSelectedAllocatedCourt, as an indication

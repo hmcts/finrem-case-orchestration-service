@@ -5,13 +5,14 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
@@ -38,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1Or
 
 @Slf4j
 @Service
-public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackHandler {
+public class AmendApplicationDetailsAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final CaseFlagsService caseFlagsService;
@@ -89,6 +90,8 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         clearUnusedMiamDetailsFields(caseData);
         clearUnusedUploadAdditionalDocuments(caseData);
 
+        clearUnusedEstimatedAssetsChecklist(caseData);
+
         generateMiniFormA(caseDetails, userAuthorisation);
 
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
@@ -104,6 +107,21 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
 
         return response(caseData, null, ContactDetailsValidator.validateOrganisationPolicy(caseData));
+    }
+
+    /*
+     * This method checks to see if the case is using the most up-to-date asset check list.
+     * If it is, then it calls clearOutdatedEstimatedAssetsChecklists, to remove older checklists.
+     *
+     * At the time of writing, the most up-to-date checklist is V3.
+     *
+     * @param caseData The case data.
+     */
+    private void clearUnusedEstimatedAssetsChecklist(FinremCaseData caseData) {
+        EstimatedAssetV3 latestAssetValue = caseData.getEstimatedAssetsChecklistV3();
+        if (latestAssetValue != null) {
+            expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
+        }
     }
 
     private void generateMiniFormA(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
