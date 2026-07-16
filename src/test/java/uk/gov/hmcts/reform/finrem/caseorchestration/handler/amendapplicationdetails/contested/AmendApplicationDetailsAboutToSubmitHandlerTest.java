@@ -13,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
@@ -22,8 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FastTrackReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -55,7 +52,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -939,6 +935,31 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         assertThat(response.getErrors()).hasSize(1);
         assertThat(response.getErrors().getFirst()).isEqualTo("Validation failed");
         assertThat(response.getData()).isNotNull();
+    }
+
+    /*
+     * Any value can be used in place of listVersion, at the time of writing.
+     * Just preferred to use correct enums, to cover logic changing later.
+     */
+    @ParameterizedTest
+    @EnumSource(value = EstimatedAssetsChecklistVersion.class)
+    void givenCaseDataWithTemporaryEstimatedAssetsChecklistVersion_whenHandle_thenTemporaryFieldSanitised(
+        EstimatedAssetsChecklistVersion listVersion) {
+
+        verifyTemporaryFieldsWereSanitised(handler,
+            finremCaseDetailsMapper, new HashMap<>(Map.of(
+                "estimatedAssetsChecklistVersion", listVersion
+            ))
+        );
+    }
+
+    @Test
+    void givenAnyCase_whenHandled_shouldClearUnusedEstimatedAssetsChecklist() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(callbackRequest.getFinremCaseData());
     }
 
     /*

@@ -101,12 +101,14 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremAboutToSu
             expressCaseService.setExpressCaseEnrollmentStatus(caseDetails.getData());
         }
 
+        expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
+
         List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
         if (!mandatoryDataErrors.isEmpty()) {
-            return response(caseData, null, mandatoryDataErrors);
+            return responseWithoutWarnings(caseData, mandatoryDataErrors);
         }
 
-        return response(caseData, null, ContactDetailsValidator.validateOrganisationPolicy(caseData));
+        return responseWithoutWarnings(caseData, ContactDetailsValidator.validateOrganisationPolicy(caseData));
     }
 
     /*
