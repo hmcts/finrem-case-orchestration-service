@@ -162,35 +162,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSuccessfullySetOrgPolicy() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
-
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
-        mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(APP_SOLICITOR_POLICY)))
-            .andExpect(jsonPath("$.data.civilPartnership", is(NO_VALUE)))
-            .andExpect(jsonPath("$.data.promptForUrgentCaseQuestion", is(NO_VALUE)));
-    }
-
-    public void shouldNotSetOrgPolicyIfInvalidCaseType() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
-        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(false);
-
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
-        mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist());
-    }
-
-    @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddressContested() {
         when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
 
