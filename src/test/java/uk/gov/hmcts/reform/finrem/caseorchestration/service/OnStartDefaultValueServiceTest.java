@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -32,9 +34,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
 @ExtendWith(MockitoExtension.class)
 class OnStartDefaultValueServiceTest {
@@ -46,6 +45,12 @@ class OnStartDefaultValueServiceTest {
 
     @Mock
     private IdamService idamService;
+
+    @Mock
+    private OrganisationPolicy applicantDefaultOrganisationPolicy;
+
+    @Mock
+    private OrganisationPolicy respondentDefaultOrganisationPolicy;
 
     @Test
     void setDefaultDate() {
@@ -74,22 +79,6 @@ class OnStartDefaultValueServiceTest {
         callbackRequest.getCaseDetails().getData().setCivilPartnership(YesOrNo.YES);
         service.defaultCivilPartnershipField(callbackRequest);
         assertEquals(YES_VALUE, callbackRequest.getCaseDetails().getData().getCivilPartnership().getYesOrNo());
-    }
-
-    @Test
-    void defaultTypeOfApplication_defaultValue() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        service.defaultTypeOfApplication(callbackRequest);
-        assertEquals(TYPE_OF_APPLICATION_DEFAULT_TO,callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION));
-    }
-
-    @Test
-    void defaultTypeOfApplication_userValue() {
-        var schedule1 = "Under paragraph 1 or 2 of schedule 1 children act 1989";
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(TYPE_OF_APPLICATION, schedule1);
-        service.defaultTypeOfApplication(callbackRequest);
-        assertEquals(schedule1,callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION));
     }
 
     @Test
@@ -126,14 +115,6 @@ class OnStartDefaultValueServiceTest {
     }
 
     @Test
-    void setDefaultUrgencyQuestion() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        service.defaultUrgencyQuestion(callbackRequest);
-        assertNotNull(callbackRequest.getCaseDetails().getData().get(URGENT_CASE_QUESTION));
-        assertEquals(NO_VALUE, callbackRequest.getCaseDetails().getData().get(URGENT_CASE_QUESTION));
-    }
-
-    @Test
     void defaultUrgencyQuestion_defaultValue_finremRequest() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
         service.defaultUrgencyQuestion(callbackRequest);
@@ -162,7 +143,7 @@ class OnStartDefaultValueServiceTest {
     }
 
     @Test
-    void tsetDefaultConsentedOrderDate() {
+    void testDefaultConsentedOrderDate() {
         FinremCaseData caseData = mock(FinremCaseData.class);
 
         try (MockedStatic<LocalDate> mockedStatic = Mockito.mockStatic(LocalDate.class)) {
@@ -170,6 +151,34 @@ class OnStartDefaultValueServiceTest {
 
             service.defaultConsentedOrderDate(caseData);
             verify(caseData).setOrderDirectionDate(FIXED_DATE);
+        }
+    }
+
+    @Test
+    void testDefaultApplicantOrganisationPolicy() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+
+        try (MockedStatic<OrganisationPolicy> mockedStatic = Mockito.mockStatic(OrganisationPolicy.class)) {
+            mockedStatic.when(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR))
+                .thenReturn(applicantDefaultOrganisationPolicy);
+
+            service.defaultApplicantOrganisationPolicy(callbackRequest);
+
+            mockedStatic.verify(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
+        }
+    }
+
+    @Test
+    void testDefaultRespondentOrganisationPolicy() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+
+        try (MockedStatic<OrganisationPolicy> mockedStatic = Mockito.mockStatic(OrganisationPolicy.class)) {
+            mockedStatic.when(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR))
+                .thenReturn(respondentDefaultOrganisationPolicy);
+
+            service.defaultRespondentOrganisationPolicy(callbackRequest);
+
+            mockedStatic.verify(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
         }
     }
 
