@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -49,6 +52,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -92,19 +96,20 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenContestedCase_whenHandledAndUserIsAdminAndCaseFileViewEnabled_thenReturnExpectedResponseCaseData() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         finremCallbackRequest.getCaseDetails().getData().getUploadAdditionalDocument().forEach(ad ->
             ad.getValue().getAdditionalDocuments().setCategoryId(
                 DocumentCategory.APPLICATIONS_MAIN_APPLICATION.getDocumentCategoryId()));
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
             .thenReturn(finremCallbackRequest.getCaseDetails());
+        when(finremCaseDetailsMapper.mapToFinremCaseData(any()))
+            .thenReturn(finremCallbackRequest.getFinremCaseData());
         when(idamService.isUserRoleAdmin(anyString())).thenReturn(true);
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(anyString(),
             any(FinremCaseDetails.class))).thenReturn(caseDocument());
         when(createCaseMandatoryDataValidator.validate(finremCallbackRequest.getCaseDetails().getData()))
             .thenReturn(Collections.emptyList());
-
+        CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
         expectedAdminResponseCaseData(responseCaseData);
@@ -114,16 +119,18 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenContestedCase_whenHandledAndUserIsNotAdminAndCaseFileViewDisabled_thenReturnExpectedResponseCaseData() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
             .thenReturn(finremCallbackRequest.getCaseDetails());
+        when(finremCaseDetailsMapper.mapToFinremCaseData(any()))
+            .thenReturn(finremCallbackRequest.getFinremCaseData());
         when(idamService.isUserRoleAdmin(anyString())).thenReturn(false);
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(anyString(),
             any(FinremCaseDetails.class))).thenReturn(caseDocument());
         when(createCaseMandatoryDataValidator.validate(finremCallbackRequest.getCaseDetails().getData()))
             .thenReturn(Collections.emptyList());
 
+        CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
         expectedNonAdminResponseCaseData(responseCaseData);
@@ -195,6 +202,22 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             mockedStatic.verify(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
             assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
         }
+    }
+
+    /*
+     * Any value can be used in place of listVersion, at the time of writing.
+     * Just preferred to use correct enums, to cover logic changing later.
+     */
+    @ParameterizedTest
+    @EnumSource(value = EstimatedAssetsChecklistVersion.class)
+    void givenCaseDataWithTemporaryEstimatedAssetsChecklistVersion_whenHandle_thenTemporaryFieldSanitised(
+        EstimatedAssetsChecklistVersion listVersion) {
+
+        verifyTemporaryFieldsWereSanitised(handler,
+            finremCaseDetailsMapper, new HashMap<>(Map.of(
+                "estimatedAssetsChecklistVersion", listVersion
+            ))
+        );
     }
 
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {
