@@ -142,11 +142,6 @@ public class HearingOrderService {
 
     private void appendDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument order,
                                                     List<DocumentCollectionItem> additionalDocs, YesOrNo isOrderStamped) {
-        appendDocumentToUploadHearingOrder(finremCaseData, order, additionalDocs, isOrderStamped, null);
-    }
-
-    private void appendDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument order,
-                                                    List<DocumentCollectionItem> additionalDocs, YesOrNo isOrderStamped, YesOrNo isFinalOrder) {
         List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder()).orElse(new ArrayList<>());
         directionOrders.add(
             DirectionOrderCollection.builder()
@@ -154,7 +149,6 @@ public class HearingOrderService {
                     .uploadDraftDocument(order)
                     .additionalDocuments(additionalDocs)
                     .isOrderStamped(isOrderStamped)
-                    .isFinalOrder(isFinalOrder)
                     .build())
                 .build()
         );
@@ -246,7 +240,7 @@ public class HearingOrderService {
         } else {
             isOrderStamped = YesOrNo.NO;
             // make the uploaded approved orders available for judge uploaded orders in Process Order event
-            appendDocumentToUploadHearingOrder(caseData, order.getApprovedOrder(), additionalDocs, isOrderStamped, order.getIsFinalOrder());
+            appendDocumentToUploadHearingOrder(caseData, order.getApprovedOrder(), additionalDocs, isOrderStamped);
         }
     }
 
