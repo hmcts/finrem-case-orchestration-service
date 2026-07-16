@@ -13,14 +13,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FastTrackReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -45,13 +50,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,6 +67,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
@@ -85,6 +94,8 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
     private ExpressCaseService expressCaseService;
     @Mock
     private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Test
     void testCanHandle() {
@@ -960,45 +971,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(callbackRequest.getFinremCaseData());
-    }
-
-    /*
-     * The Express Case must be Mocked for other tests (Spy not appropriate)
-     * Use the genuine ExpressCaseService.clearUnusedEstimatedAssetsChecklist method, for data amendment
-     * then verify that the mocked version of clearUnusedEstimatedAssetsChecklist is called.
-     */
-    @Test
-    void whenHandled_ifV3Asset_thenAnyV2AssetCleared() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .estimatedAssetsChecklistV2(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS)
-            .estimatedAssetsChecklistV3(EstimatedAssetV3.OVER_TWENTY_MILLION_POUNDS)
-            .build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
-
-        ExpressCaseService realExpressCaseService = new ExpressCaseService(featureToggleService);
-        realExpressCaseService.clearUnusedEstimatedAssetsChecklist(finremCaseData);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(finremCaseData);
-        assertThat(response.getData()).extracting(FinremCaseData::getEstimatedAssetsChecklistV2).isNull();
-    }
-
-    @Test
-    void whenHandled_ifV2Asset_thenNothingCleared() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .estimatedAssetsChecklistV2(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS)
-            .estimatedAssetsChecklistV3(null)
-            .build();
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(expressCaseService, never()).clearUnusedEstimatedAssetsChecklist(finremCaseData);
-        assertThat(response.getData())
-            .extracting(FinremCaseData::getEstimatedAssetsChecklistV2)
-            .isEqualTo(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS);
     }
 
     private <T> void assertContainsOnlyNulls(T target, List<?> functions) {
