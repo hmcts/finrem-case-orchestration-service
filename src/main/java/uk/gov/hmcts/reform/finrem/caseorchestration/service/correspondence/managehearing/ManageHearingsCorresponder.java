@@ -65,44 +65,80 @@ public class ManageHearingsCorresponder {
      * This method retrieves the active hearing in context and checks whether notifications
      * should be sent. If notifications are enabled, it gathers all relevant documents including
      * additional hearing documents, any required mini Form A, and associated working hearing
-     * documents. It then constructs a correspondence event to notify the solicitor.
+     * documents. It then constructs a single correspondence event covering all parties.
      * </p>
      *
-     * @param callbackRequest the callback request containing case details and data
+     * @param callbackRequest   the callback request containing case details and data
      * @param userAuthorisation the authorization token of the user initiating this action
      * @return a {@link SendCorrespondenceEvent} containing the hearing notification details,
      *         or {@code null} if no notification is required
      */
     public SendCorrespondenceEvent buildHearingCorrespondenceEventIfNeeded(FinremCallbackRequest callbackRequest,
                                                                            String userAuthorisation) {
-
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
-        ManageHearingsWrapper wrapper = finremCaseData.getManageHearingsWrapper();
-        Hearing hearing = hearingCorrespondenceHelper.getActiveHearingInContext(wrapper, wrapper.getWorkingHearingId());
-
-        if (!hearing.shouldSendNotifications()) {
+        HearingCorrespondenceContext context = prepareHearingCorrespondenceContext(callbackRequest);
+        if (context == null) {
             return null;
         }
 
-        List<CaseDocument> documentsToPost = getAdditionalHearingDocs(hearing);
-        hearingCorrespondenceHelper.getMiniFormAIfRequired(finremCaseData, hearing)
-            .ifPresent(documentsToPost::add);
-        documentsToPost.addAll(wrapper.getAssociatedWorkingHearingDocuments());
-
         return buildSendCorrespondenceEvent(
-            finremCaseDetails,
-            hearing,
+            context.caseDetails(),
+            context.hearing(),
             ManageHearingsAction.ADD_HEARING,
             userAuthorisation,
-            documentsToPost,
+            context.documentsToPost(),
             FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
         );
     }
 
-    public List<SendCorrespondenceEvent> buildHearingCorrespondenceEventsIfNeeded(
-        FinremCallbackRequest callbackRequest, String userAuthorisation) {
+    /**
+     * Builds one {@link SendCorrespondenceEvent} per party for a hearing notification to be
+     * sent to the solicitor, if notification is required.
+     *
+     * <p>
+     * This method retrieves the active hearing in context and checks whether notifications
+     * should be sent. If notifications are enabled, it gathers all relevant documents including
+     * additional hearing documents, any required mini Form A, and associated working hearing
+     * documents. It then constructs one correspondence event per party, so each party's
+     * correspondence can be sent/tracked independently.
+     * </p>
+     *
+     * @param callbackRequest   the callback request containing case details and data
+     * @param userAuthorisation the authorization token of the user initiating this action
+     * @return a list of {@link SendCorrespondenceEvent}s, one per party on the hearing,
+     *         or {@code null} if no notification is required
+     */
+    public List<SendCorrespondenceEvent> buildHearingCorrespondenceEventsIfNeeded(FinremCallbackRequest callbackRequest,
+                                                                                  String userAuthorisation) {
+        HearingCorrespondenceContext context = prepareHearingCorrespondenceContext(callbackRequest);
+        if (context == null) {
+            return null;
+        }
 
+        return buildSendCorrespondenceEvents(
+            context.caseDetails(),
+            context.hearing(),
+            ManageHearingsAction.ADD_HEARING,
+            userAuthorisation,
+            context.documentsToPost(),
+            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
+        );
+    }
+
+    /**
+     * Gathers the case details, active hearing, and documents to post required to build hearing
+     * correspondence events, if notification is required for the active hearing.
+     *
+     * <p>
+     * Resolves the active hearing in context and, provided notifications are required, collects
+     * additional hearing documents, any required mini Form A, and associated working hearing
+     * documents into a single list of documents to post.
+     * </p>
+     *
+     * @param callbackRequest the callback request containing case details and data
+     * @return a {@link HearingCorrespondenceContext} with the case details, hearing, and documents
+     *         to post, or {@code null} if the hearing does not require notifications
+     */
+    private HearingCorrespondenceContext prepareHearingCorrespondenceContext(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         ManageHearingsWrapper wrapper = finremCaseData.getManageHearingsWrapper();
@@ -117,14 +153,19 @@ public class ManageHearingsCorresponder {
             .ifPresent(documentsToPost::add);
         documentsToPost.addAll(wrapper.getAssociatedWorkingHearingDocuments());
 
-        return buildSendCorrespondenceEvents(
-            finremCaseDetails,
-            hearing,
-            ManageHearingsAction.ADD_HEARING,
-            userAuthorisation,
-            documentsToPost,
-            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
-        );
+        return new HearingCorrespondenceContext(finremCaseDetails, hearing, documentsToPost);
+    }
+
+    /**
+     * Simple holder for the data needed to build hearing correspondence events.
+     *
+     * @param caseDetails     the case details for the correspondence
+     * @param hearing         the active hearing the correspondence relates to
+     * @param documentsToPost the documents to be sent by post
+     */
+    private record HearingCorrespondenceContext(FinremCaseDetails caseDetails,
+                                                Hearing hearing,
+                                                List<CaseDocument> documentsToPost) {
     }
 
     /**
