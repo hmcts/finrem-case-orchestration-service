@@ -62,11 +62,13 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmitte
             List<SendCorrespondenceEvent> events = manageHearingsCorresponder
                 .buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
 
-            retryExecutor.runWithRetrySuppressException(
-                () -> manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation),
-                "Send Hearing Correspondence (%s)".formatted(GENERAL_APPLICATION_DIRECTIONS_MH.getCcdType()),
-                finremCaseDetails.getCaseIdAsString()
-            );
+            for (SendCorrespondenceEvent event : events) {
+                retryExecutor.runWithRetrySuppressException(
+                    () -> applicationEventPublisher.publishEvent(event),
+                    "%s (Event: %s)".formatted(event.describe(), GENERAL_APPLICATION_DIRECTIONS_MH.getCcdType()),
+                    finremCaseDetails.getCaseIdAsString()
+                );
+            }
         }
         return submittedResponse();
     }
