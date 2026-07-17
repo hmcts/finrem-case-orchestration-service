@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidat
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
@@ -90,7 +89,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremAboutToSu
         clearUnusedMiamDetailsFields(caseData);
         clearUnusedUploadAdditionalDocuments(caseData);
 
-        clearUnusedEstimatedAssetsChecklist(caseData);
+        expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
 
         generateMiniFormA(caseDetails, userAuthorisation);
 
@@ -107,21 +106,6 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremAboutToSu
         }
 
         return response(caseData, null, ContactDetailsValidator.validateOrganisationPolicy(caseData));
-    }
-
-    /*
-     * This method checks to see if the case is using the most up-to-date asset check list.
-     * If it is, then it calls clearOutdatedEstimatedAssetsChecklists, to remove older checklists.
-     *
-     * At the time of writing, the most up-to-date checklist is V3.
-     *
-     * @param caseData The case data.
-     */
-    private void clearUnusedEstimatedAssetsChecklist(FinremCaseData caseData) {
-        EstimatedAssetV3 latestAssetValue = caseData.getEstimatedAssetsChecklistV3();
-        if (latestAssetValue != null) {
-            expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
-        }
     }
 
     private void generateMiniFormA(FinremCaseDetails finremCaseDetails, String userAuthorisation) {

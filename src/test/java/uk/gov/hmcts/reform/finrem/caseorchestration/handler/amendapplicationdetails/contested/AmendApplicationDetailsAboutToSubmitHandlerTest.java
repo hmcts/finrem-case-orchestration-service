@@ -55,7 +55,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -963,6 +962,11 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         assertThat(response.getData()).extracting(FinremCaseData::getEstimatedAssetsChecklistV2).isNull();
     }
 
+    /*
+     * The Express Case must be Mocked for other tests (Spy not appropriate)
+     * Use the genuine ExpressCaseService.clearUnusedEstimatedAssetsChecklist method, for data amendment
+     * then verify that the mocked version of clearUnusedEstimatedAssetsChecklist is called.
+     */
     @Test
     void whenHandled_ifV2Asset_thenNothingCleared() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
@@ -971,10 +975,12 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             .build();
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+        ExpressCaseService realExpressCaseService = new ExpressCaseService(featureToggleService);
+        realExpressCaseService.clearUnusedEstimatedAssetsChecklist(finremCaseData);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(expressCaseService, never()).clearUnusedEstimatedAssetsChecklist(finremCaseData);
+        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(finremCaseData);
         assertThat(response.getData())
             .extracting(FinremCaseData::getEstimatedAssetsChecklistV2)
             .isEqualTo(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS);
