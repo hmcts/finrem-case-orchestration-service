@@ -24,6 +24,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FastTrackReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -961,13 +963,50 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         );
     }
 
+    /*
+     * The Express Case must be Mocked for other tests (Spy not appropriate)
+     * Use the genuine ExpressCaseService.clearUnusedEstimatedAssetsChecklist method, for data amendment
+     * then verify that the mocked version of clearUnusedEstimatedAssetsChecklist is called.
+     */
     @Test
-    void givenAnyCase_whenHandled_shouldClearUnusedEstimatedAssetsChecklist() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+    void whenHandled_ifV3Asset_thenAnyV2AssetCleared() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .estimatedAssetsChecklistV2(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS)
+            .estimatedAssetsChecklistV3(EstimatedAssetV3.OVER_TWENTY_MILLION_POUNDS)
+            .build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
 
-        handler.handle(callbackRequest, AUTH_TOKEN);
+        ExpressCaseService realExpressCaseService = new ExpressCaseService(featureToggleService);
+        realExpressCaseService.clearUnusedEstimatedAssetsChecklist(finremCaseData);
 
-        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(callbackRequest.getFinremCaseData());
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(finremCaseData);
+        assertThat(response.getData()).extracting(FinremCaseData::getEstimatedAssetsChecklistV2).isNull();
+    }
+
+    /*
+     * The Express Case must be Mocked for other tests (Spy not appropriate)
+     * Use the genuine ExpressCaseService.clearUnusedEstimatedAssetsChecklist method, for data amendment
+     * then verify that the mocked version of clearUnusedEstimatedAssetsChecklist is called.
+     */
+    @Test
+    void whenHandled_ifV2Asset_thenNothingCleared() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .estimatedAssetsChecklistV2(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS)
+            .estimatedAssetsChecklistV3(null)
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+        ExpressCaseService realExpressCaseService = new ExpressCaseService(featureToggleService);
+        realExpressCaseService.clearUnusedEstimatedAssetsChecklist(finremCaseData);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(finremCaseData);
+        assertThat(response.getData())
+            .extracting(FinremCaseData::getEstimatedAssetsChecklistV2)
+            .isEqualTo(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS);
     }
 
     private <T> void assertContainsOnlyNulls(T target, List<?> functions) {
