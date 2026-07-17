@@ -105,13 +105,13 @@ public class ManageHearingsCorresponder {
      * @param callbackRequest   the callback request containing case details and data
      * @param userAuthorisation the authorization token of the user initiating this action
      * @return a list of {@link SendCorrespondenceEvent}s, one per party on the hearing,
-     *         or {@code null} if no notification is required
+     *         or an empty list if no notification is required
      */
     public List<SendCorrespondenceEvent> buildHearingCorrespondenceEventsIfNeeded(FinremCallbackRequest callbackRequest,
                                                                                   String userAuthorisation) {
         HearingCorrespondenceContext context = prepareHearingCorrespondenceContext(callbackRequest);
         if (context == null) {
-            return null;
+            return List.of();
         }
 
         return buildSendCorrespondenceEvents(
