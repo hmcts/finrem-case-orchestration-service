@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.manag
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -58,6 +59,8 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmitte
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
+        final List<String> errors = new ArrayList<>();
+
         // Hearings are optional, so send hearing correspondence if a hearing was added in the event.
         if (generalApplicationDirectionsService.isHearingRequired(finremCaseDetails)) {
             List<SendCorrespondenceEvent> events = manageHearingsCorresponder
@@ -65,17 +68,28 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmitte
 
             for (SendCorrespondenceEvent event : events) {
                 if (!emptyIfNull(event.getNotificationParties()).isEmpty()) {
+                    String party = event.getNotificationParties().getFirst().name();
                     String caseId = finremCaseDetails.getCaseIdAsString();
                     String task = "Send hearing corresponder to party: %s on general application direction event"
-                        .formatted(event.getNotificationParties().getFirst());
+                        .formatted(party);
                     log.info("{} - {}", caseId, task);
 
-                    retryExecutor.runWithRetrySuppressException(
-                        () -> applicationEventPublisher.publishEvent(event), task, caseId
+                    retryExecutor.runWithRetryWithHandler(
+                        () -> applicationEventPublisher.publishEvent(event), task, caseId,
+                        (exception, actionName, caseId1) ->
+                            errors.add("Notification to %s has failed. Please send notification manually."
+                                .formatted(party))
                     );
                 }
             }
         }
-        return submittedResponse();
+
+        if (errors.isEmpty()) {
+            return submittedResponse();
+        }
+        return submittedResponse(
+            toConfirmationHeader("General Application Direction completed with error"),
+            toConfirmationBody(errors.toArray(new String[0]))
+        );
     }
 }
