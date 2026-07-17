@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocument;
@@ -58,13 +57,8 @@ class SolicitorUploadDocumentAboutToSubmitHandlerTest {
 
     @Test
     void shouldRemoveReadyToSubmitDocumentWhenHandled() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .genericInputFields(GenericInputFields.builder().readyToSubmitDocument(YesOrNo.YES).build())
-            .build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
-
         verifyTemporaryFieldsWereSanitised(underTest,
-            finremCaseDetails, finremCaseDetailsMapper, new HashMap<>(Map.of(
+            finremCaseDetailsMapper, new HashMap<>(Map.of(
                 "readyToSubmitDocument", YesOrNo.YES
             ))
         );
