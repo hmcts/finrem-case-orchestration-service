@@ -89,36 +89,4 @@ public class SendCorrespondenceEvent {
             default -> throw new IllegalStateException("Unable to describe notification party: " + notificationParty);
         };
     }
-
-    public String describe() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(letterNotificationOnly ? "Sending letter-only correspondence" : "Sending correspondence");
-
-        if (caseDetails != null) {
-            sb.append(" for case ").append(caseDetails.getId());
-        }
-
-        if (emailTemplate != null) {
-            sb.append(" using email template '").append(emailTemplate).append("'");
-        }
-
-        if (notificationParties != null && !notificationParties.isEmpty()) {
-            sb.append(" to ").append(notificationParties.size())
-                .append(notificationParties.size() == 1 ? " party" : " parties");
-        }
-
-        if (barrister != null) {
-            sb.append(" (barrister ").append(barrister.getName()).append(")");
-        }
-
-        if (documentsToPost != null && !documentsToPost.isEmpty()) {
-            sb.append(", with ").append(documentsToPost.size())
-                .append(documentsToPost.size() == 1 ? " document to post" : " documents to post");
-        }
-
-        sb.append(".");
-
-        return sb.toString();
-    }
 }
