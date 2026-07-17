@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
@@ -252,46 +253,94 @@ public class ManageHearingsCorresponder {
             .toList());
     }
 
+    /**
+     * Builds a single {@link SendCorrespondenceEvent} that targets every party on the case,
+     * bundling all parties into one combined notification list.
+     *
+     * @param caseDetails       the case the correspondence relates to
+     * @param hearing           the hearing whose parties should be notified
+     * @param action            the hearing management action that triggered this correspondence
+     * @param userAuthorisation the calling user's auth token
+     * @param documentsToPost   documents to be sent by post
+     * @param templateName      the email template to use
+     * @return a single event containing all parties on the case
+     */
     private SendCorrespondenceEvent buildSendCorrespondenceEvent(FinremCaseDetails caseDetails,
                                                                  HearingLike hearing,
                                                                  ManageHearingsAction action,
                                                                  String userAuthorisation,
                                                                  List<CaseDocument> documentsToPost,
                                                                  EmailTemplateNames templateName) {
-        List<PartyOnCaseCollectionItem> partiesOnCase =
-            Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
+        List<NotificationParty> notificationParties = partiesOnCase(hearing).stream()
+            .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
+            .toList();
 
-        return SendCorrespondenceEvent.builder()
-            .notificationParties(partiesOnCase.stream()
-                .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
-                .toList())
-            .emailNotificationRequest(buildNotificationRequest(caseDetails.getData(), action, hearing))
-            .emailTemplate(templateName)
-            .documentsToPost(documentsToPost)
-            .caseDetails(caseDetails)
-            .authToken(userAuthorisation)
+        return baseEventBuilder(caseDetails, hearing, action, userAuthorisation, documentsToPost, templateName)
+            .notificationParties(notificationParties)
             .build();
     }
 
+    /**
+     * Builds one {@link SendCorrespondenceEvent} per party on the case, so each party's
+     * correspondence can be sent/tracked independently rather than combined into one event.
+     *
+     * @param caseDetails       the case the correspondence relates to
+     * @param hearing           the hearing whose parties should be notified
+     * @param action            the hearing management action that triggered this correspondence
+     * @param userAuthorisation the calling user's auth token
+     * @param documentsToPost   documents to be sent by post
+     * @param templateName      the email template to use
+     * @return one event per party on the case
+     */
     private List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(FinremCaseDetails caseDetails,
                                                                         HearingLike hearing,
                                                                         ManageHearingsAction action,
                                                                         String userAuthorisation,
                                                                         List<CaseDocument> documentsToPost,
                                                                         EmailTemplateNames templateName) {
-
-        List<PartyOnCaseCollectionItem> partiesOnCase =
-            Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
-        return partiesOnCase.stream().map(party ->
-            SendCorrespondenceEvent.builder()
+        return partiesOnCase(hearing).stream()
+            .map(party -> baseEventBuilder(caseDetails, hearing, action, userAuthorisation, documentsToPost, templateName)
                 .notificationParties(List.of(getNotificationPartyFromRole(party.getValue().getRole())))
-                .emailNotificationRequest(buildNotificationRequest(caseDetails.getData(), action, hearing))
-                .emailTemplate(templateName)
-                .documentsToPost(documentsToPost)
-                .caseDetails(caseDetails)
-                .authToken(userAuthorisation)
-                .build()
-        ).toList();
+                .build())
+            .toList();
+    }
+
+    /**
+     * Creates a {@link SendCorrespondenceEvent} builder pre-populated with the fields common
+     * to both single-event and per-party correspondence, excluding {@code notificationParties},
+     * which the caller is responsible for setting.
+     *
+     * @param caseDetails       the case the correspondence relates to
+     * @param hearing           the hearing the correspondence relates to
+     * @param action            the hearing management action that triggered this correspondence
+     * @param userAuthorisation the calling user's auth token
+     * @param documentsToPost   documents to be sent by post
+     * @param templateName      the email template to use
+     * @return a partially-built {@code SendCorrespondenceEvent.SendCorrespondenceEventBuilder}
+     */
+    private SendCorrespondenceEvent.SendCorrespondenceEventBuilder baseEventBuilder(
+        FinremCaseDetails caseDetails,
+        HearingLike hearing,
+        ManageHearingsAction action,
+        String userAuthorisation,
+        List<CaseDocument> documentsToPost,
+        EmailTemplateNames templateName) {
+        return SendCorrespondenceEvent.builder()
+            .emailNotificationRequest(buildNotificationRequest(caseDetails.getData(), action, hearing))
+            .emailTemplate(templateName)
+            .documentsToPost(documentsToPost)
+            .caseDetails(caseDetails)
+            .authToken(userAuthorisation);
+    }
+
+    /**
+     * Returns the parties on the case for the given hearing.
+     *
+     * @param hearing the hearing to read parties from
+     * @return the parties on the case, or an empty list if none are set
+     */
+    private List<PartyOnCaseCollectionItem> partiesOnCase(HearingLike hearing) {
+        return Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
     }
 
     private boolean shouldNotSendVacateOrAdjournNotification(boolean isVacatedAndRelistedHearing,
