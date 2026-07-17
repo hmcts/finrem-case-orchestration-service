@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.List;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
 
 @Slf4j
@@ -63,11 +64,16 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmitte
                 .buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
 
             for (SendCorrespondenceEvent event : events) {
-                retryExecutor.runWithRetrySuppressException(
-                    () -> applicationEventPublisher.publishEvent(event),
-                    "%s (Event: %s)".formatted(event.describe(), GENERAL_APPLICATION_DIRECTIONS_MH.getCcdType()),
-                    finremCaseDetails.getCaseIdAsString()
-                );
+                if (!emptyIfNull(event.getNotificationParties()).isEmpty()) {
+                    String caseId = finremCaseDetails.getCaseIdAsString();
+                    String task = "Send hearing corresponder to party: %s on general application direction event"
+                        .formatted(event.getNotificationParties().getFirst());
+                    log.info("{} - {}", caseId, task);
+
+                    retryExecutor.runWithRetrySuppressException(
+                        () -> applicationEventPublisher.publishEvent(event), task, caseId
+                    );
+                }
             }
         }
         return submittedResponse();
