@@ -1,14 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -42,22 +49,30 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.APPEAL_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.FDA;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.FH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsCorresponderTest {
@@ -366,6 +381,253 @@ class ManageHearingsCorresponderTest {
 
         assertThat(actualEvent.getEmailTemplate())
             .isEqualTo(EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR);
+    }
+
+    @Nested
+    class BuildHearingCorrespondenceEventIfNeededTests {
+
+        CaseDocument miniFormA = caseDocument("miniFormA.pdf");
+        CaseDocument additionalDoc = caseDocument("AdditionalDoc.pdf");
+
+        @Test
+        void givenHearingShouldNotSendNotification_whenCalled_thenReturnNull() {
+            FinremCallbackRequest callback = FinremCallbackRequestFactory.from(
+                FinremCaseData.builder().build()
+            );
+
+            UUID workingHearingId = UUID.randomUUID();
+            callback.getFinremCaseData().getManageHearingsWrapper().setWorkingHearingId(workingHearingId);
+
+            Hearing hearing = mock(Hearing.class);
+            when(hearing.shouldSendNotifications()).thenReturn(false);
+
+            when(hearingCorrespondenceHelper.getActiveHearingInContext(
+                callback.getFinremCaseData().getManageHearingsWrapper(),
+                workingHearingId
+            )).thenReturn(hearing);
+
+            assertNull(corresponder.buildHearingCorrespondenceEventIfNeeded(callback, AUTH_TOKEN));
+            verify(hearingCorrespondenceHelper).getActiveHearingInContext(
+                callback.getFinremCaseData().getManageHearingsWrapper(),
+                workingHearingId);
+        }
+
+        static Stream<Arguments> shouldReturnSingleEventWithNotificationParties_whenMultiplePartiesOnCaseSelected() {
+            return Stream.of(
+                Arguments.of(
+                    List.of(
+                        PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder()
+                            .role(CaseRole.APP_SOLICITOR.getCcdCode()).build()).build(),
+                        PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder()
+                            .role(CaseRole.RESP_SOLICITOR.getCcdCode()).build()).build()
+                    ),
+                    List.of(NotificationParty.APPLICANT, NotificationParty.RESPONDENT)
+                ),
+                Arguments.of(
+                    List.of(
+                        PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder()
+                            .role(CaseRole.APP_SOLICITOR.getCcdCode()).build()).build()
+                    ),
+                    List.of(NotificationParty.APPLICANT)
+                )
+            );
+        }
+
+        @ParameterizedTest
+        @MethodSource
+        void shouldReturnSingleEventWithNotificationParties_whenMultiplePartiesOnCaseSelected(
+            List<PartyOnCaseCollectionItem> partiesOnCases, List<NotificationParty> expectedNotificationParties
+        ) {
+            FinremCallbackRequest callback = FinremCallbackRequestFactory.from(
+                FinremCaseData.builder()
+                    .ccdCaseId(CASE_ID)
+                    .ccdCaseType(CaseType.CONTESTED)
+                    .contactDetailsWrapper(buildContactDetails())
+                    .build()
+            );
+
+            UUID workingHearingId = UUID.randomUUID();
+            LocalDate hearingDate = LocalDate.of(2026, Month.JULY, 21);
+            callback.getFinremCaseData().getManageHearingsWrapper()
+                .setWorkingHearingId(workingHearingId);
+
+            Hearing hearing = mock(Hearing.class);
+            when(hearing.getHearingType()).thenReturn(FH);
+            when(hearing.getHearingDate()).thenReturn(hearingDate);
+            when(hearing.shouldSendNotifications()).thenReturn(true);
+
+            // Setting up parties on case
+            when(hearing.getPartiesOnCase()).thenReturn(partiesOnCases);
+
+            List<DocumentCollectionItem> hearingAdditionalDocs = new ArrayList<>();
+            hearingAdditionalDocs.add(DocumentCollectionItem.builder().value(additionalDoc).build());
+            when(hearingCorrespondenceHelper.getMiniFormAIfRequired(callback.getFinremCaseData(), hearing))
+                .thenReturn(Optional.of(miniFormA));
+            when(hearing.getAdditionalHearingDocs()).thenReturn(hearingAdditionalDocs);
+
+            when(hearingCorrespondenceHelper.getActiveHearingInContext(
+                callback.getFinremCaseData().getManageHearingsWrapper(),
+                workingHearingId
+            )).thenReturn(hearing);
+
+            try (
+                MockedStatic<CourtHelper> mockedCourtHelperStatic = Mockito.mockStatic(CourtHelper.class);
+                MockedStatic<NotificationParty> mockedNotificationPartyStatic = Mockito.mockStatic(NotificationParty.class)
+                ) {
+                mockedCourtHelperStatic.when(() -> CourtHelper.getFRCForHearing(hearing)).thenReturn("selectedFRC");
+
+                mockedNotificationPartyStatic.when(() -> NotificationParty.getNotificationPartyFromRole(
+                    CaseRole.APP_SOLICITOR.getCcdCode()
+                )).thenReturn(NotificationParty.APPLICANT);
+                mockedNotificationPartyStatic.when(() -> NotificationParty.getNotificationPartyFromRole(
+                    CaseRole.RESP_SOLICITOR.getCcdCode()
+                )).thenReturn(NotificationParty.RESPONDENT);
+
+                var event = corresponder.buildHearingCorrespondenceEventIfNeeded(callback, AUTH_TOKEN);
+
+                verify(hearingCorrespondenceHelper).getActiveHearingInContext(
+                    callback.getFinremCaseData().getManageHearingsWrapper(), workingHearingId);
+                assertThat(event)
+                    .extracting(
+                        SendCorrespondenceEvent::getCaseDetails,
+                        SendCorrespondenceEvent::getEmailTemplate,
+                        SendCorrespondenceEvent::getEmailNotificationRequest,
+                        SendCorrespondenceEvent::getDocumentsToPost,
+                        SendCorrespondenceEvent::getAuthToken)
+                    .containsExactly(
+                        callback.getCaseDetails(),
+                        FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR,
+                        NotificationRequest.builder()
+                            .caseReferenceNumber(CASE_ID)
+                            .hearingType(FH.getId())
+                            .hearingDate("21 July 2026")
+                            .applicantName("Frodo")
+                            .respondentName("Gollum")
+                            .caseType("contested")
+                            .selectedCourt("selectedFRC")
+                            .vacatedHearingDateTime("")
+                            .vacatedHearingType("")
+                            .build(),
+                        List.of(additionalDoc, miniFormA),
+                        AUTH_TOKEN
+                    );
+
+                assertThat(event.getNotificationParties())
+                    .containsAll(expectedNotificationParties);
+            }
+        }
+
+        static Stream<Arguments> shouldReturnMultipleEventWithNotificationParties_whenMultiplePartiesOnCaseSelected() {
+            return Stream.of(
+                Arguments.of(
+                    List.of(
+                        PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder()
+                            .role(CaseRole.APP_SOLICITOR.getCcdCode()).build()).build(),
+                        PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder()
+                            .role(CaseRole.RESP_SOLICITOR.getCcdCode()).build()).build()
+                    ),
+                    List.of(NotificationParty.APPLICANT, NotificationParty.RESPONDENT)
+                ),
+                Arguments.of(
+                    List.of(
+                        PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder()
+                            .role(CaseRole.APP_SOLICITOR.getCcdCode()).build()).build()
+                    ),
+                    List.of(NotificationParty.APPLICANT)
+                )
+            );
+        }
+
+        @ParameterizedTest
+        @MethodSource
+        void shouldReturnMultipleEventWithNotificationParties_whenMultiplePartiesOnCaseSelected(
+            List<PartyOnCaseCollectionItem> partiesOnCases, List<NotificationParty> expectedNotificationParties
+        ) {
+            FinremCallbackRequest callback = FinremCallbackRequestFactory.from(
+                FinremCaseData.builder()
+                    .ccdCaseId(CASE_ID)
+                    .ccdCaseType(CaseType.CONTESTED)
+                    .contactDetailsWrapper(buildContactDetails())
+                    .build()
+            );
+
+            UUID workingHearingId = UUID.randomUUID();
+            LocalDate hearingDate = LocalDate.of(2026, Month.JULY, 21);
+            callback.getFinremCaseData().getManageHearingsWrapper()
+                .setWorkingHearingId(workingHearingId);
+
+            Hearing hearing = mock(Hearing.class);
+            when(hearing.getHearingType()).thenReturn(FH);
+            when(hearing.getHearingDate()).thenReturn(hearingDate);
+            when(hearing.shouldSendNotifications()).thenReturn(true);
+
+            // Setting up parties on case
+            when(hearing.getPartiesOnCase()).thenReturn(partiesOnCases);
+
+            List<DocumentCollectionItem> hearingAdditionalDocs = new ArrayList<>();
+            hearingAdditionalDocs.add(DocumentCollectionItem.builder().value(additionalDoc).build());
+            when(hearingCorrespondenceHelper.getMiniFormAIfRequired(callback.getFinremCaseData(), hearing))
+                .thenReturn(Optional.of(miniFormA));
+            when(hearing.getAdditionalHearingDocs()).thenReturn(hearingAdditionalDocs);
+
+            when(hearingCorrespondenceHelper.getActiveHearingInContext(
+                callback.getFinremCaseData().getManageHearingsWrapper(),
+                workingHearingId
+            )).thenReturn(hearing);
+
+            try (
+                MockedStatic<CourtHelper> mockedCourtHelperStatic = Mockito.mockStatic(CourtHelper.class);
+                MockedStatic<NotificationParty> mockedNotificationPartyStatic = Mockito.mockStatic(NotificationParty.class)
+            ) {
+                mockedCourtHelperStatic.when(() -> CourtHelper.getFRCForHearing(hearing)).thenReturn("selectedFRC");
+
+                mockedNotificationPartyStatic.when(() -> NotificationParty.getNotificationPartyFromRole(
+                    CaseRole.APP_SOLICITOR.getCcdCode()
+                )).thenReturn(NotificationParty.APPLICANT);
+                mockedNotificationPartyStatic.when(() -> NotificationParty.getNotificationPartyFromRole(
+                    CaseRole.RESP_SOLICITOR.getCcdCode()
+                )).thenReturn(NotificationParty.RESPONDENT);
+
+                var events = corresponder.buildHearingCorrespondenceEventsIfNeeded(callback, AUTH_TOKEN);
+
+                verify(hearingCorrespondenceHelper).getActiveHearingInContext(
+                    callback.getFinremCaseData().getManageHearingsWrapper(), workingHearingId);
+
+                assertThat(events).hasSize(expectedNotificationParties.size());
+
+                assertThat(events).allSatisfy(event -> {
+                    assertThat(event)
+                        .extracting(
+                            SendCorrespondenceEvent::getCaseDetails,
+                            SendCorrespondenceEvent::getEmailTemplate,
+                            SendCorrespondenceEvent::getEmailNotificationRequest,
+                            SendCorrespondenceEvent::getDocumentsToPost,
+                            SendCorrespondenceEvent::getAuthToken)
+                        .containsExactly(
+                            callback.getCaseDetails(),
+                            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR,
+                            NotificationRequest.builder()
+                                .caseReferenceNumber(CASE_ID)
+                                .hearingType(FH.getId())
+                                .hearingDate("21 July 2026")
+                                .applicantName("Frodo")
+                                .respondentName("Gollum")
+                                .caseType("contested")
+                                .selectedCourt("selectedFRC")
+                                .vacatedHearingDateTime("")
+                                .vacatedHearingType("")
+                                .build(),
+                            List.of(additionalDoc, miniFormA),
+                            AUTH_TOKEN
+                        );
+                    assertThat(event.getNotificationParties()).hasSize(1);
+                });
+
+                assertThat(events)
+                    .flatExtracting(SendCorrespondenceEvent::getNotificationParties)
+                    .containsExactlyInAnyOrderElementsOf(expectedNotificationParties);
+            }
+        }
     }
 
     private Court buildCourt() {
