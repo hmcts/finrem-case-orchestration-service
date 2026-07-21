@@ -1,29 +1,31 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GiveAllocationDirectionAboutToSubmitHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class GiveAllocationDirectionAboutToSubmitHandlerTest {
 
+    @InjectMocks
     private GiveAllocationDirectionAboutToSubmitHandler handler;
 
     @Mock
@@ -32,37 +34,32 @@ public class GiveAllocationDirectionAboutToSubmitHandlerTest {
     @Mock
     private SelectedCourtService selectedCourtService;
 
-    private ObjectMapper objectMapper;
-
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
-
-    @Before
-    public void setUp() {
-        objectMapper = new ObjectMapper();
-        finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));
-        handler = new GiveAllocationDirectionAboutToSubmitHandler(finremCaseDetailsMapper, courtDetailsMapper, selectedCourtService);
+    @Test
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GIVE_ALLOCATION_DIRECTIONS);
     }
 
     @Test
-    public void givenCase_whenEventIsGiveAllocationDirection_thenCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GIVE_ALLOCATION_DIRECTIONS),
-            is(true));
-    }
+    void givenCase_whenHandleAllocationDirection_thenCourtDetailsMapperCalled() {
+        FinremCaseData finremCaseData = FinremCaseData.builder().build();
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder().build();
 
-    @Test
-    public void givenCase_whenHandleAllocationDirection_thenCourtDetailsMapperCalled() {
-        FinremCaseDetails caseDetails =
-            FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
-        FinremCaseDetails caseDetailsBefore =
-            FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
+        AllocatedRegionWrapper beforeAllocatedRegionWrapper = finremCaseDataBefore.getRegionWrapper().getAllocatedRegionWrapper();
+        AllocatedRegionWrapper allocatedRegionWrapper = finremCaseData.getRegionWrapper().getAllocatedRegionWrapper();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+            finremCaseData, finremCaseDataBefore);
 
-        FinremCallbackRequest callbackRequest =
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
+        AllocatedRegionWrapper newAllocatedRegionWrapper = new AllocatedRegionWrapper();
+        when(courtDetailsMapper.getLatestAllocatedCourt(beforeAllocatedRegionWrapper, allocatedRegionWrapper, false))
+            .thenReturn(newAllocatedRegionWrapper);
 
-        handler.handle(callbackRequest, "AUTH");
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(courtDetailsMapper).getLatestAllocatedCourt(any(), any(), any());
-        verify(selectedCourtService).setSelectedCourtDetailsIfPresent(any(FinremCaseData.class));
+        assertThat(response.getData())
+            .extracting(FinremCaseData::getRegionWrapper)
+            .extracting(RegionWrapper::getAllocatedRegionWrapper)
+            .isEqualTo(newAllocatedRegionWrapper);
+        verify(courtDetailsMapper).getLatestAllocatedCourt(beforeAllocatedRegionWrapper, allocatedRegionWrapper, false);
+        verify(selectedCourtService).setSelectedCourtDetailsIfPresent(callbackRequest.getFinremCaseData());
     }
 }

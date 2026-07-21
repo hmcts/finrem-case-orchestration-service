@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 
 @Slf4j
@@ -39,19 +39,19 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSu
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
+        FinremCaseData finremCaseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
-        FinremCaseData caseData = caseDetails.getData();
+        RegionWrapper regionWrapper = finremCaseData.getRegionWrapper();
 
-        caseData.getRegionWrapper()
-            .setAllocatedRegionWrapper(
-                courtDetailsMapper.getLatestAllocatedCourt(
-                    callbackRequest.getCaseDetailsBefore().getData().getRegionWrapper().getAllocatedRegionWrapper(),
-                    caseData.getRegionWrapper().getAllocatedRegionWrapper(),
-                    false));
+        regionWrapper.setAllocatedRegionWrapper(
+            courtDetailsMapper.getLatestAllocatedCourt(
+                finremCaseDataBefore.getRegionWrapper().getAllocatedRegionWrapper(),
+                regionWrapper.getAllocatedRegionWrapper(),
+                false));
 
-        selectedCourtService.setSelectedCourtDetailsIfPresent(caseData);
+        selectedCourtService.setSelectedCourtDetailsIfPresent(finremCaseData);
 
-        return response(caseData);
+        return response(finremCaseData);
     }
 }
