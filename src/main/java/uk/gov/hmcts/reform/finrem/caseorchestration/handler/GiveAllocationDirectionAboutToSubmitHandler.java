@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService
 
 @Slf4j
 @Service
-public class GiveAllocationDirectionAboutToSubmitHandler extends FinremCallbackHandler {
+public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final CourtDetailsMapper courtDetailsMapper;
     private final SelectedCourtService selectedCourtService;
@@ -32,7 +32,7 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremCallbackH
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.GIVE_ALLOCATION_DIRECTIONS.equals(eventType));
+            && EventType.GIVE_ALLOCATION_DIRECTIONS.equals(eventType);
     }
 
     @Override
@@ -52,6 +52,6 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremCallbackH
 
         selectedCourtService.setSelectedCourtDetailsIfPresent(caseData);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return response(caseData);
     }
 }
