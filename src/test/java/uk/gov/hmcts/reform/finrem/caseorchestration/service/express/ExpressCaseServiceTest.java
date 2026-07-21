@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
@@ -32,8 +34,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
@@ -62,6 +66,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1Or
 class ExpressCaseServiceTest {
 
     @InjectMocks
+    @Spy
     private ExpressCaseService expressCaseService;
 
     @Mock
@@ -219,6 +224,40 @@ class ExpressCaseServiceTest {
         expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
 
         assertEquals(v2Value, caseData.getEstimatedAssetsChecklistV2());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenCaseQualifiesForExpress_canJudgeSetExpressPilotStatus_returnsTrueOnlyWhenNoHearingsExist(
+        boolean hasNoHearings
+    ) {
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.hasNoHearings()).thenReturn(hasNoHearings);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(manageHearingsWrapper)
+            .build();
+
+        lenient().when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
+
+        assertThat(expressCaseService.canJudgeSetExpressPilotStatus(caseData)).isEqualTo(hasNoHearings);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenCaseWithoutHearings_canJudgeSetExpressPilotStatus_returnsTrueOnlyWhenCaseQualifiesForExpress(
+        boolean qualifiesForExpress
+    ) {
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.hasNoHearings()).thenReturn(true);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(manageHearingsWrapper)
+            .build();
+
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(qualifiesForExpress);
+
+        assertThat(expressCaseService.canJudgeSetExpressPilotStatus(caseData)).isEqualTo(qualifiesForExpress);
     }
 
     private static Stream<Arguments> provideIsExpressCase() {
