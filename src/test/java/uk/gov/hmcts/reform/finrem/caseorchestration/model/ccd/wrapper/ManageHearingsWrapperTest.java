@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
@@ -21,8 +22,10 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ManageHearingsWrapperTest {
 
@@ -265,5 +268,32 @@ class ManageHearingsWrapperTest {
             .build();
 
         assertThat(wrapper.getAssociatedHearingDocuments(target)).containsExactly(docB, docA);
+    }
+
+    @Test
+    void givenNullHearings_when_hasNoHearings_shouldReturnTrue() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        assertTrue(caseData.getManageHearingsWrapper().hasNoHearings());
+    }
+
+    @Test
+    void givenEmptyHearings_when_hasNoHearings_shouldReturnTrue() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .hearings(List.of()).build())
+            .build();
+
+        assertTrue(caseData.getManageHearingsWrapper().hasNoHearings());
+    }
+
+    @Test
+    void givenHearings_when_hasNoHearings_shouldReturnFalse() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .hearings(List.of(ManageHearingsCollectionItem.builder().build()))
+                .build())
+            .build();
+
+        assertFalse(caseData.getManageHearingsWrapper().hasNoHearings());
     }
 }
