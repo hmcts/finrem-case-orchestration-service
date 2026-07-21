@@ -34,7 +34,7 @@ class GiveAllocationDirectionAboutToStartHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GIVE_ALLOCATION_DIRECTIONS);
+        assertCanHandle(handler, CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GIVE_ALLOCATION_DIRECTIONS_V2);
     }
 
     @ParameterizedTest
