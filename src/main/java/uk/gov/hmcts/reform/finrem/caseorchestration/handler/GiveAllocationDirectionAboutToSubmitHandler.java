@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
@@ -32,7 +34,7 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSu
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.GIVE_ALLOCATION_DIRECTIONS.equals(eventType);
+            && List.of(EventType.GIVE_ALLOCATION_DIRECTIONS, EventType.GIVE_ALLOCATION_DIRECTIONS_V2).contains(eventType);
     }
 
     @Override
