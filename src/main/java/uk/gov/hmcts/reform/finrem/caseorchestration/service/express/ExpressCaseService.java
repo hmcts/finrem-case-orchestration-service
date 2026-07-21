@@ -119,19 +119,27 @@ public class ExpressCaseService {
 
     /**
      * Determines whether a judge is able to set the Express Pilot status for the case.
-     * This is only possible if the case has no hearing and otherwise qualifies
-     * for express case participation.
+     * This is only possible if:
+     * <ul>
+     *     <li>the Express Pilot feature toggle is enabled;</li>
+     *     <li>the case is not already enrolled in express case participation;</li>
+     *     <li>the case has no hearings; and</li>
+     *     <li>the case otherwise qualifies for express case participation.</li>
+     * </ul>
      *
      * @param caseData the case data
      * @return true if the judge can set the Express Pilot status, false otherwise
      * @see #qualifiesForExpress(FinremCaseData)
      */
     public boolean canJudgeSetExpressPilotStatus(FinremCaseData caseData) {
+        if (!featureToggleService.isExpressPilotEnabled()) {
+            return false;
+        }
+        if (ENROLLED.equals(caseData.getExpressCaseWrapper().getExpressCaseParticipation())) {
+            return false;
+        }
         ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
-
-        boolean hasNoHearings = manageHearingsWrapper.hasNoHearings();
-
-        return hasNoHearings && qualifiesForExpress(caseData);
+        return manageHearingsWrapper.hasNoHearings() && qualifiesForExpress(caseData);
     }
 
     /*

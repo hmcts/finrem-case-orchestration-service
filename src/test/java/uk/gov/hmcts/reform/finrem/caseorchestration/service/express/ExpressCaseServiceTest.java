@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
@@ -226,11 +227,31 @@ class ExpressCaseServiceTest {
         assertEquals(v2Value, caseData.getEstimatedAssetsChecklistV2());
     }
 
+    @Test
+    void givenExpressPilotDisabled_canJudgeSetExpressPilotStatus_returnsTrue() {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        assertThat(expressCaseService.canJudgeSetExpressPilotStatus(caseData)).isFalse();
+    }
+
+    @Test
+    void givenCaseEnrolledExpressPilot_canJudgeSetExpressPilotStatus_returnsTrue() {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        ExpressCaseWrapper expressCaseWrapper = ExpressCaseWrapper.builder()
+            .expressCaseParticipation(ENROLLED)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .expressCaseWrapper(expressCaseWrapper)
+            .build();
+        assertThat(expressCaseService.canJudgeSetExpressPilotStatus(caseData)).isFalse();
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenCaseQualifiesForExpress_canJudgeSetExpressPilotStatus_returnsTrueOnlyWhenNoHearingsExist(
         boolean hasNoHearings
     ) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
         when(manageHearingsWrapper.hasNoHearings()).thenReturn(hasNoHearings);
 
@@ -248,6 +269,7 @@ class ExpressCaseServiceTest {
     void givenCaseWithoutHearings_canJudgeSetExpressPilotStatus_returnsTrueOnlyWhenCaseQualifiesForExpress(
         boolean qualifiesForExpress
     ) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
         when(manageHearingsWrapper.hasNoHearings()).thenReturn(true);
 
