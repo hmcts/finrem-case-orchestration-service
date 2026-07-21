@@ -20,10 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCaseAmendment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
@@ -35,9 +33,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
@@ -223,33 +219,6 @@ class ExpressCaseServiceTest {
         expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
 
         assertEquals(v2Value, caseData.getEstimatedAssetsChecklistV2());
-    }
-
-    @Test
-    void givenNullHearings_when_hasNoHearings_shouldReturnTrue() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
-        assertTrue(expressCaseService.hasNoHearings(caseData));
-    }
-
-    @Test
-    void givenEmptyHearings_when_hasNoHearings_shouldReturnTrue() {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .hearings(List.of()).build())
-            .build();
-
-        assertTrue(expressCaseService.hasNoHearings(caseData));
-    }
-
-    @Test
-    void givenHearings_when_hasNoHearings_shouldReturnFalse() {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .hearings(List.of(ManageHearingsCollectionItem.builder().build()))
-                .build())
-            .build();
-
-        assertFalse(expressCaseService.hasNoHearings(caseData));
     }
 
     private static Stream<Arguments> provideIsExpressCase() {

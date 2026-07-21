@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import java.util.List;
 import java.util.Optional;
 
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
@@ -130,20 +129,6 @@ public class ExpressCaseService {
         if (latestAssetValue != null) {
             clearOutdatedEstimatedAssetsChecklists(caseData);
         }
-    }
-
-    /*
-     * Returns true if the hearings collection is empty or null.
-     * Returning true is a prerequisite for enrolling a case into Express Pilot after case submission.
-     * This is Express Pilot Cases generate and send different hearing documents.
-     *
-     * Ignores vacatedOrAdjournedHearings.  The hearing are no longer active.
-     *
-     * @param caseData The case data.
-     * @return true if the hearings collection is empty or null, false otherwise.
-     */
-    public boolean hasNoHearings(FinremCaseData caseData) {
-        return isEmpty(caseData.getManageHearingsWrapper().getHearings());
     }
 
     /*
