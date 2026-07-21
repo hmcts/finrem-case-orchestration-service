@@ -13,8 +13,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
 
@@ -24,13 +27,17 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSu
 
     private final CourtDetailsMapper courtDetailsMapper;
     private final SelectedCourtService selectedCourtService;
+    private final ExpressCaseService expressCaseService;
 
     @Autowired
     public GiveAllocationDirectionAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                       CourtDetailsMapper courtDetailsMapper, SelectedCourtService selectedCourtService) {
+                                                       CourtDetailsMapper courtDetailsMapper,
+                                                       SelectedCourtService selectedCourtService,
+                                                       ExpressCaseService expressCaseService) {
         super(mapper);
         this.courtDetailsMapper = courtDetailsMapper;
         this.selectedCourtService = selectedCourtService;
+        this.expressCaseService = expressCaseService;
     }
 
     @Override
@@ -57,6 +64,17 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSu
 
         selectedCourtService.setSelectedCourtDetailsIfPresent(finremCaseData);
 
+        setExpressPilotStatus(finremCaseData);
+
         return response(finremCaseData);
+    }
+
+    private void setExpressPilotStatus(FinremCaseData finremCaseData ) {
+        ExpressCaseWrapper expressCaseWrapper = finremCaseData.getExpressCaseWrapper();
+        if (YesOrNo.isYes(expressCaseWrapper.getShouldAllocateToExpressPilot())) {
+            expressCaseService.setExpressCaseEnrollmentStatus(finremCaseData);
+            log.info("{} - Setting express case enrollment status to {}", finremCaseData.getCcdCaseId(),
+                expressCaseWrapper.getExpressCaseParticipation());
+        }
     }
 }

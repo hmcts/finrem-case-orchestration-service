@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.giveallocationdirec
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,14 +16,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -43,6 +49,9 @@ class GiveAllocationDirectionAboutToSubmitHandlerTest {
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @Mock
+    private ExpressCaseService expressCaseService;
 
     @Test
     void testCanHandle() {
@@ -83,5 +92,23 @@ class GiveAllocationDirectionAboutToSubmitHandlerTest {
                 "showShouldAllocateToExpressPilot", "Yes")
             )
         );
+    }
+
+    @ParameterizedTest
+    @EnumSource(YesOrNo.class)
+    void givenAllocateToExpressPilotAnswered_whenHandled_shouldSetExpressCaseEnrollmentStatus(YesOrNo shouldAllocateToExpressPilot) {
+        ExpressCaseWrapper expressCaseWrapper = ExpressCaseWrapper.builder()
+            .shouldAllocateToExpressPilot(shouldAllocateToExpressPilot)
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .expressCaseWrapper(expressCaseWrapper)
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService, times(YesOrNo.isYes(shouldAllocateToExpressPilot) ? 1 : 0))
+            .setExpressCaseEnrollmentStatus(finremCaseData);
     }
 }
