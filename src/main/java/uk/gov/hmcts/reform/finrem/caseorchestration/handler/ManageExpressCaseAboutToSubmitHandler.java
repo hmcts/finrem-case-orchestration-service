@@ -41,11 +41,14 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler
         FinremCaseData caseData = caseDetails.getData();
         ExpressCaseWrapper expressPilotWrapper = caseData.getExpressCaseWrapper();
 
+        // PT todo - maybe make a plain english named private function about withdrawing
         if (ExpressCaseParticipation.ENROLLED.equals(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
             && YesOrNo.isNo(expressPilotWrapper.getExpressPilotQuestion())
             && isUserConfirmed(expressPilotWrapper)) {
             expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
         }
+
+        // PT todo - this code to add a case
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
