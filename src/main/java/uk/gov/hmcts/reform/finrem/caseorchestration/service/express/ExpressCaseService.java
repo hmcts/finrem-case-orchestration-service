@@ -110,8 +110,8 @@ public class ExpressCaseService {
      */
     public boolean isExpressCase(FinremCaseData caseData) {
         ExpressCaseParticipation expressCaseParticipation =
-                Optional.ofNullable(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
-                        .orElse(DOES_NOT_QUALIFY);
+            Optional.ofNullable(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
+                .orElse(DOES_NOT_QUALIFY);
 
         return featureToggleService.isExpressPilotEnabled()
             && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
