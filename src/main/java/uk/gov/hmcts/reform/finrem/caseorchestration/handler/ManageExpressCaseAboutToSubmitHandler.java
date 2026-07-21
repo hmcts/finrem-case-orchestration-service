@@ -26,11 +26,12 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler
         this.expressCaseService = expressCaseService;
     }
 
+    // PT todo - update test for new handler event type
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.MANAGE_EXPRESS_CASE.equals(eventType);
+            && expressCaseService.isManageExpressCaseEvent(eventType);
     }
 
     @Override
@@ -40,7 +41,7 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler
         FinremCaseData caseData = caseDetails.getData();
         ExpressCaseWrapper expressPilotWrapper = caseData.getExpressCaseWrapper();
 
-        if (caseData.getExpressCaseWrapper().getExpressCaseParticipation() == ExpressCaseParticipation.ENROLLED
+        if (ExpressCaseParticipation.ENROLLED.equals(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
             && YesOrNo.isNo(expressPilotWrapper.getExpressPilotQuestion())
             && isUserConfirmed(expressPilotWrapper)) {
             expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);

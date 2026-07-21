@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
 
@@ -21,15 +22,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCase
 @Service
 public class ManageExpressCaseAboutToStartHandler extends FinremCallbackHandler {
 
-    public ManageExpressCaseAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final ExpressCaseService expressCaseService;
+
+    public ManageExpressCaseAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                ExpressCaseService expressCaseService) {
         super(finremCaseDetailsMapper);
+        this.expressCaseService = expressCaseService;
     }
 
+    // PT todo - update test for new handler event type
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.MANAGE_EXPRESS_CASE.equals(eventType);
+            && expressCaseService.isManageExpressCaseEvent(eventType);
     }
 
     @Override

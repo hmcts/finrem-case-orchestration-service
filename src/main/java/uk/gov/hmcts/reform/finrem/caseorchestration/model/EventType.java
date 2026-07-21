@@ -93,6 +93,7 @@ public enum EventType {
     DRAFT_ORDERS("FR_draftOrders"),
     APPROVE_ORDERS("FR_approveOrders"),
     MANAGE_EXPRESS_CASE("FR_manageExpressCase"),
+    MANAGE_EXPRESS_CASE_V2("FR_manageExpressCase_v2"),
     MANAGE_HEARINGS_MIGRATION("FR_manageHearingsMigration"),
     FR_HWF_DECISION_MADE("FR_HWFDecisionMade"),
     FR_HWF_DECISION_MADE_FROM_AWAITING_PAYMENT("FR_HWFDecisionMadeFromAwaitingPayment"),
