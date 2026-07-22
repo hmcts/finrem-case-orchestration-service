@@ -51,6 +51,7 @@ public class ManageExpressCaseAboutToStartHandler extends FinremCallbackHandler 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
+    // PT todo next - logic no longer relevant - change.
     private YesOrNo getDefaultAnswerForExpressPilotQuestion(FinremCaseData caseData) {
         return YesOrNo.forValue(ENROLLED == caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
