@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCaseAmendment;
@@ -24,4 +25,9 @@ public class ExpressCaseWrapper {
     private YesOrNo expressPilotQuestion;
     private YesOrNo judgeAgreesCaseIsExpress;
     private DynamicMultiSelectList confirmRemoveCaseFromExpressPilot;
+
+    @TemporaryField
+    private YesOrNo shouldAllocateToExpressPilot;
+    @TemporaryField
+    private YesOrNo showShouldAllocateToExpressPilot;
 }
