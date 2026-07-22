@@ -89,6 +89,8 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremAboutToSu
         clearUnusedMiamDetailsFields(caseData);
         clearUnusedUploadAdditionalDocuments(caseData);
 
+        expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
+
         generateMiniFormA(caseDetails, userAuthorisation);
 
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
