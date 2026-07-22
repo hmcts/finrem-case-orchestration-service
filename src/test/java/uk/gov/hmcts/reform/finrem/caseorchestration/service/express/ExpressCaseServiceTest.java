@@ -228,14 +228,14 @@ class ExpressCaseServiceTest {
     }
 
     @Test
-    void givenExpressPilotDisabled_canSetExpressPilotStatus_returnsTrue() {
+    void givenExpressPilotDisabled_canSetExpressPilotStatus_returnsFalse() {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
         FinremCaseData caseData = FinremCaseData.builder().build();
         assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isFalse();
     }
 
     @Test
-    void givenCaseEnrolledExpressPilot_canSetExpressPilotStatus_returnsTrue() {
+    void givenCaseEnrolledExpressPilot_canSetExpressPilotStatus_returnsFalse() {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         ExpressCaseWrapper expressCaseWrapper = ExpressCaseWrapper.builder()
             .expressCaseParticipation(ENROLLED)
