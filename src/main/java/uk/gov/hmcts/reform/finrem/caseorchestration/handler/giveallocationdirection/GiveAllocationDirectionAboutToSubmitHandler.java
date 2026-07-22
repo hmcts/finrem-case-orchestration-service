@@ -69,7 +69,7 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSu
         return response(finremCaseData);
     }
 
-    private void setExpressPilotStatus(FinremCaseData finremCaseData ) {
+    private void setExpressPilotStatus(FinremCaseData finremCaseData) {
         ExpressCaseWrapper expressCaseWrapper = finremCaseData.getExpressCaseWrapper();
         if (YesOrNo.isYes(expressCaseWrapper.getShouldAllocateToExpressPilot())) {
             expressCaseService.setExpressCaseEnrollmentStatus(finremCaseData);
