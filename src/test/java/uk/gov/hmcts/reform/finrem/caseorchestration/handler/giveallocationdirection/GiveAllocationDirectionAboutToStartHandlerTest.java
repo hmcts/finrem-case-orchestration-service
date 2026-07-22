@@ -40,7 +40,7 @@ class GiveAllocationDirectionAboutToStartHandlerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldPopulateShowShouldAllocateToExpressPilot(
-        boolean canJudgeSetExpressPilotStatus
+        boolean canSetExpressPilotStatus
     ) {
         ExpressCaseWrapper expressCaseWrapper = ExpressCaseWrapper.builder().build();
 
@@ -50,13 +50,13 @@ class GiveAllocationDirectionAboutToStartHandlerTest {
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
 
-        when(expressCaseService.canSetExpressPilotStatus(finremCaseData)).thenReturn(canJudgeSetExpressPilotStatus);
+        when(expressCaseService.canSetExpressPilotStatus(finremCaseData)).thenReturn(canSetExpressPilotStatus);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(expressCaseWrapper)
             .extracting(ExpressCaseWrapper::getShowShouldAllocateToExpressPilot)
-            .isEqualTo(YesOrNo.forValue(canJudgeSetExpressPilotStatus));
+            .isEqualTo(YesOrNo.forValue(canSetExpressPilotStatus));
         verify(expressCaseService).canSetExpressPilotStatus(finremCaseData);
     }
 }
