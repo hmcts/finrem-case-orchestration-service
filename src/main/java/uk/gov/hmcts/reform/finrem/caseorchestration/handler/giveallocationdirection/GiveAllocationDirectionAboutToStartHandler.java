@@ -45,7 +45,7 @@ public class GiveAllocationDirectionAboutToStartHandler extends FinremCallbackHa
         ExpressCaseWrapper expressCaseWrapper = finremCaseData.getExpressCaseWrapper();
 
         expressCaseWrapper.setShowShouldAllocateToExpressPilot(YesOrNo.forValue(
-            expressCaseService.canJudgeSetExpressPilotStatus(finremCaseData)
+            expressCaseService.canSetExpressPilotStatus(finremCaseData)
         ));
 
         return response(finremCaseData);

@@ -228,14 +228,14 @@ class ExpressCaseServiceTest {
     }
 
     @Test
-    void givenExpressPilotDisabled_canJudgeSetExpressPilotStatus_returnsTrue() {
+    void givenExpressPilotDisabled_canSetExpressPilotStatus_returnsTrue() {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
         FinremCaseData caseData = FinremCaseData.builder().build();
-        assertThat(expressCaseService.canJudgeSetExpressPilotStatus(caseData)).isFalse();
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isFalse();
     }
 
     @Test
-    void givenCaseEnrolledExpressPilot_canJudgeSetExpressPilotStatus_returnsTrue() {
+    void givenCaseEnrolledExpressPilot_canSetExpressPilotStatus_returnsTrue() {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         ExpressCaseWrapper expressCaseWrapper = ExpressCaseWrapper.builder()
             .expressCaseParticipation(ENROLLED)
@@ -243,12 +243,12 @@ class ExpressCaseServiceTest {
         FinremCaseData caseData = FinremCaseData.builder()
             .expressCaseWrapper(expressCaseWrapper)
             .build();
-        assertThat(expressCaseService.canJudgeSetExpressPilotStatus(caseData)).isFalse();
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isFalse();
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenCaseQualifiesForExpress_canJudgeSetExpressPilotStatus_returnsTrueOnlyWhenNoHearingsExist(
+    void givenCaseQualifiesForExpress_canSetExpressPilotStatus_returnsTrueOnlyWhenNoHearingsExist(
         boolean hasNoHearings
     ) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
@@ -261,12 +261,12 @@ class ExpressCaseServiceTest {
 
         lenient().when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
 
-        assertThat(expressCaseService.canJudgeSetExpressPilotStatus(caseData)).isEqualTo(hasNoHearings);
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isEqualTo(hasNoHearings);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenCaseWithoutHearings_canJudgeSetExpressPilotStatus_returnsTrueOnlyWhenCaseQualifiesForExpress(
+    void givenCaseWithoutHearings_canSetExpressPilotStatus_returnsTrueOnlyWhenCaseQualifiesForExpress(
         boolean qualifiesForExpress
     ) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
@@ -279,7 +279,7 @@ class ExpressCaseServiceTest {
 
         when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(qualifiesForExpress);
 
-        assertThat(expressCaseService.canJudgeSetExpressPilotStatus(caseData)).isEqualTo(qualifiesForExpress);
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isEqualTo(qualifiesForExpress);
     }
 
     private static Stream<Arguments> provideIsExpressCase() {

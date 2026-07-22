@@ -118,7 +118,7 @@ public class ExpressCaseService {
     }
 
     /**
-     * Determines whether a judge is able to set the Express Pilot status for the case.
+     * Determines whether a judge or caseworker is able to set the Express Pilot status for the case.
      * This is only possible if:
      * <ul>
      *     <li>the Express Pilot feature toggle is enabled;</li>
@@ -131,7 +131,7 @@ public class ExpressCaseService {
      * @return true if the judge can set the Express Pilot status, false otherwise
      * @see #qualifiesForExpress(FinremCaseData)
      */
-    public boolean canJudgeSetExpressPilotStatus(FinremCaseData caseData) {
+    public boolean canSetExpressPilotStatus(FinremCaseData caseData) {
         if (!featureToggleService.isExpressPilotEnabled()) {
             return false;
         }

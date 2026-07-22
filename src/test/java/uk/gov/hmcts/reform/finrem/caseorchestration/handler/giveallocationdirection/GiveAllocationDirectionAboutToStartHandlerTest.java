@@ -50,13 +50,13 @@ class GiveAllocationDirectionAboutToStartHandlerTest {
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
 
-        when(expressCaseService.canJudgeSetExpressPilotStatus(finremCaseData)).thenReturn(canJudgeSetExpressPilotStatus);
+        when(expressCaseService.canSetExpressPilotStatus(finremCaseData)).thenReturn(canJudgeSetExpressPilotStatus);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(expressCaseWrapper)
             .extracting(ExpressCaseWrapper::getShowShouldAllocateToExpressPilot)
             .isEqualTo(YesOrNo.forValue(canJudgeSetExpressPilotStatus));
-        verify(expressCaseService).canJudgeSetExpressPilotStatus(finremCaseData);
+        verify(expressCaseService).canSetExpressPilotStatus(finremCaseData);
     }
 }
