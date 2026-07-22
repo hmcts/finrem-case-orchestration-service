@@ -8,12 +8,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogge
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
@@ -32,15 +34,18 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
 
     private final AssignCaseAccessService assignCaseAccessService;
+    private final FeatureToggleService featureToggleService;
 
     public AmendApplicationContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnStartDefaultValueService onStartDefaultValueService,
                                                         MiamLegacyExemptionsService miamLegacyExemptionsService,
-                                                        AssignCaseAccessService assignCaseAccessService) {
+                                                        AssignCaseAccessService assignCaseAccessService,
+                                                        FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
         this.onStartDefaultValueService = onStartDefaultValueService;
         this.miamLegacyExemptionsService = miamLegacyExemptionsService;
         this.assignCaseAccessService = assignCaseAccessService;
+        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -76,6 +81,8 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
             userAuthorisation);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
+        setEstimatedAssetsChecklistVersion(caseData);
+
         return response(callbackRequest.getCaseDetails().getData(), warnings, null);
     }
 
@@ -87,5 +94,22 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
         warnings.addAll(invalidLegacyExemptions);
 
         return warnings;
+    }
+
+    /**
+     * This method sets the version of the Estimated Assets Checklist to be used in the case data based on a feature toggle.
+     * Since these are drafted cases, we want to use the new version of the checklist once the feature toggle is enabled.
+     * So, if the feature toggle is enabled, any drafted case will use the V3 list; otherwise the new case will use the V2 list.
+     * Cleaning up the V2 list done in the about-to-submit handler.
+     *
+     * @param caseData The case data.
+     */
+    private void setEstimatedAssetsChecklistVersion(FinremCaseData caseData) {
+        boolean useV3EstimatedAssetsChecklist = featureToggleService.isEstimatedAssetsChecklistV3Enabled();
+        if (useV3EstimatedAssetsChecklist) {
+            caseData.getEstimatedAssetsChecklistWrapper().setEstimatedAssetsChecklistVersion(EstimatedAssetsChecklistVersion.V3);
+        } else {
+            caseData.getEstimatedAssetsChecklistWrapper().setEstimatedAssetsChecklistVersion(EstimatedAssetsChecklistVersion.V2);
+        }
     }
 }
