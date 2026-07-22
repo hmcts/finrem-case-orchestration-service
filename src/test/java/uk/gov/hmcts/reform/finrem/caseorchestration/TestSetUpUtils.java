@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
@@ -84,7 +83,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
@@ -103,7 +101,6 @@ public class TestSetUpUtils {
     public static final String BINARY_URL = TestResource.BINARY_URL;
     public static final String FILE_NAME = TestResource.FILE_NAME;
     public static final String DOC_FILE_NAME = "app_docs.docx";
-    public static final String VARIATION_FILE_NAME = "ApprovedVariationOrderLetter.pdf";
     public static final String PENSION_TYPE = "Form PPF1";
     public static final String PENSION_ID = "1";
 
@@ -147,26 +144,12 @@ public class TestSetUpUtils {
         return caseData;
     }
 
-    public static Map<String, Object> caseDataWithRefusalOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT, caseDocument());
-        return caseData;
-    }
-
     public static Document document() {
         Document document = new Document();
         document.setBinaryUrl(BINARY_URL);
         document.setFileName(FILE_NAME);
         document.setUrl(FILE_URL);
 
-        return document;
-    }
-
-    public static Document variationDocument() {
-        Document document = new Document();
-        document.setBinaryUrl(BINARY_URL);
-        document.setFileName(VARIATION_FILE_NAME);
-        document.setUrl(FILE_URL);
         return document;
     }
 
@@ -197,12 +180,6 @@ public class TestSetUpUtils {
         document.setTypeOfDocument(PaymentDocumentType.COPY_OF_PAPER_FORM_A);
 
         return document;
-    }
-
-    public static PaymentDocumentCollection paymentDocumentCollection() {
-        PaymentDocumentCollection collection = new PaymentDocumentCollection();
-        collection.setValue(paymentDocument());
-        return collection;
     }
 
     public static PensionType pensionDocument() {
@@ -701,9 +678,15 @@ public class TestSetUpUtils {
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequestCaseDetails))
             .thenReturn(finremCaseDetails);
 
+        CaseDetails callbackRequestCaseDetailsBefore = mock(CaseDetails.class);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequestCaseDetailsBefore))
+            .thenReturn(optionalFinremCaseDetails != null && optionalFinremCaseDetails.length == 2
+                ? optionalFinremCaseDetails[1]
+                : FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build());
+
         CallbackRequest callbackRequest = mock(CallbackRequest.class);
         when(callbackRequest.getCaseDetails()).thenReturn(callbackRequestCaseDetails);
-        when(callbackRequest.getCaseDetailsBefore()).thenReturn(callbackRequestCaseDetails);
+        when(callbackRequest.getCaseDetailsBefore()).thenReturn(callbackRequestCaseDetailsBefore);
         when(callbackRequest.getEventId()).thenReturn(MOCKED_EVENT_CCD_TYPE);
 
         when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)).thenReturn(temporaryFieldsMap);
