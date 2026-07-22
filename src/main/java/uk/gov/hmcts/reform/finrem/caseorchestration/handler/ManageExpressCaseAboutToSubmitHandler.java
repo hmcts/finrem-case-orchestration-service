@@ -10,14 +10,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import java.util.List;
+
 @Slf4j
 @Service
-public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler {
+public class ManageExpressCaseAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
+
     private final ExpressCaseService expressCaseService;
 
     public ManageExpressCaseAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -26,35 +28,44 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler
         this.expressCaseService = expressCaseService;
     }
 
-    // PT todo - update test for new handler event type
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && expressCaseService.isManageExpressCaseEvent(eventType);
+            && List.of(EventType.MANAGE_EXPRESS_CASE, EventType.MANAGE_EXPRESS_CASE_V2).contains(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
         ExpressCaseWrapper expressPilotWrapper = caseData.getExpressCaseWrapper();
 
-        // PT todo - maybe make a plain english named private function about withdrawing
-        if (ExpressCaseParticipation.ENROLLED.equals(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
-            && YesOrNo.isNo(expressPilotWrapper.getExpressPilotQuestion())
-            && isUserConfirmed(expressPilotWrapper)) {
-            expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
+        // Keeping legacy logic
+        if (EventType.MANAGE_EXPRESS_CASE.equals(callbackRequest.getEventType())) {
+            if (ExpressCaseParticipation.ENROLLED.equals(expressPilotWrapper.getExpressCaseParticipation())
+                && YesOrNo.isNo(expressPilotWrapper.getExpressPilotQuestion())
+                && isUserConfirmed(expressPilotWrapper)) {
+                expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
+            }
+        } else { // V2
+            setExpressPilotStatus(caseData);
         }
 
-        // PT todo - this code to add a case
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return response(caseData);
     }
 
     private boolean isUserConfirmed(ExpressCaseWrapper expressPilotWrapper) {
         return expressPilotWrapper.getConfirmRemoveCaseFromExpressPilot().getValue().stream().map(DynamicMultiSelectListElement::getCode)
             .anyMatch(YesOrNo::isYes);
+    }
+
+    private void setExpressPilotStatus(FinremCaseData finremCaseData) {
+        ExpressCaseWrapper expressCaseWrapper = finremCaseData.getExpressCaseWrapper();
+        if (YesOrNo.isYes(expressCaseWrapper.getShouldAllocateToExpressPilot())) {
+            expressCaseService.setExpressCaseEnrollmentStatus(finremCaseData);
+            log.info("{} - Setting express case enrollment status to {}", finremCaseData.getCcdCaseId(),
+                expressCaseWrapper.getExpressCaseParticipation());
+        }
     }
 }

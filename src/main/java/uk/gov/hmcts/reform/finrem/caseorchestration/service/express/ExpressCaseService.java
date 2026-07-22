@@ -5,7 +5,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
@@ -156,13 +155,6 @@ public class ExpressCaseService {
         if (latestAssetValue != null) {
             clearOutdatedEstimatedAssetsChecklists(caseData);
         }
-    }
-
-    // PT todo
-    // javadoc
-    // test
-    public boolean isManageExpressCaseEvent(EventType event) {
-        return EventType.MANAGE_EXPRESS_CASE.equals(event) || EventType.MANAGE_EXPRESS_CASE_V2.equals(event);
     }
 
     /*

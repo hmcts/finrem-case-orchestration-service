@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
@@ -30,28 +30,33 @@ public class ManageExpressCaseAboutToStartHandler extends FinremCallbackHandler 
         this.expressCaseService = expressCaseService;
     }
 
-    // PT todo - update test for new handler event type
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && expressCaseService.isManageExpressCaseEvent(eventType);
+            && List.of(EventType.MANAGE_EXPRESS_CASE, EventType.MANAGE_EXPRESS_CASE_V2).contains(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
+        ExpressCaseWrapper expressCaseWrapper = caseData.getExpressCaseWrapper();
 
-        caseData.getExpressCaseWrapper().setConfirmRemoveCaseFromExpressPilot(buildConfirmRemoveCaseFromExpressPilotEntry());
-        caseData.getExpressCaseWrapper().setExpressPilotQuestion(getDefaultAnswerForExpressPilotQuestion(caseData));
+        expressCaseWrapper.setConfirmRemoveCaseFromExpressPilot(buildConfirmRemoveCaseFromExpressPilotEntry());
+        if (EventType.MANAGE_EXPRESS_CASE.equals(callbackRequest.getEventType())) {
+            expressCaseWrapper.setExpressPilotQuestion(getDefaultAnswerForExpressPilotQuestion(caseData));
+        } else {
+            // V2
+            expressCaseWrapper.setShowShouldAllocateToExpressPilot(
+                YesOrNo.forValue(expressCaseService.canSetExpressPilotStatus(caseData))
+            );
+        }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return response(caseData);
     }
 
-    // PT todo next - logic no longer relevant - change.
     private YesOrNo getDefaultAnswerForExpressPilotQuestion(FinremCaseData caseData) {
         return YesOrNo.forValue(ENROLLED == caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
