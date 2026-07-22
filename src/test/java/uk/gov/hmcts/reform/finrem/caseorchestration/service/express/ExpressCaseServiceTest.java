@@ -133,7 +133,7 @@ class ExpressCaseServiceTest {
 
         expressCaseService.setWhichExpressCaseAmendmentLabelToShow(caseDataOnceAmended, caseDataBeforeAmending);
         assertEquals(LabelForExpressCaseAmendment.UNSUITABLE_FOR_EXPRESS_LABEL,
-                caseDataOnceAmended.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
+            caseDataOnceAmended.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
     }
 
     /*
@@ -143,7 +143,7 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideAmendedExpressCaseSuitableScenarios")
     void setWhichExpressCaseAmendmentLabelToShow_shouldSetSuitable_WhenCaseAmendmentDoesNotDisqualify(
-            Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
+        Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
 
         FinremCaseData dataBeforeAmending = caseDataBeforeAndAfterAmending.getLeft();
         FinremCaseData amendedData = caseDataBeforeAndAfterAmending.getRight();
@@ -161,7 +161,7 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideAmendedExpressCaseScenariosNeedingNoLabel")
     void setWhetherDisqualifiedFromExpress_shouldSetNoLabel_WhenCaseRemainsUnsuitableForExpress(
-            Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
+        Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
 
         FinremCaseData dataBeforeAmending = caseDataBeforeAndAfterAmending.getLeft();
         FinremCaseData amendedData = caseDataBeforeAndAfterAmending.getRight();
@@ -174,8 +174,8 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideIsExpressCase")
     void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabledCaseDetails(boolean isExpressPilotEnabled,
-                                                                         CaseDetails caseDetails,
-                                                                         boolean expected) {
+                                                                                         CaseDetails caseDetails,
+                                                                                         boolean expected) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(isExpressPilotEnabled);
         assertEquals(expected, expressCaseService.isExpressCase(caseDetails));
     }
@@ -183,8 +183,8 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideIsExpressCaseFinRemCaseData")
     void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabledFinRemCaseData(boolean isExpressPilotEnabled,
-                                                                              FinremCaseData caseData,
-                                                                              boolean expected) {
+                                                                                            FinremCaseData caseData,
+                                                                                            boolean expected) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(isExpressPilotEnabled);
         assertEquals(expected, expressCaseService.isExpressCase(caseData));
     }
@@ -401,9 +401,9 @@ class ExpressCaseServiceTest {
         Pair<FinremCaseData, FinremCaseData> amendedWasNullNowQualifies = Pair.of(nullEnrollmentData, dataQualifies);
 
         return Stream.of(
-                amendedStillEnrolled,
-                amendedNowQualifies,
-                amendedWasNullNowQualifies
+            amendedStillEnrolled,
+            amendedNowQualifies,
+            amendedWasNullNowQualifies
         );
     }
 
@@ -428,8 +428,8 @@ class ExpressCaseServiceTest {
 
         // Case did not qualify for enrollment, and still doesn't upon amendment
         return Stream.of(
-                amendedStillDoesNotQualify,
-                amendedWasNullStillDoesNotQualify
+            amendedStillDoesNotQualify,
+            amendedWasNullStillDoesNotQualify
         );
     }
 

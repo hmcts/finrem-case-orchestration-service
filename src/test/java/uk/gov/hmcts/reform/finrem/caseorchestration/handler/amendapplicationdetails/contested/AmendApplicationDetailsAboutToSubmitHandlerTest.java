@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
@@ -21,6 +22,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FastTrackReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -935,6 +938,52 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         assertThat(response.getErrors()).hasSize(1);
         assertThat(response.getErrors().getFirst()).isEqualTo("Validation failed");
         assertThat(response.getData()).isNotNull();
+    }
+
+    /*
+     * The Express Case must be Mocked for other tests (Spy not appropriate)
+     * Use the genuine ExpressCaseService.clearUnusedEstimatedAssetsChecklist method, for data amendment
+     * then verify that the mocked version of clearUnusedEstimatedAssetsChecklist is called.
+     */
+    @Test
+    void whenHandled_ifV3Asset_thenAnyV2AssetCleared() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .estimatedAssetsChecklistV2(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS)
+            .estimatedAssetsChecklistV3(EstimatedAssetV3.OVER_TWENTY_MILLION_POUNDS)
+            .build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+
+        ExpressCaseService realExpressCaseService = new ExpressCaseService(featureToggleService);
+        realExpressCaseService.clearUnusedEstimatedAssetsChecklist(finremCaseData);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(finremCaseData);
+        assertThat(response.getData()).extracting(FinremCaseData::getEstimatedAssetsChecklistV2).isNull();
+    }
+
+    /*
+     * The Express Case must be Mocked for other tests (Spy not appropriate)
+     * Use the genuine ExpressCaseService.clearUnusedEstimatedAssetsChecklist method, for data amendment
+     * then verify that the mocked version of clearUnusedEstimatedAssetsChecklist is called.
+     */
+    @Test
+    void whenHandled_ifV2Asset_thenNothingCleared() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .estimatedAssetsChecklistV2(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS)
+            .estimatedAssetsChecklistV3(null)
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+        ExpressCaseService realExpressCaseService = new ExpressCaseService(featureToggleService);
+        realExpressCaseService.clearUnusedEstimatedAssetsChecklist(finremCaseData);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(finremCaseData);
+        assertThat(response.getData())
+            .extracting(FinremCaseData::getEstimatedAssetsChecklistV2)
+            .isEqualTo(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS);
     }
 
     private <T> void assertContainsOnlyNulls(T target, List<?> functions) {
