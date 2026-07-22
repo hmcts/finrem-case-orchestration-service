@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCas
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
@@ -116,6 +117,31 @@ public class ExpressCaseService {
             && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
     }
 
+    /**
+     * Determines whether a judge or caseworker is able to set the Express Pilot status for the case.
+     * This is only possible if:
+     * <ul>
+     *     <li>the Express Pilot feature toggle is enabled;</li>
+     *     <li>the case is not already enrolled in express case participation;</li>
+     *     <li>the case has no hearings; and</li>
+     *     <li>the case otherwise qualifies for express case participation.</li>
+     * </ul>
+     *
+     * @param caseData the case data
+     * @return true if the judge can set the Express Pilot status, false otherwise
+     * @see #qualifiesForExpress(FinremCaseData)
+     */
+    public boolean canSetExpressPilotStatus(FinremCaseData caseData) {
+        if (!featureToggleService.isExpressPilotEnabled()) {
+            return false;
+        }
+        if (ENROLLED.equals(caseData.getExpressCaseWrapper().getExpressCaseParticipation())) {
+            return false;
+        }
+        ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
+        return manageHearingsWrapper.hasNoHearings() && qualifiesForExpress(caseData);
+    }
+
     /*
      * This method checks to see if the case is using the most up-to-date asset check list.
      * If it is, then it calls clearOutdatedEstimatedAssetsChecklists, to remove older checklists.
@@ -154,7 +180,7 @@ public class ExpressCaseService {
      * @param caseData the case data
      * @return true if the case qualifies for express case participation, false otherwise
      */
-    private boolean qualifiesForExpress(FinremCaseData caseData) {
+    protected boolean qualifiesForExpress(FinremCaseData caseData) {
 
         List<NatureApplication> natureOfApplicationCheckList = caseData
             .getNatureApplicationWrapper().getNatureOfApplicationChecklist();
