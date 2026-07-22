@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCas
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
@@ -109,11 +110,36 @@ public class ExpressCaseService {
      */
     public boolean isExpressCase(FinremCaseData caseData) {
         ExpressCaseParticipation expressCaseParticipation =
-                Optional.ofNullable(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
-                        .orElse(DOES_NOT_QUALIFY);
+            Optional.ofNullable(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
+                .orElse(DOES_NOT_QUALIFY);
 
         return featureToggleService.isExpressPilotEnabled()
             && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
+    }
+
+    /**
+     * Determines whether a judge or caseworker is able to set the Express Pilot status for the case.
+     * This is only possible if:
+     * <ul>
+     *     <li>the Express Pilot feature toggle is enabled;</li>
+     *     <li>the case is not already enrolled in express case participation;</li>
+     *     <li>the case has no hearings; and</li>
+     *     <li>the case otherwise qualifies for express case participation.</li>
+     * </ul>
+     *
+     * @param caseData the case data
+     * @return true if the judge can set the Express Pilot status, false otherwise
+     * @see #qualifiesForExpress(FinremCaseData)
+     */
+    public boolean canSetExpressPilotStatus(FinremCaseData caseData) {
+        if (!featureToggleService.isExpressPilotEnabled()) {
+            return false;
+        }
+        if (ENROLLED.equals(caseData.getExpressCaseWrapper().getExpressCaseParticipation())) {
+            return false;
+        }
+        ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
+        return manageHearingsWrapper.hasNoHearings() && qualifiesForExpress(caseData);
     }
 
     /*
@@ -154,7 +180,7 @@ public class ExpressCaseService {
      * @param caseData the case data
      * @return true if the case qualifies for express case participation, false otherwise
      */
-    private boolean qualifiesForExpress(FinremCaseData caseData) {
+    protected boolean qualifiesForExpress(FinremCaseData caseData) {
 
         List<NatureApplication> natureOfApplicationCheckList = caseData
             .getNatureApplicationWrapper().getNatureOfApplicationChecklist();
@@ -172,19 +198,23 @@ public class ExpressCaseService {
     }
 
     /**
-     * Returns true if either Estimated Asset Value field is under £250k.
+     * Returns true if the latest populated Estimated Asset Value field is under £250k.
      *
-     * <p>Handlers ensure that only one of the two Estimated Asset Value fields is set,
-     * so both fields can be checked safely. This method is null-safe and returns false
-     * if both values are null.</p>
+     * <p>V3 is newer than V2, so when a V3 value is present it takes precedence.
+     * The isEstimatedAssetsChecklistV3Enabled feature toggle is not considered, this is so existing V3 cases can
+     * still be processed after submission if Service decide to toggle off V3 case creation.
+     * This method is null-safe and returns false if both values are null.</p>
      *
      * @param v2assetValue the value from the older EstimatedAssetV2 enum
      * @param v3assetValue the value from the newer EstimatedAssetV3 enum
-     * @return true if the asset value qualifies for express case participation, false otherwise
+     * @return true if the latest populated asset value qualifies for express case participation, false otherwise
      */
     private boolean isExpressPilotAssetValue(EstimatedAssetV2 v2assetValue, EstimatedAssetV3 v3assetValue) {
-        return EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v2assetValue)
-            || EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v3assetValue);
+        if (v3assetValue != null) {
+            return EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v3assetValue);
+        }
+
+        return EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v2assetValue);
     }
 
     /* Checks that a region has been selected before calling getSelectedAllocatedCourt, as an indication

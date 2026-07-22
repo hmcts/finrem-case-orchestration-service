@@ -27,6 +27,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -171,5 +173,17 @@ public class ManageHearingsWrapper {
             .filter(doc -> hearingId.equals(doc.getHearingId()))
             .map(ManageHearingDocument::getHearingDocument)
             .toList();
+    }
+
+    /*
+     * Returns true if the hearings collection is empty or null
+     * Does not consider vacatedOrAdjournedHearings.
+     *
+     * @param caseData The case data.
+     * @return true if the hearings collection is empty or null, false otherwise.
+     */
+    @JsonIgnore
+    public boolean hasNoHearings() {
+        return isEmpty(getHearings());
     }
 }
