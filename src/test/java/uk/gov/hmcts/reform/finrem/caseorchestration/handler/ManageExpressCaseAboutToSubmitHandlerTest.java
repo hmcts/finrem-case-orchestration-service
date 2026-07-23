@@ -147,9 +147,8 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
     void shouldClearTemporaryFields() {
         verifyTemporaryFieldsWereSanitised(underTest,
             finremCaseDetailsMapper, new HashMap<>(Map.of(
-                "shouldAllocateToExpressPilot", "Yes",
-                "showShouldAllocateToExpressPilot", "Yes")
-            )
+                "shouldAllocateToExpressPilot", "Yes"
+            ))
         );
     }
 }
