@@ -62,10 +62,14 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremAboutToSubmitCa
 
     private void setExpressPilotStatus(FinremCaseData finremCaseData) {
         ExpressCaseWrapper expressCaseWrapper = finremCaseData.getExpressCaseWrapper();
+        String caseId = finremCaseData.getCcdCaseId();
         if (YesOrNo.isYes(expressCaseWrapper.getShouldAllocateToExpressPilot())) {
             expressCaseService.setExpressCaseEnrollmentStatus(finremCaseData);
-            log.info("{} - Setting express case enrollment status to {}", finremCaseData.getCcdCaseId(),
+            log.info("{} - Setting express case enrollment status to {}", caseId,
                 expressCaseWrapper.getExpressCaseParticipation());
+        } else {
+            expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(finremCaseData);
+            log.info("{} - Setting express case enrollment status to withdrawn", caseId);
         }
     }
 }
