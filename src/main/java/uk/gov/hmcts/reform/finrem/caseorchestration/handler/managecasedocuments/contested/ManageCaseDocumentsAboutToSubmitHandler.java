@@ -68,7 +68,9 @@ public class ManageCaseDocumentsAboutToSubmitHandler extends FinremAboutToSubmit
         CaseDocumentType.JUDICIAL_NOTES,
         CaseDocumentType.JUDGMENT,
         CaseDocumentType.WITNESS_SUMMONS,
-        CaseDocumentType.TRANSCRIPT
+        CaseDocumentType.TRANSCRIPT,
+        CaseDocumentType.UPDATED_DISCLOSURE
+
     );
 
     private final List<DocumentHandler> documentHandlers;

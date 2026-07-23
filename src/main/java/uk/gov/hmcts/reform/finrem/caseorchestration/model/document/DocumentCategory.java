@@ -27,6 +27,7 @@ public enum DocumentCategory {
     APPLICANT_DOCUMENTS_SUPPORTING_DOCUMENTS("applicantDocumentsSupportingDocuments"),
     APPLICANT_DOCUMENTS_PENSION_PLAN("applicantDocumentsPensionPlan"),
     APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE("applicantDocumentsPointOfClaimOrDefence"),
+    APPLICANT_DOCUMENTS_UPDATED_DISCLOSURE("applicantDocumentsUpdatedDisclosure"),
     RESPONDENT_DOCUMENTS("respondentDocuments"),
     RESPONDENT_DOCUMENTS_FORM_E("respondentDocumentsFormE"),
     RESPONDENT_DOCUMENTS_FORM_G("respondentDocumentsFormG"),
@@ -42,6 +43,7 @@ public enum DocumentCategory {
     RESPONDENT_DOCUMENTS_PENSION_PLAN("respondentDocumentsPensionPlan"),
 
     RESPONDENT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE("respondentDocumentsPointOfClaimOrDefence"),
+    RESPONDENT_DOCUMENTS_UPDATED_DISCLOSURE("respondentDocumentsUpdatedDisclosure"),
     LIP_OR_SCANNED_DOCUMENTS("lipOrScannedDocuments"),
     FDR_DOCUMENTS_AND_FDR_BUNDLE("fdrDocumentsAndFdrBundle"),
     FDR_BUNDLE("fdrBundle"),

@@ -44,7 +44,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         CaseDocumentType.JUDGMENT,
         CaseDocumentType.WITNESS_SUMMONS,
         CaseDocumentType.TRANSCRIPT,
-        CaseDocumentType.BILL_OF_COSTS
+        CaseDocumentType.BILL_OF_COSTS,
+        CaseDocumentType.UPDATED_DISCLOSURE
     );
 
     public static final String TRIAL_BUNDLE_SELECTED_ERROR =

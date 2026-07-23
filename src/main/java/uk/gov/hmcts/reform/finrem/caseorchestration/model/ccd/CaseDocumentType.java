@@ -47,6 +47,7 @@ public enum CaseDocumentType {
     WITHOUT_PREJUDICE_OFFERS("Without Prejudice offers"),
     WITNESS_SUMMONS("Witness Summons"),
     POINTS_OF_CLAIM_OR_DEFENCE("Points of claim/defence"),
+    UPDATED_DISCLOSURE("Updated Disclosure"),
 
     FM5("FM5"),
 

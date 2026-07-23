@@ -41,6 +41,13 @@ public class CaseDocumentsHandler extends PartyDocumentsHandler {
             case JUDGMENT, TRANSCRIPT -> {
                 return DocumentCategory.JUDGMENT_OR_TRANSCRIPT;
             }
+            case UPDATED_DISCLOSURE -> {
+                return switch (caseDocumentParty) {
+                    case APPLICANT -> DocumentCategory.APPLICANT_DOCUMENTS_UPDATED_DISCLOSURE;
+                    case RESPONDENT -> DocumentCategory.RESPONDENT_DOCUMENTS_UPDATED_DISCLOSURE;
+                    default -> DocumentCategory.CASE_DOCUMENTS;
+                };
+            }
             default -> {
                 return DocumentCategory.CASE_DOCUMENTS;
             }
