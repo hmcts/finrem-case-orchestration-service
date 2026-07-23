@@ -165,7 +165,6 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
         verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
     }
 
-
     @ParameterizedTest
     @EnumSource(value = YesOrNo.class, names = {"NO"})
     @NullSource
