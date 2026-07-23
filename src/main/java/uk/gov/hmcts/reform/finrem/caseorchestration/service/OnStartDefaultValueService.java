@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion.V2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion.V3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy.getDefaultOrganisationPolicy;
@@ -20,6 +20,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1Or
 @Service
 @RequiredArgsConstructor
 public class OnStartDefaultValueService {
+
+    private final FeatureToggleService featureToggleService;
 
     private final IdamService idamService;
 
@@ -45,10 +47,6 @@ public class OnStartDefaultValueService {
         callbackRequest.getFinremCaseData().setRespondentOrganisationPolicy(
             getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR)
         );
-    }
-
-    public void defaultCivilPartnershipField(CallbackRequest callbackRequest) {
-        callbackRequest.getCaseDetails().getData().putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
     }
 
     public void defaultCivilPartnershipField(FinremCallbackRequest callbackRequest) {
@@ -106,5 +104,23 @@ public class OnStartDefaultValueService {
 
     public void defaultContestedOrderDate(CallbackRequest callbackRequest) {
         callbackRequest.getCaseDetails().getData().putIfAbsent(CONTESTED_ORDER_APPROVED_DATE, LocalDate.now());
+    }
+
+    /**
+     * This method sets the version of the Estimated Assets Checklist to be used in the case data based on a feature toggle.
+     * Since these are new cases, we want to use the new version of the checklist once the feature toggle is enabled.
+     * So, the feature toggle is enabled, the new case uses the V3 list; otherwise the new case will use the V2 list.
+     *
+     *
+     * @param callbackRequest The callback request containing the case data.
+     */
+    public void setEstimatedAssetsChecklistVersion(FinremCallbackRequest callbackRequest) {
+        boolean useV3EstimatedAssetsChecklist = featureToggleService.isEstimatedAssetsChecklistV3Enabled();
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
+        if (useV3EstimatedAssetsChecklist) {
+            caseData.getEstimatedAssetsChecklistWrapper().setEstimatedAssetsChecklistVersion(V3);
+        } else {
+            caseData.getEstimatedAssetsChecklistWrapper().setEstimatedAssetsChecklistVersion(V2);
+        }
     }
 }
