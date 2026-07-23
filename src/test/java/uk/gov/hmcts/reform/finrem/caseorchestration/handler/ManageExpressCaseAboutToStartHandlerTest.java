@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,13 +21,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -119,23 +119,31 @@ class ManageExpressCaseAboutToStartHandlerTest {
         verify(expressCaseWrapper, never()).setExpressPilotQuestion(any(YesOrNo.class));
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void givenManageExpressCaseV2Event_shouldSetShowShouldAllocateToExpressPilot(boolean canSetExpressPilotStatus) {
+    @Test
+    void givenManageExpressCaseV2Event_whenCannotSetExpressPilotStatus_thenPopulateError() {
         FinremCaseData caseData = FinremCaseData.builder().build();
-        ExpressCaseWrapper expressCaseWrapper = spy(caseData.getExpressCaseWrapper());
 
-        when(expressCaseService.canSetExpressPilotStatus(caseData)).thenReturn(canSetExpressPilotStatus);
+        when(expressCaseService.canSetExpressPilotStatus(caseData, true)).thenReturn(false);
 
         var response = underTest.handle(FinremCallbackRequestFactory.from(caseData)
             .toBuilder().eventType(MANAGE_EXPRESS_CASE_V2).build(), AUTH_TOKEN);
 
         assertThat(response)
-            .extracting(GenericAboutToStartOrSubmitCallbackResponse::getData)
-            .extracting(FinremCaseData::getExpressCaseWrapper)
-            .extracting(ExpressCaseWrapper::getShowShouldAllocateToExpressPilot)
-            .isEqualTo(YesOrNo.forValue(canSetExpressPilotStatus));
-        verify(expressCaseWrapper, never()).setExpressPilotQuestion(any(YesOrNo.class));
-        verify(expressCaseService).canSetExpressPilotStatus(caseData);
+            .extracting(GenericAboutToStartOrSubmitCallbackResponse::getErrors)
+            .isEqualTo(List.of("This case is not enrolled in the Express Financial Remedy Pilot and does meet the criteria to be enrolled"));
+        verify(expressCaseService).canSetExpressPilotStatus(caseData, true);
+    }
+
+    @Test
+    void givenManageExpressCaseV2Event_whenCanSetExpressPilotStatus_thenDoNotPopulateError() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+
+        when(expressCaseService.canSetExpressPilotStatus(caseData, true)).thenReturn(true);
+
+        var response = underTest.handle(FinremCallbackRequestFactory.from(caseData)
+            .toBuilder().eventType(MANAGE_EXPRESS_CASE_V2).build(), AUTH_TOKEN);
+
+        assertThat(response.getErrors()).isEmpty();
+        verify(expressCaseService).canSetExpressPilotStatus(caseData, true);
     }
 }
