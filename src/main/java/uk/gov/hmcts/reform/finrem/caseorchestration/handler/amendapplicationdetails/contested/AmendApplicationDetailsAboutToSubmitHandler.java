@@ -89,8 +89,6 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremAboutToSu
         clearUnusedMiamDetailsFields(caseData);
         clearUnusedUploadAdditionalDocuments(caseData);
 
-        expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
-
         generateMiniFormA(caseDetails, userAuthorisation);
 
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
@@ -100,12 +98,14 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremAboutToSu
             expressCaseService.setExpressCaseEnrollmentStatus(caseDetails.getData());
         }
 
+        expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
+
         List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
         if (!mandatoryDataErrors.isEmpty()) {
-            return response(caseData, null, mandatoryDataErrors);
+            return responseWithoutWarnings(caseData, mandatoryDataErrors);
         }
 
-        return response(caseData, null, ContactDetailsValidator.validateOrganisationPolicy(caseData));
+        return responseWithoutWarnings(caseData, ContactDetailsValidator.validateOrganisationPolicy(caseData));
     }
 
     private void generateMiniFormA(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
