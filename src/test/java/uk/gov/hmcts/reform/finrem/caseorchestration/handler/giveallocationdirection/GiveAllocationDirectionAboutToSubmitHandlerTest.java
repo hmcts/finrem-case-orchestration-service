@@ -10,11 +10,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
@@ -24,9 +26,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -110,5 +114,69 @@ class GiveAllocationDirectionAboutToSubmitHandlerTest {
 
         verify(expressCaseService, times(YesOrNo.isYes(shouldAllocateToExpressPilot) ? 1 : 0))
             .setExpressCaseEnrollmentStatus(finremCaseData);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ExpressCaseParticipation.class, names = {"DOES_NOT_QUALIFY", "WITHDRAWN"})
+    void givenShouldAllocatedToExpressPilot_whenHandled_thenPopulateWarning(
+        ExpressCaseParticipation beforeExpressCaseParticipation
+    ) {
+
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .expressCaseWrapper(ExpressCaseWrapper.builder()
+                .shouldAllocateToExpressPilot(YesOrNo.YES)
+                .build())
+            .build();
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+            .expressCaseWrapper(ExpressCaseWrapper.builder()
+                .expressCaseParticipation(beforeExpressCaseParticipation)
+                .build())
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+            finremCaseDataBefore, finremCaseData);
+
+        doAnswer(f -> {
+            finremCaseData.getExpressCaseWrapper().setExpressCaseParticipation(ExpressCaseParticipation.ENROLLED);
+            return null;
+        }).when(expressCaseService).setExpressCaseEnrollmentStatus(finremCaseData);
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response)
+            .extracting(GenericAboutToStartOrSubmitCallbackResponse::getWarnings)
+            .isEqualTo(List.of("This case will now be enrolled into the Express Pilot."));
+    }
+
+    @ParameterizedTest
+    @EnumSource(ExpressCaseParticipation.class)
+    void givenNoParticipationChange_whenHandled_thenDoNotPopulateWarning(
+        ExpressCaseParticipation expressCaseParticipation
+    ) {
+
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .expressCaseWrapper(ExpressCaseWrapper.builder()
+                .shouldAllocateToExpressPilot(YesOrNo.YES)
+                .build())
+            .build();
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+            .expressCaseWrapper(ExpressCaseWrapper.builder()
+                .expressCaseParticipation(expressCaseParticipation)
+                .build())
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+            finremCaseDataBefore, finremCaseData);
+
+        doAnswer(f -> {
+            // guarantee it's no change
+            finremCaseData.getExpressCaseWrapper()
+                .setExpressCaseParticipation(
+                    finremCaseDataBefore.getExpressCaseWrapper().getExpressCaseParticipation()
+                );
+            return null;
+        }).when(expressCaseService).setExpressCaseEnrollmentStatus(finremCaseData);
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getWarnings()).isEmpty();
     }
 }
