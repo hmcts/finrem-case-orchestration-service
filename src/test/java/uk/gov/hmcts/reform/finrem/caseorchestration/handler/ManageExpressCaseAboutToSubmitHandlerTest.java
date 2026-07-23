@@ -151,4 +151,29 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
             ))
         );
     }
+
+    @Test
+    void givenManageExpressCaseV2EventAndShouldAllocateToExpressPilot_whenHandled_thenSetExpressCaseEnrollmentStatus() {
+        when(callbackRequest.getEventType()).thenReturn(MANAGE_EXPRESS_CASE_V2);
+        when(expressCaseWrapper.getShouldAllocateToExpressPilot()).thenReturn(YesOrNo.YES);
+
+        underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    @NullSource
+    void givenManageExpressCaseV2EventAndShouldNotAllocateToExpressPilot_whenHandled_thenWithdrawExpressPilot(
+        YesOrNo shouldAllocateToExpressPilot
+    ) {
+        when(callbackRequest.getEventType()).thenReturn(MANAGE_EXPRESS_CASE_V2);
+        when(expressCaseWrapper.getShouldAllocateToExpressPilot()).thenReturn(shouldAllocateToExpressPilot);
+
+        underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).setExpressCaseEnrollmentStatusToWithdrawn(caseData);
+    }
 }
