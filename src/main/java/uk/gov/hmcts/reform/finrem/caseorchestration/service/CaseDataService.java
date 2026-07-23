@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -180,6 +181,24 @@ public class CaseDataService {
         caseDetails.getData().put(CONSENT_ORDER_FRC_ADDRESS, courtDetails.get(COURT_DETAILS_ADDRESS_KEY));
         caseDetails.getData().put(CONSENT_ORDER_FRC_EMAIL, courtDetails.get(COURT_DETAILS_EMAIL_KEY));
         caseDetails.getData().put(CONSENT_ORDER_FRC_PHONE, courtDetails.get(COURT_DETAILS_PHONE_KEY));
+    }
+
+    /**
+     * Sets PowerBI fields used for tracking and gather statistics.
+     * Note that these tracking fields are used both consented and contested application
+     * in-spite of the 'Consent_Order_FRC...' naming.
+     *
+     * @param caseDetails the case data as a {@code FinremCaseDetails}
+     */
+    public void setFinancialRemediesCourtDetails(FinremCaseDetails caseDetails) {
+        Map<String, Object> courtDetails = CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData());
+
+        ConsentOrderWrapper wrapper = caseDetails.getData().getConsentOrderWrapper();
+
+        wrapper.setConsentOrderFrcName((String) courtDetails.get(COURT_DETAILS_NAME_KEY));
+        wrapper.setConsentOrderFrcAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY));
+        wrapper.setConsentOrderFrcEmail((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY));
+        wrapper.setConsentOrderFrcPhone((String) courtDetails.get(COURT_DETAILS_PHONE_KEY));
     }
 
     /**
