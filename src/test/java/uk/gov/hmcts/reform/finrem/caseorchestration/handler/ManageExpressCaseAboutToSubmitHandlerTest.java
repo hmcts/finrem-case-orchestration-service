@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -157,8 +159,9 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
         when(callbackRequest.getEventType()).thenReturn(MANAGE_EXPRESS_CASE_V2);
         when(expressCaseWrapper.getShouldAllocateToExpressPilot()).thenReturn(YesOrNo.YES);
 
-        underTest.handle(callbackRequest, AUTH_TOKEN);
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
+        assertThat(response).extracting(GenericAboutToStartOrSubmitCallbackResponse::getData).isEqualTo(caseData);
         verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
     }
 
@@ -172,8 +175,9 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
         when(callbackRequest.getEventType()).thenReturn(MANAGE_EXPRESS_CASE_V2);
         when(expressCaseWrapper.getShouldAllocateToExpressPilot()).thenReturn(shouldAllocateToExpressPilot);
 
-        underTest.handle(callbackRequest, AUTH_TOKEN);
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
+        assertThat(response).extracting(GenericAboutToStartOrSubmitCallbackResponse::getData).isEqualTo(caseData);
         verify(expressCaseService).setExpressCaseEnrollmentStatusToWithdrawn(caseData);
     }
 }
