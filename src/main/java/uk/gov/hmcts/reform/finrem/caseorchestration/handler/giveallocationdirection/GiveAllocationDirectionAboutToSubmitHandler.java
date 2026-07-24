@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
+
 @Slf4j
 @Service
 public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
@@ -64,17 +66,32 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSu
 
         selectedCourtService.setSelectedCourtDetailsIfPresent(finremCaseData);
 
-        setExpressPilotStatus(finremCaseData);
-
+        String warning = setExpressPilotStatus(finremCaseData, finremCaseDataBefore);
+        if (warning != null) {
+            return response(finremCaseData, List.of(warning), List.of());
+        }
         return response(finremCaseData);
     }
 
-    private void setExpressPilotStatus(FinremCaseData finremCaseData) {
+    private String setExpressPilotStatus(FinremCaseData finremCaseData, FinremCaseData finremCaseDataBefore) {
+        String warning = null;
+
         ExpressCaseWrapper expressCaseWrapper = finremCaseData.getExpressCaseWrapper();
         if (YesOrNo.isYes(expressCaseWrapper.getShouldAllocateToExpressPilot())) {
             expressCaseService.setExpressCaseEnrollmentStatus(finremCaseData);
             log.info("{} - Setting express case enrollment status to {}", finremCaseData.getCcdCaseId(),
                 expressCaseWrapper.getExpressCaseParticipation());
+
+            if (isBecomingEnrolled(finremCaseDataBefore.getExpressCaseWrapper(), expressCaseWrapper)) {
+                warning = "This case will now be enrolled into the Express Pilot.";
+            }
         }
+        return warning;
+    }
+
+    private boolean isBecomingEnrolled(ExpressCaseWrapper expressCaseWrapperBefore,
+                                       ExpressCaseWrapper expressCaseWrapper) {
+        return !ENROLLED.equals(expressCaseWrapperBefore.getExpressCaseParticipation())
+            && ENROLLED.equals(expressCaseWrapper.getExpressCaseParticipation());
     }
 }
