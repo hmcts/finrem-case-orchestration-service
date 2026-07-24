@@ -18,6 +18,7 @@ public enum EventType {
     UPLOAD_CONFIDENTIAL_DOCUMENT("FR_uploadConfidentialDocument"),
     UPLOAD_DOCUMENT_CONSENTED("FR_uploadDocument"),
     UPLOAD_DOCUMENT_CONTESTED("FR_uploadGeneralDocument"),
+    SOLICITOR_UPLOAD_DOCUMENT("FR_solUploadDocumentv2"),
     SOLICITOR_CREATE("FR_solicitorCreate"),
     UPDATE_CASE_DETAILS_SOLICITOR("FR_updateCaseDetailsSolicitor"),
     AMEND_APP_DETAILS("FR_amendApplicationDetails"),

@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.EstimatedA
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GenericInputFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCaseDocumentsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 
@@ -255,6 +256,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      */
     private static List<Class<?>> getClassesWithTemporaryFieldAnnotation() {
         return List.of(
+            GenericInputFields.class,
             StopRepresentationWrapper.class,
             CaseDataMetricsWrapper.class,
             ContactDetailsWrapper.class,
