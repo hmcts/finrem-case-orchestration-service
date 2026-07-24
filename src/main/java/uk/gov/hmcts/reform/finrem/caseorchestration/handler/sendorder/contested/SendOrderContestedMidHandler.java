@@ -1,14 +1,16 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.sendorder.contested;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
@@ -40,9 +42,8 @@ public class SendOrderContestedMidHandler extends FinremCallbackHandler {
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested {} mid callback for Case ID: {}", callbackRequest.getEventType(), caseDetails.getId());
-        FinremCaseData caseData = caseDetails.getData();
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
 
         List<String> errors = new ArrayList<>();
 
@@ -56,7 +57,7 @@ public class SendOrderContestedMidHandler extends FinremCallbackHandler {
                 .forEach(order -> errors.add("You chose to include a supporting document but none have been selected."));
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).data(caseData).build();
+        return response(caseData, null, errors);
     }
 
     private boolean containsSupportingDocumentNotSelected(OrderToShare orderToShare) {

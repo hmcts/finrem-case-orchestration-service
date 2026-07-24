@@ -8,6 +8,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
@@ -22,10 +24,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -39,12 +40,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -58,6 +61,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -77,9 +81,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetailsWithNonUkRespondent;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
@@ -93,10 +97,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_NAME;
@@ -108,7 +108,7 @@ class DocumentHelperTest {
     private ObjectMapper objectMapper;
     private DocumentHelper documentHelper;
     @Mock
-    private GenericDocumentService service;
+    private GenericDocumentService genericDocumentService;
 
     @Mock
     private LetterAddresseeGeneratorMapper letterAddresseeGenerator;
@@ -123,16 +123,7 @@ class DocumentHelperTest {
         CaseDataService caseDataService = new CaseDataService(objectMapper);
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
         documentHelper = new DocumentHelper(objectMapper, caseDataService,
-            service, finremCaseDetailsMapper, letterAddresseeGenerator, postalService);
-    }
-
-    @Test
-    void shouldGetLatestAmendedConsentOrder() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
-        CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl())
-            .isEqualTo("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary");
+            genericDocumentService, finremCaseDetailsMapper, letterAddresseeGenerator, postalService);
     }
 
     @Test
@@ -185,54 +176,9 @@ class DocumentHelperTest {
     }
 
     @Test
-    void hasAnotherHearingFalse() {
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().id(123L).data(new HashMap<>()).build()).build();
-        assertFalse(documentHelper.hasAnotherHearing(callbackRequest.getCaseDetails().getData()));
-    }
-
-    @Test
-    void hasAnotherHearingTrue() {
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().id(123L).data(new HashMap<>()).build()).build();
-
-        DirectionDetailsCollection ddc = DirectionDetailsCollection.builder().isAnotherHearingYN("Yes").build();
-        DirectionDetailsCollectionData dt = DirectionDetailsCollectionData.builder().directionDetailsCollection(ddc).build();
-        List<DirectionDetailsCollectionData> list = new ArrayList<>();
-        list.add(dt);
-        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
-        data.put(DIRECTION_DETAILS_COLLECTION_CT, list);
-        assertTrue(documentHelper.hasAnotherHearing(data));
-    }
-
-    @Test
-    void castToList() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
-        List<String> natureList = documentHelper.convertToList(
-            callbackRequest.getCaseDetails().getData().get("natureOfApplication6"));
-        assertThat(natureList).hasSize(2);
-    }
-
-    @Test
-    void shouldGetFormADocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
-        List<CaseDocument> formADocuments = documentHelper.getFormADocumentsData(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(formADocuments).hasSize(2);
-    }
-
-    @Test
     void shouldGetFormADocumentsFinrem() throws Exception {
         FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(pensionDocuments).hasSize(2);
-    }
-
-    @Test
-    void shouldGetConsentedInContestedPensionDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("consented-in-consented.json");
-        List<CaseDocument> pensionDocuments = documentHelper.getConsentedInContestedPensionDocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments).hasSize(2);
     }
@@ -304,22 +250,13 @@ class DocumentHelperTest {
         documentCollectionItems.add(dc);
         caseData.setHearingOrderOtherDocuments(documentCollectionItems);
 
-        when(service.convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED))).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED))).thenReturn(caseDocument());
 
         List<CaseDocument> hearingDocuments2 = documentHelper.getHearingDocumentsAsPdfDocuments(caseDetails, AUTHORIZATION_HEADER);
         assertEquals("app_docs.pdf", hearingDocuments2.getFirst().getDocumentFilename());
         assertEquals(BINARY_URL, hearingDocuments2.getFirst().getDocumentBinaryUrl());
 
-        verify(service).convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED));
-    }
-
-    @Test
-    void shouldGetRespondToOrderDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
-        Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(latestRespondToOrderDocuments).isPresent();
-        assertThat(latestRespondToOrderDocuments.get().getDocumentBinaryUrl()).isEqualTo("http://doc2/binary");
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED));
     }
 
     @Test
@@ -329,14 +266,6 @@ class DocumentHelperTest {
             callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments).isPresent();
         assertThat(latestRespondToOrderDocuments.get().getDocumentBinaryUrl()).isEqualTo("http://doc2/binary");
-    }
-
-    @Test
-    void shouldNotGetRespondToOrderDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
-        Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(latestRespondToOrderDocuments).isNotPresent();
     }
 
     @Test
@@ -469,31 +398,6 @@ class DocumentHelperTest {
     }
 
     @Test
-    void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated() {
-        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
-
-        when(letterAddresseeGenerator.generate(preparedCaseDetails, APPLICANT)).thenReturn(
-            AddresseeDetails.builder()
-                .addresseeName("addresseeName")
-                .reference("reference")
-                .addressToSendTo(buildAddress()).build());
-        preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), APPLICANT);
-
-        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
-            .serviceCentre(CTSC_SERVICE_CENTRE)
-            .careOf(CTSC_CARE_OF)
-            .poBox(CTSC_PO_BOX)
-            .town(CTSC_TOWN)
-            .postcode(CTSC_POSTCODE)
-            .emailAddress(CTSC_EMAIL_ADDRESS)
-            .phoneNumber(CTSC_PHONE_NUMBER)
-            .openingHours(CTSC_OPENING_HOURS)
-            .build();
-
-        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
-    }
-
-    @Test
     void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated_finrem() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
 
@@ -510,33 +414,6 @@ class DocumentHelperTest {
                 .finremAddressToSendTo(buildFinremAddress()).build());
 
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(finremCaseDetails, APPLICANT);
-
-        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
-            .serviceCentre(CTSC_SERVICE_CENTRE)
-            .careOf(CTSC_CARE_OF)
-            .poBox(CTSC_PO_BOX)
-            .town(CTSC_TOWN)
-            .postcode(CTSC_POSTCODE)
-            .emailAddress(CTSC_EMAIL_ADDRESS)
-            .phoneNumber(CTSC_PHONE_NUMBER)
-            .openingHours(CTSC_OPENING_HOURS)
-            .build();
-
-        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
-    }
-
-    @Test
-    void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated() {
-
-        CaseDetails caseDetails = defaultConsentedCaseDetails();
-
-        when(letterAddresseeGenerator.generate(caseDetails, RESPONDENT)).thenReturn(
-            AddresseeDetails.builder()
-                .addresseeName("addresseeName")
-                .reference("reference")
-                .addressToSendTo(buildAddress()).build());
-
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(caseDetails, RESPONDENT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
@@ -769,35 +646,11 @@ class DocumentHelperTest {
     }
 
     @Test
-    void shouldReturnTrueWhenCourtIsHighCourt() {
-        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
-        preparedCaseDetails.getData().put(HIGHCOURT_COURTLIST, "highcourt");
-        boolean isHighCourt = documentHelper.isHighCourtSelected(preparedCaseDetails.getData());
-        assertTrue(isHighCourt);
-    }
-
-    @Test
     void shouldReturnTrueWhenCourtIsHighCourtInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
         preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
         boolean isHighCourt = documentHelper.isHighCourtSelected(preparedCaseDetails.getData());
         assertTrue(isHighCourt);
-    }
-
-    @Test
-    void shouldReturnHighCourtStampWhenCourtIsHighCourt() {
-        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
-        preparedCaseDetails.getData().put(HIGHCOURT_COURTLIST, "highcourt");
-        StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
-        assertEquals(StampType.HIGH_COURT_STAMP, actualStampType);
-    }
-
-    @Test
-    void shouldReturnFamilyCourtStampWhenCourtIsLondon() {
-        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
-        preparedCaseDetails.getData().put(LONDON_COURTLIST, "london");
-        StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
-        assertEquals(StampType.FAMILY_COURT_STAMP, actualStampType);
     }
 
     @Test
@@ -814,39 +667,6 @@ class DocumentHelperTest {
         preparedCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.LONDON);
         StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
         assertEquals(StampType.FAMILY_COURT_STAMP, actualStampType);
-    }
-
-    @Test
-    void convertToCaseDocumentIfObjNotNull() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> data = caseDetails.getData();
-        CaseDocument caseDocument = documentHelper.convertToCaseDocumentIfObjNotNull(data.get(CONSENT_ORDER));
-
-        assertThat(caseDocument.getDocumentBinaryUrl()).isEqualTo("http://file1.binary");
-        assertThat(caseDocument.getDocumentUrl()).isEqualTo("http://file1");
-        assertThat(caseDocument.getDocumentFilename()).isEqualTo("file1");
-    }
-
-    @Test
-    void convertToCaseDocumentIfObjNotNullIfNullReturnNull() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> data = caseDetails.getData();
-        CaseDocument caseDocument = documentHelper.convertToCaseDocumentIfObjNotNull(data.get(GENERAL_ORDER_PREVIEW_DOCUMENT));
-        assertNull(caseDocument);
-    }
-
-    @Test
-    void convertToCaseDocument() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> data = caseDetails.getData();
-        CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER), CaseDocument.class);
-
-        assertThat(caseDocument.getDocumentBinaryUrl()).isEqualTo("http://file1.binary");
-        assertThat(caseDocument.getDocumentUrl()).isEqualTo("http://file1");
-        assertThat(caseDocument.getDocumentFilename()).isEqualTo("file1");
     }
 
     @Test
@@ -903,7 +723,6 @@ class DocumentHelperTest {
             .returns(YesOrNo.YES, DirectionOrder::getIsOrderStamped)
             .returns(finalOrder, DirectionOrder::getUploadDraftDocument)
             .returns(List.of(additionalDocument), DirectionOrder::getAdditionalDocuments);
-
     }
 
     @Test
@@ -929,6 +748,40 @@ class DocumentHelperTest {
         List<CaseDocument> result = documentHelper.getPensionDocumentsData(caseData);
 
         assertThat(result).containsExactly(document);
+    }
+
+    @Test
+    void givenNonPdfCaseDocument_whenGetCaseDocumentsAsBulkPrintDocuments_shouldConvertToPdf() {
+        CaseDocument nonPdfCaseDocument = mock(CaseDocument.class);
+        CaseDocument existingPdfCaseDocument = mock(CaseDocument.class);
+        when(existingPdfCaseDocument.getDocumentBinaryUrl()).thenReturn("existingPdfBinaryUrl");
+        when(existingPdfCaseDocument.getDocumentFilename()).thenReturn("existingPdfFilename");
+        List<CaseDocument> allCaseDocuments = List.of(nonPdfCaseDocument, existingPdfCaseDocument);
+        CaseType caseType = mock(CaseType.class);
+
+        CaseDocument convertedDocument = mock(CaseDocument.class);
+        when(convertedDocument.getDocumentBinaryUrl()).thenReturn("convertedBinaryUrl");
+        when(convertedDocument.getDocumentFilename()).thenReturn("convertedFilename");
+
+        try (MockedStatic<FileUtils> mockedFileUtils = Mockito.mockStatic(FileUtils.class)) {
+            when(genericDocumentService.convertDocumentIfNotPdfAlready(nonPdfCaseDocument, AUTH_TOKEN,
+                caseType)).thenReturn(convertedDocument);
+
+            mockedFileUtils.when(() -> FileUtils.isPdf(nonPdfCaseDocument))
+                .thenReturn(false);
+            mockedFileUtils.when(() -> FileUtils.isPdf(existingPdfCaseDocument))
+                .thenReturn(true);
+
+            List<BulkPrintDocument> actual =
+                documentHelper.getCaseDocumentsAsBulkPrintDocuments(allCaseDocuments, caseType, AUTH_TOKEN);
+
+            assertThat(actual)
+                .extracting(BulkPrintDocument::getBinaryFileUrl, BulkPrintDocument::getFileName)
+                .contains(
+                    tuple("convertedBinaryUrl", "convertedFilename"),
+                    tuple("existingPdfBinaryUrl", "existingPdfFilename")
+                );
+        }
     }
 
     private static Stream<Arguments> provideOrderCollections() {
@@ -968,18 +821,6 @@ class DocumentHelperTest {
                 .caseDetails(finremCaseDetails)
                 .build();
         }
-    }
-
-    private static Map<String, Object> buildAddress() {
-        Map<String, Object> solicitorAddress = new HashMap<>();
-        solicitorAddress.put("AddressLine1", "First Address Line");
-        solicitorAddress.put("AddressLine2", "Second Address Line");
-        solicitorAddress.put("AddressLine3", "Third Address Line");
-        solicitorAddress.put("County", "London");
-        solicitorAddress.put("Country", "England");
-        solicitorAddress.put("PostTown", "London");
-        solicitorAddress.put("PostCode", "SE1");
-        return solicitorAddress;
     }
 
     private static Address buildFinremAddress() {

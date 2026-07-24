@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 
 @Service
@@ -52,10 +53,7 @@ public class ProcessOrderService {
      * @param caseData the case data.
      */
     public void populateUnprocessedUploadHearingDocuments(FinremCaseData caseData) {
-        List<DirectionOrderCollection> uploadHearingOrders = Optional.ofNullable(caseData.getUploadHearingOrder())
-            .orElseGet(ArrayList::new);
-
-        List<DirectionOrderCollection> unprocessedOrders = uploadHearingOrders.stream()
+        List<DirectionOrderCollection> unprocessedOrders = emptyIfNull(caseData.getUploadHearingOrder()).stream()
             .filter(orderCollection -> Optional.ofNullable(orderCollection.getValue())
                 .map(directionOrder ->  directionOrder.getIsOrderStamped() == null
                     || YesOrNo.NO.equals(directionOrder.getIsOrderStamped()))

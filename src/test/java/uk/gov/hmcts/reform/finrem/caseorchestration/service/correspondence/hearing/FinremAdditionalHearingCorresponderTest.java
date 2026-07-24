@@ -18,13 +18,14 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 class FinremAdditionalHearingCorresponderTest extends FinremHearingCorrespondenceBaseTest {
 
     @BeforeEach
-    public void setUpTest() {
-        ObjectMapper objectMapper = new ObjectMapper();
+    void setUpTest() {
+        ObjectMapper objectMapper = createObjectMapper();
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         applicantAndRespondentMultiLetterCorresponder =
             new FinremAdditionalHearingCorresponder(bulkPrintService, notificationService, documentHelper);
