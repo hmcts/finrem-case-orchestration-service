@@ -246,6 +246,20 @@ class ExpressCaseServiceTest {
         assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isFalse();
     }
 
+    @Test
+    void givenCaseEnrolledExpressPilotAndDoesNotStopEnrolledCase_canSetExpressPilotStatus_returnsTrue() {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        ExpressCaseWrapper expressCaseWrapper = ExpressCaseWrapper.builder()
+            .expressCaseParticipation(ENROLLED)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .expressCaseWrapper(expressCaseWrapper)
+            .build();
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
+
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData, false)).isTrue();
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenCaseQualifiesForExpress_canSetExpressPilotStatus_returnsTrueOnlyWhenNoHearingsExist(
