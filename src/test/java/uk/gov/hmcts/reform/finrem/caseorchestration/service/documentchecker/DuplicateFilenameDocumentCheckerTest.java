@@ -598,14 +598,14 @@ class DuplicateFilenameDocumentCheckerTest {
                 .build()),
             Arguments.of(FinremCaseData.builder()
                 .generalEmailWrapper(GeneralEmailWrapper.builder()
-                    .generalEmailUploadedDocument(DUPLICATED_CASE_DOCUMENT)
+                    .generalEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(DUPLICATED_CASE_DOCUMENT)))
                     .build())
                 .build()),
             Arguments.of(FinremCaseData.builder()
                 .generalEmailWrapper(GeneralEmailWrapper.builder()
                     .generalEmailCollection(List.of(GeneralEmailCollection.builder()
                         .value(GeneralEmailHolder.builder()
-                            .generalEmailUploadedDocument(DUPLICATED_CASE_DOCUMENT)
+                            .generalEmailUploadedDocuments(List.of(DocumentCollectionItem.fromCaseDocument(DUPLICATED_CASE_DOCUMENT)))
                             .build())
                         .build()))
                     .build())

@@ -15,6 +15,7 @@ import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -48,6 +49,7 @@ public class EmailService {
     private static final String HEARING_DATE = "hearingDate";
     private static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
     private static final String DEFAULT_LINK_TO_SMART_SURVEY = "http://www.smartsurvey.co.uk/s/KCECE/";
+    private static final int MAX_EMAIL_ATTACHMENTS = 10;
 
     /**
      * Orchestrates sending an email based on the provided notification request and template.
@@ -134,7 +136,10 @@ public class EmailService {
         }
         if (EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)) {
-            templateVars.put("link_to_file", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
+            populateEmailAttachments(
+                templateVars,
+                notificationRequest.getDocumentContentsList()
+            );
         }
         if (CONSENTED.equals(notificationRequest.getCaseType()) && !EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC.name().equals(templateName)) {
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
@@ -227,6 +232,30 @@ public class EmailService {
         } catch (NotificationClientException e) {
             log.warn("Failed to send email. Reference ID: {}. Reason: {}", referenceId, e.getMessage(), e);
             notificationClientExceptionResolver.resolve(e);
+        }
+    }
+
+    private void populateEmailAttachments(
+        Map<String, Object> templateVars,
+        List<byte[]> documents
+    ) {
+        if (documents != null && documents.size() > 10) {
+            throw new IllegalArgumentException(
+                "A maximum of 10 email attachments is supported"
+            );
+        }
+        for (int i = 1; i <= 10; i++) {
+            boolean hasDocument = documents != null
+                && i <= documents.size()
+                && documents.get(i - 1) != null;
+
+            templateVars.put("has_file_" + i, hasDocument ? "yes" : "no");
+            templateVars.put(
+                "link_to_file_" + i,
+                hasDocument
+                    ? preparedForEmailAttachment(documents.get(i - 1))
+                    : ""
+            );
         }
     }
 
