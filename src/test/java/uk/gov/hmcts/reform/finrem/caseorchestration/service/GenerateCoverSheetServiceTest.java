@@ -305,7 +305,10 @@ class GenerateCoverSheetServiceTest {
     }
 
     private void setUpDocGenerationMocks() {
-        when(documentConfiguration.getBulkPrintTemplate()).thenReturn(BULK_PRINT_TEMPLATE);
+        when(documentConfiguration.getBulkPrintTemplate(
+            any(FinremCaseDetails.class),
+            any(DocumentHelper.PaperNotificationRecipient.class)))
+            .thenReturn(BULK_PRINT_TEMPLATE);
         when(documentConfiguration.getBulkPrintFileName()).thenReturn(BULK_PRINT_FILE_NAME);
 
         when(bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(any(), any(), any()))

@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,47 +22,113 @@ class AccessCodeGeneratorTest {
 
         assertNotNull(code);
         assertEquals(8, code.length());
-        assertTrue(code.matches("[A-Z2-9]+")); // allowed chars in class
+        assertTrue(code.matches("[A-Z2-9]+"));
     }
 
     @Test
-    void setAccessCode_shouldCreateApplicantAndRespondentAccessCodesWhenEmpty() {
+    void setApplicantAccessCode_shouldCreateApplicantAccessCodeWhenNull() {
         FinremCaseData data = new FinremCaseData();
 
-        AccessCodeGenerator.setAccessCode(data);
+        AccessCodeGenerator.setApplicantAccessCode(data);
 
         assertNotNull(data.getApplicantAccessCodes());
-        assertNotNull(data.getRespondentAccessCodes());
         assertEquals(1, data.getApplicantAccessCodes().size());
-        assertEquals(1, data.getRespondentAccessCodes().size());
 
-        AccessCodeEntry appEntry = data.getApplicantAccessCodes().getFirst().getValue();
-        AccessCodeEntry respEntry = data.getRespondentAccessCodes().getFirst().getValue();
+        AccessCodeEntry applicantEntry =
+            data.getApplicantAccessCodes().getFirst().getValue();
 
-        assertValidEntry(appEntry);
-        assertValidEntry(respEntry);
+        assertValidEntry(applicantEntry);
     }
 
     @Test
-    void setAccessCode_shouldNotOverwriteExistingCodes() {
-        AccessCodeEntry existingEntry = AccessCodeEntry.builder()
-            .accessCode("ABCDEFGH")
-            .isValid(YesOrNo.YES)
-            .build();
+    void setRespondentAccessCode_shouldCreateRespondentAccessCodeWhenNull() {
+        FinremCaseData data = new FinremCaseData();
 
-        AccessCodeCollection existingCollection =
-            AccessCodeCollection.builder().value(existingEntry).build();
+        AccessCodeGenerator.setRespondentAccessCode(data);
+
+        assertNotNull(data.getRespondentAccessCodes());
+        assertEquals(1, data.getRespondentAccessCodes().size());
+
+        AccessCodeEntry respondentEntry =
+            data.getRespondentAccessCodes().getFirst().getValue();
+
+        assertValidEntry(respondentEntry);
+    }
+
+    @Test
+    void setApplicantAccessCode_shouldCreateApplicantAccessCodeWhenListEmpty() {
+        FinremCaseData data = new FinremCaseData();
+        data.setApplicantAccessCodes(List.of());
+
+        AccessCodeGenerator.setApplicantAccessCode(data);
+
+        assertNotNull(data.getApplicantAccessCodes());
+        assertEquals(1, data.getApplicantAccessCodes().size());
+
+        AccessCodeEntry applicantEntry =
+            data.getApplicantAccessCodes().getFirst().getValue();
+
+        assertValidEntry(applicantEntry);
+    }
+
+    @Test
+    void setRespondentAccessCode_shouldCreateRespondentAccessCodeWhenListEmpty() {
+        FinremCaseData data = new FinremCaseData();
+        data.setRespondentAccessCodes(List.of());
+
+        AccessCodeGenerator.setRespondentAccessCode(data);
+
+        assertNotNull(data.getRespondentAccessCodes());
+        assertEquals(1, data.getRespondentAccessCodes().size());
+
+        AccessCodeEntry respondentEntry =
+            data.getRespondentAccessCodes().getFirst().getValue();
+
+        assertValidEntry(respondentEntry);
+    }
+
+    @Test
+    void setApplicantAccessCode_shouldNotOverwriteExistingCode() {
+        AccessCodeCollection existingCollection = accessCode("ABCDEFGH");
 
         FinremCaseData data = new FinremCaseData();
         data.setApplicantAccessCodes(List.of(existingCollection));
+
+        AccessCodeGenerator.setApplicantAccessCode(data);
+
+        assertEquals(1, data.getApplicantAccessCodes().size());
+        assertEquals(
+            "ABCDEFGH",
+            data.getApplicantAccessCodes().getFirst().getValue().getAccessCode()
+        );
+    }
+
+    @Test
+    void setRespondentAccessCode_shouldNotOverwriteExistingCode() {
+        AccessCodeCollection existingCollection = accessCode("ZXCVBNML");
+
+        FinremCaseData data = new FinremCaseData();
         data.setRespondentAccessCodes(List.of(existingCollection));
 
-        AccessCodeGenerator.setAccessCode(data);
+        AccessCodeGenerator.setRespondentAccessCode(data);
 
-        // Ensure no new entries added
-        assertEquals(1, data.getApplicantAccessCodes().size());
         assertEquals(1, data.getRespondentAccessCodes().size());
-        assertEquals("ABCDEFGH", data.getApplicantAccessCodes().getFirst().getValue().getAccessCode());
+        assertEquals(
+            "ZXCVBNML",
+            data.getRespondentAccessCodes().getFirst().getValue().getAccessCode()
+        );
+    }
+
+    private AccessCodeCollection accessCode(String accessCode) {
+        return AccessCodeCollection.builder()
+            .id(UUID.randomUUID())
+            .value(
+                AccessCodeEntry.builder()
+                    .accessCode(accessCode)
+                    .isValid(YesOrNo.YES)
+                    .build()
+            )
+            .build();
     }
 
     private void assertValidEntry(AccessCodeEntry entry) {

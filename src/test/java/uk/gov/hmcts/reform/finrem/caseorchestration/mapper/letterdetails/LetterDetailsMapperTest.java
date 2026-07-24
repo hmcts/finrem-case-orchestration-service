@@ -7,25 +7,34 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.TestUtils;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
@@ -48,6 +57,9 @@ class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
     @Mock
     private CourtDetailsMapper courtDetailsMapper;
 
+    @Mock
+    private FeatureToggleService featureToggleService;
+
     private LetterDetailsMapper letterDetailsMapper;
 
     private CourtDetailsTemplateFields mockedCourtDetailsTemplateFields;
@@ -58,7 +70,7 @@ class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
         mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         setFinremCaseDetails(TEST_JSON_CONTESTED);
 
-        letterDetailsMapper = new LetterDetailsMapper(mapper, courtDetailsMapper, consentedApplicationHelper);
+        letterDetailsMapper = new LetterDetailsMapper(mapper, courtDetailsMapper, consentedApplicationHelper, featureToggleService);
         mockedCourtDetailsTemplateFields = mock(CourtDetailsTemplateFields.class);
 
         when(courtDetailsMapper.getCourtDetails(caseDetails.getData().getRegionWrapper().getDefaultCourtList()))
@@ -159,6 +171,171 @@ class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
         );
     }
 
+    @Test
+    void givenApplicantRecipientWithValidAccessCode_whenBuildLetterDetails_thenReturnAccessCode() {
+
+        caseDetails.getData().setApplicantAccessCodes(List.of(
+            accessCode("K93VKS6G", YesOrNo.YES)
+        ));
+
+        BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(
+            caseDetails,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+        assertEquals("K93VKS6G", actual.getAccessCode());
+    }
+
+    @Test
+    void givenRespondentRecipientWithValidAccessCode_whenBuildLetterDetails_thenReturnAccessCode() {
+
+        caseDetails.getData().setRespondentAccessCodes(List.of(
+            accessCode("K93VKS6L", YesOrNo.YES)
+        ));
+
+        BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(
+            caseDetails,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+        assertEquals("K93VKS6L", actual.getAccessCode());
+    }
+
+    @Test
+    void givenMultipleAccessCodes_whenBuildLetterDetails_thenReturnFirstValidAccessCode() {
+
+        caseDetails.getData().setApplicantAccessCodes(List.of(
+            accessCode("K93VKS6L", YesOrNo.NO),
+            accessCode("L93VKS6L", YesOrNo.YES),
+            accessCode("M93VKS6L", YesOrNo.NO)
+        ));
+
+        BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(
+            caseDetails,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+        assertEquals("L93VKS6L", actual.getAccessCode());
+    }
+
+    @Test
+    void givenNoValidAccessCodes_whenBuildLetterDetails_thenReturnNullAccessCode() {
+
+        caseDetails.getData().setApplicantAccessCodes(List.of(
+            accessCode("L93VKS6L", YesOrNo.NO),
+            accessCode("M93VKS6L", YesOrNo.NO)
+        ));
+
+        BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(
+            caseDetails,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+        assertNull(actual.getAccessCode());
+    }
+
+    @Test
+    void givenContestedApplicantWithoutAccessCode_whenCitizenUiEnabled_thenGenerateApplicantAccessCode() {
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+
+        caseDetails.getData().setApplicantAccessCodes(null);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+
+        try (MockedStatic<AccessCodeGenerator> mockedStatic =
+                 mockStatic(AccessCodeGenerator.class)) {
+
+            letterDetailsMapper.buildLetterDetails(
+                caseDetails,
+                DocumentHelper.PaperNotificationRecipient.APPLICANT,
+                caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+            mockedStatic.verify(() ->
+                AccessCodeGenerator.setApplicantAccessCode(caseDetails.getData()));
+        }
+    }
+
+    @Test
+    void givenContestedRespondentWithoutAccessCode_whenCitizenUiEnabled_thenGenerateRespondentAccessCode() {
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+
+        caseDetails.getData().setRespondentAccessCodes(null);
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+
+        try (MockedStatic<AccessCodeGenerator> mockedStatic =
+                 mockStatic(AccessCodeGenerator.class)) {
+
+            letterDetailsMapper.buildLetterDetails(
+                caseDetails,
+                DocumentHelper.PaperNotificationRecipient.RESPONDENT,
+                caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+            mockedStatic.verify(() ->
+                AccessCodeGenerator.setRespondentAccessCode(caseDetails.getData()));
+        }
+    }
+
+    @Test
+    void givenExistingApplicantAccessCode_whenBuildLetterDetails_thenDoNotGenerateNewCode() {
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+
+        caseDetails.getData().setApplicantAccessCodes(List.of(
+            accessCode("ABC12345", YesOrNo.YES)
+        ));
+
+        try (MockedStatic<AccessCodeGenerator> mockedStatic =
+                 mockStatic(AccessCodeGenerator.class)) {
+
+            letterDetailsMapper.buildLetterDetails(
+                caseDetails,
+                DocumentHelper.PaperNotificationRecipient.APPLICANT,
+                caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+            mockedStatic.verifyNoInteractions();
+        }
+    }
+
+    @Test
+    void givenCitizenUiDisabled_whenBuildLetterDetails_thenDoNotGenerateAccessCode() {
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(false);
+
+        caseDetails.getData().setApplicantAccessCodes(null);
+
+        try (MockedStatic<AccessCodeGenerator> mockedStatic =
+                 mockStatic(AccessCodeGenerator.class)) {
+
+            letterDetailsMapper.buildLetterDetails(
+                caseDetails,
+                DocumentHelper.PaperNotificationRecipient.APPLICANT,
+                caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+            mockedStatic.verifyNoInteractions();
+        }
+    }
+
+    @Test
+    void givenRepresentedApplicant_whenBuildLetterDetails_thenDoNotGenerateAccessCode() {
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+
+        caseDetails.getData().setApplicantAccessCodes(null);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+
+        try (MockedStatic<AccessCodeGenerator> mockedStatic =
+                 mockStatic(AccessCodeGenerator.class)) {
+
+            letterDetailsMapper.buildLetterDetails(
+                caseDetails,
+                DocumentHelper.PaperNotificationRecipient.APPLICANT,
+                caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+            mockedStatic.verifyNoInteractions();
+        }
+    }
+
     private BasicLetterDetails getExpectedBasicLetterDetails(String name,
                                                              String addressLine1,
                                                              DocumentHelper.PaperNotificationRecipient recipient,
@@ -217,4 +394,17 @@ class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
             .openingHours(CTSC_OPENING_HOURS)
             .build();
     }
+
+    private AccessCodeCollection accessCode(String accessCode, YesOrNo isValid) {
+        return AccessCodeCollection.builder()
+            .id(UUID.randomUUID())
+            .value(
+                AccessCodeEntry.builder()
+                    .accessCode(accessCode)
+                    .isValid(isValid)
+                    .build()
+            )
+            .build();
+    }
 }
+

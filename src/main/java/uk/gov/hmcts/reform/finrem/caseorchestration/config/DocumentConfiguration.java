@@ -4,13 +4,20 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
+import static com.google.common.base.Strings.nullToEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 
@@ -18,7 +25,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Component
 @ConfigurationProperties(prefix = "document")
 public class DocumentConfiguration {
-    private String bulkPrintTemplate;
+
+    private final FeatureToggleService featureToggleService;
+
+    private String bulkPrintCitizenUiTemplate;
+    private String bulkPrintDefaultTemplate;
     private String bulkPrintFileName;
     @Getter(AccessLevel.NONE)
     private String miniFormTemplate;
@@ -149,6 +160,11 @@ public class DocumentConfiguration {
     private String stopRepresentingLetterToApplicantTemplate;
     private String stopRepresentingLetterToRespondentTemplate;
 
+    @Autowired
+    public DocumentConfiguration(FeatureToggleService featureToggleService) {
+        this.featureToggleService = featureToggleService;
+    }
+
     public String getGeneralOrderTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? generalOrderHighCourtTemplate : generalOrderTemplate;
     }
@@ -258,5 +274,32 @@ public class DocumentConfiguration {
 
     private boolean isHearingHighCourtSelected(Region region) {
         return HIGHCOURT.equals(region.getValue());
+    }
+
+    public String getBulkPrintTemplate(FinremCaseDetails caseDetails, DocumentHelper.PaperNotificationRecipient recipient) {
+
+        return featureToggleService.isFinremCitizenUiEnabled()
+            && isContestedCase(caseDetails)
+            && isCitizenAndNotRepresented(caseDetails, recipient)
+            ? bulkPrintCitizenUiTemplate
+            : bulkPrintDefaultTemplate;
+    }
+
+    private boolean isCitizenAndNotRepresented(FinremCaseDetails finremCaseDetails, DocumentHelper.PaperNotificationRecipient recipient) {
+        if (recipient.equals(APPLICANT)) {
+            return !finremCaseDetails.getData().isApplicantRepresentedByASolicitor();
+        } else if (recipient.equals(RESPONDENT)) {
+            return !finremCaseDetails.getData().isRespondentRepresentedByASolicitor();
+        }
+        return false;
+    }
+
+    private boolean isContestedCase(FinremCaseDetails caseDetails) {
+        return caseDetails != null
+            && caseDetails.getCaseType() != null
+            && CaseType.CONTESTED.getCcdType()
+            .equalsIgnoreCase(
+                nullToEmpty(caseDetails.getCaseType().getCcdType())
+            );
     }
 }

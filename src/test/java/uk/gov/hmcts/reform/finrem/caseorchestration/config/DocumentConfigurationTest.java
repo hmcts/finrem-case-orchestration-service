@@ -1,26 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
-/*
- * Test configuration explicitly refers to application.properties.
- * This is to confirm that template aliases and variables match.
- * A location of "classpath:application.properties" can be used, but points to the
- * application.properties file for tests.  So there is a risk when 'test' application.properties version is outdated.
- */
-@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = DocumentConfigurationTest.TestConfig.class)
 @TestPropertySource(locations = "file:src/main/resources/application.properties")
-@Import(DocumentConfigurationTest.TestConfig.class)
 class DocumentConfigurationTest {
 
     /*
@@ -31,8 +26,16 @@ class DocumentConfigurationTest {
     static class TestConfig {
     }
 
+    @MockitoBean
+    private FeatureToggleService featureToggleService;
+
     @Autowired
     private DocumentConfiguration documentConfiguration;
+
+    @BeforeEach
+    void setup() {
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(false);
+    }
 
     @Test
     void returnsStandardTemplate_whenHighCourtNotSelected() {
