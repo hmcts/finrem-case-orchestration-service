@@ -3,21 +3,28 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import com.ibm.icu.text.ListFormatter;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 
 @Getter
 @Builder(toBuilder = true)
 public class SendCorrespondenceEvent {
+
     List<NotificationParty> notificationParties;
     NotificationRequest emailNotificationRequest;
     EmailTemplateNames emailTemplate;
@@ -27,6 +34,93 @@ public class SendCorrespondenceEvent {
     String authToken;
     Barrister barrister;
     boolean letterNotificationOnly;
+
+    @Builder.Default
+    List<NotificationAudit> notificationAudits = new ArrayList<>();
+
+    @Setter
+    String eventId;
+
+    /**
+     * Indicates whether the correspondence process is being simulated.
+     * When true, listeners determine the recipients and notification channels
+     * without sending any correspondence.
+     * When false, listeners send the correspondence and record the sent audits.
+     */
+    @Setter
+    boolean simulatingCorrespondence;
+
+    /**
+     * Records that the given notification party would receive, or has received, an email notification.
+     *
+     * @param notificationParty the party whose notification channel should be recorded
+     */
+    public void recordEmailNotificationToSendAudit(NotificationParty notificationParty) {
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+            .wasSent(YesOrNo.NO)
+            .eventId(this.eventId)
+            .party(notificationParty.name())
+            .type(NotificationType.EMAIL)
+            .emailTemplate(this.emailTemplate.name())
+            .build());
+    }
+
+    /**
+     * Records a successful email notification audit for the given party.
+     * Adds an audit with wasSent set to Yes, together with the event ID,
+     * notification party, email type and email template used.
+     *
+     * @param notificationParty the party that received the email notification
+     */
+    public void recordEmailNotificationSentAudit(NotificationParty notificationParty) {
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+            .wasSent(YesOrNo.YES)
+            .eventId(this.eventId)
+            .party(notificationParty.name())
+            .type(NotificationType.EMAIL)
+            // Email ID returned from notify API service calls
+            // .emailId(emailId.toString())
+            .emailTemplate(this.emailTemplate.name())
+            .build());
+    }
+
+    /**
+     * Records that the given notification party would receive, or has received, a postal notification.
+     *
+     * <p>
+     * This is used during dry-run audit creation, where no real Bulk Print letter ID exists yet.
+     * </p>
+     *
+     * @param notificationParty the party whose notification channel should be recorded
+     */
+    public void recordPostalNotificationToSendAudit(NotificationParty notificationParty) {
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+            .wasSent(YesOrNo.NO)
+            .eventId(this.eventId)
+            .party(notificationParty.name())
+            .type(NotificationType.POSTAL)
+            .attachedPostalDocs(getDocumentsToPostFilenames())
+            .build());
+    }
+
+    /**
+     * Records a successful postal notification audit for the given party.
+     * Adds an audit with wasSent set to Yes, together with the event ID,
+     * notification party, postal type, Bulk Print letter ID and attached postal document filenames.
+     *
+     * @param notificationParty the party the postal notification was sent to
+     * @param letterId the Bulk Print letter ID returned after the postal notification was sent
+     */
+    public void recordPostalNotificationSentAudit(NotificationParty notificationParty, UUID letterId) {
+        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+            .wasSent(YesOrNo.YES)
+            .eventId(this.eventId)
+            .party(notificationParty.name())
+            .type(NotificationType.POSTAL)
+            .letterId(letterId.toString())
+            .attachedPostalDocs(getDocumentsToPostFilenames())
+            .build());
+    }
 
     public FinremCaseData getCaseData() {
         return Optional.ofNullable(caseDetails)
@@ -76,6 +170,15 @@ public class SendCorrespondenceEvent {
     public String describeNotificationParties() {
         return ListFormatter.getInstance(Locale.ENGLISH).format(getNotificationParties()
             .stream().map(this::describeNotificationParty).sorted().toList());
+    }
+
+    private List<String> getDocumentsToPostFilenames() {
+        return Optional.ofNullable(documentsToPost)
+            .orElseGet(List::of)
+            .stream()
+            .map(CaseDocument::getDocumentFilename)
+            .filter(fileName -> fileName != null && !fileName.isBlank())
+            .toList();
     }
 
     private String describeNotificationParty(NotificationParty notificationParty) {
