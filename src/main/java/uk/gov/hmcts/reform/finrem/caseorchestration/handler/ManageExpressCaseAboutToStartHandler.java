@@ -49,7 +49,7 @@ public class ManageExpressCaseAboutToStartHandler extends FinremCallbackHandler 
             expressCaseWrapper.setExpressPilotQuestion(getDefaultAnswerForExpressPilotQuestion(caseData));
         } else {
             // V2
-            boolean canSetExpressPilotStatus = expressCaseService.canSetExpressPilotStatus(caseData, true);
+            boolean canSetExpressPilotStatus = expressCaseService.canSetExpressPilotStatus(caseData, false);
             if (!canSetExpressPilotStatus) {
                 return response(caseData, null,
                     List.of("This case is not enrolled in the Express Financial Remedy Pilot and does meet the criteria to be enrolled"));

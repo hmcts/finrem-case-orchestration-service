@@ -123,7 +123,7 @@ class ManageExpressCaseAboutToStartHandlerTest {
     void givenManageExpressCaseV2Event_whenCannotSetExpressPilotStatus_thenPopulateError() {
         FinremCaseData caseData = FinremCaseData.builder().build();
 
-        when(expressCaseService.canSetExpressPilotStatus(caseData, true)).thenReturn(false);
+        when(expressCaseService.canSetExpressPilotStatus(caseData, false)).thenReturn(false);
 
         var response = underTest.handle(FinremCallbackRequestFactory.from(caseData)
             .toBuilder().eventType(MANAGE_EXPRESS_CASE_V2).build(), AUTH_TOKEN);
@@ -131,19 +131,19 @@ class ManageExpressCaseAboutToStartHandlerTest {
         assertThat(response)
             .extracting(GenericAboutToStartOrSubmitCallbackResponse::getErrors)
             .isEqualTo(List.of("This case is not enrolled in the Express Financial Remedy Pilot and does meet the criteria to be enrolled"));
-        verify(expressCaseService).canSetExpressPilotStatus(caseData, true);
+        verify(expressCaseService).canSetExpressPilotStatus(caseData, false);
     }
 
     @Test
     void givenManageExpressCaseV2Event_whenCanSetExpressPilotStatus_thenDoNotPopulateError() {
         FinremCaseData caseData = FinremCaseData.builder().build();
 
-        when(expressCaseService.canSetExpressPilotStatus(caseData, true)).thenReturn(true);
+        when(expressCaseService.canSetExpressPilotStatus(caseData, false)).thenReturn(true);
 
         var response = underTest.handle(FinremCallbackRequestFactory.from(caseData)
             .toBuilder().eventType(MANAGE_EXPRESS_CASE_V2).build(), AUTH_TOKEN);
 
         assertThat(response.getErrors()).isEmpty();
-        verify(expressCaseService).canSetExpressPilotStatus(caseData, true);
+        verify(expressCaseService).canSetExpressPilotStatus(caseData, false);
     }
 }

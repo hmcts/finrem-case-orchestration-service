@@ -247,7 +247,7 @@ class ExpressCaseServiceTest {
     }
 
     @Test
-    void givenCaseEnrolledExpressPilot_canSetExpressPilotStatusAndIgnoreExpressCaseParticipation_returnsTrue() {
+    void givenCaseEnrolledExpressPilotAndDoesNotStopEnrolledCase_canSetExpressPilotStatus_returnsTrue() {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         ExpressCaseWrapper expressCaseWrapper = ExpressCaseWrapper.builder()
             .expressCaseParticipation(ENROLLED)
@@ -257,7 +257,7 @@ class ExpressCaseServiceTest {
             .build();
         when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
 
-        assertThat(expressCaseService.canSetExpressPilotStatus(caseData, true)).isTrue();
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData, false)).isTrue();
     }
 
     @ParameterizedTest

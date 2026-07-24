@@ -132,7 +132,7 @@ public class ExpressCaseService {
      * @see #qualifiesForExpress(FinremCaseData)
      */
     public boolean canSetExpressPilotStatus(FinremCaseData caseData) {
-        return canSetExpressPilotStatus(caseData, false);
+        return canSetExpressPilotStatus(caseData, true);
     }
 
     /**
@@ -140,24 +140,24 @@ public class ExpressCaseService {
      * This is only possible if:
      * <ul>
      *     <li>the Express Pilot feature toggle is enabled;</li>
-     *     <li>either {@code ignoreExpressCaseParticipation} is true, or the case is not already
+     *     <li>either {@code stopEnrolledCases} is false, or the case is not already
      *     enrolled in express case participation;</li>
      *     <li>the case has no hearings; and</li>
      *     <li>the case otherwise qualifies for express case participation.</li>
      * </ul>
      *
      * @param caseData the case data
-     * @param ignoreExpressCaseParticipation true to skip checking whether the case is already
-     *                                        enrolled in express case participation, false to
-     *                                        include that check
+     * @param stopEnrolledCases true to exclude cases that are already enrolled in
+     *                          express case participation, false to allow them
      * @return true if the judge can set the Express Pilot status, false otherwise
      * @see #qualifiesForExpress(FinremCaseData)
      */
-    public boolean canSetExpressPilotStatus(FinremCaseData caseData, boolean ignoreExpressCaseParticipation) {
+
+    public boolean canSetExpressPilotStatus(FinremCaseData caseData, boolean stopEnrolledCases) {
         if (!featureToggleService.isExpressPilotEnabled()) {
             return false;
         }
-        if (!ignoreExpressCaseParticipation && ENROLLED.equals(caseData.getExpressCaseWrapper().getExpressCaseParticipation())) {
+        if (stopEnrolledCases && ENROLLED.equals(caseData.getExpressCaseWrapper().getExpressCaseParticipation())) {
             return false;
         }
         ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
