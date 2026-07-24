@@ -464,6 +464,13 @@ public class FinremCaseData implements HasCaseDocument {
     @Getter(AccessLevel.NONE)
     private EstimatedAssetsChecklistWrapper estimatedAssetsChecklistWrapper;
 
+    @JsonProperty("caseNameHmctsInternal")
+    private String caseNameHmctsInternal;
+    @JsonProperty("caseManagementCategory")
+    private DynamicList caseManagementCategory;
+    @JsonProperty("caseManagementLocation")
+    private CaseLocation caseManagementLocation;
+
     @JsonIgnore
     public CaseDataMetricsWrapper getCaseDataMetricsWrapper() {
         if (caseDataMetricsWrapper == null) {

@@ -47,7 +47,7 @@ public class CCDConfigValidator {
     protected static final String REFUSAL_ORDER_CT = "FR_orderRefusalOrder";
     protected static final int ROW_HEADERS = 2;
     private final List<String> ccdFieldsTypeToIgnore = List.of("Label", "OrderSummary", "CaseHistoryViewer",
-        "CasePaymentHistoryViewer", "FlagLauncher", "ComponentLauncher");
+        "CasePaymentHistoryViewer", "FlagLauncher", "ComponentLauncher", "SearchCriteria");
 
     private List<String> ccdFieldsToIgnore = Arrays.asList("caseDocumentConfidential");
     protected static final String STATE_SHEET = "State";
