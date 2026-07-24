@@ -118,6 +118,8 @@ public class CcdCallbackController {
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 
+        log.warn("Lr test change confirmation.");
+
         validateCaseData(callbackRequest);
 
         return performRequest(SUBMITTED, callbackRequest, authorisationToken);
