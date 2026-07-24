@@ -1,9 +1,12 @@
+import uk.gov.hmcts.rse.AuthMode
+
 plugins {
     id 'application'
     id 'checkstyle'
     id 'jacoco'
     id 'org.sonarqube' version '7.2.3.7755'
-    id 'org.springframework.boot' version '3.5.16'
+    id 'org.springframework.boot' version '4.1.0'
+    id 'io.spring.dependency-management' version '1.1.7'
     id 'com.github.ben-manes.versions' version '0.53.0'
     id 'uk.gov.hmcts.java' version '0.12.70'
     id 'au.com.dius.pact' version '4.6.20'
@@ -11,53 +14,40 @@ plugins {
     id 'com.github.hmcts.rse-cft-lib' version '0.19.2240'
 }
 
-apply plugin: 'com.github.ben-manes.versions'
-apply plugin: 'io.spring.dependency-management'
-
 def versions = [
         guava                : '33.6.0-jre',
         bspCommonLib         : '0.2.0',
-        ccdClient            : '5.3.0',
-        commonsIo            : '2.21.0',
-        commonsLang3         : '3.20.0',
+        ccdClient            : '6.0.0',
         hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
-        lombok               : '1.18.46',
         mockito              : '5.21.0',
         pact                 : '4.6.20',
         pdfbox               : '3.0.7',
         reformLogging        : '8.0.0',
         serenity             : '4.3.4',
-        serviceTokenGenerator: '5.3.4',
-        springDoc            : '2.8.17',
+        serviceTokenGenerator: '6.0.0',
+        springDoc            : '3.0.3',
         wiremock             : '3.0.1',
-        apacheLogging        : '2.25.4',
-        idamClient           : '3.0.5',
-        springHateoas        : '1.5.6',
+        idamClient           : '4.0.0',
         tika                 : '3.2.3',
-        amClient             : '1.59.2',
+        amClient             : '1.60.0',
         sendLetterClient     : '5.1.1',
         elasticSearch        : '8.19.18',
-        jacksonDatabind      : '2.19.2',
         retry                : '1.3.4',
-        snakeyaml            : '2.5',
-        loadbalancer         : '4.3.0',
         commonsValidator     : '1.10.1',
         commonsBeanUtils     : '1.11.0',
-        ibmIcu               : '72.1'
+        ibmIcu               : '72.1',
+        poi                  : '5.5.1'
 ]
 
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
-    springCloudBomVersion = "2025.0.0"
+    springCloudBomVersion = "2025.1.2"
     restAssuredBomVersion = "5.5.7"
-    // Tomcat bump to address CVEs.  Remove when upgrading SpringBoot to version 4.
-    set('tomcat.version', '10.1.56')
 }
 
 group = 'uk.gov.hmcts.reform.finrem'
 version = '0.0.1'
-mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 
 checkstyle {
     toolVersion = '12.3.1'
@@ -339,20 +329,19 @@ tasks.register('runAndPublishConsumerPactTests', Test) {
     testClassesDirs = sourceSets.contract.output.classesDirs
     classpath = sourceSets.contract.runtimeClasspath
     finalizedBy(pactPublish)
-
 }
 
 static def getCheckedOutGitCommitHash() {
     'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
 
-task fortifyScan(type: JavaExec) {
+tasks.register('fortifyScan', JavaExec) {
     mainClass.set("uk.gov.hmcts.fortifyclient.FortifyClientMainApp")
     classpath += sourceSets.test.runtimeClasspath
     jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
 
-task buildCCDXlsx(type: Exec) {
+tasks.register('buildCCDXlsx', Exec) {
     group 'ccd tasks'
     commandLine './bin/build-finrem-xlxs-definitions.sh'
 }
@@ -370,7 +359,7 @@ bootWithCCD {
     }
 
     // AAT (Local cftlib not currently supported)
-    authMode = uk.gov.hmcts.rse.AuthMode.AAT
+    authMode = AuthMode.AAT
 
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
@@ -401,10 +390,6 @@ dependencyManagement {
             entry 'legion-of-the-bouncy-castle-java-crytography-api'
             entry 'the_bouncy_castle_crypto_package_for_java'
         }
-        //CVE-2024-25710
-        dependencySet(group: 'org.apache.commons', version: '1.28.0') {
-            entry 'commons-compress'
-        }
     }
 }
 
@@ -412,115 +397,99 @@ dependencies {
     implementation group: 'com.ibm.icu', name: 'icu4j', version: versions.ibmIcu
     implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
-    implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
-    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.aspectj:aspectjweaver'
     implementation group: 'org.springframework.retry', name: 'spring-retry', version: versions.retry
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
-    implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
-    implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
+    implementation 'com.jayway.jsonpath:json-path-assert'
+    implementation 'commons-io:commons-io'
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: versions.springDoc
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
-    implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    implementation 'org.apache.commons:commons-lang3'
+    implementation 'org.projectlombok:lombok'
     implementation group: 'com.github.hmcts', name: 'idam-java-client', version: versions.idamClient
     implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
     implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
     implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: versions.apacheLogging
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
-    implementation group: 'org.springframework.hateoas', name: 'spring-hateoas', version: versions.springHateoas
+    implementation 'org.apache.logging.log4j:log4j-api'
+    implementation 'org.apache.logging.log4j:log4j-core'
+    implementation 'org.apache.logging.log4j:log4j-to-slf4j'
+    implementation 'org.springframework.hateoas:spring-hateoas'
     implementation group: 'org.apache.tika', name: 'tika-core', version: versions.tika
     implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
     implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
     implementation group: 'org.apache.pdfbox', name: 'pdfbox-io', version: versions.pdfbox
-    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.5.0'
+    implementation 'org.apache.commons:commons-collections4'
     implementation('commons-fileupload:commons-fileupload') {
         version {
             strictly '[1.6.0,)'
         }
     }
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.15.0'
+    implementation 'org.apache.commons:commons-text'
     implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
     implementation group: 'org.elasticsearch', name: 'elasticsearch', version: versions.elasticSearch
-    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jacksonDatabind
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versions.jacksonDatabind
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jacksonDatabind
-    developmentOnly group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.loadbalancer
+    // To configure ObjectMapper bean to include the Jackson 2 ParameterNamesModule for backward compatibility:
+    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
+    developmentOnly 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
 
-    implementation("org.apache.poi:poi:5.5.1") {
-        exclude group: "org.apache.commons", module: "commons-math3"
-    }
-    implementation("org.apache.poi:poi-ooxml:5.5.1") {
-        exclude group: "org.apache.commons", module: "commons-math3"
-    }
-
-    implementation("org.springframework.boot:spring-boot-starter-web") {
-        exclude group: "org.yaml", module: "snakeyaml"
-    }
-
-    implementation group: 'org.yaml', name: 'snakeyaml', version: versions.snakeyaml
+    implementation "org.apache.poi:poi:${versions.poi}"
+    implementation "org.apache.poi:poi-ooxml:${versions.poi}"
 
     implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
-    // Can be removed once notifications-java-client is updated
-    implementation("org.bitbucket.b_c:jose4j:0.9.6")
 
-    developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
+    runtimeOnly 'org.springframework.boot:spring-boot-starter-actuator'
 
-    runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
-    runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    annotationProcessor 'org.projectlombok:lombok'
 
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    cftlibCompileOnly 'org.projectlombok:lombok'
+    cftlibAnnotationProcessor 'org.projectlombok:lombok'
 
-    cftlibCompileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-    cftlibAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-    cftlibImplementation group: 'org.springframework', name: 'spring-aspects'
-
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    // to add the Jackson 2 ParameterNamesModule back only for tests,
+    // since it's needed for deserializing third-party classes like CallbackRequest that rely on it:
+    testImplementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
-    testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    testImplementation 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation('com.github.hmcts:fortify-client:1.4.10:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
     testImplementation 'org.aspectj:aspectjweaver'
 
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
-    testSmokeImplementation group: 'io.rest-assured', name: 'rest-assured'
+    testSmokeImplementation 'io.rest-assured:rest-assured'
 
     functionalImplementation sourceSets.main.runtimeClasspath
     functionalImplementation sourceSets.test.runtimeClasspath
-    functionalImplementation group: 'io.rest-assured', name: 'rest-assured'
-    functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
+    functionalImplementation 'io.rest-assured:rest-assured'
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
-    functionalImplementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
+    functionalImplementation 'org.apache.commons:commons-lang3'
     functionalImplementation group: 'org.mockito', name: 'mockito-core', version: versions.mockito
     functionalImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
-    functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    functionalImplementation 'org.projectlombok:lombok'
     functionalImplementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
     functionalImplementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
     functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
 
-    functionalAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    functionalAnnotationProcessor 'org.projectlombok:lombok'
 
     contractImplementation sourceSets.main.runtimeClasspath
     contractImplementation sourceSets.test.runtimeClasspath
-    contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     contractImplementation group: 'au.com.dius.pact', name: 'consumer', version: versions.pact
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
-    contractImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer'
+    contractImplementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
 
     configurations.configureEach {
         exclude group: 'com.vaadin.external.google', module: 'android-json'

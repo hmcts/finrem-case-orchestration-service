@@ -16,107 +16,51 @@
     </suppress>
     <suppress until="2026-12-31Z">
         <notes><![CDATA[
-Suppress CVE-2020-29582 only when Dependency-Check maps a dependency
-to the overly broad Kotlin CPE "jetbrains:kotlin" (known false positive
-for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
-    ]]></notes>
-
-        <!-- Matches: cpe:2.3:a:jetbrains:kotlin:<any>:*:*:*:*:*:*:* -->
-        <cpe>cpe:2.3:a:jetbrains:kotlin:*:*:*:*:*:*:*:*</cpe>
-
-        <!-- Optional: cover legacy CPE format if your scans include it -->
-        <cpe>cpe:/a:jetbrains:kotlin</cpe>
-
-        <cve>CVE-2020-29582</cve>
-    </suppress>
-    <suppress until="2026-12-31Z">
-        <notes><![CDATA[
-   Suppress Spring Framework 6.2.18 false positives / accepted risk for release
-   ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-.*@6\.2\.18$</packageUrl>
-        <cve>CVE-2026-41842</cve>
-        <cve>CVE-2026-41850</cve>
-        <cve>CVE-2026-41851</cve>
-        <cve>CVE-2026-41840</cve>
-        <cve>CVE-2026-41841</cve>
-        <cve>CVE-2026-41843</cve>
-        <!-- Added 2026-06-12 -->
-        <cve>CVE-2026-41844</cve>
-        <cve>CVE-2026-41007</cve>
-        <cve>CVE-2026-41852</cve>
-        <cve>CVE-2026-41006</cve>
-        <cve>CVE-2026-41848</cve>
-        <cve>CVE-2026-41846</cve>
-        <cve>CVE-2026-41845</cve>
-        <cve>CVE-2026-41838</cve>
-        <!-- Added 2026-06-16-->
-        <cve>CVE-2026-41854</cve>
-        <cve>CVE-2026-41853</cve>
-    </suppress>
-    <suppress until="2026-09-01Z">
-        <notes><![CDATA[
-    CVE-2026-41006 and CVE-2026-41007 affect spring-hateoas 1.5.6.
-    Fixed in spring-hateoas 2.5.3+ and 3.0.4+, but no OSS fix exists for the 1.5.x line.
-    Accepted risk pending upgrade of spring-hateoas or migration to Spring Boot 4
-    (which brings spring-hateoas 3.x).
-    ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.springframework\.hateoas/spring-hateoas@.*$</packageUrl>
-        <cve>CVE-2026-41006</cve>
-        <cve>CVE-2026-41007</cve>
-    </suppress>
-    <suppress until="2026-09-01Z">
-        <notes><![CDATA[
-    Suppress spring-security-crypto 6.5.10 false positives / accepted risk for release.
-    ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-crypto@.*$</packageUrl>
-        <cve>CVE-2026-40988</cve>
-        <cve>CVE-2026-41003</cve>
-        <cve>CVE-2026-41694</cve>
-    </suppress>
-    <suppress until="2026-09-01Z">
-        <notes><![CDATA[
-    jackson-databind CVEs (CWE-184 array-subtype allowlist bypass, SSRF via
-    eager DNS resolution in InetSocketAddress deserialization, and
-    CWE-915 case-insensitive-property mass-assignment bypass).
-    Fixed in 2.18.8/2.18.9, 2.21.4/2.21.5, 3.1.4. Upgrade will resolve.
+    CVE-2026-54515 - jackson-databind 2.21.4 false positive / accepted risk pending fix.
     ]]></notes>
         <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson-databind@.*$</packageUrl>
-        <cve>CVE-2026-54512</cve>
-        <cve>CVE-2026-54513</cve>
-        <cve>CVE-2026-54514</cve>
         <cve>CVE-2026-54515</cve>
     </suppress>
     <suppress until="2026-12-31Z">
         <notes><![CDATA[
-    False positive: CVE-2026-54399 and CVE-2026-54428 affect Apache
-    HttpComponents Core5 (org.apache.httpcomponents.core5:httpcore5,
-    5.4.2 and earlier / 5.5-beta1 and earlier) - a DoS in the async/HTTP2
-    HTTP/1.1 message parser. This project depends on the legacy
-    org.apache.httpcomponents:httpcore 4.4.x artifact, a different,
-    unrelated codebase that shares an overly broad CPE
-    (apache:httpcomponents_core) with httpcore5 in the NVD data.
+    CVE-2026-53914 - Kotlin stdlib false positive via overly broad jetbrains:kotlin CPE mapping.
+    ]]></notes>
+        <cpe>cpe:2.3:a:jetbrains:kotlin:*:*:*:*:*:*:*:*</cpe>
+        <cpe>cpe:/a:jetbrains:kotlin</cpe>
+        <cve>CVE-2026-53914</cve>
+    </suppress>
+    <suppress until="2026-12-31Z">
+        <notes><![CDATA[
+    Suppress Tomcat 11.0.22 false positives / accepted risk pending fix.
+    Version is managed by Spring Boot 4.1.0 BOM.
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-.*@.*$</packageUrl>
+        <cve>CVE-2026-53434</cve>
+        <cve>CVE-2026-55276</cve>
+        <cve>CVE-2026-53404</cve>
+        <cve>CVE-2026-55955</cve>
+        <cve>CVE-2026-55956</cve>
+        <cve>CVE-2026-50229</cve>
+        <cve>CVE-2026-59083</cve>
+        <cve>CVE-2026-59084</cve>
+    </suppress>
+    <suppress until="2026-12-31Z">
+        <notes><![CDATA[
+    Suppress httpcore 4.4.16 CVEs. Transitive dependency via httpclient 4.5.14,
+    pulled in by multiple HMCTS libraries (notifications-java-client, core-case-data-store-client,
+    service-auth-provider-java-client, ccd-case-document-am-client, idam-java-client).
+    Cannot be upgraded directly until upstream HMCTS libraries migrate to httpclient 5.x.
     ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.httpcomponents/httpcore@.*$</packageUrl>
-        <cpe>cpe:2.3:a:apache:httpcomponents_core:*:*:*:*:*:*:*:*</cpe>
         <cve>CVE-2026-54399</cve>
         <cve>CVE-2026-54428</cve>
     </suppress>
     <suppress until="2026-12-31Z">
         <notes><![CDATA[
     CVE-2026-49844 - log4j 2.25.4 false positive / accepted risk pending fix.
-    Version managed by Spring Boot 3 BOM.
+    Version managed by Spring Boot 4.1.0 BOM.
     ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j-.*@.*$</packageUrl>
         <cve>CVE-2026-49844</cve>
-    </suppress>
-
-    <suppress until="2026-12-31Z">
-        <notes><![CDATA[
-    Suppress Tomcat 10.1.56 false positives / accepted risk pending fix.
-    Version managed by Spring Boot 3 BOM.
-    ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-.*@.*$</packageUrl>
-        <cve>CVE-2026-59083</cve>
-        <cve>CVE-2026-59084</cve>
     </suppress>
 </suppressions>
