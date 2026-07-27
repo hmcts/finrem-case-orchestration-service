@@ -93,12 +93,12 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
         when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails()))
             .thenReturn(true);
 
-        SendCorrespondenceEvent event1 = mock(SendCorrespondenceEvent.class);
-        when(event1.getNotificationParties()).thenReturn(List.of(
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getNotificationParties()).thenReturn(List.of(
             NotificationParty.APPLICANT
         ));
 
-        List<SendCorrespondenceEvent> events = List.of(event1);
+        List<SendCorrespondenceEvent> events = List.of(event);
         when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest,
             AUTH_TOKEN)).thenReturn(events);
 
@@ -119,7 +119,7 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
                 ),
             () -> {
                 sendHearingRunnableCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
-                verify(applicationEventPublisher).publishEvent(event1);
+                verify(applicationEventPublisher).publishEvent(event);
             }
         );
     }
@@ -133,16 +133,16 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
         when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails()))
             .thenReturn(true);
 
-        SendCorrespondenceEvent event1 = mock(SendCorrespondenceEvent.class);
-        when(event1.getNotificationParties()).thenReturn(List.of(
+        SendCorrespondenceEvent applicantEvent = mock(SendCorrespondenceEvent.class);
+        when(applicantEvent.getNotificationParties()).thenReturn(List.of(
             NotificationParty.APPLICANT
         ));
-        SendCorrespondenceEvent event2 = mock(SendCorrespondenceEvent.class);
-        when(event2.getNotificationParties()).thenReturn(List.of(
+        SendCorrespondenceEvent respondentEvent = mock(SendCorrespondenceEvent.class);
+        when(respondentEvent.getNotificationParties()).thenReturn(List.of(
             NotificationParty.RESPONDENT
         ));
 
-        List<SendCorrespondenceEvent> events = List.of(event1, event2);
+        List<SendCorrespondenceEvent> events = List.of(applicantEvent, respondentEvent);
         when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest,
             AUTH_TOKEN)).thenReturn(events);
 
@@ -170,8 +170,8 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
                 ),
             () -> {
                 sendHearingRunnableCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
-                verify(applicationEventPublisher).publishEvent(event1);
-                verify(applicationEventPublisher).publishEvent(event2);
+                verify(applicationEventPublisher).publishEvent(applicantEvent);
+                verify(applicationEventPublisher).publishEvent(respondentEvent);
                 verifyNoMoreInteractions(applicationEventPublisher);
             }
         );
@@ -186,16 +186,16 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
         when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails()))
             .thenReturn(true);
 
-        SendCorrespondenceEvent event1 = mock(SendCorrespondenceEvent.class);
-        when(event1.getNotificationParties()).thenReturn(List.of(
+        SendCorrespondenceEvent applicantEvent = mock(SendCorrespondenceEvent.class);
+        when(applicantEvent.getNotificationParties()).thenReturn(List.of(
             NotificationParty.APPLICANT
         ));
-        SendCorrespondenceEvent event2 = mock(SendCorrespondenceEvent.class);
-        when(event2.getNotificationParties()).thenReturn(List.of(
+        SendCorrespondenceEvent respondentEvent = mock(SendCorrespondenceEvent.class);
+        when(respondentEvent.getNotificationParties()).thenReturn(List.of(
             NotificationParty.RESPONDENT
         ));
 
-        List<SendCorrespondenceEvent> events = List.of(event1, event2);
+        List<SendCorrespondenceEvent> events = List.of(applicantEvent, respondentEvent);
         when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest,
             AUTH_TOKEN)).thenReturn(events);
 
