@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -11,14 +13,18 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.EstimatedAssetsChecklistWrapper;
 
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -29,12 +35,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion.V2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion.V3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
 @ExtendWith(MockitoExtension.class)
 class OnStartDefaultValueServiceTest {
@@ -47,18 +51,20 @@ class OnStartDefaultValueServiceTest {
     @Mock
     private IdamService idamService;
 
+    @Mock
+    private OrganisationPolicy applicantDefaultOrganisationPolicy;
+
+    @Mock
+    private OrganisationPolicy respondentDefaultOrganisationPolicy;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
+
     @Test
     void setDefaultDate() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
         service.defaultIssueDate(callbackRequest);
         assertNotNull(callbackRequest.getCaseDetails().getData().getIssueDate());
-    }
-
-    @Test
-    void defaultCivilPartnershipField() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        service.defaultCivilPartnershipField(callbackRequest);
-        assertEquals(NO_VALUE, callbackRequest.getCaseDetails().getData().get(CIVIL_PARTNERSHIP));
     }
 
     @Test
@@ -74,22 +80,6 @@ class OnStartDefaultValueServiceTest {
         callbackRequest.getCaseDetails().getData().setCivilPartnership(YesOrNo.YES);
         service.defaultCivilPartnershipField(callbackRequest);
         assertEquals(YES_VALUE, callbackRequest.getCaseDetails().getData().getCivilPartnership().getYesOrNo());
-    }
-
-    @Test
-    void defaultTypeOfApplication_defaultValue() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        service.defaultTypeOfApplication(callbackRequest);
-        assertEquals(TYPE_OF_APPLICATION_DEFAULT_TO,callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION));
-    }
-
-    @Test
-    void defaultTypeOfApplication_userValue() {
-        var schedule1 = "Under paragraph 1 or 2 of schedule 1 children act 1989";
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(TYPE_OF_APPLICATION, schedule1);
-        service.defaultTypeOfApplication(callbackRequest);
-        assertEquals(schedule1,callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION));
     }
 
     @Test
@@ -126,14 +116,6 @@ class OnStartDefaultValueServiceTest {
     }
 
     @Test
-    void setDefaultUrgencyQuestion() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        service.defaultUrgencyQuestion(callbackRequest);
-        assertNotNull(callbackRequest.getCaseDetails().getData().get(URGENT_CASE_QUESTION));
-        assertEquals(NO_VALUE, callbackRequest.getCaseDetails().getData().get(URGENT_CASE_QUESTION));
-    }
-
-    @Test
     void defaultUrgencyQuestion_defaultValue_finremRequest() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
         service.defaultUrgencyQuestion(callbackRequest);
@@ -162,7 +144,7 @@ class OnStartDefaultValueServiceTest {
     }
 
     @Test
-    void tsetDefaultConsentedOrderDate() {
+    void testDefaultConsentedOrderDate() {
         FinremCaseData caseData = mock(FinremCaseData.class);
 
         try (MockedStatic<LocalDate> mockedStatic = Mockito.mockStatic(LocalDate.class)) {
@@ -171,6 +153,50 @@ class OnStartDefaultValueServiceTest {
             service.defaultConsentedOrderDate(caseData);
             verify(caseData).setOrderDirectionDate(FIXED_DATE);
         }
+    }
+
+    @Test
+    void testDefaultApplicantOrganisationPolicy() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+
+        try (MockedStatic<OrganisationPolicy> mockedStatic = Mockito.mockStatic(OrganisationPolicy.class)) {
+            mockedStatic.when(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR))
+                .thenReturn(applicantDefaultOrganisationPolicy);
+
+            service.defaultApplicantOrganisationPolicy(callbackRequest);
+
+            mockedStatic.verify(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
+        }
+    }
+
+    @Test
+    void testDefaultRespondentOrganisationPolicy() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+
+        try (MockedStatic<OrganisationPolicy> mockedStatic = Mockito.mockStatic(OrganisationPolicy.class)) {
+            mockedStatic.when(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR))
+                .thenReturn(respondentDefaultOrganisationPolicy);
+
+            service.defaultRespondentOrganisationPolicy(callbackRequest);
+
+            mockedStatic.verify(() -> OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testSetEstimatedAssetsChecklistVersion(boolean toggle) {
+        FinremCaseData finremCaseData = FinremCaseData.builder().build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+        when(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).thenReturn(toggle);
+
+        service.setEstimatedAssetsChecklistVersion(callbackRequest);
+
+        assertThat(callbackRequest.getFinremCaseData())
+            .extracting(FinremCaseData::getEstimatedAssetsChecklistWrapper)
+            .extracting(EstimatedAssetsChecklistWrapper::getEstimatedAssetsChecklistVersion)
+            .isEqualTo(toggle ? V3 : V2);
     }
 
     private CallbackRequest buildCallbackRequest() {

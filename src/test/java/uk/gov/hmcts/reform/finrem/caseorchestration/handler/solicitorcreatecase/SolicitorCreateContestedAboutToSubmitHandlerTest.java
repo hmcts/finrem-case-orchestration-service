@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.EstimatedAssetsChecklistWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
@@ -54,7 +53,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.APPLICATION_ISSUED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -215,21 +213,8 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     void givenCaseDataWithTemporaryEstimatedAssetsChecklistVersion_whenHandle_thenTemporaryFieldSanitised(
         EstimatedAssetsChecklistVersion listVersion) {
 
-        FinremCaseData caseData = FinremCaseData.builder()
-            .estimatedAssetsChecklistWrapper(
-                EstimatedAssetsChecklistWrapper.builder()
-                    .estimatedAssetsChecklistVersion(listVersion)
-                    .build()
-            )
-            .build();
-
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(Long.valueOf(CASE_ID))
-            .state(APPLICATION_ISSUED)
-            .data(caseData).build();
-
         verifyTemporaryFieldsWereSanitised(handler,
-            caseDetails, finremCaseDetailsMapper, new HashMap<>(Map.of(
+            finremCaseDetailsMapper, new HashMap<>(Map.of(
                 "estimatedAssetsChecklistVersion", listVersion
             ))
         );

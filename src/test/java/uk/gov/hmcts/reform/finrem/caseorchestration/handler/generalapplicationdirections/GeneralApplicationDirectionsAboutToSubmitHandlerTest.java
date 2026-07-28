@@ -553,22 +553,14 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
     @Test
     void shouldRemoveGadPreviewWhenHandled() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
-                .generalApplications(List.of())
-                .build())
-            .build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
-
-        when(helper.getGeneralApplicationList(finremCaseData, GENERAL_APPLICATION_COLLECTION)).thenReturn(List.of());
         when(helper.objectToDynamicList(any())).thenReturn(DynamicList.builder()
-            .value(DynamicListElement.builder().code("a#b").build())
+                .value(DynamicListElement.builder().code("a#b").build())
             .build());
 
-        CaseDocument caseDocument = caseDocument();
+        final CaseDocument caseDocument = caseDocument();
 
         verifyTemporaryFieldsWereSanitised(aboutToSubmitHandler,
-            finremCaseDetails, finremCaseDetailsMapper, new HashMap<>(Map.of(
+            finremCaseDetailsMapper, new HashMap<>(Map.of(
                 "generalApplicationDirectionsPreview", Map.of(
                     "document_url", caseDocument.getDocumentUrl(),
                     "document_binary_url", caseDocument.getDocumentBinaryUrl(),

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
@@ -16,15 +17,12 @@ public enum Schedule1OrMatrimonialAndCpList {
     SCHEDULE_1_CHILDREN_ACT_1989("Under paragraph 1 or 2 of schedule 1 children act 1989", "Under paragraph 1 or 2 of schedule 1 children act 1989");
 
     private final String value;
+    @Getter
     private final String text;
 
     @JsonValue
     public String getValue() {
         return value;
-    }
-
-    public String getText() {
-        return text;
     }
 
     public static Schedule1OrMatrimonialAndCpList forValue(String value) {

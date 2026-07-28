@@ -1,10 +1,12 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.newpapercase.contested;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.ApplicantSolicitorDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -30,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Slf4j
 @Service
-public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
@@ -67,8 +69,8 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallback
         validateCaseData(callbackRequest);
         caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
 
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
+        final FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
 
         if (idamService.isUserRoleAdmin(userAuthorisation)) {
             caseData.getContactDetailsWrapper().setIsAdmin(YES_VALUE);
@@ -98,21 +100,14 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallback
         RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
 
-        CaseDetails oldCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
-
         // Call to caseDataService to set PowerBI tracking fields.
-        caseDataService.setFinancialRemediesCourtDetails(oldCaseDetails);
-
-        caseData = finremCaseDetailsMapper.mapToFinremCaseData(oldCaseDetails.getData());
+        caseDataService.setFinancialRemediesCourtDetails(caseDetails);
 
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(caseData));
         errors.addAll(applicantSolicitorDetailsValidator.validate(caseData));
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData)
-            .errors(errors)
-            .build();
+        return responseWithoutWarnings(caseData, errors);
     }
 }

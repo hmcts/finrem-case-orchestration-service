@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.newpapercase.contested;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
@@ -115,14 +115,11 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(caseDetails).build();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(response).extracting(
-            GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
-            GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody
-        ).containsExactly(
-            "# Paper Case Created with Errors",
-            "<ul><li><h2>There was a problem setting supplementary data.</h2></li></ul>"
-        );
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getConfirmationHeader())
+            .contains("Paper Case Created with Errors");
+        assertThat(response.getConfirmationBody())
+            .contains("There was a problem setting supplementary data.");
 
         verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("setting supplementary data"), eq(CASE_ID));
         verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting applicant solicitor"), eq(CASE_ID));
@@ -151,14 +148,12 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(caseDetails).build();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(response).extracting(
-            GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
-            GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody
-        ).containsExactly(
-            "# Paper Case Created with Errors",
-            "<ul><li><h2>There was a problem granting access to applicant solicitor: %s</h2></li></ul>".formatted(TEST_SOLICITOR_EMAIL)
-        );
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getConfirmationHeader())
+            .contains("Paper Case Created with Errors");
+        assertThat(response.getConfirmationBody())
+            .contains("There was a problem granting access to applicant solicitor: %s".formatted(TEST_SOLICITOR_EMAIL));
 
         verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("setting supplementary data"), eq(CASE_ID));
         verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting applicant solicitor"), eq(CASE_ID));
