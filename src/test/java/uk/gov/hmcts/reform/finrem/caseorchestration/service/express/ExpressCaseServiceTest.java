@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -38,8 +40,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNABLE_TO_QUANTIFY;
@@ -94,12 +96,18 @@ class ExpressCaseServiceTest {
         assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void shouldSetExpressEnrollmentStatusToWithdrawn(Boolean isAssetsChecklistV3) {
-        FinremCaseData caseData = createExpressCaseWithAssertV3(isAssetsChecklistV3);
+    @Test
+    void shouldSetExpressEnrollmentStatusToWithdrawn() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
         expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
         assertEquals(WITHDRAWN, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
+    }
+
+    @Test
+    void shouldSetExpressEnrollmentStatusToEnrolled() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        expressCaseService.setExpressCaseEnrollmentStatusToEnrolled(caseData);
+        assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
     @ParameterizedTest
@@ -227,59 +235,92 @@ class ExpressCaseServiceTest {
         assertEquals(v2Value, caseData.getEstimatedAssetsChecklistV2());
     }
 
-    @Test
-    void givenExpressPilotDisabled_canSetExpressPilotStatus_returnsFalse() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenExpressPilotDisabled_canSetExpressPilotStatus_returnsFalse(boolean stopEnrolledCases) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
         FinremCaseData caseData = FinremCaseData.builder().build();
-        assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isFalse();
-    }
-
-    @Test
-    void givenCaseEnrolledExpressPilot_canSetExpressPilotStatus_returnsFalse() {
-        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
-        ExpressCaseWrapper expressCaseWrapper = ExpressCaseWrapper.builder()
-            .expressCaseParticipation(ENROLLED)
-            .build();
-        FinremCaseData caseData = FinremCaseData.builder()
-            .expressCaseWrapper(expressCaseWrapper)
-            .build();
-        assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isFalse();
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData, stopEnrolledCases)).isFalse();
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenCaseQualifiesForExpress_canSetExpressPilotStatus_returnsTrueOnlyWhenNoHearingsExist(
-        boolean hasNoHearings
-    ) {
+    void givenCaseDoesNotQualifyForExpress_canSetExpressPilotStatus_returnsFalse(boolean stopEnrolledCases) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(false);
+
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData, stopEnrolledCases)).isFalse();
+        verify(expressCaseService).qualifiesForExpress(caseData);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenCaseHasHearing_canSetExpressPilotStatus_returnsFalse(boolean stopEnrolledCases) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
-        when(manageHearingsWrapper.hasNoHearings()).thenReturn(hasNoHearings);
+        when(manageHearingsWrapper.hasNoHearings()).thenReturn(false);
+        FinremCaseData caseData = FinremCaseData.builder().manageHearingsWrapper(manageHearingsWrapper).build();
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
 
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(manageHearingsWrapper)
-            .build();
-
-        lenient().when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
-
-        assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isEqualTo(hasNoHearings);
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData, stopEnrolledCases)).isFalse();
+        verify(expressCaseService).qualifiesForExpress(caseData);
     }
 
+    @ValueSource(booleans = {true})
+    @NullSource
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void givenCaseWithoutHearings_canSetExpressPilotStatus_returnsTrueOnlyWhenCaseQualifiesForExpress(
-        boolean qualifiesForExpress
-    ) {
+    void givenCaseEnrolledExpressCase_canSetExpressPilotStatus_returnsFalse(Boolean stopEnrolledCases) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
         when(manageHearingsWrapper.hasNoHearings()).thenReturn(true);
-
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(manageHearingsWrapper)
+            .expressCaseWrapper(ExpressCaseWrapper.builder().expressCaseParticipation(ENROLLED).build())
             .build();
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
 
-        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(qualifiesForExpress);
+        if (stopEnrolledCases == null) {
+            assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isFalse();
+        } else {
+            assertThat(expressCaseService.canSetExpressPilotStatus(caseData, stopEnrolledCases)).isFalse();
+        }
+        verify(expressCaseService).qualifiesForExpress(caseData);
+        verify(manageHearingsWrapper).hasNoHearings();
+    }
 
-        assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isEqualTo(qualifiesForExpress);
+    @ParameterizedTest
+    @EnumSource(ExpressCaseParticipation.class)
+    void givenStopEnrolledCaseIsFalse_canSetExpressPilotStatus_returnsTrue(ExpressCaseParticipation expressCaseParticipation) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.hasNoHearings()).thenReturn(true);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(manageHearingsWrapper)
+            .expressCaseWrapper(ExpressCaseWrapper.builder().expressCaseParticipation(expressCaseParticipation).build())
+            .build();
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
+
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData, false)).isTrue();
+        verify(expressCaseService).qualifiesForExpress(caseData);
+        verify(manageHearingsWrapper).hasNoHearings();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ExpressCaseParticipation.class, names = {"WITHDRAWN", "DOES_NOT_QUALIFY"})
+    void givenCaseIsNotEnrolled_canSetExpressPilotStatus_returnsTrue(ExpressCaseParticipation expressCaseParticipation) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.hasNoHearings()).thenReturn(true);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(manageHearingsWrapper)
+            .expressCaseWrapper(ExpressCaseWrapper.builder().expressCaseParticipation(expressCaseParticipation).build())
+            .build();
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
+
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isTrue();
+        verify(expressCaseService).qualifiesForExpress(caseData);
+        verify(manageHearingsWrapper).hasNoHearings();
     }
 
     private static Stream<Arguments> provideIsExpressCase() {

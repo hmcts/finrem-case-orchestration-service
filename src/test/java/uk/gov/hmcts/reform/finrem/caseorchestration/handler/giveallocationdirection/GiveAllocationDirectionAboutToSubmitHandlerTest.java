@@ -100,7 +100,7 @@ class GiveAllocationDirectionAboutToSubmitHandlerTest {
 
     @ParameterizedTest
     @EnumSource(YesOrNo.class)
-    void givenAllocateToExpressPilotAnswered_whenHandled_shouldSetExpressCaseEnrollmentStatus(YesOrNo shouldAllocateToExpressPilot) {
+    void givenAllocateToExpressPilotAnswered_whenHandled_shouldEnrollInExpressPilotIfApplicable(YesOrNo shouldAllocateToExpressPilot) {
         ExpressCaseWrapper expressCaseWrapper = ExpressCaseWrapper.builder()
             .shouldAllocateToExpressPilot(shouldAllocateToExpressPilot)
             .build();
@@ -113,7 +113,7 @@ class GiveAllocationDirectionAboutToSubmitHandlerTest {
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(expressCaseService, times(YesOrNo.isYes(shouldAllocateToExpressPilot) ? 1 : 0))
-            .setExpressCaseEnrollmentStatus(finremCaseData);
+            .setExpressCaseEnrollmentStatusToEnrolled(finremCaseData);
     }
 
     @ParameterizedTest

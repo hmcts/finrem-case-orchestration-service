@@ -18,20 +18,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 
 @Slf4j
 @Service
-public class GiveAllocationDirectionAboutToStartHandler extends FinremCallbackHandler {
+public class GiveAllocationDirectionMidHandler extends FinremCallbackHandler {
 
     private final ExpressCaseService expressCaseService;
 
     @Autowired
-    public GiveAllocationDirectionAboutToStartHandler(FinremCaseDetailsMapper mapper,
-                                                      ExpressCaseService expressCaseService) {
+    public GiveAllocationDirectionMidHandler(FinremCaseDetailsMapper mapper,
+                                             ExpressCaseService expressCaseService) {
         super(mapper);
         this.expressCaseService = expressCaseService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_START.equals(callbackType)
+        return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.GIVE_ALLOCATION_DIRECTIONS_V2.equals(eventType);
     }
@@ -39,7 +39,7 @@ public class GiveAllocationDirectionAboutToStartHandler extends FinremCallbackHa
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
 
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         ExpressCaseWrapper expressCaseWrapper = finremCaseData.getExpressCaseWrapper();

@@ -24,17 +24,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class GiveAllocationDirectionAboutToStartHandlerTest {
+class GiveAllocationDirectionMidHandlerTest {
 
     @InjectMocks
-    private GiveAllocationDirectionAboutToStartHandler handler;
+    private GiveAllocationDirectionMidHandler handler;
 
     @Mock
     private ExpressCaseService expressCaseService;
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GIVE_ALLOCATION_DIRECTIONS_V2);
+        assertCanHandle(handler, CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GIVE_ALLOCATION_DIRECTIONS_V2);
     }
 
     @ParameterizedTest

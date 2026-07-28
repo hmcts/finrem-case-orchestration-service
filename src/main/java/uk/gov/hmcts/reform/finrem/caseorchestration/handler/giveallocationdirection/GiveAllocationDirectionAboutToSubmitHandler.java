@@ -66,25 +66,16 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSu
 
         selectedCourtService.setSelectedCourtDetailsIfPresent(finremCaseData);
 
-        String warning = setExpressPilotStatus(finremCaseData, finremCaseDataBefore);
-        if (warning != null) {
-            return response(finremCaseData, List.of(warning), List.of());
-        }
+        enrollInExpressPilotIfApplicable(finremCaseData);
+
         return response(finremCaseData);
     }
 
-    private String setExpressPilotStatus(FinremCaseData finremCaseData, FinremCaseData finremCaseDataBefore) {
-        String warning = null;
-
+    private void enrollInExpressPilotIfApplicable(FinremCaseData finremCaseData) {
         ExpressCaseWrapper expressCaseWrapper = finremCaseData.getExpressCaseWrapper();
         if (YesOrNo.isYes(expressCaseWrapper.getShouldAllocateToExpressPilot())) {
-            expressCaseService.setExpressCaseEnrollmentStatus(finremCaseData);
-            log.info("{} - Setting express case enrollment status to {}", finremCaseData.getCcdCaseId(),
-                expressCaseWrapper.getExpressCaseParticipation());
-
-            if (isBecomingEnrolled(finremCaseDataBefore.getExpressCaseWrapper(), expressCaseWrapper)) {
-                warning = "This case will now be enrolled into the Express Pilot.";
-            }
+            expressCaseService.setExpressCaseEnrollmentStatusToEnrolled(finremCaseData);
+            log.info("{} - Setting express case enrollment status to enrolled", finremCaseData.getCcdCaseId());
         }
         return warning;
     }
