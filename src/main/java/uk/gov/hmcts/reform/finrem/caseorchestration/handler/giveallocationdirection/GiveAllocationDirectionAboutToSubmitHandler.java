@@ -21,8 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
-
 @Slf4j
 @Service
 public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
@@ -66,23 +64,20 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSu
 
         selectedCourtService.setSelectedCourtDetailsIfPresent(finremCaseData);
 
-        enrollInExpressPilotIfApplicable(finremCaseData);
-
+        String warning = enrollInExpressPilotIfApplicable(finremCaseData);
+        if (warning != null) {
+            return response(finremCaseData, List.of(warning), List.of());
+        }
         return response(finremCaseData);
     }
 
-    private void enrollInExpressPilotIfApplicable(FinremCaseData finremCaseData) {
+    private String enrollInExpressPilotIfApplicable(FinremCaseData finremCaseData) {
         ExpressCaseWrapper expressCaseWrapper = finremCaseData.getExpressCaseWrapper();
         if (YesOrNo.isYes(expressCaseWrapper.getShouldAllocateToExpressPilot())) {
             expressCaseService.setExpressCaseEnrollmentStatusToEnrolled(finremCaseData);
             log.info("{} - Setting express case enrollment status to enrolled", finremCaseData.getCcdCaseId());
+            return "This case will now be enrolled into the Express Pilot.";
         }
-        return warning;
-    }
-
-    private boolean isBecomingEnrolled(ExpressCaseWrapper expressCaseWrapperBefore,
-                                       ExpressCaseWrapper expressCaseWrapper) {
-        return !ENROLLED.equals(expressCaseWrapperBefore.getExpressCaseParticipation())
-            && ENROLLED.equals(expressCaseWrapper.getExpressCaseParticipation());
+        return null;
     }
 }
