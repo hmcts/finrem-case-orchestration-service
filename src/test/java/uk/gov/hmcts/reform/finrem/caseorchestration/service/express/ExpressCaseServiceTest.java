@@ -237,7 +237,7 @@ class ExpressCaseServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenExpressPilotDisabled_canSetExpressPilotStatus_returnsFalse(boolean stopEnrolledCases) {
+    void canSetExpressPilotStatus_returnsFalseForExpressPilotDisabled(boolean stopEnrolledCases) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
         FinremCaseData caseData = FinremCaseData.builder().build();
         assertThat(expressCaseService.canSetExpressPilotStatus(caseData, stopEnrolledCases)).isFalse();
@@ -245,7 +245,7 @@ class ExpressCaseServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenCaseDoesNotQualifyForExpress_canSetExpressPilotStatus_returnsFalse(boolean stopEnrolledCases) {
+    void canSetExpressPilotStatus_returnsFalseForCaseDoesNotQualifyForExpress(boolean stopEnrolledCases) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         FinremCaseData caseData = FinremCaseData.builder().build();
         when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(false);
@@ -256,7 +256,7 @@ class ExpressCaseServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenCaseHasHearing_canSetExpressPilotStatus_returnsFalse(boolean stopEnrolledCases) {
+    void canSetExpressPilotStatus_returnsFalseForCaseHasHearing(boolean stopEnrolledCases) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
         when(manageHearingsWrapper.hasNoHearings()).thenReturn(false);
@@ -270,7 +270,7 @@ class ExpressCaseServiceTest {
     @ValueSource(booleans = {true})
     @NullSource
     @ParameterizedTest
-    void givenCaseEnrolledExpressCase_canSetExpressPilotStatus_returnsFalse(Boolean stopEnrolledCases) {
+    void canSetExpressPilotStatus_returnsFalseForEnrolled(Boolean stopEnrolledCases) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
         when(manageHearingsWrapper.hasNoHearings()).thenReturn(true);
@@ -291,7 +291,7 @@ class ExpressCaseServiceTest {
 
     @ParameterizedTest
     @EnumSource(ExpressCaseParticipation.class)
-    void givenStopEnrolledCaseIsFalse_canSetExpressPilotStatus_returnsTrue(ExpressCaseParticipation expressCaseParticipation) {
+    void canSetExpressPilotStatus_returnsTrueForAllParticipationTypesWhenNotStopEnrolled(ExpressCaseParticipation expressCaseParticipation) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
         when(manageHearingsWrapper.hasNoHearings()).thenReturn(true);
@@ -308,7 +308,7 @@ class ExpressCaseServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = ExpressCaseParticipation.class, names = {"WITHDRAWN", "DOES_NOT_QUALIFY"})
-    void givenCaseIsNotEnrolled_canSetExpressPilotStatus_returnsTrue(ExpressCaseParticipation expressCaseParticipation) {
+    void canSetExpressPilotStatus_returnsTrueForWithdrawnOrDoesNotQualify(ExpressCaseParticipation expressCaseParticipation) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
         when(manageHearingsWrapper.hasNoHearings()).thenReturn(true);
