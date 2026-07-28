@@ -64,17 +64,16 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremAboutToSu
 
         selectedCourtService.setSelectedCourtDetailsIfPresent(finremCaseData);
 
-        setExpressPilotStatus(finremCaseData);
+        enrollInExpressPilotIfApplicable(finremCaseData);
 
         return response(finremCaseData);
     }
 
-    private void setExpressPilotStatus(FinremCaseData finremCaseData) {
+    private void enrollInExpressPilotIfApplicable(FinremCaseData finremCaseData) {
         ExpressCaseWrapper expressCaseWrapper = finremCaseData.getExpressCaseWrapper();
         if (YesOrNo.isYes(expressCaseWrapper.getShouldAllocateToExpressPilot())) {
-            expressCaseService.setExpressCaseEnrollmentStatus(finremCaseData);
-            log.info("{} - Setting express case enrollment status to {}", finremCaseData.getCcdCaseId(),
-                expressCaseWrapper.getExpressCaseParticipation());
+            expressCaseService.setExpressCaseEnrollmentStatusToEnrolled(finremCaseData);
+            log.info("{} - Setting express case enrollment status to enrolled", finremCaseData.getCcdCaseId());
         }
     }
 }

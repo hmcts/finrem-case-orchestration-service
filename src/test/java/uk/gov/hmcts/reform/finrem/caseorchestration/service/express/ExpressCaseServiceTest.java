@@ -96,12 +96,18 @@ class ExpressCaseServiceTest {
         assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void shouldSetExpressEnrollmentStatusToWithdrawn(Boolean isAssetsChecklistV3) {
-        FinremCaseData caseData = createExpressCaseWithAssertV3(isAssetsChecklistV3);
+    @Test
+    void shouldSetExpressEnrollmentStatusToWithdrawn() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
         expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
         assertEquals(WITHDRAWN, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
+    }
+
+    @Test
+    void shouldSetExpressEnrollmentStatusToEnrolled() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        expressCaseService.setExpressCaseEnrollmentStatusToEnrolled(caseData);
+        assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
     @ParameterizedTest

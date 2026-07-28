@@ -43,6 +43,17 @@ public class ExpressCaseService {
      */
     public void setExpressCaseEnrollmentStatusToWithdrawn(FinremCaseData caseData) {
         caseData.getExpressCaseWrapper().setExpressCaseParticipation(WITHDRAWN);
+
+    }
+
+    /**
+     * Sets the express case participation status to {@link ExpressCaseParticipation#ENROLLED}
+     * for the given case data.
+     *
+     * @param caseData the case data whose express case enrollment status is to be updated
+     */
+    public void setExpressCaseEnrollmentStatusToEnrolled(FinremCaseData caseData) {
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
     }
 
     /**
