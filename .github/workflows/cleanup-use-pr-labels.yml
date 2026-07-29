@@ -7,8 +7,7 @@ on:
 
 jobs:
   cleanup-use-pr-labels:
-    # Reopen-safe: merged PRs cannot be reopened.
-    if: github.event.pull_request.merged == true
+    # Run for any closed PR (merged or not).
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -46,11 +45,7 @@ jobs:
 
               if (openPrCount === 0) {
                 try {
-                  await github.rest.issues.deleteLabel({
-                    owner,
-                    repo,
-                    name: label
-                  });
+                  await github.rest.issues.deleteLabel({ owner, repo, name: label });
                   core.info(`Deleted label: ${label}`);
                 } catch (error) {
                   if (error.status === 404) {
