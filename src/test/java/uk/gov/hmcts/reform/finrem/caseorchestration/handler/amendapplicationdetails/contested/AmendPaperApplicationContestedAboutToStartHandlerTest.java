@@ -54,6 +54,7 @@ class AmendPaperApplicationContestedAboutToStartHandlerTest {
                 () -> verify(onStartDefaultValueService).defaultCivilPartnershipField(callbackRequest),
                 () -> verify(onStartDefaultValueService).defaultTypeOfApplication(callbackRequest),
                 () -> verify(onStartDefaultValueService).defaultUrgencyQuestion(callbackRequest),
+                () -> verify(onStartDefaultValueService).setEstimatedAssetsChecklistVersion(callbackRequest),
                 () -> verifyNoMoreInteractions(onStartDefaultValueService),
                 () -> assertEquals(finremCaseData, response.getData()),
                 () -> mockedStatic.verify(() -> RefugeWrapperUtils.populateApplicantInRefugeQuestion(caseDetails)),
