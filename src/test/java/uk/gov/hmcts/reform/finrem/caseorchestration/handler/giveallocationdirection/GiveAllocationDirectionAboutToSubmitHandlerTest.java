@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,5 +112,37 @@ class GiveAllocationDirectionAboutToSubmitHandlerTest {
 
         verify(expressCaseService, times(YesOrNo.isYes(shouldAllocateToExpressPilot) ? 1 : 0))
             .setExpressCaseEnrollmentStatusToEnrolled(finremCaseData);
+    }
+
+    @Test
+    void givenShouldAllocatedToExpressPilotIsYes_whenHandled_thenPopulateWarning() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .expressCaseWrapper(ExpressCaseWrapper.builder()
+                .shouldAllocateToExpressPilot(YesOrNo.YES)
+                .build())
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+            finremCaseData);
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response)
+            .extracting(GenericAboutToStartOrSubmitCallbackResponse::getWarnings)
+            .isEqualTo(List.of("This case will now be enrolled into the Express Pilot."));
+    }
+
+    @Test
+    void givenShouldAllocatedToExpressPilotIsNo_whenHandled_thenDoesNotPopulateWarning() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .expressCaseWrapper(ExpressCaseWrapper.builder()
+                .shouldAllocateToExpressPilot(YesOrNo.NO)
+                .build())
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+            finremCaseData);
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getWarnings()).isEmpty();
     }
 }
