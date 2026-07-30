@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 @Slf4j
-@Service
+//@Service
 public class PaperCaseCreateConsentedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final UpdateRepresentationWorkflowService representationWorkflowService;
