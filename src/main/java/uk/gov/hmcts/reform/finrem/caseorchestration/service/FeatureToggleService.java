@@ -26,6 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.FINREM
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.INTERVENER_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_CASE_DOCS_DELETE_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_HEARING_ENABLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAPER_ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_LETTER_RECIPIENT_CHECK;
@@ -141,6 +142,11 @@ public class FeatureToggleService {
     public boolean isEstimatedAssetsChecklistV3Enabled() {
         return isFeatureEnabled(ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED);
     }
+
+    public boolean isPaperEstimatedAssetsChecklistV3Enabled() {
+        return isFeatureEnabled(PAPER_ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED);
+    }
+
 
     /**
      * Given runtime feature toggle status, returns fields that should be ignored during serialisation (i.e. not
