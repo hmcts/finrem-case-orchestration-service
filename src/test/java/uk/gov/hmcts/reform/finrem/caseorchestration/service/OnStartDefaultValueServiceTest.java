@@ -185,13 +185,29 @@ class OnStartDefaultValueServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void testSetEstimatedAssetsChecklistVersion(boolean toggle) {
+    void testSetFormAEstimatedAssetsChecklistVersion(boolean toggle) {
         FinremCaseData finremCaseData = FinremCaseData.builder().build();
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
         when(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).thenReturn(toggle);
 
-        service.setEstimatedAssetsChecklistVersion(callbackRequest);
+        service.setFormAEstimatedAssetsChecklistVersion(callbackRequest);
+
+        assertThat(callbackRequest.getFinremCaseData())
+            .extracting(FinremCaseData::getEstimatedAssetsChecklistWrapper)
+            .extracting(EstimatedAssetsChecklistWrapper::getEstimatedAssetsChecklistVersion)
+            .isEqualTo(toggle ? V3 : V2);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testSetPaperEstimatedAssetsChecklistVersion(boolean toggle) {
+        FinremCaseData finremCaseData = FinremCaseData.builder().build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+        when(featureToggleService.isPaperEstimatedAssetsChecklistV3Enabled()).thenReturn(toggle);
+
+        service.setPaperEstimatedAssetsChecklistVersion(callbackRequest);
 
         assertThat(callbackRequest.getFinremCaseData())
             .extracting(FinremCaseData::getEstimatedAssetsChecklistWrapper)

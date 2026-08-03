@@ -10,8 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
 
@@ -21,28 +22,41 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCase
 @Service
 public class ManageExpressCaseAboutToStartHandler extends FinremCallbackHandler {
 
-    public ManageExpressCaseAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final ExpressCaseService expressCaseService;
+
+    public ManageExpressCaseAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                ExpressCaseService expressCaseService) {
         super(finremCaseDetailsMapper);
+        this.expressCaseService = expressCaseService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.MANAGE_EXPRESS_CASE.equals(eventType);
+            && List.of(EventType.MANAGE_EXPRESS_CASE, EventType.MANAGE_EXPRESS_CASE_V2).contains(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
+        ExpressCaseWrapper expressCaseWrapper = caseData.getExpressCaseWrapper();
 
-        caseData.getExpressCaseWrapper().setConfirmRemoveCaseFromExpressPilot(buildConfirmRemoveCaseFromExpressPilotEntry());
-        caseData.getExpressCaseWrapper().setExpressPilotQuestion(getDefaultAnswerForExpressPilotQuestion(caseData));
+        expressCaseWrapper.setConfirmRemoveCaseFromExpressPilot(buildConfirmRemoveCaseFromExpressPilotEntry());
+        if (EventType.MANAGE_EXPRESS_CASE.equals(callbackRequest.getEventType())) {
+            expressCaseWrapper.setExpressPilotQuestion(getDefaultAnswerForExpressPilotQuestion(caseData));
+        } else {
+            // V2
+            boolean canSetExpressPilotStatus = expressCaseService.canSetExpressPilotStatus(caseData, false);
+            if (!canSetExpressPilotStatus) {
+                return response(caseData, null,
+                    List.of("This case is not enrolled in the Express Financial Remedy Pilot and does meet the criteria to be enrolled"));
+            }
+        }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return response(caseData);
     }
 
     private YesOrNo getDefaultAnswerForExpressPilotQuestion(FinremCaseData caseData) {
