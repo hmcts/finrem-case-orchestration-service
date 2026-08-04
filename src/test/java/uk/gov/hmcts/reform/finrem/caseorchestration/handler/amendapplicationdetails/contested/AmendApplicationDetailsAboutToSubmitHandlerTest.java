@@ -14,16 +14,15 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV3;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FastTrackReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -48,7 +47,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,6 +63,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
@@ -88,6 +90,8 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
     private ExpressCaseService expressCaseService;
     @Mock
     private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Test
     void testCanHandle() {
@@ -110,7 +114,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN, finremCaseDetails))
             .thenReturn(generatedMiniFormA);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(FinremCaseData::getMiniFormA).isEqualTo(generatedMiniFormA);
         verify(onlineFormDocumentService).generateDraftContestedMiniFormA(AUTH_TOKEN, finremCaseDetails);
         verify(caseFlagsService).setCaseFlagInformation(finremCaseDetails);
@@ -168,7 +172,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
             FinremCaseData::getDivorceUploadEvidence2,
             FinremCaseData::getDivorceDecreeAbsoluteDate,
@@ -206,7 +210,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
             FinremCaseData::getDivorceUploadPetition,
             FinremCaseData::getDivorceUploadEvidence1,
@@ -238,7 +242,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
             FinremCaseData::getDivorceUploadEvidence1,
             FinremCaseData::getDivorceUploadEvidence2,
@@ -291,7 +295,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
             FinremCaseData::getPropertyAddress,
             FinremCaseData::getMortgageDetail,
@@ -340,7 +344,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
             FinremCaseData::getPropertyAddress,
             FinremCaseData::getMortgageDetail
@@ -385,7 +389,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         ObjectEnumerableAssert respondentSolicitorContactFields = assertThat(contactDetailsWrapper).extracting(
             ContactDetailsWrapper::getRespondentSolicitorName,
@@ -468,7 +472,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(FinremCaseData::getPaymentForChildrenDecision).isNull();
         if (typeOfApplication == MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS) {
             assertThat(response.getData())
@@ -536,7 +540,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         List<Function<FinremCaseData, ?>> fieldsAreNullExtractors = List.of();
         List<Function<FinremCaseData, ?>> fieldsAreNotNullExtractors = List.of(
@@ -615,7 +619,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setFastTrackDecision(fastTrackDecision);
         finremCaseData.setFastTrackDecisionReason(fastTrackDecisionReason);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         if (YesOrNo.NO.equals(fastTrackDecision)) {
             assertThat(response.getData()).extracting(FinremCaseData::getFastTrackDecisionReason)
                 .isNull();
@@ -642,7 +646,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setOtherReasonForComplexity(otherReasonForComplexity);
         finremCaseData.setOtherReasonForComplexityText(otherReasonForComplexityText);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         if (YesOrNo.NO.equals(otherReasonForComplexity)) {
             assertThat(response.getData()).extracting(FinremCaseData::getOtherReasonForComplexityText)
                 .isNull();
@@ -669,7 +673,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setIsApplicantsHomeCourt(isApplicantsHomeCourt);
         finremCaseData.setReasonForLocalCourt(reasonForLocalCourt);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         if (YesOrNo.NO.equals(isApplicantsHomeCourt)) {
             assertThat(response.getData()).extracting(FinremCaseData::getReasonForLocalCourt)
                 .isNull();
@@ -697,7 +701,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setAllocatedToBeHeardAtHighCourtJudgeLevel(allocatedToBeHeardAtHighCourtJudgeLevel);
         finremCaseData.setAllocatedToBeHeardAtHighCourtJudgeLevelText(allocatedToBeHeardAtHighCourtJudgeLevelText);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         if (YesOrNo.NO.equals(allocatedToBeHeardAtHighCourtJudgeLevel)) {
             assertThat(response.getData()).extracting(FinremCaseData::getAllocatedToBeHeardAtHighCourtJudgeLevelText)
                 .isNull();
@@ -725,7 +729,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setFamilyMediatorServiceName1("familyMediatorServiceName1");
         finremCaseData.setMediatorRegistrationNumber1("mediatorRegistrationNumber1");
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData().getMiamWrapper())
             .extracting(
                 MiamWrapper::getFamilyMediatorMiam,
@@ -775,7 +779,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setMediatorRegistrationNumber("mediatorRegistrationNumber");
         finremCaseData.setUploadMediatorDocument(mock(CaseDocument.class));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         final List<Function<MiamWrapper, ?>> fieldsAreNotNullExtractors = List.of();
         final List<Function<FinremCaseData, ?>> finremCaseDataFieldsAreNullExtractors = List.of(
@@ -836,7 +840,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.setMediatorRegistrationNumber("mediatorRegistrationNumber");
         finremCaseData.setUploadMediatorDocument(mock(CaseDocument.class));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         // Setting to null
         final List<Function<MiamWrapper, ?>> fieldsAreNullExtractors = List.of(
@@ -885,7 +889,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
 
         finremCaseData.setUploadAdditionalDocument(mock(List.class));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         if (promptForAnyDocument == YesOrNo.YES) {
             assertThat(response.getData()).extracting(FinremCaseData::getUploadAdditionalDocument)
@@ -909,7 +913,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             mockedStatic.when(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData))
                 .thenReturn(List.of("VALIDATION FAILED"));
 
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+            var response = handler.handle(callbackRequest, AUTH_TOKEN);
             mockedStatic.verify(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
             assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
         }
@@ -934,56 +938,35 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
             .thenReturn(List.of("Validation failed"));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).hasSize(1);
         assertThat(response.getErrors().getFirst()).isEqualTo("Validation failed");
         assertThat(response.getData()).isNotNull();
     }
 
     /*
-     * The Express Case must be Mocked for other tests (Spy not appropriate)
-     * Use the genuine ExpressCaseService.clearUnusedEstimatedAssetsChecklist method, for data amendment
-     * then verify that the mocked version of clearUnusedEstimatedAssetsChecklist is called.
+     * Any value can be used in place of listVersion, at the time of writing.
+     * Just preferred to use correct enums, to cover logic changing later.
      */
-    @Test
-    void whenHandled_ifV3Asset_thenAnyV2AssetCleared() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .estimatedAssetsChecklistV2(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS)
-            .estimatedAssetsChecklistV3(EstimatedAssetV3.OVER_TWENTY_MILLION_POUNDS)
-            .build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+    @ParameterizedTest
+    @EnumSource(value = EstimatedAssetsChecklistVersion.class)
+    void givenCaseDataWithTemporaryEstimatedAssetsChecklistVersion_whenHandle_thenTemporaryFieldSanitised(
+        EstimatedAssetsChecklistVersion listVersion) {
 
-        ExpressCaseService realExpressCaseService = new ExpressCaseService(featureToggleService);
-        realExpressCaseService.clearUnusedEstimatedAssetsChecklist(finremCaseData);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(finremCaseData);
-        assertThat(response.getData()).extracting(FinremCaseData::getEstimatedAssetsChecklistV2).isNull();
+        verifyTemporaryFieldsWereSanitised(handler,
+            finremCaseDetailsMapper, new HashMap<>(Map.of(
+                "estimatedAssetsChecklistVersion", listVersion
+            ))
+        );
     }
 
-    /*
-     * The Express Case must be Mocked for other tests (Spy not appropriate)
-     * Use the genuine ExpressCaseService.clearUnusedEstimatedAssetsChecklist method, for data amendment
-     * then verify that the mocked version of clearUnusedEstimatedAssetsChecklist is called.
-     */
     @Test
-    void whenHandled_ifV2Asset_thenNothingCleared() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .estimatedAssetsChecklistV2(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS)
-            .estimatedAssetsChecklistV3(null)
-            .build();
+    void givenAnyCase_whenHandled_shouldClearUnusedEstimatedAssetsChecklist() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
-        ExpressCaseService realExpressCaseService = new ExpressCaseService(featureToggleService);
-        realExpressCaseService.clearUnusedEstimatedAssetsChecklist(finremCaseData);
+        handler.handle(callbackRequest, AUTH_TOKEN);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(finremCaseData);
-        assertThat(response.getData())
-            .extracting(FinremCaseData::getEstimatedAssetsChecklistV2)
-            .isEqualTo(EstimatedAssetV2.OVER_FIFTEEN_MILLION_POUNDS);
+        verify(expressCaseService).clearUnusedEstimatedAssetsChecklist(callbackRequest.getFinremCaseData());
     }
 
     private <T> void assertContainsOnlyNulls(T target, List<?> functions) {
