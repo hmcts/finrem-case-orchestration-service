@@ -136,6 +136,12 @@ public class EmailService {
         }
         if (EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)) {
+
+            templateVars.put(
+                PHONE_OPENING_HOURS,
+                notificationRequest.getPhoneOpeningHours()
+            );
+
             populateEmailAttachments(
                 templateVars,
                 notificationRequest.getDocumentContentsList()
