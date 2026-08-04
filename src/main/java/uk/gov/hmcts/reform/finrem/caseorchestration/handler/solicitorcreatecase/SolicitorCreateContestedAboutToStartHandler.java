@@ -39,7 +39,7 @@ public class SolicitorCreateContestedAboutToStartHandler extends FinremCallbackH
         onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
         onStartDefaultValueService.defaultTypeOfApplication(callbackRequest);
         onStartDefaultValueService.defaultUrgencyQuestion(callbackRequest);
-        onStartDefaultValueService.setEstimatedAssetsChecklistVersion(callbackRequest);
+        onStartDefaultValueService.setFormAEstimatedAssetsChecklistVersion(callbackRequest);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData()).build();
     }
