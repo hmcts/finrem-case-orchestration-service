@@ -51,7 +51,7 @@ def getProjectName() {
     String projectPrefix = "HMCTS_d_to_i/finrem-ccd-definitions/"
     def githubApi = new GithubAPI(this)
     for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "use-pr-") ) {
-        String prNumber = label.substring(12, label.length())
+        String prNumber = label.substring(7, label.length())
         return projectPrefix + "PR-" + prNumber
     }
     return projectPrefix + "master"
