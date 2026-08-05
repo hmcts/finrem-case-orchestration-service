@@ -67,12 +67,18 @@ public class ManageExpressCaseAboutToStartHandler extends FinremCallbackHandler 
     }
 
     private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>  v2EventResponse(FinremCaseData caseData) {
-        boolean canSetExpressPilotStatus = expressCaseService.canSetExpressPilotStatus(caseData, false);
-        if (!canSetExpressPilotStatus) {
-            return response(caseData, null,
-                List.of("This case is not enrolled in the Express Financial Remedy Pilot and does meet the criteria to be enrolled"));
+        if (notEnrolled(caseData)) {
+            boolean canSetExpressPilotStatus = expressCaseService.canSetExpressPilotStatus(caseData, false);
+            if (!canSetExpressPilotStatus) {
+                return response(caseData, null,
+                    List.of("This case is not enrolled in the Express Financial Remedy Pilot and does meet the criteria to be enrolled"));
+            }
         }
         return response(caseData);
+    }
+
+    private boolean notEnrolled(FinremCaseData caseData) {
+        return !expressCaseService.isExpressCase(caseData);
     }
 
     private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>  v1EventResponse(FinremCaseData caseData) {
