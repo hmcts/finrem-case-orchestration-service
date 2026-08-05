@@ -44,7 +44,7 @@ public class PaperCaseCreateContestedAboutToStartHandler extends FinremCallbackH
         onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
         onStartDefaultValueService.defaultTypeOfApplication(callbackRequest);
         onStartDefaultValueService.defaultUrgencyQuestion(callbackRequest);
-
+        onStartDefaultValueService.setPaperEstimatedAssetsChecklistVersion(callbackRequest);
         return response(callbackRequest.getFinremCaseData());
     }
 }

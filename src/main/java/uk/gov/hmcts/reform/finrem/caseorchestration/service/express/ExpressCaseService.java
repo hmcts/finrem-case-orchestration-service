@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.express;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1Or
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExpressCaseService {
 
     @Value("${finrem.expressCase.frcs}")
@@ -41,6 +43,17 @@ public class ExpressCaseService {
      */
     public void setExpressCaseEnrollmentStatusToWithdrawn(FinremCaseData caseData) {
         caseData.getExpressCaseWrapper().setExpressCaseParticipation(WITHDRAWN);
+
+    }
+
+    /**
+     * Sets the express case participation status to {@link ExpressCaseParticipation#ENROLLED}
+     * for the given case data.
+     *
+     * @param caseData the case data whose express case enrollment status is to be updated
+     */
+    public void setExpressCaseEnrollmentStatusToEnrolled(FinremCaseData caseData) {
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
     }
 
     /**
@@ -109,11 +122,68 @@ public class ExpressCaseService {
      */
     public boolean isExpressCase(FinremCaseData caseData) {
         ExpressCaseParticipation expressCaseParticipation =
-                Optional.ofNullable(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
-                        .orElse(DOES_NOT_QUALIFY);
+            Optional.ofNullable(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
+                .orElse(DOES_NOT_QUALIFY);
 
         return featureToggleService.isExpressPilotEnabled()
             && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
+    }
+
+    /**
+     * Determines whether a case can have its Express Pilot status set.
+     * This is only possible if:
+     * <ul>
+     *     <li>the Express Pilot feature toggle is enabled;</li>
+     *     <li>the case otherwise qualifies for express case participation;</li>
+     *     <li>the case has no hearings; and</li>
+     *     <li>the case is not already enrolled in express case participation.</li>
+     * </ul>
+     *
+     * @param caseData the case data
+     * @return true if the judge can set the Express Pilot status, false otherwise
+     * @see #qualifiesForExpress(FinremCaseData)
+     */
+    public boolean canSetExpressPilotStatus(FinremCaseData caseData) {
+        return canSetExpressPilotStatus(caseData, true);
+    }
+
+    /**
+     * Determines whether a case can have its Express Pilot status set.
+     * This is only possible if:
+     * <ul>
+     *     <li>the Express Pilot feature toggle is enabled;</li>
+     *     <li>the case otherwise qualifies for express case participation;</li>
+     *     <li>the case has no hearings; and</li>
+     *     <li>either {@code stopEnrolledCases} is false, or the case is not already
+     *     enrolled in express case participation.</li>
+     * </ul>
+     *
+     * @param caseData the case data
+     * @param stopEnrolledCases true to exclude cases that are already enrolled in
+     *                          express case participation, false to allow them
+     * @return true if the judge can set the Express Pilot status, false otherwise
+     * @see #qualifiesForExpress(FinremCaseData)
+     */
+    public boolean canSetExpressPilotStatus(FinremCaseData caseData, boolean stopEnrolledCases) {
+        String caseId = caseData.getCcdCaseId();
+        if (!featureToggleService.isExpressPilotEnabled()) {
+            log.info("{} - Cannot set Express Pilot status because Express Pilot feature toggle is off", caseId);
+            return false;
+        }
+
+        if (!qualifiesForExpress(caseData)) {
+            log.info("{} - Cannot set Express Pilot status because the case does not qualify for Express Pilot.", caseId);
+            return false;
+        }
+        if (!caseData.getManageHearingsWrapper().hasNoHearings()) {
+            log.info("{} - Cannot set Express Pilot status because the case has one or more hearings.", caseId);
+            return false;
+        }
+        if (stopEnrolledCases && ENROLLED.equals(caseData.getExpressCaseWrapper().getExpressCaseParticipation())) {
+            log.info("{} - Cannot set Express Pilot status because the case has been enrolled.", caseId);
+            return false;
+        }
+        return true;
     }
 
     /*
@@ -154,7 +224,7 @@ public class ExpressCaseService {
      * @param caseData the case data
      * @return true if the case qualifies for express case participation, false otherwise
      */
-    private boolean qualifiesForExpress(FinremCaseData caseData) {
+    protected boolean qualifiesForExpress(FinremCaseData caseData) {
 
         List<NatureApplication> natureOfApplicationCheckList = caseData
             .getNatureApplicationWrapper().getNatureOfApplicationChecklist();
@@ -172,19 +242,23 @@ public class ExpressCaseService {
     }
 
     /**
-     * Returns true if either Estimated Asset Value field is under £250k.
+     * Returns true if the latest populated Estimated Asset Value field is under £250k.
      *
-     * <p>Handlers ensure that only one of the two Estimated Asset Value fields is set,
-     * so both fields can be checked safely. This method is null-safe and returns false
-     * if both values are null.</p>
+     * <p>V3 is newer than V2, so when a V3 value is present it takes precedence.
+     * The isEstimatedAssetsChecklistV3Enabled feature toggle is not considered, this is so existing V3 cases can
+     * still be processed after submission if Service decide to toggle off V3 case creation.
+     * This method is null-safe and returns false if both values are null.</p>
      *
      * @param v2assetValue the value from the older EstimatedAssetV2 enum
      * @param v3assetValue the value from the newer EstimatedAssetV3 enum
-     * @return true if the asset value qualifies for express case participation, false otherwise
+     * @return true if the latest populated asset value qualifies for express case participation, false otherwise
      */
     private boolean isExpressPilotAssetValue(EstimatedAssetV2 v2assetValue, EstimatedAssetV3 v3assetValue) {
-        return EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v2assetValue)
-            || EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v3assetValue);
+        if (v3assetValue != null) {
+            return EstimatedAssetV3.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v3assetValue);
+        }
+
+        return EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(v2assetValue);
     }
 
     /* Checks that a region has been selected before calling getSelectedAllocatedCourt, as an indication
@@ -199,7 +273,7 @@ public class ExpressCaseService {
         String selectedCourtId = caseData.getSelectedAllocatedCourt();
 
         return selectedCourtId != null && expressCaseFrcs.stream()
-               .map(String::trim)
-               .anyMatch(court -> court.equalsIgnoreCase(selectedCourtId.trim()));
+            .map(String::trim)
+            .anyMatch(court -> court.equalsIgnoreCase(selectedCourtId.trim()));
     }
 }

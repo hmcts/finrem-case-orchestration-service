@@ -120,7 +120,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(caseDataService).setFinancialRemediesCourtDetails(any());
+        verify(caseDataService).setFinancialRemediesCourtDetails(any(CaseDetails.class));
         verify(idamService, never()).isUserRoleAdmin(anyString());
     }
 
@@ -137,7 +137,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors",
                 hasItem(endsWith("You cannot select High Court or Royal Court of Justice. Please select another court."))));
 
-        verify(caseDataService).setFinancialRemediesCourtDetails(any());
+        verify(caseDataService).setFinancialRemediesCourtDetails(any(CaseDetails.class));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").isEmpty());
 
-        verify(caseDataService).setFinancialRemediesCourtDetails(any());
+        verify(caseDataService).setFinancialRemediesCourtDetails(any(CaseDetails.class));
     }
 
     @Test
