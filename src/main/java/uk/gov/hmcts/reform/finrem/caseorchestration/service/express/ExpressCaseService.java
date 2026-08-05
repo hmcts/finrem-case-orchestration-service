@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.express;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCas
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1Or
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExpressCaseService {
 
     @Value("${finrem.expressCase.frcs}")
@@ -42,6 +43,17 @@ public class ExpressCaseService {
      */
     public void setExpressCaseEnrollmentStatusToWithdrawn(FinremCaseData caseData) {
         caseData.getExpressCaseWrapper().setExpressCaseParticipation(WITHDRAWN);
+
+    }
+
+    /**
+     * Sets the express case participation status to {@link ExpressCaseParticipation#ENROLLED}
+     * for the given case data.
+     *
+     * @param caseData the case data whose express case enrollment status is to be updated
+     */
+    public void setExpressCaseEnrollmentStatusToEnrolled(FinremCaseData caseData) {
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
     }
 
     /**
@@ -118,13 +130,13 @@ public class ExpressCaseService {
     }
 
     /**
-     * Determines whether a judge or caseworker is able to set the Express Pilot status for the case.
+     * Determines whether a case can have its Express Pilot status set.
      * This is only possible if:
      * <ul>
      *     <li>the Express Pilot feature toggle is enabled;</li>
-     *     <li>the case is not already enrolled in express case participation;</li>
+     *     <li>the case otherwise qualifies for express case participation;</li>
      *     <li>the case has no hearings; and</li>
-     *     <li>the case otherwise qualifies for express case participation.</li>
+     *     <li>the case is not already enrolled in express case participation.</li>
      * </ul>
      *
      * @param caseData the case data
@@ -132,14 +144,46 @@ public class ExpressCaseService {
      * @see #qualifiesForExpress(FinremCaseData)
      */
     public boolean canSetExpressPilotStatus(FinremCaseData caseData) {
+        return canSetExpressPilotStatus(caseData, true);
+    }
+
+    /**
+     * Determines whether a case can have its Express Pilot status set.
+     * This is only possible if:
+     * <ul>
+     *     <li>the Express Pilot feature toggle is enabled;</li>
+     *     <li>the case otherwise qualifies for express case participation;</li>
+     *     <li>the case has no hearings; and</li>
+     *     <li>either {@code stopEnrolledCases} is false, or the case is not already
+     *     enrolled in express case participation.</li>
+     * </ul>
+     *
+     * @param caseData the case data
+     * @param stopEnrolledCases true to exclude cases that are already enrolled in
+     *                          express case participation, false to allow them
+     * @return true if the judge can set the Express Pilot status, false otherwise
+     * @see #qualifiesForExpress(FinremCaseData)
+     */
+    public boolean canSetExpressPilotStatus(FinremCaseData caseData, boolean stopEnrolledCases) {
+        String caseId = caseData.getCcdCaseId();
         if (!featureToggleService.isExpressPilotEnabled()) {
+            log.info("{} - Cannot set Express Pilot status because Express Pilot feature toggle is off", caseId);
             return false;
         }
-        if (ENROLLED.equals(caseData.getExpressCaseWrapper().getExpressCaseParticipation())) {
+
+        if (!qualifiesForExpress(caseData)) {
+            log.info("{} - Cannot set Express Pilot status because the case does not qualify for Express Pilot.", caseId);
             return false;
         }
-        ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
-        return manageHearingsWrapper.hasNoHearings() && qualifiesForExpress(caseData);
+        if (!caseData.getManageHearingsWrapper().hasNoHearings()) {
+            log.info("{} - Cannot set Express Pilot status because the case has one or more hearings.", caseId);
+            return false;
+        }
+        if (stopEnrolledCases && ENROLLED.equals(caseData.getExpressCaseWrapper().getExpressCaseParticipation())) {
+            log.info("{} - Cannot set Express Pilot status because the case has been enrolled.", caseId);
+            return false;
+        }
+        return true;
     }
 
     /*
@@ -229,7 +273,7 @@ public class ExpressCaseService {
         String selectedCourtId = caseData.getSelectedAllocatedCourt();
 
         return selectedCourtId != null && expressCaseFrcs.stream()
-               .map(String::trim)
-               .anyMatch(court -> court.equalsIgnoreCase(selectedCourtId.trim()));
+            .map(String::trim)
+            .anyMatch(court -> court.equalsIgnoreCase(selectedCourtId.trim()));
     }
 }
