@@ -78,7 +78,6 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-
         assertEquals("wales", migratedCaseData.get("regionList"));
         assertEquals("newport", migratedCaseData.get("walesFRCList"));
         assertEquals("FR_newport_hc_list_1", migratedCaseData.get("newportCourtList"));
@@ -235,7 +234,6 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
         assertEquals("nottingham", migratedCaseData.get("midlandsFRCList"));
         assertEquals("FR_nottingham_hc_list_1", migratedCaseData.get("nottinghamCourtList"));
 
-
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("midlandsFRCListSL"));
         assertNull(migratedCaseData.get("nottinghamCourtListSL"));
@@ -301,7 +299,6 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
         assertEquals("midlands", migratedCaseData.get("regionList"));
         assertEquals("birmingham", migratedCaseData.get("midlandsFRCList"));
         assertEquals("FR_birmingham_hc_list_1", migratedCaseData.get("birminghamCourtList"));
-
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("midlandsFRCListSL"));
@@ -497,11 +494,9 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
 
         Map<String, Object> migratedCaseData = classUnderTest.migrate(caseDetails);
 
-
         assertEquals("northeast", migratedCaseData.get("regionList"));
         assertEquals("cleaveland", migratedCaseData.get("northEastFRCList"));
         assertEquals("FR_cleaveland_hc_list_1", migratedCaseData.get("cleavelandCourtList"));
-
 
         assertNull(migratedCaseData.get("regionListSL"));
         assertNull(migratedCaseData.get("northEastFRCListSL"));

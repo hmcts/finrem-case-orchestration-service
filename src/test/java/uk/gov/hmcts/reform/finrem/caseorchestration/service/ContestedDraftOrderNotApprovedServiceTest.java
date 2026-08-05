@@ -89,7 +89,6 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
         assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
 
-
         CaseDocument latestRefusalOrder = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT);
         assertThat(latestRefusalOrder.getDocumentUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));

@@ -76,14 +76,12 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         setUpCaseDetails("draft-consent-order.json");
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
 
-
         List<VariationOrderCollection> variationList = new ArrayList<>();
 
         VariationOrderCollection orderCollection = getObj(VariationTypeOfDocument.ORIGINAL_ORDER, true);
 
         variationList.add(orderCollection);
         VariationOrderCollection orderCollection2 = getObj(VariationTypeOfDocument.OTHER_DOCUMENTS, false);
-
 
         variationList.add(orderCollection2);
         data.put("otherVariationCollection", variationList);
