@@ -117,7 +117,7 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
           Apache states that deployments without the examples application
           are not affected. Remove after upgrading to Tomcat 10.1.58 or later.
       ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-websocket@.*$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-.*@10\.1\.57$</packageUrl>
         <cve>CVE-2026-66299</cve>
     </suppress>
 </suppressions>
