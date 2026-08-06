@@ -66,7 +66,7 @@ public class ManageExpressCaseAboutToStartHandler extends FinremCallbackHandler 
         return !EventType.MANAGE_EXPRESS_CASE.equals(callbackRequest.getEventType());
     }
 
-    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>  v2EventResponse(FinremCaseData caseData) {
+    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> v2EventResponse(FinremCaseData caseData) {
         if (notEnrolled(caseData)) {
             boolean canSetExpressPilotStatus = expressCaseService.canSetExpressPilotStatus(caseData, false);
             if (!canSetExpressPilotStatus) {
@@ -81,7 +81,7 @@ public class ManageExpressCaseAboutToStartHandler extends FinremCallbackHandler 
         return !expressCaseService.isExpressCase(caseData);
     }
 
-    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>  v1EventResponse(FinremCaseData caseData) {
+    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> v1EventResponse(FinremCaseData caseData) {
         caseData.getExpressCaseWrapper().setExpressPilotQuestion(getDefaultAnswerForExpressPilotQuestion(caseData));
         return response(caseData);
     }
