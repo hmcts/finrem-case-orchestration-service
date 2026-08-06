@@ -526,28 +526,28 @@ public class ContactDetailsValidator {
     private static void checkForMissingApplicantPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                               EventType eventType, List<String> errors) {
         if (caseData.isApplicantRepresentedByASolicitor()) {
-            if (postalAddressIsMissing(wrapper.getApplicantSolicitorAddress())) {
-                errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant solicitor", eventType.getCcdType()));
+            if (postalAddressIsMissing(wrapper.getAppSolicitorAddress(caseData.getCcdCaseType()))) {
+                errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant solicitor", eventType.getDisplayName()));
             }
             return;
         }
 
         if (postalAddressIsMissing(wrapper.getApplicantAddress())) {
-            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant", eventType.getCcdType()));
+            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant", eventType.getDisplayName()));
         }
     }
 
     private static void checkForMissingRespondentPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                                EventType eventType, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()) {
-            if (postalAddressIsMissing(wrapper.getRespondentSolicitorAddress())) {
-                errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent solicitor", eventType.getCcdType()));
+            if (postalAddressIsMissing(wrapper.getRespSolicitorAddress(caseData.getCcdCaseType()))) {
+                errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent solicitor", eventType.getDisplayName()));
             }
             return;
         }
 
         if (postalAddressIsMissing(wrapper.getRespondentAddress())) {
-            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent", eventType.getCcdType()));
+            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent", eventType.getDisplayName()));
         }
     }
 

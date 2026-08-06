@@ -2,13 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model;
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 
 @Slf4j
-@RequiredArgsConstructor
 public enum EventType {
     INTERNAL_CHANGE_UPDATE_CASE("internal-change-UPDATE_CASE"),
     MANAGE_HEARINGS("FR_manageHearings"),
@@ -42,7 +41,7 @@ public enum EventType {
     GENERAL_APPLICATION_REFER_TO_JUDGE("FR_generalApplicationReferToJudge"),
     GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
     GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
-    GENERAL_APPLICATION_DIRECTIONS_MH("FR_GeneralApplicationDirectionsMH"),
+    GENERAL_APPLICATION_DIRECTIONS_MH("FR_GeneralApplicationDirectionsMH", "General Application Directions"),
     GENERAL_ORDER_CONSENT_IN_CONTESTED("FR_generalOrderConsent"),
     GENERAL_ORDER("FR_generalOrder"),
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
@@ -108,6 +107,29 @@ public enum EventType {
     NONE("");
 
     private final String ccdType;
+    @Getter
+    private final String displayName;
+
+    /**
+     * Constructor for EventType enum that defaults display
+     * name to the same value as the CCD type where not provided.
+     *
+     * @param ccdType the CCD type associated with the event
+     */
+    EventType(String ccdType) {
+        this(ccdType, ccdType);
+    }
+
+    /**
+     * Constructor for EventType enum that allows display name to be specified.
+     *
+     * @param ccdType     the CCD type associated with the event
+     * @param displayName the display name for the event
+     */
+    EventType(String ccdType, String displayName) {
+        this.ccdType = ccdType;
+        this.displayName = displayName;
+    }
 
     @JsonValue
     public String getCcdType() {

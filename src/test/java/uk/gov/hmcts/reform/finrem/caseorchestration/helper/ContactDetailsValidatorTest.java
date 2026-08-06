@@ -967,6 +967,7 @@ class ContactDetailsValidatorTest {
 
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(wrapper)
+            .ccdCaseType(CaseType.CONTESTED)
             .build();
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
@@ -986,6 +987,7 @@ class ContactDetailsValidatorTest {
 
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(wrapper)
+            .ccdCaseType(CaseType.CONTESTED)
             .build();
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
@@ -1005,6 +1007,7 @@ class ContactDetailsValidatorTest {
 
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(wrapper)
+            .ccdCaseType(CaseType.CONTESTED)
             .build();
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
@@ -1025,14 +1028,14 @@ class ContactDetailsValidatorTest {
                 YesOrNo.NO,
                 getInvalidAddress(),
                 TEST_EVENT,
-                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant", TEST_EVENT.getCcdType()))
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant", TEST_EVENT.getDisplayName()))
             ),
             Arguments.of(
                 "Applicant not represented + Null address",
                 YesOrNo.NO,
                 null,
                 TEST_EVENT,
-                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant", TEST_EVENT.getCcdType()))
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant", TEST_EVENT.getDisplayName()))
             )
         );
     }
@@ -1051,14 +1054,14 @@ class ContactDetailsValidatorTest {
                 YesOrNo.YES,
                 getInvalidAddress(),
                 TEST_EVENT,
-                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant solicitor", TEST_EVENT.getCcdType()))
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant solicitor", TEST_EVENT.getDisplayName()))
             ),
             Arguments.of(
                 "Applicant is represented + Null address",
                 YesOrNo.YES,
                 null,
                 TEST_EVENT,
-                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant solicitor", TEST_EVENT.getCcdType()))
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Applicant solicitor", TEST_EVENT.getDisplayName()))
             )
         );
     }
@@ -1077,14 +1080,14 @@ class ContactDetailsValidatorTest {
                 YesOrNo.NO,
                 getInvalidAddress(),
                 TEST_EVENT,
-                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent", TEST_EVENT.getCcdType()))
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent", TEST_EVENT.getDisplayName()))
             ),
             Arguments.of(
                 "Respondent not represented + Null address",
                 YesOrNo.NO,
                 null,
                 TEST_EVENT,
-                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent", TEST_EVENT.getCcdType()))
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent", TEST_EVENT.getDisplayName()))
             )
         );
     }
@@ -1103,14 +1106,14 @@ class ContactDetailsValidatorTest {
                 YesOrNo.YES,
                 getInvalidAddress(),
                 TEST_EVENT,
-                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent solicitor", TEST_EVENT.getCcdType()))
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent solicitor", TEST_EVENT.getDisplayName()))
             ),
             Arguments.of(
                 "Respondent is represented + Null address",
                 YesOrNo.YES,
                 null,
                 TEST_EVENT,
-                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent solicitor", TEST_EVENT.getCcdType()))
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Respondent solicitor", TEST_EVENT.getDisplayName()))
             )
         );
     }
