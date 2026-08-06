@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CCDConfigConstant {
 
@@ -306,7 +308,6 @@ public class CCDConfigConstant {
     public static final String CONSENT_D81_QUESTION = "consentD81Question";
 
     //Nature of Application
-    public static final String URGENT_CASE_QUESTION = "promptForUrgentCaseQuestion";
     public static final String CONSENTED_NATURE_OF_APPLICATION = "natureOfApplication2";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION = "consentNatureOfApplicationChecklist";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_SCHEDULE_1 = "consentNatureOfApplicationChecklistSchedule";
@@ -486,7 +487,7 @@ public class CCDConfigConstant {
 
     //Schedule1FormA
     public static final String TYPE_OF_APPLICATION = "typeOfApplication";
-    public static final String TYPE_OF_APPLICATION_DEFAULT_TO = "In connection to matrimonial and civil partnership proceedings";
+    public static final String TYPE_OF_APPLICATION_DEFAULT_TO = MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.getValue();
 
     //Get user based on role i.e applicant or respondent
     public static final String CASE_ROLE = "currentUserCaseRole";

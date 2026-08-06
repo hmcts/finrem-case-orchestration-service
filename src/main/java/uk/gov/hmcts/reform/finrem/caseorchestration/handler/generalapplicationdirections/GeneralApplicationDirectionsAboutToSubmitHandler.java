@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
@@ -157,7 +158,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
 
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
         gaService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseDetails);
-        caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
+        emptyIfNull(caseData.getGeneralApplicationWrapper().getGeneralApplications()).forEach(
             ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
     }
