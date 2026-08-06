@@ -71,7 +71,7 @@
           Apache states that deployments without the examples application
           are not affected. Remove after upgrading to Tomcat 10.1.58 or later.
       ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-.*@10\.1\.57$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-.*@(10\.1\.(2[4-9]|[3-4][0-9]|5[0-7])|11\.0\.([0-9]|1[0-9]|2[0-4]))$</packageUrl>
         <cve>CVE-2026-66299</cve>
     </suppress>
 </suppressions>
