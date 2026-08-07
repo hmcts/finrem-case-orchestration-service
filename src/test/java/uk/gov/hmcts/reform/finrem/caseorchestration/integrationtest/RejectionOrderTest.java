@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -18,7 +17,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 
-@Ignore("Temporarily disabled due to deserialisation issue on class uk.gov.hmcts.reform.ccd.document.am.model.Document")
 // to upgrade ccd-case-document-am-client library (EM-7149)
 public class RejectionOrderTest extends AbstractDocumentTest {
 
