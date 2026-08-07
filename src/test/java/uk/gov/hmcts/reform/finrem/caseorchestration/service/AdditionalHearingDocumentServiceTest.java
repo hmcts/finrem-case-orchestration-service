@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
@@ -248,7 +247,6 @@ class AdditionalHearingDocumentServiceTest {
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()
-            .eventType(EventType.DIRECTION_UPLOAD_ORDER)
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
                 .data(new FinremCaseData()).state(State.APPLICATION_ISSUED).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
