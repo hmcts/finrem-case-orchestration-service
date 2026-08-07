@@ -95,19 +95,6 @@ public class NotificationAuditService {
                 ))
                 .toList();
 
-        /*
-         * Keep pending notifications belonging to previous event executions.
-         */
-        List<NotificationToBeSentCollectionItem> remainingPending =
-            pending.stream()
-                .filter(Objects::nonNull)
-                .filter(item -> item.getValue() == null
-                    || !Objects.equals(
-                    currentNotificationEventId,
-                    item.getValue().getNotificationTrackerId()
-                ))
-                .toList();
-
         List<NotificationAudit> audits = new ArrayList<>(
             Optional.ofNullable(sentEvent.getNotificationAudits())
                 .orElseGet(List::of)
@@ -129,6 +116,16 @@ public class NotificationAuditService {
                 .value(audit)
                 .build())
             .forEach(auditItems::add);
+
+        List<NotificationToBeSentCollectionItem> remainingPending =
+            pending.stream()
+                .filter(Objects::nonNull)
+                .filter(item -> item.getValue() == null
+                    || !Objects.equals(
+                    currentNotificationEventId,
+                    item.getValue().getNotificationTrackerId()
+                ))
+                .toList();
 
         Map<String, Object> updatedFields = new HashMap<>();
 
