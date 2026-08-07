@@ -85,6 +85,10 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         if (correspondenceEvent != null) {
             correspondenceEvent.setEventId(callbackRequest.getEventType().getCcdType());
 
+            correspondenceEvent.setNotificationTrackerId(
+                finremCaseData.getNotificationAuditWrapper().getNotificationEventId()
+            );
+
             publishEvent(getEventDescription(actionSelection), correspondenceEvent, errors);
 
             markPendingNotificationsAsSent(caseDetails, correspondenceEvent);

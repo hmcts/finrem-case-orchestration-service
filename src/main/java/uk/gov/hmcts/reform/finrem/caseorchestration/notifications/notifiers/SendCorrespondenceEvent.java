@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -40,6 +41,8 @@ public class SendCorrespondenceEvent {
 
     @Setter
     String eventId;
+    @Setter
+    String notificationTrackerId;
 
     /**
      * Indicates whether the correspondence process is being simulated.
@@ -57,6 +60,7 @@ public class SendCorrespondenceEvent {
      */
     public void recordEmailNotificationToSendAudit(NotificationParty notificationParty) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+            .notificationTrackerId(notificationTrackerId)
             .wasSent(YesOrNo.NO)
             .eventId(this.eventId)
             .party(notificationParty.name())
@@ -74,6 +78,7 @@ public class SendCorrespondenceEvent {
      */
     public void recordEmailNotificationSentAudit(NotificationParty notificationParty) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+            .notificationTrackerId(notificationTrackerId)
             .wasSent(YesOrNo.YES)
             .eventId(this.eventId)
             .party(notificationParty.name())
@@ -95,6 +100,7 @@ public class SendCorrespondenceEvent {
      */
     public void recordPostalNotificationToSendAudit(NotificationParty notificationParty) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+            .notificationTrackerId(notificationTrackerId)
             .wasSent(YesOrNo.NO)
             .eventId(this.eventId)
             .party(notificationParty.name())
@@ -113,6 +119,7 @@ public class SendCorrespondenceEvent {
      */
     public void recordPostalNotificationSentAudit(NotificationParty notificationParty, UUID letterId) {
         notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+            .notificationTrackerId(notificationTrackerId)
             .wasSent(YesOrNo.YES)
             .eventId(this.eventId)
             .party(notificationParty.name())
@@ -172,12 +179,13 @@ public class SendCorrespondenceEvent {
             .stream().map(this::describeNotificationParty).sorted().toList());
     }
 
-    private List<String> getDocumentsToPostFilenames() {
+    private List<Element<String>> getDocumentsToPostFilenames() {
         return Optional.ofNullable(documentsToPost)
             .orElseGet(List::of)
             .stream()
             .map(CaseDocument::getDocumentFilename)
             .filter(fileName -> fileName != null && !fileName.isBlank())
+            .map(Element::newElement)
             .toList();
     }
 

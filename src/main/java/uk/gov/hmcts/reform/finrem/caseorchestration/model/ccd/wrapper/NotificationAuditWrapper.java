@@ -19,6 +19,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NotificationAuditWrapper {
 
+    private String notificationEventId;
     private List<NotificationAuditCollectionItem> notificationsAudits;
     private List<NotificationToBeSentCollectionItem> notificationsToBeSent;
 }

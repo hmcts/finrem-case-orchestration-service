@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDateTime;
@@ -29,5 +30,6 @@ public class NotificationAudit {
     private String emailId;
     private String emailTemplate;
     private String letterId;
-    private List<String> attachedPostalDocs;
+    private List<Element<String>> attachedPostalDocs;
+    private String notificationTrackerId;
 }

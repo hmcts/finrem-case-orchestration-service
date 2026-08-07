@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -56,6 +58,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsSubmittedHandlerTest {
+
+    private static final String NOTIFICATION_EVENT_ID = "event-123";
 
     @TestLogs
     private final TestLogger logs = new TestLogger(ManageHearingsSubmittedHandler.class);
@@ -203,6 +207,7 @@ class ManageHearingsSubmittedHandlerTest {
             );
         publishEventCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
         assertAll(
+            () -> verify(event).setNotificationTrackerId(NOTIFICATION_EVENT_ID),
             () -> verify(applicationEventPublisher).publishEvent(event),
             () -> verifyNoMoreInteractions(retryExecutor)
         );
@@ -266,9 +271,18 @@ class ManageHearingsSubmittedHandlerTest {
             AUTH_TOKEN
         )).thenReturn(event);
 
-        Map<String, Object> updatedFields = Map.of(
-            NOTIFICATIONS_AUDITS, List.of(Map.of("wasSent", "Yes")),
-            NOTIFICATIONS_TO_BE_SENT, List.of()
+        Map<String, Object> updatedFields = new HashMap<>();
+        updatedFields.put(
+            NOTIFICATIONS_AUDITS,
+            List.of(Map.of("wasSent", "Yes"))
+        );
+        updatedFields.put(
+            NOTIFICATIONS_TO_BE_SENT,
+            List.of()
+        );
+        updatedFields.put(
+            "notificationEventId",
+            null
         );
 
         when(notificationAuditService.updateSentAuditsList(event))
@@ -312,6 +326,12 @@ class ManageHearingsSubmittedHandlerTest {
                 .builder()
                 .manageHearingsActionSelection(action)
                 .build())
+            .notificationAuditWrapper(
+                NotificationAuditWrapper.builder()
+                    .notificationEventId(NOTIFICATION_EVENT_ID)
+                    .build()
+            )
+
             .ccdCaseId(CASE_ID)
             .ccdCaseType(CaseType.CONTESTED)
             .build();
