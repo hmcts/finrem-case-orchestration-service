@@ -1,17 +1,23 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
+import java.util.Objects;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Component
 @Slf4j
@@ -24,16 +30,35 @@ public class GeneralEmailDocumentCategoriser extends DocumentCategoriser {
 
     @Override
     protected void categoriseDocuments(FinremCaseData finremCaseData) {
-        log.info("Categorising general email documents for case with Case ID: {}", finremCaseData.getCcdCaseId());
-        List<GeneralEmailCollection> generalEmails = finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection();
-        if (generalEmails != null && !generalEmails.isEmpty()) {
-            for (GeneralEmailCollection generalEmail : generalEmails) {
-                CaseDocument generalEmailDocument = generalEmail.getValue().getGeneralEmailUploadedDocument();
-                String generalEmailRecipient = generalEmail.getValue().getGeneralEmailRecipient();
-                if (generalEmailDocument != null && generalEmailDocument.getCategoryId() == null && generalEmailRecipient != null) {
-                    generalEmailDocument.setCategoryId(getGeneralEmailCategory(generalEmailRecipient, finremCaseData));
-                }
-            }
+        emptyIfNull(finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection())
+            .stream()
+            .map(GeneralEmailCollection::getValue)
+            .filter(Objects::nonNull)
+            .forEach(generalEmail -> categoriseGeneralEmailDocuments(generalEmail, finremCaseData));
+    }
+
+    private void categoriseGeneralEmailDocuments(GeneralEmailHolder generalEmail,
+                                                 FinremCaseData finremCaseData) {
+        String recipient = generalEmail.getGeneralEmailRecipient();
+        List<DocumentCollectionItem> documents = generalEmail.getGeneralEmailUploadedDocuments();
+
+        if (recipient == null || CollectionUtils.isEmpty(documents)) {
+            return;
+        }
+
+        String categoryId = getGeneralEmailCategory(recipient, finremCaseData);
+        documents.forEach(documentItem -> setCategoryIfMissing(documentItem, categoryId));
+    }
+
+    private void setCategoryIfMissing(DocumentCollectionItem documentItem, String categoryId) {
+        if (documentItem == null || documentItem.getValue() == null) {
+            return;
+        }
+
+        CaseDocument document = documentItem.getValue();
+
+        if (document.getCategoryId() == null) {
+            document.setCategoryId(categoryId);
         }
     }
 
@@ -43,6 +68,7 @@ public class GeneralEmailDocumentCategoriser extends DocumentCategoriser {
         IntervenerWrapper intervenerThreeWrapper = caseData.getIntervenerThreeWrapperIfPopulated();
         IntervenerWrapper intervenerFourWrapper = caseData.getIntervenerFourWrapperIfPopulated();
         ContactDetailsWrapper detailsWrapper = caseData.getContactDetailsWrapper();
+
         return getCategoryBasedOnRecipientRole(emailAddress, detailsWrapper, intervenerOneWrapper,
             intervenerTwoWrapper, intervenerThreeWrapper, intervenerFourWrapper);
     }
