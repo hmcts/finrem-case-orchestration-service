@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -24,8 +25,10 @@ public class SendOrderWrapper {
     @Deprecated
     private CaseDocument additionalDocument;
 
+    @TemporaryField
     private List<DocumentCollectionItem> additionalDocuments;
 
+    @TemporaryField
     private OrdersToSend ordersToSend;
 
     private SendOrderEventPostStateOption sendOrderPostStateOption;
