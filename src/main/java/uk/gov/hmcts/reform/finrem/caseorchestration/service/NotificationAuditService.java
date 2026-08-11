@@ -69,6 +69,11 @@ public class NotificationAuditService {
 
     public Map<String, Object> updateSentAuditsList(SendCorrespondenceEvent sentEvent) {
         FinremCaseData caseData = sentEvent.getCaseData();
+        if (caseData == null) {
+            log.warn("No caseData found when updating notification audits");
+            return Map.of();
+        }
+
         NotificationAuditWrapper wrapper = caseData.getNotificationAuditWrapper();
 
         String currentNotificationEventId = wrapper.getNotificationEventId();
