@@ -27,7 +27,7 @@ public class GeneralEmailHolder implements HasCaseDocument {
     private String generalEmailRecipient;
     private String generalEmailCreatedBy;
     private String generalEmailBody;
+    private CaseDocument generalEmailUploadedDocument;
     private List<DocumentCollectionItem> generalEmailUploadedDocuments;
-    private List<DocumentCollectionItem> generalEmailUploadedDocument;
     private LocalDateTime generalEmailDateSent;
 }
