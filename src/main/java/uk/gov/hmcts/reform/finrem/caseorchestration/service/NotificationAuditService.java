@@ -38,6 +38,9 @@ public class NotificationAuditService {
     public void createAuditsForCorrespondence(SendCorrespondenceEvent event,
                                               EventType eventType) {
         FinremCaseData caseData = event.getCaseData();
+        if (caseData == null) {
+            throw new IllegalStateException("No caseData found when creating notification audits");
+        }
         NotificationAuditWrapper wrapper = caseData.getNotificationAuditWrapper();
 
         String notificationEventId = UUID.randomUUID().toString();
