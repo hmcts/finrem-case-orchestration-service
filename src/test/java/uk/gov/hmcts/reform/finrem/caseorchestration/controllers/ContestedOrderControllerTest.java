@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import static org.hamcrest.Matchers.endsWith;
@@ -33,9 +32,6 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
 
     @Autowired
     protected MockMvc mvc;
-
-    @MockitoBean
-    private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
 
     @Test
     public void shouldThrowExceptionWhenHearingDateNotFound() throws Exception {
