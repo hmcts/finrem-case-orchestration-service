@@ -74,13 +74,6 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     }
 
     @JsonIgnore
-    public Address getAppSolicitorAddress() {
-        return isConsentedApplication()
-            ? data.getContactDetailsWrapper().getSolicitorAddress()
-            : data.getContactDetailsWrapper().getApplicantSolicitorAddress();
-    }
-
-    @JsonIgnore
     public String getAppSolicitorEmail() {
         return isConsentedApplication()
             ? data.getContactDetailsWrapper().getSolicitorEmail()
