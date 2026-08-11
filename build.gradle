@@ -34,7 +34,7 @@ def versions = [
         apacheLogging        : '2.25.4',
         idamClient           : '3.0.5',
         springHateoas        : '1.5.6',
-        tika                 : '3.2.3',
+        tika                 : '3.3.2',
         amClient             : '1.59.2',
         sendLetterClient     : '5.1.1',
         elasticSearch        : '8.19.19',
