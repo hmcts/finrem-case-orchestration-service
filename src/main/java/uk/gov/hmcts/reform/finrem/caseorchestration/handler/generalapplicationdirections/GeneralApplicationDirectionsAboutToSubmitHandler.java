@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -98,7 +99,12 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         } else {
             updateApplications(caseDetails, documents, userAuthorisation);
         }
-        List<String> errors = new ArrayList<>();
+
+        final List<String> errors = validatePostalAddressErrors(caseData, callbackRequest.getEventType());
+
+        if (!errors.isEmpty()) {
+            return responseWithoutWarnings(caseData, errors);
+        }
 
         try {
             gaDirectionService.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);
@@ -112,6 +118,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             return responseWithoutWarnings(caseData, errors, postState);
         }
         return responseWithoutWarnings(caseData, errors);
+    }
+
+    private List<String> validatePostalAddressErrors(FinremCaseData caseData, EventType eventType) {
+        return new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
     }
 
     private void migrateExistingApplication(FinremCaseDetails caseDetails,
