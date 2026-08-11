@@ -15,68 +15,75 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
-public abstract class FinremHearingCorrespondenceBaseTest {
-
-    @Mock
-    NotificationService notificationService;
-    @Mock
-    BulkPrintService bulkPrintService;
+abstract class FinremHearingCorrespondenceBaseTest {
 
     @Mock
-    DocumentHelper documentHelper;
-    FinremCaseDetails caseDetails;
+    protected NotificationService notificationService;
+    @Mock
+    protected BulkPrintService bulkPrintService;
+
+    @Mock
+    protected DocumentHelper documentHelper;
+
+    protected FinremCaseDetails caseDetails;
+
     FinremMultiLetterOrEmailAllPartiesCorresponder applicantAndRespondentMultiLetterCorresponder;
 
+    protected void setUnderTest(FinremMultiLetterOrEmailAllPartiesCorresponder underTest) {
+        applicantAndRespondentMultiLetterCorresponder = underTest;
+    }
+
     @Test
-    public void shouldEmailApplicantAndRespondent() {
+    void shouldEmailApplicantAndRespondent() {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
     }
 
     @Test
-    public void shouldSendLettersToApplicantAndRespondent() {
+    void shouldSendLettersToApplicantAndRespondent() {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
 
-        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService).printRespondentDocuments(any(FinremCaseDetails.class), anyString(), anyList());
     }
 
     @Test
-    public void shouldSendLettersToApplicantAndEmailToRespondent() {
+    void shouldSendLettersToApplicantAndEmailToRespondent() {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(FinremCaseDetails.class), anyString(), anyList());
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
     }
 
     @Test
-    public void shouldEmailToApplicantAndSendLetterToRespondent() {
+    void shouldEmailToApplicantAndSendLetterToRespondent() {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
 
-        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService).printRespondentDocuments(any(FinremCaseDetails.class), anyString(), anyList());
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
     }
 
     @Test
-    public void shouldEmailInterveners() {
+    void shouldEmailInterveners() {
 
         IntervenerOne intervenerOne = IntervenerOne.builder()
             .intervenerName("Intervener 1")
@@ -92,7 +99,7 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerOne))
             .thenReturn(SolicitorCaseDataKeysWrapper.builder().build());
 
-        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
@@ -100,7 +107,7 @@ public abstract class FinremHearingCorrespondenceBaseTest {
     }
 
     @Test
-    public void shouldSendLettersToInterveners() {
+    void shouldSendLettersToInterveners() {
 
         IntervenerOne intervenerOne = IntervenerOne.builder()
             .intervenerName("Intervener 1")
@@ -115,7 +122,7 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOne.class),
             any(FinremCaseDetails.class))).thenReturn(false);
 
-        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
