@@ -29,7 +29,7 @@ def versions = [
         springDoc            : '3.0.3',
         wiremock             : '3.0.1',
         idamClient           : '4.0.0',
-        tika                 : '3.2.3',
+        tika                 : '3.3.2',
         amClient             : '2.0.0',
         sendLetterClient     : '5.1.1',
         elasticSearch        : '8.19.19',
