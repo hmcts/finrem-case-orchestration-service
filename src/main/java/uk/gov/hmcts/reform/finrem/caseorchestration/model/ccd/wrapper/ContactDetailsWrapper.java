@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -276,5 +277,38 @@ public class ContactDetailsWrapper {
         setApplicantSolicitorEmail(null);
         setApplicantSolicitorDxNumber(null);
         setApplicantSolicitorConsentForEmails(null);
+    }
+
+    /**
+     * Returns appropriate App solicitor address field value based on casetype.
+     *
+     * @param caseType the case type.
+     * @return the solicitor address for the given case type.
+     * @throws IllegalArgumentException if the case type is unsupported.
+     */
+    @JsonIgnore
+    public Address getAppSolicitorAddress(CaseType caseType) {
+        return switch (caseType) {
+            case CONSENTED -> getSolicitorAddress();
+            case CONTESTED -> getApplicantSolicitorAddress();
+            default -> throw new IllegalArgumentException("Unsupported case type: " + caseType);
+        };
+    }
+
+    /**
+     * Returns Resp solicitor address field value based on casetype, this method exists as an
+     * indicator that unlike applicant solicitor address, respondent solicitor address
+     * is stored in a single field for both contested and consented cases.
+     *
+     * @param caseType the case type.
+     * @return the solicitor address for the given case type.
+     * @throws IllegalArgumentException if the case type is unsupported.
+     */
+    @JsonIgnore
+    public Address getRespSolicitorAddress(CaseType caseType) {
+        return switch (caseType) {
+            case CONSENTED, CONTESTED -> getRespondentSolicitorAddress();
+            default -> throw new IllegalArgumentException("Unsupported case type: " + caseType);
+        };
     }
 }
