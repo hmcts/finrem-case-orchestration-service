@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GenericInputFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
@@ -310,6 +311,9 @@ public class FinremCaseData implements HasCaseDocument {
     private DynamicMultiSelectList solicitorRoleList;
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private GenericInputFields genericInputFields;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ManageCaseDocumentsWrapper manageCaseDocumentsWrapper;
@@ -1070,6 +1074,14 @@ public class FinremCaseData implements HasCaseDocument {
             return List.of();
         }
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
+    }
+
+    @JsonIgnore
+    public GenericInputFields getGenericInputFields() {
+        if (genericInputFields == null) {
+            this.genericInputFields = new GenericInputFields();
+        }
+        return genericInputFields;
     }
 
     @JsonIgnore
