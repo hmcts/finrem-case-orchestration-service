@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.functional.documents;
 
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BINARY_URL_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
+@Slf4j
 @RunWith(SerenityRunner.class)
 public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
@@ -206,6 +208,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private JsonPath accessGeneratedDocument(String url) {
+        log.info("accessGeneratedDocument = " + url);
         Response jsonResponse = SerenityRest.given()
             .relaxedHTTPSValidation()
             .headers(utils.getHeadersWithUserId())
