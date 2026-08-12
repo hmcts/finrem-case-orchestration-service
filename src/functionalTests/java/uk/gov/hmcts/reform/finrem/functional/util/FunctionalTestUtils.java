@@ -103,6 +103,8 @@ public class FunctionalTestUtils {
                 "Failed to download PDF from " + documentUrl
                     + " - status: " + document.getStatusCode()
                     + ", body present: " + (document.getBody() != null));
+        } else {
+            log.info("ASHLEY - ASHLEY: " + documentUrl + " successfully downloaded");
         }
 
         return parsePdfToString(document.getBody().asInputStream());
