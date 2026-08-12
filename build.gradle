@@ -121,6 +121,14 @@ configurations {
     functionalRuntimeOnly.extendsFrom testRuntimeOnly
     cftlibRuntimeClasspath.extendsFrom runtimeClasspath
 }
+configurations.functionalRuntimeClasspath {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'org.apache.groovy') {
+            details.useVersion('4.0.23')
+            details.because('pin to Groovy 4 for functional tests — Spring Boot 4.1 BOM pulls in 5.0.6')
+        }
+    }
+}
 
 processTestResources {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
