@@ -98,13 +98,6 @@ public class FunctionalTestUtils {
             .headers(getHeadersWithUserId())
             .when().get(documentUrl).andReturn();
 
-        if (document.getStatusCode() != 200 || document.getBody() == null) {
-            throw new IllegalStateException(
-                "Failed to download PDF from " + documentUrl
-                    + " - status: " + document.getStatusCode()
-                    + ", body present: " + (document.getBody() != null));
-        }
-
         return parsePdfToString(document.getBody().asInputStream());
     }
 

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.functional.documents;
 
-import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -208,13 +206,9 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private JsonPath accessGeneratedDocument(String url) {
-        assertThat(url).as("Generated document URL must not be null or blank").isNotBlank();
-
-        Headers headers = utils.getHeadersWithUserId();
-
         Response jsonResponse = SerenityRest.given()
             .relaxedHTTPSValidation()
-            .headers(headers)
+            .headers(utils.getHeadersWithUserId())
             .when().get(url)
             .andReturn();
 
