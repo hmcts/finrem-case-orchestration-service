@@ -417,4 +417,3 @@ public class ManageHearingsCorresponder {
         return !isVacatedAndRelistedHearing && !vacateOrAdjournedHearing.shouldSendNotifications();
     }
 }
-
