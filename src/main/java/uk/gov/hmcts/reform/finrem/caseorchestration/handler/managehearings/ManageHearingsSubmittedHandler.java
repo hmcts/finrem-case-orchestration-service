@@ -91,7 +91,9 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
 
             publishEvent(getEventDescription(actionSelection), correspondenceEvent, errors);
 
-            markPendingNotificationsAsSent(caseDetails, correspondenceEvent);
+            if (errors.isEmpty()) {
+                markPendingNotificationsAsSent(caseDetails, correspondenceEvent);
+            }
         }
 
         if (errors.isEmpty()) {

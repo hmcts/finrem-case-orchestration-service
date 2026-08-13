@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -38,7 +39,7 @@ class NotificationAuditServiceTest {
     private static final String PREVIOUS_NOTIFICATION_EVENT_ID = "event-456";
 
     @Spy
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = TestObjectMapperFactory.createObjectMapper();
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
@@ -113,7 +114,6 @@ class NotificationAuditServiceTest {
             CURRENT_NOTIFICATION_EVENT_ID
         );
         SendCorrespondenceEvent event = buildEventWithPendingAndSentAudits(
-            CURRENT_NOTIFICATION_EVENT_ID,
             List.of(pendingItem(pendingAudit)),
             new ArrayList<>(List.of(sentAudit))
         );
@@ -143,7 +143,6 @@ class NotificationAuditServiceTest {
             NotificationType.EMAIL,
             CURRENT_NOTIFICATION_EVENT_ID);
         SendCorrespondenceEvent event = buildEventWithPendingAndSentAudits(
-            CURRENT_NOTIFICATION_EVENT_ID,
             List.of(pendingItem(pendingAudit)),
             new ArrayList<>(List.of(sentAudit)));
         Map<String, Object> result = notificationAuditService.updateSentAuditsList(event);
@@ -177,7 +176,6 @@ class NotificationAuditServiceTest {
             NotificationType.EMAIL,
             CURRENT_NOTIFICATION_EVENT_ID);
         SendCorrespondenceEvent event = buildEventWithPendingAndSentAudits(
-            CURRENT_NOTIFICATION_EVENT_ID,
             List.of(
                 pendingItem(previousPendingAudit),
                 pendingItem(currentPendingAudit)
@@ -197,7 +195,6 @@ class NotificationAuditServiceTest {
     }
 
     private SendCorrespondenceEvent buildEventWithPendingAndSentAudits(
-        String notificationEventId,
         List<NotificationToBeSentCollectionItem> pending,
         List<NotificationAudit> sentAudits
     ) {
@@ -205,7 +202,7 @@ class NotificationAuditServiceTest {
             .caseDetails(
                 caseDetails(
                     NotificationAuditWrapper.builder()
-                        .notificationEventId(notificationEventId)
+                        .notificationEventId(NotificationAuditServiceTest.CURRENT_NOTIFICATION_EVENT_ID)
                         .notificationsToBeSent(pending)
                         .build()
                 )

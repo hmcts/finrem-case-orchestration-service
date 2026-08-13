@@ -35,6 +35,16 @@ public class NotificationAuditService {
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    /**
+     * Creates notification audit entries for correspondence that is about to be sent.
+     * A unique notification event ID is generated and associated with both the case data
+     * and the {@link SendCorrespondenceEvent}. The event is then published and the
+     * notification audits are added to the pending notifications list.
+     *
+     * @param event the correspondence event containing the case data and notification audits
+     * @param eventType the CCD event type associated with the correspondence
+     * @throws IllegalStateException if the correspondence event does not contain case data
+     */
     public void createAuditsForCorrespondence(SendCorrespondenceEvent event,
                                               EventType eventType) {
         FinremCaseData caseData = event.getCaseData();
@@ -90,9 +100,7 @@ public class NotificationAuditService {
             Optional.ofNullable(wrapper.getNotificationsToBeSent())
                 .orElseGet(List::of);
 
-        /*
-         * Only process pending notifications belonging to this event execution.
-         */
+        //Only process pending notifications belonging to this event execution.
         List<NotificationToBeSentCollectionItem> currentEventPending =
             pending.stream()
                 .filter(Objects::nonNull)
@@ -110,9 +118,8 @@ public class NotificationAuditService {
 
         combinePendingAndSentAudits(currentEventPending, audits);
 
-        /*
-         * Preserve existing permanent audit history.
-         */
+        //Preserve existing permanent audit history.
+
         List<NotificationAuditCollectionItem> auditItems = new ArrayList<>(
             Optional.ofNullable(wrapper.getNotificationsAudits())
                 .orElseGet(List::of)

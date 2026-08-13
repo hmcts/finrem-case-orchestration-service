@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
-import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 
 @Slf4j
@@ -95,7 +95,7 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
             userAuthorisation
         );
 
-        if (!isNull(event)) {
+        if (nonNull(event)) {
             notificationAuditService.createAuditsForCorrespondence(
                 event,
                 callbackRequest.getEventType()
