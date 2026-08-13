@@ -66,7 +66,7 @@ public class GeneralApplicationDirectionsService {
         List<String> eventDetailsOnCase = ccdService.getCcdEventDetailsOnCase(
                 userAuthorisation,
                 caseDetails,
-                EventType.GENERAL_APPLICATION_DIRECTIONS.getCcdType())
+                EventType.GENERAL_APPLICATION_DIRECTIONS_MH.getCcdType())
             .stream()
             .map(CaseEventDetail::getEventName).toList();
 
