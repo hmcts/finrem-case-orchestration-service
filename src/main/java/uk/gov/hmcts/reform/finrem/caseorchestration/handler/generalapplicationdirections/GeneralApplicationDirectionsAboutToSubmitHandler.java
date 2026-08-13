@@ -37,6 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
@@ -74,7 +75,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.GENERAL_APPLICATION_DIRECTIONS_MH.equals(eventType);
+            && GENERAL_APPLICATION_DIRECTIONS_MH.equals(eventType);
     }
 
     @Override
@@ -138,7 +139,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             String status = Objects.toString(caseData.getGeneralApplicationWrapper()
                 .getGeneralApplicationOutcome(), null);
             log.info("In map outcome decision {} for general application for Case ID: {} Event type {}",
-                status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
+                status, caseId, GENERAL_APPLICATION_DIRECTIONS_MH);
             setStatusForNonCollAndBulkPrintDocuments(caseDetails,
                 data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
@@ -232,7 +233,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
-            EventType.GENERAL_APPLICATION_DIRECTIONS);
+            GENERAL_APPLICATION_DIRECTIONS_MH);
 
         switch (gaElementStatus.toLowerCase()) {
             case "approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
