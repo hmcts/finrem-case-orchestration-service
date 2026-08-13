@@ -161,7 +161,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
         caseDetails.getData().put(GENERAL_APPLICATION_PRE_STATE, "applicationIssued");
-        when(ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, caseDetails, EventType.GENERAL_APPLICATION_DIRECTIONS.getCcdType()))
+        when(ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, caseDetails, EventType.GENERAL_APPLICATION_DIRECTIONS_MH.getCcdType()))
             .thenReturn(list);
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").build();
