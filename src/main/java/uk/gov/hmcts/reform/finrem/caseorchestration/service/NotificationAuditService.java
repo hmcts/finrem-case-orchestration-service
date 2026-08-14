@@ -7,7 +7,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAuditCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationToBeSentCollectionItem;
@@ -165,15 +164,14 @@ public class NotificationAuditService {
     ) {
         pending.stream()
             .map(NotificationToBeSentCollectionItem::getValue)
-            .forEach(pendingAudit ->
-                audits.stream()
-                    .filter(sentAudit -> isSameNotification(pendingAudit, sentAudit))
-                    .findFirst()
-                    .ifPresentOrElse(
-                        sentAudit -> sentAudit.setWasSent(YesOrNo.YES),
-                        () -> audits.add(pendingAudit)
-                    )
-            );
+            .forEach(pendingAudit -> {
+                boolean notificationWasSent = audits.stream()
+                    .anyMatch(sentAudit -> isSameNotification(pendingAudit, sentAudit));
+
+                if (!notificationWasSent) {
+                    audits.add(pendingAudit);
+                }
+            });
     }
 
     private boolean isSameNotification(NotificationAudit expected,
