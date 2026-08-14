@@ -25,12 +25,7 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
         "uk.gov.hmcts.reform.ccd.document.am.feign"
     },
     exclude = {
-        uk.gov.hmcts.reform.sendletter.SendLetterAutoConfiguration.class,
-        // This is a temporary workaround until SpringDoc releases a version that's fully compatible with Spring Boot 4.1.
-        // You can check if a newer version fixes it:
-        // `find ~/.gradle -path "*/springdoc*.jar" | grep -v sources | head -1 | xargs jar tf | grep -i "HateoasConfig"`
-        // If a newer SpringDoc version removes the HateoasProperties reference, you can remove the exclude. Until then keep it.
-        org.springdoc.core.configuration.SpringDocHateoasConfiguration.class
+        uk.gov.hmcts.reform.sendletter.SendLetterAutoConfiguration.class
     })
 
 @EnableFeignClients(
