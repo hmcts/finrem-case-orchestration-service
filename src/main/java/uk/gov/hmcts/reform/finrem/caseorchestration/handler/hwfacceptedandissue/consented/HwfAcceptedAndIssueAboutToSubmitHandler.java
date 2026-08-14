@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.hwfacceptedandissue.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -6,7 +6,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.hwfacceptedandissue.consented.HwfAcceptedAndIssueAboutToSubmitHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.IssueApplicationConsentedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -21,11 +24,11 @@ import java.util.List;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AssignToJudgeReason.DRAFT_CONSENT_ORDER;
 
 /**
- * Changes to this class also require updates to {@link HwfAcceptedAndIssueAboutToSubmitHandler}.
+ * Logics are copied from {@link IssueApplicationConsentedAboutToSubmitHandler}.
  */
 @Slf4j
 @Service
-public class IssueApplicationConsentedAboutToSubmitHandler extends FinremCallbackHandler {
+public class HwfAcceptedAndIssueAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final DefaultsConfiguration defaultsConfiguration;
@@ -33,21 +36,21 @@ public class IssueApplicationConsentedAboutToSubmitHandler extends FinremCallbac
 
     private static final String MISSING_COURT_SELECTION_ERROR = "Case cannot be issued as court selection is missing.";
 
-    public IssueApplicationConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         OnlineFormDocumentService onlineFormDocumentService,
-                                                         DefaultsConfiguration defaultsConfiguration,
-                                                         GenerateCoverSheetService generateCoverSheetService) {
-        super(finremCaseDetailsMapper);
-        this.onlineFormDocumentService = onlineFormDocumentService;
-        this.defaultsConfiguration = defaultsConfiguration;
-        this.generateCoverSheetService = generateCoverSheetService;
-    }
+    public HwfAcceptedAndIssueAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+            OnlineFormDocumentService onlineFormDocumentService,
+            DefaultsConfiguration defaultsConfiguration,
+            GenerateCoverSheetService generateCoverSheetService) {
+            super(finremCaseDetailsMapper);
+            this.onlineFormDocumentService = onlineFormDocumentService;
+            this.defaultsConfiguration = defaultsConfiguration;
+            this.generateCoverSheetService = generateCoverSheetService;
+        }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.ISSUE_APPLICATION.equals(eventType);
+            && EventType.HWF_ACCEPTED_AND_ISSUE.equals(eventType);
     }
 
     @Override
@@ -66,7 +69,6 @@ public class IssueApplicationConsentedAboutToSubmitHandler extends FinremCallbac
 
         caseData.setMiniFormA(onlineFormDocumentService.generateMiniFormA(userAuthorisation, caseDetails));
         populateAssignToJudgeFields(caseData);
-
         return response(caseData);
     }
 
