@@ -32,7 +32,7 @@ class CourtDetailsConfigurationTest {
 
         CourtDetails courtDetails = config.getCourts().get(CONSENTED_MANCHESTER_COURT.getId());
 
-        assertThat(courtDetails.getCourtName()).isEqualTo("Manchester Civil Justice Centre (Civil and Family Courts)");
+        assertThat(courtDetails.getCourtName()).isEqualTo("Manchester County And Family Court");
         assertThat(courtDetails.getCourtAddress()).isEqualTo("1 Bridge Street West, Manchester, M60 9DJ");
         assertThat(courtDetails.getPhoneNumber()).isEqualTo("0300 123 5577");
         assertThat(courtDetails.getEmail()).isEqualTo("manchesterdivorce@justice.gov.uk");
