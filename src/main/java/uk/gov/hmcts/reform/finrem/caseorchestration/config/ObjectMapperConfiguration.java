@@ -31,8 +31,6 @@ public class ObjectMapperConfiguration {
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = JsonMapper
             .builder()
-            // Before the upgrade (Spring Boot 3.x), JavaTimeModule and ParameterNamesModule
-            // were auto-registered by Spring Boot's Jackson auto-configuration.
             .addModule(new JavaTimeModule())
             .addModule(new ParameterNamesModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
