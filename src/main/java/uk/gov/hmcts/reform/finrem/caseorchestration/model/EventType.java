@@ -102,6 +102,7 @@ public enum EventType {
     INVALIDATE_RESPONDENT_ACCESS_CODE("CUI_invalidateRespondentAccessCode"),
     CUI_APPLICANT_DOCUMENT_UPLOAD("CUI_applicantUploadDocuments"),
     CUI_RESPONDENT_DOCUMENT_UPLOAD("CUI_respondentUploadDocuments"),
+    HWF_ACCEPTED_AND_ISSUE("FR_HWFAcceptedAndIssue"),
     @JsonEnumDefaultValue
     NONE("");
 
