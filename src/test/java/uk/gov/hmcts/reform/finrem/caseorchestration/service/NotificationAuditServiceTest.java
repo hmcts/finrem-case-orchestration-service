@@ -52,36 +52,44 @@ class NotificationAuditServiceTest {
         NotificationAudit previousPendingAudit = audit(
             NotificationParty.RESPONDENT,
             NotificationType.POSTAL,
-            PREVIOUS_NOTIFICATION_EVENT_ID
+            PREVIOUS_NOTIFICATION_EVENT_ID,
+            YesOrNo.NO
         );
 
         NotificationAuditWrapper wrapper = NotificationAuditWrapper.builder()
             .notificationsToBeSent(List.of(pendingItem(previousPendingAudit)))
             .build();
+
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails(wrapper))
             .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .build();
+
         doAnswer(invocation -> {
             SendCorrespondenceEvent publishedEvent = invocation.getArgument(0);
             publishedEvent.recordEmailNotificationToSendAudit(NotificationParty.APPLICANT);
             publishedEvent.recordEmailNotificationToSendAudit(NotificationParty.RESPONDENT);
             return null;
         }).when(applicationEventPublisher).publishEvent(event);
+
         notificationAuditService.createAuditsForCorrespondence(
             event,
             EventType.MANAGE_HEARINGS
         );
+
         String notificationEventId = wrapper.getNotificationEventId();
         List<NotificationToBeSentCollectionItem> pending = wrapper.getNotificationsToBeSent();
 
         verify(applicationEventPublisher).publishEvent(event);
+
         assertThat(event.isSimulatingCorrespondence()).isTrue();
         assertThat(notificationEventId).isNotBlank();
         assertThat(event.getNotificationTrackerId()).isEqualTo(notificationEventId);
         assertThat(pending).hasSize(3);
+
         assertThat(pending.getFirst().getValue().getNotificationTrackerId())
             .isEqualTo(PREVIOUS_NOTIFICATION_EVENT_ID);
+
         List<NotificationToBeSentCollectionItem> newPending = pending.subList(
             1,
             pending.size()
@@ -90,45 +98,61 @@ class NotificationAuditServiceTest {
         assertThat(newPending)
             .extracting(item -> item.getValue().getNotificationTrackerId())
             .containsOnly(notificationEventId);
+
         assertThat(newPending)
             .extracting(item -> item.getValue().getWasSent())
             .containsOnly(YesOrNo.NO);
+
         assertThat(newPending)
             .extracting(item -> item.getValue().getEventId())
             .containsOnly(EventType.MANAGE_HEARINGS.getCcdType());
+
         assertThat(newPending)
             .extracting(item -> item.getValue().getEmailTemplate())
             .containsOnly(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR.name());
     }
 
     @Test
-    void givenPendingNotificationMatchesSentAudit_whenUpdateSentAuditsList_thenAuditIsMarkedAsSent() {
+    void givenPendingNotificationMatchesSentAudit_whenUpdateSentAuditsList_thenSuccessfulAuditIsRetained() {
         NotificationAudit pendingAudit = audit(
             NotificationParty.APPLICANT,
             NotificationType.EMAIL,
-            CURRENT_NOTIFICATION_EVENT_ID
+            CURRENT_NOTIFICATION_EVENT_ID,
+            YesOrNo.NO
         );
+
         NotificationAudit sentAudit = audit(
             NotificationParty.APPLICANT,
             NotificationType.EMAIL,
-            CURRENT_NOTIFICATION_EVENT_ID
+            CURRENT_NOTIFICATION_EVENT_ID,
+            YesOrNo.YES
         );
+
         SendCorrespondenceEvent event = buildEventWithPendingAndSentAudits(
             List.of(pendingItem(pendingAudit)),
             new ArrayList<>(List.of(sentAudit))
         );
-        Map<String, Object> result = notificationAuditService.updateSentAuditsList(event);
+
+        Map<String, Object> result =
+            notificationAuditService.updateSentAuditsList(event);
+
         assertThat(result)
             .containsEntry(NOTIFICATIONS_TO_BE_SENT, List.of())
             .containsEntry(NOTIFICATION_EVENT_ID, null);
+
         Map<String, Object> audit = firstNotificationAuditValue(result);
+
         assertThat(audit)
             .containsEntry("party", NotificationParty.APPLICANT.name())
             .containsEntry("type", "email")
             .containsEntry("wasSent", "Yes")
             .containsEntry(
-                "eventId", EventType.MANAGE_HEARINGS.getCcdType())
-            .containsEntry("notificationTrackerId", CURRENT_NOTIFICATION_EVENT_ID
+                "eventId",
+                EventType.MANAGE_HEARINGS.getCcdType()
+            )
+            .containsEntry(
+                "notificationTrackerId",
+                CURRENT_NOTIFICATION_EVENT_ID
             );
     }
 
@@ -137,23 +161,37 @@ class NotificationAuditServiceTest {
         NotificationAudit pendingAudit = audit(
             NotificationParty.RESPONDENT,
             NotificationType.POSTAL,
-            CURRENT_NOTIFICATION_EVENT_ID);
+            CURRENT_NOTIFICATION_EVENT_ID,
+            YesOrNo.NO
+        );
+
         NotificationAudit sentAudit = audit(
             NotificationParty.RESPONDENT,
             NotificationType.EMAIL,
-            CURRENT_NOTIFICATION_EVENT_ID);
+            CURRENT_NOTIFICATION_EVENT_ID,
+            YesOrNo.YES
+        );
+
         SendCorrespondenceEvent event = buildEventWithPendingAndSentAudits(
             List.of(pendingItem(pendingAudit)),
-            new ArrayList<>(List.of(sentAudit)));
-        Map<String, Object> result = notificationAuditService.updateSentAuditsList(event);
-        assertThat(result).containsEntry(NOTIFICATIONS_TO_BE_SENT, List.of());
+            new ArrayList<>(List.of(sentAudit))
+        );
+
+        Map<String, Object> result =
+            notificationAuditService.updateSentAuditsList(event);
+
+        assertThat(result)
+            .containsEntry(NOTIFICATIONS_TO_BE_SENT, List.of());
+
         assertThat(notificationAuditValues(result)).anySatisfy(audit ->
             assertThat(audit)
                 .containsEntry("party", NotificationParty.RESPONDENT.name())
                 .containsEntry("type", "postal")
                 .containsEntry("wasSent", "No")
                 .containsEntry(
-                    "eventId", EventType.MANAGE_HEARINGS.getCcdType())
+                    "eventId",
+                    EventType.MANAGE_HEARINGS.getCcdType()
+                )
                 .containsEntry(
                     "notificationTrackerId",
                     CURRENT_NOTIFICATION_EVENT_ID
@@ -166,15 +204,24 @@ class NotificationAuditServiceTest {
         NotificationAudit previousPendingAudit = audit(
             NotificationParty.RESPONDENT,
             NotificationType.POSTAL,
-            PREVIOUS_NOTIFICATION_EVENT_ID);
+            PREVIOUS_NOTIFICATION_EVENT_ID,
+            YesOrNo.NO
+        );
+
         NotificationAudit currentPendingAudit = audit(
             NotificationParty.APPLICANT,
             NotificationType.EMAIL,
-            CURRENT_NOTIFICATION_EVENT_ID);
+            CURRENT_NOTIFICATION_EVENT_ID,
+            YesOrNo.NO
+        );
+
         NotificationAudit currentSentAudit = audit(
             NotificationParty.APPLICANT,
             NotificationType.EMAIL,
-            CURRENT_NOTIFICATION_EVENT_ID);
+            CURRENT_NOTIFICATION_EVENT_ID,
+            YesOrNo.YES
+        );
+
         SendCorrespondenceEvent event = buildEventWithPendingAndSentAudits(
             List.of(
                 pendingItem(previousPendingAudit),
@@ -182,16 +229,28 @@ class NotificationAuditServiceTest {
             ),
             new ArrayList<>(List.of(currentSentAudit))
         );
-        Map<String, Object> result = notificationAuditService.updateSentAuditsList(event);
-        List<Map<String, Object>> remainingPending = notificationToBeSentValues(result);
+
+        Map<String, Object> result =
+            notificationAuditService.updateSentAuditsList(event);
+
+        List<Map<String, Object>> remainingPending =
+            notificationToBeSentValues(result);
+
         assertThat(remainingPending).hasSize(1);
+
         assertThat(remainingPending.getFirst())
             .containsEntry(
                 "party",
                 NotificationParty.RESPONDENT.name()
-            ).containsEntry("type", "postal")
-            .containsEntry("notificationTrackerId", PREVIOUS_NOTIFICATION_EVENT_ID);
-        assertThat(result).containsEntry(NOTIFICATION_EVENT_ID, null);
+            )
+            .containsEntry("type", "postal")
+            .containsEntry(
+                "notificationTrackerId",
+                PREVIOUS_NOTIFICATION_EVENT_ID
+            );
+
+        assertThat(result)
+            .containsEntry(NOTIFICATION_EVENT_ID, null);
     }
 
     private SendCorrespondenceEvent buildEventWithPendingAndSentAudits(
@@ -202,7 +261,9 @@ class NotificationAuditServiceTest {
             .caseDetails(
                 caseDetails(
                     NotificationAuditWrapper.builder()
-                        .notificationEventId(NotificationAuditServiceTest.CURRENT_NOTIFICATION_EVENT_ID)
+                        .notificationEventId(
+                            NotificationAuditServiceTest.CURRENT_NOTIFICATION_EVENT_ID
+                        )
                         .notificationsToBeSent(pending)
                         .build()
                 )
@@ -224,10 +285,11 @@ class NotificationAuditServiceTest {
     private NotificationAudit audit(
         NotificationParty party,
         NotificationType type,
-        String notificationTrackerId
+        String notificationTrackerId,
+        YesOrNo wasSent
     ) {
         return NotificationAudit.builder()
-            .wasSent(YesOrNo.NO)
+            .wasSent(wasSent)
             .eventId(EventType.MANAGE_HEARINGS.getCcdType())
             .party(party.name())
             .type(type)
