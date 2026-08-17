@@ -40,11 +40,11 @@ public class HwfAcceptedAndIssueAboutToSubmitHandler extends FinremAboutToSubmit
             OnlineFormDocumentService onlineFormDocumentService,
             DefaultsConfiguration defaultsConfiguration,
             IssueApplicationService issueApplicationService) {
-            super(finremCaseDetailsMapper);
-            this.onlineFormDocumentService = onlineFormDocumentService;
-            this.defaultsConfiguration = defaultsConfiguration;
-            this.issueApplicationService = issueApplicationService;
-        }
+        super(finremCaseDetailsMapper);
+        this.onlineFormDocumentService = onlineFormDocumentService;
+        this.defaultsConfiguration = defaultsConfiguration;
+        this.issueApplicationService = issueApplicationService;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
