@@ -6,10 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -22,6 +25,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
@@ -32,9 +37,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNABLE_TO_QUANTIFY;
@@ -62,6 +69,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1Or
 class ExpressCaseServiceTest {
 
     @InjectMocks
+    @Spy
     private ExpressCaseService expressCaseService;
 
     @Mock
@@ -88,12 +96,18 @@ class ExpressCaseServiceTest {
         assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void shouldSetExpressEnrollmentStatusToWithdrawn(Boolean isAssetsChecklistV3) {
-        FinremCaseData caseData = createExpressCaseWithAssertV3(isAssetsChecklistV3);
+    @Test
+    void shouldSetExpressEnrollmentStatusToWithdrawn() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
         expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
         assertEquals(WITHDRAWN, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
+    }
+
+    @Test
+    void shouldSetExpressEnrollmentStatusToEnrolled() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        expressCaseService.setExpressCaseEnrollmentStatusToEnrolled(caseData);
+        assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
     @ParameterizedTest
@@ -127,7 +141,7 @@ class ExpressCaseServiceTest {
 
         expressCaseService.setWhichExpressCaseAmendmentLabelToShow(caseDataOnceAmended, caseDataBeforeAmending);
         assertEquals(LabelForExpressCaseAmendment.UNSUITABLE_FOR_EXPRESS_LABEL,
-                caseDataOnceAmended.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
+            caseDataOnceAmended.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
     }
 
     /*
@@ -137,7 +151,7 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideAmendedExpressCaseSuitableScenarios")
     void setWhichExpressCaseAmendmentLabelToShow_shouldSetSuitable_WhenCaseAmendmentDoesNotDisqualify(
-            Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
+        Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
 
         FinremCaseData dataBeforeAmending = caseDataBeforeAndAfterAmending.getLeft();
         FinremCaseData amendedData = caseDataBeforeAndAfterAmending.getRight();
@@ -155,7 +169,7 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideAmendedExpressCaseScenariosNeedingNoLabel")
     void setWhetherDisqualifiedFromExpress_shouldSetNoLabel_WhenCaseRemainsUnsuitableForExpress(
-            Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
+        Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
 
         FinremCaseData dataBeforeAmending = caseDataBeforeAndAfterAmending.getLeft();
         FinremCaseData amendedData = caseDataBeforeAndAfterAmending.getRight();
@@ -168,8 +182,8 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideIsExpressCase")
     void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabledCaseDetails(boolean isExpressPilotEnabled,
-                                                                         CaseDetails caseDetails,
-                                                                         boolean expected) {
+                                                                                         CaseDetails caseDetails,
+                                                                                         boolean expected) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(isExpressPilotEnabled);
         assertEquals(expected, expressCaseService.isExpressCase(caseDetails));
     }
@@ -177,8 +191,8 @@ class ExpressCaseServiceTest {
     @ParameterizedTest
     @MethodSource("provideIsExpressCaseFinRemCaseData")
     void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabledFinRemCaseData(boolean isExpressPilotEnabled,
-                                                                              FinremCaseData caseData,
-                                                                              boolean expected) {
+                                                                                            FinremCaseData caseData,
+                                                                                            boolean expected) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(isExpressPilotEnabled);
         assertEquals(expected, expressCaseService.isExpressCase(caseData));
     }
@@ -219,6 +233,94 @@ class ExpressCaseServiceTest {
         expressCaseService.clearUnusedEstimatedAssetsChecklist(caseData);
 
         assertEquals(v2Value, caseData.getEstimatedAssetsChecklistV2());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void canSetExpressPilotStatus_returnsFalseForExpressPilotDisabled(boolean stopEnrolledCases) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData, stopEnrolledCases)).isFalse();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void canSetExpressPilotStatus_returnsFalseForCaseDoesNotQualifyForExpress(boolean stopEnrolledCases) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(false);
+
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData, stopEnrolledCases)).isFalse();
+        verify(expressCaseService).qualifiesForExpress(caseData);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void canSetExpressPilotStatus_returnsFalseForCaseHasHearing(boolean stopEnrolledCases) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.hasNoHearings()).thenReturn(false);
+        FinremCaseData caseData = FinremCaseData.builder().manageHearingsWrapper(manageHearingsWrapper).build();
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
+
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData, stopEnrolledCases)).isFalse();
+        verify(expressCaseService).qualifiesForExpress(caseData);
+    }
+
+    @ValueSource(booleans = {true})
+    @NullSource
+    @ParameterizedTest
+    void canSetExpressPilotStatus_returnsFalseForEnrolled(Boolean stopEnrolledCases) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.hasNoHearings()).thenReturn(true);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(manageHearingsWrapper)
+            .expressCaseWrapper(ExpressCaseWrapper.builder().expressCaseParticipation(ENROLLED).build())
+            .build();
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
+
+        if (stopEnrolledCases == null) {
+            assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isFalse();
+        } else {
+            assertThat(expressCaseService.canSetExpressPilotStatus(caseData, stopEnrolledCases)).isFalse();
+        }
+        verify(expressCaseService).qualifiesForExpress(caseData);
+        verify(manageHearingsWrapper).hasNoHearings();
+    }
+
+    @ParameterizedTest
+    @EnumSource(ExpressCaseParticipation.class)
+    void canSetExpressPilotStatus_returnsTrueForAllParticipationTypesWhenNotStopEnrolled(ExpressCaseParticipation expressCaseParticipation) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.hasNoHearings()).thenReturn(true);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(manageHearingsWrapper)
+            .expressCaseWrapper(ExpressCaseWrapper.builder().expressCaseParticipation(expressCaseParticipation).build())
+            .build();
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
+
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData, false)).isTrue();
+        verify(expressCaseService).qualifiesForExpress(caseData);
+        verify(manageHearingsWrapper).hasNoHearings();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ExpressCaseParticipation.class, names = {"WITHDRAWN", "DOES_NOT_QUALIFY"})
+    void canSetExpressPilotStatus_returnsTrueForWithdrawnOrDoesNotQualify(ExpressCaseParticipation expressCaseParticipation) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.hasNoHearings()).thenReturn(true);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(manageHearingsWrapper)
+            .expressCaseWrapper(ExpressCaseWrapper.builder().expressCaseParticipation(expressCaseParticipation).build())
+            .build();
+        when(expressCaseService.qualifiesForExpress(caseData)).thenReturn(true);
+
+        assertThat(expressCaseService.canSetExpressPilotStatus(caseData)).isTrue();
+        verify(expressCaseService).qualifiesForExpress(caseData);
+        verify(manageHearingsWrapper).hasNoHearings();
     }
 
     private static Stream<Arguments> provideIsExpressCase() {
@@ -340,9 +442,9 @@ class ExpressCaseServiceTest {
         Pair<FinremCaseData, FinremCaseData> amendedWasNullNowQualifies = Pair.of(nullEnrollmentData, dataQualifies);
 
         return Stream.of(
-                amendedStillEnrolled,
-                amendedNowQualifies,
-                amendedWasNullNowQualifies
+            amendedStillEnrolled,
+            amendedNowQualifies,
+            amendedWasNullNowQualifies
         );
     }
 
@@ -367,8 +469,8 @@ class ExpressCaseServiceTest {
 
         // Case did not qualify for enrollment, and still doesn't upon amendment
         return Stream.of(
-                amendedStillDoesNotQualify,
-                amendedWasNullStillDoesNotQualify
+            amendedStillDoesNotQualify,
+            amendedWasNullStillDoesNotQualify
         );
     }
 

@@ -40,6 +40,7 @@ class PaperCaseCreateContestedAboutToStartHandlerTest {
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData()).isEqualTo(callbackRequest.getFinremCaseData());
+        verify(onStartDefaultValueService).setPaperEstimatedAssetsChecklistVersion(callbackRequest);
         verify(onStartDefaultValueService).defaultApplicantOrganisationPolicy(callbackRequest);
         verify(onStartDefaultValueService).defaultRespondentOrganisationPolicy(callbackRequest);
         verify(onStartDefaultValueService).defaultCivilPartnershipField(callbackRequest);

@@ -132,4 +132,11 @@ class AmendApplicationContestedAboutToStartHandlerTest {
             () -> verifyNoMoreInteractions(assignCaseAccessService)
         );
     }
+
+    @Test
+    void givenCase_whenHandled_thenVerifyAssetSetterUsed() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+        handler.handle(callbackRequest, AUTH_TOKEN);
+        verify(onStartDefaultValueService).setFormAEstimatedAssetsChecklistVersion(callbackRequest);
+    }
 }

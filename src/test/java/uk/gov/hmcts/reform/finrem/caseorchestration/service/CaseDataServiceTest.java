@@ -13,13 +13,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -257,6 +263,40 @@ class CaseDataServiceTest {
             "East London Family Court, 6th and 7th Floor, 11 Westferry Circus, London, E14 4HD");
         assertThat(caseDetails.getData()).containsEntry(CONSENT_ORDER_FRC_EMAIL, "FRCLondon@justice.gov.uk");
         assertThat(caseDetails.getData()).containsEntry(CONSENT_ORDER_FRC_PHONE, "0300 123 5577");
+    }
+
+    @Test
+    void shouldPopulateFinancialRemediesCourtDetails_finrem() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .regionWrapper(RegionWrapper.builder()
+                .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
+                    .regionList(Region.LONDON)
+                    .londonFrcList(RegionLondonFrc.LONDON)
+                    .courtListWrapper(DefaultCourtListWrapper.builder()
+                        .cfcCourtList(CfcCourt.EAST_LONDON_FAMILY_COURT).build())
+                    .build())
+                .build())
+            .build();
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(caseData).build();
+
+        caseDataService.setFinancialRemediesCourtDetails(finremCaseDetails);
+
+        ConsentOrderWrapper wrapper = finremCaseDetails.getData().getConsentOrderWrapper();
+        assertThat(wrapper)
+            .extracting(
+                ConsentOrderWrapper::getConsentOrderFrcName,
+                ConsentOrderWrapper::getConsentOrderFrcAddress,
+                ConsentOrderWrapper::getConsentOrderFrcEmail,
+                ConsentOrderWrapper::getConsentOrderFrcPhone
+            )
+            .contains(
+                "East London Family Court",
+                "East London Family Court, 6th and 7th Floor, 11 Westferry Circus, London, E14 4HD",
+                "FRCLondon@justice.gov.uk",
+                "0300 123 5577"
+            )
+        ;
     }
 
     @Test

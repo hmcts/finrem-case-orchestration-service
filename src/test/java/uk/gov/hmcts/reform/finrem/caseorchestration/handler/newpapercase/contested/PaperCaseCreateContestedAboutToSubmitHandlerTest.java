@@ -1,31 +1,25 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.newpapercase.contested;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.ApplicantSolicitorDetailsValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -36,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,15 +38,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG2_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -70,10 +63,8 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest {
     @Mock
     private ApplicantSolicitorDetailsValidator applicantSolicitorDetailsValidator;
 
-    @Spy
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(
-        new ObjectMapper().registerModule(new JavaTimeModule())
-    );
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @InjectMocks
     private PaperCaseCreateContestedAboutToSubmitHandler handler;
@@ -220,56 +211,32 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest {
     void givenAnyCase_whenHandle_thenFinancialRemediesCourtDetailsSet() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
 
-        CaseDetails oldCaseDetails = mock(CaseDetails.class);
-        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(oldCaseDetails);
-
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        InOrder inOrder = Mockito.inOrder(finremCaseDetailsMapper, caseDataService);
-        inOrder.verify(finremCaseDetailsMapper, times(2)).mapToCaseDetails(callbackRequest.getCaseDetails());
-        inOrder.verify(caseDataService).setFinancialRemediesCourtDetails(oldCaseDetails);
+        verify(caseDataService).setFinancialRemediesCourtDetails(callbackRequest.getCaseDetails());
     }
 
     @Test
     void givenAnyCase_whenHandle_thenExpressCaseEnrollmentStatusSet() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
 
-        CaseDetails oldCaseDetails = mock(CaseDetails.class);
-        when(oldCaseDetails.getData()).thenReturn(Map.of());
-        FinremCaseData caseData = mock(FinremCaseData.class);
-
-        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(oldCaseDetails);
-        when(finremCaseDetailsMapper.mapToFinremCaseData(oldCaseDetails.getData())).thenReturn(caseData);
-
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        InOrder inOrder = Mockito.inOrder(finremCaseDetailsMapper, expressCaseService);
-        inOrder.verify(finremCaseDetailsMapper).mapToCaseDetails(callbackRequest.getCaseDetails());
-        inOrder.verify(finremCaseDetailsMapper).mapToFinremCaseData(oldCaseDetails.getData());
-        inOrder.verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
+        verify(expressCaseService).setExpressCaseEnrollmentStatus(callbackRequest.getFinremCaseData());
     }
 
     @Test
     void givenAnyCase_whenHandle_thenValidateCaseDataAndPopulateErrors() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
 
-        CaseDetails oldCaseDetails = mock(CaseDetails.class);
-        when(oldCaseDetails.getData()).thenReturn(Map.of());
-        FinremCaseData caseData = mock(FinremCaseData.class);
-
-        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(oldCaseDetails);
-        when(finremCaseDetailsMapper.mapToFinremCaseData(oldCaseDetails.getData())).thenReturn(caseData);
-        when(applicantSolicitorDetailsValidator.validate(caseData))
+        when(applicantSolicitorDetailsValidator.validate(callbackRequest.getFinremCaseData()))
             .thenReturn(List.of("error1"));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        var handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(handle.getErrors()).containsExactly("error1");
 
-        InOrder inOrder = Mockito.inOrder(finremCaseDetailsMapper, applicantSolicitorDetailsValidator);
-        inOrder.verify(finremCaseDetailsMapper).mapToCaseDetails(callbackRequest.getCaseDetails());
-        inOrder.verify(finremCaseDetailsMapper).mapToFinremCaseData(oldCaseDetails.getData());
-        inOrder.verify(applicantSolicitorDetailsValidator).validate(caseData);
+        verify(applicantSolicitorDetailsValidator).validate(callbackRequest.getFinremCaseData());
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
@@ -284,26 +251,33 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenContestedCase_whenApplicantAndRespondentOrganisationPolicyAreTheSame_thenShowError(boolean happyPath) {
-        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
-        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
-        when(callbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
-        FinremCaseData finremCaseData = spy(FinremCaseData.class);
-        when(finremCaseDetails.getState()).thenReturn(State.APPLICATION_SUBMITTED);
-        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
-        when(finremCaseDetails.getCaseType()).thenReturn(CaseType.CONTESTED);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
-        when(finremCaseData.getApplicantOrganisationPolicy()).thenReturn(OrganisationPolicy
-            .builder().organisation(Organisation.builder().organisationID(TEST_ORG_ID).build())
-            .build());
-        when(finremCaseData.getRespondentOrganisationPolicy()).thenReturn(OrganisationPolicy
-            .builder().organisation(Organisation.builder().organisationID(happyPath ? TEST_ORG2_ID : TEST_ORG_ID).build())
-            .build());
+        try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class)) {
+            mockedStatic.when(() -> ContactDetailsValidator.validateOrganisationPolicy(callbackRequest.getFinremCaseData()))
+                .thenReturn(happyPath ? List.of() : List.of("Solicitor can only represent one party."));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        if (happyPath) {
-            assertThat(response.getErrors()).isEmpty();
-        } else {
-            assertThat(response.getErrors()).contains("Solicitor can only represent one party.");
+            var response = handler.handle(callbackRequest, AUTH_TOKEN);
+            if (happyPath) {
+                assertThat(response.getErrors()).isEmpty();
+            } else {
+                assertThat(response.getErrors()).contains("Solicitor can only represent one party.");
+            }
         }
+    }
+
+    /*
+     * Any value can be used in place of listVersion, at the time of writing.
+     * Just preferred to use correct enums, to cover logic changing later.
+     */
+    @ParameterizedTest
+    @EnumSource(value = EstimatedAssetsChecklistVersion.class)
+    void givenCaseDataWithTemporaryEstimatedAssetsChecklistVersion_whenHandle_thenTemporaryFieldSanitised(
+        EstimatedAssetsChecklistVersion listVersion) {
+        verifyTemporaryFieldsWereSanitised(handler,
+            finremCaseDetailsMapper, new HashMap<>(Map.of(
+                "estimatedAssetsChecklistVersion", listVersion
+            ))
+        );
     }
 }
