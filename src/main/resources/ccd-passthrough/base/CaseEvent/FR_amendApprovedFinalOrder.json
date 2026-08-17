@@ -1,0 +1,4 @@
+[ {
+  "ID" : "FR_amendApprovedFinalOrder",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdAboutToSubmitEvent"
+} ]

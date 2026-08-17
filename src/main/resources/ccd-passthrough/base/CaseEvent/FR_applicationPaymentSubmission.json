@@ -1,0 +1,8 @@
+[ {
+  "ID" : "FR_applicationPaymentSubmission",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/case-orchestration/assign-applicant-solicitor",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdAboutToSubmitEvent",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/case-orchestration/payment-confirmation",
+  "RetriesTimeoutURLAboutToSubmitEvent" : "0",
+  "RetriesTimeoutURLSubmittedEvent" : "3,4,5"
+} ]

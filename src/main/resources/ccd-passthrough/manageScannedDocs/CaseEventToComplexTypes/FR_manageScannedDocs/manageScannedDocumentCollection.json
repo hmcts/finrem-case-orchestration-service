@@ -1,0 +1,98 @@
+[ {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "selectForUpdate",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "caseDocuments",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/01/2017",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "scannedDate",
+  "FieldType" : "DateTime",
+  "DisplayContext" : "READONLY",
+  "SecurityClassification" : "Public"
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "fileName",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "manageScannedDocumentCollection.selectForUpdate=\"Yes\""
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "caseDocumentType",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "manageScannedDocumentCollection.selectForUpdate=\"Yes\""
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "caseDocumentOther",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "manageScannedDocumentCollection.selectForUpdate=\"Yes\" AND manageScannedDocumentCollection.caseDocumentType=\"other\""
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "hearingDetails",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "manageScannedDocumentCollection.selectForUpdate=\"Yes\""
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentiality",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "manageScannedDocumentCollection.selectForUpdate=\"Yes\" AND manageScannedDocumentCollection.caseDocumentType!=\"Without Prejudice offers\" AND manageScannedDocumentCollection.caseDocumentType!=\"Attendance Sheets\" AND manageScannedDocumentCollection.caseDocumentType!=\"Judicial notes\" AND manageScannedDocumentCollection.caseDocumentType!=\"Judgment\" AND manageScannedDocumentCollection.caseDocumentType!=\"Witness Summons\" AND manageScannedDocumentCollection.caseDocumentType!=\"Transcript\""
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "caseDocumentFdr",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "manageScannedDocumentCollection.selectForUpdate=\"Yes\" AND manageScannedDocumentCollection.caseDocumentConfidentiality=\"No\" AND manageScannedDocumentCollection.caseDocumentType!=\"Without Prejudice offers\" AND manageScannedDocumentCollection.caseDocumentType!=\"Attendance Sheets\" AND manageScannedDocumentCollection.caseDocumentType!=\"Judicial notes\" AND manageScannedDocumentCollection.caseDocumentType!=\"Judgment\" AND manageScannedDocumentCollection.caseDocumentType!=\"Witness Summons\" AND manageScannedDocumentCollection.caseDocumentType!=\"Transcript\""
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "caseDocumentParty",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "manageScannedDocumentCollection.selectForUpdate=\"Yes\" AND manageScannedDocumentCollection.caseDocumentConfidentiality=\"No\" AND manageScannedDocumentCollection.caseDocumentFdr=\"No\" AND manageScannedDocumentCollection.caseDocumentType!=\"Attendance Sheets\" AND manageScannedDocumentCollection.caseDocumentType!=\"Judicial notes\" AND manageScannedDocumentCollection.caseDocumentType!=\"Judgment\" AND manageScannedDocumentCollection.caseDocumentType!=\"Witness Summons\" AND manageScannedDocumentCollection.caseDocumentType!=\"Transcript\""
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "caseDocumentUploadDateTime",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "manageScannedDocumentCollection=\"IMPOSSIBLAW\""
+}, {
+  "LiveFrom" : "01/01/2017",
+  "ID" : "FR_manageScannedDocs",
+  "CaseEventID" : "FR_manageScannedDocs",
+  "CaseFieldID" : "manageScannedDocumentCollection",
+  "ListElementCode" : "exceptionRecordReference",
+  "FieldType" : "Text",
+  "DisplayContext" : "READONLY",
+  "SecurityClassification" : "Public",
+  "FieldShowCondition" : "manageScannedDocumentCollection.selectForUpdate=\"Yes\""
+} ]

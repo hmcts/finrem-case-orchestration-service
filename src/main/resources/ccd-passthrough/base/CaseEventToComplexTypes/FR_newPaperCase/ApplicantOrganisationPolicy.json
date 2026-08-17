@@ -1,0 +1,30 @@
+[ {
+  "LiveFrom" : "01/01/2017",
+  "ID" : "FR_newPaperCase",
+  "CaseEventID" : "FR_newPaperCase",
+  "CaseFieldID" : "ApplicantOrganisationPolicy",
+  "ListElementCode" : "OrgPolicyCaseAssignedRole",
+  "DefaultValue" : "[APPSOLICITOR]",
+  "EventElementLabel" : "Applicant Organisation Policy",
+  "FieldDisplayOrder" : 1,
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "divorceCaseNumber=\"IMPOSSIBLAW\""
+}, {
+  "LiveFrom" : "05/08/2020",
+  "ID" : "FR_newPaperCase",
+  "CaseEventID" : "FR_newPaperCase",
+  "CaseFieldID" : "ApplicantOrganisationPolicy",
+  "ListElementCode" : "Organisation.OrganisationID",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "05/08/2020",
+  "ID" : "FR_newPaperCase",
+  "CaseEventID" : "FR_newPaperCase",
+  "CaseFieldID" : "ApplicantOrganisationPolicy",
+  "ListElementCode" : "OrgPolicyReference",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "",
+  "DisplayContext" : "OPTIONAL"
+} ]

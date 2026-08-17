@@ -1,0 +1,5 @@
+[ {
+  "ID" : "FR_HWFFeeAccountDebited",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-orchestration/remove-case-data-state",
+  "RetriesTimeoutURLAboutToSubmitEvent" : "3,4,5"
+} ]

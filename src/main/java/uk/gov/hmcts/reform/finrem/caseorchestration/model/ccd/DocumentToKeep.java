@@ -10,7 +10,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_documentToRemove", generate = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -18,8 +22,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DocumentToKeep {
+    @CCD(label = "Document ID", searchable = false)
     private String documentId;
+    @CCD(label = "Document", searchable = false, typeOverride = FieldType.Document)
     private CaseDocument caseDocument;
+    @CCD(label = "Document Upload Date", searchable = false)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime caseDocumentUploadedDate;
 }

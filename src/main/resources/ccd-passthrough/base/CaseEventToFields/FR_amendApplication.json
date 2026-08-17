@@ -1,0 +1,43 @@
+[ {
+  "CaseFieldID" : "applicantRepresented",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "applicantSolicitorAddress",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/amend-application-validate-applicant-solicitor-address",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "applicantDetailsLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "applicantResideOutsideUK",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/amend-application-validate-applicant-address",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "respondentRepresentedLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "respondentResideOutsideUK",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "allocatedToBeHeardAtHighCourtJudgeLevel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "applicantAttendedMIAMLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/miam-attend-exempt-check"
+}, {
+  "CaseFieldID" : "evidenceUnavailableDomesticAbuseMIAM",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/miam-attend-exempt-check"
+}, {
+  "CaseFieldID" : "evidenceUnavailableUrgencyMIAM",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/miam-attend-exempt-check"
+}, {
+  "CaseFieldID" : "evidenceUnavailablePreviousAttendanceMIAM",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/miam-attend-exempt-check"
+}, {
+  "CaseFieldID" : "evidenceUnavailableOtherGroundsMIAM",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/miam-attend-exempt-check"
+} ]

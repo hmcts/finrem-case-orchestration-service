@@ -19,6 +19,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCrudPlus2RolesSfvgopAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerApproverCaseworkerCaaCrudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceSystemupdateCrudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.DefaultAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerApproverCrudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerApproverCrudCaseworkerCaaCudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerCaaCudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCrudPlus1RolesGpeopvAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyJudiciaryCrAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.RESPBARRISTERRESPSOLICITORCudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.RESPBARRISTERCudRESPSOLICITORCrudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminRPlus1RolesEhdmahAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesOpciwwAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedySolicitorCrudAccess;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -27,71 +43,256 @@ import java.util.Set;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ContactDetailsWrapper {
+    @CCD(
+            label = "Does this update include a change in representation for either party?",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudPlus2RolesSfvgopAccess.class, CaseworkerApproverCaseworkerCaaCrudAccess.class, CaseworkerDivorceSystemupdateCrudAccess.class}
+    )
     private YesOrNo updateIncludesRepresentativeChange;
+    @CCD(
+            label = "Select Party to which the change in representation applies: ",
+            searchable = false,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudPlus2RolesSfvgopAccess.class, CaseworkerApproverCaseworkerCaaCrudAccess.class, CaseworkerDivorceSystemupdateCrudAccess.class}
+    )
     private NoticeOfChangeParty nocParty;
+    @CCD(
+            label = "          ",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {DefaultAccess.class, CaseworkerApproverCrudAccess.class}
+    )
     private YesOrNo applicantRepresented;
+    @CCD(
+            label = "          ",
+            searchable = false,
+            typeOverride = FieldType.AddressUK,
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class}
+    )
     private Address applicantSolicitorAddress;
+    @CCD(
+            label = "Solicitor’s name",
+            searchable = false,
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class}
+    )
     private String applicantSolicitorName;
+    @CCD(
+            label = "Solicitor’s firm",
+            searchable = false,
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class}
+    )
     private String applicantSolicitorFirm;
+    @CCD(
+            label = "Your reference number",
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class}
+    )
     private String solicitorReference;
+    @CCD(
+            label = "Phone Number",
+            searchable = false,
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class}
+    )
     private String applicantSolicitorPhone;
+    @CCD(
+            label = "Email",
+            searchable = false,
+            typeOverride = FieldType.Email,
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class}
+    )
     private String applicantSolicitorEmail;
+    @CCD(label = "DX number", searchable = false, access = {DefaultAccess.class, CaseworkerApproverCrudAccess.class})
     @JsonProperty("applicantSolicitorDXnumber")
     private String applicantSolicitorDxNumber;
+    @CCD(
+            label = "Do you consent to receive emails from the court about your case ?",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class}
+    )
     private YesOrNo applicantSolicitorConsentForEmails;
+    @CCD(label = "Current First and Middle names", access = {DefaultAccess.class, CaseworkerCaaCudAccess.class})
     @JsonProperty("applicantFMName")
     private String applicantFmName;
+    @CCD(label = "Current Last Name", access = {DefaultAccess.class, CaseworkerCaaCudAccess.class})
     @JsonProperty("applicantLName")
     private String applicantLname;
+    @CCD(label = "          ", searchable = false, typeOverride = FieldType.AddressUK, access = {DefaultAccess.class})
     private Address applicantAddress;
+    @CCD(
+            label = "Does the applicant live outside of the UK?",
+            hint = "If Yes, please enter the Country in the field below.",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {DefaultAccess.class}
+    )
     private YesOrNo applicantResideOutsideUK;
+    @CCD(label = "Phone Number", searchable = false, access = {DefaultAccess.class})
     private String applicantPhone;
+    @CCD(label = "Email", searchable = false, typeOverride = FieldType.Email, access = {DefaultAccess.class})
     private String applicantEmail;
+    @CCD(
+            label = "Keep the Applicant's contact details private from the Respondent?",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudPlus1RolesGpeopvAccess.class, CaseworkerDivorceFinancialremedyJudiciaryCrAccess.class}
+    )
     @JsonProperty("applicantAddressConfidential")
     private YesOrNo applicantAddressHiddenFromRespondent;
+    @CCD(
+            label = "Current First and Middle names",
+            access = {DefaultAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class, CaseworkerCaaCudAccess.class}
+    )
     @JsonProperty("respondentFMName")
     private String respondentFmName;
+    @CCD(
+            label = "Current Last Name",
+            access = {DefaultAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class, CaseworkerCaaCudAccess.class}
+    )
     @JsonProperty("respondentLName")
     private String respondentLname;
+    @CCD(
+            label = "          ",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {DefaultAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class, CaseworkerApproverCrudAccess.class}
+    )
     @JsonProperty("respondentRepresented")
     private YesOrNo contestedRespondentRepresented;
+    @CCD(
+            label = "Solicitor’s name",
+            searchable = false,
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class, RESPBARRISTERCudRESPSOLICITORCrudAccess.class}
+    )
     @JsonProperty("rSolicitorName")
     private String respondentSolicitorName;
+    @CCD(
+            label = "Solicitor’s firm",
+            searchable = false,
+            access = {DefaultAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class}
+    )
     @JsonProperty("rSolicitorFirm")
     private String respondentSolicitorFirm;
+    @CCD(
+            label = "Respondent solicitor’s reference",
+            searchable = false,
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class, RESPBARRISTERCudRESPSOLICITORCrudAccess.class}
+    )
     @JsonProperty("rSolicitorReference")
     private String respondentSolicitorReference;
+    @CCD(
+            label = "          ",
+            searchable = false,
+            typeOverride = FieldType.AddressUK,
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class, RESPBARRISTERCudRESPSOLICITORCrudAccess.class}
+    )
     @JsonProperty("rSolicitorAddress")
     private Address respondentSolicitorAddress;
+    @CCD(
+            label = "Phone Number",
+            searchable = false,
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class, RESPBARRISTERCudRESPSOLICITORCrudAccess.class}
+    )
     @JsonProperty("rSolicitorPhone")
     private String respondentSolicitorPhone;
+    @CCD(
+            label = "Email",
+            searchable = false,
+            typeOverride = FieldType.Email,
+            access = {DefaultAccess.class, CaseworkerApproverCrudCaseworkerCaaCudAccess.class, RESPBARRISTERCudRESPSOLICITORCrudAccess.class}
+    )
     @JsonProperty("rSolicitorEmail")
     private String respondentSolicitorEmail;
+    @CCD(
+            label = "DX number",
+            searchable = false,
+            access = {DefaultAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class, CaseworkerApproverCrudAccess.class}
+    )
     @JsonProperty("rSolicitorDXnumber")
     private String respondentSolicitorDxNumber;
+    @CCD(
+            label = "          ",
+            searchable = false,
+            typeOverride = FieldType.AddressUK,
+            access = {DefaultAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private Address respondentAddress;
+    @CCD(
+            label = "Does the respondent live outside of the UK?",
+            hint = "If yes, please enter the Country in the field below.",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {DefaultAccess.class}
+    )
     private YesOrNo respondentResideOutsideUK;
+    @CCD(
+            label = "Phone Number",
+            searchable = false,
+            access = {DefaultAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private String respondentPhone;
+    @CCD(
+            label = "Email",
+            searchable = false,
+            typeOverride = FieldType.Email,
+            access = {DefaultAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private String respondentEmail;
+    @CCD(
+            label = "Keep the Respondent's contact details private from the Applicant?",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {DefaultAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     @JsonProperty("respondentAddressConfidential")
     private YesOrNo respondentAddressHiddenFromApplicant;
     // solicitorXXXX fields are for consented cases
+    @CCD(ignore = true)
     private String solicitorName;
+    @CCD(
+            label = "Solicitor Firm",
+            searchable = false,
+            access = {CaseworkerDivorceFinancialremedyCourtadminRPlus1RolesEhdmahAccess.class, CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesOpciwwAccess.class}
+    )
     private String solicitorFirm;
+    @CCD(ignore = true)
     private Address solicitorAddress;
+    @CCD(ignore = true)
     private String solicitorPhone;
+    @CCD(ignore = true)
     private String solicitorEmail;
+    @CCD(ignore = true)
     @JsonProperty("solicitorDXnumber")
     private String solicitorDxNumber;
+    @CCD(ignore = true)
     private YesOrNo solicitorAgreeToReceiveEmails;
+    @CCD(ignore = true)
     @JsonProperty("appRespondentFMName")
     private String appRespondentFmName;
+    @CCD(ignore = true)
     private String appRespondentLName;
+    @CCD(ignore = true)
     @JsonProperty("appRespondentRep")
     private YesOrNo consentedRespondentRepresented;
+    @CCD(
+            label = "  ",
+            searchable = false,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudPlus1RolesGpeopvAccess.class}
+    )
     private String isAdmin;
+    @CCD(
+            label = " ",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudAccess.class}
+    )
     @TemporaryField
     private YesOrNo currentUserIsApplicantSolicitor;
+    @CCD(
+            label = " ",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudAccess.class}
+    )
     @TemporaryField
     private YesOrNo currentUserIsRespondentSolicitor;
 

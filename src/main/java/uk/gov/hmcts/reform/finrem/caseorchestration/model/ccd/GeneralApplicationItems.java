@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 
 import java.time.LocalDate;
 import java.util.List;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(generate = false)
 @Builder
 @Getter
 @Setter

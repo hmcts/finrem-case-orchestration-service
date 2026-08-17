@@ -13,7 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.WithAt
 
 import java.time.LocalDateTime;
 import java.util.List;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(generate = false)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)

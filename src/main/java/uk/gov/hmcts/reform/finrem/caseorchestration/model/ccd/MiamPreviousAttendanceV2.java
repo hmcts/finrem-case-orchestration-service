@@ -6,23 +6,33 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
 /**
  * Fixed list options for MIAM Previous Attendance.
  * Replaces {@link MiamPreviousAttendance} for new cases.
  */
+@ComplexType(name = "FR_ms_MIAMPreviousAttendanceChecklistV2", generate = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum MiamPreviousAttendanceV2 {
+    @CCD(
+            label = "In the 4 months prior to making the application, the person attended a MIAM or a non-court dispute resolution process relating to the same or substantially the same dispute; and where the applicant attended a non-court dispute resolution process, there is evidence of that attendance in the form of written confirmation from the dispute resolution provider. This evidence should be submitted alongside your application, and must include the signature of the provider; or"
+    )
     FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2_VALUE_1("FR_ms_MIAMPreviousAttendanceChecklistV2_Value_1",
         "In the 4 months prior to making the application, the person attended a MIAM or a non-court dispute "
             + "resolution process relating to the same or substantially the same dispute; and where the applicant attended "
             + "a non-court dispute resolution process, there is evidence of that attendance in the form of written "
             + "confirmation from the dispute resolution provider. This evidence should be submitted alongside your "
             + "application, and must include the signature of the provider; or"),
+    @CCD(
+            label = "The application would be made in existing proceedings which are continuing and the prospective applicant attended a MIAM before initiating those proceedings."
+    )
     FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2_VALUE_4("FR_ms_MIAMPreviousAttendanceChecklistV2_Value_4",
         "The application would be made in existing proceedings which are continuing and the prospective "
             + "applicant attended a MIAM before initiating those proceedings."),
+    @CCD(label = "I am unable to provide the required evidence with my application.")
     FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2_VALUE_6("FR_ms_MIAMPreviousAttendanceChecklistV2_Value_6",
         "I am unable to provide the required evidence with my application.");
 

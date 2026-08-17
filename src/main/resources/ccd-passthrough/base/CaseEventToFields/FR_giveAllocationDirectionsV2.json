@@ -1,0 +1,5 @@
+[ {
+  "CaseFieldID" : "alteringCourtImpactExpressPilotCaseWarning",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+} ]

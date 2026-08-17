@@ -31,6 +31,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ThamesValleyCourt;
 
 import java.util.Arrays;
 import java.util.Optional;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRSNottinghamList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRSCFCList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRBirminghamHcList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRLiverpoolHcList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRManchesterHcList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRClevelandHcList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRNwYorkshireHcList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRHumberHcList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRKentSurreyHcList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRNewportHcList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRSwanseaHcList;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -40,28 +53,181 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DefaultCourtListWrapper implements CourtListWrapper {
 
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides - if the applicant does not reside within one of these areas, please choose 'other'",
+            showCondition = "region=\"midlands\" AND midlandsList=\"nottingham\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_s_NottinghamList",
+            typeParameterClass = FRSNottinghamList.class
+    )
     private NottinghamCourt nottinghamCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"london\" AND londonList=\"cfc\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_s_CFCList",
+            typeParameterClass = FRSCFCList.class
+    )
     private CfcCourt cfcCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"midlands\" AND midlandsList=\"birmingham\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_birmingham_hc_list",
+            typeParameterClass = FRBirminghamHcList.class
+    )
     private BirminghamCourt birminghamCourtList;
+    @CCD(ignore = true)
     private LondonCourt londonCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"northwest\" AND northWestList=\"liverpool\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_liverpool_hc_list",
+            typeParameterClass = FRLiverpoolHcList.class
+    )
     private LiverpoolCourt liverpoolCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"northwest\" AND northWestList=\"manchester\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_manchester_hc_list",
+            typeParameterClass = FRManchesterHcList.class
+    )
     private ManchesterCourt manchesterCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"northwest\" AND northWestList=\"lancashire\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_lancashireList"
+    )
     private LancashireCourt lancashireCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"northeast\" AND northEastList=\"cleaveland\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_cleveland_hc_list",
+            typeParameterClass = FRClevelandHcList.class
+    )
     private ClevelandCourt cleavelandCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"northeast\" AND northEastList=\"cleaveland\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_cleveland_hc_list",
+            typeParameterClass = FRClevelandHcList.class
+    )
     private ClevelandCourt clevelandCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"northeast\" AND northEastList=\"nwyorkshire\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_nw_yorkshire_hc_list",
+            typeParameterClass = FRNwYorkshireHcList.class
+    )
     @JsonProperty("nwyorkshireCourtList")
     private NwYorkshireCourt nwYorkshireCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"northeast\" AND northEastList=\"hsyorkshire\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_humber_hc_list",
+            typeParameterClass = FRHumberHcList.class
+    )
     private HumberCourt humberCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"southeast\" AND southEastList=\"kentfrc\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_kent_surrey_hc_list",
+            typeParameterClass = FRKentSurreyHcList.class
+    )
     private KentSurreyCourt kentSurreyCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"southeast\" AND southEastList=\"bedfordshire\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_bedfordshireList"
+    )
     private BedfordshireCourt bedfordshireCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"southeast\" AND southEastList=\"thamesvalley\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_thamesvalleyList"
+    )
     @JsonProperty("thamesvalleyCourtList")
     private ThamesValleyCourt thamesValleyCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"southwest\" AND southWestList=\"devon\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_devonList"
+    )
     private DevonCourt devonCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"southwest\" AND southWestList=\"dorset\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_dorsetList"
+    )
     private DorsetCourt dorsetCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"southwest\" AND southWestList=\"bristol\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_bristolList"
+    )
     private BristolCourt bristolCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"wales\" AND walesList=\"newport\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_newport_hc_list",
+            typeParameterClass = FRNewportHcList.class
+    )
     private NewportCourt newportCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"wales\" AND walesList=\"swansea\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_swansea_hc_list",
+            typeParameterClass = FRSwanseaHcList.class
+    )
     private SwanseaCourt swanseaCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"wales\" AND walesList=\"northwales\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_northwalesList"
+    )
     private NorthWalesCourt northWalesCourtList;
+    @CCD(
+            label = "Please give the name of the Court which is closest to the Applicants home postcode. If you are unsure, please check on http://courttribunalfinder.service.gov.uk",
+            showCondition = "region=\"highcourt\" AND hcCourtList=\"highcourt\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_highCourtList"
+    )
     private HighCourt highCourtList;
 
     @JsonIgnore

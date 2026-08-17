@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_fl_PensionDocument", generate = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum PensionDocumentType {

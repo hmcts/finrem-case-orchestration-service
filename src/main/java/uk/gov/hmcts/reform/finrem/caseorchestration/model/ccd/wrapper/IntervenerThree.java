@@ -12,7 +12,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 
 import java.util.ArrayList;
 import java.util.List;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(generate = false)
 @SuperBuilder
 @NoArgsConstructor
 public class IntervenerThree extends IntervenerWrapper {

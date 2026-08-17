@@ -7,12 +7,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
 
 /**
  * Represents a collection containing a single UUID value.
  * This class is used to encapsulate a UUID in a structured format.
  */
+@ComplexType(generate = false)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder

@@ -1,0 +1,23 @@
+[ {
+  "CaseFieldID" : "consentNatureOfApplicationLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/contested/set-frc-details",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "consentOrderForChildrenQuestionLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/field/consentOrder/file-upload-check"
+}, {
+  "CaseFieldID" : "consentOrder",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "consentD81Question",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "consentPensionCollectionLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "consentOtherCollection",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+} ]

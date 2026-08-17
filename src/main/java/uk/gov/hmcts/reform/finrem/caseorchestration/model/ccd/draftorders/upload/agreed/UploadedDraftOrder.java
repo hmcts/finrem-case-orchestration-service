@@ -18,7 +18,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRFlAgreedDraftOrderResubmission;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_AgreedDraftOrders", generate = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -27,12 +32,33 @@ import java.util.stream.Stream;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UploadedDraftOrder implements HasUploadingDocuments {
 
+    @CCD(
+            label = "Document",
+            hint = "You must upload Microsoft Word documents. Document names should clearly reflect the party name, the type of hearing and the date of the hearing. For example \"JonesFDA11Jul24\"",
+            regex = ".doc,.docx",
+            searchable = false,
+            typeOverride = FieldType.Document
+    )
     @JsonProperty("agreedDraftOrderDocument")
     private CaseDocument agreedDraftOrderDocument;
 
+    @CCD(
+            label = " ",
+            searchable = false,
+            typeOverride = FieldType.MultiSelectList,
+            typeParameterOverride = "FR_fl_AgreedDraftOrderResubmission",
+            typeParameterClass = FRFlAgreedDraftOrderResubmission.class
+    )
     @JsonProperty("resubmission")
     private List<String> resubmission;
 
+    @CCD(
+            label = "Upload additional attachments",
+            hint = "You must upload Microsoft Word or PDF documents",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_UploadDraftOrderAdditionalDocument"
+    )
     @JsonProperty("additionalDocuments")
     private List<AdditionalDocumentsCollection> additionalDocuments;
 

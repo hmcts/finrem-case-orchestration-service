@@ -6,7 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_iHBulkPrintDocument", generate = false)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder

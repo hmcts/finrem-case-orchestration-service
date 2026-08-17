@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EstimatedAssetsChecklistVersion;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCrudPlus2RolesUoltzlAccess;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -16,6 +19,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EstimatedAssetsChecklistWrapper {
+    @CCD(
+            label = " ",
+            searchable = false,
+            typeOverride = FieldType.Text,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudPlus2RolesUoltzlAccess.class}
+    )
     @TemporaryField
     private EstimatedAssetsChecklistVersion estimatedAssetsChecklistVersion; // = v2 v3 etc
 }

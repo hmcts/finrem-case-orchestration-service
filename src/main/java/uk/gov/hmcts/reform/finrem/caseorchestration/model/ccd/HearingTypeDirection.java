@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_fl_hearingTypeDirections", generate = true)
 @RequiredArgsConstructor
 public enum HearingTypeDirection {
     FDA("First Directions Appointment (FDA)"),

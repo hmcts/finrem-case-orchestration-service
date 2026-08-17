@@ -1,0 +1,5 @@
+[ {
+  "ID" : "FR_HWFDecisionMadeFromAwaitingPayment",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdSubmittedEvent",
+  "RetriesTimeoutURLSubmittedEvent" : "3,4,5"
+} ]

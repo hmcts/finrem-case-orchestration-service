@@ -10,7 +10,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_intervenerHearingNoticeCollection", generate = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -18,9 +22,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class IntervenerHearingNotice implements HasCaseDocument {
 
+    @CCD(
+            label = "Hearing notices",
+            categoryID = "systemDuplicates",
+            searchable = false,
+            typeOverride = FieldType.Document
+    )
     @JsonProperty("hearingNotice")
     CaseDocument caseDocument;
 
+    @CCD(label = "Notice received at", searchable = false)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime noticeReceivedAt;
 }

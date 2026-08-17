@@ -21,6 +21,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthWestFrc
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthEastFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthWestFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCrudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRLondonFRCList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRNeFrcList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRSeFrcList;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -29,22 +35,88 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GeneralApplicationRegionWrapper {
+    @CCD(
+            label = "Please choose the Region in which the Hearing takes place",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_region_list",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     @JsonProperty("generalApplicationDirections_regionList")
     private Region generalApplicationDirectionsRegionList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Hearing takes place",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_midlands_FRCList",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     @JsonProperty("generalApplicationDirections_midlandsFRCList")
     private RegionMidlandsFrc generalApplicationDirectionsMidlandsFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Hearing takes place",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_london_FRCList",
+            typeParameterClass = FRLondonFRCList.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     @JsonProperty("generalApplicationDirections_londonFRCList")
     private RegionLondonFrc generalApplicationDirectionsLondonFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Hearing takes place",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_nw_frc_list",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     @JsonProperty("generalApplicationDirections_northWestFRCList")
     private RegionNorthWestFrc generalApplicationDirectionsNorthWestFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Hearing takes place",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_ne_frc_list",
+            typeParameterClass = FRNeFrcList.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     @JsonProperty("generalApplicationDirections_northEastFRCList")
     private RegionNorthEastFrc generalApplicationDirectionsNorthEastFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Hearing takes place",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_se_frc_list",
+            typeParameterClass = FRSeFrcList.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     @JsonProperty("generalApplicationDirections_southEastFRCList")
     private RegionSouthEastFrc generalApplicationDirectionsSouthEastFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Hearing takes place",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_sw_frc_list",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     @JsonProperty("generalApplicationDirections_southWestFRCList")
     private RegionSouthWestFrc generalApplicationDirectionsSouthWestFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Hearing takes place",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_wales_frc_list",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     @JsonProperty("generalApplicationDirections_walesFRCList")
     private RegionWalesFrc generalApplicationDirectionsWalesFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Hearing takes place",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_hc_frc_list",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     @JsonProperty("generalApplicationDirections_highCourtFRCList")
     private RegionHighCourtFrc generalApplicationDirectionsHighCourtFrcList;
     @JsonUnwrapped

@@ -1,0 +1,17 @@
+[ {
+  "CaseFieldID" : "applicantSolicitorAddress",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "applicantResideOutsideUK",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "rSolicitorAddress",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "respondentResideOutsideUK",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+} ]

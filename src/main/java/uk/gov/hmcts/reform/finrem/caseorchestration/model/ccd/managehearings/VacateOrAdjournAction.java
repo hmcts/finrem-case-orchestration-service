@@ -7,12 +7,17 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_VacateOrAdjournHearingAction", generate = true)
 @RequiredArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public enum VacateOrAdjournAction {
 
+    @CCD(label = "Adjourn hearing")
     ADJOURN_HEARING("Adjourn_Hearing", "Adjourned"),
+    @CCD(label = "Vacate hearing")
     VACATE_HEARING("Vacate_Hearing", "Vacated");
 
     private final String value;

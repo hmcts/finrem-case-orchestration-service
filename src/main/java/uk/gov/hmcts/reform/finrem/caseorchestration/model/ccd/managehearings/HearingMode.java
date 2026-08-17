@@ -7,13 +7,20 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_ManageHearingMode", generate = true)
 @RequiredArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public enum HearingMode {
+    @CCD(label = "In person")
     IN_PERSON("In_Person", "In Person"),
+    @CCD(label = "Remote - video call")
     VIDEO_CALL("Video_Call", "Remote - Video call"),
+    @CCD(label = "Remote - phone call")
     PHONE_CALL("Phone_Call", "Remote - Phone call"),
+    @CCD(label = "Hybrid - in person and remote")
     HYBRID("Hybrid", "Hybrid - In person and remote"),;
 
     private final String value;

@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_ManageHearingType", generate = true)
 @RequiredArgsConstructor
 public enum HearingType {
     MPS("Maintenance Pending Suit (MPS)"),

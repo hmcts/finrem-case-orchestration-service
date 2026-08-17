@@ -6,16 +6,22 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_ms_natureApplication_sch", generate = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum NatureOfApplicationSchedule {
 
     INTERIM_CHILD_PERIODICAL_PAYMENTS("Interim child periodical payments", "Interim child periodical payments"),
     LUMP_SUM_ORDER("Lump Sum Order", "Lump Sum Order"),
+    @CCD(label = "A settlement or a transfer of property for the benefit of the child(ren)")
     A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY("A settlement or a transfer of property",
         "A settlement or a transfer of property for the benefit of the child(ren)"),
+    @CCD(label = "Periodical Payment Order")
     PERIODICAL_PAYMENT_ORDER("periodicalPaymentOrder", "Periodical Payment Order"),
+    @CCD(label = "Variation Order")
     VARIATION_ORDER("variationOrder", "Variation Order");
 
     private final String value;

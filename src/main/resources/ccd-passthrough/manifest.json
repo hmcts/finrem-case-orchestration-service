@@ -1,0 +1,735 @@
+[ {
+  "relativePath" : "AuthorisationComplexType/role.json",
+  "primaryKeys" : [ "CaseTypeID", "CaseFieldID", "ListElementCode", "CRUD", "UserRole" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_manageScannedDocs/manageScannedDocumentCollection.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false,
+  "overlaySuffix" : "manageScannedDocs",
+  "envVar" : "CCD_DEF_ENV",
+  "value" : "__never__",
+  "negated" : true
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_amendPaperApplication/ApplicantOrganisationPolicy.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false,
+  "overlaySuffix" : "newPaperCase",
+  "envVar" : "CCD_DEF_ENV",
+  "value" : "__never__",
+  "negated" : true
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_amendPaperApplication/RespondentOrganisationPolicy.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false,
+  "overlaySuffix" : "newPaperCase",
+  "envVar" : "CCD_DEF_ENV",
+  "value" : "__never__",
+  "negated" : true
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_solicitorCreate/ApplicantOrganisationPolicy.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_newPaperCase/ApplicantOrganisationPolicy.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_updateContactDetails/ApplicantOrganisationPolicy.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_amendApplication/ApplicantOrganisationPolicy.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_solicitorCreate/RespondentOrganisationPolicy.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_newPaperCase/RespondentOrganisationPolicy.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_updateContactDetails/RespondentOrganisationPolicy.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_amendApplication/RespondentOrganisationPolicy.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/nocRequest/changeOrganisationRequestField.json",
+  "primaryKeys" : [ "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_manageCaseDocuments/manageCaseDocumentCollection.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_uploadCaseFiles/manageCaseDocumentCollection.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/manageInterveners/intervener1.json",
+  "primaryKeys" : [ "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/manageInterveners/intervener2.json",
+  "primaryKeys" : [ "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/manageInterveners/intervener3.json",
+  "primaryKeys" : [ "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/manageInterveners/intervener4.json",
+  "primaryKeys" : [ "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_manageHearings/workingHearing.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_processOrder/workingHearing.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_uploadApprovedOrderMh/workingHearing.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_GeneralApplicationDirectionsMH/workingHearing.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToComplexTypes/FR_newManageCaseDocuments/inputManageCaseDocumentCollection.json",
+  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEventToFields/FR_newPaperCase.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true,
+  "overlaySuffix" : "newPaperCase",
+  "envVar" : "CCD_DEF_ENV",
+  "value" : "__never__",
+  "negated" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_amendPaperApplication.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true,
+  "overlaySuffix" : "newPaperCase",
+  "envVar" : "CCD_DEF_ENV",
+  "value" : "__never__",
+  "negated" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_solicitorCreate.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_applicationPaymentSubmission.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_addSchedulingListingInfo.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_giveAllocationDirectionsV2.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_amendApplication.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_solicitorDraftDirectionOrder.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_judgeDraftDirectionOrder.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_generalOrder.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_generalEmail.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_generalLetter.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_generalLetter_judge.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_consentOrder.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_generalOrderConsent.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_respondToConsentOrder.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_consentOrderNotApproved.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_updateFRCInformation.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_updateContactDetails.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_updateCaseDetailsSolicitor.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_uploadApprovedOrder.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/createGeneralApplication.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_manageBarrister.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/manageInterveners.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/shareSelectedDocuments.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_sendOrder.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_draftOrders.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_approveOrders.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_directionOrder.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_manageHearings.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_processOrder.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_uploadApprovedOrderMh.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_GeneralApplicationDirectionsMH.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_newManageCaseDocuments.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_stopRepresentingClient.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEventToFields/FR_draftOrderNotApproved.json",
+  "primaryKeys" : [ "CaseFieldID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : true
+}, {
+  "relativePath" : "CaseEvent/CUI_invalidateApplicantAccessCode.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false,
+  "overlaySuffix" : "nonprod",
+  "envVar" : "CCD_DEF_ENV",
+  "value" : "prod",
+  "negated" : true
+}, {
+  "relativePath" : "CaseEvent/CUI_invalidateRespondentAccessCode.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false,
+  "overlaySuffix" : "nonprod",
+  "envVar" : "CCD_DEF_ENV",
+  "value" : "prod",
+  "negated" : true
+}, {
+  "relativePath" : "CaseEvent/CUI_applicantUploadDocuments.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false,
+  "overlaySuffix" : "nonprod",
+  "envVar" : "CCD_DEF_ENV",
+  "value" : "prod",
+  "negated" : true
+}, {
+  "relativePath" : "CaseEvent/CUI_respondentUploadDocuments.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false,
+  "overlaySuffix" : "nonprod",
+  "envVar" : "CCD_DEF_ENV",
+  "value" : "prod",
+  "negated" : true
+}, {
+  "relativePath" : "CaseEvent/FR_manageExpressCase.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false,
+  "overlaySuffix" : "prod",
+  "envVar" : "CCD_DEF_ENV",
+  "value" : "prod",
+  "negated" : false
+}, {
+  "relativePath" : "CaseEvent/FR_giveAllocationDirections.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false,
+  "overlaySuffix" : "prod",
+  "envVar" : "CCD_DEF_ENV",
+  "value" : "prod",
+  "negated" : false
+}, {
+  "relativePath" : "CaseEvent/FR_solicitorCreate.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_applicationPaymentSubmission.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_awaitingPaymentResponseFromHWF.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_HWFDecisionMade.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_HWFDecisionMadeFromAwaitingPayment.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_HWFFeeAccountDebited.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_issueApplication.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_giveAllocationDirectionsV2.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_amendApplication.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_amendPaperApplication.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_generalOrder.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_solicitorToDraftOrder.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_solicitorDraftDirectionOrder.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_draftOrders.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_sendRefusalReason.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_approveOrders.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_judgeDraftDirectionOrder.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_sendOrder.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_amendCase.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_updateContactDetails.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_uploadGeneralDocument.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_migrateCase.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_manageScannedDocs.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_generalEmail.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_generalLetter.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_generalLetter_judge.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_consentOrder.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_assignToJudgeConsent.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_consentOrderApproved.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_consentOrderNotApproved.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_generalOrderConsent.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_newPaperCase.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_consentSendOrder.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_generalApplicationReferToJudge.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_GeneralApplicationOutcome.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_amendApprovedFinalOrder.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_manualPayment.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_shareDocumentsWithApplicant.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_shareDocumentsWithResp.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/nocRequest.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/applyNocDecision.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_updateFRCInformation.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_manageHearingBundles.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_updateCaseDetailsSolicitor.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_uploadCaseFiles.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_newManageCaseDocuments.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/createGeneralApplication.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/rejectGeneralApplication.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_manageBarrister.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/updateGeneralApplication.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/manageInterveners.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/shareSelectedDocuments.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/clearApplicantPolicy.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/clearRespondentPolicy.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_assignDocumentCategories.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_hideCase.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_unhideCase.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_removeCaseDocument.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_removeUserCaseAccess.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_manageExpressCase_v2.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_manageHearings.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_stopRepresentingClient.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_processOrder.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_uploadApprovedOrderMh.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_GeneralApplicationDirectionsMH.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/internal-change-UPDATE_CASE.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_addSchedulingListingInfo.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_listForInterimHearing.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_directionOrder.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_GeneralApplicationDirections.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_uploadApprovedOrder.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+}, {
+  "relativePath" : "CaseEvent/FR_manageHearingsMigration.json",
+  "primaryKeys" : [ "ID" ],
+  "overwriteColumns" : [ ],
+  "columnsOnly" : false
+} ]

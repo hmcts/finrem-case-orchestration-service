@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import static java.util.Optional.ofNullable;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -20,6 +21,7 @@ import static java.util.Optional.ofNullable;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GenericInputFields {
 
+    @CCD(ignore = true)
     @TemporaryField
     private YesOrNo readyToSubmitDocument;
 

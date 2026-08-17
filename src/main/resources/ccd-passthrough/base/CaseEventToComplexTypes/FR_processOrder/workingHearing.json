@@ -1,0 +1,153 @@
+[ {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.nottinghamCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"midlands\" AND workingHearing.hearingCourtSelection.midlandsList=\"nottingham\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.cfcCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"london\" AND workingHearing.hearingCourtSelection.londonList=\"cfc\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.birminghamCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"midlands\" AND workingHearing.hearingCourtSelection.midlandsList=\"birmingham\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.liverpoolCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"northwest\" AND workingHearing.hearingCourtSelection.northWestList=\"liverpool\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.manchesterCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"northwest\" AND workingHearing.hearingCourtSelection.northWestList=\"manchester\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.lancashireCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"northwest\" AND workingHearing.hearingCourtSelection.northWestList=\"lancashire\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.cleavelandCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"northeast\" AND workingHearing.hearingCourtSelection.northEastList=\"cleaveland\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.nwyorkshireCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"northeast\" AND workingHearing.hearingCourtSelection.northEastList=\"nwyorkshire\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.humberCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"northeast\" AND workingHearing.hearingCourtSelection.northEastList=\"hsyorkshire\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.kentSurreyCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"southeast\" AND workingHearing.hearingCourtSelection.southEastList=\"kentfrc\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.bedfordshireCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"southeast\" AND workingHearing.hearingCourtSelection.southEastList=\"bedfordshire\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.thamesvalleyCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"southeast\" AND workingHearing.hearingCourtSelection.southEastList=\"thamesvalley\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.devonCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"southwest\" AND workingHearing.hearingCourtSelection.southWestList=\"devon\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.dorsetCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"southwest\" AND workingHearing.hearingCourtSelection.southWestList=\"dorset\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.bristolCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"southwest\" AND workingHearing.hearingCourtSelection.southWestList=\"bristol\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.newportCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"wales\" AND workingHearing.hearingCourtSelection.walesList=\"newport\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.swanseaCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"wales\" AND workingHearing.hearingCourtSelection.walesList=\"swansea\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.northWalesCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"wales\" AND workingHearing.hearingCourtSelection.walesList=\"northwales\""
+}, {
+  "LiveFrom" : "24/07/2025",
+  "ID" : "FR_processOrderToWorkingHearing",
+  "CaseEventID" : "FR_processOrder",
+  "CaseFieldID" : "workingHearing",
+  "ListElementCode" : "hearingCourtSelection.highCourtList",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "workingHearing.hearingCourtSelection.region=\"highcourt\" AND workingHearing.hearingCourtSelection.hcCourtList=\"highcourt\""
+} ]

@@ -1,0 +1,4 @@
+[ {
+  "ID" : "CUI_respondentUploadDocuments",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdAboutToSubmitEvent"
+} ]

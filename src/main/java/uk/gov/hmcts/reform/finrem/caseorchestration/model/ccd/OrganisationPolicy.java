@@ -12,7 +12,9 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(generate = false)
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)

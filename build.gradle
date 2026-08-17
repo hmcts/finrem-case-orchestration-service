@@ -9,10 +9,29 @@ plugins {
     id 'au.com.dius.pact' version '4.6.20'
     id "info.solidsoft.pitest" version "1.15.0"
     id 'com.github.hmcts.rse-cft-lib' version '0.19.2240'
+    id 'hmcts.ccd.sdk' version 'json-definition-converter-130.1-7861f595'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'io.spring.dependency-management'
+
+ccd {
+    // rootPackage names the COMPANION package, not …caseorchestration: generateCCDConfig looks for a
+    // single @SpringBootConfiguration under it, and the companion tree carries its own minimal one
+    // (ConverterGeneratedApplication). Pointing it at the service's own base package would find
+    // CaseOrchestrationApplication instead and boot the whole service — Camunda, IDAM, feign clients
+    // and all — which definition generation has no need of.
+    configDir = file('build/definitions')
+    rootPackage = 'uk.gov.hmcts.reform.finrem.caseorchestration.ccd'
+    caseType = 'FinancialRemedyContested'
+}
+
+// Definition generation reads annotations and builders; it serves no traffic. The service is a
+// servlet application, so without this the generator's context tries to start a web server and dies
+// on the missing ServletWebServerFactory (the generator's own classpath carries no servlet container).
+generateCCDConfig {
+    systemProperty 'spring.main.web-application-type', 'none'
+}
 
 def versions = [
         guava                : '33.6.0-jre',

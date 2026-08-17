@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentType;
 
 import java.time.LocalDateTime;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -19,13 +20,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FormAScannedDocWrapper {
+    @CCD(ignore = true)
     private ScannedDocumentType formAType;
+    @CCD(ignore = true)
     private String formASubtype;
+    @CCD(ignore = true)
     private String formAControlNumber;
+    @CCD(ignore = true)
     private String formAFileName;
+    @CCD(ignore = true)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime formAScannedDate;
+    @CCD(ignore = true)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime formADeliveryDate;
+    @CCD(ignore = true)
     private String formAExceptionRecordReference;
 }

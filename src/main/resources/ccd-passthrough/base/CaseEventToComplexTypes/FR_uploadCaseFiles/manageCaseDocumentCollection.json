@@ -1,0 +1,57 @@
+[ {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageCaseDocuments",
+  "CaseEventID" : "FR_uploadCaseFiles",
+  "CaseFieldID" : "manageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning0",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageCaseDocuments",
+  "CaseEventID" : "FR_uploadCaseFiles",
+  "CaseFieldID" : "manageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning1",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageCaseDocuments",
+  "CaseEventID" : "FR_uploadCaseFiles",
+  "CaseFieldID" : "manageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning2",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageCaseDocuments",
+  "CaseEventID" : "FR_uploadCaseFiles",
+  "CaseFieldID" : "manageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning3",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageCaseDocuments",
+  "CaseEventID" : "FR_uploadCaseFiles",
+  "CaseFieldID" : "manageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning4",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageCaseDocuments",
+  "CaseEventID" : "FR_uploadCaseFiles",
+  "CaseFieldID" : "manageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning5",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageCaseDocuments",
+  "CaseEventID" : "FR_uploadCaseFiles",
+  "CaseFieldID" : "manageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning6",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/06/2022",
+  "ID" : "FR_manageCaseDocuments",
+  "CaseEventID" : "FR_uploadCaseFiles",
+  "CaseFieldID" : "manageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning7",
+  "DisplayContext" : "READONLY"
+} ]

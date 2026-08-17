@@ -18,6 +18,28 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.INTVRBARRISTER1CrudPlus7RolesQwwlocAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.RESPBARRISTERRESPSOLICITORCudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.APPBARRISTERAPPSOLICITORCudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyJudiciaryUAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedySuperuserCrudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedySolicitorCrudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedySolicitorCudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.INTVRBARRISTER1CudPlus2RolesUmycfuAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.INTVRBARRISTER2CudPlus2RolesOsrpjfAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.INTVRBARRISTER3CudPlus2RolesIykcoqAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.INTVRBARRISTER4CudPlus2RolesCeepsbAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesMhrsdiAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.INTVRBARRISTER1INTVRSOLICITOR1CudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.INTVRBARRISTER2INTVRSOLICITOR2CudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.INTVRBARRISTER3INTVRSOLICITOR3CudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.INTVRBARRISTER4INTVRSOLICITOR4CudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRUploadCaseDocument;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -26,165 +48,1261 @@ import java.util.stream.Stream;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UploadCaseDocumentWrapper implements HasCaseDocument {
+    @CCD(
+            label = " ",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CrudPlus7RolesQwwlocAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class, CaseworkerDivorceFinancialremedyJudiciaryUAccess.class, CaseworkerDivorceFinancialremedySuperuserCrudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> uploadCaseDocument;
+    @CCD(
+            label = "                                                                                      ",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, CaseworkerDivorceFinancialremedySolicitorCrudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> fdrCaseDocumentCollection;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, CaseworkerDivorceFinancialremedySolicitorCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appCorrespondenceCollection;
+    @CCD(
+            label = "FR Forms",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, CaseworkerDivorceFinancialremedySolicitorCudAccess.class}
+    )
     @JsonProperty("appFRFormsCollection")
     private List<UploadCaseDocumentCollection> appFrFormsCollection;
+    @CCD(
+            label = "Evidence In Support",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, CaseworkerDivorceFinancialremedySolicitorCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appEvidenceCollection;
+    @CCD(
+            label = "Trial Bundle",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, CaseworkerDivorceFinancialremedySolicitorCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appTrialBundleCollection;
+    @CCD(
+            label = "Confidential Applicant Documents",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appConfidentialDocsCollection;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, CaseworkerDivorceFinancialremedySolicitorCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respCorrespondenceCollection;
+    @CCD(
+            label = "FR Forms",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, CaseworkerDivorceFinancialremedySolicitorCudAccess.class}
+    )
     @JsonProperty("respFRFormsCollection")
     private List<UploadCaseDocumentCollection> respFrFormsCollection;
+    @CCD(
+            label = "Evidence In Support",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, CaseworkerDivorceFinancialremedySolicitorCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respEvidenceCollection;
+    @CCD(
+            label = "Trial Bundle",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, CaseworkerDivorceFinancialremedySolicitorCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respTrialBundleCollection;
+    @CCD(
+            label = "Confidential Respondent Documents",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respConfidentialDocsCollection;
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appHearingBundlesCollection;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appFormEExhibitsCollection;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appChronologiesCollection;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class}
+    )
     @JsonProperty("appQACollection")
     private List<UploadCaseDocumentCollection> appQaCollection;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appStatementsExhibitsCollection;
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appCaseSummariesCollection;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appFormsHCollection;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appExpertEvidenceCollection;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appCorrespondenceDocsCollection;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, APPBARRISTERAPPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appOtherCollection;
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respHearingBundlesCollection;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respFormEExhibitsCollection;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respChronologiesCollection;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     @JsonProperty("respQACollection")
     private List<UploadCaseDocumentCollection> respQaCollection;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respStatementsExhibitsCollection;
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respCaseSummariesCollection;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respFormsHCollection;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respExpertEvidenceCollection;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {RESPBARRISTERRESPSOLICITORCudAccess.class, CaseworkerDivorceFinancialremedyCourtadminCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respCorrespondenceDocsColl;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesZbqgyjAccess.class, RESPBARRISTERRESPSOLICITORCudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respOtherCollection;
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appHearingBundlesCollectionShared;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appFormEExhibitsCollectionShared;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appChronologiesCollectionShared;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     @JsonProperty("appQACollectionShared")
     private List<UploadCaseDocumentCollection> appQaCollectionShared;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appStatementsExhibitsCollShared;
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appCaseSummariesCollectionShared;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appFormsHCollectionShared;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appExpertEvidenceCollectionShared;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appCorrespondenceDocsCollShared;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> appOtherCollectionShared;
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respHearingBundlesCollShared;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respFormEExhibitsCollectionShared;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respChronologiesCollectionShared;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     @JsonProperty("respQACollectionShared")
     private List<UploadCaseDocumentCollection> respQaCollectionShared;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respStatementsExhibitsCollShared;
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respCaseSummariesCollectionShared;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respFormsHCollectionShared;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respExpertEvidenceCollShared;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respCorrespondenceDocsCollShared;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedySolicitorCrudPlus1RolesAvwswjAccess.class}
+    )
     private List<UploadCaseDocumentCollection> respOtherCollectionShared;
 
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CudPlus2RolesUmycfuAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1Summaries;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CudPlus2RolesUmycfuAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1Chronologies;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CudPlus2RolesUmycfuAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1CorrespDocs;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CudPlus2RolesUmycfuAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1ExpertEvidence;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CudPlus2RolesUmycfuAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1FormEsExhibits;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CudPlus2RolesUmycfuAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1FormHs;
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CudPlus2RolesUmycfuAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1HearingBundles;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CudPlus2RolesUmycfuAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1Other;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CudPlus2RolesUmycfuAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1Qa;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CudPlus2RolesUmycfuAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1StmtsExhibits;
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2CudPlus2RolesOsrpjfAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2Summaries;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2CudPlus2RolesOsrpjfAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2Chronologies;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2CudPlus2RolesOsrpjfAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2CorrespDocs;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2CudPlus2RolesOsrpjfAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2ExpertEvidence;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2CudPlus2RolesOsrpjfAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2FormEsExhibits;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2CudPlus2RolesOsrpjfAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2FormHs;
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2CudPlus2RolesOsrpjfAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2HearingBundles;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2CudPlus2RolesOsrpjfAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2Other;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2CudPlus2RolesOsrpjfAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2Qa;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2CudPlus2RolesOsrpjfAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2StmtsExhibits;
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3CudPlus2RolesIykcoqAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3Summaries;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3CudPlus2RolesIykcoqAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3Chronologies;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3CudPlus2RolesIykcoqAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3CorrespDocs;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3CudPlus2RolesIykcoqAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3ExpertEvidence;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3CudPlus2RolesIykcoqAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3FormEsExhibits;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3CudPlus2RolesIykcoqAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3FormHs;
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3CudPlus2RolesIykcoqAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3HearingBundles;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3CudPlus2RolesIykcoqAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3Other;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3CudPlus2RolesIykcoqAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3Qa;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3CudPlus2RolesIykcoqAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3StmtsExhibits;
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4CudPlus2RolesCeepsbAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4Summaries;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4CudPlus2RolesCeepsbAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4Chronologies;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4CudPlus2RolesCeepsbAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4CorrespDocs;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4CudPlus2RolesCeepsbAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4ExpertEvidence;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4CudPlus2RolesCeepsbAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4FormEsExhibits;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4CudPlus2RolesCeepsbAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4FormHs;
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4CudPlus2RolesCeepsbAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4HearingBundles;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4CudPlus2RolesCeepsbAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4Other;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4CudPlus2RolesCeepsbAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4Qa;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4CudPlus2RolesCeepsbAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4StmtsExhibits;
+    @CCD(
+            label = "FDR Case documents",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1CudPlus2RolesUmycfuAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1FdrCaseDocuments;
+    @CCD(
+            label = "FDR Case documents",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2CudPlus2RolesOsrpjfAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2FdrCaseDocuments;
+    @CCD(
+            label = "FDR Case documents",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3CudPlus2RolesIykcoqAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3FdrCaseDocuments;
+    @CCD(
+            label = "FDR Case documents",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4CudPlus2RolesCeepsbAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4FdrCaseDocuments;
+    @CCD(
+            label = "Confidential documents",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCudPlus1RolesMhrsdiAccess.class}
+    )
     private List<UploadCaseDocumentCollection> confidentialDocumentCollection;
 
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1INTVRSOLICITOR1CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1HearingBundlesShared;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1INTVRSOLICITOR1CudAccess.class}
+    )
     @JsonProperty("intv1FormEExhibitsShared")
     private List<UploadCaseDocumentCollection> intv1FormEsExhibitsShared;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1INTVRSOLICITOR1CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1ChronologiesShared;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1INTVRSOLICITOR1CudAccess.class}
+    )
     @JsonProperty("intv1QAShared")
     private List<UploadCaseDocumentCollection> intv1QaShared;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1INTVRSOLICITOR1CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1StmtsExhibitsShared;
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1INTVRSOLICITOR1CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1SummariesShared;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1INTVRSOLICITOR1CudAccess.class}
+    )
     @JsonProperty("intv1FormsHShared")
     private List<UploadCaseDocumentCollection> intv1FormHsShared;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1INTVRSOLICITOR1CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1ExpertEvidenceShared;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1INTVRSOLICITOR1CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1CorrespDocsShared;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER1INTVRSOLICITOR1CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv1OtherShared;
 
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2INTVRSOLICITOR2CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2HearingBundlesShared;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2INTVRSOLICITOR2CudAccess.class}
+    )
     @JsonProperty("intv2FormEExhibitsShared")
     private List<UploadCaseDocumentCollection> intv2FormEsExhibitsShared;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2INTVRSOLICITOR2CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2ChronologiesShared;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2INTVRSOLICITOR2CudAccess.class}
+    )
     @JsonProperty("intv2QAShared")
     private List<UploadCaseDocumentCollection> intv2QaShared;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2INTVRSOLICITOR2CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2StmtsExhibitsShared;
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2INTVRSOLICITOR2CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2SummariesShared;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2INTVRSOLICITOR2CudAccess.class}
+    )
     @JsonProperty("intv2FormsHShared")
     private List<UploadCaseDocumentCollection> intv2FormHsShared;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2INTVRSOLICITOR2CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2ExpertEvidenceShared;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2INTVRSOLICITOR2CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2CorrespDocsShared;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER2INTVRSOLICITOR2CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv2OtherShared;
 
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3INTVRSOLICITOR3CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3HearingBundlesShared;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3INTVRSOLICITOR3CudAccess.class}
+    )
     @JsonProperty("intv3FormEExhibitsShared")
     private List<UploadCaseDocumentCollection> intv3FormEsExhibitsShared;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3INTVRSOLICITOR3CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3ChronologiesShared;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3INTVRSOLICITOR3CudAccess.class}
+    )
     @JsonProperty("intv3QAShared")
     private List<UploadCaseDocumentCollection> intv3QaShared;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3INTVRSOLICITOR3CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3StmtsExhibitsShared;
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3INTVRSOLICITOR3CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3SummariesShared;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3INTVRSOLICITOR3CudAccess.class}
+    )
     @JsonProperty("intv3FormsHShared")
     private List<UploadCaseDocumentCollection> intv3FormHsShared;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3INTVRSOLICITOR3CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3ExpertEvidenceShared;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3INTVRSOLICITOR3CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3CorrespDocsShared;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER3INTVRSOLICITOR3CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv3OtherShared;
 
+    @CCD(
+            label = "Hearing Bundles",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4INTVRSOLICITOR4CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4HearingBundlesShared;
+    @CCD(
+            label = "Forms E & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4INTVRSOLICITOR4CudAccess.class}
+    )
     @JsonProperty("intv4FormEExhibitsShared")
     private List<UploadCaseDocumentCollection> intv4FormEsExhibitsShared;
+    @CCD(
+            label = "Chronologies and Statements of Issues",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4INTVRSOLICITOR4CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4ChronologiesShared;
+    @CCD(
+            label = "Questionnaires & Answers to Questionnaires & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4INTVRSOLICITOR4CudAccess.class}
+    )
     @JsonProperty("intv4QAShared")
     private List<UploadCaseDocumentCollection> intv4QaShared;
+    @CCD(
+            label = "Statements & Exhibits",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4INTVRSOLICITOR4CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4StmtsExhibitsShared;
+    @CCD(
+            label = "Case Summaries",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4INTVRSOLICITOR4CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4SummariesShared;
+    @CCD(
+            label = "Forms H",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4INTVRSOLICITOR4CudAccess.class}
+    )
     @JsonProperty("intv4FormsHShared")
     private List<UploadCaseDocumentCollection> intv4FormHsShared;
+    @CCD(
+            label = "Expert Evidence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4INTVRSOLICITOR4CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4ExpertEvidenceShared;
+    @CCD(
+            label = "Correspondence",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4INTVRSOLICITOR4CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4CorrespDocsShared;
+    @CCD(
+            label = "Other",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_uploadCaseDocument",
+            typeParameterClass = FRUploadCaseDocument.class,
+            access = {INTVRBARRISTER4INTVRSOLICITOR4CudAccess.class}
+    )
     private List<UploadCaseDocumentCollection> intv4OtherShared;
 
     @JsonIgnore

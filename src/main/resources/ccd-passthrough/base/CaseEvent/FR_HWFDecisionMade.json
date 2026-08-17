@@ -1,0 +1,7 @@
+[ {
+  "ID" : "FR_HWFDecisionMade",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-orchestration/remove-case-data-state",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdSubmittedEvent",
+  "RetriesTimeoutURLAboutToSubmitEvent" : "3,4,5",
+  "RetriesTimeoutURLSubmittedEvent" : "3,4,5"
+} ]

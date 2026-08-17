@@ -1,0 +1,37 @@
+[ {
+  "CaseFieldID" : "applicantSolicitorAddress",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "applicantResideOutsideUK",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "respondentResideOutsideUK",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "natureOfApplicationChecklist",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/org-policies"
+}, {
+  "CaseFieldID" : "natureOfApplicationChecklistSchedule",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/org-policies"
+}, {
+  "CaseFieldID" : "reasonForLocalCourt",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "applicantAttendedMIAMLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/miam-attend-exempt-check"
+}, {
+  "CaseFieldID" : "evidenceUnavailableDomesticAbuseMIAM",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/miam-attend-exempt-check"
+}, {
+  "CaseFieldID" : "evidenceUnavailableUrgencyMIAM",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/miam-attend-exempt-check"
+}, {
+  "CaseFieldID" : "evidenceUnavailablePreviousAttendanceMIAM",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/miam-attend-exempt-check"
+}, {
+  "CaseFieldID" : "evidenceUnavailableOtherGroundsMIAM",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/miam-attend-exempt-check"
+} ]

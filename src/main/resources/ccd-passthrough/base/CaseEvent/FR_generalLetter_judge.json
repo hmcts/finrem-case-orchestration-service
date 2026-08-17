@@ -1,0 +1,5 @@
+[ {
+  "ID" : "FR_generalLetter_judge",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdAboutToStartEvent",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdAboutToSubmitEvent"
+} ]

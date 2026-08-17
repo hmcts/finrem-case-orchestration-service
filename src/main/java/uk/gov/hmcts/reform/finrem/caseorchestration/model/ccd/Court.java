@@ -12,7 +12,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_ct_courtList", generate = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -20,15 +24,80 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCou
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Court implements CourtListWrapper {
+    @CCD(
+            label = "Please state in which Financial Remedies Court Zone the applicant resides",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_region_list"
+    )
     private Region region;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides - if the applicant does not reside within one of these areas, please choose 'other'",
+            showCondition = "region=\"midlands\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_midlands_FRCList"
+    )
     private RegionMidlandsFrc midlandsList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides - if the applicant does not reside within one of these areas, please choose 'other'",
+            showCondition = "region=\"london\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_london_FRCList",
+            typeParameterClass = FRLondonFRCList.class
+    )
     private RegionLondonFrc londonList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides - if the applicant does not reside within one of these areas, please choose 'other'",
+            showCondition = "region=\"northwest\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_nw_frc_list"
+    )
     private RegionNorthWestFrc northWestList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides - if the applicant does not reside within one of these areas, please choose 'other'",
+            showCondition = "region=\"northeast\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_ne_frc_list",
+            typeParameterClass = FRNeFrcList.class
+    )
     private RegionNorthEastFrc northEastList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides - if the applicant does not reside within one of these areas, please choose 'other'",
+            showCondition = "region=\"southeast\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_se_frc_list",
+            typeParameterClass = FRSeFrcList.class
+    )
     private RegionSouthEastFrc southEastList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides - if the applicant does not reside within one of these areas, please choose 'other'",
+            showCondition = "region=\"southwest\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_sw_frc_list"
+    )
     private RegionSouthWestFrc southWestList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides - if the applicant does not reside within one of these areas, please choose 'other'",
+            showCondition = "region=\"wales\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_wales_frc_list"
+    )
     private RegionWalesFrc walesList;
 
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides - if the applicant does not reside within one of these areas, please choose 'other'",
+            showCondition = "region=\"highcourt\"",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_hc_frc_list"
+    )
     private RegionHighCourtFrc hcCourtList;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -161,4 +230,9 @@ public class Court implements CourtListWrapper {
     public HighCourt getHighCourt() {
         return getDefaultCourtListWrapper().getHighCourt();
     }
+
+  // ==== ccd-definition-converter: synthesised definition-only fields (retrofit) ====
+  @CCD(label = "This would usually be the applicants local Court", searchable = false, typeOverride = FieldType.Label)
+  private String localCourtLbl;
+  // ==== end synthesised definition-only fields ====
 }

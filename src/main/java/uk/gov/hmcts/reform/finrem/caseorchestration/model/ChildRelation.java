@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_childRelation", generate = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum ChildRelation {
@@ -18,6 +21,7 @@ public enum ChildRelation {
     GRAND_PARENT("Grand parent"),
     GUARDIAN("Guardian"),
     SPECIAL_GUARDIAN("Special Guardian"),
+    @CCD(label = "Other (specify)")
     OTHER("Other");
 
     private final String value;

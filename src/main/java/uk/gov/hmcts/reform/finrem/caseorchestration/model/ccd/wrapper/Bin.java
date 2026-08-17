@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -27,10 +28,12 @@ import java.util.stream.Stream;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Bin {
 
+    @CCD(ignore = true)
     @Deprecated(forRemoval = true)
     @JsonProperty("bin_fileUrls")
     private DynamicList binFileUrls;
 
+    @CCD(ignore = true)
     @JsonProperty("bin_fileUrlsCollection")
     private List<BinFileUrlsCollection> fileUrlsToBeDeleted;
 

@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -19,32 +20,46 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReferToJudgeWrapper {
+    @CCD(ignore = true)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate referToJudgeDate;
+    @CCD(ignore = true)
     private String referToJudgeText;
+    @CCD(ignore = true)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate referToJudgeDateFromOrderMade;
+    @CCD(ignore = true)
     private String referToJudgeTextFromOrderMade;
+    @CCD(ignore = true)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate referToJudgeDateFromConsOrdApproved;
+    @CCD(ignore = true)
     private String referToJudgeTextFromConsOrdApproved;
+    @CCD(ignore = true)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate referToJudgeDateFromConsOrdMade;
+    @CCD(ignore = true)
     private String referToJudgeTextFromConsOrdMade;
+    @CCD(ignore = true)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate referToJudgeDateFromClose;
+    @CCD(ignore = true)
     private String referToJudgeTextFromClose;
+    @CCD(ignore = true)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate referToJudgeDateFromAwaitingResponse;
+    @CCD(ignore = true)
     private String referToJudgeTextFromAwaitingResponse;
+    @CCD(ignore = true)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate referToJudgeDateFromRespondToOrder;
+    @CCD(ignore = true)
     private String referToJudgeTextFromRespondToOrder;
 }

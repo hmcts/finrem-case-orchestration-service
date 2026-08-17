@@ -6,12 +6,17 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "docTypeOption", generate = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum ScannedDocumentTypeOption {
 
+    @CCD(label = "Applicant document")
     APPLICANT_DOCUMENT("applicantDoc"),
+    @CCD(label = "Respondent document")
     RESPONDENT_DOCUMENT("respondentDoc");
 
     private final String value;

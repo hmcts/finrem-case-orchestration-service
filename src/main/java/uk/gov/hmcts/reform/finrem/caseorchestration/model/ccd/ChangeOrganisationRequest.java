@@ -13,7 +13,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(generate = false)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
 @Data

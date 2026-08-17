@@ -6,9 +6,13 @@ import lombok.RequiredArgsConstructor;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_RelistHearingAction", generate = true)
 @RequiredArgsConstructor
 public enum YesOrNo {
+    @CCD(label = "Yes - I can add the new date now")
     YES("Yes"),
     NO("No");
 

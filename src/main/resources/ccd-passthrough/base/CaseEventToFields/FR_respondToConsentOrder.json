@@ -1,0 +1,7 @@
+[ {
+  "CaseFieldID" : "consentOrderLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/field/consentOrder/file-upload-check"
+}, {
+  "CaseFieldID" : "consentPensionCollectionLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/field/consentPensionCollection/file-upload-check"
+} ]

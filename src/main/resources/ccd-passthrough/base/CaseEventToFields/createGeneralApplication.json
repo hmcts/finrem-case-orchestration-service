@@ -1,0 +1,19 @@
+[ {
+  "CaseFieldID" : "generalApplications",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "intervener1GeneralApplications",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "intervener2GeneralApplications",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "intervener3GeneralApplications",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "intervener4GeneralApplications",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "appRespGeneralApplications",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+} ]

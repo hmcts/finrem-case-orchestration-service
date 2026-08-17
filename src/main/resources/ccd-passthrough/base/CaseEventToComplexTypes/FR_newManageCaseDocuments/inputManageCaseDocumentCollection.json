@@ -1,0 +1,57 @@
+[ {
+  "LiveFrom" : "01/11/2025",
+  "ID" : "FR_newManageCaseDocuments_to_inputManageCaseDocumentCollection",
+  "CaseEventID" : "FR_newManageCaseDocuments",
+  "CaseFieldID" : "inputManageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning.warning0",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/11/2025",
+  "ID" : "FR_newManageCaseDocuments_to_inputManageCaseDocumentCollection",
+  "CaseEventID" : "FR_newManageCaseDocuments",
+  "CaseFieldID" : "inputManageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning.warning1",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/11/2025",
+  "ID" : "FR_newManageCaseDocuments_to_inputManageCaseDocumentCollection",
+  "CaseEventID" : "FR_newManageCaseDocuments",
+  "CaseFieldID" : "inputManageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning.warning2",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/11/2025",
+  "ID" : "FR_newManageCaseDocuments_to_inputManageCaseDocumentCollection",
+  "CaseEventID" : "FR_newManageCaseDocuments",
+  "CaseFieldID" : "inputManageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning.warning3",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/11/2025",
+  "ID" : "FR_newManageCaseDocuments_to_inputManageCaseDocumentCollection",
+  "CaseEventID" : "FR_newManageCaseDocuments",
+  "CaseFieldID" : "inputManageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning.warning4",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/11/2025",
+  "ID" : "FR_newManageCaseDocuments_to_inputManageCaseDocumentCollection",
+  "CaseEventID" : "FR_newManageCaseDocuments",
+  "CaseFieldID" : "inputManageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning.warning5",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/11/2025",
+  "ID" : "FR_newManageCaseDocuments_to_inputManageCaseDocumentCollection",
+  "CaseEventID" : "FR_newManageCaseDocuments",
+  "CaseFieldID" : "inputManageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning.warning6",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/11/2025",
+  "ID" : "FR_newManageCaseDocuments_to_inputManageCaseDocumentCollection",
+  "CaseEventID" : "FR_newManageCaseDocuments",
+  "CaseFieldID" : "inputManageCaseDocumentCollection",
+  "ListElementCode" : "caseDocumentConfidentialityWarning.warning7",
+  "DisplayContext" : "READONLY"
+} ]

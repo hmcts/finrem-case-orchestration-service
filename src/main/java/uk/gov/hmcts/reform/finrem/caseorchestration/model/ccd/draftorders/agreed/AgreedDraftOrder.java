@@ -22,24 +22,82 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRUploadParty;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_agreedDraftOrder", generate = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Approvable, WithAttachments {
+    @CCD(
+            label = "Order type",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_fl_draftOrderOrderType"
+    )
     private OrderType orderType;
+    @CCD(
+            label = "Document status",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_fl_draftOrderOrderStatus"
+    )
     private OrderStatus orderStatus;
+    @CCD(
+            label = "Draft order",
+            categoryID = "postHearingDraftOrder",
+            searchable = false,
+            typeOverride = FieldType.Document
+    )
     private CaseDocument draftOrder;
+    @CCD(
+            label = "Pension Sharing Annex",
+            categoryID = "postHearingDraftOrder",
+            searchable = false,
+            typeOverride = FieldType.Document
+    )
     private CaseDocument pensionSharingAnnex;
+    @CCD(
+            label = "Cover Letter",
+            categoryID = "postHearingDraftOrder",
+            searchable = false,
+            typeOverride = FieldType.Document
+    )
     private CaseDocument coverLetter;
+    @CCD(label = "Submitted by", searchable = false)
     private String submittedBy;
+    @CCD(label = "Submitted by (Email address)", searchable = false)
     private String submittedByEmail;
+    @CCD(
+            label = "Uploaded on behalf of",
+            searchable = false,
+            typeOverride = FieldType.FixedRadioList,
+            typeParameterOverride = "FR_uploadParty",
+            typeParameterClass = FRUploadParty.class
+    )
     private String uploadedOnBehalfOf;
+    @CCD(label = "Date submitted", searchable = false)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime submittedDate;
+    @CCD(
+            label = "Is this a resubmission?",
+            showCondition = "resubmission=\"DO_NOT_SHOW\"",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo
+    )
     private YesOrNo resubmission;
+    @CCD(
+            label = "Attachments",
+            categoryID = "postHearingDraftOrder",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "Document"
+    )
     private List<DocumentCollectionItem> attachments;
 
     @Override
@@ -107,4 +165,20 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
         }
     }
 
+  // ==== ccd-definition-converter: synthesised definition-only fields (retrofit) ====
+  @CCD(
+          label = "This is a resubmission. <a href=\"cases/case-details/${[CASE_REFERENCE]}#Orders\" target=\"_blank\">(see previously rejected draft orders)</a>",
+          showCondition = "resubmission=\"Yes\"",
+          searchable = false,
+          typeOverride = FieldType.Label
+  )
+  private String resubmissionLinkYes;
+  @CCD(
+          label = "This is not a resubmission.",
+          showCondition = "resubmission=\"No\"",
+          searchable = false,
+          typeOverride = FieldType.Label
+  )
+  private String resubmissionLinkNo;
+  // ==== end synthesised definition-only fields ====
 }

@@ -6,11 +6,16 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_fl_ApplicantAndRespondentEvidenceParty", generate = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum ApplicantAndRespondentEvidenceParty {
+    @CCD(label = "Applicant")
     APPLICANT("applicant"),
+    @CCD(label = "Respondent")
     RESPONDENT("respondent");
 
     private final String value;

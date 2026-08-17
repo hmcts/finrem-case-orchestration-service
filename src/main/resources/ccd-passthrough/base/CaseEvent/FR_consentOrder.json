@@ -1,0 +1,4 @@
+[ {
+  "ID" : "FR_consentOrder",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdAboutToSubmitEvent"
+} ]

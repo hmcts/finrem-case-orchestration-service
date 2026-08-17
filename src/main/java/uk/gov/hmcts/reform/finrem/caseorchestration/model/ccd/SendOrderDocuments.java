@@ -6,7 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "sendOrderDocuments", generate = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -14,6 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SendOrderDocuments implements HasCaseDocument {
 
+    @CCD(label = "Document", searchable = false, typeOverride = FieldType.Document)
     @JsonProperty("bulkPrintDocument")
     CaseDocument caseDocument;
 }

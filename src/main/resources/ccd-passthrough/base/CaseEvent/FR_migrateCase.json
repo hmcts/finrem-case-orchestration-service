@@ -1,0 +1,5 @@
+[ {
+  "ID" : "FR_migrateCase",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/ccd-data-migration/migrate",
+  "RetriesTimeoutURLAboutToSubmitEvent" : "3,4,5"
+} ]

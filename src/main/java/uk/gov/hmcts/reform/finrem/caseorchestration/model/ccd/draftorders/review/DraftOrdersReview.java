@@ -23,7 +23,12 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRFlAssignToJudge;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_draftOrdersReview", generate = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder(toBuilder = true)
 @Getter
@@ -31,15 +36,35 @@ import static java.util.Optional.ofNullable;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class DraftOrdersReview implements HasCaseDocument {
+    @CCD(label = "Type of Hearing", searchable = false)
     private String hearingType;
+    @CCD(label = "Hearing Date", searchable = false)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate hearingDate;
+    @CCD(label = "Hearing Time", searchable = false)
     private String hearingTime;
+    @CCD(
+            label = "Hearing Judge",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_fl_AssignToJudge",
+            typeParameterClass = FRFlAssignToJudge.class
+    )
     private String hearingJudge;
 
+    @CCD(
+            label = "Uploaded draft orders",
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_draftOrderDocumentReview"
+    )
     @JsonProperty("draftOrderDocReviewCollection")
     private List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection;
+    @CCD(
+            label = "Uploaded pension sharing annexes",
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_psaDocumentReview"
+    )
     @JsonProperty("psaDocReviewCollection")
     private List<PsaDocReviewCollection> psaDocReviewCollection;
 

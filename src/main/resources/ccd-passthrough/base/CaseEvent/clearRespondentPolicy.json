@@ -1,0 +1,5 @@
+[ {
+  "ID" : "clearRespondentPolicy",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdAboutToSubmitEvent",
+  "RetriesTimeoutURLAboutToSubmitEvent" : "3,4,5"
+} ]

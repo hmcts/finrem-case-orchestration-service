@@ -1,0 +1,19 @@
+[ {
+  "CaseFieldID" : "appBarristerCollection",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "respBarristerCollection",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "intvr1BarristerCollection",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "intvr2BarristerCollection",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "intvr3BarristerCollection",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+}, {
+  "CaseFieldID" : "intvr4BarristerCollection",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent"
+} ]

@@ -21,6 +21,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthWestFrc
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthEastFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthWestFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCruPlus2RolesAblzopAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCruPlus2RolesGasysbAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRLondonFRCList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRNeFrcList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FRSeFrcList;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -29,22 +36,96 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class HearingRegionWrapper {
+    @CCD(
+            label = "Please state in which Financial Remedies Court Zone the applicant resides",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_region_list",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCruPlus2RolesAblzopAccess.class}
+    )
     @JsonProperty("hearing_regionList")
     private Region hearingRegionList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides.",
+            hint = "This should be the FRC local to the applicant",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_midlands_FRCList",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCruPlus2RolesAblzopAccess.class}
+    )
     @JsonProperty("hearing_midlandsFRCList")
     private RegionMidlandsFrc hearingMidlandsFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides.",
+            hint = "This should be the FRC local to the applicant",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_london_FRCList",
+            typeParameterClass = FRLondonFRCList.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCruPlus2RolesAblzopAccess.class}
+    )
     @JsonProperty("hearing_londonFRCList")
     private RegionLondonFrc hearingLondonFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides.",
+            hint = "This should be the FRC local to the applicant",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_nw_frc_list",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCruPlus2RolesAblzopAccess.class}
+    )
     @JsonProperty("hearing_northWestFRCList")
     private RegionNorthWestFrc hearingNorthWestFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides.",
+            hint = "This should be the FRC local to the applicant",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_ne_frc_list",
+            typeParameterClass = FRNeFrcList.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCruPlus2RolesAblzopAccess.class}
+    )
     @JsonProperty("hearing_northEastFRCList")
     private RegionNorthEastFrc hearingNorthEastFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides.",
+            hint = "This should be the FRC local to the applicant",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_se_frc_list",
+            typeParameterClass = FRSeFrcList.class,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCruPlus2RolesAblzopAccess.class}
+    )
     @JsonProperty("hearing_southEastFRCList")
     private RegionSouthEastFrc hearingSouthEastFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides.",
+            hint = "This should be the FRC local to the applicant",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_sw_frc_list",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCruPlus2RolesAblzopAccess.class}
+    )
     @JsonProperty("hearing_southWestFRCList")
     private RegionSouthWestFrc hearingSouthWestFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides.",
+            hint = "This should be the FRC local to the applicant",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_wales_frc_list",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCruPlus2RolesGasysbAccess.class}
+    )
     @JsonProperty("hearing_walesFRCList")
     private RegionWalesFrc hearingWalesFrcList;
+    @CCD(
+            label = "Please choose the FRC which covers the area within which the Applicant resides.",
+            hint = "This should be the FRC local to the applicant",
+            searchable = false,
+            typeOverride = FieldType.FixedList,
+            typeParameterOverride = "FR_hc_frc_list",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCruPlus2RolesGasysbAccess.class}
+    )
     @JsonProperty("hearing_highCourtFRCList")
     private RegionHighCourtFrc hearingHighCourtFrcList;
     @JsonUnwrapped

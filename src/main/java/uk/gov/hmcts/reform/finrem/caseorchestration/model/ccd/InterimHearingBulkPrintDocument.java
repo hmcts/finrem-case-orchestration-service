@@ -6,13 +6,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_iHBulkPrintDocument", generate = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class InterimHearingBulkPrintDocument implements HasCaseDocument {
+    @CCD(label = " ", categoryID = "hearingNotices", searchable = false, typeOverride = FieldType.Document)
     @JsonProperty("bulkprintDocument")
     CaseDocument caseDocument;
 }

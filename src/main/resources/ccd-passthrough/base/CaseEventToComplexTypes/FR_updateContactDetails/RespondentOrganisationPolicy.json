@@ -1,0 +1,30 @@
+[ {
+  "LiveFrom" : "05/08/2020",
+  "ID" : "FR_updateContactDetails",
+  "CaseEventID" : "FR_updateContactDetails",
+  "CaseFieldID" : "RespondentOrganisationPolicy",
+  "ListElementCode" : "OrgPolicyCaseAssignedRole",
+  "DefaultValue" : "[RESPSOLICITOR]",
+  "EventElementLabel" : "Respondent Organisation Policy",
+  "FieldDisplayOrder" : "",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "divorceCaseNumber=\"IMPOSSIBLAW\""
+}, {
+  "LiveFrom" : "05/08/2020",
+  "ID" : "FR_updateContactDetails",
+  "CaseEventID" : "FR_updateContactDetails",
+  "CaseFieldID" : "RespondentOrganisationPolicy",
+  "ListElementCode" : "Organisation.OrganisationID",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "05/08/2020",
+  "ID" : "FR_updateContactDetails",
+  "CaseEventID" : "FR_updateContactDetails",
+  "CaseFieldID" : "RespondentOrganisationPolicy",
+  "ListElementCode" : "OrgPolicyReference",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "",
+  "DisplayContext" : "OPTIONAL"
+} ]

@@ -28,6 +28,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCrudPlus1RolesIwxsitAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceSystemupdateCrudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCrudAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCuPlus1RolesOsjhrjAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCPlus1RolesTqxnytAccess;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.access.CaseworkerDivorceFinancialremedyCourtadminCAccess;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -38,40 +46,210 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 public class ManageHearingsWrapper {
 
     // Working data representations
+    @CCD(
+            label = "What would you like to do?",
+            searchable = false,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudPlus1RolesIwxsitAccess.class}
+    )
     private ManageHearingsAction manageHearingsActionSelection;
+    @CCD(
+            label = " ",
+            searchable = false,
+            typeOverride = FieldType.Text,
+            access = {CaseworkerDivorceSystemupdateCrudAccess.class}
+    )
     private UUID workingHearingId;
+    @CCD(
+            label = "Hearing",
+            searchable = false,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudPlus1RolesIwxsitAccess.class}
+    )
     private WorkingHearing workingHearing;
+    @CCD(
+            label = "Adjourn or Vacate hearing",
+            searchable = false,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     private WorkingVacatedHearing workingVacatedHearing;
+    @CCD(
+            label = " ",
+            searchable = false,
+            typeOverride = FieldType.Text,
+            access = {CaseworkerDivorceSystemupdateCrudAccess.class}
+    )
     private UUID workingVacatedHearingId;
+    @CCD(
+            label = "Will you be relisting the hearing and adding a new date now?",
+            searchable = false,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     private YesOrNo isRelistSelected;
+    @CCD(label = " ", searchable = false, access = {CaseworkerDivorceSystemupdateCrudAccess.class})
     private YesOrNo wasRelistSelected;
+    @CCD(
+            label = "Do you want to add a hearing?",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     private YesOrNo isAddHearingChosen;
+    @CCD(
+            label = "Is this the final order?",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     private YesOrNo isFinalOrder;
+    @CCD(
+            label = "Do you want to send notices?",
+            searchable = false,
+            typeOverride = FieldType.YesOrNo,
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     private YesOrNo shouldSendVacateOrAdjNotice;
 
     // Hearing data Repositories
+    @CCD(
+            label = "Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_hearing",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudPlus1RolesIwxsitAccess.class}
+    )
     private List<ManageHearingsCollectionItem> hearings;
+    @CCD(
+            label = "Adjourned or Vacated Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_vacateOrAdjournHearing",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudAccess.class}
+    )
     private List<VacatedOrAdjournedHearingsCollectionItem> vacatedOrAdjournedHearings;
+    @CCD(
+            label = " ",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_manageHearingDocument",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCrudPlus1RolesIwxsitAccess.class}
+    )
     private List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection;
 
     // TabItem representations maintaining confidentiality for parties
+    @CCD(
+            label = "Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_manageHearingTabItem",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCuPlus1RolesOsjhrjAccess.class, CaseworkerDivorceSystemupdateCrudAccess.class}
+    )
     private List<HearingTabCollectionItem> hearingTabItems;
 
+    @CCD(
+            label = "Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_manageHearingTabItem",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCPlus1RolesTqxnytAccess.class}
+    )
     private List<HearingTabCollectionItem> applicantHearingTabItems;
+    @CCD(
+            label = "Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_manageHearingTabItem",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCPlus1RolesTqxnytAccess.class}
+    )
     private List<HearingTabCollectionItem> respondentHearingTabItems;
+    @CCD(
+            label = "Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_manageHearingTabItem",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCPlus1RolesTqxnytAccess.class}
+    )
     private List<HearingTabCollectionItem> int1HearingTabItems;
+    @CCD(
+            label = "Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_manageHearingTabItem",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCPlus1RolesTqxnytAccess.class}
+    )
     private List<HearingTabCollectionItem> int2HearingTabItems;
+    @CCD(
+            label = "Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_manageHearingTabItem",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCPlus1RolesTqxnytAccess.class}
+    )
     private List<HearingTabCollectionItem> int3HearingTabItems;
+    @CCD(
+            label = "Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_manageHearingTabItem",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCPlus1RolesTqxnytAccess.class}
+    )
     private List<HearingTabCollectionItem> int4HearingTabItems;
 
     // Vacated Or Adjourned Hearing Tab Items
+    @CCD(
+            label = "Adjourned or Vacated Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_vacatedOrAdjournedHearingTabItems",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCuPlus1RolesOsjhrjAccess.class, CaseworkerDivorceSystemupdateCrudAccess.class}
+    )
     private List<VacatedOrAdjournedHearingTabCollectionItem> vacatedOrAdjournedHearingTabItems;
 
+    @CCD(
+            label = "Adjourned or Vacated Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_vacatedOrAdjournedHearingTabItems",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCAccess.class}
+    )
     private List<VacatedOrAdjournedHearingTabCollectionItem> applicantVacOrAdjHearingTabItems;
+    @CCD(
+            label = "Adjourned or Vacated Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_vacatedOrAdjournedHearingTabItems",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCAccess.class}
+    )
     private List<VacatedOrAdjournedHearingTabCollectionItem> respondentVacOrAdjHearingTabItems;
+    @CCD(
+            label = "Adjourned or Vacated Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_vacatedOrAdjournedHearingTabItems",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCAccess.class}
+    )
     private List<VacatedOrAdjournedHearingTabCollectionItem> int1VacOrAdjHearingTabItems;
+    @CCD(
+            label = "Adjourned or Vacated Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_vacatedOrAdjournedHearingTabItems",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCAccess.class}
+    )
     private List<VacatedOrAdjournedHearingTabCollectionItem> int2VacOrAdjHearingTabItems;
+    @CCD(
+            label = "Adjourned or Vacated Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_vacatedOrAdjournedHearingTabItems",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCAccess.class}
+    )
     private List<VacatedOrAdjournedHearingTabCollectionItem> int3VacOrAdjHearingTabItems;
+    @CCD(
+            label = "Adjourned or Vacated Hearings",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_vacatedOrAdjournedHearingTabItems",
+            access = {CaseworkerDivorceFinancialremedyCourtadminCAccess.class}
+    )
     private List<VacatedOrAdjournedHearingTabCollectionItem> int4VacOrAdjHearingTabItems;
 
     /**

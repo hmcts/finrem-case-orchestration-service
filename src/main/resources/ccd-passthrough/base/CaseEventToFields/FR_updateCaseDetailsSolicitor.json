@@ -1,0 +1,9 @@
+[ {
+  "CaseFieldID" : "applicantSolicitorName",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+}, {
+  "CaseFieldID" : "rSolicitorName",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdMidEvent",
+  "RetriesTimeoutURLMidEvent" : "3,4,5"
+} ]

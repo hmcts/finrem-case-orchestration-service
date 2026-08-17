@@ -1,0 +1,6 @@
+[ {
+  "ID" : "FR_manageExpressCase_v2",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdAboutToStartEvent",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdAboutToSubmitEvent",
+  "RetriesTimeoutURLAboutToSubmitEvent" : "3,4,5"
+} ]

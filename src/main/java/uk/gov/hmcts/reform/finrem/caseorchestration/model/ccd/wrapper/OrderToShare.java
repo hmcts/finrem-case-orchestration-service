@@ -14,11 +14,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
 /**
  * Represents an order document that can be shared within the case orchestration process.
  * This class provides details such as the document ID, name, and related sharing preferences.
  */
+@ComplexType(name = "FR_orderToShare", generate = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -27,18 +31,35 @@ import static java.util.Optional.ofNullable;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderToShare implements DocumentIdProvider {
 
+    @CCD(label = " ", searchable = false)
     private String documentId;
 
+    @CCD(label = " ", searchable = false)
     private String documentName;
 
+    @CCD(label = "Send?", searchable = false, typeOverride = FieldType.YesOrNo)
     private YesOrNo documentToShare;
 
+    @CCD(label = "<hidden field>", searchable = false, typeOverride = FieldType.YesOrNo)
     private YesOrNo hasSupportingDocuments;
     
+    @CCD(
+            label = "Include supporting documents",
+            searchable = false,
+            typeOverride = FieldType.MultiSelectList,
+            typeParameterOverride = "FR_yesOnly"
+    )
     private List<Yes> includeSupportingDocument;
 
+    @CCD(
+            label = " ",
+            searchable = false,
+            typeOverride = FieldType.Collection,
+            typeParameterOverride = "FR_attachmentsToShare"
+    )
     private List<AttachmentToShareCollection> attachmentsToShare;
 
+    @CCD(label = " ", searchable = false)
     private CoverLetterToShare coverLetterToShare;
 
     /**

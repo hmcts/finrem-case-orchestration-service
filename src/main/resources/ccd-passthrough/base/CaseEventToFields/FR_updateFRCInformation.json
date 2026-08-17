@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "hearingCourtLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-orchestration/contested/set-frc-details"
+} ]

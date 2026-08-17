@@ -1,0 +1,7 @@
+[ {
+  "CaseEventID" : "manageInterveners",
+  "CaseFieldID" : "intervener4",
+  "ListElementCode" : "intervenerOrganisation.OrgPolicyCaseAssignedRole",
+  "FieldShowCondition" : "divorceCaseNumber=\"IMPOSSIBLAW\"",
+  "DefaultValue" : "[INTVRSOLICITOR4]"
+} ]

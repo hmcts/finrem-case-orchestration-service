@@ -1,0 +1,4 @@
+[ {
+  "ID" : "FR_shareDocumentsWithResp",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-orchestration/share-documents-with-respondent"
+} ]

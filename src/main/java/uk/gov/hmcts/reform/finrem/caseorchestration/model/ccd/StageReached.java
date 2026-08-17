@@ -5,11 +5,17 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_fl_StageReached", generate = true)
 @RequiredArgsConstructor
 public enum StageReached {
+    @CCD(label = "Decree Nisi / Conditional Order")
     @JsonProperty("Decree Nisi") DECREE_NISI("Decree Nisi"),
+    @CCD(label = "Decree Absolute / Final Order")
     @JsonProperty("Decree Absolute") DECREE_ABSOLUTE("Decree Absolute"),
+    @CCD(label = "Petition / Application Issued")
     @JsonProperty("Petition Issued") PETITION_ISSUED("Petition Issued");
 
     private final String value;

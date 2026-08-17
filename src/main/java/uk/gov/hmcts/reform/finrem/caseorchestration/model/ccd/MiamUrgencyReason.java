@@ -6,25 +6,42 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FR_ms_MIAMUrgencyReasonChecklist", generate = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum MiamUrgencyReason {
+    @CCD(
+            label = "There is risk to the life, liberty or physical safety of the prospective applicant or his or her family or his or her home; or"
+    )
     FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_1("FR_ms_MIAMUrgencyReasonChecklist_Value_1",
         "There is risk to the life, liberty or physical safety of the prospective applicant or "
             + "his or her family or his or her home; or"),
+    @CCD(label = "Any delay caused by attending a MIAM would cause a significant risk of a miscarriage of justice; or")
     FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_2("FR_ms_MIAMUrgencyReasonChecklist_Value_2",
         "Any delay caused by attending a MIAM would cause a significant risk of a miscarriage of justice; or"),
+    @CCD(
+            label = "Any delay caused by attending a MIAM would cause significant financial hardship to the prospective applicant; or"
+    )
     FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_3("FR_ms_MIAMUrgencyReasonChecklist_Value_3",
         "Any delay caused by attending a MIAM would cause significant financial hardship to the prospective applicant; or"),
+    @CCD(
+            label = "Any delay caused by attending a MIAM would cause irretrievable problems in dealing with the dispute (including the irretrievable loss of significant evidence); or"
+    )
     FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_4("FR_ms_MIAMUrgencyReasonChecklist_Value_4",
         "Any delay caused by attending a MIAM would cause irretrievable problems in dealing with the dispute "
             + "(including the irretrievable loss of significant evidence); or"),
+    @CCD(
+            label = "There is a significant risk that in the period necessary to schedule and attend a MIAM, proceedings relating to the dispute will be brought in another state in which a valid claim to jurisdiction may exist, such that a court in that other State would be seized of the dispute before a court in England and Wales."
+    )
     FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_5("FR_ms_MIAMUrgencyReasonChecklist_Value_5",
         "There is a significant risk that in the period necessary to schedule and attend a MIAM, "
             + "proceedings relating to the dispute will be brought in another state in which a valid claim "
             + "to jurisdiction may exist, such that a court in that other State would be seized of the dispute "
             + "before a court in England and Wales."),
+    @CCD(label = "I am unable to provide the required evidence with my application.")
     FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_6("FR_ms_MIAMUrgencyReasonChecklist_Value_6",
         "I am unable to provide the required evidence with my application.");
 

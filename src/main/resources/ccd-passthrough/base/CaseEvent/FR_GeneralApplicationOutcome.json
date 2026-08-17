@@ -1,0 +1,6 @@
+[ {
+  "ID" : "FR_GeneralApplicationOutcome",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdAboutToStartEvent",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-orchestration/ccdAboutToSubmitEvent",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/case-orchestration/notify/general-application-outcome"
+} ]
