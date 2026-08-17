@@ -14,8 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 @Slf4j
@@ -23,16 +23,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
-    private final GenerateCoverSheetService generateCoverSheetService;
+    private final IssueApplicationService issueApplicationService;
     private final FeatureToggleService featureToggleService;
 
     public IssueApplicationContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                          OnlineFormDocumentService onlineFormDocumentService,
-                                                         GenerateCoverSheetService generateCoverSheetService,
+                                                         IssueApplicationService issueApplicationService,
                                                          FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
         this.onlineFormDocumentService = onlineFormDocumentService;
-        this.generateCoverSheetService = generateCoverSheetService;
+        this.issueApplicationService = issueApplicationService;
         this.featureToggleService = featureToggleService;
     }
 
@@ -76,7 +76,6 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
     }
 
     private void generateCoverSheets(FinremCaseDetails caseDetails, String userAuthorisation) {
-        generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, userAuthorisation);
-        generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, userAuthorisation);
+        issueApplicationService.generateCoverSheets(caseDetails, userAuthorisation);
     }
 }

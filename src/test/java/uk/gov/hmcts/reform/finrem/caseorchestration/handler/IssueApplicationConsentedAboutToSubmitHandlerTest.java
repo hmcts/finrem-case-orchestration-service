@@ -15,8 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 import java.time.LocalDate;
 
@@ -42,7 +42,7 @@ class IssueApplicationConsentedAboutToSubmitHandlerTest {
     @Mock
     private DefaultsConfiguration defaultsConfiguration;
     @Mock
-    private GenerateCoverSheetService generateCoverSheetService;
+    private IssueApplicationService issueApplicationService;
 
     private static final String MISSING_COURT_SELECTION_ERROR = "Case cannot be issued as court selection is missing.";
 
@@ -68,9 +68,8 @@ class IssueApplicationConsentedAboutToSubmitHandlerTest {
         verify(onlineFormDocumentService).generateMiniFormA(AUTH_TOKEN, request.getCaseDetails());
         verifyNoMoreInteractions(onlineFormDocumentService);
 
-        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(request.getCaseDetails(), AUTH_TOKEN);
-        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(request.getCaseDetails(), AUTH_TOKEN);
-        verifyNoMoreInteractions(generateCoverSheetService);
+        verify(issueApplicationService).generateCoverSheets(request.getCaseDetails(), AUTH_TOKEN);
+        verifyNoMoreInteractions(issueApplicationService);
 
         assertThat(finremCaseData)
             .extracting(
@@ -94,7 +93,7 @@ class IssueApplicationConsentedAboutToSubmitHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
 
         doThrow(new MissingCourtException("Court selection is missing"))
-            .when(generateCoverSheetService).generateAndSetApplicantCoverSheet(request.getCaseDetails(), AUTH_TOKEN);
+            .when(issueApplicationService).generateCoverSheets(request.getCaseDetails(), AUTH_TOKEN);
 
         var response = handler.handle(request, AUTH_TOKEN);
 

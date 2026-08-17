@@ -15,8 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,18 +32,18 @@ public class HwfAcceptedAndIssueAboutToSubmitHandler extends FinremAboutToSubmit
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final DefaultsConfiguration defaultsConfiguration;
-    private final GenerateCoverSheetService generateCoverSheetService;
+    private final IssueApplicationService issueApplicationService;
 
     private static final String MISSING_COURT_SELECTION_ERROR = "Case cannot be issued as court selection is missing.";
 
     public HwfAcceptedAndIssueAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
             OnlineFormDocumentService onlineFormDocumentService,
             DefaultsConfiguration defaultsConfiguration,
-            GenerateCoverSheetService generateCoverSheetService) {
+            IssueApplicationService issueApplicationService) {
             super(finremCaseDetailsMapper);
             this.onlineFormDocumentService = onlineFormDocumentService;
             this.defaultsConfiguration = defaultsConfiguration;
-            this.generateCoverSheetService = generateCoverSheetService;
+            this.issueApplicationService = issueApplicationService;
         }
 
     @Override
@@ -69,6 +69,7 @@ public class HwfAcceptedAndIssueAboutToSubmitHandler extends FinremAboutToSubmit
 
         caseData.setMiniFormA(onlineFormDocumentService.generateMiniFormA(userAuthorisation, caseDetails));
         populateAssignToJudgeFields(caseData);
+
         return response(caseData);
     }
 
@@ -80,7 +81,6 @@ public class HwfAcceptedAndIssueAboutToSubmitHandler extends FinremAboutToSubmit
     }
 
     private void generateCoverSheets(FinremCaseDetails caseDetails, String userAuthorisation) {
-        generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, userAuthorisation);
-        generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, userAuthorisation);
+        issueApplicationService.generateCoverSheets(caseDetails, userAuthorisation);
     }
 }
