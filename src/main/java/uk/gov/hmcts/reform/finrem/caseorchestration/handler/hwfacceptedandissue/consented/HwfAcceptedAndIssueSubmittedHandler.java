@@ -90,12 +90,12 @@ public class HwfAcceptedAndIssueSubmittedHandler extends FinremCallbackHandler {
     // Copied from IssueApplicationConsentedSubmittedHandler
     private String sendIssueApplicationCorrespondence(FinremCaseDetails caseDetails, String userAuthorisation) {
         AtomicReference<String> error = new AtomicReference<>();
-            retryExecutor.runWithRetryWithHandler(() -> issueApplicationConsentCorresponder
-                    .sendCorrespondence(caseDetails, userAuthorisation),
-                "sending issue application correspondence",
-                caseDetails.getCaseIdAsString(),
-                (exception, actionName, caseId1) ->
-                    error.set("There was a problem sending issue application correspondence. Please send it manually."));
+        retryExecutor.runWithRetryWithHandler(() -> issueApplicationConsentCorresponder
+                .sendCorrespondence(caseDetails, userAuthorisation),
+            "sending issue application correspondence",
+            caseDetails.getCaseIdAsString(),
+            (exception, actionName, caseId1) ->
+                error.set("There was a problem sending issue application correspondence. Please send it manually."));
         return error.get();
     }
 

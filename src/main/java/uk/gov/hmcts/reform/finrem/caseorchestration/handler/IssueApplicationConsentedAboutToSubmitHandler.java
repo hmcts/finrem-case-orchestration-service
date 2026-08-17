@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.hwfacceptedandissue.consented.HwfAcceptedAndIssueAboutToSubmitHandler;
@@ -15,10 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
-import java.time.LocalDate;
 import java.util.List;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AssignToJudgeReason.DRAFT_CONSENT_ORDER;
 
 /**
  * Changes to this class also require updates to {@link HwfAcceptedAndIssueAboutToSubmitHandler}.
@@ -28,18 +24,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AssignToJud
 public class IssueApplicationConsentedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
-    private final DefaultsConfiguration defaultsConfiguration;
     private final IssueApplicationService issueApplicationService;
 
     private static final String MISSING_COURT_SELECTION_ERROR = "Case cannot be issued as court selection is missing.";
 
     public IssueApplicationConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                          OnlineFormDocumentService onlineFormDocumentService,
-                                                         DefaultsConfiguration defaultsConfiguration,
                                                          IssueApplicationService issueApplicationService) {
         super(finremCaseDetailsMapper);
         this.onlineFormDocumentService = onlineFormDocumentService;
-        this.defaultsConfiguration = defaultsConfiguration;
         this.issueApplicationService = issueApplicationService;
     }
 
@@ -71,10 +64,7 @@ public class IssueApplicationConsentedAboutToSubmitHandler extends FinremCallbac
     }
 
     private void populateAssignToJudgeFields(FinremCaseData caseData) {
-        caseData.setAssignedToJudge(defaultsConfiguration.getAssignedToJudgeDefault());
-        caseData.setAssignedToJudgeReason(DRAFT_CONSENT_ORDER);
-        caseData.getReferToJudgeWrapper().setReferToJudgeDate(LocalDate.now());
-        caseData.getReferToJudgeWrapper().setReferToJudgeText("consent for approval");
+        issueApplicationService.populateAssignToJudgeFields(caseData);
     }
 
     private void generateCoverSheets(FinremCaseDetails caseDetails, String userAuthorisation) {
