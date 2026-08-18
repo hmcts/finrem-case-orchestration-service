@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.hwfacceptedandissue.consented.HwfAcceptedAndIssueAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -16,12 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.Iss
 
 import java.util.List;
 
-/**
- * Changes to this class also require updates to {@link HwfAcceptedAndIssueAboutToSubmitHandler}.
- */
 @Slf4j
 @Service
-public class IssueApplicationConsentedAboutToSubmitHandler extends FinremCallbackHandler {
+public class IssueApplicationConsentedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler{
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final IssueApplicationService issueApplicationService;
@@ -40,7 +36,7 @@ public class IssueApplicationConsentedAboutToSubmitHandler extends FinremCallbac
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.ISSUE_APPLICATION.equals(eventType);
+            && List.of(EventType.ISSUE_APPLICATION, EventType.HWF_ACCEPTED_AND_ISSUE).contains(eventType);
     }
 
     @Override
