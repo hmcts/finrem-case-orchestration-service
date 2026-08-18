@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 @Slf4j
 @Service
-public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class IssueApplicationContestedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final IssueApplicationService issueApplicationService;
