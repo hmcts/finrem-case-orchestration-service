@@ -17,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class IssueApplicationConsentedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler{
+public class IssueApplicationConsentedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final IssueApplicationService issueApplicationService;
