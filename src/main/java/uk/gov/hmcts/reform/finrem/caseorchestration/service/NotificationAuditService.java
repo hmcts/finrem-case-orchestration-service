@@ -94,7 +94,11 @@ public class NotificationAuditService {
      * event, its pending notification records are not accidentally deleted by a
      * later event.
      * </p>
+     *
+     * <p>
      * The notification event ID is cleared once processing is complete.
+     * </p>
+     *
      * @return a map containing the CCD case data fields that need to be updated,
      *         or an empty map when case data or the notification event ID is unavailable
      */
@@ -106,7 +110,6 @@ public class NotificationAuditService {
         }
 
         NotificationAuditWrapper wrapper = caseData.getNotificationAuditWrapper();
-
         String currentNotificationEventId = wrapper.getNotificationEventId();
 
         if (currentNotificationEventId == null) {
@@ -115,66 +118,58 @@ public class NotificationAuditService {
         }
 
         List<NotificationToBeSentCollectionItem> pending =
-            Optional.ofNullable(wrapper.getNotificationsToBeSent())
-                .orElseGet(List::of);
+            getPendingNotifications(wrapper);
 
-        //Only process pending notifications belonging to this event execution.
         List<NotificationToBeSentCollectionItem> currentEventPending =
-            pending.stream()
-                .filter(Objects::nonNull)
-                .filter(item -> item.getValue() != null)
-                .filter(item -> Objects.equals(
-                    currentNotificationEventId,
-                    item.getValue().getNotificationTrackerId()
-                ))
-                .toList();
+            getCurrentEventPendingNotifications(
+                pending,
+                currentNotificationEventId
+            );
 
-        List<NotificationAudit> audits = new ArrayList<>(
-            Optional.ofNullable(sentEvent.getNotificationAudits())
-                .orElseGet(List::of)
-        );
+        List<NotificationAudit> audits = getSentAudits(sentEvent);
 
         combinePendingAndSentAudits(currentEventPending, audits);
 
-        //Preserve existing permanent audit history.
-
-        List<NotificationAuditCollectionItem> auditItems = new ArrayList<>(
-            Optional.ofNullable(wrapper.getNotificationsAudits())
-                .orElseGet(List::of)
-        );
-
-        audits.stream()
-            .map(audit -> NotificationAuditCollectionItem.builder()
-                .id(UUID.randomUUID())
-                .value(audit)
-                .build())
-            .forEach(auditItems::add);
+        List<NotificationAuditCollectionItem> auditItems =
+            addAuditsToExistingHistory(wrapper, audits);
 
         List<NotificationToBeSentCollectionItem> remainingPending =
-            pending.stream()
-                .filter(Objects::nonNull)
-                .filter(item -> item.getValue() == null
-                    || !Objects.equals(
-                    currentNotificationEventId,
-                    item.getValue().getNotificationTrackerId()
-                ))
-                .toList();
+            removeCurrentEventPendingNotifications(
+                pending,
+                currentNotificationEventId
+            );
 
-        Map<String, Object> updatedFields = new HashMap<>();
+        return buildUpdatedFields(auditItems, remainingPending);
+    }
 
-        updatedFields.put(
-            NOTIFICATIONS_AUDITS,
-            objectMapper.convertValue(auditItems, List.class)
+    private List<NotificationToBeSentCollectionItem> getPendingNotifications(
+        NotificationAuditWrapper wrapper
+    ) {
+        return Optional.ofNullable(wrapper.getNotificationsToBeSent())
+            .orElseGet(List::of);
+    }
+
+    private List<NotificationToBeSentCollectionItem> getCurrentEventPendingNotifications(
+        List<NotificationToBeSentCollectionItem> pending,
+        String notificationEventId
+    ) {
+        return pending.stream()
+            .filter(Objects::nonNull)
+            .filter(item -> item.getValue() != null)
+            .filter(item -> Objects.equals(
+                notificationEventId,
+                item.getValue().getNotificationTrackerId()
+            ))
+            .toList();
+    }
+
+    private List<NotificationAudit> getSentAudits(
+        SendCorrespondenceEvent sentEvent
+    ) {
+        return new ArrayList<>(
+            Optional.ofNullable(sentEvent.getNotificationAudits())
+                .orElseGet(List::of)
         );
-
-        updatedFields.put(
-            NOTIFICATIONS_TO_BE_SENT,
-            objectMapper.convertValue(remainingPending, List.class)
-        );
-
-        updatedFields.put(NOTIFICATION_EVENT_ID, null);
-
-        return updatedFields;
     }
 
     private void combinePendingAndSentAudits(
@@ -191,6 +186,60 @@ public class NotificationAuditService {
                     audits.add(pendingAudit);
                 }
             });
+    }
+
+    private List<NotificationAuditCollectionItem> addAuditsToExistingHistory(
+        NotificationAuditWrapper wrapper,
+        List<NotificationAudit> audits
+    ) {
+        List<NotificationAuditCollectionItem> auditItems = new ArrayList<>(
+            Optional.ofNullable(wrapper.getNotificationsAudits())
+                .orElseGet(List::of)
+        );
+
+        audits.stream()
+            .map(audit -> NotificationAuditCollectionItem.builder()
+                .id(UUID.randomUUID())
+                .value(audit)
+                .build())
+            .forEach(auditItems::add);
+
+        return auditItems;
+    }
+
+    private List<NotificationToBeSentCollectionItem> removeCurrentEventPendingNotifications(
+        List<NotificationToBeSentCollectionItem> pending,
+        String notificationEventId
+    ) {
+        return pending.stream()
+            .filter(Objects::nonNull)
+            .filter(item -> item.getValue() == null
+                || !Objects.equals(
+                notificationEventId,
+                item.getValue().getNotificationTrackerId()
+            ))
+            .toList();
+    }
+
+    private Map<String, Object> buildUpdatedFields(
+        List<NotificationAuditCollectionItem> auditItems,
+        List<NotificationToBeSentCollectionItem> remainingPending
+    ) {
+        Map<String, Object> updatedFields = new HashMap<>();
+
+        updatedFields.put(
+            NOTIFICATIONS_AUDITS,
+            objectMapper.convertValue(auditItems, List.class)
+        );
+
+        updatedFields.put(
+            NOTIFICATIONS_TO_BE_SENT,
+            objectMapper.convertValue(remainingPending, List.class)
+        );
+
+        updatedFields.put(NOTIFICATION_EVENT_ID, null);
+
+        return updatedFields;
     }
 
     private boolean isSameNotification(NotificationAudit expected,
