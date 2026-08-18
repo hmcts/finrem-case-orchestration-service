@@ -38,9 +38,10 @@ class IssueApplicationConsentedAboutToSubmitHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, Arguments.of(
-            CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.ISSUE_APPLICATION,
-            CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.HWF_ACCEPTED_AND_ISSUE));
+        assertCanHandle(handler,
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.ISSUE_APPLICATION),
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.HWF_ACCEPTED_AND_ISSUE)
+        );
     }
 
     @Test
