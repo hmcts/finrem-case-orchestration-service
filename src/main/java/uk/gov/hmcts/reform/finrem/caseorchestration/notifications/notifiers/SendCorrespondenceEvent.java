@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
 import com.ibm.icu.text.ListFormatter;
+import io.micrometer.common.util.StringUtils;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -184,7 +185,7 @@ public class SendCorrespondenceEvent {
             .orElseGet(List::of)
             .stream()
             .map(CaseDocument::getDocumentFilename)
-            .filter(fileName -> fileName != null && !fileName.isBlank())
+            .filter(StringUtils::isNotBlank)
             .map(Element::newElement)
             .toList();
     }

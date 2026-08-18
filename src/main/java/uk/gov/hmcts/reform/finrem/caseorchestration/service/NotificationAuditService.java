@@ -79,6 +79,25 @@ public class NotificationAuditService {
         wrapper.setNotificationsToBeSent(allPending);
     }
 
+    /**
+     * Updates notification audit data after correspondence has been processed.
+     * Matches notifications expected for the current notification event against
+     * notifications actually produced during the submitted event using the party,
+     * notification type and notification tracker ID.
+     *
+     * Once the current event has been processed, its pending notification records
+     * are removed from the pending list. Any records already in the pending list
+     * from an earlier event are preserved because they may be there as a result
+     * of that event's submitted handler failing before the records could be
+     * processed. This ensures that if the submitted handler failed for an earlier
+     * event, its pending notification records are not accidentally deleted by a
+     * later event.
+     *
+     * The notification event ID is cleared once processing is complete.
+     *
+     * @return a map containing the CCD case data fields that need to be updated,
+     *         or an empty map when case data or the notification event ID is unavailable
+     */
     public Map<String, Object> updateSentAuditsList(SendCorrespondenceEvent sentEvent) {
         FinremCaseData caseData = sentEvent.getCaseData();
         if (caseData == null) {
