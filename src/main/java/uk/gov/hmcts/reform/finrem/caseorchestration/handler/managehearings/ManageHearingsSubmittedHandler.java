@@ -71,9 +71,6 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
 
-        log.info("Beginning hearing correspondence for {} action. Case reference: {}",
-            actionSelection.getDescription(), finremCaseData.getCcdCaseId());
-
         List<String> errors = new ArrayList<>();
 
         SendCorrespondenceEvent correspondenceEvent = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
@@ -83,6 +80,8 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         );
 
         if (correspondenceEvent != null) {
+            log.info("Sending hearing correspondence for {} action. Case reference: {}",
+                actionSelection.getDescription(), finremCaseData.getCcdCaseId());
             correspondenceEvent.setEventId(callbackRequest.getEventType().getCcdType());
 
             correspondenceEvent.setNotificationTrackerId(

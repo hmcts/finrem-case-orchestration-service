@@ -130,7 +130,7 @@ class NotificationAuditServiceTest {
 
         SendCorrespondenceEvent event = buildEventWithPendingAndSentAudits(
             List.of(pendingItem(pendingAudit)),
-            new ArrayList<>(List.of(sentAudit))
+            List.of(sentAudit)
         );
 
         Map<String, Object> result =
@@ -174,7 +174,7 @@ class NotificationAuditServiceTest {
 
         SendCorrespondenceEvent event = buildEventWithPendingAndSentAudits(
             List.of(pendingItem(pendingAudit)),
-            new ArrayList<>(List.of(sentAudit))
+            List.of(sentAudit)
         );
 
         Map<String, Object> result =
@@ -227,7 +227,7 @@ class NotificationAuditServiceTest {
                 pendingItem(previousPendingAudit),
                 pendingItem(currentPendingAudit)
             ),
-            new ArrayList<>(List.of(currentSentAudit))
+            List.of(currentSentAudit)
         );
 
         Map<String, Object> result =
@@ -268,7 +268,7 @@ class NotificationAuditServiceTest {
                         .build()
                 )
             )
-            .notificationAudits(sentAudits)
+            .notificationAudits(new ArrayList<>(sentAudits))
             .build();
     }
 
