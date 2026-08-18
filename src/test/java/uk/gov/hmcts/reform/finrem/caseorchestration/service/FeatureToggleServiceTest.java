@@ -98,6 +98,12 @@ public class FeatureToggleServiceTest {
             // default value is defined in src/test/resources/application.properties
             assertThat(featureToggleService.isGlobalSearchEnabled()).isFalse();
         }
+      
+        @Test
+        void isPaperEstimatedAssetsChecklistV3EnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isPaperEstimatedAssetsChecklistV3Enabled()).isFalse();
+        }
     }
 
     @Nested
@@ -106,7 +112,8 @@ public class FeatureToggleServiceTest {
         "feature.toggle.assign_case_access=true",
         "feature.toggle.pba_case_type=true",
         "feature.toggle.estimated_assets_checklist_V3_enabled=true",
-        "feature.toggle.global_search_enabled=true"
+        "feature.toggle.global_search_enabled=true",
+        "feature.toggle.paper_estimated_assets_checklist_V3_enabled=true"
     })
     class ApprovedConsentOrderNotificationSwitchedOn {
 
@@ -136,6 +143,11 @@ public class FeatureToggleServiceTest {
         @Test
         void isGlobalSearchEnabledReturnsTrue() {
             assertThat(featureToggleService.isGlobalSearchEnabled()).isTrue();
+        }
+      
+        @Test
+        void isPaperEstimatedAssetsChecklistV3EnabledReturnsTrue() {
+            assertThat(featureToggleService.isPaperEstimatedAssetsChecklistV3Enabled()).isTrue();
         }
     }
 

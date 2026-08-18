@@ -109,14 +109,15 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j-.*@.*$</packageUrl>
         <cve>CVE-2026-49844</cve>
     </suppress>
-
-    <suppress until="2026-12-31Z">
+    <suppress until="2026-09-01Z">
         <notes><![CDATA[
-    Suppress Tomcat 10.1.56 false positives / accepted risk pending fix.
-    Version managed by Spring Boot 3 BOM.
-    ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-.*@.*$</packageUrl>
-        <cve>CVE-2026-59083</cve>
-        <cve>CVE-2026-59084</cve>
+          CVE-2026-66299 applies to the Tomcat WebSocket chat example.
+          This Spring Boot application uses embedded Tomcat and does not
+          package or deploy the Tomcat examples web application.
+          Apache states that deployments without the examples application
+          are not affected. Remove after upgrading to Tomcat 10.1.58 or later.
+      ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-.*@10\.1\.57$</packageUrl>
+        <cve>CVE-2026-66299</cve>
     </suppress>
 </suppressions>

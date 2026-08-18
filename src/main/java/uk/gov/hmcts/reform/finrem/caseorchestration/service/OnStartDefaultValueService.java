@@ -107,17 +107,34 @@ public class OnStartDefaultValueService {
     }
 
     /**
-     * This method sets the version of the Estimated Assets Checklist to be used in the case data based on a feature toggle.
+     * This method sets the version of the Estimated Assets Checklist to be used in the Form A Events before submission.
+     * The isEstimatedAssetsChecklistV3Enabled feature toggle determines which version of the checklist to use.
      * Since these are new cases, we want to use the new version of the checklist once the feature toggle is enabled.
      * So, the feature toggle is enabled, the new case uses the V3 list; otherwise the new case will use the V2 list.
      *
+     * @param callbackRequest The callback request containing the case data.
+     */
+    public void setFormAEstimatedAssetsChecklistVersion(FinremCallbackRequest callbackRequest) {
+        boolean useV3EstimatedAssetsChecklist = featureToggleService.isEstimatedAssetsChecklistV3Enabled();
+        setEstimatedAssetsChecklistVersion(useV3EstimatedAssetsChecklist, callbackRequest);
+    }
+
+    /**
+     * This method sets the version of the Estimated Assets Checklist to be used in Paper Case Events before submission.
+     * The isPaperEstimatedAssetsChecklistV3Enabled feature toggle determines which version of the checklist to use.
+     * Since these are new cases, we want to use the new version of the checklist once the feature toggle is enabled.
+     * So, the feature toggle is enabled, the new case uses the V3 list; otherwise the new case will use the V2 list.
      *
      * @param callbackRequest The callback request containing the case data.
      */
-    public void setEstimatedAssetsChecklistVersion(FinremCallbackRequest callbackRequest) {
-        boolean useV3EstimatedAssetsChecklist = featureToggleService.isEstimatedAssetsChecklistV3Enabled();
+    public void setPaperEstimatedAssetsChecklistVersion(FinremCallbackRequest callbackRequest) {
+        boolean useV3EstimatedAssetsChecklist = featureToggleService.isPaperEstimatedAssetsChecklistV3Enabled();
+        setEstimatedAssetsChecklistVersion(useV3EstimatedAssetsChecklist, callbackRequest);
+    }
+
+    private void setEstimatedAssetsChecklistVersion(boolean useV3, FinremCallbackRequest callbackRequest) {
         FinremCaseData caseData = callbackRequest.getFinremCaseData();
-        if (useV3EstimatedAssetsChecklist) {
+        if (useV3) {
             caseData.getEstimatedAssetsChecklistWrapper().setEstimatedAssetsChecklistVersion(V3);
         } else {
             caseData.getEstimatedAssetsChecklistWrapper().setEstimatedAssetsChecklistVersion(V2);

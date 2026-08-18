@@ -41,6 +41,6 @@ class SolicitorCreateContestedAboutToStartHandlerTest {
         verify(onStartDefaultValueService).defaultCivilPartnershipField(callbackRequest);
         verify(onStartDefaultValueService).defaultTypeOfApplication(callbackRequest);
         verify(onStartDefaultValueService).defaultUrgencyQuestion(callbackRequest);
-        verify(onStartDefaultValueService).setEstimatedAssetsChecklistVersion(callbackRequest);
+        verify(onStartDefaultValueService).setFormAEstimatedAssetsChecklistVersion(callbackRequest);
     }
 }

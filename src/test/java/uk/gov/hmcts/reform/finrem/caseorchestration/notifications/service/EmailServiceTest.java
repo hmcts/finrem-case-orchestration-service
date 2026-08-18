@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.except
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.SendEmailException;
 import uk.gov.service.notify.NotificationClientException;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -517,7 +518,7 @@ class EmailServiceTest {
     void shouldBuildTemplateVarsForGeneralEmailAttachmentConsented() {
         setConsentedData();
         notificationRequest.setGeneralEmailBody("test email body");
-        notificationRequest.setDocumentContents(new byte[5]);
+        notificationRequest.setDocumentContentsList(List.of(new byte[5]));
 
         Map<String, Object> returnedTemplateVars =
 
@@ -526,14 +527,15 @@ class EmailServiceTest {
         assertNull(returnedTemplateVars.get("courtName"));
         assertNull(returnedTemplateVars.get("courtEmail"));
         assertEquals("test email body", returnedTemplateVars.get("generalEmailBody"));
-        assertNotNull(returnedTemplateVars.get("link_to_file"));
+        assertEquals("yes", returnedTemplateVars.get("has_file_1"));
+        assertNotNull(returnedTemplateVars.get("link_to_file_1"));
     }
 
     @Test
     void shouldBuildTemplateVarsForGeneralEmailAttachmentContested() {
         setConsentedData();
         notificationRequest.setGeneralEmailBody("test email body");
-        notificationRequest.setDocumentContents(new byte[5]);
+        notificationRequest.setDocumentContentsList(List.of(new byte[5]));
 
         Map<String, Object> returnedTemplateVars =
 
@@ -542,7 +544,51 @@ class EmailServiceTest {
         assertNull(returnedTemplateVars.get("courtName"));
         assertNull(returnedTemplateVars.get("courtEmail"));
         assertEquals("test email body", returnedTemplateVars.get("generalEmailBody"));
-        assertNotNull(returnedTemplateVars.get("link_to_file"));
+        assertEquals("yes", returnedTemplateVars.get("has_file_1"));
+        assertNotNull(returnedTemplateVars.get("link_to_file_1"));
+    }
+
+    @Test
+    public void givenMoreThanTenDocuments_whenBuildTemplateVarsForGeneralEmailAttachment_thenThrowException() {
+        setConsentedData();
+        notificationRequest.setDocumentContentsList(
+            java.util.stream.IntStream.range(0, 11)
+                .mapToObj(i -> new byte[1])
+                .toList()
+        );
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> emailService.buildTemplateVars(
+                notificationRequest,
+                FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name()
+            )
+        );
+
+        assertEquals("A maximum of 10 email attachments is supported", exception.getMessage());
+    }
+
+    @Test
+    public void givenZeroToTenDocuments_whenBuildTemplateVarsForGeneralEmailAttachment_thenFilesAreHandled() {
+        setConsentedData();
+
+        Map<String, Object> returnedTemplateVars =
+            emailService.buildTemplateVars(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name());
+
+        assertAttachmentPlaceholders(returnedTemplateVars, 0);
+
+        for (int numberOfDocuments = 0; numberOfDocuments <= 10; numberOfDocuments++) {
+            notificationRequest.setDocumentContentsList(
+                java.util.stream.IntStream.range(0, numberOfDocuments)
+                    .mapToObj(i -> new byte[5])
+                    .toList()
+            );
+
+            returnedTemplateVars =
+                emailService.buildTemplateVars(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name());
+
+            assertAttachmentPlaceholders(returnedTemplateVars, numberOfDocuments);
+        }
     }
 
     @Test
@@ -999,5 +1045,17 @@ class EmailServiceTest {
         assertNull(returnedTemplateVars.get("courtName"));
         assertNull(returnedTemplateVars.get("courtEmail"));
         assertNull(returnedTemplateVars.get("generalEmailBody"));
+    }
+
+    private void assertAttachmentPlaceholders(Map<String, Object> templateVars, int numberOfDocuments) {
+        for (int i = 1; i <= 10; i++) {
+            assertEquals(i <= numberOfDocuments ? "yes" : "no", templateVars.get("has_file_" + i));
+
+            if (i <= numberOfDocuments) {
+                assertNotNull(templateVars.get("link_to_file_" + i));
+            } else {
+                assertEquals("", templateVars.get("link_to_file_" + i));
+            }
+        }
     }
 }

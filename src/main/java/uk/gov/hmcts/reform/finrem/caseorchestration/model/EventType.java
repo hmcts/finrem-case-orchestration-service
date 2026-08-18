@@ -2,13 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model;
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 
 @Slf4j
-@RequiredArgsConstructor
 public enum EventType {
     INTERNAL_CHANGE_UPDATE_CASE("internal-change-UPDATE_CASE"),
     MANAGE_HEARINGS("FR_manageHearings"),
@@ -18,6 +17,7 @@ public enum EventType {
     UPLOAD_CONFIDENTIAL_DOCUMENT("FR_uploadConfidentialDocument"),
     UPLOAD_DOCUMENT_CONSENTED("FR_uploadDocument"),
     UPLOAD_DOCUMENT_CONTESTED("FR_uploadGeneralDocument"),
+    SOLICITOR_UPLOAD_DOCUMENT("FR_solUploadDocumentv2"),
     SOLICITOR_CREATE("FR_solicitorCreate"),
     UPDATE_CASE_DETAILS_SOLICITOR("FR_updateCaseDetailsSolicitor"),
     AMEND_APP_DETAILS("FR_amendApplicationDetails"),
@@ -41,8 +41,7 @@ public enum EventType {
     NEW_PAPER_CASE("FR_newPaperCase"),
     GENERAL_APPLICATION_REFER_TO_JUDGE("FR_generalApplicationReferToJudge"),
     GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
-    GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
-    GENERAL_APPLICATION_DIRECTIONS_MH("FR_GeneralApplicationDirectionsMH"),
+   GENERAL_APPLICATION_DIRECTIONS_MH("FR_GeneralApplicationDirectionsMH", "General Application Directions"),
     GENERAL_ORDER_CONSENT_IN_CONTESTED("FR_generalOrderConsent"),
     GENERAL_ORDER("FR_generalOrder"),
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
@@ -94,6 +93,7 @@ public enum EventType {
     DRAFT_ORDERS("FR_draftOrders"),
     APPROVE_ORDERS("FR_approveOrders"),
     MANAGE_EXPRESS_CASE("FR_manageExpressCase"),
+    MANAGE_EXPRESS_CASE_V2("FR_manageExpressCase_v2"),
     MANAGE_HEARINGS_MIGRATION("FR_manageHearingsMigration"),
     FR_HWF_DECISION_MADE("FR_HWFDecisionMade"),
     FR_HWF_DECISION_MADE_FROM_AWAITING_PAYMENT("FR_HWFDecisionMadeFromAwaitingPayment"),
@@ -107,6 +107,29 @@ public enum EventType {
     NONE("");
 
     private final String ccdType;
+    @Getter
+    private final String displayName;
+
+    /**
+     * Constructor for EventType enum that defaults display
+     * name to the same value as the CCD type where not provided.
+     *
+     * @param ccdType the CCD type associated with the event
+     */
+    EventType(String ccdType) {
+        this(ccdType, ccdType);
+    }
+
+    /**
+     * Constructor for EventType enum that allows display name to be specified.
+     *
+     * @param ccdType     the CCD type associated with the event
+     * @param displayName the display name for the event
+     */
+    EventType(String ccdType, String displayName) {
+        this.ccdType = ccdType;
+        this.displayName = displayName;
+    }
 
     @JsonValue
     public String getCcdType() {
