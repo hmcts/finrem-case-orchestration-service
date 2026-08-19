@@ -42,6 +42,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -126,7 +127,8 @@ class ManageHearingsSubmittedHandlerTest {
             ),
             () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
             () -> assertThat(response.getConfirmationBody())
-                .contains("Notification to WHATEVER has failed. Please send notification to WHATEVER manually.")
+                .contains("Notification to WHATEVER has failed. Please send notification to WHATEVER manually."),
+            () -> verify(notificationAuditService, never()).updateSentAuditsList(event)
         );
     }
 

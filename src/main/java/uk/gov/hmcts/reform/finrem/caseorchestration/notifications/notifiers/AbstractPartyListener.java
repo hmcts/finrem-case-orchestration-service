@@ -140,7 +140,7 @@ public abstract class AbstractPartyListener {
         EmailTemplateNames emailTemplate = Optional.ofNullable(event.getEmailTemplate()).orElseThrow(() ->
             new IllegalArgumentException("Email template is required for digital notifications, case ID: " + event.getCaseId()));
 
-        // Email service handles email-specific exceptions - consider building in retries to email service.
+        // Email service handles email specific exceptions - consider building in retries to email service. DFR-5574
         emailService.sendConfirmationEmail(emailRequest, emailTemplate);
 
         log.info("Completed email notification for party {} on case {}", getNotificationParty(), event.getCaseId());

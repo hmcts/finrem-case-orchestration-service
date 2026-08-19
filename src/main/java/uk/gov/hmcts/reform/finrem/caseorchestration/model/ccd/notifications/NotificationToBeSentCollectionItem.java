@@ -18,6 +18,5 @@ import java.util.UUID;
 public class NotificationToBeSentCollectionItem {
 
     private UUID id;
-
     private NotificationAudit value;
 }

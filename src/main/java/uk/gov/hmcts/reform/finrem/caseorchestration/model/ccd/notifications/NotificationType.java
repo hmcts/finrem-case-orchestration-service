@@ -3,10 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 
-/**
- * Channel through which a notification was (or will be) sent to a party.
- */
-
 @RequiredArgsConstructor
 public enum NotificationType {
 

@@ -84,7 +84,7 @@ public class SendCorrespondenceEvent {
             .eventId(this.eventId)
             .party(notificationParty.name())
             .type(NotificationType.EMAIL)
-            // Email ID returned from notify API service calls
+            // Email ID returned from notify API service calls - DFR-5573
             // .emailId(emailId.toString())
             .emailTemplate(this.emailTemplate.name())
             .build());
