@@ -36,7 +36,8 @@ public class IssueApplicationConsentedAboutToSubmitHandler extends FinremAboutTo
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && List.of(EventType.ISSUE_APPLICATION, EventType.HWF_ACCEPTED_AND_ISSUE).contains(eventType);
+            && List.of(EventType.ISSUE_APPLICATION, EventType.HWF_ACCEPTED_AND_ISSUE, EventType.FEE_ACCOUNT_DEBITED_AND_ISSUE)
+                .contains(eventType);
     }
 
     @Override

@@ -103,6 +103,7 @@ public enum EventType {
     CUI_APPLICANT_DOCUMENT_UPLOAD("CUI_applicantUploadDocuments"),
     CUI_RESPONDENT_DOCUMENT_UPLOAD("CUI_respondentUploadDocuments"),
     HWF_ACCEPTED_AND_ISSUE("FR_HWFAcceptedAndIssue"),
+    FEE_ACCOUNT_DEBITED_AND_ISSUE("FR_feeAccountDebitedAndIssue"),
     @JsonEnumDefaultValue
     NONE("");
 
