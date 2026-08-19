@@ -13,14 +13,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
-public abstract class AbstractDefaultIssueDateAboutToStartHandler extends FinremCallbackHandler {
+public abstract class AbstractDefaultIssueApplicationAboutToStartHandler extends FinremCallbackHandler {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     protected final OnStartDefaultValueService onStartDefaultValueService;
 
-    protected AbstractDefaultIssueDateAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                          OnStartDefaultValueService onStartDefaultValueService) {
+    protected AbstractDefaultIssueApplicationAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                                 OnStartDefaultValueService onStartDefaultValueService) {
         super(finremCaseDetailsMapper);
         this.onStartDefaultValueService = onStartDefaultValueService;
     }

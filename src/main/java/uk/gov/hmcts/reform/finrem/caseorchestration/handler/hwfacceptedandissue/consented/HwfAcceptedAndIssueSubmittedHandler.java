@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.hwfacceptedandissue
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractDefaultIssueDateSubmittedHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractDefaultIssueApplicationSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
-public class HwfAcceptedAndIssueSubmittedHandler extends AbstractDefaultIssueDateSubmittedHandler {
+public class HwfAcceptedAndIssueSubmittedHandler extends AbstractDefaultIssueApplicationSubmittedHandler {
 
     private static final String CONFIRMATION_HEADER_WITH_ERROR = "HWF accepted and issued with errors";
 

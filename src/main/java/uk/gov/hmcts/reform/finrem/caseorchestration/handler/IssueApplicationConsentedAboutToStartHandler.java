@@ -2,14 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractDefaultIssueDateAboutToStartHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractDefaultIssueApplicationAboutToStartHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
 @Slf4j
 @Service
-public class IssueApplicationConsentedAboutToStartHandler extends AbstractDefaultIssueDateAboutToStartHandler {
+public class IssueApplicationConsentedAboutToStartHandler extends AbstractDefaultIssueApplicationAboutToStartHandler {
 
     public IssueApplicationConsentedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnStartDefaultValueService onStartDefaultValueService) {

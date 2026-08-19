@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractDefaultIssueDateSubmittedHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractDefaultIssueApplicationSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 @Slf4j
 @Service
-public class IssueApplicationConsentedSubmittedHandler extends AbstractDefaultIssueDateSubmittedHandler {
+public class IssueApplicationConsentedSubmittedHandler extends AbstractDefaultIssueApplicationSubmittedHandler {
 
     public IssueApplicationConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      EvidenceManagementDeleteService evidenceManagementDeleteService,
