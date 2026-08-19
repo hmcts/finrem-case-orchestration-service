@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public abstract class AbstractDefaultIssueApplicationSubmittedHandler extends FinremSubmittedCallbackHandler {
+public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSubmittedCallbackHandler {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -32,11 +32,11 @@ public abstract class AbstractDefaultIssueApplicationSubmittedHandler extends Fi
 
     protected final AssignPartiesAccessService assignPartiesAccessService;
 
-    protected AbstractDefaultIssueApplicationSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                              EvidenceManagementDeleteService evidenceManagementDeleteService,
-                                                              RetryExecutor retryExecutor,
-                                                              IssueApplicationConsentCorresponder issueApplicationConsentCorresponder,
-                                                              AssignPartiesAccessService assignPartiesAccessService) {
+    protected AbstractIssueApplicationSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                       EvidenceManagementDeleteService evidenceManagementDeleteService,
+                                                       RetryExecutor retryExecutor,
+                                                       IssueApplicationConsentCorresponder issueApplicationConsentCorresponder,
+                                                       AssignPartiesAccessService assignPartiesAccessService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
         this.issueApplicationConsentCorresponder = issueApplicationConsentCorresponder;
         this.assignPartiesAccessService = assignPartiesAccessService;
