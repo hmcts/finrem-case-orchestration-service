@@ -18,6 +18,6 @@ public class FeeAccountDebitedAndIssueAboutToStartHandler extends AbstractIssueA
 
     @Override
     protected EventType supportedEventType() {
-        return EventType.ISSUE_APPLICATION;
+        return EventType.FEE_ACCOUNT_DEBITED_AND_ISSUE;
     }
 }
