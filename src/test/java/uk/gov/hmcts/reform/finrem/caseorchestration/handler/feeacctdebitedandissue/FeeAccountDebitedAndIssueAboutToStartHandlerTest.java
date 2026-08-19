@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.fee;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.feeacctdebitedandissue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
