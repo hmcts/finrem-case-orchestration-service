@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.feeacctdebitedandissue.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,9 +9,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 
 @Slf4j
 @Service
-public class IssueApplicationConsentedAboutToStartHandler extends AbstractDefaultIssueDateAboutToStartHandler {
+public class FeeAccountDebitedAndIssueAboutToStartHandler extends AbstractDefaultIssueDateAboutToStartHandler {
 
-    public IssueApplicationConsentedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public FeeAccountDebitedAndIssueAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnStartDefaultValueService onStartDefaultValueService) {
         super(finremCaseDetailsMapper, onStartDefaultValueService);
     }
