@@ -77,7 +77,6 @@ public class HwfAcceptedAndIssueSubmittedHandler extends FinremCallbackHandler {
         return submittedResponse();
     }
 
-    // Copied from HwfSuccessfulSubmittedHandler
     private String sendHwfCorrespondence(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
         AtomicReference<String> error = new AtomicReference<>();
         retryExecutor.runWithRetryWithHandler(() -> hwfNotificationsService.sendCorrespondence(finremCaseDetails, userAuthorisation),
@@ -87,7 +86,6 @@ public class HwfAcceptedAndIssueSubmittedHandler extends FinremCallbackHandler {
         return error.get();
     }
 
-    // Copied from IssueApplicationConsentedSubmittedHandler
     private String sendIssueApplicationCorrespondence(FinremCaseDetails caseDetails, String userAuthorisation) {
         AtomicReference<String> error = new AtomicReference<>();
         retryExecutor.runWithRetryWithHandler(() -> issueApplicationConsentCorresponder
@@ -99,7 +97,6 @@ public class HwfAcceptedAndIssueSubmittedHandler extends FinremCallbackHandler {
         return error.get();
     }
 
-    // Copied from IssueApplicationConsentedSubmittedHandler
     private String grantRespondentSolicitor(FinremCaseData caseData) {
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
         String respSolEmail = YesOrNo.isYes(contactDetailsWrapper.getConsentedRespondentRepresented())
