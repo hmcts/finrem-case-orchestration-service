@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 @Service
 public class HwfAcceptedAndIssueAboutToStartHandler extends AbstractIssueApplicationAboutToStartHandler {
 
-
     public HwfAcceptedAndIssueAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                   OnStartDefaultValueService onStartDefaultValueService) {
         super(finremCaseDetailsMapper, onStartDefaultValueService);
