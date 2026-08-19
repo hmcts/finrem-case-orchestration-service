@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
@@ -12,8 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
-@Slf4j
 public abstract class AbstractDefaultIssueDateAboutToStartHandler extends FinremCallbackHandler {
+
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     protected final OnStartDefaultValueService onStartDefaultValueService;
 
