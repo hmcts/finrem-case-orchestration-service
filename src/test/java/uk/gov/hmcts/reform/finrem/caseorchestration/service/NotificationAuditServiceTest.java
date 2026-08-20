@@ -134,7 +134,7 @@ class NotificationAuditServiceTest {
         );
 
         Map<String, Object> result =
-            notificationAuditService.updateSentAuditsList(event);
+            notificationAuditService.reconcileNotificationAudits(event);
 
         assertThat(result)
             .containsEntry(NOTIFICATIONS_TO_BE_SENT, List.of())
@@ -178,7 +178,7 @@ class NotificationAuditServiceTest {
         );
 
         Map<String, Object> result =
-            notificationAuditService.updateSentAuditsList(event);
+            notificationAuditService.reconcileNotificationAudits(event);
 
         assertThat(result)
             .containsEntry(NOTIFICATIONS_TO_BE_SENT, List.of());
@@ -231,7 +231,7 @@ class NotificationAuditServiceTest {
         );
 
         Map<String, Object> result =
-            notificationAuditService.updateSentAuditsList(event);
+            notificationAuditService.reconcileNotificationAudits(event);
 
         List<Map<String, Object>> remainingPending =
             notificationToBeSentValues(result);
@@ -268,7 +268,7 @@ class NotificationAuditServiceTest {
                         .build()
                 )
             )
-            .notificationAudits(new ArrayList<>(sentAudits))
+            .audits(new ArrayList<>(sentAudits))
             .build();
     }
 

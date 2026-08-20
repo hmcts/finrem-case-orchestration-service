@@ -38,7 +38,7 @@ public class SendCorrespondenceEvent {
     boolean letterNotificationOnly;
 
     @Builder.Default
-    List<NotificationAudit> notificationAudits = new ArrayList<>();
+    List<NotificationAudit> audits = new ArrayList<>();
 
     @Setter
     String eventId;
@@ -60,7 +60,7 @@ public class SendCorrespondenceEvent {
      * @param notificationParty the party whose notification channel should be recorded
      */
     public void recordEmailNotificationToSendAudit(NotificationParty notificationParty) {
-        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+        audits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
             .notificationTrackerId(notificationTrackerId)
             .wasSent(YesOrNo.NO)
             .eventId(this.eventId)
@@ -78,7 +78,7 @@ public class SendCorrespondenceEvent {
      * @param notificationParty the party that received the email notification
      */
     public void recordEmailNotificationSentAudit(NotificationParty notificationParty) {
-        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+        audits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
             .notificationTrackerId(notificationTrackerId)
             .wasSent(YesOrNo.YES)
             .eventId(this.eventId)
@@ -100,7 +100,7 @@ public class SendCorrespondenceEvent {
      * @param notificationParty the party whose notification channel should be recorded
      */
     public void recordPostalNotificationToSendAudit(NotificationParty notificationParty) {
-        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+        audits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
             .notificationTrackerId(notificationTrackerId)
             .wasSent(YesOrNo.NO)
             .eventId(this.eventId)
@@ -119,7 +119,7 @@ public class SendCorrespondenceEvent {
      * @param letterId the Bulk Print letter ID returned after the postal notification was sent
      */
     public void recordPostalNotificationSentAudit(NotificationParty notificationParty, UUID letterId) {
-        notificationAudits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
+        audits.add(NotificationAudit.builder().createdAt(LocalDateTime.now())
             .notificationTrackerId(notificationTrackerId)
             .wasSent(YesOrNo.YES)
             .eventId(this.eventId)

@@ -169,9 +169,9 @@ class SendCorrespondenceEventTest {
         event.setEventId(eventId);
         event.recordEmailNotificationToSendAudit(notificationParty);
 
-        assertThat(event.getNotificationAudits()).hasSize(1);
+        assertThat(event.getAudits()).hasSize(1);
 
-        NotificationAudit audit = event.getNotificationAudits().getFirst();
+        NotificationAudit audit = event.getAudits().getFirst();
 
         assertCommonAuditFields(audit, notificationParty, NotificationType.EMAIL, YesOrNo.NO, eventId);
         assertThat(audit.getEmailTemplate()).isEqualTo(emailTemplate.name());
@@ -188,9 +188,9 @@ class SendCorrespondenceEventTest {
         event.setEventId(eventId);
         event.recordEmailNotificationSentAudit(notificationParty);
 
-        assertThat(event.getNotificationAudits()).hasSize(1);
+        assertThat(event.getAudits()).hasSize(1);
 
-        NotificationAudit audit = event.getNotificationAudits().getFirst();
+        NotificationAudit audit = event.getAudits().getFirst();
 
         assertCommonAuditFields(audit, notificationParty, NotificationType.EMAIL, YesOrNo.YES, eventId);
         assertThat(audit.getEmailTemplate()).isEqualTo(emailTemplate.name());
@@ -204,9 +204,9 @@ class SendCorrespondenceEventTest {
         event.setEventId(eventId);
         event.recordPostalNotificationToSendAudit(notificationParty);
 
-        assertThat(event.getNotificationAudits()).hasSize(1);
+        assertThat(event.getAudits()).hasSize(1);
 
-        NotificationAudit audit = event.getNotificationAudits().getFirst();
+        NotificationAudit audit = event.getAudits().getFirst();
 
         assertCommonAuditFields(audit, notificationParty, NotificationType.POSTAL, YesOrNo.NO, eventId);
     }
@@ -220,9 +220,9 @@ class SendCorrespondenceEventTest {
         event.setEventId(eventId);
         event.recordPostalNotificationSentAudit(notificationParty, letterId);
 
-        assertThat(event.getNotificationAudits()).hasSize(1);
+        assertThat(event.getAudits()).hasSize(1);
 
-        NotificationAudit audit = event.getNotificationAudits().getFirst();
+        NotificationAudit audit = event.getAudits().getFirst();
 
         assertCommonAuditFields(audit, notificationParty, NotificationType.POSTAL, YesOrNo.YES, eventId);
         assertThat(audit.getLetterId()).isEqualTo(letterId.toString());

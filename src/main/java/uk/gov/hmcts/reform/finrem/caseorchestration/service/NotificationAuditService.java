@@ -62,7 +62,7 @@ public class NotificationAuditService {
         applicationEventPublisher.publishEvent(event);
 
         List<NotificationToBeSentCollectionItem> pending =
-            event.getNotificationAudits().stream()
+            event.getAudits().stream()
                 .map(audit -> NotificationToBeSentCollectionItem.builder()
                     .id(UUID.randomUUID())
                     .value(audit)
@@ -102,7 +102,7 @@ public class NotificationAuditService {
      * @return a map containing the CCD case data fields that need to be updated,
      *         or an empty map when case data or the notification event ID is unavailable
      */
-    public Map<String, Object> updateSentAuditsList(SendCorrespondenceEvent sentEvent) {
+    public Map<String, Object> reconcileNotificationAudits(SendCorrespondenceEvent sentEvent) {
         FinremCaseData caseData = sentEvent.getCaseData();
         if (caseData == null) {
             log.warn("No caseData found when updating notification audits");
@@ -167,7 +167,7 @@ public class NotificationAuditService {
         SendCorrespondenceEvent sentEvent
     ) {
         return new ArrayList<>(
-            Optional.ofNullable(sentEvent.getNotificationAudits())
+            Optional.ofNullable(sentEvent.getAudits())
                 .orElseGet(List::of)
         );
     }

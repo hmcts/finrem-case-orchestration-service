@@ -87,7 +87,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             );
 
             error = publishEvent(getEventDescription(actionSelection), correspondenceEvent);
-            if (error != null) {
+            if (error == null) {
                 markPendingNotificationsAsSent(caseDetails, correspondenceEvent);
             }
         }
@@ -127,7 +127,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
                                                 SendCorrespondenceEvent correspondenceEvent) {
 
         Map<String, Object> updatedFields =
-            notificationAuditService.updateSentAuditsList(correspondenceEvent);
+            notificationAuditService.reconcileNotificationAudits(correspondenceEvent);
 
         if (!updatedFields.isEmpty()) {
             retryExecutor.runWithRetrySuppressException(

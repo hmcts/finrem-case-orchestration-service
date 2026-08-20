@@ -86,7 +86,7 @@ class ManageHearingsSubmittedHandlerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(notificationAuditService.updateSentAuditsList(any()))
+        lenient().when(notificationAuditService.reconcileNotificationAudits(any()))
             .thenReturn(Map.of());
     }
 
@@ -128,7 +128,7 @@ class ManageHearingsSubmittedHandlerTest {
             () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
             () -> assertThat(response.getConfirmationBody())
                 .contains("Notification to WHATEVER has failed. Please send notification to WHATEVER manually."),
-            () -> verify(notificationAuditService, never()).updateSentAuditsList(event)
+            () -> verify(notificationAuditService, never()).reconcileNotificationAudits(event)
         );
     }
 
@@ -283,7 +283,7 @@ class ManageHearingsSubmittedHandlerTest {
             null
         );
 
-        when(notificationAuditService.updateSentAuditsList(event))
+        when(notificationAuditService.reconcileNotificationAudits(event))
             .thenReturn(updatedFields);
 
         // Act
