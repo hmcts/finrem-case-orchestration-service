@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.String.format;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 @Slf4j
@@ -77,7 +79,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         );
 
         String error = null;
-        if (correspondenceEvent != null) {
+        if (nonNull(correspondenceEvent)) {
             log.info("Sending hearing correspondence for {} action. Case reference: {}",
                 actionSelection.getDescription(), finremCaseData.getCcdCaseId());
             correspondenceEvent.setEventId(callbackRequest.getEventType().getCcdType());
@@ -92,7 +94,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             }
         }
 
-        if (error == null) {
+        if (isNull(error)) {
             return submittedResponse();
         }
         return submittedResponse(
