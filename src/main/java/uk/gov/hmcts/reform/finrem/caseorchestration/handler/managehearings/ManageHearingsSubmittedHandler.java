@@ -20,9 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
@@ -71,14 +70,13 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
 
-        List<String> errors = new ArrayList<>();
-
         SendCorrespondenceEvent correspondenceEvent = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
             actionSelection,
             callbackRequest,
             userAuthorisation
         );
 
+        String error = null;
         if (correspondenceEvent != null) {
             log.info("Sending hearing correspondence for {} action. Case reference: {}",
                 actionSelection.getDescription(), finremCaseData.getCcdCaseId());
@@ -88,19 +86,18 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
                 finremCaseData.getNotificationAuditWrapper().getNotificationEventId()
             );
 
-            publishEvent(getEventDescription(actionSelection), correspondenceEvent, errors);
-
-            if (errors.isEmpty()) {
+            error = publishEvent(getEventDescription(actionSelection), correspondenceEvent);
+            if (error != null) {
                 markPendingNotificationsAsSent(caseDetails, correspondenceEvent);
             }
         }
 
-        if (errors.isEmpty()) {
+        if (error == null) {
             return submittedResponse();
         }
         return submittedResponse(
             toConfirmationHeader("Manage Hearings completed with error"),
-            toConfirmationBody(errors.toArray(new String[0]))
+            toConfirmationBody(error)
         );
     }
 
@@ -111,16 +108,19 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         };
     }
 
-    private void publishEvent(String eventDescription, SendCorrespondenceEvent event, List<String> errors) {
+    private String publishEvent(String eventDescription, SendCorrespondenceEvent event) {
         String notifyingPartyInString = event.describeNotificationParties();
+
+        AtomicReference<String> error = new AtomicReference<>();
         retryExecutor.runWithRetryWithHandler(
             () -> applicationEventPublisher.publishEvent(event),
             eventDescription,
             event.getCaseId(),
             (exception, actionName, caseId1) ->
-                errors.add(format("Notification to %s has failed. Please send notification to %s manually.",
+                error.set(format("Notification to %s has failed. Please send notification to %s manually.",
                     notifyingPartyInString, notifyingPartyInString))
         );
+        return error.get();
     }
 
     private void markPendingNotificationsAsSent(FinremCaseDetails caseDetails,
