@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_AUDITS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_TO_BE_SENT;
 
@@ -166,10 +167,7 @@ public class NotificationAuditService {
     private List<NotificationAudit> getSentAudits(
         SendCorrespondenceEvent sentEvent
     ) {
-        return new ArrayList<>(
-            Optional.ofNullable(sentEvent.getAudits())
-                .orElseGet(List::of)
-        );
+        return new ArrayList<>(emptyIfNull(sentEvent.getAudits()));
     }
 
     private void combinePendingAndSentAudits(
