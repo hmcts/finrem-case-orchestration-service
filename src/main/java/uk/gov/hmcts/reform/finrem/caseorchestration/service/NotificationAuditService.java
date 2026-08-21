@@ -24,13 +24,12 @@ import java.util.UUID;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_AUDITS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_TO_BE_SENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATION_EVENT_ID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationAuditService {
-
-    private static final String NOTIFICATION_EVENT_ID = "notificationEventId";
 
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher applicationEventPublisher;

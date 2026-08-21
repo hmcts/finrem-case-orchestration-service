@@ -343,10 +343,6 @@ public class CCDConfigConstant {
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String PFD_NCDR_COMPLIANCE_LETTER = "pfdNcdrComplianceLetter";
     public static final String PFD_NCDR_COVER_LETTER = "pfdNcdrCoverLetter";
-
-    public static final String NOTIFICATIONS_AUDITS = "notificationsAudits";
-    public static final String NOTIFICATIONS_TO_BE_SENT = "notificationsToBeSent";
-
     public static final String GENERAL_ORDER_PREVIEW_DOCUMENT = "generalOrderPreviewDocument";
     public static final String GENERAL_ORDER_BODY_TEXT = "generalOrderBodyText";
     public static final String GENERAL_ORDER_DATE = "generalOrderDate";
@@ -567,4 +563,9 @@ public class CCDConfigConstant {
     //international postal flag
     public static final String APPLICANT_RESIDE_OUTSIDE_UK = "applicantResideOutsideUK";
     public static final String RESPONDENT_RESIDE_OUTSIDE_UK = "respondentResideOutsideUK";
+
+    //notification audits
+    public static final String NOTIFICATIONS_AUDITS = "notificationsAudits";
+    public static final String NOTIFICATIONS_TO_BE_SENT = "notificationsToBeSent";
+    public static final String NOTIFICATION_EVENT_ID = "notificationEventId";
 }
