@@ -19,8 +19,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 public class HwfAcceptedAndIssueSubmittedHandler extends AbstractIssueApplicationSubmittedHandler {
 
-    private static final String CONFIRMATION_HEADER_WITH_ERROR = "HWF accepted and issued with errors";
-
     private final HwfCorrespondenceService hwfNotificationsService;
 
     public HwfAcceptedAndIssueSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -39,8 +37,9 @@ public class HwfAcceptedAndIssueSubmittedHandler extends AbstractIssueApplicatio
         return EventType.HWF_ACCEPTED_AND_ISSUE;
     }
 
+    @Override
     protected String getConfirmationHeader() {
-        return CONFIRMATION_HEADER_WITH_ERROR;
+        return "HWF accepted and issued with errors";
     }
 
     private String sendHwfCorrespondence(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
