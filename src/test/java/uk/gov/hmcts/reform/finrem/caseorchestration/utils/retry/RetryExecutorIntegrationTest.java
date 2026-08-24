@@ -6,10 +6,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.RetryListener;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.interceptor.RetryInterceptorBuilder;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,12 +27,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 
 @SpringJUnitConfig(classes = {
     RetryExecutor.class,
-    RetryConfig.class,
-    RetryExecutorIntegrationTest.EnableRetryConfig.class
+    RetryExecutorIntegrationTest.EnableRetryConfig.class,
+    RetryExecutorIntegrationTest.TestRetryConfig.class
 })
 class RetryExecutorIntegrationTest {
 
     private static final int DEFAULT_MAX_ATTEMPTS = 3;
+    private static final long TEST_RETRY_BACKOFF_MILLIS = 10L;
 
     @Autowired
     private RetryExecutor retryExecutor;
@@ -32,6 +41,34 @@ class RetryExecutorIntegrationTest {
     @Configuration
     @EnableRetry
     static class EnableRetryConfig {
+    }
+
+    @Configuration
+    static class TestRetryConfig {
+
+        @Bean(name = "retryLoggerInterceptor")
+        RetryOperationsInterceptor retryLoggerInterceptor() {
+            Map<Class<? extends Throwable>, Boolean> retryableExceptions = Map.of(
+                FeignException.InternalServerError.class, true,
+                FeignException.ServiceUnavailable.class, true,
+                FeignException.GatewayTimeout.class, true,
+                FeignException.BadGateway.class, true
+            );
+
+            SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(DEFAULT_MAX_ATTEMPTS, retryableExceptions);
+            RetryTemplate retryTemplate = new RetryTemplate();
+            retryTemplate.setRetryPolicy(retryPolicy);
+
+            FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
+            backOffPolicy.setBackOffPeriod(TEST_RETRY_BACKOFF_MILLIS);
+            retryTemplate.setBackOffPolicy(backOffPolicy);
+
+            retryTemplate.setListeners(new RetryListener[]{new RetryLogger()});
+
+            return RetryInterceptorBuilder.stateless()
+                .retryOperations(retryTemplate)
+                .build();
+        }
     }
 
     @Nested

@@ -9,10 +9,13 @@ plugins {
     id 'au.com.dius.pact' version '4.6.20'
     id "info.solidsoft.pitest" version "1.15.0"
     id 'com.github.hmcts.rse-cft-lib' version '0.19.2240'
+    id 'org.gradle.test-retry' version '1.6.2'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'io.spring.dependency-management'
+
+def isCiBuild = System.getenv('JENKINS_URL') != null || System.getenv('CI') == 'true'
 
 def versions = [
         guava                : '33.6.0-jre',
@@ -33,7 +36,7 @@ def versions = [
         wiremock             : '3.0.1',
         apacheLogging        : '2.25.4',
         idamClient           : '3.0.5',
-        springHateoas        : '1.5.6',
+        springHateoas        : '2.5.3',
         tika                 : '3.3.2',
         amClient             : '1.59.2',
         sendLetterClient     : '5.1.1',
@@ -142,6 +145,21 @@ tasks.withType(JavaExec).configureEach {
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
+
+    // Stabilise test behaviour across developer machines and Jenkins agents.
+    systemProperty 'user.timezone', 'UTC'
+    systemProperty 'user.language', 'en'
+    systemProperty 'user.country', 'GB'
+
+    // Use a conservative level of parallelism to reduce long runtimes without overloading CI agents.
+    maxParallelForks = isCiBuild ? 2 : Math.max(1, Runtime.runtime.availableProcessors().intdiv(2))
+    forkEvery = 200
+
+    retry {
+        maxRetries = isCiBuild ? 1 : 0
+        maxFailures = 20
+        failOnPassedAfterRetry = false
+    }
 
     testLogging {
         exceptionFormat = 'full'
