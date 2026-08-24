@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -25,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrls;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrlsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseLocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
@@ -32,6 +36,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -622,5 +628,61 @@ class FinremCallbackHandlerTest {
                     .build())
                 .build();
         }
+    }
+
+    private static Stream<Arguments> testPopulateCaseLocationField() {
+        CaseLocation expectedCaseLocation = CaseLocation.builder()
+            .baseLocation("283922")
+            .region("2")
+            .build();
+
+        return Stream.of(
+            Arguments.of((Function<FinremCallbackHandlerTest, FinremCallbackHandler>)
+                testClass -> testClass.finremCallbackHandler, true, expectedCaseLocation),
+            Arguments.of((Function<FinremCallbackHandlerTest, FinremCallbackHandler>)
+                testClass -> testClass.submittedCallbackHandler, true, expectedCaseLocation),
+            Arguments.of((Function<FinremCallbackHandlerTest, FinremCallbackHandler>)
+                testClass -> testClass.finremCallbackHandler, false, null),
+            Arguments.of((Function<FinremCallbackHandlerTest, FinremCallbackHandler>)
+                testClass -> testClass.submittedCallbackHandler, false, null)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testPopulateCaseLocationField")
+    void shouldPopulateCaseLocationFieldInPostHandle(Function<FinremCallbackHandlerTest, FinremCallbackHandler> handlerFactory,
+              boolean isConsentedApplication,
+              CaseLocation expectedCaseLocation) {
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        when(finremCaseDetails.getData()).thenReturn(caseData);
+        when(finremCaseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
+
+        when(caseData.isConsentedApplication()).thenReturn(isConsentedApplication);
+
+        FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
+        FinremCaseData caseDataBefore = spy(FinremCaseData.builder().build());
+        when(finremCaseDetailsBefore.getData()).thenReturn(caseDataBefore);
+
+        CallbackRequest callbackRequest = mock(CallbackRequest.class);
+        when(callbackRequest.getEventId()).thenReturn("FR_sendOrder");
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
+
+        CaseDetails caseDetailsBefore = mock(CaseDetails.class);
+        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore)).thenReturn(finremCaseDetailsBefore);
+
+        ArgumentCaptor<CaseLocation> captor = ArgumentCaptor.forClass(CaseLocation.class);
+
+        handlerFactory.apply(this).handle(callbackRequest, AUTH_TOKEN);
+
+        assertAll(
+            () -> verify(caseData).setCaseManagementLocation(captor.capture()),
+            () -> verify(caseDataBefore, never()).setCaseManagementLocation(any()),
+            () -> assertEquals(expectedCaseLocation, captor.getValue())
+        );
     }
 }

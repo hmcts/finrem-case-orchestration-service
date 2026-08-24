@@ -77,6 +77,7 @@ public abstract class FinremSubmittedCallbackHandler extends FinremCallbackHandl
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response,
         FinremCaseData finremCaseData, String userAuthorisation) {
 
+        setCaseLocationFieldAfterHandle(response, finremCaseData);
         purgeBinFileUrls(finremCaseData, userAuthorisation);
 
         return response;
