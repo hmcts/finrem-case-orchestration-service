@@ -12,16 +12,12 @@ import uk.gov.hmcts.reform.finrem.functional.model.RegisterUserRequest;
 import uk.gov.hmcts.reform.finrem.functional.model.UserDetails;
 import uk.gov.hmcts.reform.finrem.functional.model.UserGroup;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @Slf4j
 @Component
@@ -63,34 +59,30 @@ public class IdamUtils {
     }
 
     private String fetchUserToken(String username, String password) {
-        String userLoginDetails = String.join(":", username, password);
-        final String authHeader = "Basic " + Base64.getEncoder()
-            .encodeToString(userLoginDetails.getBytes(StandardCharsets.UTF_8));
-
         int retryCount = 0;
         Response response;
+
         do {
             response = RestAssured.given()
-                .header(AUTHORIZATION_HEADER, authHeader)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .formParam("grant_type", "password")
+                .formParam("username", username)
+                .formParam("password", password)
+                .formParam("client_id", "finrem")
+                .formParam("client_secret", idamSecret)
+                .formParam("scope", "openid profile roles")
                 .relaxedHTTPSValidation()
-                .post(idamCodeUrl());
+                .post(idamTokenUrl());
+
             retryCount++;
         } while (response.getStatusCode() > 300 && retryCount <= 3);
 
-        assert response.getStatusCode() < 300
-            : String.format("Code generation failed with code: %d, body: %s",
-            response.getStatusCode(), response.getBody().prettyPrint());
-
-        String code = response.getBody().path("code");
-
-        response = RestAssured.given()
-            .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .relaxedHTTPSValidation()
-            .post(idamTokenUrl(code));
-
         assert HttpStatus.valueOf(response.getStatusCode()) == HttpStatus.OK
-            : String.format("Token generation failed with code: %d, body: %s",
-            response.getStatusCode(), response.getBody().prettyPrint());
+            : String.format(
+            "Token generation failed with code: %d, body: %s",
+            response.getStatusCode(),
+            response.getBody().prettyPrint()
+        );
 
         return response.getBody().path("access_token");
     }
@@ -209,20 +201,8 @@ public class IdamUtils {
         return idamUserBaseUrl + "/testing-support/accounts/" + username;
     }
 
-    private String idamCodeUrl() {
-        return idamUserBaseUrl + "/oauth2/authorize"
-            + "?response_type=code"
-            + "&client_id=finrem"
-            + "&redirect_uri=" + idamRedirectUri;
-    }
-
-    private String idamTokenUrl(String code) {
-        return idamUserBaseUrl + "/o/token"
-            + "?code=" + code
-            + "&client_id=finrem"
-            + "&client_secret=" + idamSecret
-            + "&redirect_uri=" + idamRedirectUri
-            + "&grant_type=authorization_code";
+    private String idamTokenUrl() {
+        return idamUserBaseUrl + "/o/token";
     }
 
     private String idamCreateUrl() {
