@@ -146,4 +146,24 @@ class ManageExpressCaseAboutToStartHandlerTest {
         assertThat(response.getErrors()).isEmpty();
         verify(expressCaseService).canSetExpressPilotStatus(caseData, false);
     }
+
+    /*
+     * Given the admin has selected ManageExpressCaseV2Event for a case
+     * when the case is enrolled, but no longer qualifies for the express pilot
+     * then an Admin can still run the event (no errors).  This is so the admin can withdraw the case from the express pilot.
+     */
+    @Test
+    void givenManageExpressCaseV2Event_whenEnrolledCaseNowIneligible_thenDoNotPopulateError() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+
+        when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
+
+        var response = underTest.handle(FinremCallbackRequestFactory.from(caseData)
+            .toBuilder().eventType(MANAGE_EXPRESS_CASE_V2).build(), AUTH_TOKEN);
+
+        assertThat(response)
+            .extracting(GenericAboutToStartOrSubmitCallbackResponse::getErrors)
+            .isEqualTo(List.of());
+        verify(expressCaseService, never()).canSetExpressPilotStatus(caseData, false);
+    }
 }

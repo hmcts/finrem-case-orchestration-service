@@ -136,7 +136,7 @@ public class AssignPartiesAccessService {
      * @param finremCaseData the financial remedy case data before the update,
      *                             containing previous applicant representation details and organisation information
      */
-    public void revokeApplicantSolicitor(FinremCaseData finremCaseData) throws UserNotFoundInOrganisationApiException {
+    public void revokeApplicantSolicitor(FinremCaseData finremCaseData) {
         String caseId = finremCaseData.getCcdCaseId();
         String applicantSolicitorEmail = finremCaseData.getAppSolicitorEmail();
         OrganisationPolicy applicantOrganisationPolicy = finremCaseData.getApplicantOrganisationPolicy();
@@ -171,7 +171,7 @@ public class AssignPartiesAccessService {
      * @param finremCaseData the financial remedy case data before the update,
      *                             containing previous respondent representation details and organisation information
      */
-    public void revokeRespondentSolicitor(FinremCaseData finremCaseData) throws UserNotFoundInOrganisationApiException {
+    public void revokeRespondentSolicitor(FinremCaseData finremCaseData) {
         String caseId = finremCaseData.getCcdCaseId();
         String respondentSolicitorEmail = finremCaseData.getRespondentSolicitorEmail();
         OrganisationPolicy respondentOrganisationPolicy = finremCaseData.getRespondentOrganisationPolicy();
@@ -214,12 +214,10 @@ public class AssignPartiesAccessService {
         return userId;
     }
 
-    private void revokeAccess(Long caseId, String email, String orgId, String caseRole)
-        throws UserNotFoundInOrganisationApiException {
-        String userId = prdOrganisationService.findUserByEmail(email)
-            .orElseThrow(() -> new UserNotFoundInOrganisationApiException(
-                String.format("CaseID %s - Attempting to revoke role %s but system is unable to find user", caseId, caseRole)
-            ));
-        assignCaseAccessService.removeCaseRoleToUser(caseId, userId, caseRole, orgId);
+    private void revokeAccess(Long caseId, String email, String orgId, String caseRole) {
+        Optional.ofNullable(email)
+            .filter(StringUtils::isNotBlank)
+            .flatMap(prdOrganisationService::findUserByEmail)
+            .ifPresent(userId -> assignCaseAccessService.removeCaseRoleToUser(caseId, userId, caseRole, orgId));
     }
 }
