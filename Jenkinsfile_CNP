@@ -2,7 +2,7 @@
 import uk.gov.hmcts.contino.AppPipelineDsl
 import uk.gov.hmcts.contino.GithubAPI
 
-@Library("Infrastructure")
+@Library("Infrastructure@2.5.1")
 
 def githubApi = new GithubAPI(this)
 
