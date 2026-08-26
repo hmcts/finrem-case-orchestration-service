@@ -61,8 +61,13 @@ public class EmailService {
      */
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
-        EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
-            templateVars, notificationRequest.getEmailReplyToId());
+        EmailToSend emailToSend = generateEmail(
+            notificationRequest.getNotificationEmail(),
+            template.name(),
+            templateVars,
+            notificationRequest.getEmailReplyToId(),
+            notificationRequest.getCaseReferenceNumber());
+
         log.info("Sending confirmation email on Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
         sendEmail(emailToSend, "send Confirmation email for " + template.name());
     }
@@ -216,8 +221,8 @@ public class EmailService {
     }
 
     protected EmailToSend generateEmail(String destinationAddress, String templateName,
-                                        Map<String, Object> templateVars, String emailReplyToId) {
-        String referenceId = UUID.randomUUID().toString();
+                                        Map<String, Object> templateVars, String emailReplyToId, String caseReferenceNumber) {
+        String referenceId = String.format("%s-%s", caseReferenceNumber, UUID.randomUUID());
         String templateId = emailTemplates.get(templateName);
         return new EmailToSend(destinationAddress, templateId, templateVars, referenceId, emailReplyToId);
     }
