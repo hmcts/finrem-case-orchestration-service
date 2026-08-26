@@ -59,7 +59,7 @@ public class EmailService {
      * @param notificationRequest the request containing details for the email
      * @param template            the email template to use
      */
-    public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
+    public String sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(
             notificationRequest.getNotificationEmail(),
@@ -68,8 +68,11 @@ public class EmailService {
             notificationRequest.getEmailReplyToId(),
             notificationRequest.getCaseReferenceNumber());
 
-        log.info("Sending confirmation email on Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
+        String reference = emailToSend.getReferenceId();
+        log.info("Sending confirmation with reference: {} using template: {}", emailToSend.getReferenceId(), template.name());
         sendEmail(emailToSend, "send Confirmation email for " + template.name());
+
+        return reference;
     }
 
     protected Map<String, Object> buildTemplateVars(NotificationRequest notificationRequest, String templateName) {
