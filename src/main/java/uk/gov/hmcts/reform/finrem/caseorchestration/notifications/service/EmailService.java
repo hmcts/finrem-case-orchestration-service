@@ -69,7 +69,7 @@ public class EmailService {
             notificationRequest.getCaseReferenceNumber());
 
         String reference = emailToSend.getReferenceId();
-        log.info("Sending confirmation with reference: {} using template: {}", emailToSend.getReferenceId(), template.name());
+        log.info("Sending confirmation email with reference: {} using template: {}", emailToSend.getReferenceId(), template.name());
         sendEmail(emailToSend, "send Confirmation email for " + template.name());
 
         return reference;
