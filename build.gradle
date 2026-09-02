@@ -53,7 +53,7 @@ project.ext {
     jacksonBomVersion = "2.21.5"
     restAssuredBomVersion = "5.5.7"
     // Tomcat bump to address CVEs.  Remove when upgrading SpringBoot to version 4.
-    set('tomcat.version', '10.1.57')
+    set('tomcat.version', '10.1.59')
 }
 
 group = 'uk.gov.hmcts.reform.finrem'
