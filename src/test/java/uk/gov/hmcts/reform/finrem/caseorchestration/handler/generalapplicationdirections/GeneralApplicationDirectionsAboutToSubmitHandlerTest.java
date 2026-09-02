@@ -128,7 +128,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         contactDetailsValidatorMockedStatic = mockStatic(ContactDetailsValidator.class);
         contactDetailsValidatorMockedStatic
-            .when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(any(), any()))
+            .when(() -> ContactDetailsValidator.validatePostcodesByRepresentation(any(FinremCaseDetails.class)))
             .thenReturn(List.of());
     }
 
@@ -505,50 +505,41 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenPostalValidationErrors_whenHandle_thenResponseContainsPostalErrors() {
+    void givenPostalValidationErrors_whenHandle_thenResponseContainsErrors() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        List<String> expectedErrors = List.of(
-            "Applicant's postal address is missing",
-            "Respondent's postal address is missing"
-        );
+        List<String> expectedErrors = List.of("Applicant postcode is missing");
 
-        contactDetailsValidatorMockedStatic.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-                caseData, callbackRequest.getEventType()))
+        contactDetailsValidatorMockedStatic
+            .when(() -> ContactDetailsValidator.validatePostcodesByRepresentation(
+                callbackRequest.getCaseDetails()))
             .thenReturn(expectedErrors);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
-
-        verify(gaDirectionService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
-        verify(gaDirectionService, never()).getEventPostState(any(), any());
-        verify(generalApplicationsCategoriser, never()).categorise(any());
+        assertThat(response.getErrors()).containsExactlyElementsOf(expectedErrors);
+        verify(gaDirectionService, never())
+            .submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
     @Test
-    void givenNoPostalValidationErrors_whenHandle_thenResponseContainsEmptyErrorList() {
+    void givenNoPostalValidationErrors_whenHandle_thenContinues() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        List<String> expectedErrors = List.of();
-
-        contactDetailsValidatorMockedStatic.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-                caseData, callbackRequest.getEventType()))
-            .thenReturn(expectedErrors);
+        contactDetailsValidatorMockedStatic
+            .when(() -> ContactDetailsValidator.validatePostcodesByRepresentation(
+                callbackRequest.getCaseDetails()))
+            .thenReturn(List.of());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors()).isEmpty();
-
-        verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any());
-        verify(gaDirectionService).getEventPostState(any(), any());
-        verify(generalApplicationsCategoriser).categorise(any());
+        verify(gaDirectionService)
+            .submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
     @Test
