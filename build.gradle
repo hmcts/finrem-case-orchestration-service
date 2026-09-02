@@ -33,7 +33,7 @@ def versions = [
         wiremock             : '3.0.1',
         apacheLogging        : '2.25.4',
         idamClient           : '3.0.5',
-        springHateoas        : '1.5.6',
+        springHateoas        : '2.5.3',
         tika                 : '3.3.2',
         amClient             : '1.59.2',
         sendLetterClient     : '5.1.1',
@@ -52,7 +52,7 @@ project.ext {
     springCloudBomVersion = "2025.0.0"
     restAssuredBomVersion = "5.5.7"
     // Tomcat bump to address CVEs.  Remove when upgrading SpringBoot to version 4.
-    set('tomcat.version', '10.1.57')
+    set('tomcat.version', '10.1.59')
 }
 
 group = 'uk.gov.hmcts.reform.finrem'
