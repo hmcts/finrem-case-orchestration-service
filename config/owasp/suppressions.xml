@@ -72,6 +72,7 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-40988</cve>
         <cve>CVE-2026-41003</cve>
         <cve>CVE-2026-41694</cve>
+        <cve>CVE-2026-59270</cve>
     </suppress>
     <suppress until="2026-09-01Z">
         <notes><![CDATA[
@@ -128,6 +129,5 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-47893</cve>
         <cve>CVE-2026-59280</cve>
         <cve>CVE-2026-59314</cve>
-        <cve>CVE-2026-59270</cve>
     </suppress>
 </suppressions>
