@@ -413,7 +413,56 @@ dependencies {
     constraints {
         implementation('org.springframework:spring-aop') {
             version {
-                require '[6.2.20,)'
+                require '[6.2.20,6.3)'
+            }
+        }
+
+        implementation('org.springframework:spring-beans') {
+            version {
+                require '[6.2.20,6.3)'
+            }
+        }
+
+        implementation('org.springframework:spring-context') {
+            version {
+                require '[6.2.20,6.3)'
+            }
+        }
+
+        implementation('org.springframework:spring-core') {
+            version {
+                require '[6.2.20,6.3)'
+            }
+        }
+
+        implementation('org.springframework:spring-expression') {
+            version {
+                require '[6.2.20,6.3)'
+            }
+        }
+
+        implementation('org.springframework:spring-jcl') {
+            version {
+                require '[6.2.20,6.3)'
+            }
+            because 'Fix CVE-2026-59313 and CVE-2026-59314'
+        }
+
+        implementation('org.springframework:spring-web') {
+            version {
+                require '[6.2.20,6.3)'
+            }
+        }
+
+        implementation('org.springframework:spring-webmvc') {
+            version {
+                require '[6.2.20,6.3)'
+            }
+        }
+
+        implementation('org.springframework.hateoas:spring-hateoas') {
+            version {
+                require '[2.5.0,3.0)'
             }
         }
     }
