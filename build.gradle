@@ -409,15 +409,16 @@ dependencyManagement {
 }
 
 dependencies {
+    //'Fix CVE-2026-59313 and CVE-2026-59314 by avoiding vulnerable spring-aop 6.2.19'
     constraints {
         implementation('org.springframework:spring-aop') {
             version {
-                strictly '6.2.20'
+                require '[6.2.20,)'
             }
-            because 'Fix CVE-2026-59313 and CVE-2026-59314 by avoiding vulnerable spring-aop 6.2.19'
         }
     }
-    implementation group: 'com.ibm.icu', name: 'icu4j', version: versions.ibmIcu
+
+implementation group: 'com.ibm.icu', name: 'icu4j', version: versions.ibmIcu
     implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
