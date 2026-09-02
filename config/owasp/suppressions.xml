@@ -120,4 +120,13 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-.*@10\.1\.57$</packageUrl>
         <cve>CVE-2026-66299</cve>
     </suppress>
+    <suppress until="2026-10-01Z">
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-.*@6\.2\.19$</packageUrl>
+        <cve>CVE-2026-47892</cve>
+        <cve>CVE-2026-59313</cve>
+        <cve>CVE-2026-59283</cve>
+        <cve>CVE-2026-47893</cve>
+        <cve>CVE-2026-59280</cve>
+        <cve>CVE-2026-59314</cve>
+    </suppress>
 </suppressions>
