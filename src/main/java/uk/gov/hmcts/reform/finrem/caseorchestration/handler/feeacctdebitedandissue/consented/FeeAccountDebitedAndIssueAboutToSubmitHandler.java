@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.feeacctdebitedandissue.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,9 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.Iss
 
 @Slf4j
 @Service
-public class IssueApplicationConsentedAboutToSubmitHandler extends AbstractIssueApplicationAboutToSubmitHandler {
+public class FeeAccountDebitedAndIssueAboutToSubmitHandler extends AbstractIssueApplicationAboutToSubmitHandler {
 
-    public IssueApplicationConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public FeeAccountDebitedAndIssueAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                          OnlineFormDocumentService onlineFormDocumentService,
                                                          IssueApplicationService issueApplicationService) {
         super(finremCaseDetailsMapper, onlineFormDocumentService, issueApplicationService);
@@ -20,6 +20,6 @@ public class IssueApplicationConsentedAboutToSubmitHandler extends AbstractIssue
 
     @Override
     protected EventType supportedEventType() {
-        return EventType.ISSUE_APPLICATION;
+        return EventType.FEE_ACCOUNT_DEBITED_AND_ISSUE;
     }
 }
