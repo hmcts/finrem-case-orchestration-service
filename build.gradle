@@ -399,6 +399,12 @@ dependencyManagement {
             entry 'the_bouncy_castle_crypto_package_for_java'
         }
     }
+    // Remove this section once a newer Spring Boot version manages Tomcat 11.0.25 or later.
+    dependencies {
+        dependency "org.apache.tomcat.embed:tomcat-embed-core:11.0.25"
+        dependency "org.apache.tomcat.embed:tomcat-embed-el:11.0.25"
+        dependency "org.apache.tomcat.embed:tomcat-embed-websocket:11.0.25"
+    }
 }
 
 dependencies {
