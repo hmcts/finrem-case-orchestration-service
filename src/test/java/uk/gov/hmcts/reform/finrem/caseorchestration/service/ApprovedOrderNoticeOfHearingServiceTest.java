@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -297,7 +296,6 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()
-            .eventType(EventType.DIRECTION_UPLOAD_ORDER)
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
                 .data(new FinremCaseData()).state(State.APPLICATION_ISSUED).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
