@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseLocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.EstimatedAssetsChecklistWrapper;
@@ -43,6 +44,9 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
 
     protected static final List<String> NO_WARNINGS = null;
 
+    private static final String CONSENTED_CASE_MANAGEMENT_LOCATION_BASE_LOCATION = "283922";
+    private static final String CONSENTED_CASE_MANAGEMENT_LOCATION_REGION = "2";
+
     protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Override
@@ -65,10 +69,28 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response,
         FinremCaseData finremCaseData, String userAuthorisation) {
 
+        setCaseLocationFieldAfterHandle(response, finremCaseData);
+
         if (shouldClearTemporaryFieldsAfterHandle()) {
             return removeTemporaryFieldsAfterHandled(response);
         }
+
         return response;
+    }
+
+    protected static void setCaseLocationFieldAfterHandle(
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response,
+        FinremCaseData finremCaseData
+    ) {
+        CaseLocation caseLocation = finremCaseData.getCaseManagementLocation();
+        if (finremCaseData.isConsentedApplication()) {
+            caseLocation = CaseLocation.builder()
+                .baseLocation(CONSENTED_CASE_MANAGEMENT_LOCATION_BASE_LOCATION)
+                .region(CONSENTED_CASE_MANAGEMENT_LOCATION_REGION)
+                .build();
+        }
+        finremCaseData.setCaseManagementLocation(caseLocation);
+        response.setData(finremCaseData);
     }
 
     protected void validateCaseData(FinremCallbackRequest callbackRequest) {
