@@ -15,8 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -35,7 +35,7 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
     @Mock
     private OnlineFormDocumentService service;
     @Mock
-    private GenerateCoverSheetService generateCoverSheetService;
+    private IssueApplicationService issueApplicationService;
     @Mock
     private FeatureToggleService featureToggleService;
 
@@ -63,9 +63,8 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
             data.getScheduleOneWrapper().getTypeOfApplication().getValue());
         assertEquals(caseDocument(), data.getMiniFormA());
 
-        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN);
-        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN);
-        verifyNoMoreInteractions(generateCoverSheetService);
+        verify(issueApplicationService).generateCoverSheets(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verifyNoMoreInteractions(issueApplicationService);
     }
 
     @Test
