@@ -101,7 +101,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             updateApplications(caseDetails, documents, userAuthorisation);
         }
 
-        final List<String> errors = validatePostalAddressErrors(caseData, callbackRequest.getEventType());
+        final List<String> errors = new ArrayList<>(validatePostalAddressErrors(caseDetails));
 
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(caseData, errors);
@@ -121,8 +121,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         return responseWithoutWarnings(caseData, errors);
     }
 
-    private List<String> validatePostalAddressErrors(FinremCaseData caseData, EventType eventType) {
-        return new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
+    private List<String> validatePostalAddressErrors(FinremCaseDetails finremCaseDetails) {
+        return new ArrayList<>(ContactDetailsValidator.validatePostcodesByRepresentation(finremCaseDetails));
     }
 
     private void migrateExistingApplication(FinremCaseDetails caseDetails,
