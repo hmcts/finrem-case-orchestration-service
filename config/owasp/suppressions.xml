@@ -63,7 +63,7 @@
         <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j-.*@.*$</packageUrl>
         <cve>CVE-2026-49844</cve>
     </suppress>
-    <suppress until="2026-09-01Z">
+    <suppress until="2026-11-01Z">
         <notes><![CDATA[
           CVE-2026-66299 applies to the Tomcat WebSocket chat example.
           This Spring Boot application uses embedded Tomcat and does not
