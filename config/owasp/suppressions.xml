@@ -70,6 +70,7 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
     ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-crypto@.*$</packageUrl>
         <cve>CVE-2026-59270</cve>
+        <cve>CVE-2026-59276</cve>
     </suppress>
     <suppress until="2026-09-01Z">
         <notes><![CDATA[
