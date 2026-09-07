@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
@@ -55,6 +57,11 @@ class EmailNotificationOnlyListenerTest {
         }
 
         @Override
+        protected NotificationParty getNotificationPartyEnum() {
+            return NotificationParty.APPLICANT;
+        }
+
+        @Override
         protected boolean isRelevantParty(SendCorrespondenceEvent event) {
             return true;
         }
@@ -85,6 +92,7 @@ class EmailNotificationOnlyListenerTest {
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
             .emailTemplate(template)
             .emailNotificationRequest(nr)
+            .notificationParties(List.of(NotificationParty.APPLICANT))
             .build();
 
         emailNotificationOnlyListener.handleNotification(event);
