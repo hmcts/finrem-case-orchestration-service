@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import static java.util.Collections.singletonMap;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
@@ -15,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CaseFlagsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
@@ -30,6 +34,8 @@ public class CcdService {
     private final CaseEventsApi caseEventsApi;
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamAuthService idamAuthService;
+    private final CaseFlagsConfiguration caseFlagsConfiguration;
+
     private static final String LOGGER = "Executing eventType {} on Case ID: {}";
 
     public void executeCcdEventOnCase(String authorisation, String caseId, String caseTypeId,
@@ -155,6 +161,20 @@ public class CcdService {
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
         return coreCaseDataApi.searchCases(idamToken.getIdamOauth2Token(),
             idamToken.getServiceAuthorization(), caseType.getCcdType(), esQueryString);
+    }
+
+    public void submitSupplementaryDataToCcd(String authorisation, String caseId) {
+        IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
+
+        Map<String, Map<String, Map<String, Object>>> supplementaryDataFinancialRemedy = new HashMap<>();
+        supplementaryDataFinancialRemedy.put("supplementary_data_updates",
+                singletonMap("$set", singletonMap("HMCTSServiceId",
+                        caseFlagsConfiguration.getHmctsId())));
+
+        coreCaseDataApi.submitSupplementaryData(authorisation,
+                idamToken.getIdamOauth2Token(),
+                caseId,
+                supplementaryDataFinancialRemedy);
     }
 
 }
