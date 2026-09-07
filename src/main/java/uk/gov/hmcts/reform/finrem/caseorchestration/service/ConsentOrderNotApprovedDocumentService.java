@@ -62,10 +62,11 @@ public class ConsentOrderNotApprovedDocumentService {
         Optional<CaseDocument> generalOrder = Optional.ofNullable(documentHelper.getLatestGeneralOrder(finremCaseDetails.getData()));
 
         boolean useNotApprovedOrder = !notApprovedOrderDocuments.isEmpty() && (generalOrder.isEmpty()
-            || documentOrderingService.isDocumentModifiedLater(notApprovedOrderDocuments.get(0), generalOrder.get(), authorisationToken));
+            || documentOrderingService.isDocumentModifiedLater(notApprovedOrderDocuments.getFirst(), generalOrder.get(), authorisationToken));
 
         if (useNotApprovedOrder) {
-            existingList.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(notApprovedOrderDocuments));
+            existingList.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(notApprovedOrderDocuments, finremCaseDetails.getCaseType(),
+                authorisationToken));
         } else {
             generalOrder.ifPresent(caseDocument -> existingList.add(documentHelper.mapToBulkPrintDocument(caseDocument)));
         }
@@ -75,7 +76,7 @@ public class ConsentOrderNotApprovedDocumentService {
                                                     DocumentHelper.PaperNotificationRecipient recipient) {
         CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
         String notApprovedOrderNotificationFileName;
-        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getData()))) {
+        if (consentedApplicationHelper.isVariationOrder(caseDetails.getData())) {
             notApprovedOrderNotificationFileName = documentConfiguration.getVariationOrderNotApprovedCoverLetterFileName();
             caseDetailsWithTemplateData.getData().put(ORDER_TYPE, VARIATION);
         } else {
@@ -97,7 +98,7 @@ public class ConsentOrderNotApprovedDocumentService {
         if (caseDataService.isContestedApplication(caseDetails)) {
             List<ContestedConsentOrderData> consentOrders = consentOrderInContestedNotApprovedList(caseData);
             if (!consentOrders.isEmpty()) {
-                ContestedConsentOrderData contestedConsentOrderData = consentOrders.get(consentOrders.size() - 1);
+                ContestedConsentOrderData contestedConsentOrderData = consentOrders.getLast();
                 return singletonList(contestedConsentOrderData.getConsentOrder().getConsentOrder());
             }
         } else {

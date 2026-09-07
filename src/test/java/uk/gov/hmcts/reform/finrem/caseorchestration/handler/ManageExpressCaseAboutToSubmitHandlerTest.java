@@ -158,11 +158,27 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
     void givenManageExpressCaseV2EventAndShouldAllocateToExpressPilot_whenHandled_thenSetExpressCaseEnrollmentStatus() {
         when(callbackRequest.getEventType()).thenReturn(MANAGE_EXPRESS_CASE_V2);
         when(expressCaseWrapper.getShouldAllocateToExpressPilot()).thenReturn(YesOrNo.YES);
+        when(expressCaseService.canSetExpressPilotStatus(caseData, false)).thenReturn(true);
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response).extracting(GenericAboutToStartOrSubmitCallbackResponse::getData).isEqualTo(caseData);
+        assertThat(response).extracting(GenericAboutToStartOrSubmitCallbackResponse::getErrors).isEqualTo(List.of());
         verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
+    }
+
+    @Test
+    void givenManageExpressCaseV2EventAndShouldAllocateToExpressPilot_whenHandledWithIneligibleCase_thenErrorsInResponse() {
+        when(callbackRequest.getEventType()).thenReturn(MANAGE_EXPRESS_CASE_V2);
+        when(expressCaseWrapper.getShouldAllocateToExpressPilot()).thenReturn(YesOrNo.YES);
+        when(expressCaseService.canSetExpressPilotStatus(caseData, false)).thenReturn(false);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response).extracting(GenericAboutToStartOrSubmitCallbackResponse::getData).isEqualTo(caseData);
+        assertThat(response).extracting(GenericAboutToStartOrSubmitCallbackResponse::getErrors)
+            .isEqualTo(List.of("Case no longer qualifies for Express Pilot."));
+        verify(expressCaseService, never()).setExpressCaseEnrollmentStatus(caseData);
     }
 
     @ParameterizedTest

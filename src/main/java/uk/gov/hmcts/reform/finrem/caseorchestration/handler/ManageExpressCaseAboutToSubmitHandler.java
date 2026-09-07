@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -40,6 +41,7 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremAboutToSubmitCa
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseData caseData = callbackRequest.getFinremCaseData();
         ExpressCaseWrapper expressPilotWrapper = caseData.getExpressCaseWrapper();
+        List<String> errors = new ArrayList<>();
 
         // Keeping legacy logic
         if (EventType.MANAGE_EXPRESS_CASE.equals(callbackRequest.getEventType())) {
@@ -49,10 +51,10 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremAboutToSubmitCa
                 expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
             }
         } else { // V2
-            setExpressPilotStatus(caseData);
+            errors.addAll(setExpressPilotStatus(caseData));
         }
 
-        return response(caseData);
+        return response(caseData, null, errors);
     }
 
     private boolean isUserConfirmed(ExpressCaseWrapper expressPilotWrapper) {
@@ -60,16 +62,37 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremAboutToSubmitCa
             .anyMatch(YesOrNo::isYes);
     }
 
-    private void setExpressPilotStatus(FinremCaseData finremCaseData) {
-        ExpressCaseWrapper expressCaseWrapper = finremCaseData.getExpressCaseWrapper();
-        String caseId = finremCaseData.getCcdCaseId();
-        if (YesOrNo.isYes(expressCaseWrapper.getShouldAllocateToExpressPilot())) {
-            expressCaseService.setExpressCaseEnrollmentStatus(finremCaseData);
-            log.info("{} - Setting express case enrollment status to {}", caseId,
-                expressCaseWrapper.getExpressCaseParticipation());
-        } else {
-            expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(finremCaseData);
+    /**
+     * This method is used to set the express pilot status for the case.
+     * If the case should no longer be allocated to the express pilot, it sets the status to withdrawn.
+     * If the case no longer qualifies for the express pilot, it returns an error message.
+     * If the case qualifies for the express pilot, it sets the status to enrolled.
+     *
+     * @param caseData The case data
+     * @return A list of error messages, if any
+     */
+    private List<String> setExpressPilotStatus(FinremCaseData caseData) {
+        ExpressCaseWrapper expressCaseWrapper = caseData.getExpressCaseWrapper();
+        String caseId = caseData.getCcdCaseId();
+
+        if (YesOrNo.isNoOrNull(expressCaseWrapper.getShouldAllocateToExpressPilot())) {
+            expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
             log.info("{} - Setting express case enrollment status to withdrawn", caseId);
+            return List.of();
         }
+
+        if (!expressCaseService.canSetExpressPilotStatus(caseData, false)) {
+            log.info("{} - Express case enrollment not set. Case no longer qualifies", caseId);
+            return List.of("Case no longer qualifies for Express Pilot.");
+        }
+
+        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+        log.info(
+            "{} - Setting express case enrollment status to {}",
+            caseId,
+            expressCaseWrapper.getExpressCaseParticipation()
+        );
+
+        return List.of();
     }
 }

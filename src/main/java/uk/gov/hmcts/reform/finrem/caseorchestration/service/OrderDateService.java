@@ -23,21 +23,6 @@ public class OrderDateService {
     private final EvidenceManagementAuditService evidenceManagementAuditService;
 
     /**
-     * Use {@link #syncCreatedDateAndMarkDocumentStamped(List, String)} instead.
-     * This method forwards the call to the new method to ensure consistent behaviour.
-     *
-     * @param orderCollections   the list of direction orders to update; may be null
-     * @param authorisationToken the authorisation token used for the document service
-     * @return a list of direction orders with the created date set and the document marked as stamped
-     * @deprecated Since July 2025. This method is deprecated and will be removed in a future release.
-     */
-    @Deprecated(since = "2025-07")
-    public List<DirectionOrderCollection> addCreatedDateInFinalOrder(List<DirectionOrderCollection> orderCollections,
-                                                                     String authorisationToken) {
-        return syncCreatedDateAndMarkDocumentStamped(orderCollections, authorisationToken);
-    }
-
-    /**
      * Adds the created date to each direction order in the list and marks the document as stamped.
      * If the input list is null, it returns an empty list with no errors.
      *

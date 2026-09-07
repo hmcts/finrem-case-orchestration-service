@@ -335,7 +335,6 @@ public class CCDConfigConstant {
     public static final String FORMA_SCANNED_DATE = "formAScannedDate";
     public static final String FORMA_DELIVERY_DATE = "formADeliveryDate";
     public static final String FORMA_EXCEPTIONAL_RECORD_REFERENCE = "formAExceptionRecordReference";
-    public static final String FORM_A_COLLECTION = "copyOfPaperFormA";
     public static final String FORM_C = "formC";
     public static final String FORM_G = "formG";
     public static final String HEARING_NOTICE_DOCUMENT = "hearingNotice";
@@ -344,7 +343,6 @@ public class CCDConfigConstant {
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String PFD_NCDR_COMPLIANCE_LETTER = "pfdNcdrComplianceLetter";
     public static final String PFD_NCDR_COVER_LETTER = "pfdNcdrCoverLetter";
-
     public static final String GENERAL_ORDER_PREVIEW_DOCUMENT = "generalOrderPreviewDocument";
     public static final String GENERAL_ORDER_BODY_TEXT = "generalOrderBodyText";
     public static final String GENERAL_ORDER_DATE = "generalOrderDate";
@@ -371,7 +369,6 @@ public class CCDConfigConstant {
     public static final String AMENDED_CONSENT_ORDER_COLLECTION = "amendedConsentOrderCollection";
     public static final String ORDER_REFUSAL_PREVIEW_COLLECTION = "orderRefusalPreviewDocument";
     public static final String CONTESTED_CONSENT_ORDER_COLLECTION = "Contested_ConsentedApprovedOrders";
-    public static final String CONTESTED_CONSENT_PENSION_COLLECTION = "consentPensionCollection";
     public static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION = "consentedNotApprovedOrders";
     public static final String CONSENTED_ORDER_DIRECTION_JUDGE_TITLE = "orderDirectionJudge";
     public static final String CONTESTED_ORDER_DIRECTION_JUDGE_TITLE = "consentSelectJudge";
@@ -471,7 +468,6 @@ public class CCDConfigConstant {
     //scheduled hearings
     public static final String HEARING_TYPE = "hearingType";
     public static final String HEARING_DATE = "hearingDate";
-    public static final String DIRECTION_DETAILS_COLLECTION_CT = "directionDetailsCollection";
 
     //transfer to local courts
     public static final String TRANSFER_COURTS_COLLECTION = "transferLocalCourtEmailCollection";
@@ -567,4 +563,9 @@ public class CCDConfigConstant {
     //international postal flag
     public static final String APPLICANT_RESIDE_OUTSIDE_UK = "applicantResideOutsideUK";
     public static final String RESPONDENT_RESIDE_OUTSIDE_UK = "respondentResideOutsideUK";
+
+    //notification audits
+    public static final String NOTIFICATIONS_AUDITS = "notificationsAudits";
+    public static final String NOTIFICATIONS_TO_BE_SENT = "notificationsToBeSent";
+    public static final String NOTIFICATION_EVENT_ID = "notificationEventId";
 }

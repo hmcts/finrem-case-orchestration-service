@@ -5,6 +5,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -22,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.Process
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -50,9 +50,8 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} about to start callback for Case ID: {}", callbackRequest.getEventType(), caseId);
         FinremCaseData caseData = caseDetails.getData();
 
         processOrderService.populateUnprocessedUploadHearingDocuments(caseData);
@@ -63,8 +62,7 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
         if (processOrderService.hasNoApprovedOrdersToProcess(caseData)) {
             String error = "There are no draft orders to be processed.";
             errors.add(error);
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(errors).build();
+            return response(caseData, null, errors);
         }
 
         // Initialise Working Hearings if the event is PROCESS_ORDER
@@ -79,14 +77,13 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
             );
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return response(caseData, null, errors);
     }
 
     private void populateMetaDataFields(FinremCaseData caseData) {
         caseData.getDraftOrdersWrapper().setIsLegacyApprovedOrderPresent(YesOrNo.forValue(!CollectionUtils
             .isEmpty(caseData.getUnprocessedUploadHearingDocuments())));
-        caseData.getDraftOrdersWrapper().setIsUnprocessedApprovedDocumentPresent(YesOrNo.forValue(!ofNullable(caseData.getDraftOrdersWrapper()
-            .getUnprocessedApprovedDocuments()).orElse(List.of()).isEmpty()));
+        caseData.getDraftOrdersWrapper().setIsUnprocessedApprovedDocumentPresent(YesOrNo.forValue(!CollectionUtils
+            .isEmpty(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())));
     }
-
 }

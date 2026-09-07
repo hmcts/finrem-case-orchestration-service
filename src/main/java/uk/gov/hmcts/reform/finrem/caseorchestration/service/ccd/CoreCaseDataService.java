@@ -5,9 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -40,7 +38,6 @@ public class CoreCaseDataService {
         return self.performPostSubmitCallback(caseType, caseId, eventName, changeFunction, false);
     }
 
-    @Retryable(recover = "recover", maxAttempts = 5, backoff = @Backoff(delay = 2000))
     public CaseDetails performPostSubmitCallback(CaseType caseType,
                                                  Long caseId,
                                                  String eventName,

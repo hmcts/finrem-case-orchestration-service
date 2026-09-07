@@ -56,8 +56,7 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
         interveners.forEach(intervenerWrapper -> {
             log.info("Intervener type {}, communication enabled {}, Case ID:{}", intervenerWrapper.getIntervenerType(),
                 intervenerWrapper.getIntervenerCorrespondenceEnabled(), caseDetails.getId());
-            if (intervenerWrapper.getIntervenerCorrespondenceEnabled() == null
-                || Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
+            if (Boolean.TRUE.equals(intervenerWrapper.getIntervenerCorrespondenceEnabled())) {
                 List<CaseDocument> caseDocuments = returnAndAddCaseDocumentsToIntervenerHearingNotices(caseDetails, intervenerWrapper);
                 if (shouldSendIntervenerSolicitorEmail(intervenerWrapper, caseDetails)) {
                     log.info("Sending email correspondence to {} for Case ID: {}",
@@ -68,7 +67,8 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
                     log.info("Sending letter correspondence to {} for Case ID: {}",
                         intervenerWrapper.getIntervenerType().getTypeValue(),
                         caseDetails.getId());
-                    List<BulkPrintDocument> documentsToPrint = documentHelper.getCaseDocumentsAsBulkPrintDocuments(caseDocuments);
+                    List<BulkPrintDocument> documentsToPrint = documentHelper.getCaseDocumentsAsBulkPrintDocuments(caseDocuments,
+                        caseDetails.getCaseType(), authorisationToken);
                     bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, documentsToPrint);
                 }
 
@@ -105,11 +105,13 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
 
     protected void printApplicantDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
-            documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails),
+                caseDetails.getCaseType(), authorisationToken));
     }
 
     protected void printRespondentDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
-            documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails),
+                caseDetails.getCaseType(), authorisationToken));
     }
 }

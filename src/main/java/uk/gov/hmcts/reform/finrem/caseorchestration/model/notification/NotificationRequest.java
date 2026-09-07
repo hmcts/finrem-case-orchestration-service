@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder(toBuilder = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -47,8 +49,6 @@ public class NotificationRequest {
     private String intervenerFullName;
     @JsonProperty("intervenerSolicitorFirm")
     private String intervenerSolicitorFirm;
-    @JsonProperty("")
-    private byte[] documentContents;
     @JsonProperty("isNotDigital")
     private Boolean isNotDigital;
     @JsonProperty("hearingDate")
@@ -67,4 +67,5 @@ public class NotificationRequest {
     private String vacatedHearingDateTime;
     private String vacatedHearingType;
     private String dateOfIssue;
+    private List<byte[]> documentContentsList;
 }

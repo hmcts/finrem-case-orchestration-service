@@ -96,19 +96,19 @@ public class BulkPrintService {
     }
 
     public UUID printRespondentDocuments(FinremCaseDetails caseDetails, String authorisationToken,
-                                         List<BulkPrintDocument> caseDocuments) {
+                                         List<BulkPrintDocument> bulkPrintDocuments) {
 
         return printDocumentsWithCoversheet(caseDetails,
-            generateRespondentCoverSheet(caseDetails, authorisationToken), caseDocuments,
+            generateRespondentCoverSheet(caseDetails, authorisationToken), bulkPrintDocuments,
             RESPONDENT, postalService.isRespondentResideOutsideOfUK(caseDetails.getData()), authorisationToken);
     }
 
     public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper,
                                          FinremCaseDetails caseDetails,
                                          String authorisationToken,
-                                         List<BulkPrintDocument> caseDocuments) {
+                                         List<BulkPrintDocument> bulkPrintDocuments) {
         return printDocumentsWithCoversheet(caseDetails,
-            generateIntervenerCoverSheet(caseDetails, authorisationToken, intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
+            generateIntervenerCoverSheet(caseDetails, authorisationToken, intervenerWrapper.getPaperNotificationRecipient()), bulkPrintDocuments,
             intervenerWrapper.getIntervenerType().getTypeValue(),
             postalService.isIntervenerResideOutsideOfUK(intervenerWrapper), authorisationToken);
     }

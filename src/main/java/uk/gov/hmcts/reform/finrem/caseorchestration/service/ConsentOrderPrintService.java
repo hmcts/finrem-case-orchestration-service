@@ -141,19 +141,22 @@ public class ConsentOrderPrintService {
         CaseDocument generalOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
 
         if (eventType.getCcdType().equals(EventType.APPROVE_ORDER.getCcdType())) {
-            bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
+            bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments,
+                finremCaseDetails.getCaseType(), authorisationToken));
         } else {
             if (!isNull(generalOrder) && isNull(generalOrderBefore)) {
                 bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalOrder));
             } else if (isNull(generalOrder) && isNull(generalOrderBefore)) {
-                bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
+                bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments,
+                    finremCaseDetails.getCaseType(), authorisationToken));
             } else if (!isNull(generalOrder) && !orderDocuments.isEmpty()
-                && documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.get(0), authorisationToken)) {
+                && documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.getFirst(), authorisationToken)) {
                 bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalOrder));
             } else if (!isNull(generalOrder) && orderDocuments.isEmpty()) {
                 bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalOrder));
             } else {
-                bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
+                bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments,
+                    finremCaseDetails.getCaseType(), authorisationToken));
             }
         }
     }

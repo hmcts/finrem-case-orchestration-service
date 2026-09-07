@@ -432,26 +432,21 @@ public class GeneralOrderService {
         final List<CaseDocument> newOrders = new ArrayList<>();
         final Map<CaseDocument, List<CaseDocument>> order2AttachmentMap = new HashMap<>();
 
-        List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
-        List<FinalisedOrderCollection> finalisedOrders = caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection();
         List<AgreedDraftOrderCollection> agreedDraftOrderCollection = emptyIfNull(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .stream().filter(a -> a.getValue().getOrderStatus() == PROCESSED).toList();
 
-        if (selectedOrders != null) {
-            if (selectedOrders.stream().anyMatch(s -> !YesOrNo.isYes(s.getDocumentToShare()))) {
-                log.warn("It assumes that the provided selectedOrders should have a value of 'Yes' in documentToShare;"
-                    + " however, this logic filters them regardless.");
+        emptyIfNull(selectedOrders).stream().filter(o -> YesOrNo.isYes(o.getDocumentToShare())).forEach(selected -> {
+            boolean isProcessed = populateSelectedUploadHearingOrder(legacyOrders, order2AttachmentMap,
+                caseData.getUploadHearingOrder(), selected);
+            if (!isProcessed) {
+                isProcessed = populateSelectedFinalisedOrders(newOrders, order2AttachmentMap,
+                caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection(), selected);
             }
-            selectedOrders.stream().filter(o -> YesOrNo.isYes(o.getDocumentToShare())).forEach(selected -> {
-                boolean isProcessed = populateSelectedUploadHearingOrder(legacyOrders, order2AttachmentMap, hearingOrders, selected);
-                if (!isProcessed) {
-                    isProcessed = populateSelectedFinalisedOrders(newOrders, order2AttachmentMap, finalisedOrders, selected);
-                }
-                if (!isProcessed) {
-                    populateSelectedProcessedOrders(newOrders, order2AttachmentMap, agreedDraftOrderCollection, selected);
-                }
-            });
-        }
+            if (!isProcessed) {
+                populateSelectedProcessedOrders(newOrders, order2AttachmentMap, agreedDraftOrderCollection, selected);
+            }
+        });
+
         return Triple.of(legacyOrders, newOrders, order2AttachmentMap);
     }
 
