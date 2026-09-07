@@ -59,6 +59,7 @@ import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.ListUtils.defaultIfNull;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateCaseDataAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -102,6 +103,11 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
+
+        List<String> errors = validateCaseDataAddresses(caseData);
+        if (!errors.isEmpty()) {
+            return response(caseData, null, errors);
+        }
 
         List<String> parties = generalOrderService.getParties(caseDetails);
         List<OrderToShare> selectedOrders = getSelectedOrders(caseData);
