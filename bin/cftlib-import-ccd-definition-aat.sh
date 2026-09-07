@@ -43,7 +43,7 @@ if [[ -n $1 ]]; then
   fi
 fi
 
-idamApiHost=https://idam-api.aat.platform.hmcts.net
+idamApiHost=https://idam-web-public.aat.platform.hmcts.net
 s2sHost=http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
 ccdDefinitionStoreHost=http://localhost:4451
 

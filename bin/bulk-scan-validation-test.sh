@@ -9,7 +9,7 @@
 #   - CCD_IMPORT_USERNAME_AAT
 #   - CCD_IMPORT_PASSWORD_AAT
 
-idamApiHost=https://idam-api.aat.platform.hmcts.net
+idamApiHost=https://idam-web-public.aat.platform.hmcts.net
 s2sHost=http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
 
 binFolder=$(dirname "$0")
