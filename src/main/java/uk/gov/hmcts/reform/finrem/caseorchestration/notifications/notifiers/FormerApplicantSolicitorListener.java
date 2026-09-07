@@ -17,13 +17,13 @@ public class FormerApplicantSolicitorListener extends EmailNotificationOnlyListe
     }
 
     @Override
-    protected String getNotificationParty() {
-        return "former applicant solicitor";
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
     }
 
     @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY);
+    protected String getNotificationParty() {
+        return "former applicant solicitor";
     }
 
     @Override
