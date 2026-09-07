@@ -106,7 +106,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
 
         List<String> errors = validateCaseDataAddresses(caseData);
         if (!errors.isEmpty()) {
-            return response(caseData, null, errors);
+            return responseWithoutWarnings(caseData, errors);
         }
 
         List<String> parties = generalOrderService.getParties(caseDetails);
