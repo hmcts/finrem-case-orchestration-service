@@ -39,7 +39,16 @@ public class IdamAuthService {
         String authToken = StringUtils.containsIgnoreCase(authorisation, "Bearer")
             ? authorisation
             : String.format("%s %s", "Bearer", authorisation);
-        return idamAuthApi.retrieveUserDetails(authToken);
+
+        UserInfo userInfo = idamAuthApi.retrieveUserInfo(authToken);
+
+        return UserDetails.builder()
+            .id(userInfo.getUid())
+            .email(userInfo.getSub())
+            .forename(userInfo.getGivenName())
+            .surname(userInfo.getFamilyName())
+            .roles(userInfo.getRoles())
+            .build();
     }
 
     public IdamToken getIdamToken(String authorisation) {

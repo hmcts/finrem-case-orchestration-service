@@ -32,8 +32,4 @@ public interface IdamAuthApi {
     UserInfo retrieveUserInfo(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation
     );
-
-    @GetMapping("/details")
-    UserDetails retrieveUserDetails(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation);
-
 }
