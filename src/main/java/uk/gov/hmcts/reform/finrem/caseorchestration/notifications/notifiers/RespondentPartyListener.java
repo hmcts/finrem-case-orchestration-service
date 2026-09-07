@@ -39,13 +39,13 @@ public class RespondentPartyListener extends AbstractPartyListener {
     }
 
     @Override
-    protected String getNotificationParty() {
-        return RESPONDENT;
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.RESPONDENT;
     }
 
     @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.RESPONDENT);
+    protected String getNotificationParty() {
+        return RESPONDENT;
     }
 
     @Override

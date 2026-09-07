@@ -385,6 +385,33 @@ public class ManageHearingsCorresponder {
         return Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
     }
 
+    /**
+     * Builds a correspondence event for the selected manage hearings action, if correspondence is required.
+     *
+     * <p>This method routes the selected action to the appropriate correspondence builder.
+     * Add hearing actions use the hearing correspondence builder, while adjourn or vacate
+     * actions use the adjourned or vacated hearing correspondence builder.</p>
+     *
+     * @param actionSelection   the manage hearings action selected by the user
+     * @param callbackRequest   the callback request containing the case details and hearing data
+     * @param userAuthorisation the authorisation token used when building correspondence
+     * @return a {@link SendCorrespondenceEvent}, or {@code null} if no correspondence is required
+     */
+    public SendCorrespondenceEvent buildCorrespondenceEventIfNeeded(ManageHearingsAction actionSelection,
+                                                                    FinremCallbackRequest callbackRequest,
+                                                                    String userAuthorisation) {
+        return switch (actionSelection) {
+            case ADD_HEARING -> buildHearingCorrespondenceEventIfNeeded(
+                callbackRequest,
+                userAuthorisation
+            );
+            case ADJOURN_OR_VACATE_HEARING -> buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(
+                callbackRequest,
+                userAuthorisation
+            );
+        };
+    }
+
     private boolean shouldNotSendVacateOrAdjournNotification(boolean isVacatedAndRelistedHearing,
                                                              VacateOrAdjournedHearing vacateOrAdjournedHearing) {
         return !isVacatedAndRelistedHearing && !vacateOrAdjournedHearing.shouldSendNotifications();
