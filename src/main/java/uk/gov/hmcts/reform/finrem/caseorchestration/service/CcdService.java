@@ -174,8 +174,8 @@ public class CcdService {
             singletonMap("$set", singletonMap("HMCTSServiceId",
                 caseFlagsConfiguration.getHmctsId())));
 
-        coreCaseDataApi.submitSupplementaryData(authorisation,
-            idamToken.getIdamOauth2Token(),
+        coreCaseDataApi.submitSupplementaryData(idamToken.getIdamOauth2Token(),
+            idamToken.getServiceAuthorization(),
             caseId,
             supplementaryDataFinancialRemedy);
     }
