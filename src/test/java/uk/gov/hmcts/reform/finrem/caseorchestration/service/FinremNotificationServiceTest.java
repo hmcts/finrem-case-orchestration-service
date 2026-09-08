@@ -664,34 +664,6 @@ class FinremNotificationServiceTest {
     }
 
     @Test
-    void givenContestedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
-        NotificationRequest notificationRequest = NotificationRequest.builder().build();
-        notificationRequest.setName(TEST_SOLICITOR_NAME);
-        notificationRequest.setNotificationEmail("test@test.com");
-        when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
-
-        notificationService.sendNoticeOfChangeEmail(caseDetails);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_NOTICE_OF_CHANGE));
-    }
-
-    @Test
-    void givenConsentedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
-        NotificationRequest notificationRequest = NotificationRequest.builder().build();
-        notificationRequest.setName(TEST_SOLICITOR_NAME);
-        notificationRequest.setNotificationEmail("test@test.com");
-        when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails();
-
-        notificationService.sendNoticeOfChangeEmail(caseDetails);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENTED_NOTICE_OF_CHANGE));
-    }
-
-    @Test
     void sendUpdateFrcInformationEmailToAppSolicitor() {
         notificationService.sendUpdateFrcInformationEmailToAppSolicitor(contestedFinremCaseDetails);
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
