@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.sendorder.contested
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -142,6 +143,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     final String approvalJudge = "Peter Chapman";
     @Mock
     private CaseDocument coversheet;
+    private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
 
     private List<SendOrderPartyDocumentHandler> handlers;
 
@@ -185,6 +187,16 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         lenient().when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
             .thenReturn(mock(Triple.class));
         lenient().when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(stampType);
+
+        mockedContactDetailsValidator = Mockito.mockStatic(ContactDetailsValidator.class);
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                any(FinremCaseData.class), any(EventType.class)))
+            .thenReturn(List.of());
+    }
+
+    @AfterEach
+    void tearDownStatics() {
+        mockedContactDetailsValidator.close();
     }
 
     @Test
@@ -777,15 +789,14 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
 
-        try (MockedStatic<ContactDetailsValidator> mockedStatic = Mockito.mockStatic(ContactDetailsValidator.class)) {
-            List<String> expectedErrors = List.of("ERROR1");
-            mockedStatic.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(caseData, EventType.SEND_ORDER))
-                .thenReturn(expectedErrors);
+        List<String> expectedErrors = List.of("some error message");
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+            caseData, EventType.SEND_ORDER))
+        .thenReturn(expectedErrors);
 
-            var response = underTest.handle(callbackRequest, AUTH_TOKEN);
-            assertThat(response.getErrors()).isEqualTo(expectedErrors);
-            verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService);
-        }
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).isEqualTo(expectedErrors);
+        verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService);
     }
 
     private OrderToShareCollection toSelectedOrderToShare(String documentName) {
