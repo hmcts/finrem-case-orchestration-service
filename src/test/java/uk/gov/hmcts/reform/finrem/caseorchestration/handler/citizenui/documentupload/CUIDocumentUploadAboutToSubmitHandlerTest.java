@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentupload;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.documentupload;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-class CuiDocumentUploadAboutToSubmitHandlerTest {
+class CUIDocumentUploadAboutToSubmitHandlerTest {
 
     @ParameterizedTest
     @MethodSource("handlers")
@@ -112,12 +112,12 @@ class CuiDocumentUploadAboutToSubmitHandlerTest {
 
         return Stream.of(
             new HandlerCase(
-                new CuiApplicantDocumentUploadAboutToSubmitHandler(mapper, featureToggleService),
+                new CUIApplicantDocumentUploadAboutToSubmitHandler(mapper, featureToggleService),
                 EventType.CUI_APPLICANT_DOCUMENT_UPLOAD,
                 Party.APPLICANT
             ),
             new HandlerCase(
-                new CuiRespondentDocumentUploadAboutToSubmitHandler(mapper, featureToggleService),
+                new CUIRespondentDocumentUploadAboutToSubmitHandler(mapper, featureToggleService),
                 EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD,
                 Party.RESPONDENT
             )
@@ -176,7 +176,7 @@ class CuiDocumentUploadAboutToSubmitHandlerTest {
     }
 
     private record HandlerCase(
-        CuiDocumentUploadAboutToSubmitHandler handler,
+        CUIDocumentUploadAboutToSubmitHandler handler,
         EventType eventType,
         Party party
     ) {

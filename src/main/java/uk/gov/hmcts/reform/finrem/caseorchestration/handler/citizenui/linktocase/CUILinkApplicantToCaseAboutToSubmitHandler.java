@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.linktocase;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -6,22 +6,31 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InvalidateAccessCodeService;
 
 import java.util.List;
 
 @Slf4j
 @Service
-public class InvalidateApplicantAccessCodeAboutToSubmitHandler extends InvalidateAccessCodeAboutToSubmitHandler {
+public class CUILinkApplicantToCaseAboutToSubmitHandler extends CUILinkToCaseAccessCodeAboutToSubmitHandler {
 
-    public InvalidateApplicantAccessCodeAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                             InvalidateAccessCodeService invalidateAccessCodeService) {
-        super(finremCaseDetailsMapper, invalidateAccessCodeService);
+    private static final String APPLICANT_CASE_ROLE = "[APPLICANT]";
+
+    public CUILinkApplicantToCaseAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                       InvalidateAccessCodeService invalidateAccessCodeService,
+                                                       AssignCaseAccessService assignCaseAccessService) {
+        super(finremCaseDetailsMapper, invalidateAccessCodeService, assignCaseAccessService);
     }
 
     @Override
     protected EventType handledEventType() {
-        return EventType.INVALIDATE_APPLICANT_ACCESS_CODE;
+        return EventType.LINK_APPLICANT_TO_CASE;
+    }
+
+    @Override
+    protected String citizenCaseRole() {
+        return APPLICANT_CASE_ROLE;
     }
 
     @Override

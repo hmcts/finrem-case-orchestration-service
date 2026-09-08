@@ -26,7 +26,7 @@ class InvalidateAccessCodeServiceTest {
 
         AccessCodeCollection before = collection(
             id,
-            entry("ABC123", YesOrNo.YES)
+            entry("ABC123", YesOrNo.YES, "before-user-id")
         );
 
         AccessCodeCollection current = collection(
@@ -41,6 +41,7 @@ class InvalidateAccessCodeServiceTest {
 
         assertThat(merged.getAccessCode()).isEqualTo("ABC123");
         assertThat(merged.getIsValid()).isEqualTo(YesOrNo.NO);
+        assertThat(merged.getUserIdamID()).isEqualTo("before-user-id");
     }
 
     @Test
@@ -49,7 +50,7 @@ class InvalidateAccessCodeServiceTest {
 
         AccessCodeCollection before = collection(
             id,
-            entry("XYZ999", YesOrNo.YES)
+            entry("XYZ999", YesOrNo.YES, "before-user-id")
         );
 
         List<AccessCodeCollection> result =
@@ -73,9 +74,18 @@ class InvalidateAccessCodeServiceTest {
         String accessCode,
         YesOrNo isValid) {
 
+        return entry(accessCode, isValid, null);
+    }
+
+    private AccessCodeEntry entry(
+        String accessCode,
+        YesOrNo isValid,
+        String userIdamId) {
+
         return AccessCodeEntry.builder()
             .accessCode(accessCode)
             .isValid(isValid)
+            .userIdamID(userIdamId)
             .build();
     }
 }

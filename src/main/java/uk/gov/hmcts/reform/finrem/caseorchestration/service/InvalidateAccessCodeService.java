@@ -86,6 +86,8 @@ public class InvalidateAccessCodeService {
             .value(AccessCodeEntry.builder()
                 .accessCode(beforeValue.getAccessCode())
                 .isValid(updatedValue.getIsValid())
+                .userIdamID(beforeValue.getUserIdamID())
+                .usedAt(beforeValue.getUsedAt())
                 .build())
             .build();
     }
