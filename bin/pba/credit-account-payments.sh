@@ -3,7 +3,7 @@
 # It can be used to trigger duplicate payments for testing purposes.
 # Usage: ./bin/pba/credit-account-payments.sh <applicant solicitor password> <contested | consented> <ccdReference>
 
-idamApiHost=https://idam-web-public.aat.platform.hmcts.net
+idamApiHost=https://idam-api.aat.platform.hmcts.net
 s2sHost=http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
 paymentsApiHost=http://payment-api-aat.service.core-compute-aat.internal
 userEmail="fr_applicant_solicitor1@mailinator.com"
