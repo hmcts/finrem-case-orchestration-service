@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import static java.util.Collections.singletonMap;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
@@ -23,7 +20,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static java.util.Collections.singletonMap;
 
 @Service
 @Slf4j
@@ -50,10 +51,11 @@ public class CcdService {
      * Start a CCD event.
      *
      * <p>The event should be submitted by a subsequent call to {@link #submitEventForCaseWorker}.</p>
+     *
      * @param authorisation auth token
-     * @param caseId case id
-     * @param caseTypeId case type id
-     * @param eventType case event to start
+     * @param caseId        case id
+     * @param caseTypeId    case type id
+     * @param eventType     case event to start
      * @return StartEventResponse
      */
     public StartEventResponse startEventForCaseWorker(String authorisation, String caseId, String caseTypeId,
@@ -78,13 +80,14 @@ public class CcdService {
      * <p>The case data in {@code startEventResponse} should be from the return value of the initial call to
      * {@link #startEventForCaseWorker}. Do not use case data from another source to avoid data loss due to concurrent
      * case data updates.</p>
+     *
      * @param startEventResponse case data
-     * @param authorisation auth token
-     * @param caseId case id
-     * @param caseTypeId case type id
-     * @param eventType case event to submit
-     * @param summary event summary
-     * @param description event description
+     * @param authorisation      auth token
+     * @param caseId             case id
+     * @param caseTypeId         case type id
+     * @param eventType          case event to submit
+     * @param summary            event summary
+     * @param description        event description
      */
     public void submitEventForCaseWorker(StartEventResponse startEventResponse, String authorisation, String caseId, String caseTypeId,
                                          String eventType, String summary, String description) {
@@ -168,13 +171,13 @@ public class CcdService {
 
         Map<String, Map<String, Map<String, Object>>> supplementaryDataFinancialRemedy = new HashMap<>();
         supplementaryDataFinancialRemedy.put("supplementary_data_updates",
-                singletonMap("$set", singletonMap("HMCTSServiceId",
-                        caseFlagsConfiguration.getHmctsId())));
+            singletonMap("$set", singletonMap("HMCTSServiceId",
+                caseFlagsConfiguration.getHmctsId())));
 
         coreCaseDataApi.submitSupplementaryData(authorisation,
-                idamToken.getIdamOauth2Token(),
-                caseId,
-                supplementaryDataFinancialRemedy);
+            idamToken.getIdamOauth2Token(),
+            caseId,
+            supplementaryDataFinancialRemedy);
     }
 
 }
