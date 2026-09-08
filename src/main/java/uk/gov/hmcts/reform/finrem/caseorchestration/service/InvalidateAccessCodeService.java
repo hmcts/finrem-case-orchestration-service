@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -80,14 +82,16 @@ public class InvalidateAccessCodeService {
 
         AccessCodeEntry beforeValue = beforeItem.getValue();
         AccessCodeEntry updatedValue = updated.getValue();
+        LocalDateTime usedAt = LocalDateTime.now(ZoneOffset.UTC);
+        String userIdamId = updatedValue.getUserIdamID() != null ? updatedValue.getUserIdamID() : beforeValue.getUserIdamID();
 
         return AccessCodeCollection.builder()
             .id(beforeItem.getId())
             .value(AccessCodeEntry.builder()
                 .accessCode(beforeValue.getAccessCode())
                 .isValid(updatedValue.getIsValid())
-                .userIdamID(beforeValue.getUserIdamID())
-                .usedAt(beforeValue.getUsedAt())
+                .userIdamID(userIdamId)
+                .usedAt(usedAt)
                 .build())
             .build();
     }
