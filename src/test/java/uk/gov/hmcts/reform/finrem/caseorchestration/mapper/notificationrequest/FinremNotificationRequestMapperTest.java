@@ -98,6 +98,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.barris
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getContestedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getDefaultConsentedFinremCaseData;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getDefaultContestedFinremCaseData;
 
 @ExtendWith(MockitoExtension.class)
 class FinremNotificationRequestMapperTest {
@@ -271,6 +273,65 @@ class FinremNotificationRequestMapperTest {
         assertEquals("nottingham", notificationRequest.getSelectedCourt());
         assertEquals("David Goodman", notificationRequest.getRespondentName());
         assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+    }
+
+    @Test
+    void givenApplicantSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
+        FinremCaseData caseData = getDefaultContestedFinremCaseData();
+        caseData.setRepresentationUpdateHistory(getChangeOfRepresentationListJson("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails(caseData);
+
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(caseDetails);
+
+        assertThat(notificationRequest.getNotificationEmail()).isEqualTo(TEST_SOLICITOR_EMAIL);
+        assertThat(notificationRequest.getName()).isEqualTo(TEST_SOLICITOR_NAME);
+        assertThat(notificationRequest.getCaseType()).isEqualTo("contested");
+    }
+
+    @Test
+    void givenRespondentSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
+        FinremCaseData caseData = getDefaultContestedFinremCaseData();
+        caseData.setRepresentationUpdateHistory(getChangeOfRepresentationListJson("Respondent", TEST_RESP_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL));
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails(caseData);
+
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(caseDetails);
+
+        assertThat(notificationRequest.getNotificationEmail()).isEqualTo(TEST_RESP_SOLICITOR_EMAIL);
+        assertThat(notificationRequest.getName()).isEqualTo(TEST_RESP_SOLICITOR_NAME);
+        assertThat(notificationRequest.getCaseType()).isEqualTo("contested");
+    }
+
+    @Test
+    void givenApplicantSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
+        FinremCaseData caseData = getDefaultConsentedFinremCaseData();
+        caseData.setRepresentationUpdateHistory(getChangeOfRepresentationListJson("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
+        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(caseData);
+
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
+            caseDetails);
+
+        assertThat(notificationRequest.getNotificationEmail()).isEqualTo(TEST_SOLICITOR_EMAIL);
+        assertThat(notificationRequest.getName()).isEqualTo(TEST_SOLICITOR_NAME);
+        assertThat(notificationRequest.getCaseType()).isEqualTo("consented");
+        assertEquals("consent", notificationRequest.getCaseOrderType());
+        assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
+    }
+
+    @Test
+    void givenRespondentSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
+        FinremCaseData caseData = getDefaultConsentedFinremCaseData();
+        caseData.setRepresentationUpdateHistory(getChangeOfRepresentationListJson("Respondent", TEST_RESP_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL));
+        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(caseData);
+
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(caseDetails);
+
+        assertThat(notificationRequest.getNotificationEmail()).isEqualTo(TEST_RESP_SOLICITOR_EMAIL);
+        assertThat(notificationRequest.getName()).isEqualTo(TEST_RESP_SOLICITOR_NAME);
+        assertThat(notificationRequest.getCaseType()).isEqualTo("consented");
+        assertEquals("consent", notificationRequest.getCaseOrderType());
+        assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
     }
 
     @Test
