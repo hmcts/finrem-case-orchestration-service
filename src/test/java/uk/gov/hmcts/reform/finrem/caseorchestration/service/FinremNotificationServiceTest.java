@@ -229,6 +229,9 @@ class FinremNotificationServiceTest {
 
     @Test
     void sendAssignToJudgeNotificationEmailToApplicantSolicitor() {
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(consentedFinremCaseDetails.getCaseIdAsString()))
+            .thenReturn(false);
+
         notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(consentedFinremCaseDetails);
 
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails, true);
