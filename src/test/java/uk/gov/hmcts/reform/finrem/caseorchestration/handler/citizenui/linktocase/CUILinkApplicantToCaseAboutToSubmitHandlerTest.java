@@ -13,14 +13,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InvalidateAccessCodeService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -34,7 +35,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class CUILinkApplicantToCaseAboutToSubmitHandlerTest {
 
     private static final String USER_ID = "citizen-user-id";
-    private static final String APPLICANT_ROLE = "[APPLICANT]";
 
     @Mock
     private InvalidateAccessCodeService invalidateAccessCodeService;
@@ -54,16 +54,22 @@ class CUILinkApplicantToCaseAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldMergeApplicantAccessCodesAndReturnUpdatedCaseData() {
-        AccessCodeCollection beforeCode = accessCode(UUID.randomUUID(), "before-user-id");
-        AccessCodeCollection mergedCode = accessCode(UUID.randomUUID(), USER_ID);
+    void shouldUseApplicantAccessCodesAndAssignApplicantRole() {
+        AccessCodeCollection beforeApplicantCode = accessCode(UUID.randomUUID(), "before-user-id", null);
+        AccessCodeCollection currentApplicantCode = accessCode(UUID.randomUUID(), "current-user-id", null);
+        AccessCodeCollection mergedApplicantCode = accessCode(UUID.randomUUID(), USER_ID, LocalDateTime.now());
+
+        AccessCodeCollection beforeRespondentCode = accessCode(UUID.randomUUID(), "resp-user", null);
+        AccessCodeCollection currentRespondentCode = accessCode(UUID.randomUUID(), "resp-user", null);
 
         FinremCaseData beforeData = FinremCaseData.builder()
-            .applicantAccessCodes(List.of(beforeCode))
+            .applicantAccessCodes(List.of(beforeApplicantCode))
+            .respondentAccessCodes(List.of(beforeRespondentCode))
             .build();
 
         FinremCaseData currentData = FinremCaseData.builder()
-            .applicantAccessCodes(List.of())
+            .applicantAccessCodes(List.of(currentApplicantCode))
+            .respondentAccessCodes(List.of(currentRespondentCode))
             .build();
 
         var callbackRequest = FinremCallbackRequestFactory.from(
@@ -75,75 +81,26 @@ class CUILinkApplicantToCaseAboutToSubmitHandlerTest {
         );
 
         when(invalidateAccessCodeService.mergeForInvalidation(anyList(), anyList()))
-            .thenReturn(List.of(mergedCode));
+            .thenReturn(List.of(mergedApplicantCode));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(callbackRequest, TestConstants.AUTH_TOKEN);
 
         assertThat(response.getData().getApplicantAccessCodes())
-            .containsExactly(mergedCode);
+            .containsExactly(mergedApplicantCode);
+        assertThat(response.getData().getRespondentAccessCodes())
+            .containsExactly(currentRespondentCode);
 
         verify(invalidateAccessCodeService).mergeForInvalidation(
-            List.of(beforeCode),
-            List.of()
+            List.of(beforeApplicantCode),
+            List.of(currentApplicantCode)
         );
-        verify(assignCaseAccessService).grantCaseRoleToUser(eq(Long.valueOf(CASE_ID)), eq(USER_ID), eq(APPLICANT_ROLE), eq(null));
-    }
-
-    @Test
-    void shouldHandleNullAccessCodeListsGracefully() {
-        FinremCaseData beforeData = FinremCaseData.builder().build();
-        FinremCaseData currentData = FinremCaseData.builder()
-            .applicantAccessCodes(List.of(accessCode(UUID.randomUUID(), USER_ID)))
-            .build();
-
-        var callbackRequest = FinremCallbackRequestFactory.from(
-            Long.valueOf(CASE_ID),
-            CaseType.CONTESTED,
-            EventType.LINK_APPLICANT_TO_CASE,
-            currentData,
-            beforeData
+        verify(assignCaseAccessService).grantCaseRoleToUser(
+            eq(Long.valueOf(CASE_ID)),
+            eq(USER_ID),
+            eq(CaseRole.CITIZEN_APPLICANT.getCcdCode()),
+            eq(null)
         );
-
-        when(invalidateAccessCodeService.mergeForInvalidation(anyList(), anyList()))
-            .thenReturn(List.of(accessCode(UUID.randomUUID(), USER_ID)));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(callbackRequest, TestConstants.AUTH_TOKEN);
-
-        assertThat(response.getData().getApplicantAccessCodes()).hasSize(1);
-        verify(assignCaseAccessService).grantCaseRoleToUser(eq(Long.valueOf(CASE_ID)), eq(USER_ID), eq(APPLICANT_ROLE), eq(null));
-    }
-
-    @Test
-    void shouldAssignRoleUsingLatestAccessCodeUserId() {
-        String oldUserId = "old-user-id";
-        String latestUserId = "latest-user-id";
-
-        AccessCodeCollection oldAccessCode = accessCode(UUID.randomUUID(), oldUserId, LocalDateTime.now().minusDays(1));
-        AccessCodeCollection latestAccessCode = accessCode(UUID.randomUUID(), latestUserId, LocalDateTime.now());
-
-        FinremCaseData beforeData = FinremCaseData.builder().applicantAccessCodes(List.of(oldAccessCode, latestAccessCode)).build();
-        FinremCaseData currentData = FinremCaseData.builder().applicantAccessCodes(List.of()).build();
-
-        var callbackRequest = FinremCallbackRequestFactory.from(
-            Long.valueOf(CASE_ID),
-            CaseType.CONTESTED,
-            EventType.LINK_APPLICANT_TO_CASE,
-            currentData,
-            beforeData
-        );
-
-        when(invalidateAccessCodeService.mergeForInvalidation(anyList(), anyList()))
-            .thenReturn(List.of(oldAccessCode, latestAccessCode));
-
-        handler.handle(callbackRequest, TestConstants.AUTH_TOKEN);
-
-        verify(assignCaseAccessService).grantCaseRoleToUser(eq(Long.valueOf(CASE_ID)), eq(latestUserId), eq(APPLICANT_ROLE), eq(null));
-    }
-
-    private AccessCodeCollection accessCode(UUID id, String userIdamId) {
-        return accessCode(id, userIdamId, null);
     }
 
     private AccessCodeCollection accessCode(UUID id, String userIdamId, LocalDateTime usedAt) {

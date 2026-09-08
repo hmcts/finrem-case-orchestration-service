@@ -13,11 +13,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InvalidateAccessCodeService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +35,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class CUILinkRespondentToCaseAboutToSubmitHandlerTest {
 
     private static final String USER_ID = "citizen-user-id";
-    private static final String RESPONDENT_ROLE = "[RESPONDENT]";
 
     @Mock
     private InvalidateAccessCodeService invalidateAccessCodeService;
@@ -53,16 +54,22 @@ class CUILinkRespondentToCaseAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldMergeRespondentAccessCodesAndReturnUpdatedCaseData() {
-        AccessCodeCollection beforeCode = accessCode(UUID.randomUUID(), "before-user-id");
-        AccessCodeCollection mergedCode = accessCode(UUID.randomUUID(), USER_ID);
+    void shouldUseRespondentAccessCodesAndAssignRespondentRole() {
+        AccessCodeCollection beforeRespondentCode = accessCode(UUID.randomUUID(), "before-user-id", null);
+        AccessCodeCollection currentRespondentCode = accessCode(UUID.randomUUID(), "current-user-id", null);
+        AccessCodeCollection mergedRespondentCode = accessCode(UUID.randomUUID(), USER_ID, LocalDateTime.now());
+
+        AccessCodeCollection beforeApplicantCode = accessCode(UUID.randomUUID(), "app-user", null);
+        AccessCodeCollection currentApplicantCode = accessCode(UUID.randomUUID(), "app-user", null);
 
         FinremCaseData beforeData = FinremCaseData.builder()
-            .respondentAccessCodes(List.of(beforeCode))
+            .respondentAccessCodes(List.of(beforeRespondentCode))
+            .applicantAccessCodes(List.of(beforeApplicantCode))
             .build();
 
         FinremCaseData currentData = FinremCaseData.builder()
-            .respondentAccessCodes(List.of())
+            .respondentAccessCodes(List.of(currentRespondentCode))
+            .applicantAccessCodes(List.of(currentApplicantCode))
             .build();
 
         var callbackRequest = FinremCallbackRequestFactory.from(
@@ -74,50 +81,32 @@ class CUILinkRespondentToCaseAboutToSubmitHandlerTest {
         );
 
         when(invalidateAccessCodeService.mergeForInvalidation(anyList(), anyList()))
-            .thenReturn(List.of(mergedCode));
+            .thenReturn(List.of(mergedRespondentCode));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(callbackRequest, TestConstants.AUTH_TOKEN);
 
         assertThat(response.getData().getRespondentAccessCodes())
-            .containsExactly(mergedCode);
+            .containsExactly(mergedRespondentCode);
+        assertThat(response.getData().getApplicantAccessCodes())
+            .containsExactly(currentApplicantCode);
 
         verify(invalidateAccessCodeService).mergeForInvalidation(
-            List.of(beforeCode),
-            List.of()
+            List.of(beforeRespondentCode),
+            List.of(currentRespondentCode)
         );
-        verify(assignCaseAccessService).grantCaseRoleToUser(eq(Long.valueOf(CASE_ID)), eq(USER_ID), eq(RESPONDENT_ROLE), eq(null));
+        verify(assignCaseAccessService).grantCaseRoleToUser(
+            eq(Long.valueOf(CASE_ID)),
+            eq(USER_ID),
+            eq(CaseRole.CITIZEN_RESPONDENT.getCcdCode()),
+            eq(null)
+        );
     }
 
-    @Test
-    void shouldHandleNullRespondentAccessCodesGracefully() {
-        FinremCaseData beforeData = FinremCaseData.builder().build();
-        FinremCaseData currentData = FinremCaseData.builder()
-            .respondentAccessCodes(List.of(accessCode(UUID.randomUUID(), USER_ID)))
-            .build();
-
-        var callbackRequest = FinremCallbackRequestFactory.from(
-            Long.valueOf(CASE_ID),
-            CaseType.CONTESTED,
-            EventType.LINK_RESPONDENT_TO_CASE,
-            currentData,
-            beforeData
-        );
-
-        when(invalidateAccessCodeService.mergeForInvalidation(anyList(), anyList()))
-            .thenReturn(List.of(accessCode(UUID.randomUUID(), USER_ID)));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(callbackRequest, TestConstants.AUTH_TOKEN);
-
-        assertThat(response.getData().getRespondentAccessCodes()).hasSize(1);
-        verify(assignCaseAccessService).grantCaseRoleToUser(eq(Long.valueOf(CASE_ID)), eq(USER_ID), eq(RESPONDENT_ROLE), eq(null));
-    }
-
-    private AccessCodeCollection accessCode(UUID id, String userIdamId) {
+    private AccessCodeCollection accessCode(UUID id, String userIdamId, LocalDateTime usedAt) {
         return AccessCodeCollection.builder()
             .id(id)
-            .value(AccessCodeEntry.builder().userIdamID(userIdamId).build())
+            .value(AccessCodeEntry.builder().userIdamID(userIdamId).usedAt(usedAt).build())
             .build();
     }
 }
