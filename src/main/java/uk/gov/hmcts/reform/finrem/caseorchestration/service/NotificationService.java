@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
@@ -1284,43 +1283,12 @@ public class NotificationService {
             || !isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
     }
 
-    /**
-     * Do not expect any return.
-     *
-     * <p>Please use @{@link #sendNoticeOfChangeEmail(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendNoticeOfChangeEmail(CaseDetails caseDetails) {
-        EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
-        NotificationRequest notificationRequest = notificationRequestMapper
-            .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendNocEmail(notificationRequest, template);
-    }
-
-    public void sendNoticeOfChangeEmail(FinremCaseDetails caseDetails) {
-        EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
-        NotificationRequest notificationRequest = finremNotificationRequestMapper
-            .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendNocEmail(notificationRequest, template);
-    }
-
     public boolean isContestedApplication(CaseDetails caseDetails) {
         return caseDataService.isContestedApplication(caseDetails);
     }
 
     public boolean isContestedApplication(FinremCaseDetails caseDetails) {
         return caseDataService.isContestedApplication(caseDetails);
-    }
-
-    private void sendNocEmail(
-        NotificationRequest notificationRequest,
-        EmailTemplateNames template) {
-        if (StringUtils.hasText(notificationRequest.getNotificationEmail())) {
-            sendNotificationEmail(notificationRequest, template);
-        }
     }
 
     /**
