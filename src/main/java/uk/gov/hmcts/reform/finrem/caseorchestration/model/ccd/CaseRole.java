@@ -11,6 +11,12 @@ import static java.lang.String.format;
 public enum CaseRole {
     APP_SOLICITOR("[APPSOLICITOR]"),
     APP_BARRISTER("[APPBARRISTER]"),
+    CITIZEN_APPLICANT("[APPLICANT]"),
+    CITIZEN_RESPONDENT("[RESPONDENT]"),
+    @Deprecated(forRemoval = false)
+    APPLICANT("[APPLICANT]"),
+    @Deprecated(forRemoval = false)
+    RESPONDENT("[RESPONDENT]"),
     RESP_SOLICITOR("[RESPSOLICITOR]"),
     RESP_BARRISTER("[RESPBARRISTER]"),
     CASEWORKER("[CASEWORKER]"),

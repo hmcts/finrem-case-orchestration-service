@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InvalidateAccessCodeService;
@@ -13,9 +14,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class CUILinkApplicantToCaseAboutToSubmitHandler extends CUILinkToCaseAccessCodeAboutToSubmitHandler {
-
-    private static final String APPLICANT_CASE_ROLE = "[APPLICANT]";
+public class CUILinkApplicantToCaseAboutToSubmitHandler extends CUILinkToCaseAboutToSubmitHandler {
 
     public CUILinkApplicantToCaseAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                        InvalidateAccessCodeService invalidateAccessCodeService,
@@ -30,7 +29,7 @@ public class CUILinkApplicantToCaseAboutToSubmitHandler extends CUILinkToCaseAcc
 
     @Override
     protected String citizenCaseRole() {
-        return APPLICANT_CASE_ROLE;
+        return CaseRole.CITIZEN_APPLICANT.getCcdCode();
     }
 
     @Override

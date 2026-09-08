@@ -25,23 +25,21 @@ import java.util.UUID;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
-public abstract class CUILinkToCaseAccessCodeAboutToSubmitHandler extends FinremCallbackHandler {
+public abstract class CUILinkToCaseAboutToSubmitHandler extends FinremCallbackHandler {
 
     protected final InvalidateAccessCodeService invalidateAccessCodeService;
     private final AssignCaseAccessService assignCaseAccessService;
 
-    protected CUILinkToCaseAccessCodeAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                          InvalidateAccessCodeService invalidateAccessCodeService,
-                                                          AssignCaseAccessService assignCaseAccessService) {
+    protected CUILinkToCaseAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                InvalidateAccessCodeService invalidateAccessCodeService,
+                                                AssignCaseAccessService assignCaseAccessService) {
         super(finremCaseDetailsMapper);
         this.invalidateAccessCodeService = invalidateAccessCodeService;
         this.assignCaseAccessService = assignCaseAccessService;
     }
 
     @Override
-    public boolean canHandle(CallbackType callbackType,
-                             CaseType caseType,
-                             EventType eventType) {
+    public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && handledEventType().equals(eventType);
@@ -79,9 +77,10 @@ public abstract class CUILinkToCaseAccessCodeAboutToSubmitHandler extends Finrem
         try {
             assignCaseAccessService.grantCaseRoleToUser(caseId, userId, caseRole, null);
 
-            log.info("Successfully added user to case. caseId: {}, userId: {}, caseRole: {}", caseId, userId, caseRole);
+            log.info("Successfully linked citizen user to case. caseId: {}, userId: {}, caseRole: {}",
+                caseId, userId, caseRole);
         } catch (RuntimeException error) {
-            log.error("Error adding user to case. caseId: {}, userId: {}, caseRole: {}, error: {}",
+            log.error("Error linking citizen user to case. caseId: {}, userId: {}, caseRole: {}, error: {}",
                 caseId, userId, caseRole, error.getMessage());
             throw error;
         }
