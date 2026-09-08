@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Scheduled task to update cases for Global search
+ * Scheduled task to update cases for Global search.
  * To enable the task to execute set environment variables:
  * <ul>
  *     <li>CRON_GLOBAL_SEARCH_MIGRATION_ENABLED=true</li>
