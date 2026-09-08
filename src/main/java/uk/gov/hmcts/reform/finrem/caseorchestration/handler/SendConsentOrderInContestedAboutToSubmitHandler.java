@@ -26,8 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderP
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_CONSENT_IN_CONTESTED_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_CONSENT_IN_CONTESTED_ORDER;
 
 @Slf4j
 @Service
