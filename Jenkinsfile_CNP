@@ -2,7 +2,7 @@
 import uk.gov.hmcts.contino.AppPipelineDsl
 import uk.gov.hmcts.contino.GithubAPI
 
-@Library("Infrastructure")
+@Library("Infrastructure@2.5.1")
 
 def githubApi = new GithubAPI(this)
 
@@ -50,8 +50,8 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 def getProjectName() {
     String projectPrefix = "HMCTS_d_to_i/finrem-ccd-definitions/"
     def githubApi = new GithubAPI(this)
-    for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "use-defs-pr-") ) {
-        String prNumber = label.substring(12, label.length())
+    for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "use-pr-") ) {
+        String prNumber = label.substring(7, label.length())
         return projectPrefix + "PR-" + prNumber
     }
     return projectPrefix + "master"

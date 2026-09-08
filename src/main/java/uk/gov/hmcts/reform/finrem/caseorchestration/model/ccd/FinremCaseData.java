@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHear
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NotificationAuditWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RefugeWrapper;
@@ -449,6 +450,10 @@ public class FinremCaseData implements HasCaseDocument {
 
     private String previousState;
     private DynamicList userCaseAccessList;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private NotificationAuditWrapper notificationAuditWrapper;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -1199,6 +1204,14 @@ public class FinremCaseData implements HasCaseDocument {
             this.manageCaseDocumentsWrapper = new ManageCaseDocumentsWrapper();
         }
         return manageCaseDocumentsWrapper;
+    }
+
+    @JsonIgnore
+    public NotificationAuditWrapper getNotificationAuditWrapper() {
+        if (notificationAuditWrapper == null) {
+            this.notificationAuditWrapper = new NotificationAuditWrapper();
+        }
+        return notificationAuditWrapper;
     }
 
     @JsonIgnore
