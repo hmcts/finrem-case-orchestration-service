@@ -25,7 +25,7 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 @Slf4j
 public abstract class CUILinkToCaseAboutToSubmitHandler extends FinremCallbackHandler {
 
-    protected final InvalidateAccessCodeService invalidateAccessCodeService;
+    private final InvalidateAccessCodeService invalidateAccessCodeService;
     private final AssignCaseAccessService assignCaseAccessService;
 
     protected CUILinkToCaseAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
