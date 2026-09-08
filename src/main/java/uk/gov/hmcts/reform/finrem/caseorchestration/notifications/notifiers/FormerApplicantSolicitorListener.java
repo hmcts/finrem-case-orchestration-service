@@ -27,6 +27,11 @@ public class FormerApplicantSolicitorListener extends EmailNotificationOnlyListe
     }
 
     @Override
+    protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
+        return event.getCaseData().isApplicantCorrespondenceEnabled();
+    }
+
+    @Override
     protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
         if (event.getCaseDetailsBefore() != null) {
             return notificationService.isApplicantSolicitorEmailPopulatedAndPresented(event.getCaseDetailsBefore());
