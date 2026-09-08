@@ -5,8 +5,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.IdamAuthApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.IdamOidcApi;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
 import uk.gov.hmcts.reform.idam.client.models.TokenResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -26,6 +28,9 @@ class IdamAuthServiceTest {
     private IdamOidcApi idamOidcApi;
     @Mock
     private OAuth2Configuration oAuth2Configuration;
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
     @InjectMocks
     private IdamAuthService idamAuthService;
 
@@ -58,5 +63,29 @@ class IdamAuthServiceTest {
         UserInfo userInfo = idamAuthService.getUserInfo(AUTH_TOKEN);
 
         assertThat(userInfo.getUid()).isEqualTo("uidTest");
+    }
+
+    @Test
+    void givenToken_whenGetUserDetails_ThenReturnUserDetails() {
+        when(idamOidcApi.retrieveUserInfo(AUTH_TOKEN))
+            .thenReturn(UserInfo.builder().uid("uidTest").build());
+
+        UserDetails userDetails = idamAuthService.getUserDetails(AUTH_TOKEN);
+
+        assertThat(userDetails.getId()).isEqualTo("uidTest");
+    }
+
+    @Test
+    void givenToken_whenGetIdamToken_ThenReturnIdamToken() {
+        UserInfo userInfo = UserInfo.builder()
+            .uid("uidTest")
+            .build();
+
+        when(idamOidcApi.retrieveUserInfo(AUTH_TOKEN)).thenReturn(userInfo);
+        when(authTokenGenerator.generate()).thenReturn("service-auth-token");
+
+        IdamToken idamToken = idamAuthService.getIdamToken(AUTH_TOKEN);
+
+        assertThat(idamToken.getUserId()).isEqualTo("uidTest");
     }
 }
