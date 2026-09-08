@@ -59,7 +59,7 @@ import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.ListUtils.defaultIfNull;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateCaseDataAddresses;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -104,7 +104,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        List<String> errors = validateCaseDataAddresses(caseData);
+        List<String> errors = validateRequiredPostalAddresses(caseData, SEND_ORDER);
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(caseData, errors);
         }

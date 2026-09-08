@@ -779,10 +779,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         try (MockedStatic<ContactDetailsValidator> mockedStatic = Mockito.mockStatic(ContactDetailsValidator.class)) {
             List<String> expectedErrors = List.of("ERROR1");
-            mockedStatic.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData)).thenReturn(expectedErrors);
+            mockedStatic.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(caseData, EventType.SEND_ORDER))
+                .thenReturn(expectedErrors);
 
             var response = underTest.handle(callbackRequest, AUTH_TOKEN);
             assertThat(response.getErrors()).isEqualTo(expectedErrors);
+            verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService);
         }
     }
 
