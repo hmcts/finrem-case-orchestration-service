@@ -36,7 +36,10 @@ public class IdamUtils {
     private final Map<String, String> userIdCache = new ConcurrentHashMap<>();
 
     @Value("${idam.api.url}")
-    private String idamUserBaseUrl;
+    private String idamApiBaseUrl;
+
+    @Value("${idam.oidc.url}")
+    private String idamOidcBaseUrl;
 
     @Value("${idam.whitelist.url}")
     private String idamRedirectUri;
@@ -116,7 +119,7 @@ public class IdamUtils {
         Response response = SerenityRest.given()
             .header("Authorization", jwt)
             .relaxedHTTPSValidation()
-            .get(idamUserBaseUrl + "/details");
+            .get(idamApiBaseUrl + "/details");
 
         assert response.getStatusCode() < 300
             : String.format("Fetching user id failed with code: %d, body: %s",
@@ -206,18 +209,18 @@ public class IdamUtils {
     }
 
     private String idamDeleteUserUrl(String username) {
-        return idamUserBaseUrl + "/testing-support/accounts/" + username;
+        return idamApiBaseUrl + "/testing-support/accounts/" + username;
     }
 
     private String idamCodeUrl() {
-        return idamUserBaseUrl + "/oauth2/authorize"
+        return idamOidcBaseUrl + "/oauth2/authorize"
             + "?response_type=code"
             + "&client_id=finrem"
             + "&redirect_uri=" + idamRedirectUri;
     }
 
     private String idamTokenUrl(String code) {
-        return idamUserBaseUrl + "/o/token"
+        return idamOidcBaseUrl + "/o/token"
             + "?code=" + code
             + "&client_id=finrem"
             + "&client_secret=" + idamSecret
@@ -226,6 +229,6 @@ public class IdamUtils {
     }
 
     private String idamCreateUrl() {
-        return idamUserBaseUrl + "/testing-support/accounts";
+        return idamApiBaseUrl + "/testing-support/accounts";
     }
 }
