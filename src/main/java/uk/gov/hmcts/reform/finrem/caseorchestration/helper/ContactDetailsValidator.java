@@ -532,7 +532,7 @@ public class ContactDetailsValidator {
             return;
         }
 
-        if (postalAddressIsMissing(wrapper.getApplicantAddress(),wrapper.getApplicantResideOutsideUK())) {
+        if (postalAddressIsMissing(wrapper.getApplicantAddress(), wrapper.getApplicantResideOutsideUK())) {
             errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant", eventType.getDisplayName()));
         }
     }
@@ -540,13 +540,13 @@ public class ContactDetailsValidator {
     private static void checkForMissingRespondentPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                                EventType eventType, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()) {
-            if (postalAddressIsMissing(wrapper.getRespSolicitorAddress(caseData.getCcdCaseType()),YesOrNo.NO)) {
+            if (postalAddressIsMissing(wrapper.getRespSolicitorAddress(caseData.getCcdCaseType()), YesOrNo.NO)) {
                 errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent solicitor", eventType.getDisplayName()));
             }
             return;
         }
 
-        if (postalAddressIsMissing(wrapper.getRespondentAddress(),wrapper.getRespondentResideOutsideUK())) {
+        if (postalAddressIsMissing(wrapper.getRespondentAddress(), wrapper.getRespondentResideOutsideUK())) {
             errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent", eventType.getDisplayName()));
         }
     }
