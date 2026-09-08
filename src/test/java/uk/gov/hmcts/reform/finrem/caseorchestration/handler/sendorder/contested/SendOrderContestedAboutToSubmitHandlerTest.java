@@ -792,7 +792,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         List<String> expectedErrors = List.of("some error message");
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
             caseData, EventType.SEND_ORDER))
-        .thenReturn(expectedErrors);
+            .thenReturn(expectedErrors);
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).isEqualTo(expectedErrors);
