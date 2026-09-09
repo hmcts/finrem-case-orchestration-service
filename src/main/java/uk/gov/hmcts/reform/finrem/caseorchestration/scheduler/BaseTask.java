@@ -35,6 +35,8 @@ public abstract class BaseTask implements Runnable {
     private int bulkPrintWaitTime;
     @Value("${cron.dryRun:false}")
     private boolean dryRun;
+    @Value("${cron.supplementaryDataUpdate:false}")
+    private boolean supplementaryDataRequired;
 
     private HashMap<String, String> taskFailures = new HashMap<>();
 
@@ -96,6 +98,12 @@ public abstract class BaseTask implements Runnable {
                                 getSummary(),
                                 description);
                             log.info("Updated {} for Case ID: {}", getTaskName(), caseId);
+
+                            if (supplementaryDataRequired) {
+                                ccdService.submitSupplementaryDataToCcd(systemUserToken, caseId);
+                                log.info("Global Search supplementary data added by {} for Case ID: {}",
+                                    getTaskName(), caseId);
+                            }
                         } else {
                             log.info("[DRY RUN] Updated {} for Case ID: {}", getTaskName(), caseId);
                         }
