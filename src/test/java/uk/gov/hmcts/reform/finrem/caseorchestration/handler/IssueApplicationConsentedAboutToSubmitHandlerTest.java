@@ -2,90 +2,63 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-
-import java.time.LocalDate;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AssignToJudgeReason.DRAFT_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class IssueApplicationConsentedAboutToSubmitHandlerTest {
-
-    static LocalDate fixedLocalDate = LocalDate.of(2026, 2, 2);
 
     @InjectMocks
     private IssueApplicationConsentedAboutToSubmitHandler handler;
     @Mock
     private OnlineFormDocumentService onlineFormDocumentService;
     @Mock
-    private DefaultsConfiguration defaultsConfiguration;
-    @Mock
-    private GenerateCoverSheetService generateCoverSheetService;
+    private IssueApplicationService issueApplicationService;
 
     private static final String MISSING_COURT_SELECTION_ERROR = "Case cannot be issued as court selection is missing.";
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.ISSUE_APPLICATION);
+        assertCanHandle(handler,
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.ISSUE_APPLICATION),
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.HWF_ACCEPTED_AND_ISSUE)
+        );
     }
 
     @Test
-    void givenCase_whenHandled_thenGenerateMiniFormA_andGenerateCoverSheets() {
+    void givenCase_whenHandled_thenGenerateMiniFormAAndCoverSheetsAndPopulateAssignToJudgeFields() {
         FinremCaseData finremCaseData = FinremCaseData.builder().build();
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(finremCaseData);
 
-        when(defaultsConfiguration.getAssignedToJudgeDefault()).thenReturn("ASSIGNED_TO_JUDGE_DEFAULT");
-
-        try (MockedStatic<LocalDate> mockedStatic = Mockito.mockStatic(LocalDate.class)) {
-            mockedStatic.when(LocalDate::now).thenReturn(fixedLocalDate);
-            // Act
-            handler.handle(request, AUTH_TOKEN);
-        }
+        // Act
+        handler.handle(request, AUTH_TOKEN);
 
         // Verify
         verify(onlineFormDocumentService).generateMiniFormA(AUTH_TOKEN, request.getCaseDetails());
         verifyNoMoreInteractions(onlineFormDocumentService);
 
-        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(request.getCaseDetails(), AUTH_TOKEN);
-        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(request.getCaseDetails(), AUTH_TOKEN);
-        verifyNoMoreInteractions(generateCoverSheetService);
-
-        assertThat(finremCaseData)
-            .extracting(
-                FinremCaseData::getAssignedToJudge,
-                FinremCaseData::getAssignedToJudgeReason)
-            .containsExactly(
-                "ASSIGNED_TO_JUDGE_DEFAULT",
-                DRAFT_CONSENT_ORDER);
-        assertThat(finremCaseData.getReferToJudgeWrapper())
-            .extracting(
-                ReferToJudgeWrapper::getReferToJudgeDate,
-                ReferToJudgeWrapper::getReferToJudgeText)
-            .containsExactly(
-                fixedLocalDate,
-                "consent for approval");
+        verify(issueApplicationService).populateAssignToJudgeFields(finremCaseData);
+        verify(issueApplicationService).generateCoverSheets(request.getCaseDetails(), AUTH_TOKEN);
+        verifyNoMoreInteractions(issueApplicationService);
     }
 
     @Test
@@ -94,12 +67,12 @@ class IssueApplicationConsentedAboutToSubmitHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
 
         doThrow(new MissingCourtException("Court selection is missing"))
-            .when(generateCoverSheetService).generateAndSetApplicantCoverSheet(request.getCaseDetails(), AUTH_TOKEN);
+            .when(issueApplicationService).generateCoverSheets(request.getCaseDetails(), AUTH_TOKEN);
 
         var response = handler.handle(request, AUTH_TOKEN);
 
         assertThat(response.getErrors()).containsExactly(MISSING_COURT_SELECTION_ERROR);
         verifyNoInteractions(onlineFormDocumentService);
-        verifyNoMoreInteractions(defaultsConfiguration);
+        verify(issueApplicationService, never()).populateAssignToJudgeFields(caseData);
     }
 }
