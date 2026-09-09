@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -19,9 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPDATE_CONTACT_DETAILS_EVENT;
 
+@Import(BaseControllerTest.TestConfig.class)
 public abstract class BaseControllerTest extends BaseTest {
 
     @Autowired
@@ -32,11 +37,20 @@ public abstract class BaseControllerTest extends BaseTest {
     protected ScheduledTaskRunner taskRunner;
 
     protected MockMvc mvc;
+    @MockitoBean
+    protected CacheManager cacheManager;
     protected JsonNode requestContent;
 
     @Before
     public void setUp() {
-        mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
+    }
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public ObjectMapper objectMapper() {
+            return createObjectMapper();
+        }
     }
 
     protected void doEmptyCaseDataSetUp() {

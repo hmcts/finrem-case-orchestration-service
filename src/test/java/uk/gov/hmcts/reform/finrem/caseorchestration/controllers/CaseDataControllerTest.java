@@ -2,12 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
@@ -21,7 +23,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -36,14 +37,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(CaseDataController.class)
 public class CaseDataControllerTest extends BaseControllerTest {
 
     private static final String CONTESTED_HWF_JSON = "/fixtures/contested/hwf.json";
     private static final String PATH = "/fixtures/noticeOfChange/";
     private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
 
+    @Autowired
+    protected MockMvc mvc;
     @Autowired
     private CaseDataController caseDataController;
 
@@ -53,6 +55,11 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private IdamService idamService;
     @MockitoBean
     private CaseDataService caseDataService;
+
+    @MockitoBean
+    private BulkPrintDocumentService bulkPrintDocumentService;
+    @MockitoBean
+    private ConsentOrderService consentOrderService;
 
     protected CaseDetails caseDetails;
     private CallbackRequest request;
@@ -162,7 +169,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         caseDataController.setContestedDefaultValues(AUTH_TOKEN, callbackRequest);
 
-        verify(updateSolicitorDetailsService, times(1)).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, callbackRequest.getCaseDetails());
+        verify(updateSolicitorDetailsService).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -182,7 +189,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         caseDataController.setConsentedDefaultValues(AUTH_TOKEN, callbackRequest);
 
-        verify(updateSolicitorDetailsService, times(1)).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, callbackRequest.getCaseDetails());
+        verify(updateSolicitorDetailsService).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, callbackRequest.getCaseDetails());
     }
 
     @Test

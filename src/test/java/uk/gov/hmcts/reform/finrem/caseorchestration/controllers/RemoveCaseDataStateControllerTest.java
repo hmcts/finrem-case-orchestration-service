@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
@@ -20,6 +22,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class RemoveCaseDataStateControllerTest extends BaseControllerTest {
 
     public static final String REMOVE_CASE_STATE_URI = "/case-orchestration/remove-case-data-state";
+
+    @Autowired
+    protected MockMvc mvc;
 
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {

@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.junit.Assert.fail;
@@ -38,16 +41,16 @@ public class CaseAssignedRoleControllerTest extends BaseControllerTest {
     private static final String CASE_DETAILS_KEY = "case_details";
     private static final String OTHER_ROLE = "otherRole";
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
     private JsonNode requestContent;
+    @Autowired
+    protected MockMvc mvc;
 
     @MockitoBean
     private CaseAssignedRoleService service;
 
+    @Override
     @Before
     public void setUp() {
-        super.setUp();
         try {
             doRequestSetUp();
         } catch (Exception e) {
@@ -61,8 +64,8 @@ public class CaseAssignedRoleControllerTest extends BaseControllerTest {
         Map<String, Object> userRoles = new HashMap<>();
         userRoles.put(SOLICITOR_ROLE_KEY, APP_SOLICITOR_POLICY);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json")).toURI()));
         CaseDetails caseDetails = objectMapper.convertValue(requestContent.get(CASE_DETAILS_KEY), CaseDetails.class);
         when(service.setCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(userRoles);
         mvc.perform(post(GET_USER_ROLES)
@@ -84,8 +87,8 @@ public class CaseAssignedRoleControllerTest extends BaseControllerTest {
         Map<String, Object> userRoles = new HashMap<>();
         userRoles.put(SOLICITOR_ROLE_KEY, OTHER_ROLE);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json")).toURI()));
         CaseDetails caseDetails = objectMapper.convertValue(requestContent.get(CASE_DETAILS_KEY), CaseDetails.class);
         when(service.setCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(userRoles);
         mvc.perform(post(GET_USER_ROLES)
@@ -104,8 +107,8 @@ public class CaseAssignedRoleControllerTest extends BaseControllerTest {
         Map<String, Object> userRoles = new HashMap<>();
         userRoles.put(SOLICITOR_ROLE_KEY, RESP_SOLICITOR_POLICY);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/updatecase/remove-respondent-solicitor-details.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/updatecase/remove-respondent-solicitor-details.json")).toURI()));
         CaseDetails caseDetails = objectMapper.convertValue(requestContent.get(CASE_DETAILS_KEY), CaseDetails.class);
         when(service.setCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(userRoles);
         mvc.perform(post(GET_USER_ROLES)
@@ -120,7 +123,7 @@ public class CaseAssignedRoleControllerTest extends BaseControllerTest {
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(RESOURCE).toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource(RESOURCE)).toURI()));
     }
 }

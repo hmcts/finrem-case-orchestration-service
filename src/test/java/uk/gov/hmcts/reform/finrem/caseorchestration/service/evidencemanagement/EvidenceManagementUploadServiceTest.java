@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,6 +15,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
@@ -35,6 +35,7 @@ import java.util.List;
 import static java.nio.file.Files.readAllBytes;
 import static java.nio.file.Paths.get;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -91,26 +92,26 @@ public class EvidenceManagementUploadServiceTest {
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectUploadToSucceed() {
         List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CONTESTED,
             authKey());
-        assertTrue(responses.size() > 0);
+        assertFalse(responses.isEmpty());
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmRequestWith3Headers() {
         emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
         List<HttpEntity> allValues = httpEntityReqEntity.getAllValues();
-        assertEquals(3, allValues.get(0).getHeaders().size());
+        assertEquals(3, allValues.getFirst().getHeaders().size());
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveSecurityAuthHeader() {
         emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
-        assertTrue(getEmRequestHeaders().containsKey("ServiceAuthorization"));
+        assertTrue(getEmRequestHeaders().containsHeader("ServiceAuthorization"));
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveUserIdHeader() {
         emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
-        assertTrue(getEmRequestHeaders().containsKey("user-id"));
+        assertTrue(getEmRequestHeaders().containsHeader("user-id"));
     }
 
     @Test
@@ -138,7 +139,7 @@ public class EvidenceManagementUploadServiceTest {
         when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
         List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
-        assertTrue(responses.size() > 0);
+        assertFalse(responses.isEmpty());
     }
 
     @Test
@@ -165,7 +166,7 @@ public class EvidenceManagementUploadServiceTest {
     }
 
     private HttpHeaders getEmRequestHeaders() {
-        return httpEntityReqEntity.getAllValues().get(0).getHeaders();
+        return httpEntityReqEntity.getAllValues().getFirst().getHeaders();
     }
 
     private ObjectNode getResponse() throws IOException {
