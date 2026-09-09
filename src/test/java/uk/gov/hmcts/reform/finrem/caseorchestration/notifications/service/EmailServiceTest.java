@@ -110,6 +110,9 @@ class EmailServiceTest {
 
     private ArgumentCaptor<Map<String, Object>> templateFieldsArgumentCaptor = ArgumentCaptor.forClass(Map.class);
 
+    private ArgumentCaptor<String> referenceArgumentCaptor =
+        ArgumentCaptor.forClass(String.class);
+
     private NotificationRequest notificationRequest;
 
     @BeforeEach
@@ -153,7 +156,10 @@ class EmailServiceTest {
             eq(emailTemplates.get(FR_HWF_SUCCESSFUL.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString(), isNull());
+            referenceArgumentCaptor.capture(), isNull());
+
+        assertThat(referenceArgumentCaptor.getValue())
+            .startsWith(TEST_CASE_FAMILY_MAN_ID + "-");
     }
 
     @Test

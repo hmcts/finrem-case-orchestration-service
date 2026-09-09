@@ -45,12 +45,20 @@ public class LocalEmailService extends EmailService {
      * @param template            the email template to use
      */
     @Override
-    public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
+    public String sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
-        EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
-            templateVars, notificationRequest.getEmailReplyToId());
-        log.info("Creating a preview email for Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
+        EmailToSend emailToSend = generateEmail(
+            notificationRequest.getNotificationEmail(),
+            template.name(),
+            templateVars,
+            notificationRequest.getEmailReplyToId(),
+            notificationRequest.getCaseReferenceNumber());
+
+        String reference = emailToSend.getReferenceId();
+        log.info("Sending confirmation with reference: {} using template: {}", emailToSend.getReferenceId(), template.name());
         previewEmail(emailToSend, "send Confirmation email for " + template.name());
+
+        return reference;
     }
 
     /**
