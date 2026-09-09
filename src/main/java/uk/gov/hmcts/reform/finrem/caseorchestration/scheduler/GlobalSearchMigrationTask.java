@@ -80,7 +80,7 @@ public class GlobalSearchMigrationTask extends BaseTask {
         BoolQueryBuilder searchCriteriaQuery = QueryBuilders.boolQuery()
             .mustNot(new ExistsQueryBuilder("data.SearchCriteria"));
         QueryBuilder shouldQuery = QueryBuilders.boolQuery()
-            .filter(stateQuery)
+            .must(stateQuery)
             .must(supplementaryQuery)
             .must(searchCriteriaQuery);
 
