@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -72,16 +70,11 @@ public class GlobalSearchMigrationTask extends BaseTask {
 
     private String getSearchQuery() {
 
-        BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
-            .mustNot(new TermsQueryBuilder("state.keyword", "close", "consentOrderMade"));
-        BoolQueryBuilder supplementaryQuery = QueryBuilders.boolQuery()
-            .mustNot(new ExistsQueryBuilder("supplementary_data.HMCTSServiceId"));
-        BoolQueryBuilder searchCriteriaQuery = QueryBuilders.boolQuery()
-            .mustNot(new ExistsQueryBuilder("data.SearchCriteria"));
         QueryBuilder shouldQuery = QueryBuilders.boolQuery()
-            .should(stateQuery)
-            .should(supplementaryQuery)
-            .should(searchCriteriaQuery);
+            .filter(QueryBuilders.boolQuery()
+                .mustNot(new TermsQueryBuilder("state.keyword", "close", "consentOrderMade")))
+            .mustNot(QueryBuilders.existsQuery("supplementary_data.HMCTSServiceId"))
+            .mustNot(QueryBuilders.existsQuery("data.SearchCriteria"));
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
             .size(gsQuerySize)
