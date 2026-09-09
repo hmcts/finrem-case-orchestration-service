@@ -101,6 +101,7 @@ public class UpdateContactDetailsNotificationService {
 
         FinremCaseData finremCaseData = caseDetails.getData();
         boolean isRespondentSolicitorChanged = isRespondentSolicitorChangedOnLatestRepresentationUpdate(finremCaseData);
+        // TODO if no history what happened?
 
         return SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
