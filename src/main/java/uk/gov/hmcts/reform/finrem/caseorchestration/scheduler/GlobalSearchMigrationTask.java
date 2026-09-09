@@ -61,6 +61,7 @@ public class GlobalSearchMigrationTask extends BaseTask {
     @Override
     public List<CaseReference> getCaseReferences() {
         String searchQuery = getSearchQuery();
+        log.info("Search query: {}", searchQuery);
         String systemUserToken = getSystemUserToken();
         SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
         log.info("{} cases found for {}", searchResult.getTotal(), caseTypeId);
