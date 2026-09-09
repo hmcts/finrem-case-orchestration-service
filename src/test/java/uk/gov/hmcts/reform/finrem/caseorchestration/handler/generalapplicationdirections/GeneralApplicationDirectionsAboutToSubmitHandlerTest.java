@@ -61,14 +61,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_NOT_APPROVED;
@@ -128,7 +129,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         contactDetailsValidatorMockedStatic = mockStatic(ContactDetailsValidator.class);
         contactDetailsValidatorMockedStatic
-            .when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(any(), any()))
+            .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH)))
             .thenReturn(List.of());
     }
 
@@ -515,18 +516,16 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             "Respondent's postal address is missing"
         );
 
-        contactDetailsValidatorMockedStatic.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+        contactDetailsValidatorMockedStatic.when(() -> validateRequiredPostalAddresses(
                 caseData, callbackRequest.getEventType()))
             .thenReturn(expectedErrors);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
 
-        verify(gaDirectionService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
-        verify(gaDirectionService, never()).getEventPostState(any(), any());
-        verify(generalApplicationsCategoriser, never()).categorise(any());
+        verifyNoInteractions(helper, gaService, gaDirectionService, generalApplicationsCategoriser,
+            manageHearingActionService, hearingCorrespondenceHelper);
     }
 
     @Test
@@ -537,7 +536,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         List<String> expectedErrors = List.of();
 
-        contactDetailsValidatorMockedStatic.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+        contactDetailsValidatorMockedStatic.when(() -> validateRequiredPostalAddresses(
                 caseData, callbackRequest.getEventType()))
             .thenReturn(expectedErrors);
 
