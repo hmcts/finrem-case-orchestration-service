@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.hwfacceptedandissue.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,16 +10,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.Iss
 
 @Slf4j
 @Service
-public class IssueApplicationConsentedAboutToSubmitHandler extends AbstractIssueApplicationAboutToSubmitHandler {
+public class HwfAcceptedAndIssueAboutToSubmitHandler extends AbstractIssueApplicationAboutToSubmitHandler {
 
-    public IssueApplicationConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         OnlineFormDocumentService onlineFormDocumentService,
-                                                         IssueApplicationService issueApplicationService) {
+    public HwfAcceptedAndIssueAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                   OnlineFormDocumentService onlineFormDocumentService,
+                                                   IssueApplicationService issueApplicationService) {
         super(finremCaseDetailsMapper, onlineFormDocumentService, issueApplicationService);
     }
 
     @Override
     protected EventType supportedEventType() {
-        return EventType.ISSUE_APPLICATION;
+        return EventType.HWF_ACCEPTED_AND_ISSUE;
     }
 }
