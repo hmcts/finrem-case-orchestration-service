@@ -102,6 +102,7 @@ public enum EventType {
     LINK_RESPONDENT_TO_CASE("CUI_linkRespondentToCase"),
     CUI_APPLICANT_DOCUMENT_UPLOAD("CUI_applicantUploadDocuments"),
     CUI_RESPONDENT_DOCUMENT_UPLOAD("CUI_respondentUploadDocuments"),
+    HWF_ACCEPTED_AND_ISSUE("FR_HWFAcceptedAndIssue"),
     @JsonEnumDefaultValue
     NONE("");
 
