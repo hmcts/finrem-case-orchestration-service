@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.linktocase;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
@@ -88,7 +89,7 @@ public abstract class CUILinkToCaseAboutToSubmitHandler extends FinremCallbackHa
         return mergedAccessCodes.stream()
             .map(AccessCodeCollection::getValue)
             .filter(Objects::nonNull)
-            .filter(entry -> entry.getUserIdamID() != null && !entry.getUserIdamID().isBlank())
+            .filter(entry -> StringUtils.isNotBlank(entry.getUserIdamID()))
             .max(Comparator.comparing(AccessCodeEntry::getUsedAt, Comparator.nullsFirst(Comparator.naturalOrder())))
             .map(AccessCodeEntry::getUserIdamID);
     }
