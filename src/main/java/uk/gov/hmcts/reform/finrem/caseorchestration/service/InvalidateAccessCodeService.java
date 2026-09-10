@@ -83,7 +83,7 @@ public class InvalidateAccessCodeService {
         AccessCodeEntry beforeValue = beforeItem.getValue();
         AccessCodeEntry updatedValue = updated.getValue();
         LocalDateTime usedAt = LocalDateTime.now(ZoneOffset.UTC);
-        String userIdamId = updatedValue.getUserIdamID() != null ? updatedValue.getUserIdamID() : beforeValue.getUserIdamID();
+        String userIdamId = updatedValue.getUserIdamID();
 
         return AccessCodeCollection.builder()
             .id(beforeItem.getId())

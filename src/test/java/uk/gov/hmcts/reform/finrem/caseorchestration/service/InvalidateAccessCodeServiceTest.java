@@ -28,12 +28,12 @@ class InvalidateAccessCodeServiceTest {
 
         AccessCodeCollection before = collection(
             id,
-            entry("ABC123", YesOrNo.YES, "before-user-id")
+            entry("ABC123", YesOrNo.YES)
         );
 
         AccessCodeCollection current = collection(
             id,
-            entry("DIFFERENT", YesOrNo.NO)
+            entry("DIFFERENT", YesOrNo.NO, "user-id")
         );
 
         LocalDateTime beforeCall = LocalDateTime.now(ZoneOffset.UTC);
@@ -47,83 +47,19 @@ class InvalidateAccessCodeServiceTest {
 
         assertThat(merged.getAccessCode()).isEqualTo("ABC123");
         assertThat(merged.getIsValid()).isEqualTo(YesOrNo.NO);
-        assertThat(merged.getUserIdamID()).isEqualTo("before-user-id");
+        assertThat(merged.getUserIdamID()).isEqualTo("user-id");
         assertThat(merged.getUsedAt()).isAfterOrEqualTo(beforeCall);
         assertThat(merged.getUsedAt()).isBeforeOrEqualTo(afterCall);
     }
 
     @Test
-    void shouldPreferCurrentUserIdAndSetBackendUsedAt() {
-        UUID id = UUID.randomUUID();
-
-        AccessCodeCollection before = collection(
-            id,
-            entry("ABC123", YesOrNo.YES, "before-user-id", LocalDateTime.now().minusDays(1))
-        );
-
-        LocalDateTime usedAtFromUi = LocalDateTime.now().minusHours(2);
-        AccessCodeCollection current = collection(
-            id,
-            entry("DIFFERENT", YesOrNo.NO, "current-user-id", usedAtFromUi)
-        );
-
-        LocalDateTime beforeCall = LocalDateTime.now(ZoneOffset.UTC);
-
-        List<AccessCodeCollection> result =
-            service.mergeForInvalidation(List.of(before), List.of(current));
-
-        LocalDateTime afterCall = LocalDateTime.now(ZoneOffset.UTC);
-
-        AccessCodeEntry merged = result.getFirst().getValue();
-
-        assertThat(merged.getAccessCode()).isEqualTo("ABC123");
-        assertThat(merged.getIsValid()).isEqualTo(YesOrNo.NO);
-        assertThat(merged.getUserIdamID()).isEqualTo("current-user-id");
-        assertThat(merged.getUsedAt()).isAfterOrEqualTo(beforeCall);
-        assertThat(merged.getUsedAt()).isBeforeOrEqualTo(afterCall);
-        assertThat(merged.getUsedAt()).isNotEqualTo(usedAtFromUi);
-    }
-
-    @Test
-    void shouldFallbackToBeforeUserIdAndSetBackendUsedAtWhenCurrentMissing() {
+    void shouldSetUsedAtDateTime() {
         UUID id = UUID.randomUUID();
 
         LocalDateTime usedAtBefore = LocalDateTime.now().minusDays(1);
         AccessCodeCollection before = collection(
             id,
-            entry("ABC123", YesOrNo.YES, "before-user-id", usedAtBefore)
-        );
-
-        AccessCodeCollection current = collection(
-            id,
-            entry("DIFFERENT", YesOrNo.NO, null, null)
-        );
-
-        LocalDateTime beforeCall = LocalDateTime.now(ZoneOffset.UTC);
-
-        List<AccessCodeCollection> result =
-            service.mergeForInvalidation(List.of(before), List.of(current));
-
-        LocalDateTime afterCall = LocalDateTime.now(ZoneOffset.UTC);
-
-        AccessCodeEntry merged = result.getFirst().getValue();
-
-        assertThat(merged.getAccessCode()).isEqualTo("ABC123");
-        assertThat(merged.getIsValid()).isEqualTo(YesOrNo.NO);
-        assertThat(merged.getUserIdamID()).isEqualTo("before-user-id");
-        assertThat(merged.getUsedAt()).isAfterOrEqualTo(beforeCall);
-        assertThat(merged.getUsedAt()).isBeforeOrEqualTo(afterCall);
-        assertThat(merged.getUsedAt()).isNotEqualTo(usedAtBefore);
-    }
-
-    @Test
-    void shouldSetBackendUsedAtWhenAccessCodeValidityDoesNotChange() {
-        UUID id = UUID.randomUUID();
-
-        LocalDateTime usedAtBefore = LocalDateTime.now().minusDays(1);
-        AccessCodeCollection before = collection(
-            id,
-            entry("ABC123", YesOrNo.NO, "before-user-id", usedAtBefore)
+            entry("ABC123", YesOrNo.NO)
         );
 
         AccessCodeCollection current = collection(

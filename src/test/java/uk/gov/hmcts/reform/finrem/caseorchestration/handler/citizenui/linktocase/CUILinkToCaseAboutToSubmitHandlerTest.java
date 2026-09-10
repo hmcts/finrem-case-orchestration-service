@@ -43,12 +43,14 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    public static final String CITIZEN_IDAM_USER_ID = "citizen-user-id";
+
     @Test
     void shouldAssignCitizenRoleUsingLatestMergedAccessCode() {
         TestHandler handler = new TestHandler(finremCaseDetailsMapper, invalidateAccessCodeService, assignCaseAccessService);
 
-        AccessCodeCollection oldAccessCode = accessCode(UUID.randomUUID(), "old-user", LocalDateTime.now().minusDays(1));
-        AccessCodeCollection latestAccessCode = accessCode(UUID.randomUUID(), "latest-user", LocalDateTime.now());
+        AccessCodeCollection oldAccessCode = accessCode(UUID.randomUUID(), null, null);
+        AccessCodeCollection latestAccessCode = accessCode(UUID.randomUUID(), CITIZEN_IDAM_USER_ID, LocalDateTime.now());
 
         FinremCaseData beforeData = FinremCaseData.builder().applicantAccessCodes(List.of(oldAccessCode, latestAccessCode)).build();
         FinremCaseData currentData = FinremCaseData.builder().applicantAccessCodes(List.of()).build();
@@ -68,10 +70,10 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
 
         assertThat(response.getData().getApplicantAccessCodes()).containsExactly(oldAccessCode, latestAccessCode);
         verify(assignCaseAccessService).grantCaseRoleToUser(
-            eq(Long.valueOf(CASE_ID)),
-            eq("latest-user"),
-            eq(CaseRole.CITIZEN_APPLICANT.getCcdCode()),
-            eq(null)
+            Long.valueOf(CASE_ID),
+            CITIZEN_IDAM_USER_ID,
+            CaseRole.CITIZEN_APPLICANT.getCcdCode(),
+            null
         );
     }
 
@@ -105,7 +107,7 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
         assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LINK_APPLICANT_TO_CASE);
     }
 
-    private static AccessCodeCollection accessCode(UUID id, String userIdamId, LocalDateTime usedAt) {
+    public static AccessCodeCollection accessCode(UUID id, String userIdamId, LocalDateTime usedAt) {
         return AccessCodeCollection.builder()
             .id(id)
             .value(AccessCodeEntry.builder().userIdamID(userIdamId).usedAt(usedAt).build())
