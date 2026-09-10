@@ -28,4 +28,6 @@ withNightlyPipeline(type, product, component) {
     afterSuccess('fortify-scan') {
         steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
     }
+
+    enableSlackNotifications('#finrem-dev')
 }
