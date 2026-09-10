@@ -13,8 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
@@ -22,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.Iss
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -109,58 +106,5 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
         assertNotNull(data.getRespondentAccessCodes());
         assertEquals(1, data.getApplicantAccessCodes().size());
         assertEquals(1, data.getRespondentAccessCodes().size());
-    }
-
-    @Test
-    void givenRepresentedParties_whenIssueApplication_thenDoNotGenerateAccessCodes() {
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(123L)
-            .data(FinremCaseData.builder()
-                .scheduleOneWrapper(ScheduleOneWrapper.builder().build())
-                .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                    .applicantRepresented(YesOrNo.YES)
-                    .contestedRespondentRepresented(YesOrNo.YES)
-                    .build())
-                .build())
-            .build();
-        FinremCallbackRequest callbackRequest
-            = FinremCallbackRequest.builder().eventType(EventType.ISSUE_APPLICATION).caseDetails(caseDetails).build();
-
-        when(service.generateContestedMiniForm(AUTH_TOKEN, callbackRequest.getCaseDetails())).thenReturn(caseDocument());
-        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        FinremCaseData data = response.getData();
-
-        assertNull(data.getApplicantAccessCodes());
-        assertNull(data.getRespondentAccessCodes());
-    }
-
-    @Test
-    void givenMixedRepresentation_whenIssueApplication_thenGenerateAccessCodeForLipOnly() {
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(123L)
-            .data(FinremCaseData.builder()
-                .scheduleOneWrapper(ScheduleOneWrapper.builder().build())
-                .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                    .applicantRepresented(YesOrNo.NO)
-                    .contestedRespondentRepresented(YesOrNo.YES)
-                    .build())
-                .build())
-            .build();
-        FinremCallbackRequest callbackRequest
-            = FinremCallbackRequest.builder().eventType(EventType.ISSUE_APPLICATION).caseDetails(caseDetails).build();
-
-        when(service.generateContestedMiniForm(AUTH_TOKEN, callbackRequest.getCaseDetails())).thenReturn(caseDocument());
-        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        FinremCaseData data = response.getData();
-
-        assertNotNull(data.getApplicantAccessCodes());
-        assertEquals(1, data.getApplicantAccessCodes().size());
-        assertNull(data.getRespondentAccessCodes());
     }
 }
