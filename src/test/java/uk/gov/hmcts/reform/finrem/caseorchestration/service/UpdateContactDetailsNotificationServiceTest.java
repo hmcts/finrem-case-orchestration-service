@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -33,7 +32,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -133,7 +131,7 @@ class UpdateContactDetailsNotificationServiceTest {
             .thenReturn(mockRequest);
 
         SendCorrespondenceEvent result =
-            updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(caseDetails);
+            updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(caseDetails, isRespondentSolicitorChanged);
 
         assertAll(
             () -> assertThat(result).extracting(SendCorrespondenceEvent::getEmailTemplate)
@@ -157,22 +155,6 @@ class UpdateContactDetailsNotificationServiceTest {
             )),
             Arguments.of(List.of(RepresentationUpdateHistoryCollection.builder().build()))
         );
-    }
-
-    @ParameterizedTest
-    @MethodSource
-    @NullAndEmptySource
-    void shouldThrowException_whenLatest_whenLastRepresentationUpdateIsMissing(
-        List<RepresentationUpdateHistoryCollection> representationUpdateHistory) {
-
-        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        FinremCaseData caseData = mock(FinremCaseData.class);
-
-        when(caseData.getRepresentationUpdateHistory()).thenReturn(representationUpdateHistory);
-        when(caseDetails.getData()).thenReturn(caseData);
-
-        assertThrows(IllegalStateException.class, () ->
-            updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(caseDetails));
     }
 
     @Test
