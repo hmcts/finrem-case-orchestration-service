@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentupload;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.documentupload;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,27 +14,27 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Cu
 import java.util.List;
 
 /**
- * Handler for Respondent CUI document upload events.
+ * Handler for Applicant CUI document upload events.
  *
- * <p>This handler processes {@link EventType#CUI_RESPONDENT_DOCUMENT_UPLOAD} events and is responsible for:
+ * <p>This handler processes {@link EventType#CUI_APPLICANT_DOCUMENT_UPLOAD} events and is responsible for:
  * <ul>
- *     <li>Retrieving the respondent document collection</li>
+ *     <li>Retrieving the applicant document collection</li>
  *     <li>Merging newly uploaded documents with existing ones</li>
- *     <li>Sorting documents by upload datetime (delegated to the abstract class)</li>
- *     <li>Updating the respondent document collection on the case data</li>
+ *     <li>Sorting documents by upload datetime (handled in the abstract class)</li>
+ *     <li>Updating the applicant document collection on the case data</li>
  * </ul>
  *
  * <p>All core merge and sort logic is implemented in
- * {@link CuiDocumentUploadAboutToSubmitHandler}.
+ * {@link CUIDocumentUploadAboutToSubmitHandler}.
  */
 @Slf4j
 @Service
-public class CuiRespondentDocumentUploadAboutToSubmitHandler extends CuiDocumentUploadAboutToSubmitHandler {
+public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentUploadAboutToSubmitHandler {
 
     private final FeatureToggleService featureToggleService;
 
-    public CuiRespondentDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                           FeatureToggleService featureToggleService) {
+    public CUIApplicantDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                          FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
         this.featureToggleService = featureToggleService;
     }
@@ -42,33 +42,33 @@ public class CuiRespondentDocumentUploadAboutToSubmitHandler extends CuiDocument
     /**
      * Defines the event type handled by this class.
      *
-     * @return {@link EventType#CUI_RESPONDENT_DOCUMENT_UPLOAD}
+     * @return {@link EventType#CUI_APPLICANT_DOCUMENT_UPLOAD}
      */
     @Override
     protected EventType handledEventType() {
-        return EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD;
+        return EventType.CUI_APPLICANT_DOCUMENT_UPLOAD;
     }
 
     /**
-     * Retrieves the respondent document collection from case data.
+     * Retrieves the applicant document collection from case data.
      *
      * @param caseData case data
-     * @return list of respondent documents (may be null)
+     * @return list of applicant documents (may be null)
      */
     @Override
     protected List<CitizenDocumentCollection> getDocuments(FinremCaseData caseData) {
-        return caseData.getCitizenDocumentWrapper().getCitizenRespondentDocument();
+        return caseData.getCitizenDocumentWrapper().getCitizenApplicantDocument();
     }
 
     /**
-     * Sets the updated respondent document collection onto case data.
+     * Sets the updated applicant document collection onto case data.
      *
      * @param caseData  case data
-     * @param documents merged and sorted respondent documents
+     * @param documents merged and sorted applicant documents
      */
     @Override
     protected void setDocuments(FinremCaseData caseData, List<CitizenDocumentCollection> documents) {
-        caseData.getCitizenDocumentWrapper().setCitizenRespondentDocument(documents);
+        caseData.getCitizenDocumentWrapper().setCitizenApplicantDocument(documents);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class CuiRespondentDocumentUploadAboutToSubmitHandler extends CuiDocument
 
     @Override
     protected void categoriseDocuments(FinremCaseData caseData) {
-        new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.RESPONDENT)
+        new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT)
             .categorise(caseData);
     }
 
