@@ -119,7 +119,7 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-.*@10\.1\.57$</packageUrl>
         <cve>CVE-2026-66299</cve>
     </suppress>
-    <suppress until="2026-10-01Z">
+    <suppress until="2026-12-01Z">
         <notes>Spring Framework 6.2.x is EOL with no public fix for these CVEs. Fixed in Spring Framework 7.0.9
             (Spring Boot 4.0.8+). Upgrading to Spring Boot 4.x is required for a public OSS fix.
             CVE-2026-47892, CVE-2026-47893, CVE-2026-59280, CVE-2026-59283: Various Spring Framework vulnerabilities.
@@ -138,6 +138,14 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-47891</cve>
         <cve>CVE-2026-59282</cve>
         <cve>CVE-2026-59281</cve>
+        <!-- Added 2026-09-11: same Aug 2026 disclosure batch, same 7.0.9/Boot 4.0.8+ fix -->
+        <cve>CVE-2026-47883</cve>
+        <cve>CVE-2026-47884</cve>
+        <cve>CVE-2026-47885</cve>
+        <cve>CVE-2026-47886</cve>
+        <cve>CVE-2026-47887</cve>
+        <cve>CVE-2026-47888</cve>
+        <cve>CVE-2026-47889</cve>
     </suppress>
     <suppress until="2026-10-01Z">
         <notes><![CDATA[
