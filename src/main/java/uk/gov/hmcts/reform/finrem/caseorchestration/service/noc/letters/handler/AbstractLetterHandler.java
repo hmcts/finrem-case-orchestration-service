@@ -97,9 +97,13 @@ public abstract class AbstractLetterHandler implements LetterHandler {
         List<Element<RepresentationUpdate>> representationUpdates =
             objectMapper.convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
             });
-        return Collections.max(representationUpdates, Comparator.comparing(
-                representationUpdate -> representationUpdate.getValue().getDate()))
-            .getValue();
+        if (representationUpdates != null && !representationUpdates.isEmpty()) {
+            return Collections.max(representationUpdates, Comparator.comparing(
+                    representationUpdate -> representationUpdate.getValue().getDate()))
+                .getValue();
+        } else {
+            return null;
+        }
     }
 
     protected boolean isApplicant(RepresentationUpdate representationUpdate) {

@@ -136,7 +136,7 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
         }
     }
 
-    /*
+    /**
      * Distinct mid-event handlers validate postcodes for Consented and Contested cases.
      * This blends validation from each, to protect Users from skipping validation with browser controls.
      *
