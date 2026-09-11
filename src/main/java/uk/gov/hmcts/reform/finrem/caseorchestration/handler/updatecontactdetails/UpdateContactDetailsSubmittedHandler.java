@@ -85,9 +85,8 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
             // Notifications will still be sent if the case assignment is only partially completed (e.g.,
             // applicant solicitor granted but revocation of the previous solicitor failed).
             // Further enhancement can refine notification accuracy if needed.
-            List<SendCorrespondenceEvent> events = prepareNocEmailToLitigantSolicitor(result,
-                caseDetails);
-            sendNocEmailToLitigantSolicitorWithRetry(events, errors);
+            sendNocEmailToLitigantSolicitorWithRetry(prepareNocEmailToLitigantSolicitor(result,
+                caseDetails), errors);
             sendNocLetterToLitigantsWithRetry(caseDetails, caseDetailsBefore, userAuthorisation, errors);
         }
 
