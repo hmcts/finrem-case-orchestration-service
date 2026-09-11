@@ -67,6 +67,7 @@ class GlobalSearchMigrationTaskTest {
     void setup() {
 
         ReflectionTestUtils.setField(globalSearchMigrationTask, "taskEnabled", true);
+        ReflectionTestUtils.setField(globalSearchMigrationTask, "gsQuerySize", 10);
         ReflectionTestUtils.setField(globalSearchMigrationTask, "dryRun", false);
         ReflectionTestUtils.setField(globalSearchMigrationTask, "supplementaryDataRequired", true);
         ReflectionTestUtils.setField(globalSearchMigrationTask, "caseTypeId", CaseType.CONTESTED.getCcdType());

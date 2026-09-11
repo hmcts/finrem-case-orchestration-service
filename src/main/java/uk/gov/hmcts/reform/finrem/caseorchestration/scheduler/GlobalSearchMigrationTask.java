@@ -7,6 +7,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
@@ -60,19 +61,38 @@ public class GlobalSearchMigrationTask extends BaseTask {
 
     @Override
     public List<CaseReference> getCaseReferences() {
-        String searchQuery = getSearchQuery();
-        log.info("Search query: {}", searchQuery);
         String systemUserToken = getSystemUserToken();
-        SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
-        log.info("{} cases found for {}", searchResult.getTotal(), caseTypeId);
+        List<CaseReference> results = new ArrayList<>();
+        String searchAfter = null;
+        while (true) {
+            String searchQuery = getSearchQuery(searchAfter);
+            log.info("Search query: {}", searchQuery);
+            SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
+            log.info("{} cases found for {}", searchResult.getTotal(), caseTypeId);
 
-        return searchResult.getCases().stream()
-            .map(caseDetails -> caseDetails.getId().toString())
-            .map(CaseReference::new)
-            .toList();
+            if (searchResult.getCases().isEmpty()) {
+                break;
+            }
+
+            results.addAll(
+                searchResult.getCases().stream()
+                    .map(caseDetails -> new CaseReference(
+                        caseDetails.getId().toString()))
+                    .toList()
+
+            );
+            var lastCase = searchResult.getCases().getLast();
+            searchAfter = lastCase.getId().toString();
+            log.info("Last case reference: {}", searchAfter);
+
+            if (searchResult.getCases().size() < gsQuerySize) {
+                break;
+            }
+        }
+        return results;
     }
 
-    private String getSearchQuery() {
+    private String getSearchQuery(String searchAfter) {
 
         BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
             .mustNot(new TermsQueryBuilder("state.keyword", "close", "consentOrderMade"));
@@ -87,16 +107,14 @@ public class GlobalSearchMigrationTask extends BaseTask {
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
             .size(gsQuerySize)
-            .query(shouldQuery);
+            .query(shouldQuery)
+            .fetchSource(new String[]{"caseReference"}, null)
+            .sort("caseReference.keyword", SortOrder.DESC);
 
+        if (searchAfter != null) {
+            searchSourceBuilder.searchAfter(new Object[]{searchAfter});
+        }
         return searchSourceBuilder.toString();
-    }
-
-    private List<CaseReference> getCaseReferencesFromSearchResult(SearchResult searchResult) {
-        List<CaseReference> caseReferences = new ArrayList<>();
-        searchResult.getCases().forEach(caseDetails ->
-            caseReferences.add(new CaseReference(caseDetails.getId().toString())));
-        return caseReferences;
     }
 
     @Override
