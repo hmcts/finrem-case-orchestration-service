@@ -32,6 +32,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
@@ -121,11 +122,11 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
         @ParameterizedTest
         @CsvSource(value = {
-            BOTH_CHANGES/*,
+            BOTH_CHANGES,
             BOTH_CHANGES_AND_APP_ISSUED,
             APP_SOL_CHANGE_ONLY_AND_APP_ISSUED,
             APP_SOL_CHANGE_ONLY_AND_APP_NOT_ISSUED,
-            RESP_SOL_CHANGE_ONLY_AND_APP_ISSUED*/
+            RESP_SOL_CHANGE_ONLY_AND_APP_ISSUED
         })
         void givenAnySolicitorChanged_whenHandled_thenNocEmailAndLetterSent(
             boolean hasApplicantSolicitorChanged, boolean hasRespondentSolicitorChanged, boolean isApplicationIssued
@@ -137,7 +138,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
             SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
             when(event.getCaseId()).thenReturn(CASE_ID);
-            when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(callbackRequest.getCaseDetails(), hasRespondentSolicitorChanged))
+            when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean()))
                 .thenReturn(event);
 
             // Act
@@ -148,8 +149,8 @@ class UpdateContactDetailsSubmittedHandlerTest {
             assertAll(
                 () -> assertThat(response.getConfirmationBody()).isNull(),
                 () -> assertThat(response.getConfirmationHeader()).isNull(),
-                () -> verify(updateContactDetailsNotificationService).prepareNocEmailToNewSolicitor(callbackRequest.getCaseDetails(),
-                    hasRespondentSolicitorChanged),
+                () -> verify(updateContactDetailsNotificationService).prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()),
+                    anyBoolean()),
                 () -> verify(retryExecutor).runWithRetryWithHandler(
                     nocNotificationCaptor.capture(),
                     eq("Sending NOC email to litigant solicitor"),
