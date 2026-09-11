@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -47,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCondition;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingSupplierCaptor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mockRunWithRetryWithHandlerInvokesFirstErrorHandler;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -242,148 +244,149 @@ class UpdateContactDetailsSubmittedHandlerTest {
             }
         }
     }
-//
-//    @Nested
-//    class GrantOrRevokeTests {
-//
-//        static final String FAIL_GRANT_AND_REVOKE = "true,true";
-//        static final String FAIL_GRANT_ONLY = "true,false";
-//        static final String FAIL_REVOKE_ONLY = "false,true";
-//
-//        @ParameterizedTest
-//        @CsvSource({
-//            FAIL_GRANT_AND_REVOKE,
-//            FAIL_GRANT_ONLY,
-//            FAIL_REVOKE_ONLY
-//        })
-//        void givenApplicantSolicitorChanged_whenUnableToGrantOrRevoke_thenErrorsPopulatedToConfirmation(boolean failGrant, boolean failRevoke) {
-//            FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
-//            when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn("new@email.com");
-//            FinremCaseData finremCaseDataBefore = spy(FinremCaseData.builder().build());
-//            when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn("old@email.com");
-//
-//            FinremCallbackRequest callbackRequest = spy(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), finremCaseDataBefore,
-//                finremCaseData));
-//            when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(true);
-//            when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(false);
-//            when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(callbackRequest.getCaseDetails()))
-//                .thenReturn(mock(SendCorrespondenceEvent.class));
-//
-//            // Simulate error in checkAndAssignSolicitorAccess by making retryExecutor set the error
-//
-//            when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class), eq("Update Contact Details - granting applicant solicitor"),
-//                eq(CASE_ID), any())).thenAnswer(invocation -> {
-//                    if (failGrant) {
-//                        String actionName = invocation.getArgument(1);
-//                        String caseId = invocation.getArgument(2);
-//                        RetryErrorHandler errorHandler = invocation.getArgument(3);
-//                        errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
-//                    }
-//                    return Optional.of(Boolean.TRUE);
-//                });
-//
-//            when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class), eq("Update Contact Details - revoking applicant solicitor"),
-//                eq(CASE_ID), any())).thenAnswer(invocation -> {
-//                    if (failRevoke) {
-//                        String actionName = invocation.getArgument(1);
-//                        String caseId = invocation.getArgument(2);
-//                        RetryErrorHandler errorHandler = invocation.getArgument(3);
-//                        errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
-//                        return Optional.empty();
-//                    }
-//                    return Optional.of(Boolean.TRUE);
-//                });
-//
-//            // Act
-//            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-//
-//            // Assert
-//            String body = response.getConfirmationBody();
-//            String header = response.getConfirmationHeader();
-//
-//            String grantMsg = "There was a problem granting access to applicant solicitor (new@email.com). Please grant access manually.";
-//            String revokeMsg = "There was a problem revoking access to applicant solicitor (old@email.com). Please revoke access manually.";
-//
-//            assertAll(
-//                () -> verify(retryExecutor).supplyWithRetryWithHandler(
-//                    any(ThrowingSupplier.class),
-//                    eq("Update Contact Details - granting applicant solicitor"),
-//                    eq(CASE_ID),
-//                    any(RetryErrorHandler.class)
-//                ),
-//                () -> verify(retryExecutor).supplyWithRetryWithHandler(
-//                    any(ThrowingSupplier.class),
-//                    eq("Update Contact Details - revoking applicant solicitor"),
-//                    eq(CASE_ID),
-//                    any(RetryErrorHandler.class)
-//                ),
-//                () -> assertThat(header).contains("Contact details updated with errors"),
-//                () -> assertCondition(body, grantMsg, failGrant),
-//                () -> assertCondition(body, revokeMsg, failRevoke)
-//            );
-//        }
-//
-//        @Test
-//        void givenApplicantSolicitorChanged_whenHandled_thenGrantAndRevokeApplicantSolicitorAndNotifyParties() {
-//            FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
-//            when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn("new@email.com");
-//            FinremCaseData finremCaseDataBefore = spy(FinremCaseData.builder().build());
-//            when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn("old@email.com");
-//
-//            FinremCallbackRequest callbackRequest = spy(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), finremCaseDataBefore,
-//                finremCaseData));
-//            when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(true);
-//            when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(false);
-//
-//            when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(callbackRequest.getCaseDetails()))
-//                .thenReturn(mock(SendCorrespondenceEvent.class));
-//            // Simulate grant/revoke applicant solicitor success
-//            when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
-//                eq("Update Contact Details - granting applicant solicitor"),
-//                eq(CASE_ID), any())).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
-//            when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
-//                eq("Update Contact Details - revoking applicant solicitor"),
-//                eq(CASE_ID), any())).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
-//
-//            // Act
-//            var response = handler.handle(callbackRequest, AUTH_TOKEN);
-//
-//            // Verify
-//            ArgumentCaptor<ThrowingSupplier<Boolean>> grantApplicantSolicitorCaptor = getThrowingSupplierCaptor();
-//            ArgumentCaptor<ThrowingSupplier<Boolean>> revokeApplicantSolicitorCaptor = getThrowingSupplierCaptor();
-//
-//            assertAll(
-//                // to verify execution of granting applicant solicitor
-//                () -> verify(retryExecutor).supplyWithRetryWithHandler(
-//                    grantApplicantSolicitorCaptor.capture(),
-//                    eq("Update Contact Details - granting applicant solicitor"),
-//                    eq(CASE_ID),
-//                    any(RetryErrorHandler.class)),
-//                // to verify assignPartiesAccessService.grantApplicantSolicitor was invoked
-//                () -> {
-//                    assertTrue(grantApplicantSolicitorCaptor.getValue().get());
-//                    verify(assignPartiesAccessService).grantApplicantSolicitor(finremCaseData);
-//                },
-//                // to verify execution of revoking applicant solicitor
-//                () -> verify(retryExecutor).supplyWithRetryWithHandler(
-//                    revokeApplicantSolicitorCaptor.capture(),
-//                    eq("Update Contact Details - revoking applicant solicitor"),
-//                    eq(CASE_ID),
-//                    any(RetryErrorHandler.class)),
-//                // to verify assignPartiesAccessService.revokeApplicantSolicitor was invoked
-//                () -> {
-//                    assertTrue(revokeApplicantSolicitorCaptor.getValue().get());
-//                    verify(assignPartiesAccessService).revokeApplicantSolicitor(finremCaseDataBefore);
-//                },
-//                () -> verifyNoMoreInteractions(assignPartiesAccessService),
-//                // to verify notifying parties
-//                () -> verify(updateContactDetailsNotificationService)
-//                    .prepareNocEmailToNewSolicitor(callbackRequest.getCaseDetails()),
-//                // to verify happy path that return null
-//                () -> assertThat(response.getConfirmationHeader()).isNull(),
-//                () -> assertThat(response.getConfirmationBody()).isNull()
-//            );
-//        }
+
+    @Nested
+    class GrantOrRevokeTests {
+
+        static final String FAIL_GRANT_AND_REVOKE = "true,true";
+        static final String FAIL_GRANT_ONLY = "true,false";
+        static final String FAIL_REVOKE_ONLY = "false,true";
+
+        @ParameterizedTest
+        @CsvSource({
+            FAIL_GRANT_AND_REVOKE,
+            FAIL_GRANT_ONLY,
+            FAIL_REVOKE_ONLY
+        })
+        void givenApplicantSolicitorChanged_whenUnableToGrantOrRevoke_thenErrorsPopulatedToConfirmation(boolean failGrant, boolean failRevoke) {
+            FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
+            when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn("new@email.com");
+            FinremCaseData finremCaseDataBefore = spy(FinremCaseData.builder().build());
+            when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn("old@email.com");
+
+            FinremCallbackRequest callbackRequest = spy(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), finremCaseDataBefore,
+                finremCaseData));
+            when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(true);
+            when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(false);
+            when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean()))
+                .thenReturn(mock(SendCorrespondenceEvent.class));
+
+            // Simulate error in checkAndAssignSolicitorAccess by making retryExecutor set the error
+
+            when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class), eq("Update Contact Details - granting applicant solicitor"),
+                eq(CASE_ID), any())).thenAnswer(invocation -> {
+                    if (failGrant) {
+                        String actionName = invocation.getArgument(1);
+                        String caseId = invocation.getArgument(2);
+                        RetryErrorHandler errorHandler = invocation.getArgument(3);
+                        errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
+                    }
+                    return Optional.of(Boolean.TRUE);
+                });
+
+            when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class), eq("Update Contact Details - revoking applicant solicitor"),
+                eq(CASE_ID), any())).thenAnswer(invocation -> {
+                    if (failRevoke) {
+                        String actionName = invocation.getArgument(1);
+                        String caseId = invocation.getArgument(2);
+                        RetryErrorHandler errorHandler = invocation.getArgument(3);
+                        errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
+                        return Optional.empty();
+                    }
+                    return Optional.of(Boolean.TRUE);
+                });
+
+            // Act
+            var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+            // Assert
+            String body = response.getConfirmationBody();
+            String header = response.getConfirmationHeader();
+
+            String grantMsg = "There was a problem granting access to applicant solicitor (new@email.com). Please grant access manually.";
+            String revokeMsg = "There was a problem revoking access to applicant solicitor (old@email.com). Please revoke access manually.";
+
+            assertAll(
+                () -> verify(retryExecutor).supplyWithRetryWithHandler(
+                    any(ThrowingSupplier.class),
+                    eq("Update Contact Details - granting applicant solicitor"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)
+                ),
+                () -> verify(retryExecutor).supplyWithRetryWithHandler(
+                    any(ThrowingSupplier.class),
+                    eq("Update Contact Details - revoking applicant solicitor"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)
+                ),
+                () -> assertThat(header).contains("Contact details updated with errors"),
+                () -> assertCondition(body, grantMsg, failGrant),
+                () -> assertCondition(body, revokeMsg, failRevoke)
+            );
+        }
+
+        @Test
+        void givenApplicantSolicitorChanged_whenHandled_thenGrantAndRevokeApplicantSolicitorAndNotifyParties() {
+            FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
+            when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn("new@email.com");
+            FinremCaseData finremCaseDataBefore = spy(FinremCaseData.builder().build());
+            when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn("old@email.com");
+
+            FinremCallbackRequest callbackRequest = spy(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), finremCaseDataBefore,
+                finremCaseData));
+            when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(true);
+            when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(false);
+
+            when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()),
+                anyBoolean()))
+                .thenReturn(mock(SendCorrespondenceEvent.class));
+            // Simulate grant/revoke applicant solicitor success
+            when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
+                eq("Update Contact Details - granting applicant solicitor"),
+                eq(CASE_ID), any())).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
+            when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
+                eq("Update Contact Details - revoking applicant solicitor"),
+                eq(CASE_ID), any())).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
+
+            // Act
+            var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+            // Verify
+            ArgumentCaptor<ThrowingSupplier<Boolean>> grantApplicantSolicitorCaptor = getThrowingSupplierCaptor();
+            ArgumentCaptor<ThrowingSupplier<Boolean>> revokeApplicantSolicitorCaptor = getThrowingSupplierCaptor();
+
+            assertAll(
+                // to verify execution of granting applicant solicitor
+                () -> verify(retryExecutor).supplyWithRetryWithHandler(
+                    grantApplicantSolicitorCaptor.capture(),
+                    eq("Update Contact Details - granting applicant solicitor"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)),
+                // to verify assignPartiesAccessService.grantApplicantSolicitor was invoked
+                () -> {
+                    assertTrue(grantApplicantSolicitorCaptor.getValue().get());
+                    verify(assignPartiesAccessService).grantApplicantSolicitor(finremCaseData);
+                },
+                // to verify execution of revoking applicant solicitor
+                () -> verify(retryExecutor).supplyWithRetryWithHandler(
+                    revokeApplicantSolicitorCaptor.capture(),
+                    eq("Update Contact Details - revoking applicant solicitor"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)),
+                // to verify assignPartiesAccessService.revokeApplicantSolicitor was invoked
+                () -> {
+                    assertTrue(revokeApplicantSolicitorCaptor.getValue().get());
+                    verify(assignPartiesAccessService).revokeApplicantSolicitor(finremCaseDataBefore);
+                },
+                () -> verifyNoMoreInteractions(assignPartiesAccessService),
+                // to verify notifying parties
+                () -> verify(updateContactDetailsNotificationService)
+                    .prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean()),
+                // to verify happy path that return null
+                () -> assertThat(response.getConfirmationHeader()).isNull(),
+                () -> assertThat(response.getConfirmationBody()).isNull()
+            );
+        }
 //
 //        @ParameterizedTest
 //        @CsvSource({
@@ -517,7 +520,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
 //                () -> assertThat(response.getConfirmationBody()).isNull()
 //            );
 //        }
-//    }
+    }
 
     @Test
     void givenRespondentSolicitorChangedButApplicationNotIssued_whenHandled_thenNoCaseAssignmentAndNoNotification() {
