@@ -78,6 +78,8 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @NoArgsConstructor
 public class FinremCaseData implements HasCaseDocument {
 
+    private static final String DEFAULT_CASE_NAME = "Financial Remedy";
+
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private Bin bin;
@@ -472,6 +474,19 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private EstimatedAssetsChecklistWrapper estimatedAssetsChecklistWrapper;
+
+    private String caseNameHmctsInternal;
+    //if (caseData != null and caseData.applicantLName != null and caseData.appRespondentLName != null) then (caseData.applicantLName + " vs " + caseData.appRespondentLName) else "Financial Remedy"
+    private DynamicList caseManagementCategory;
+
+    public String getCaseNameHmctsInternal() {
+        var caseNameHmctsInternal = DEFAULT_CASE_NAME;
+        if (StringUtils.isNoneBlank(this.contactDetailsWrapper.getApplicantLname(), this.contactDetailsWrapper.getRespondentLname())) {
+            caseNameHmctsInternal = String.format("%s vs %s",
+                this.contactDetailsWrapper.getApplicantLname(), this.contactDetailsWrapper.getRespondentLname());
+        }
+        return caseNameHmctsInternal;
+    }
 
     @JsonIgnore
     public CaseDataMetricsWrapper getCaseDataMetricsWrapper() {
