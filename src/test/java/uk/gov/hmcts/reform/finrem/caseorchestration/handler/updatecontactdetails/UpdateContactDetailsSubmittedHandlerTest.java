@@ -408,7 +408,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 finremCaseData));
             when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(false);
             when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(true);
-            when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean()))
+            lenient().when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean()))
                 .thenReturn(mock(SendCorrespondenceEvent.class));
 
             when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class), eq("Update Contact Details - granting respondent solicitor"),
@@ -418,6 +418,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                         String caseId = invocation.getArgument(2);
                         RetryErrorHandler errorHandler = invocation.getArgument(3);
                         errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
+                        return Optional.of(Boolean.FALSE);
                     }
                     return Optional.of(Boolean.TRUE);
                 });
@@ -429,7 +430,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                         String caseId = invocation.getArgument(2);
                         RetryErrorHandler errorHandler = invocation.getArgument(3);
                         errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
-                        return Optional.empty();
+                        return Optional.of(Boolean.FALSE);
                     }
                     return Optional.of(Boolean.TRUE);
                 });
@@ -459,7 +460,9 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 ),
                 () -> assertThat(header).contains("Contact details updated with errors"),
                 () -> assertCondition(body, grantMsg, failGrant),
-                () -> assertCondition(body, revokeMsg, failRevoke)
+                () -> assertCondition(body, revokeMsg, failRevoke),
+                () -> verify(updateContactDetailsNotificationService, times(failGrant ? 0 : 1))
+                    .prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean())
             );
         }
 
