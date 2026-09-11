@@ -15,11 +15,16 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CaseFlagsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static java.util.Collections.singletonMap;
 
 @Service
 @Slf4j
@@ -30,6 +35,8 @@ public class CcdService {
     private final CaseEventsApi caseEventsApi;
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamAuthService idamAuthService;
+    private final CaseFlagsConfiguration caseFlagsConfiguration;
+
     private static final String LOGGER = "Executing eventType {} on Case ID: {}";
 
     public void executeCcdEventOnCase(String authorisation, String caseId, String caseTypeId,
@@ -44,10 +51,11 @@ public class CcdService {
      * Start a CCD event.
      *
      * <p>The event should be submitted by a subsequent call to {@link #submitEventForCaseWorker}.</p>
+     *
      * @param authorisation auth token
-     * @param caseId case id
-     * @param caseTypeId case type id
-     * @param eventType case event to start
+     * @param caseId        case id
+     * @param caseTypeId    case type id
+     * @param eventType     case event to start
      * @return StartEventResponse
      */
     public StartEventResponse startEventForCaseWorker(String authorisation, String caseId, String caseTypeId,
@@ -72,13 +80,14 @@ public class CcdService {
      * <p>The case data in {@code startEventResponse} should be from the return value of the initial call to
      * {@link #startEventForCaseWorker}. Do not use case data from another source to avoid data loss due to concurrent
      * case data updates.</p>
+     *
      * @param startEventResponse case data
-     * @param authorisation auth token
-     * @param caseId case id
-     * @param caseTypeId case type id
-     * @param eventType case event to submit
-     * @param summary event summary
-     * @param description event description
+     * @param authorisation      auth token
+     * @param caseId             case id
+     * @param caseTypeId         case type id
+     * @param eventType          case event to submit
+     * @param summary            event summary
+     * @param description        event description
      */
     public void submitEventForCaseWorker(StartEventResponse startEventResponse, String authorisation, String caseId, String caseTypeId,
                                          String eventType, String summary, String description) {
@@ -155,6 +164,20 @@ public class CcdService {
         IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
         return coreCaseDataApi.searchCases(idamToken.getIdamOauth2Token(),
             idamToken.getServiceAuthorization(), caseType.getCcdType(), esQueryString);
+    }
+
+    public void submitSupplementaryDataToCcd(String authorisation, String caseId) {
+        IdamToken idamToken = idamAuthService.getIdamToken(authorisation);
+
+        Map<String, Map<String, Map<String, Object>>> supplementaryDataFinancialRemedy = new HashMap<>();
+        supplementaryDataFinancialRemedy.put("supplementary_data_updates",
+            singletonMap("$set", singletonMap("HMCTSServiceId",
+                caseFlagsConfiguration.getHmctsId())));
+
+        coreCaseDataApi.submitSupplementaryData(idamToken.getIdamOauth2Token(),
+            idamToken.getServiceAuthorization(),
+            caseId,
+            supplementaryDataFinancialRemedy);
     }
 
 }
