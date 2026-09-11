@@ -15,8 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -25,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -38,8 +35,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest.APPLICANT_PARTY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest.RESPONDENT_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOC_CASEWORKER;
 
@@ -84,46 +79,29 @@ class UpdateContactDetailsNotificationServiceTest {
         assertFalse(result);
     }
 
-    static Stream<Arguments> shouldUseConsentedNocTemplate_whenLastRepresentationUpdate() {
+    static Stream<Arguments> shouldUseProperNocTemplate() {
         return Stream.of(
             // Respondent changed, consented application
-            Arguments.of(RESPONDENT_PARTY, NotificationParty.RESPONDENT_SOLICITOR_ONLY, true, true, FR_CONSENTED_NOC_CASEWORKER),
+            Arguments.of(NotificationParty.RESPONDENT_SOLICITOR_ONLY, true, true, FR_CONSENTED_NOC_CASEWORKER),
 
             // Applicant changed, consented application
-            Arguments.of(APPLICANT_PARTY, NotificationParty.APPLICANT_SOLICITOR_ONLY, false, true, FR_CONSENTED_NOC_CASEWORKER),
+            Arguments.of(NotificationParty.APPLICANT_SOLICITOR_ONLY, false, true, FR_CONSENTED_NOC_CASEWORKER),
 
             // Respondent changed, contested application
-            Arguments.of(RESPONDENT_PARTY, NotificationParty.RESPONDENT_SOLICITOR_ONLY, true, false, FR_CONTESTED_NOC_CASEWORKER),
+            Arguments.of(NotificationParty.RESPONDENT_SOLICITOR_ONLY, true, false, FR_CONTESTED_NOC_CASEWORKER),
 
             // Applicant changed, contested application
-            Arguments.of(APPLICANT_PARTY, NotificationParty.APPLICANT_SOLICITOR_ONLY, false, false, FR_CONTESTED_NOC_CASEWORKER)
+            Arguments.of(NotificationParty.APPLICANT_SOLICITOR_ONLY, false, false, FR_CONTESTED_NOC_CASEWORKER)
         );
     }
 
     @ParameterizedTest
     @MethodSource
-    void shouldUseConsentedNocTemplate_whenLastRepresentationUpdate(String party, NotificationParty notificationParty,
-                                                                    boolean isRespondentSolicitorChanged, boolean isConsented,
-                                                                    EmailTemplateNames emailTemplateNames) {
+    void shouldUseProperNocTemplate(NotificationParty notificationParty,
+                                    boolean isRespondentSolicitorChanged, boolean isConsented,
+                                    EmailTemplateNames emailTemplateNames) {
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        FinremCaseData caseData = mock(FinremCaseData.class);
-
-        when(caseData.getRepresentationUpdateHistory()).thenReturn(List.of(
-            RepresentationUpdateHistoryCollection.builder()
-                .value(RepresentationUpdate.builder()
-                    .party(party)
-                    .date(LocalDateTime.of(2026, 3, 24, 23, 58))
-                    .build())
-                .build(), // max
-            RepresentationUpdateHistoryCollection.builder()
-                .value(RepresentationUpdate.builder()
-                    .party(RESPONDENT_PARTY)
-                    .date(LocalDateTime.of(2026, 2, 24, 23, 58))
-                    .build())
-                .build()
-        ));
         when(caseDetails.isConsentedApplication()).thenReturn(isConsented);
-        when(caseDetails.getData()).thenReturn(caseData);
 
         // stub mapper
         NotificationRequest mockRequest = mock(NotificationRequest.class);
@@ -143,17 +121,6 @@ class UpdateContactDetailsNotificationServiceTest {
                     SendCorrespondenceEvent::getEmailNotificationRequest,
                     SendCorrespondenceEvent::getNotificationParties)
                 .containsExactly(emailTemplateNames, caseDetails, mockRequest, List.of(notificationParty))
-        );
-    }
-
-    static Stream<Arguments> shouldThrowException_whenLatest_whenLastRepresentationUpdateIsMissing() {
-        return Stream.of(
-            Arguments.of(List.of(
-                RepresentationUpdateHistoryCollection.builder()
-                    .value(RepresentationUpdate.builder().build())
-                    .build()
-            )),
-            Arguments.of(List.of(RepresentationUpdateHistoryCollection.builder().build()))
         );
     }
 
