@@ -108,7 +108,6 @@ public class GlobalSearchMigrationTask extends BaseTask {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
             .size(gsQuerySize)
             .query(shouldQuery)
-            .fetchSource(new String[]{"reference"}, null)
             .sort("reference.keyword", SortOrder.ASC);
 
         if (searchAfter != null) {
