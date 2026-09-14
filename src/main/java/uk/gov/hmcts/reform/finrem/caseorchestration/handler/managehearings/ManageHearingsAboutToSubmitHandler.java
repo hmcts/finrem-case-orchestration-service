@@ -20,7 +20,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 
 @Slf4j
@@ -64,6 +68,11 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
+        List<String> errors = new ArrayList<>(validateRequiredPostalAddresses(finremCaseData,
+            EventType.MANAGE_HEARINGS));
+        if (!errors.isEmpty()) {
+            return responseWithoutWarnings(finremCaseData, errors);
+        }
 
         ManageHearingsWrapper hearingsWrapper = finremCaseData.getManageHearingsWrapper();
         ManageHearingsAction actionSelection = hearingsWrapper.getManageHearingsActionSelection();
