@@ -5,12 +5,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollecti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AccessCodeGeneratorTest {
@@ -62,6 +64,36 @@ class AccessCodeGeneratorTest {
         assertEquals(1, data.getApplicantAccessCodes().size());
         assertEquals(1, data.getRespondentAccessCodes().size());
         assertEquals("ABCDEFGH", data.getApplicantAccessCodes().getFirst().getValue().getAccessCode());
+    }
+
+    @Test
+    void setAccessCode_shouldNotCreateCodesForRepresentedParties() {
+        FinremCaseData data = new FinremCaseData();
+        data.setContactDetailsWrapper(ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.YES)
+            .contestedRespondentRepresented(YesOrNo.YES)
+            .build());
+
+        AccessCodeGenerator.setAccessCode(data);
+
+        assertNull(data.getApplicantAccessCodes());
+        assertNull(data.getRespondentAccessCodes());
+    }
+
+    @Test
+    void setAccessCode_shouldCreateCodeForUnrepresentedPartyInMixedScenario() {
+        FinremCaseData data = new FinremCaseData();
+        data.setContactDetailsWrapper(ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.YES)
+            .contestedRespondentRepresented(YesOrNo.NO)
+            .build());
+
+        AccessCodeGenerator.setAccessCode(data);
+
+        assertNull(data.getApplicantAccessCodes());
+        assertNotNull(data.getRespondentAccessCodes());
+        assertEquals(1, data.getRespondentAccessCodes().size());
+        assertValidEntry(data.getRespondentAccessCodes().getFirst().getValue());
     }
 
     private void assertValidEntry(AccessCodeEntry entry) {
