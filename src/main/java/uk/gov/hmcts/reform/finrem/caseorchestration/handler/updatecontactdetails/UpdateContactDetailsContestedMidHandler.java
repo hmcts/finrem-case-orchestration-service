@@ -16,8 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 
 @Slf4j
 @Service
@@ -49,13 +48,12 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        List<String> errors = new ArrayList<>();
+        LinkedHashSet<String> errors = new LinkedHashSet<>();
         errors.addAll(internationalPostalService.validate(finremCaseData));
         errors.addAll(ContactDetailsValidator.validatePostcodesByRepresentation(caseDetails));
         errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData, validatePartiesService));
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseData));
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).errors(errors).build();
+        return responseWithoutWarnings(finremCaseData, errors.stream().toList());
     }
 }
