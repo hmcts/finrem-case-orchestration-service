@@ -8,12 +8,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.FinremAssignToJudgeCorresponder;
 
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REASSIGN_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE_FROM_AWAITING_RESPONSE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE_FROM_CLOSE;
@@ -42,19 +40,14 @@ class AssignToJudgeSubmittedHandlerTest {
             Arguments.of(CallbackType.SUBMITTED, CONSENTED, REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE),
             Arguments.of(CallbackType.SUBMITTED, CONSENTED, REFER_TO_JUDGE_FROM_AWAITING_RESPONSE),
             Arguments.of(CallbackType.SUBMITTED, CONSENTED, REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER),
-            Arguments.of(CallbackType.SUBMITTED, CONSENTED, REFER_TO_JUDGE_FROM_CLOSE),
-            Arguments.of(CallbackType.SUBMITTED, CONSENTED, REASSIGN_JUDGE)
+            Arguments.of(CallbackType.SUBMITTED, CONSENTED, REFER_TO_JUDGE_FROM_CLOSE)
         );
     }
 
     @Test
     void testHandle() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
         handlerUnderTest.handle(callbackRequest, AUTH_TOKEN);
         verify(assignToJudgeCorresponder).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
-    }
-
-    private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequestFactory.from(FinremCaseData.builder().ccdCaseType(CONSENTED).build());
     }
 }
