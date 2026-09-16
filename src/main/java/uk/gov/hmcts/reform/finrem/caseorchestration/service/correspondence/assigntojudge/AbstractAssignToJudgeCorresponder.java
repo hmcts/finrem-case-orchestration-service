@@ -38,8 +38,8 @@ public abstract class AbstractAssignToJudgeCorresponder extends FinremSingleLett
 
     @Autowired
     protected AbstractAssignToJudgeCorresponder(NotificationService notificationService,
-                                             BulkPrintService bulkPrintService,
-                                             AssignedToJudgeDocumentService assignedToJudgeDocumentService) {
+                                                BulkPrintService bulkPrintService,
+                                                AssignedToJudgeDocumentService assignedToJudgeDocumentService) {
         super(notificationService, bulkPrintService);
         this.assignedToJudgeDocumentService = assignedToJudgeDocumentService;
     }
