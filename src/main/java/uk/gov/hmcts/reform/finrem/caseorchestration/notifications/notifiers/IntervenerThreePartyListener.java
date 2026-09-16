@@ -22,13 +22,13 @@ public class IntervenerThreePartyListener extends AbstractPartyListener {
     }
 
     @Override
-    protected String getNotificationParty() {
-        return IntervenerConstant.INTERVENER_THREE;
+    protected NotificationParty getNotificationPartyEnum() {
+        return NotificationParty.INTERVENER_THREE;
     }
 
     @Override
-    protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.INTERVENER_THREE);
+    protected String getNotificationParty() {
+        return IntervenerConstant.INTERVENER_THREE;
     }
 
     @Override

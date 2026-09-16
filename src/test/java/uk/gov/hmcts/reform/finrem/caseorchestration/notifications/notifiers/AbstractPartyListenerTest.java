@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
@@ -22,9 +23,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -65,6 +68,11 @@ class AbstractPartyListenerTest {
                 AbstractPartyListenerTest.this.emailService,
                 AbstractPartyListenerTest.this.notificationService,
                 AbstractPartyListenerTest.this.internationalPostalService);
+        }
+
+        @Override
+        protected NotificationParty getNotificationPartyEnum() {
+            return NotificationParty.APPLICANT;
         }
 
         @Override
@@ -276,6 +284,7 @@ class AbstractPartyListenerTest {
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
             .emailTemplate(template)
             .emailNotificationRequest(nr)
+            .notificationParties(List.of(NotificationParty.APPLICANT))
             .build();
 
         sendEmailNotificationListener.handleNotification(event);
@@ -299,6 +308,7 @@ class AbstractPartyListenerTest {
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
             .emailTemplate(template)
             .emailNotificationRequest(nr)
+            .notificationParties(List.of(NotificationParty.APPLICANT))
             .build();
 
         sendEmailNotificationWithPartySpecificDetailsListener.handleNotification(event);
@@ -340,6 +350,7 @@ class AbstractPartyListenerTest {
             .authToken(AUTH_TOKEN)
             .caseDetails(caseDetails)
             .documentsToPost(documentsToPost)
+            .notificationParties(List.of(NotificationParty.APPLICANT))
             .build());
         when(event.getCaseDetails()).thenReturn(caseDetails);
         when(event.getCaseId()).thenReturn(TEST_CASE_ID);
@@ -349,6 +360,14 @@ class AbstractPartyListenerTest {
         List<BulkPrintDocument> bpDocs = mock(List.class);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType))
             .thenReturn(bpDocs);
+        UUID letterId = UUID.randomUUID();
+        when(bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+            caseDetails,
+            SendPaperNotificationListener.class.getSimpleName(),
+            bpDocs,
+            isOutsideUK,
+            AUTH_TOKEN
+        )).thenReturn(letterId);
 
         // act
         if (isOutsideUK) {
@@ -383,6 +402,15 @@ class AbstractPartyListenerTest {
         List<CaseDocument> expectedDocuments = buildExpectedDocumentsWithCoversheet(documentsToPost);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType))
             .thenReturn(bpDocs);
+        UUID letterId = UUID.randomUUID();
+
+        when(bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+            caseDetails,
+            EmailOrPaperNotificationListener.class.getSimpleName(),
+            bpDocs,
+            false,
+            AUTH_TOKEN
+        )).thenReturn(letterId);
 
         // act
         emailOrPaperNotificationListener.handleNotification(event);
@@ -420,12 +448,42 @@ class AbstractPartyListenerTest {
             .contains(RECIPIENT_NAME, RECIPIENT_EMAIL, RECIPIENT_REFERENCE);
     }
 
+    @ParameterizedTest
+    @EnumSource(NotificationParty.class)
+    void givenSimulatingEmailNotification_whenHandleNotification_thenEmailIsNotSent(NotificationParty notificationParty) {
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .notificationParties(List.of(notificationParty))
+            .build();
+        event.setSimulatingCorrespondence(true);
+
+        assertDoesNotThrow(() -> sendEmailNotificationListener.handleNotification(event));
+
+        verifyNoEmailSent();
+        verifyNoLetterSent();
+    }
+
+    @ParameterizedTest
+    @EnumSource(NotificationParty.class)
+    void givenSimulatingPaperNotification_whenHandleNotification_thenLetterIsNotSent(NotificationParty notificationParty) {
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .notificationParties(List.of(notificationParty))
+            .build();
+        event.setSimulatingCorrespondence(true);
+
+        assertDoesNotThrow(() -> sendPaperNotificationListener.handleNotification(event));
+
+        verifyNoEmailSent();
+        verifyNoLetterSent();
+    }
+
     private SendCorrespondenceEvent buildEventFOrEmailOrPaperNotificationListener(FinremCaseDetails caseDetails,
                                                                                   CaseType caseType, List<CaseDocument> expectedDocuments) {
         lenient().when(caseDetails.getCaseType()).thenReturn(caseType);
         return spy(SendCorrespondenceEvent.builder()
             .emailTemplate(mock(EmailTemplateNames.class))
             .emailNotificationRequest(NotificationRequest.builder().build())
+            .notificationParties(List.of(NotificationParty.APPLICANT))
             .authToken(AUTH_TOKEN)
             .caseDetails(caseDetails)
             .documentsToPost(expectedDocuments)

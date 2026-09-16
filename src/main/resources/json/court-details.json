@@ -249,7 +249,9 @@
     "courtAddress": "Newbold Terrace, Leamington Spa, CV32 4EL",
     "phoneNumber": "0300 123 5577",
     "email": "FRCNottingham@justice.gov.uk",
-    "emailReplyToId": "5c727fb0-4618-4e78-ab4d-387a2ce0b728"
+    "emailReplyToId": "5c727fb0-4618-4e78-ab4d-387a2ce0b728",
+    "centralFRCCourtAddress": "HMCTS Financial Remedy, PO Box 12746, HARLOW, CM20 9QZ",
+    "centralFRCCourtEmail": "FRCBirmingham@Justice.gov.uk"
   },
   "FR_birmingham_hc_list_12": {
     "courtName": "Wolverhampton Hearing Centre",
