@@ -16,9 +16,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -599,5 +602,58 @@ class DocumentRemovalServiceTest {
             .getFirst().getValue().getApproveOrders().getFirst()
             .getValue().getCaseDocument().getDocumentFilename());
         assertNull(result.getDocumentToKeepCollection());
+    }
+
+    @Test
+    void shouldRemoveDocumentWithoutRemovingGeneralApplicationCollectionElement() {
+        String documentUrl = "https://example.com/123";
+
+        CaseDocument document = CaseDocument.builder()
+            .documentUrl(documentUrl)
+            .documentFilename("document-to-delete.pdf")
+            .documentBinaryUrl("https://example.com/binary/123")
+            .build();
+
+        GeneralApplication generalApplication = GeneralApplication.builder()
+            .generalApplicationDocument(document)
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .generalApplicationWrapper(
+                GeneralApplicationWrapper.builder()
+                    .generalApplicationDocumentCollection(
+                        List.of(
+                            GeneralApplicationCollection.builder()
+                                .value(generalApplication)
+                                .build()
+                        )
+                    )
+                    .build()
+            )
+            .build();
+
+        FinremCaseData result =
+            documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
+
+        assertNotNull(result);
+        assertNotNull(
+            result.getGeneralApplicationWrapper()
+                .getGeneralApplicationDocumentCollection()
+        );
+
+        assertEquals(
+            1,
+            result.getGeneralApplicationWrapper()
+                .getGeneralApplicationDocumentCollection()
+                .size()
+        );
+
+        assertNull(
+            result.getGeneralApplicationWrapper()
+                .getGeneralApplicationDocumentCollection()
+                .getFirst()
+                .getValue()
+                .getGeneralApplicationDocument()
+        );
     }
 }
