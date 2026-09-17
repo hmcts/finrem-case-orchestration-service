@@ -63,6 +63,7 @@ public class NotificationRequestBuilder {
     private String vacatedHearingDateTime;
     private String vacatedHearingType;
     private String dateOfIssue;
+    private String timeOfSubmission;
 
     /**
      * Sets default values for the NotificationRequestBuilder based on the provided case details.
@@ -223,6 +224,7 @@ public class NotificationRequestBuilder {
         notificationRequest.setVacatedHearingDateTime(vacatedHearingDateTime);
         notificationRequest.setVacatedHearingType(vacatedHearingType);
         notificationRequest.setDateOfIssue(dateOfIssue);
+        notificationRequest.setTimeOfSubmission(timeOfSubmission);
 
         return notificationRequest;
     }
@@ -384,6 +386,11 @@ public class NotificationRequestBuilder {
 
     public NotificationRequestBuilder dateOfIssue(String dateOfIssue) {
         this.dateOfIssue = dateOfIssue;
+        return this;
+    }
+
+    public NotificationRequestBuilder timeOfSubmission(String timeOfSubmission) {
+        this.timeOfSubmission = timeOfSubmission;
         return this;
     }
 }

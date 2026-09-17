@@ -194,6 +194,7 @@ public class EmailService {
         }
         if (EmailTemplateNames.FR_CUI_DOCUMENTS_UPLOADED.name().equals(templateName)) {
             templateVars.put("timeOfSubmission", notificationRequest.getTimeOfSubmission());
+            templateVars.putIfAbsent("courtName", "");
             String courtName = (String) templateVars.get("courtName");
             templateVars.put("hasCourtName", StringUtils.isNotBlank(courtName));
         }
