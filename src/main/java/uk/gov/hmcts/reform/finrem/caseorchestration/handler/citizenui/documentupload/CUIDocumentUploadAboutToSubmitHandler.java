@@ -14,12 +14,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentUploadCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentsUploadedCorresponder;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
@@ -49,14 +48,14 @@ import static java.util.Optional.ofNullable;
 public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
-    private final CUIDocumentUploadCorresponder cuiDocumentUploadCorresponder;
+    private final CUIDocumentsUploadedCorresponder cuiDocumentsUploadedCorresponder;
 
     protected CUIDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
-                                                    CUIDocumentUploadCorresponder cuiDocumentUploadCorresponder) {
+                                                    CUIDocumentsUploadedCorresponder cuiDocumentsUploadedCorresponder) {
         super(finremCaseDetailsMapper);
         this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
-        this.cuiDocumentUploadCorresponder = cuiDocumentUploadCorresponder;
+        this.cuiDocumentsUploadedCorresponder = cuiDocumentsUploadedCorresponder;
     }
 
     /**
@@ -120,9 +119,10 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
         );
     }
 
-    private Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
-                                                                            String userAuthorisation) {
-        return cuiDocumentUploadCorresponder.buildCorrespondenceEventIfNeeded(
+    private SendCorrespondenceEvent buildSendCorrespondenceEvent(
+        FinremCallbackRequest callbackRequest,
+        String userAuthorisation) {
+        return cuiDocumentsUploadedCorresponder.buildCorrespondenceEvent(
             callbackRequest.getCaseDetails(),
             userAuthorisation,
             notificationParty()

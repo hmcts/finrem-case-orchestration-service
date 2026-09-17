@@ -10,25 +10,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentUploadCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
-
-import java.util.Optional;
 
 @Slf4j
 public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedCallbackHandler {
 
-    private final CUIDocumentUploadCorresponder cuiDocumentUploadCorresponder;
+    private final CUIDocumentsUploadedCorresponder cuiDocumentsUploadedCorresponder;
     private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     protected CUIDocumentUploadSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                 EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                 RetryExecutor retryExecutor,
-                                                CUIDocumentUploadCorresponder cuiDocumentUploadCorresponder,
+                                                CUIDocumentsUploadedCorresponder cuiDocumentsUploadedCorresponder,
                                                 CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
-        this.cuiDocumentUploadCorresponder = cuiDocumentUploadCorresponder;
+        this.cuiDocumentsUploadedCorresponder = cuiDocumentsUploadedCorresponder;
         this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
     }
 
@@ -38,16 +36,7 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
         final String caseId = callbackRequest.getCaseDetails().getCaseIdAsString();
-        Optional<SendCorrespondenceEvent> optionalEvent = buildSendCorrespondenceEvent(
-            callbackRequest, userAuthorisation
-        );
-
-        if (optionalEvent.isEmpty()) {
-            logMissingNotificationEvent(caseId, callbackRequest.getEventType().getCcdType());
-            return submittedResponse();
-        }
-
-        SendCorrespondenceEvent event = optionalEvent.get();
+        SendCorrespondenceEvent event = buildSendCorrespondenceEvent(callbackRequest, userAuthorisation);
         event.setEventId(callbackRequest.getEventType().getCcdType());
         event.setNotificationTrackerId(callbackRequest.getCaseDetails().getData().getNotificationAuditWrapper().getNotificationEventId());
 
@@ -66,21 +55,12 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
         return submittedResponse();
     }
 
-    private Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
-                                                                            String userAuthorisation) {
-        return cuiDocumentUploadCorresponder.buildCorrespondenceEventIfNeeded(
+    private SendCorrespondenceEvent buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
+                                                                  String userAuthorisation) {
+        return cuiDocumentsUploadedCorresponder.buildCorrespondenceEvent(
             callbackRequest.getCaseDetails(),
             userAuthorisation,
             notificationParty()
-        );
-    }
-
-    private void logMissingNotificationEvent(String caseId, String eventId) {
-        log.warn(
-            "{} - Citizen documents uploaded email not published because notification event could not be built. eventId: {}, party: {}",
-            caseId,
-            eventId,
-            getNotificationPartyLabel()
         );
     }
 

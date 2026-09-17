@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
@@ -35,15 +34,13 @@ public class CorrespondenceEventAuditOrchestrationService {
     private final CoreCaseDataService coreCaseDataService;
 
     /**
-     * Creates pending notification audit rows when a correspondence event is available.
+     * Creates pending notification audit rows for a correspondence event.
      *
-     * @param event optional correspondence event
+     * @param event correspondence event
      * @param eventType callback event type used for audit metadata
      */
-    public void createPendingAudits(Optional<SendCorrespondenceEvent> event, EventType eventType) {
-        event.ifPresent(sendCorrespondenceEvent ->
-            notificationAuditService.createAuditsForCorrespondence(sendCorrespondenceEvent, eventType)
-        );
+    public void createPendingAudits(SendCorrespondenceEvent event, EventType eventType) {
+        notificationAuditService.createAuditsForCorrespondence(event, eventType);
     }
 
     /**

@@ -15,7 +15,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CUI_DOCUMENTS_UPLOADED;
@@ -27,25 +26,21 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
  * {@link FinremCaseDetails} using the supplied {@link NotificationParty}.</p>
  */
 @Service
-public class CUIDocumentUploadCorresponder {
+public class CUIDocumentsUploadedCorresponder {
 
     private static final DateTimeFormatter TIME_OF_SUBMISSION_FORMAT = DateTimeFormatter.ofPattern("h:mma 'on' dd/MM/yyyy");
 
     /**
-     * Builds a correspondence event for a CUI document upload when a recipient email exists.
+     * Builds a correspondence event for a CUI document upload.
      *
      * @param caseDetails finrem case details
      * @param authToken authorization token used by notification listeners
      * @param notificationParty target citizen party to notify
-     * @return populated event when recipient email exists; otherwise empty
+     * @return populated correspondence event
      */
-    public Optional<SendCorrespondenceEvent> buildCorrespondenceEventIfNeeded(FinremCaseDetails caseDetails,
-                                                                               String authToken,
-                                                                               NotificationParty notificationParty) {
-        if (!hasRecipientEmail(caseDetails, notificationParty)) {
-            return Optional.empty();
-        }
-
+    public SendCorrespondenceEvent buildCorrespondenceEvent(FinremCaseDetails caseDetails,
+                                                             String authToken,
+                                                             NotificationParty notificationParty) {
         NotificationRequest notificationRequest = NotificationRequest.builder()
             .caseReferenceNumber(caseDetails.getCaseIdAsString())
             .caseType(CaseType.CONTESTED.name().toLowerCase())
@@ -54,23 +49,13 @@ public class CUIDocumentUploadCorresponder {
             .timeOfSubmission(getCitizenUploadTime())
             .build();
 
-        return Optional.of(SendCorrespondenceEvent.builder()
+        return SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
             .authToken(authToken)
             .emailTemplate(FR_CUI_DOCUMENTS_UPLOADED)
             .emailNotificationRequest(notificationRequest)
             .notificationParties(List.of(notificationParty))
-            .build());
-    }
-
-    private boolean hasRecipientEmail(FinremCaseDetails caseDetails, NotificationParty notificationParty) {
-        String recipientEmail = switch (notificationParty) {
-            case CITIZEN_APPLICANT -> caseDetails.getData().getContactDetailsWrapper().getApplicantEmail();
-            case CITIZEN_RESPONDENT -> caseDetails.getData().getContactDetailsWrapper().getRespondentEmail();
-            default -> throw new IllegalStateException("Unsupported notification party: " + notificationParty);
-        };
-
-        return StringUtils.hasText(recipientEmail);
+            .build();
     }
 
     private String getCitizenUploadCourtName(FinremCaseDetails caseDetails) {

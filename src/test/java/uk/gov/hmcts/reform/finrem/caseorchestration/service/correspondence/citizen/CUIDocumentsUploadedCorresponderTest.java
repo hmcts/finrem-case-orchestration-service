@@ -7,56 +7,39 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CUIDocumentUploadCorresponderTest {
+class CUIDocumentsUploadedCorresponderTest {
 
-    private final CUIDocumentUploadCorresponder underTest = new CUIDocumentUploadCorresponder();
+    private final CUIDocumentsUploadedCorresponder underTest = new CUIDocumentsUploadedCorresponder();
 
     @Test
     void shouldBuildEventForCitizenApplicantWhenEmailPresent() {
         FinremCaseDetails caseDetails = caseDetails("applicant@example.com", "respondent@example.com");
 
-        Optional<SendCorrespondenceEvent> event = underTest.buildCorrespondenceEventIfNeeded(
+        SendCorrespondenceEvent event = underTest.buildCorrespondenceEvent(
             caseDetails,
             "auth",
             NotificationParty.CITIZEN_APPLICANT
         );
 
-        assertThat(event).isPresent();
-        assertThat(event.get().getNotificationParties()).containsExactly(NotificationParty.CITIZEN_APPLICANT);
-        assertThat(event.get().getEmailNotificationRequest().getCaseReferenceNumber()).isEqualTo("12345");
-        assertThat(event.get().getEmailNotificationRequest().getNotificationEmail()).isNull();
+        assertThat(event.getNotificationParties()).containsExactly(NotificationParty.CITIZEN_APPLICANT);
+        assertThat(event.getEmailNotificationRequest().getCaseReferenceNumber()).isEqualTo("12345");
+        assertThat(event.getEmailNotificationRequest().getNotificationEmail()).isNull();
     }
 
     @Test
     void shouldBuildEventForCitizenRespondentWhenEmailPresent() {
         FinremCaseDetails caseDetails = caseDetails("applicant@example.com", "respondent@example.com");
 
-        Optional<SendCorrespondenceEvent> event = underTest.buildCorrespondenceEventIfNeeded(
+        SendCorrespondenceEvent event = underTest.buildCorrespondenceEvent(
             caseDetails,
             "auth",
             NotificationParty.CITIZEN_RESPONDENT
         );
 
-        assertThat(event).isPresent();
-        assertThat(event.get().getNotificationParties()).containsExactly(NotificationParty.CITIZEN_RESPONDENT);
-        assertThat(event.get().getEmailNotificationRequest().getNotificationEmail()).isNull();
-    }
-
-    @Test
-    void shouldReturnEmptyWhenCitizenApplicantEmailMissing() {
-        FinremCaseDetails caseDetails = caseDetails("", "respondent@example.com");
-
-        Optional<SendCorrespondenceEvent> event = underTest.buildCorrespondenceEventIfNeeded(
-            caseDetails,
-            "auth",
-            NotificationParty.CITIZEN_APPLICANT
-        );
-
-        assertThat(event).isEmpty();
+        assertThat(event.getNotificationParties()).containsExactly(NotificationParty.CITIZEN_RESPONDENT);
+        assertThat(event.getEmailNotificationRequest().getNotificationEmail()).isNull();
     }
 
     private FinremCaseDetails caseDetails(String applicantEmail, String respondentEmail) {

@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentUploadCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -32,7 +32,7 @@ class CUIRespondentDocumentUploadSubmittedHandlerTest {
     private CUIRespondentDocumentUploadSubmittedHandler underTest;
 
     @Mock
-    private CUIDocumentUploadCorresponder cuiDocumentUploadCorresponder;
+    private CUIDocumentsUploadedCorresponder cuiDocumentsUploadedCorresponder;
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
@@ -67,21 +67,21 @@ class CUIRespondentDocumentUploadSubmittedHandlerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(cuiDocumentUploadCorresponder.buildCorrespondenceEventIfNeeded(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT))
-            .thenReturn(java.util.Optional.of(event));
+        when(cuiDocumentsUploadedCorresponder.buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT))
+            .thenReturn(event);
         when(correspondenceEventAuditOrchestrationService.publishEvent(any(), anyString()))
             .thenReturn(true);
         
         underTest.handle(callbackRequest, "auth");
 
-        verify(cuiDocumentUploadCorresponder).buildCorrespondenceEventIfNeeded(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT);
+        verify(cuiDocumentsUploadedCorresponder).buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT);
         verify(correspondenceEventAuditOrchestrationService).publishEvent(any(), anyString());
         verify(correspondenceEventAuditOrchestrationService)
             .reconcileAndPersistAudits(caseDetails, event, "markPendingNotificationsAsSent");
     }
 
     @Test
-    void shouldSkipWhenNoRespondentEmailEventBuilt() {
+    void shouldNotReconcileWhenPublishFails() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .id(12345L)
             .data(new uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData())
@@ -92,12 +92,20 @@ class CUIRespondentDocumentUploadSubmittedHandlerTest {
             .eventType(EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD)
             .build();
 
-        when(cuiDocumentUploadCorresponder.buildCorrespondenceEventIfNeeded(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT))
-            .thenReturn(java.util.Optional.empty());
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        when(cuiDocumentsUploadedCorresponder.buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT))
+            .thenReturn(event);
+        when(correspondenceEventAuditOrchestrationService.publishEvent(any(), anyString()))
+            .thenReturn(false);
 
         underTest.handle(callbackRequest, "auth");
 
-        verify(cuiDocumentUploadCorresponder).buildCorrespondenceEventIfNeeded(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT);
-        verify(correspondenceEventAuditOrchestrationService, never()).publishEvent(any(), anyString());
+        verify(cuiDocumentsUploadedCorresponder).buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT);
+        verify(correspondenceEventAuditOrchestrationService).publishEvent(any(), anyString());
+        verify(correspondenceEventAuditOrchestrationService, never())
+            .reconcileAndPersistAudits(any(), any(), anyString());
     }
 }
