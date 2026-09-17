@@ -12,7 +12,7 @@ properties([
         ])
 ])
 
-@Library("Infrastructure")
+@Library("Infrastructure@2.5.1")
 
 def type = "java"
 def product = "finrem"
@@ -28,4 +28,6 @@ withNightlyPipeline(type, product, component) {
     afterSuccess('fortify-scan') {
         steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
     }
+
+    enableSlackNotifications('#finrem-dev')
 }
