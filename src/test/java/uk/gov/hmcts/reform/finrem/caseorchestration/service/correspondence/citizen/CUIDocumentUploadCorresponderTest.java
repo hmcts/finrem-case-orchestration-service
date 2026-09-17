@@ -27,8 +27,8 @@ class CUIDocumentUploadCorresponderTest {
 
         assertThat(event).isPresent();
         assertThat(event.get().getNotificationParties()).containsExactly(NotificationParty.CITIZEN_APPLICANT);
-        assertThat(event.get().getEmailNotificationRequest().getNotificationEmail()).isEqualTo("applicant@example.com");
         assertThat(event.get().getEmailNotificationRequest().getCaseReferenceNumber()).isEqualTo("12345");
+        assertThat(event.get().getEmailNotificationRequest().getNotificationEmail()).isNull();
     }
 
     @Test
@@ -43,7 +43,7 @@ class CUIDocumentUploadCorresponderTest {
 
         assertThat(event).isPresent();
         assertThat(event.get().getNotificationParties()).containsExactly(NotificationParty.CITIZEN_RESPONDENT);
-        assertThat(event.get().getEmailNotificationRequest().getNotificationEmail()).isEqualTo("respondent@example.com");
+        assertThat(event.get().getEmailNotificationRequest().getNotificationEmail()).isNull();
     }
 
     @Test

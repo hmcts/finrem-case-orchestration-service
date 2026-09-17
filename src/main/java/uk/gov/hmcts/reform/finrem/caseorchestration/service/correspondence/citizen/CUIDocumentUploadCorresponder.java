@@ -42,16 +42,12 @@ public class CUIDocumentUploadCorresponder {
     public Optional<SendCorrespondenceEvent> buildCorrespondenceEventIfNeeded(FinremCaseDetails caseDetails,
                                                                                String authToken,
                                                                                NotificationParty notificationParty) {
-        Recipient recipient = getRecipient(caseDetails, notificationParty);
-
-        if (!StringUtils.hasText(recipient.email())) {
+        if (!hasRecipientEmail(caseDetails, notificationParty)) {
             return Optional.empty();
         }
 
         NotificationRequest notificationRequest = NotificationRequest.builder()
             .caseReferenceNumber(caseDetails.getCaseIdAsString())
-            .name(recipient.name())
-            .notificationEmail(recipient.email())
             .caseType(CaseType.CONTESTED.name().toLowerCase())
             .contactCourtName(getCitizenUploadCourtName(caseDetails))
             .contactCourtEmail(getCitizenUploadCourtEmail(caseDetails))
@@ -67,18 +63,14 @@ public class CUIDocumentUploadCorresponder {
             .build());
     }
 
-    private Recipient getRecipient(FinremCaseDetails caseDetails, NotificationParty notificationParty) {
-        return switch (notificationParty) {
-            case CITIZEN_APPLICANT -> new Recipient(
-                caseDetails.getData().getFullApplicantName(),
-                caseDetails.getData().getContactDetailsWrapper().getApplicantEmail()
-            );
-            case CITIZEN_RESPONDENT -> new Recipient(
-                caseDetails.getData().getRespondentFullName(),
-                caseDetails.getData().getContactDetailsWrapper().getRespondentEmail()
-            );
+    private boolean hasRecipientEmail(FinremCaseDetails caseDetails, NotificationParty notificationParty) {
+        String recipientEmail = switch (notificationParty) {
+            case CITIZEN_APPLICANT -> caseDetails.getData().getContactDetailsWrapper().getApplicantEmail();
+            case CITIZEN_RESPONDENT -> caseDetails.getData().getContactDetailsWrapper().getRespondentEmail();
             default -> throw new IllegalStateException("Unsupported notification party: " + notificationParty);
         };
+
+        return StringUtils.hasText(recipientEmail);
     }
 
     private String getCitizenUploadCourtName(FinremCaseDetails caseDetails) {
@@ -105,8 +97,5 @@ public class CUIDocumentUploadCorresponder {
 
     private String getCitizenUploadTime() {
         return TIME_OF_SUBMISSION_FORMAT.format(ZonedDateTime.now(ZoneId.of("Europe/London"))).toLowerCase();
-    }
-
-    private record Recipient(String name, String email) {
     }
 }
