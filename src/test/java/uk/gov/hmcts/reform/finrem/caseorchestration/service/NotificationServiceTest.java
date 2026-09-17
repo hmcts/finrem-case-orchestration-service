@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.CUIDocumentUploadNotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.CUINotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -47,6 +47,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
@@ -55,6 +57,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -150,7 +153,7 @@ class NotificationServiceTest {
     @Mock
     private FeatureToggleService featureToggleService;
     @Mock
-    private CUIDocumentUploadNotificationRequestMapper cuiDocumentUploadNotificationRequestMapper;
+    private CUINotificationRequestMapper cuiNotificationRequestMapper;
     @Mock
     private NotificationRequestMapper notificationRequestMapper;
     @Mock
@@ -244,61 +247,57 @@ class NotificationServiceTest {
     }
 
     @Test
-    void shouldSendCitizenApplicantUploadDocumentsNotification() {
+    void shouldBuildCitizenApplicantUploadDocumentsNotificationEvent() {
         FinremCaseDetails finremCaseDetails = getContestedNewCallbackRequest().getCaseDetails();
-        finremCaseDetails.getData().getContactDetailsWrapper().setApplicantEmail(TEST_USER_EMAIL);
-        finremCaseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcName("Nottingham FRC");
-        finremCaseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcEmail("frc@justice.gov.uk");
-        finremCaseDetails.getData().setManageHearingsWrapper(ManageHearingsWrapper.builder()
-            .hearings(List.of(ManageHearingsCollectionItem.builder()
-                .value(Hearing.builder().hearingMode(HearingMode.IN_PERSON).build())
-                .build()))
-            .build());
+        NotificationRequest expectedNotificationRequest = NotificationRequest.builder().build();
+        when(cuiNotificationRequestMapper.build(finremCaseDetails, NotificationParty.CUI_APPLICANT))
+            .thenReturn(java.util.Optional.of(expectedNotificationRequest));
 
-        NotificationRequest expectedNotificationRequest = NotificationRequest.builder()
-            .caseReferenceNumber("12345")
-            .name("Victoria Goodman")
-            .notificationEmail(TEST_USER_EMAIL)
-            .contactCourtName("Nottingham FRC")
-            .contactCourtEmail("frc@justice.gov.uk")
-            .timeOfSubmission("3:45pm on 01/01/2026")
-            .build();
-        when(cuiDocumentUploadNotificationRequestMapper.build(finremCaseDetails, TEST_USER_EMAIL, "Victoria Goodman"))
-            .thenReturn(expectedNotificationRequest);
+        Optional<SendCorrespondenceEvent> event = notificationService.buildCitizenUploadDocumentsNotificationEvent(
+            finremCaseDetails,
+            AUTH_TOKEN,
+            NotificationParty.CUI_APPLICANT
+        );
 
-        notificationService.sendCitizenApplicantDocumentsUploadedNotification(finremCaseDetails);
-
-        verify(cuiDocumentUploadNotificationRequestMapper).build(finremCaseDetails, TEST_USER_EMAIL, "Victoria Goodman");
-        verify(emailService).sendConfirmationEmail(expectedNotificationRequest, FR_CUI_DOCUMENTS_UPLOADED);
+        assertThat(event).isPresent();
+        assertThat(event.get().getEmailNotificationRequest()).isEqualTo(expectedNotificationRequest);
+        assertThat(event.get().getNotificationParties()).containsExactly(NotificationParty.CUI_APPLICANT);
+        verify(cuiNotificationRequestMapper).build(finremCaseDetails, NotificationParty.CUI_APPLICANT);
     }
 
     @Test
-    void shouldSendCitizenRespondentUploadDocumentsNotificationWithoutCourtNameWhenHearingNotInPerson() {
+    void shouldBuildCitizenRespondentUploadDocumentsNotificationEvent() {
         FinremCaseDetails finremCaseDetails = getContestedNewCallbackRequest().getCaseDetails();
-        finremCaseDetails.getData().getContactDetailsWrapper().setRespondentEmail("respondent@email.com");
-        finremCaseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcName("Nottingham FRC");
-        finremCaseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcEmail("frc@justice.gov.uk");
-        finremCaseDetails.getData().setManageHearingsWrapper(ManageHearingsWrapper.builder()
-            .hearings(List.of(ManageHearingsCollectionItem.builder()
-                .value(Hearing.builder().hearingMode(HearingMode.VIDEO_CALL).build())
-                .build()))
-            .build());
+        NotificationRequest expectedNotificationRequest = NotificationRequest.builder().build();
+        when(cuiNotificationRequestMapper.build(finremCaseDetails, NotificationParty.CUI_RESPONDENT))
+            .thenReturn(java.util.Optional.of(expectedNotificationRequest));
 
-        NotificationRequest expectedNotificationRequest = NotificationRequest.builder()
-            .caseReferenceNumber("12345")
-            .name("David Goodman")
-            .notificationEmail("respondent@email.com")
-            .contactCourtName("")
-            .contactCourtEmail("frc@justice.gov.uk")
-            .timeOfSubmission("3:45pm on 01/01/2026")
-            .build();
-        when(cuiDocumentUploadNotificationRequestMapper.build(finremCaseDetails, "respondent@email.com", "David Goodman"))
-            .thenReturn(expectedNotificationRequest);
+        Optional<SendCorrespondenceEvent> event = notificationService.buildCitizenUploadDocumentsNotificationEvent(
+            finremCaseDetails,
+            AUTH_TOKEN,
+            NotificationParty.CUI_RESPONDENT
+        );
 
-        notificationService.sendCitizenRespondentDocumentsUploadedNotification(finremCaseDetails);
+        assertThat(event).isPresent();
+        assertThat(event.get().getEmailNotificationRequest()).isEqualTo(expectedNotificationRequest);
+        assertThat(event.get().getNotificationParties()).containsExactly(NotificationParty.CUI_RESPONDENT);
+        verify(cuiNotificationRequestMapper).build(finremCaseDetails, NotificationParty.CUI_RESPONDENT);
+    }
 
-        verify(cuiDocumentUploadNotificationRequestMapper).build(finremCaseDetails, "respondent@email.com", "David Goodman");
-        verify(emailService).sendConfirmationEmail(expectedNotificationRequest, FR_CUI_DOCUMENTS_UPLOADED);
+    @Test
+    void shouldReturnEmptyCitizenUploadDocumentsNotificationEventWhenNoRecipient() {
+        FinremCaseDetails finremCaseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        when(cuiNotificationRequestMapper.build(finremCaseDetails, NotificationParty.CUI_APPLICANT))
+            .thenReturn(java.util.Optional.empty());
+
+        Optional<SendCorrespondenceEvent> event = notificationService.buildCitizenUploadDocumentsNotificationEvent(
+            finremCaseDetails,
+            AUTH_TOKEN,
+            NotificationParty.CUI_APPLICANT
+        );
+
+        assertThat(event).isEmpty();
+        verify(cuiNotificationRequestMapper).build(finremCaseDetails, NotificationParty.CUI_APPLICANT);
     }
 
     @Test

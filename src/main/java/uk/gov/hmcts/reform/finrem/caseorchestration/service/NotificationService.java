@@ -7,11 +7,10 @@ import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.CUIDocumentUploadNotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.CUINotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
@@ -103,7 +102,7 @@ public class NotificationService {
     private static final String CUI_UPLOAD_NOTIFICATION_LOG =
         "Received request for notification email for citizen uploaded documents. Case ID : {}";
     private final FeatureToggleService featureToggleService;
-    private final CUIDocumentUploadNotificationRequestMapper cuiDocumentUploadNotificationRequestMapper;
+    private final CUINotificationRequestMapper cuiNotificationRequestMapper;
     private final NotificationRequestMapper notificationRequestMapper;
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
     private final CaseDataService caseDataService;
@@ -1165,81 +1164,19 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_INTERVENER_SOLICITOR_REMOVED_EMAIL);
     }
 
-    public void sendCitizenApplicantDocumentsUploadedNotification(FinremCaseDetails caseDetails) {
-        log.info("Received request for citizen applicant uploaded documents email. Case ID : {}", caseDetails.getCaseIdAsString());
-
-        sendCitizenUploadDocumentsNotification(
-            caseDetails,
-            caseDetails.getData().getContactDetailsWrapper().getApplicantEmail(),
-            caseDetails.getData().getFullApplicantName()
-        );
-    }
-
-    public Optional<SendCorrespondenceEvent> buildCitizenApplicantUploadDocumentsNotificationEvent(FinremCaseDetails caseDetails,
-                                                                                                    String authToken) {
-        return buildCitizenUploadDocumentsNotificationEvent(
-            caseDetails,
-            authToken,
-            caseDetails.getData().getContactDetailsWrapper().getApplicantEmail(),
-            caseDetails.getData().getFullApplicantName(),
-            NotificationParty.CUI_APPLICANT
-        );
-    }
-
-    public void sendCitizenRespondentDocumentsUploadedNotification(FinremCaseDetails caseDetails) {
-        log.info("Received request for citizen respondent uploaded documents email. Case ID : {}", caseDetails.getCaseIdAsString());
-
-        sendCitizenUploadDocumentsNotification(
-            caseDetails,
-            caseDetails.getData().getContactDetailsWrapper().getRespondentEmail(),
-            caseDetails.getData().getRespondentFullName()
-        );
-    }
-
-    public Optional<SendCorrespondenceEvent> buildCitizenRespondentDocumentsUploadedNotificationEvent(FinremCaseDetails caseDetails,
-                                                                                                     String authToken) {
-        return buildCitizenUploadDocumentsNotificationEvent(
-            caseDetails,
-            authToken,
-            caseDetails.getData().getContactDetailsWrapper().getRespondentEmail(),
-            caseDetails.getData().getRespondentFullName(),
-            NotificationParty.CUI_RESPONDENT
-        );
-    }
-
-    private void sendCitizenUploadDocumentsNotification(FinremCaseDetails caseDetails, String recipientEmail, String partyName) {
-        if (!StringUtils.hasText(recipientEmail)) {
-            log.warn("Unable to send citizen uploaded documents notification as recipient email is blank. Case ID : {}",
-                caseDetails.getCaseIdAsString());
-            return;
-        }
-
-        NotificationRequest notificationRequest =
-            cuiDocumentUploadNotificationRequestMapper.build(caseDetails, recipientEmail, partyName);
-
-        log.info(CUI_UPLOAD_NOTIFICATION_LOG, notificationRequest.getCaseReferenceNumber());
-        emailService.sendConfirmationEmail(notificationRequest, FR_CUI_DOCUMENTS_UPLOADED);
-    }
-
-    private Optional<SendCorrespondenceEvent> buildCitizenUploadDocumentsNotificationEvent(FinremCaseDetails caseDetails,
-                                                                                            String authToken,
-                                                                                            String recipientEmail,
-                                                                                            String partyName,
-                                                                                            NotificationParty notificationParty) {
-        if (!StringUtils.hasText(recipientEmail)) {
-            return Optional.empty();
-        }
-
-        NotificationRequest notificationRequest =
-            cuiDocumentUploadNotificationRequestMapper.build(caseDetails, recipientEmail, partyName);
-
-        return Optional.of(SendCorrespondenceEvent.builder()
-            .caseDetails(caseDetails)
-            .authToken(authToken)
-            .emailTemplate(FR_CUI_DOCUMENTS_UPLOADED)
-            .emailNotificationRequest(notificationRequest)
-            .notificationParties(List.of(notificationParty))
-            .build());
+    public Optional<SendCorrespondenceEvent> buildCitizenUploadDocumentsNotificationEvent(
+        FinremCaseDetails caseDetails,
+        String authToken,
+        NotificationParty notificationParty)
+    {
+        return cuiNotificationRequestMapper.build(caseDetails, notificationParty)
+            .map(notificationRequest -> SendCorrespondenceEvent.builder()
+                .caseDetails(caseDetails)
+                .authToken(authToken)
+                .emailTemplate(FR_CUI_DOCUMENTS_UPLOADED)
+                .emailNotificationRequest(notificationRequest)
+                .notificationParties(List.of(notificationParty))
+                .build());
     }
 
     private void sendNotificationEmail(NotificationRequest notificationRequest, EmailTemplateNames emailTemplateName) {

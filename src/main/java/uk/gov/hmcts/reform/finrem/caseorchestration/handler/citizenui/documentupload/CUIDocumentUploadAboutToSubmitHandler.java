@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -119,8 +120,14 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
         );
     }
 
-    protected abstract Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
-                                                                                       String userAuthorisation);
+    private Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
+                                                                            String userAuthorisation) {
+        return notificationService.buildCitizenUploadDocumentsNotificationEvent(
+            callbackRequest.getCaseDetails(),
+            userAuthorisation,
+            notificationParty()
+        );
+    }
 
     /**
      * Determines whether this handler can process the callback.
@@ -178,6 +185,8 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
         FinremCaseData caseData,
         List<CitizenDocumentCollection> documents
     );
+
+    protected abstract NotificationParty notificationParty();
 
     protected abstract void handleLog(FinremCallbackRequest callbackRequest);
 

@@ -8,14 +8,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Handler for Applicant CUI document upload events.
@@ -89,12 +88,8 @@ public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentU
     }
 
     @Override
-    protected Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        return notificationService.buildCitizenApplicantUploadDocumentsNotificationEvent(
-            callbackRequest.getCaseDetails(),
-            userAuthorisation
-        );
+    protected NotificationParty notificationParty() {
+        return NotificationParty.CUI_APPLICANT;
     }
 
 }

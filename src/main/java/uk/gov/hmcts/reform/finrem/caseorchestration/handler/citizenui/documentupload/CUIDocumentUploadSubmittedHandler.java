@@ -72,18 +72,12 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
     }
 
     private Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
-                                                                           String userAuthorisation) {
-        return switch (notificationParty()) {
-            case CUI_APPLICANT -> notificationService.buildCitizenApplicantUploadDocumentsNotificationEvent(
-                callbackRequest.getCaseDetails(),
-                userAuthorisation
-            );
-            case CUI_RESPONDENT -> notificationService.buildCitizenRespondentDocumentsUploadedNotificationEvent(
-                callbackRequest.getCaseDetails(),
-                userAuthorisation
-            );
-            default -> throw new IllegalStateException("Unsupported notification party: " + notificationParty());
-        };
+                                                                            String userAuthorisation) {
+        return notificationService.buildCitizenUploadDocumentsNotificationEvent(
+            callbackRequest.getCaseDetails(),
+            userAuthorisation,
+            notificationParty()
+        );
     }
 
     private String noRecipientWarningMessage() {
