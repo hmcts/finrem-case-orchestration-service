@@ -14,17 +14,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentUploadCorresponder;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 class CUIDocumentUploadAboutToSubmitHandlerTest {
@@ -128,19 +131,21 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
         FeatureToggleService featureToggleService = mock(FeatureToggleService.class);
         CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService =
             mock(CorrespondenceEventAuditOrchestrationService.class);
-        NotificationService notificationService = mock(NotificationService.class);
+        CUIDocumentUploadCorresponder cuiDocumentUploadCorresponder = mock(CUIDocumentUploadCorresponder.class);
+        when(cuiDocumentUploadCorresponder.buildCorrespondenceEventIfNeeded(any(), anyString(), any()))
+            .thenReturn(Optional.empty());
 
         return Stream.of(
             new HandlerCase(
                 new CUIApplicantDocumentUploadAboutToSubmitHandler(mapper, featureToggleService,
-                    correspondenceEventAuditOrchestrationService, notificationService),
+                    correspondenceEventAuditOrchestrationService, cuiDocumentUploadCorresponder),
                 EventType.CUI_APPLICANT_DOCUMENT_UPLOAD,
                 Party.APPLICANT,
                 correspondenceEventAuditOrchestrationService
             ),
             new HandlerCase(
                 new CUIRespondentDocumentUploadAboutToSubmitHandler(mapper, featureToggleService,
-                    correspondenceEventAuditOrchestrationService, notificationService),
+                    correspondenceEventAuditOrchestrationService, cuiDocumentUploadCorresponder),
                 EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD,
                 Party.RESPONDENT,
                 correspondenceEventAuditOrchestrationService

@@ -7,18 +7,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Component
-public class CUIApplicantListener extends EmailNotificationOnlyListener {
+public class CitizenApplicantPartyListener extends EmailNotificationOnlyListener {
 
-    public CUIApplicantListener(BulkPrintService bulkPrintService,
-                                EmailService emailService,
-                                NotificationService notificationService,
-                                InternationalPostalService internationalPostalService) {
+    public CitizenApplicantPartyListener(BulkPrintService bulkPrintService,
+                                         EmailService emailService,
+                                         NotificationService notificationService,
+                                         InternationalPostalService internationalPostalService) {
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
     }
 
     @Override
     protected NotificationParty getNotificationPartyEnum() {
-        return NotificationParty.CUI_APPLICANT;
+        return NotificationParty.CITIZEN_APPLICANT;
     }
 
     @Override

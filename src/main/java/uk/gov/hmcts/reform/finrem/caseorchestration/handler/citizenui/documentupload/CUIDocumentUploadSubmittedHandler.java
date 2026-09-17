@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentUploadCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -19,16 +19,16 @@ import java.util.Optional;
 @Slf4j
 public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedCallbackHandler {
 
-    protected final NotificationService notificationService;
+    private final CUIDocumentUploadCorresponder cuiDocumentUploadCorresponder;
     private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     protected CUIDocumentUploadSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                 EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                 RetryExecutor retryExecutor,
-                                                NotificationService notificationService,
+                                                CUIDocumentUploadCorresponder cuiDocumentUploadCorresponder,
                                                 CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
-        this.notificationService = notificationService;
+        this.cuiDocumentUploadCorresponder = cuiDocumentUploadCorresponder;
         this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
     }
 
@@ -68,7 +68,7 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
 
     private Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
                                                                             String userAuthorisation) {
-        return notificationService.buildCitizenUploadDocumentsNotificationEvent(
+        return cuiDocumentUploadCorresponder.buildCorrespondenceEventIfNeeded(
             callbackRequest.getCaseDetails(),
             userAuthorisation,
             notificationParty()

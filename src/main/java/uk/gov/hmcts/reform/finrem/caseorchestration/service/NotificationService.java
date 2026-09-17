@@ -7,7 +7,6 @@ import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.CUINotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -19,8 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
@@ -28,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Check
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -79,7 +75,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CUI_DOCUMENTS_UPLOADED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL;
@@ -99,10 +94,7 @@ public class NotificationService {
     private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
     private static final String HWF_LOG = "Received request for notification email for HWFSuccessful. Case ID : {}";
     private static final String BARRISTER_ACCESS_LOG = "Received request for notification email for Barrister Access Added event. Case ID : {}";
-    private static final String CUI_UPLOAD_NOTIFICATION_LOG =
-        "Received request for notification email for citizen uploaded documents. Case ID : {}";
     private final FeatureToggleService featureToggleService;
-    private final CUINotificationRequestMapper cuiNotificationRequestMapper;
     private final NotificationRequestMapper notificationRequestMapper;
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
     private final CaseDataService caseDataService;
@@ -1156,26 +1148,12 @@ public class NotificationService {
     }
 
     public void sendIntervenerSolicitorRemovedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
-                                                     String recipientName, String recipientEmail, String referenceNumber) {
+                                                    String recipientName, String recipientEmail, String referenceNumber) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(
             caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
         log.info("Received request for notification email for Intervener Solicitor removed event. Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_INTERVENER_SOLICITOR_REMOVED_EMAIL);
-    }
-
-    public Optional<SendCorrespondenceEvent> buildCitizenUploadDocumentsNotificationEvent(
-        FinremCaseDetails caseDetails,
-        String authToken,
-        NotificationParty notificationParty) {
-        return cuiNotificationRequestMapper.build(caseDetails, notificationParty)
-            .map(notificationRequest -> SendCorrespondenceEvent.builder()
-                .caseDetails(caseDetails)
-                .authToken(authToken)
-                .emailTemplate(FR_CUI_DOCUMENTS_UPLOADED)
-                .emailNotificationRequest(notificationRequest)
-                .notificationParties(List.of(notificationParty))
-                .build());
     }
 
     private void sendNotificationEmail(NotificationRequest notificationRequest, EmailTemplateNames emailTemplateName) {

@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentUploadCorresponder;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -49,14 +49,14 @@ import static java.util.Optional.ofNullable;
 public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
-    protected final NotificationService notificationService;
+    private final CUIDocumentUploadCorresponder cuiDocumentUploadCorresponder;
 
     protected CUIDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
-                                                    NotificationService notificationService) {
+                                                    CUIDocumentUploadCorresponder cuiDocumentUploadCorresponder) {
         super(finremCaseDetailsMapper);
         this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
-        this.notificationService = notificationService;
+        this.cuiDocumentUploadCorresponder = cuiDocumentUploadCorresponder;
     }
 
     /**
@@ -122,7 +122,7 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
 
     private Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
                                                                             String userAuthorisation) {
-        return notificationService.buildCitizenUploadDocumentsNotificationEvent(
+        return cuiDocumentUploadCorresponder.buildCorrespondenceEventIfNeeded(
             callbackRequest.getCaseDetails(),
             userAuthorisation,
             notificationParty()

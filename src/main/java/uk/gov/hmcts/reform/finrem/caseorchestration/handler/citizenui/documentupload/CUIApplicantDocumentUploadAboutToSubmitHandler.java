@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentUploadCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser;
 
 import java.util.List;
@@ -39,8 +39,8 @@ public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentU
     public CUIApplicantDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            FeatureToggleService featureToggleService,
                                                            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
-                                                           NotificationService notificationService) {
-        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, notificationService);
+                                                           CUIDocumentUploadCorresponder cuiDocumentUploadCorresponder) {
+        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, cuiDocumentUploadCorresponder);
         this.featureToggleService = featureToggleService;
     }
 
@@ -89,7 +89,7 @@ public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentU
 
     @Override
     protected NotificationParty notificationParty() {
-        return NotificationParty.CUI_APPLICANT;
+        return NotificationParty.CITIZEN_APPLICANT;
     }
 
 }

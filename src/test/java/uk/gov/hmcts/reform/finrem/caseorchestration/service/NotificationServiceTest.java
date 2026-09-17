@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.CUINotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -43,8 +42,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
@@ -53,7 +50,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -148,8 +144,6 @@ class NotificationServiceTest {
     @Mock
     private FeatureToggleService featureToggleService;
     @Mock
-    private CUINotificationRequestMapper cuiNotificationRequestMapper;
-    @Mock
     private NotificationRequestMapper notificationRequestMapper;
     @Mock
     private FinremNotificationRequestMapper finremNotificationRequestMapper;
@@ -239,60 +233,6 @@ class NotificationServiceTest {
         verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
             dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
-    }
-
-    @Test
-    void shouldBuildCitizenApplicantUploadDocumentsNotificationEvent() {
-        FinremCaseDetails finremCaseDetails = getContestedNewCallbackRequest().getCaseDetails();
-        NotificationRequest expectedNotificationRequest = NotificationRequest.builder().build();
-        when(cuiNotificationRequestMapper.build(finremCaseDetails, NotificationParty.CUI_APPLICANT))
-            .thenReturn(java.util.Optional.of(expectedNotificationRequest));
-
-        Optional<SendCorrespondenceEvent> event = notificationService.buildCitizenUploadDocumentsNotificationEvent(
-            finremCaseDetails,
-            AUTH_TOKEN,
-            NotificationParty.CUI_APPLICANT
-        );
-
-        assertThat(event).isPresent();
-        assertThat(event.get().getEmailNotificationRequest()).isEqualTo(expectedNotificationRequest);
-        assertThat(event.get().getNotificationParties()).containsExactly(NotificationParty.CUI_APPLICANT);
-        verify(cuiNotificationRequestMapper).build(finremCaseDetails, NotificationParty.CUI_APPLICANT);
-    }
-
-    @Test
-    void shouldBuildCitizenRespondentUploadDocumentsNotificationEvent() {
-        FinremCaseDetails finremCaseDetails = getContestedNewCallbackRequest().getCaseDetails();
-        NotificationRequest expectedNotificationRequest = NotificationRequest.builder().build();
-        when(cuiNotificationRequestMapper.build(finremCaseDetails, NotificationParty.CUI_RESPONDENT))
-            .thenReturn(java.util.Optional.of(expectedNotificationRequest));
-
-        Optional<SendCorrespondenceEvent> event = notificationService.buildCitizenUploadDocumentsNotificationEvent(
-            finremCaseDetails,
-            AUTH_TOKEN,
-            NotificationParty.CUI_RESPONDENT
-        );
-
-        assertThat(event).isPresent();
-        assertThat(event.get().getEmailNotificationRequest()).isEqualTo(expectedNotificationRequest);
-        assertThat(event.get().getNotificationParties()).containsExactly(NotificationParty.CUI_RESPONDENT);
-        verify(cuiNotificationRequestMapper).build(finremCaseDetails, NotificationParty.CUI_RESPONDENT);
-    }
-
-    @Test
-    void shouldReturnEmptyCitizenUploadDocumentsNotificationEventWhenNoRecipient() {
-        FinremCaseDetails finremCaseDetails = getContestedNewCallbackRequest().getCaseDetails();
-        when(cuiNotificationRequestMapper.build(finremCaseDetails, NotificationParty.CUI_APPLICANT))
-            .thenReturn(java.util.Optional.empty());
-
-        Optional<SendCorrespondenceEvent> event = notificationService.buildCitizenUploadDocumentsNotificationEvent(
-            finremCaseDetails,
-            AUTH_TOKEN,
-            NotificationParty.CUI_APPLICANT
-        );
-
-        assertThat(event).isEmpty();
-        verify(cuiNotificationRequestMapper).build(finremCaseDetails, NotificationParty.CUI_APPLICANT);
     }
 
     @Test
