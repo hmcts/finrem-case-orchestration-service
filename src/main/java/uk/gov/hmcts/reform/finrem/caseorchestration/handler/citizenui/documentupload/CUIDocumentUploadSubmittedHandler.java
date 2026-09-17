@@ -43,7 +43,7 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
         );
 
         if (optionalEvent.isEmpty()) {
-            logNotificationFailure(caseId);
+            logMissingNotificationEvent(caseId, callbackRequest.getEventType().getCcdType());
             return submittedResponse();
         }
 
@@ -53,7 +53,7 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
 
         boolean success = correspondenceEventAuditOrchestrationService.publishEvent(event, correspondenceTaskDescription());
         if (!success) {
-            logNotificationFailure(caseId);
+            logPublishFailure(caseId, event.getEventId());
             return submittedResponse();
         }
 
@@ -75,9 +75,21 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
         );
     }
 
-    private void logNotificationFailure(String caseId) {
+    private void logMissingNotificationEvent(String caseId, String eventId) {
         log.warn(
-            "{} - Failed to send citizen documents uploaded email: {}", caseId, getNotificationPartyLabel()
+            "{} - Citizen documents uploaded email not published because notification event could not be built. eventId: {}, party: {}",
+            caseId,
+            eventId,
+            getNotificationPartyLabel()
+        );
+    }
+
+    private void logPublishFailure(String caseId, String eventId) {
+        log.warn(
+            "{} - Failed to publish citizen documents uploaded email event. eventId: {}, party: {}",
+            caseId,
+            eventId,
+            getNotificationPartyLabel()
         );
     }
 

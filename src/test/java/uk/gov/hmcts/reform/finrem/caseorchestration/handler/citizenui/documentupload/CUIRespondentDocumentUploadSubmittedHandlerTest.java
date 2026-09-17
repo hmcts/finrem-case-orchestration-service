@@ -69,13 +69,13 @@ class CUIRespondentDocumentUploadSubmittedHandlerTest {
 
         when(notificationService.buildCitizenUploadDocumentsNotificationEvent(caseDetails, "auth", NotificationParty.CUI_RESPONDENT))
             .thenReturn(java.util.Optional.of(event));
-        when(correspondenceEventAuditOrchestrationService.publishEvent(any(), anyString(), any()))
+        when(correspondenceEventAuditOrchestrationService.publishEvent(any(), anyString()))
             .thenReturn(true);
         
         underTest.handle(callbackRequest, "auth");
 
         verify(notificationService).buildCitizenUploadDocumentsNotificationEvent(caseDetails, "auth", NotificationParty.CUI_RESPONDENT);
-        verify(correspondenceEventAuditOrchestrationService).publishEvent(any(), anyString(), any());
+        verify(correspondenceEventAuditOrchestrationService).publishEvent(any(), anyString());
         verify(correspondenceEventAuditOrchestrationService)
             .reconcileAndPersistAudits(caseDetails, event, "markPendingNotificationsAsSent");
     }
@@ -98,6 +98,6 @@ class CUIRespondentDocumentUploadSubmittedHandlerTest {
         underTest.handle(callbackRequest, "auth");
 
         verify(notificationService).buildCitizenUploadDocumentsNotificationEvent(caseDetails, "auth", NotificationParty.CUI_RESPONDENT);
-        verify(correspondenceEventAuditOrchestrationService, never()).publishEvent(any(), anyString(), any());
+        verify(correspondenceEventAuditOrchestrationService, never()).publishEvent(any(), anyString());
     }
 }
