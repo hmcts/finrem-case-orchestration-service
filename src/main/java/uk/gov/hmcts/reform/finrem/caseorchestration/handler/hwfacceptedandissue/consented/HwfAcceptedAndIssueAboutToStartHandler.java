@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.hwfacceptedandissue.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,15 +9,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 
 @Slf4j
 @Service
-public class IssueApplicationConsentedAboutToStartHandler extends AbstractIssueApplicationAboutToStartHandler {
+public class HwfAcceptedAndIssueAboutToStartHandler extends AbstractIssueApplicationAboutToStartHandler {
 
-    public IssueApplicationConsentedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                        OnStartDefaultValueService onStartDefaultValueService) {
+    public HwfAcceptedAndIssueAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                  OnStartDefaultValueService onStartDefaultValueService) {
         super(finremCaseDetailsMapper, onStartDefaultValueService);
     }
 
     @Override
     protected EventType supportedEventType() {
-        return EventType.ISSUE_APPLICATION;
+        return EventType.HWF_ACCEPTED_AND_ISSUE;
     }
 }
