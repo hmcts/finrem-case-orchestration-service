@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventA
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
 
 import java.util.Optional;
 
@@ -38,10 +37,13 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
                                                                                 String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        Optional<SendCorrespondenceEvent> optionalEvent = buildSendCorrespondenceEvent(callbackRequest, userAuthorisation);
+        final String caseId = callbackRequest.getCaseDetails().getCaseIdAsString();
+        Optional<SendCorrespondenceEvent> optionalEvent = buildSendCorrespondenceEvent(
+            callbackRequest, userAuthorisation
+        );
 
         if (optionalEvent.isEmpty()) {
-            log.warn("{} - {}", callbackRequest.getCaseDetails().getCaseIdAsString(), noRecipientWarningMessage());
+            logNotificationFailure(caseId);
             return submittedResponse();
         }
 
@@ -49,26 +51,19 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
         event.setEventId(callbackRequest.getEventType().getCcdType());
         event.setNotificationTrackerId(callbackRequest.getCaseDetails().getData().getNotificationAuditWrapper().getNotificationEventId());
 
-        boolean success = correspondenceEventAuditOrchestrationService.publishEvent(
-            event,
-            correspondenceTaskDescription(),
-            notificationFailureHandler(event)
-        );
-        if (success) {
-            correspondenceEventAuditOrchestrationService.reconcileAndPersistAudits(
-                callbackRequest.getCaseDetails(),
-                event,
-                markAuditsActionName()
-            );
+        boolean success = correspondenceEventAuditOrchestrationService.publishEvent(event, correspondenceTaskDescription());
+        if (!success) {
+            logNotificationFailure(caseId);
+            return submittedResponse();
         }
 
-        return submittedResponse();
-    }
+        correspondenceEventAuditOrchestrationService.reconcileAndPersistAudits(
+            callbackRequest.getCaseDetails(),
+            event,
+            "markPendingNotificationsAsSent"
+        );
 
-    protected RetryErrorHandler notificationFailureHandler(SendCorrespondenceEvent event) {
-        return (exception, actionName, caseId) -> {
-            // no-op: CUI flow intentionally returns a standard submitted response.
-        };
+        return submittedResponse();
     }
 
     private Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
@@ -80,29 +75,19 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
         );
     }
 
-    private String noRecipientWarningMessage() {
-        return switch (notificationParty()) {
-            case CUI_APPLICANT -> "No recipient email found for citizen applicant upload notification";
-            case CUI_RESPONDENT -> "No recipient email found for citizen respondent upload notification";
-            default -> throw new IllegalStateException("Unsupported notification party: " + notificationParty());
-        };
+    private void logNotificationFailure(String caseId) {
+        log.warn(
+            "{} - Failed to send citizen documents uploaded email: {}", caseId, getNotificationPartyLabel()
+        );
     }
 
     private String correspondenceTaskDescription() {
-        return switch (notificationParty()) {
-            case CUI_APPLICANT -> "Send citizen applicant upload documents correspondence";
-            case CUI_RESPONDENT -> "Send citizen respondent upload documents correspondence";
-            default -> throw new IllegalStateException("Unsupported notification party: " + notificationParty());
-        };
-    }
-
-    private String markAuditsActionName() {
-        return switch (notificationParty()) {
-            case CUI_APPLICANT -> "markCuiApplicantNotificationAuditAsSent";
-            case CUI_RESPONDENT -> "markCuiRespondentNotificationAuditAsSent";
-            default -> throw new IllegalStateException("Unsupported notification party: " + notificationParty());
-        };
+        return String.format("Send citizen documents uploaded email: %s", getNotificationPartyLabel());
     }
 
     protected abstract NotificationParty notificationParty();
+
+    private String getNotificationPartyLabel() {
+        return notificationParty().getRole();
+    }
 }

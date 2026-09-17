@@ -23,7 +23,7 @@ public class CUIApplicantListener extends EmailNotificationOnlyListener {
 
     @Override
     protected String getNotificationParty() {
-        return "cui applicant";
+        return "citizen applicant";
     }
 
     @Override

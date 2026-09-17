@@ -77,7 +77,7 @@ class CUIRespondentDocumentUploadSubmittedHandlerTest {
         verify(notificationService).buildCitizenUploadDocumentsNotificationEvent(caseDetails, "auth", NotificationParty.CUI_RESPONDENT);
         verify(correspondenceEventAuditOrchestrationService).publishEvent(any(), anyString(), any());
         verify(correspondenceEventAuditOrchestrationService)
-            .reconcileAndPersistAudits(caseDetails, event, "markCuiRespondentNotificationAuditAsSent");
+            .reconcileAndPersistAudits(caseDetails, event, "markPendingNotificationsAsSent");
     }
 
     @Test

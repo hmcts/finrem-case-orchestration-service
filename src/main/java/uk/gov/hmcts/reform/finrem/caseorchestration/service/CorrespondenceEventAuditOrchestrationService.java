@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 @Service
@@ -31,9 +32,7 @@ public class CorrespondenceEventAuditOrchestrationService {
         );
     }
 
-    public boolean publishEvent(SendCorrespondenceEvent event,
-                                String actionName,
-                                RetryErrorHandler errorHandler) {
+    public boolean publishEvent(SendCorrespondenceEvent event, String actionName) {
         AtomicBoolean success = new AtomicBoolean(true);
 
         retryExecutor.runWithRetryWithHandler(
@@ -42,9 +41,6 @@ public class CorrespondenceEventAuditOrchestrationService {
             event.getCaseId(),
             (exception, action, caseId) -> {
                 success.set(false);
-                if (errorHandler != null) {
-                    errorHandler.handle(exception, action, caseId);
-                }
             }
         );
 
