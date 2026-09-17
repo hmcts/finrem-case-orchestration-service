@@ -191,7 +191,7 @@
         <module name="AbbreviationAsWordInName">
             <property name="ignoreFinal" value="false"/>
             <property name="allowedAbbreviationLength" value="1"/>
-            <property name="allowedAbbreviations" value="JNDI,PBA,FRC,HWF,CCD,API"/>
+            <property name="allowedAbbreviations" value="JNDI,PBA,FRC,HWF,CCD,API,CUI"/>
         </module>
         <module name="OverloadMethodsDeclarationOrder"/>
         <module name="VariableDeclarationUsageDistance"/>
