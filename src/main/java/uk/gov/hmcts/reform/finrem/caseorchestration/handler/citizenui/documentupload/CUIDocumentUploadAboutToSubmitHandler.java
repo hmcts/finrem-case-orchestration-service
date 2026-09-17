@@ -11,10 +11,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
@@ -43,8 +46,12 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
-    protected CUIDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
+
+    protected CUIDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                     CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
         super(finremCaseDetailsMapper);
+        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
     }
 
     /**
@@ -95,8 +102,21 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
 
         categoriseDocuments(currentCaseData);
 
+        createNotificationAuditRows(callbackRequest, userAuthorisation);
+
         return response(currentCaseData);
     }
+
+    private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
+                                             String userAuthorisation) {
+        correspondenceEventAuditOrchestrationService.createPendingAudits(
+            buildSendCorrespondenceEvent(callbackRequest, userAuthorisation),
+            handledEventType()
+        );
+    }
+
+    protected abstract Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
+                                                                                       String userAuthorisation);
 
     /**
      * Determines whether this handler can process the callback.

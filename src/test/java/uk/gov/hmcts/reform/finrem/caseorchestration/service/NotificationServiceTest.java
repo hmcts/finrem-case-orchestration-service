@@ -28,12 +28,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -126,6 +130,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_SOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CUI_UPLOAD_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 
@@ -233,6 +238,56 @@ class NotificationServiceTest {
         verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
             dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
+    }
+
+    @Test
+    void shouldSendCitizenApplicantUploadDocumentsNotification() {
+        FinremCaseDetails finremCaseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        finremCaseDetails.getData().getContactDetailsWrapper().setApplicantEmail(TEST_USER_EMAIL);
+        finremCaseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcName("Nottingham FRC");
+        finremCaseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcEmail("frc@justice.gov.uk");
+        finremCaseDetails.getData().setManageHearingsWrapper(ManageHearingsWrapper.builder()
+            .hearings(List.of(ManageHearingsCollectionItem.builder()
+                .value(Hearing.builder().hearingMode(HearingMode.IN_PERSON).build())
+                .build()))
+            .build());
+
+        notificationService.sendCitizenApplicantUploadDocumentsNotification(finremCaseDetails);
+
+        ArgumentCaptor<NotificationRequest> requestCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(requestCaptor.capture(), eq(FR_CUI_UPLOAD_DOCUMENT));
+
+        NotificationRequest captured = requestCaptor.getValue();
+        assertThat(captured.getNotificationEmail()).isEqualTo(TEST_USER_EMAIL);
+        assertThat(captured.getName()).isEqualTo("Victoria Goodman");
+        assertThat(captured.getCaseReferenceNumber()).isEqualTo("12345");
+        assertThat(captured.getContactCourtName()).isEqualTo("Nottingham FRC");
+        assertThat(captured.getContactCourtEmail()).isEqualTo("frc@justice.gov.uk");
+        assertThat(captured.getUploadTime()).matches("^\\d{1,2}:\\d{2}(am|pm) on \\d{2}/\\d{2}/\\d{4}$");
+    }
+
+    @Test
+    void shouldSendCitizenRespondentUploadDocumentsNotificationWithoutCourtNameWhenHearingNotInPerson() {
+        FinremCaseDetails finremCaseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        finremCaseDetails.getData().getContactDetailsWrapper().setRespondentEmail("respondent@email.com");
+        finremCaseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcName("Nottingham FRC");
+        finremCaseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcEmail("frc@justice.gov.uk");
+        finremCaseDetails.getData().setManageHearingsWrapper(ManageHearingsWrapper.builder()
+            .hearings(List.of(ManageHearingsCollectionItem.builder()
+                .value(Hearing.builder().hearingMode(HearingMode.VIDEO_CALL).build())
+                .build()))
+            .build());
+
+        notificationService.sendCitizenRespondentUploadDocumentsNotification(finremCaseDetails);
+
+        ArgumentCaptor<NotificationRequest> requestCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(requestCaptor.capture(), eq(FR_CUI_UPLOAD_DOCUMENT));
+
+        NotificationRequest captured = requestCaptor.getValue();
+        assertThat(captured.getNotificationEmail()).isEqualTo("respondent@email.com");
+        assertThat(captured.getName()).isEqualTo("David Goodman");
+        assertThat(captured.getContactCourtName()).isEmpty();
+        assertThat(captured.getContactCourtEmail()).isEqualTo("frc@justice.gov.uk");
     }
 
     @Test

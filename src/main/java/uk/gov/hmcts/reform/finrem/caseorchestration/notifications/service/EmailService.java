@@ -192,6 +192,11 @@ public class EmailService {
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED.name().equals(templateName)) {
             addRefusedDraftOrderOrPsaTemplateVars(notificationRequest, templateVars);
         }
+        if (EmailTemplateNames.FR_CUI_UPLOAD_DOCUMENT.name().equals(templateName)) {
+            templateVars.put("uploadTime", notificationRequest.getUploadTime());
+            String courtName = (String) templateVars.get("courtName");
+            templateVars.put("hasCourtName", StringUtils.isNotBlank(courtName));
+        }
     }
 
     protected void populateTemplateVarsFromApplicationProperties(Map<String, Object> templateVars, String templateName) {

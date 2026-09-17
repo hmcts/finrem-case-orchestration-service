@@ -67,5 +67,6 @@ public class NotificationRequest {
     private String vacatedHearingDateTime;
     private String vacatedHearingType;
     private String dateOfIssue;
+    private String uploadTime;
     private List<byte[]> documentContentsList;
 }

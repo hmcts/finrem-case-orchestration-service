@@ -8,10 +8,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CuiDocumentsCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Handler for Applicant CUI document upload events.
@@ -32,11 +36,15 @@ import java.util.List;
 public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentUploadAboutToSubmitHandler {
 
     private final FeatureToggleService featureToggleService;
+    private final NotificationService notificationService;
 
     public CUIApplicantDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                          FeatureToggleService featureToggleService) {
-        super(finremCaseDetailsMapper);
+                                                           FeatureToggleService featureToggleService,
+                                                           CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
+                                                           NotificationService notificationService) {
+        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService);
         this.featureToggleService = featureToggleService;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -78,8 +86,17 @@ public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentU
 
     @Override
     protected void categoriseDocuments(FinremCaseData caseData) {
-        new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT)
+        new CUIDocumentsCategoriser(featureToggleService, CUIDocumentsCategoriser.Party.APPLICANT)
             .categorise(caseData);
+    }
+
+    @Override
+    protected Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        return notificationService.buildCitizenApplicantUploadDocumentsNotificationEvent(
+            callbackRequest.getCaseDetails(),
+            userAuthorisation
+        );
     }
 
 }

@@ -10,21 +10,30 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfigura
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -75,6 +84,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CUI_UPLOAD_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL;
@@ -94,6 +104,9 @@ public class NotificationService {
     private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
     private static final String HWF_LOG = "Received request for notification email for HWFSuccessful. Case ID : {}";
     private static final String BARRISTER_ACCESS_LOG = "Received request for notification email for Barrister Access Added event. Case ID : {}";
+    private static final String CUI_UPLOAD_NOTIFICATION_LOG =
+        "Received request for notification email for citizen uploaded documents. Case ID : {}";
+    private static final DateTimeFormatter CUI_UPLOAD_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mma 'on' dd/MM/yyyy");
     private final FeatureToggleService featureToggleService;
     private final NotificationRequestMapper notificationRequestMapper;
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
@@ -1148,12 +1161,129 @@ public class NotificationService {
     }
 
     public void sendIntervenerSolicitorRemovedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
-                                                    String recipientName, String recipientEmail, String referenceNumber) {
+                                                     String recipientName, String recipientEmail, String referenceNumber) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(
             caseDetails, intervenerDetails, recipientName, recipientEmail, referenceNumber);
         log.info("Received request for notification email for Intervener Solicitor removed event. Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_INTERVENER_SOLICITOR_REMOVED_EMAIL);
+    }
+
+    public void sendCitizenApplicantUploadDocumentsNotification(FinremCaseDetails caseDetails) {
+        log.info("Received request for citizen applicant uploaded documents email. Case ID : {}", caseDetails.getCaseIdAsString());
+
+        sendCitizenUploadDocumentsNotification(
+            caseDetails,
+            caseDetails.getData().getContactDetailsWrapper().getApplicantEmail(),
+            caseDetails.getData().getFullApplicantName()
+        );
+    }
+
+    public Optional<SendCorrespondenceEvent> buildCitizenApplicantUploadDocumentsNotificationEvent(FinremCaseDetails caseDetails,
+                                                                                                    String authToken) {
+        return buildCitizenUploadDocumentsNotificationEvent(
+            caseDetails,
+            authToken,
+            caseDetails.getData().getContactDetailsWrapper().getApplicantEmail(),
+            caseDetails.getData().getFullApplicantName(),
+            NotificationParty.CUI_APPLICANT
+        );
+    }
+
+    public void sendCitizenRespondentUploadDocumentsNotification(FinremCaseDetails caseDetails) {
+        log.info("Received request for citizen respondent uploaded documents email. Case ID : {}", caseDetails.getCaseIdAsString());
+
+        sendCitizenUploadDocumentsNotification(
+            caseDetails,
+            caseDetails.getData().getContactDetailsWrapper().getRespondentEmail(),
+            caseDetails.getData().getRespondentFullName()
+        );
+    }
+
+    public Optional<SendCorrespondenceEvent> buildCitizenRespondentUploadDocumentsNotificationEvent(FinremCaseDetails caseDetails,
+                                                                                                     String authToken) {
+        return buildCitizenUploadDocumentsNotificationEvent(
+            caseDetails,
+            authToken,
+            caseDetails.getData().getContactDetailsWrapper().getRespondentEmail(),
+            caseDetails.getData().getRespondentFullName(),
+            NotificationParty.CUI_RESPONDENT
+        );
+    }
+
+    private void sendCitizenUploadDocumentsNotification(FinremCaseDetails caseDetails, String recipientEmail, String partyName) {
+        if (!StringUtils.hasText(recipientEmail)) {
+            log.warn("Unable to send citizen uploaded documents notification as recipient email is blank. Case ID : {}",
+                caseDetails.getCaseIdAsString());
+            return;
+        }
+
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+            .caseReferenceNumber(caseDetails.getCaseIdAsString())
+            .name(partyName)
+            .notificationEmail(recipientEmail)
+            .caseType(CaseType.CONTESTED.name().toLowerCase())
+            .contactCourtName(getCitizenUploadCourtName(caseDetails))
+            .contactCourtEmail(getCitizenUploadCourtEmail(caseDetails))
+            .uploadTime(getCitizenUploadTime())
+            .build();
+
+        log.info(CUI_UPLOAD_NOTIFICATION_LOG, notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_CUI_UPLOAD_DOCUMENT);
+    }
+
+    private Optional<SendCorrespondenceEvent> buildCitizenUploadDocumentsNotificationEvent(FinremCaseDetails caseDetails,
+                                                                                            String authToken,
+                                                                                            String recipientEmail,
+                                                                                            String partyName,
+                                                                                            NotificationParty notificationParty) {
+        if (!StringUtils.hasText(recipientEmail)) {
+            return Optional.empty();
+        }
+
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+            .caseReferenceNumber(caseDetails.getCaseIdAsString())
+            .name(partyName)
+            .notificationEmail(recipientEmail)
+            .caseType(CaseType.CONTESTED.name().toLowerCase())
+            .contactCourtName(getCitizenUploadCourtName(caseDetails))
+            .contactCourtEmail(getCitizenUploadCourtEmail(caseDetails))
+            .uploadTime(getCitizenUploadTime())
+            .build();
+
+        return Optional.of(SendCorrespondenceEvent.builder()
+            .caseDetails(caseDetails)
+            .authToken(authToken)
+            .emailTemplate(FR_CUI_UPLOAD_DOCUMENT)
+            .emailNotificationRequest(notificationRequest)
+            .notificationParties(List.of(notificationParty))
+            .build());
+    }
+
+    private String getCitizenUploadCourtName(FinremCaseDetails caseDetails) {
+        if (!isFirstHearingInPerson(caseDetails.getData())) {
+            return "";
+        }
+
+        String frcName = caseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcName();
+        return StringUtils.hasText(frcName) ? frcName : "";
+    }
+
+    private String getCitizenUploadCourtEmail(FinremCaseDetails caseDetails) {
+        return ofNullable(caseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcEmail()).orElse("");
+    }
+
+    private boolean isFirstHearingInPerson(FinremCaseData caseData) {
+        return ofNullable(caseData.getManageHearingsWrapper().getHearings())
+            .filter(hearings -> !hearings.isEmpty())
+            .map(List::getFirst)
+            .map(ManageHearingsCollectionItem::getValue)
+            .map(hearing -> HearingMode.IN_PERSON.equals(hearing.getHearingMode()))
+            .orElse(false);
+    }
+
+    private String getCitizenUploadTime() {
+        return CUI_UPLOAD_TIME_FORMAT.format(ZonedDateTime.now(ZoneId.of("Europe/London"))).toLowerCase();
     }
 
     private void sendNotificationEmail(NotificationRequest notificationRequest, EmailTemplateNames emailTemplateName) {
