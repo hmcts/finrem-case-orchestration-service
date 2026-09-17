@@ -8,6 +8,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
@@ -75,10 +76,10 @@ public class GlobalSearchMigrationTask extends BaseTask {
             }
 
             results.addAll(
-                searchResult.getCases().stream()
-                    .map(caseDetails -> new CaseReference(
-                        caseDetails.getId().toString()))
-                    .toList()
+                    searchResult.getCases().stream()
+                            .map(caseDetails -> new CaseReference(
+                                    caseDetails.getId().toString()))
+                            .toList()
 
             );
             var lastCase = searchResult.getCases().getLast();
@@ -95,25 +96,28 @@ public class GlobalSearchMigrationTask extends BaseTask {
     private String getSearchQuery(String searchAfter) {
 
         BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
-            .mustNot(new TermsQueryBuilder("state.keyword", "close", "consentOrderMade"));
+                .mustNot(new TermsQueryBuilder("state.keyword", "close", "consentOrderMade"));
         BoolQueryBuilder supplementaryQuery = QueryBuilders.boolQuery()
-            .mustNot(new ExistsQueryBuilder("supplementary_data.HMCTSServiceId"));
+                .mustNot(new ExistsQueryBuilder("supplementary_data.HMCTSServiceId"));
         BoolQueryBuilder searchCriteriaQuery = QueryBuilders.boolQuery()
-            .mustNot(new ExistsQueryBuilder("data.SearchCriteria"));
+                .mustNot(new ExistsQueryBuilder("data.SearchCriteria"));
         QueryBuilder shouldQuery = QueryBuilders.boolQuery()
-            .must(stateQuery)
-            .must(supplementaryQuery)
-            .must(searchCriteriaQuery);
+                .must(stateQuery)
+                .must(supplementaryQuery)
+                .must(searchCriteriaQuery);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-            .size(gsQuerySize)
-            .query(shouldQuery)
-            .sort("reference.keyword", SortOrder.ASC);
+                .size(gsQuerySize)
+                .query(shouldQuery)
+                .sort("reference.keyword", SortOrder.ASC);
 
         if (searchAfter != null) {
             searchSourceBuilder.searchAfter(new Object[]{searchAfter});
         }
-        return searchSourceBuilder.toString();
+        String searchQuery = searchSourceBuilder.toString();
+        JSONObject jsonObject = new JSONObject(searchQuery);
+        jsonObject.put("_source", new String[]{"reference"});
+        return jsonObject.toString();
     }
 
     @Override
