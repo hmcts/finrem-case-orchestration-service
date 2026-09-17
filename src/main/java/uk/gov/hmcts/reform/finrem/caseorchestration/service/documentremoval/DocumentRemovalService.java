@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
 
 @Service
 @Slf4j
@@ -172,44 +173,34 @@ public class DocumentRemovalService {
             return;
         }
 
-        if (node.isObject()) {
-            ObjectNode objectNode = (ObjectNode) node;
+        if (node.isArray()) {
+            removeDocumentFromArray((ArrayNode) node, documentUrl);
 
-            Iterator<Map.Entry<String, JsonNode>> iterator = objectNode.properties().iterator();
+        } else if (node.isObject()) {
+            ObjectNode objectNode = (ObjectNode) node;
             List<String> fieldsToRemove = new ArrayList<>();
 
-            while (iterator.hasNext()) {
-                Map.Entry<String, JsonNode> entry = iterator.next();
-                String fieldName = entry.getKey();
-                JsonNode fieldValue = entry.getValue();
+            for (Map.Entry<String, JsonNode> field : objectNode.properties()) {
+                String fieldName = field.getKey();
+                JsonNode fieldValue = field.getValue();
 
-                if (isDocumentNode(fieldValue, documentUrl)) {
+
+                if (isDocumentEntry(fieldValue, documentUrl)) {
                     fieldsToRemove.add(fieldName);
-                } else if (isMatchingDocumentUrlField(fieldName, fieldValue, documentUrl)) {
-                    fieldsToRemove.add(fieldName);
-                } else if (fieldValue.isArray()) {
-                    removeDocumentFromArray(fieldName, (ArrayNode) fieldValue, documentUrl);
                 } else {
                     removeDocumentFromJson(fieldValue, documentUrl);
                 }
             }
-
             fieldsToRemove.forEach(objectNode::remove);
-
-        } else if (node.isArray()) {
-            removeDocumentFromArray(null, (ArrayNode) node, documentUrl);
         }
     }
 
-    private void removeDocumentFromArray(String fieldName, ArrayNode arrayNode, String documentUrl) {
+    private void removeDocumentFromArray(ArrayNode arrayNode, String documentUrl) {
         for (int i = arrayNode.size() - 1; i >= 0; i--) {
             JsonNode element = arrayNode.get(i);
 
-            boolean isDirectDocument = isDocumentNode(element, documentUrl);
-            boolean isCollectionElementToRemove = ("uploadDocuments".equals(fieldName) || "approveOrders".equals(fieldName)
-                    || "hearingNoticeDocumentPack".equals(fieldName)) && containsDocumentNode(element, documentUrl);
-
-            if (isDirectDocument || isCollectionElementToRemove) {
+            if (isDocumentArrayElement(element, documentUrl)) {
+                log.info("Removing document entry with URL: {}", documentUrl);
                 arrayNode.remove(i);
             } else {
                 removeDocumentFromJson(element, documentUrl);
@@ -217,36 +208,39 @@ public class DocumentRemovalService {
         }
     }
 
-    private boolean containsDocumentNode(JsonNode node, String documentUrl) {
-        if (node == null) {
-            return false;
-        }
-
-        if (isDocumentNode(node, documentUrl)) {
+    private boolean isDocumentArrayElement(JsonNode element, String documentUrl) {
+        if (isDocumentEntry(element, documentUrl)) {
             return true;
         }
 
-        if (node.isObject()) {
-            Iterator<JsonNode> values = node.elements();
+        if (element == null || !element.isObject()) {
+            return false;
+        }
 
-            while (values.hasNext()) {
-                if (containsDocumentNode(values.next(), documentUrl)) {
-                    return true;
-                }
+        JsonNode valueNode = element.get("value");
+
+        if (valueNode == null || !valueNode.isObject()) {
+            return false;
+        }
+
+        for (Map.Entry<String, JsonNode> field : valueNode.properties()) {
+
+            if (GENERAL_APPLICATION_DOCUMENT.equals(field.getKey())) {
+                continue;
             }
-        } else if (node.isArray()) {
-            for (JsonNode element : node) {
-                if (containsDocumentNode(element, documentUrl)) {
-                    return true;
-                }
+
+            JsonNode fieldValue = field.getValue();
+
+            if (fieldValue.isTextual() && documentUrl.equals(fieldValue.asText())) {
+                return true;
+            }
+
+            if (isDocumentEntry(fieldValue, documentUrl)) {
+                return true;
             }
         }
 
         return false;
-    }
-
-    private boolean isMatchingDocumentUrlField(String fieldName, JsonNode fieldValue, String documentUrl) {
-        return DOCUMENT_URL.equals(fieldName) && fieldValue.isTextual() && documentUrl.equals(fieldValue.asText());
     }
 
     private void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken, Long caseId) {
@@ -278,7 +272,41 @@ public class DocumentRemovalService {
         return amendedCaseData;
     }
 
-    private boolean isDocumentNode(JsonNode node, String documentUrl) {
-        return node.isObject() && node.has(DOCUMENT_URL) && documentUrl.equals(node.get(DOCUMENT_URL).asText());
+    private boolean isDocumentEntry(JsonNode node, String documentUrl) {
+        if (node == null || !node.isObject()) {
+            return false;
+        }
+
+        JsonNode directDocumentUrl = node.get(DOCUMENT_URL);
+
+        if (directDocumentUrl != null && directDocumentUrl.isTextual() && documentUrl.equals(directDocumentUrl.asText())) {
+            return true;
+        }
+
+        JsonNode valueNode = node.get("value");
+
+        if (valueNode == null || !valueNode.isObject()) {
+            return false;
+        }
+
+        JsonNode valueDocumentUrl = valueNode.get(DOCUMENT_URL);
+
+        if (valueDocumentUrl != null && valueDocumentUrl.isTextual() && documentUrl.equals(valueDocumentUrl.asText())) {
+            return true;
+        }
+
+        JsonNode documentLinkNode = valueNode.get("documentLink");
+
+        if (documentLinkNode == null) {
+            documentLinkNode = valueNode.get("document_link");
+        }
+
+        if (documentLinkNode != null && documentLinkNode.isObject()) {
+            JsonNode documentLinkUrl = documentLinkNode.get(DOCUMENT_URL);
+
+            return documentLinkUrl != null && documentLinkUrl.isTextual() && documentUrl.equals(documentLinkUrl.asText());
+        }
+
+        return false;
     }
 }

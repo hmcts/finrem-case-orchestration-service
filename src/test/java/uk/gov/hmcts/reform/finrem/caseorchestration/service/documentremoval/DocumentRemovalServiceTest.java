@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -32,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -605,55 +605,70 @@ class DocumentRemovalServiceTest {
     }
 
     @Test
-    void shouldRemoveDocumentWithoutRemovingGeneralApplicationCollectionElement() {
-        String documentUrl = "https://example.com/123";
+    void testRemoveDocuments_GeneralApplicationDocument() throws Exception {
+        String documentToDeleteUrl = "https://example1.com/123";
+        String documentToKeepUrl = "https://example2.com/456";
 
-        CaseDocument document = CaseDocument.builder()
-            .documentUrl(documentUrl)
-            .documentFilename("document-to-delete.pdf")
-            .documentBinaryUrl("https://example.com/binary/123")
-            .build();
+        ObjectMapper objectMapper = createObjectMapper();
 
-        GeneralApplication generalApplication = GeneralApplication.builder()
-            .generalApplicationDocument(document)
-            .build();
+        FinremCaseData caseData = objectMapper.readValue(
+            """
+            {
+              "generalApplicationCollection": [
+                {
+                  "value": {
+                    "generalApplicationDocument": {
+                      "document_url": "https://example1.com/123",
+                      "document_filename": "Document-to-delete.pdf",
+                      "document_binary_url": "https://example1.com/binary"
+                    }
+                  }
+                },
+                {
+                  "value": {
+                    "generalApplicationDocument": {
+                      "document_url": "https://example2.com/456",
+                      "document_filename": "Document-to-keep.pdf",
+                      "document_binary_url": "https://example2.com/binary"
+                    }
+                  }
+                }
+              ],
+              "documentToKeepCollection": [
+                {
+                  "value": {
+                    "documentId": "456",
+                    "caseDocument": {
+                      "document_url": "https://example2.com/456",
+                      "document_filename": "Document-to-keep.pdf",
+                      "document_binary_url": "https://example2.com/binary"
+                    }
+                  }
+                }
+              ]
+            }
+            """,
+            FinremCaseData.class
+        );
 
-        FinremCaseData caseData = FinremCaseData.builder()
-            .generalApplicationWrapper(
-                GeneralApplicationWrapper.builder()
-                    .generalApplicationDocumentCollection(
-                        List.of(
-                            GeneralApplicationCollection.builder()
-                                .value(generalApplication)
-                                .build()
-                        )
-                    )
-                    .build()
-            )
-            .build();
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(false);
 
         FinremCaseData result =
             documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
 
-        assertNotNull(result);
-        assertNotNull(
+        List<GeneralApplicationCollection> generalApplicationCollection =
             result.getGeneralApplicationWrapper()
-                .getGeneralApplicationDocumentCollection()
-        );
+                .getGeneralApplicationDocumentCollection();
 
-        assertEquals(
-            1,
-            result.getGeneralApplicationWrapper()
-                .getGeneralApplicationDocumentCollection()
-                .size()
-        );
+        assertThat(generalApplicationCollection)
+            .extracting(GeneralApplicationCollection::getValue)
+            .extracting(GeneralApplication::getGeneralApplicationDocument)
+            .filteredOn(Objects::nonNull)
+            .extracting(CaseDocument::getDocumentUrl)
+            .contains(documentToKeepUrl)
+            .doesNotContain(documentToDeleteUrl);
 
-        assertNull(
-            result.getGeneralApplicationWrapper()
-                .getGeneralApplicationDocumentCollection()
-                .getFirst()
-                .getValue()
-                .getGeneralApplicationDocument()
-        );
+        assertNull(result.getDocumentToKeepCollection());
+        verifyNoInteractions(genericDocumentService);
     }
 }
