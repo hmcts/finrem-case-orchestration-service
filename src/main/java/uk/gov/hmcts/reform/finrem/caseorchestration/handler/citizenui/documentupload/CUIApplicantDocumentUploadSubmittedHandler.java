@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.documentupload;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentupload;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,12 +44,12 @@ public class CUIApplicantDocumentUploadSubmittedHandler extends CUIDocumentUploa
 
     @Override
     protected String noRecipientWarningMessage() {
-        return "No recipient email found for citizen applicant upload notification";
+        return "No recipient email found for citizen applicant uploaded notification";
     }
 
     @Override
     protected String correspondenceTaskDescription() {
-        return "Send citizen applicant upload documents correspondence";
+        return "Send citizen applicant uploaded documents correspondence";
     }
 
     @Override

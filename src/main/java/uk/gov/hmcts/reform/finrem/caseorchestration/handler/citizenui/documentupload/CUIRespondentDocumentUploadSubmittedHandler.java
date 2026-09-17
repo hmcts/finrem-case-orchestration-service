@@ -49,7 +49,7 @@ public class CUIRespondentDocumentUploadSubmittedHandler extends CUIDocumentUplo
 
     @Override
     protected String correspondenceTaskDescription() {
-        return "Send citizen respondent upload documents correspondence";
+        return "Send citizen respondent uploaded documents correspondence";
     }
 
     @Override
