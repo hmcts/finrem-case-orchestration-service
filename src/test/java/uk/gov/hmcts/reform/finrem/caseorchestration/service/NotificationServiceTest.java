@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.CUIDocumentUploadNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -130,7 +131,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_SOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CUI_UPLOAD_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CUI_DOCUMENTS_UPLOADED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 
@@ -148,6 +149,8 @@ class NotificationServiceTest {
     private CourtDetailsConfiguration courtDetailsConfiguration;
     @Mock
     private FeatureToggleService featureToggleService;
+    @Mock
+    private CUIDocumentUploadNotificationRequestMapper cuiDocumentUploadNotificationRequestMapper;
     @Mock
     private NotificationRequestMapper notificationRequestMapper;
     @Mock
@@ -252,18 +255,21 @@ class NotificationServiceTest {
                 .build()))
             .build());
 
-        notificationService.sendCitizenApplicantUploadDocumentsNotification(finremCaseDetails);
+        NotificationRequest expectedNotificationRequest = NotificationRequest.builder()
+            .caseReferenceNumber("12345")
+            .name("Victoria Goodman")
+            .notificationEmail(TEST_USER_EMAIL)
+            .contactCourtName("Nottingham FRC")
+            .contactCourtEmail("frc@justice.gov.uk")
+            .timeOfSubmission("3:45pm on 01/01/2026")
+            .build();
+        when(cuiDocumentUploadNotificationRequestMapper.build(finremCaseDetails, TEST_USER_EMAIL, "Victoria Goodman"))
+            .thenReturn(expectedNotificationRequest);
 
-        ArgumentCaptor<NotificationRequest> requestCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
-        verify(emailService).sendConfirmationEmail(requestCaptor.capture(), eq(FR_CUI_UPLOAD_DOCUMENT));
+        notificationService.sendCitizenApplicantDocumentsUploadedNotification(finremCaseDetails);
 
-        NotificationRequest captured = requestCaptor.getValue();
-        assertThat(captured.getNotificationEmail()).isEqualTo(TEST_USER_EMAIL);
-        assertThat(captured.getName()).isEqualTo("Victoria Goodman");
-        assertThat(captured.getCaseReferenceNumber()).isEqualTo("12345");
-        assertThat(captured.getContactCourtName()).isEqualTo("Nottingham FRC");
-        assertThat(captured.getContactCourtEmail()).isEqualTo("frc@justice.gov.uk");
-        assertThat(captured.getUploadTime()).matches("^\\d{1,2}:\\d{2}(am|pm) on \\d{2}/\\d{2}/\\d{4}$");
+        verify(cuiDocumentUploadNotificationRequestMapper).build(finremCaseDetails, TEST_USER_EMAIL, "Victoria Goodman");
+        verify(emailService).sendConfirmationEmail(expectedNotificationRequest, FR_CUI_DOCUMENTS_UPLOADED);
     }
 
     @Test
@@ -278,16 +284,21 @@ class NotificationServiceTest {
                 .build()))
             .build());
 
-        notificationService.sendCitizenRespondentUploadDocumentsNotification(finremCaseDetails);
+        NotificationRequest expectedNotificationRequest = NotificationRequest.builder()
+            .caseReferenceNumber("12345")
+            .name("David Goodman")
+            .notificationEmail("respondent@email.com")
+            .contactCourtName("")
+            .contactCourtEmail("frc@justice.gov.uk")
+            .timeOfSubmission("3:45pm on 01/01/2026")
+            .build();
+        when(cuiDocumentUploadNotificationRequestMapper.build(finremCaseDetails, "respondent@email.com", "David Goodman"))
+            .thenReturn(expectedNotificationRequest);
 
-        ArgumentCaptor<NotificationRequest> requestCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
-        verify(emailService).sendConfirmationEmail(requestCaptor.capture(), eq(FR_CUI_UPLOAD_DOCUMENT));
+        notificationService.sendCitizenRespondentDocumentsUploadedNotification(finremCaseDetails);
 
-        NotificationRequest captured = requestCaptor.getValue();
-        assertThat(captured.getNotificationEmail()).isEqualTo("respondent@email.com");
-        assertThat(captured.getName()).isEqualTo("David Goodman");
-        assertThat(captured.getContactCourtName()).isEmpty();
-        assertThat(captured.getContactCourtEmail()).isEqualTo("frc@justice.gov.uk");
+        verify(cuiDocumentUploadNotificationRequestMapper).build(finremCaseDetails, "respondent@email.com", "David Goodman");
+        verify(emailService).sendConfirmationEmail(expectedNotificationRequest, FR_CUI_DOCUMENTS_UPLOADED);
     }
 
     @Test

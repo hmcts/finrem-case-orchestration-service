@@ -76,7 +76,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CUI_UPLOAD_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CUI_DOCUMENTS_UPLOADED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL;
@@ -464,35 +464,35 @@ class EmailServiceTest {
     }
 
     @Test
-    void shouldBuildTemplateVarsForCuiUploadDocumentWithUploadTime() {
+    void shouldBuildTemplateVarsForCuiUploadDocumentWithTimeOfSubmission() {
         setContestedData();
-        notificationRequest.setUploadTime("3:45pm");
+        notificationRequest.setTimeOfSubmission("3:45pm");
 
-        Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CUI_UPLOAD_DOCUMENT.name());
+        Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CUI_DOCUMENTS_UPLOADED.name());
 
-        assertEquals("3:45pm", returnedTemplateVars.get("uploadTime"));
+        assertEquals("3:45pm", returnedTemplateVars.get("timeOfSubmission"));
         assertEquals(true, returnedTemplateVars.get("hasCourtName"));
     }
 
     @Test
     void shouldBuildTemplateVarsForCuiUploadDocumentWithoutCourtName() {
         notificationRequest.setCaseType(CONTESTED);
-        notificationRequest.setUploadTime("3:45pm");
+        notificationRequest.setTimeOfSubmission("3:45pm");
 
-        Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CUI_UPLOAD_DOCUMENT.name());
+        Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CUI_DOCUMENTS_UPLOADED.name());
 
-        assertEquals("3:45pm", returnedTemplateVars.get("uploadTime"));
+        assertEquals("3:45pm", returnedTemplateVars.get("timeOfSubmission"));
         assertEquals(false, returnedTemplateVars.get("hasCourtName"));
     }
 
     @Test
-    void shouldNotBuildUploadTimeForNonCuiTemplate() {
+    void shouldNotBuildTimeOfSubmissionForNonCuiTemplate() {
         setContestedData();
-        notificationRequest.setUploadTime("3:45pm");
+        notificationRequest.setTimeOfSubmission("3:45pm");
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL.name());
 
-        assertNull(returnedTemplateVars.get("uploadTime"));
+        assertNull(returnedTemplateVars.get("timeOfSubmission"));
     }
 
     @Test

@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremSubmittedCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -70,12 +71,44 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
         };
     }
 
-    protected abstract Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
-                                                                                       String userAuthorisation);
+    private Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
+                                                                           String userAuthorisation) {
+        return switch (notificationParty()) {
+            case CUI_APPLICANT -> notificationService.buildCitizenApplicantUploadDocumentsNotificationEvent(
+                callbackRequest.getCaseDetails(),
+                userAuthorisation
+            );
+            case CUI_RESPONDENT -> notificationService.buildCitizenRespondentDocumentsUploadedNotificationEvent(
+                callbackRequest.getCaseDetails(),
+                userAuthorisation
+            );
+            default -> throw new IllegalStateException("Unsupported notification party: " + notificationParty());
+        };
+    }
 
-    protected abstract String noRecipientWarningMessage();
+    private String noRecipientWarningMessage() {
+        return switch (notificationParty()) {
+            case CUI_APPLICANT -> "No recipient email found for citizen applicant upload notification";
+            case CUI_RESPONDENT -> "No recipient email found for citizen respondent upload notification";
+            default -> throw new IllegalStateException("Unsupported notification party: " + notificationParty());
+        };
+    }
 
-    protected abstract String correspondenceTaskDescription();
+    private String correspondenceTaskDescription() {
+        return switch (notificationParty()) {
+            case CUI_APPLICANT -> "Send citizen applicant upload documents correspondence";
+            case CUI_RESPONDENT -> "Send citizen respondent upload documents correspondence";
+            default -> throw new IllegalStateException("Unsupported notification party: " + notificationParty());
+        };
+    }
 
-    protected abstract String markAuditsActionName();
+    private String markAuditsActionName() {
+        return switch (notificationParty()) {
+            case CUI_APPLICANT -> "markCuiApplicantNotificationAuditAsSent";
+            case CUI_RESPONDENT -> "markCuiRespondentNotificationAuditAsSent";
+            default -> throw new IllegalStateException("Unsupported notification party: " + notificationParty());
+        };
+    }
+
+    protected abstract NotificationParty notificationParty();
 }

@@ -3,17 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.documentu
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
-
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -36,24 +33,7 @@ public class CUIRespondentDocumentUploadSubmittedHandler extends CUIDocumentUplo
     }
 
     @Override
-    protected Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        return notificationService.buildCitizenRespondentUploadDocumentsNotificationEvent(
-            callbackRequest.getCaseDetails(), userAuthorisation);
-    }
-
-    @Override
-    protected String noRecipientWarningMessage() {
-        return "No recipient email found for citizen respondent upload notification";
-    }
-
-    @Override
-    protected String correspondenceTaskDescription() {
-        return "Send citizen respondent uploaded documents correspondence";
-    }
-
-    @Override
-    protected String markAuditsActionName() {
-        return "markCuiRespondentNotificationAuditAsSent";
+    protected NotificationParty notificationParty() {
+        return NotificationParty.CUI_RESPONDENT;
     }
 }

@@ -66,14 +66,14 @@ class CUIRespondentDocumentUploadSubmittedHandlerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(notificationService.buildCitizenRespondentUploadDocumentsNotificationEvent(caseDetails, "auth"))
+        when(notificationService.buildCitizenRespondentDocumentsUploadedNotificationEvent(caseDetails, "auth"))
             .thenReturn(java.util.Optional.of(event));
         when(correspondenceEventAuditOrchestrationService.publishEvent(any(), anyString(), any()))
             .thenReturn(true);
         
         underTest.handle(callbackRequest, "auth");
 
-        verify(notificationService).buildCitizenRespondentUploadDocumentsNotificationEvent(caseDetails, "auth");
+        verify(notificationService).buildCitizenRespondentDocumentsUploadedNotificationEvent(caseDetails, "auth");
         verify(correspondenceEventAuditOrchestrationService).publishEvent(any(), anyString(), any());
         verify(correspondenceEventAuditOrchestrationService)
             .reconcileAndPersistAudits(caseDetails, event, "markCuiRespondentNotificationAuditAsSent");
@@ -91,12 +91,12 @@ class CUIRespondentDocumentUploadSubmittedHandlerTest {
             .eventType(EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD)
             .build();
 
-        when(notificationService.buildCitizenRespondentUploadDocumentsNotificationEvent(caseDetails, "auth"))
+        when(notificationService.buildCitizenRespondentDocumentsUploadedNotificationEvent(caseDetails, "auth"))
             .thenReturn(java.util.Optional.empty());
 
         underTest.handle(callbackRequest, "auth");
 
-        verify(notificationService).buildCitizenRespondentUploadDocumentsNotificationEvent(caseDetails, "auth");
+        verify(notificationService).buildCitizenRespondentDocumentsUploadedNotificationEvent(caseDetails, "auth");
         verify(correspondenceEventAuditOrchestrationService, never()).publishEvent(any(), anyString(), any());
     }
 }

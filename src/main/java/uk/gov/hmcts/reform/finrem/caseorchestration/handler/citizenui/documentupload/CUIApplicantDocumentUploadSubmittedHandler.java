@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentupload;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.documentupload;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -7,13 +7,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
-
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -36,24 +34,7 @@ public class CUIApplicantDocumentUploadSubmittedHandler extends CUIDocumentUploa
     }
 
     @Override
-    protected Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        return notificationService.buildCitizenApplicantUploadDocumentsNotificationEvent(
-            callbackRequest.getCaseDetails(), userAuthorisation);
-    }
-
-    @Override
-    protected String noRecipientWarningMessage() {
-        return "No recipient email found for citizen applicant uploaded notification";
-    }
-
-    @Override
-    protected String correspondenceTaskDescription() {
-        return "Send citizen applicant uploaded documents correspondence";
-    }
-
-    @Override
-    protected String markAuditsActionName() {
-        return "markCuiApplicantNotificationAuditAsSent";
+    protected NotificationParty notificationParty() {
+        return NotificationParty.CUI_APPLICANT;
     }
 }

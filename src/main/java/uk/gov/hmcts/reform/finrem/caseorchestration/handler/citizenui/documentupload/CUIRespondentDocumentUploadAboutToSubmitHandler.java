@@ -91,7 +91,7 @@ public class CUIRespondentDocumentUploadAboutToSubmitHandler extends CUIDocument
     @Override
     protected Optional<SendCorrespondenceEvent> buildSendCorrespondenceEvent(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        return notificationService.buildCitizenRespondentUploadDocumentsNotificationEvent(
+        return notificationService.buildCitizenRespondentDocumentsUploadedNotificationEvent(
             callbackRequest.getCaseDetails(),
             userAuthorisation
         );
