@@ -1167,8 +1167,7 @@ public class NotificationService {
     public Optional<SendCorrespondenceEvent> buildCitizenUploadDocumentsNotificationEvent(
         FinremCaseDetails caseDetails,
         String authToken,
-        NotificationParty notificationParty)
-    {
+        NotificationParty notificationParty) {
         return cuiNotificationRequestMapper.build(caseDetails, notificationParty)
             .map(notificationRequest -> SendCorrespondenceEvent.builder()
                 .caseDetails(caseDetails)
