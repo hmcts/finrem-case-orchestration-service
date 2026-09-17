@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,11 +48,14 @@ import static java.util.Optional.ofNullable;
 public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
+    protected final NotificationService notificationService;
 
     protected CUIDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
+                                                    CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
+                                                    NotificationService notificationService) {
         super(finremCaseDetailsMapper);
         this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
+        this.notificationService = notificationService;
     }
 
     /**

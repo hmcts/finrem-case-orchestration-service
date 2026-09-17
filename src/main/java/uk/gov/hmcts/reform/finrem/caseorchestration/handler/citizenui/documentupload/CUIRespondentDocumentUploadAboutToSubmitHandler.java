@@ -36,15 +36,13 @@ import java.util.Optional;
 public class CUIRespondentDocumentUploadAboutToSubmitHandler extends CUIDocumentUploadAboutToSubmitHandler {
 
     private final FeatureToggleService featureToggleService;
-    private final NotificationService notificationService;
 
     public CUIRespondentDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                             FeatureToggleService featureToggleService,
                                                             CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
                                                             NotificationService notificationService) {
-        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService);
+        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, notificationService);
         this.featureToggleService = featureToggleService;
-        this.notificationService = notificationService;
     }
 
     /**
