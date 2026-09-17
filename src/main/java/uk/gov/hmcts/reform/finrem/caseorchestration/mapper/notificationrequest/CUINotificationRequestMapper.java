@@ -18,11 +18,24 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 
+/**
+ * Maps CUI document upload data into a notification request.
+ *
+ * <p>Recipient details are resolved by {@link NotificationParty}. If the selected party has no
+ * email address, this mapper returns {@link Optional#empty()} so handlers can skip publishing.
+ */
 @Service
 public class CUINotificationRequestMapper {
 
     private static final DateTimeFormatter TIME_OF_SUBMISSION_FORMAT = DateTimeFormatter.ofPattern("h:mma 'on' dd/MM/yyyy");
 
+    /**
+     * Builds a notification request for the CUI applicant/respondent document upload confirmation email.
+     *
+     * @param caseDetails finrem case details
+     * @param notificationParty target notification party
+     * @return populated notification request when recipient email exists; otherwise empty
+     */
     public Optional<NotificationRequest> build(FinremCaseDetails caseDetails, NotificationParty notificationParty) {
         Recipient recipient = getRecipient(caseDetails, notificationParty);
 
@@ -41,6 +54,9 @@ public class CUINotificationRequestMapper {
             .build());
     }
 
+    /**
+     * Resolves citizen name and email address for the target notification party.
+     */
     private Recipient getRecipient(FinremCaseDetails caseDetails, NotificationParty notificationParty) {
         return switch (notificationParty) {
             case CUI_APPLICANT -> new Recipient(
@@ -55,6 +71,9 @@ public class CUINotificationRequestMapper {
         };
     }
 
+    /**
+     * Returns the FRC name for first in-person hearing, otherwise empty string.
+     */
     private String getCitizenUploadCourtName(FinremCaseDetails caseDetails) {
         if (!isFirstHearingInPerson(caseDetails.getData())) {
             return "";
@@ -64,10 +83,16 @@ public class CUINotificationRequestMapper {
         return StringUtils.hasText(frcName) ? frcName : "";
     }
 
+    /**
+     * Returns the FRC email or empty string when missing.
+     */
     private String getCitizenUploadCourtEmail(FinremCaseDetails caseDetails) {
         return ofNullable(caseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcEmail()).orElse("");
     }
 
+    /**
+     * Determines whether the first hearing is in-person.
+     */
     private boolean isFirstHearingInPerson(FinremCaseData caseData) {
         return ofNullable(caseData.getManageHearingsWrapper().getHearings())
             .filter(hearings -> !hearings.isEmpty())
@@ -77,6 +102,9 @@ public class CUINotificationRequestMapper {
             .orElse(false);
     }
 
+    /**
+     * Formats current UK time for email template variable `timeOfSubmission`.
+     */
     private String getCitizenUploadTime() {
         return TIME_OF_SUBMISSION_FORMAT.format(ZonedDateTime.now(ZoneId.of("Europe/London"))).toLowerCase();
     }

@@ -15,6 +15,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
+/**
+ * Orchestrates correspondence notifications for callback handlers.
+ *
+ * <p>The expected correspondence flow is:
+ * <ol>
+ *     <li>Create pending audit rows before submit</li>
+ *     <li>Publish correspondence event on submit</li>
+ *     <li>Reconcile and persist audit rows after successful publish</li>
+ * </ol>
+ */
 @Service
 @RequiredArgsConstructor
 public class CorrespondenceEventAuditOrchestrationService {
@@ -24,12 +34,25 @@ public class CorrespondenceEventAuditOrchestrationService {
     private final NotificationAuditService notificationAuditService;
     private final CoreCaseDataService coreCaseDataService;
 
+    /**
+     * Creates pending notification audit rows when a correspondence event is available.
+     *
+     * @param event optional correspondence event
+     * @param eventType callback event type used for audit metadata
+     */
     public void createPendingAudits(Optional<SendCorrespondenceEvent> event, EventType eventType) {
         event.ifPresent(sendCorrespondenceEvent ->
             notificationAuditService.createAuditsForCorrespondence(sendCorrespondenceEvent, eventType)
         );
     }
 
+    /**
+     * Publishes a correspondence event with retries.
+     *
+     * @param event correspondence event to publish
+     * @param actionName action label used for retry/audit logging
+     * @return true when publishing succeeds; false when retries are exhausted
+     */
     public boolean publishEvent(SendCorrespondenceEvent event, String actionName) {
         AtomicBoolean success = new AtomicBoolean(true);
 
@@ -45,6 +68,13 @@ public class CorrespondenceEventAuditOrchestrationService {
         return success.get();
     }
 
+    /**
+     * Reconciles notification audit rows and persists any updates to CCD.
+     *
+     * @param caseDetails case details used for post-submit update
+     * @param event published correspondence event used for reconciliation
+     * @param actionName action label used for retry/audit logging
+     */
     public void reconcileAndPersistAudits(FinremCaseDetails caseDetails,
                                           SendCorrespondenceEvent event,
                                           String actionName) {
