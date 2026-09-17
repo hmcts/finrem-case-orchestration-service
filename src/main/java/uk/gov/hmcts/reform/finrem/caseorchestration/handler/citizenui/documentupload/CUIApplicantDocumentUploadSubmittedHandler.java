@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentsUploadedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -19,10 +19,10 @@ public class CUIApplicantDocumentUploadSubmittedHandler extends CUIDocumentUploa
     public CUIApplicantDocumentUploadSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                       EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                       RetryExecutor retryExecutor,
-                                                      CUIDocumentsUploadedCorresponder cuiDocumentsUploadedCorresponder,
+                                                      CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
                                                       CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor,
-            cuiDocumentsUploadedCorresponder, correspondenceEventAuditOrchestrationService);
+            citizenDocumentsUploadedCorresponder, correspondenceEventAuditOrchestrationService);
     }
 
     @Override

@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentsUploadedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser;
 
 import java.util.List;
@@ -39,8 +39,8 @@ public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentU
     public CUIApplicantDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            FeatureToggleService featureToggleService,
                                                            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
-                                                           CUIDocumentsUploadedCorresponder cuiDocumentsUploadedCorresponder) {
-        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, cuiDocumentsUploadedCorresponder);
+                                                           CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder) {
+        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder);
         this.featureToggleService = featureToggleService;
     }
 

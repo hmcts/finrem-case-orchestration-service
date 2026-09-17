@@ -9,9 +9,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CUIDocumentsUploadedCorresponderTest {
+class CitizenDocumentsUploadedCorresponderTest {
 
-    private final CUIDocumentsUploadedCorresponder underTest = new CUIDocumentsUploadedCorresponder();
+    private final CitizenDocumentsUploadedCorresponder underTest = new CitizenDocumentsUploadedCorresponder();
 
     @Test
     void shouldBuildEventForCitizenApplicantWhenEmailPresent() {

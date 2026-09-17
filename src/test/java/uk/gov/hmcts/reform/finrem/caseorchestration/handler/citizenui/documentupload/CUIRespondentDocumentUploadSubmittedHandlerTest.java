@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CUIDocumentsUploadedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -32,7 +32,7 @@ class CUIRespondentDocumentUploadSubmittedHandlerTest {
     private CUIRespondentDocumentUploadSubmittedHandler underTest;
 
     @Mock
-    private CUIDocumentsUploadedCorresponder cuiDocumentsUploadedCorresponder;
+    private CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder;
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
@@ -67,14 +67,14 @@ class CUIRespondentDocumentUploadSubmittedHandlerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(cuiDocumentsUploadedCorresponder.buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT))
+        when(citizenDocumentsUploadedCorresponder.buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT))
             .thenReturn(event);
         when(correspondenceEventAuditOrchestrationService.publishEvent(any(), anyString()))
             .thenReturn(true);
         
         underTest.handle(callbackRequest, "auth");
 
-        verify(cuiDocumentsUploadedCorresponder).buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT);
+        verify(citizenDocumentsUploadedCorresponder).buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT);
         verify(correspondenceEventAuditOrchestrationService).publishEvent(any(), anyString());
         verify(correspondenceEventAuditOrchestrationService)
             .reconcileAndPersistAudits(caseDetails, event, "markPendingNotificationsAsSent");
@@ -96,14 +96,14 @@ class CUIRespondentDocumentUploadSubmittedHandlerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(cuiDocumentsUploadedCorresponder.buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT))
+        when(citizenDocumentsUploadedCorresponder.buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT))
             .thenReturn(event);
         when(correspondenceEventAuditOrchestrationService.publishEvent(any(), anyString()))
             .thenReturn(false);
 
         underTest.handle(callbackRequest, "auth");
 
-        verify(cuiDocumentsUploadedCorresponder).buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT);
+        verify(citizenDocumentsUploadedCorresponder).buildCorrespondenceEvent(caseDetails, "auth", NotificationParty.CITIZEN_RESPONDENT);
         verify(correspondenceEventAuditOrchestrationService).publishEvent(any(), anyString());
         verify(correspondenceEventAuditOrchestrationService, never())
             .reconcileAndPersistAudits(any(), any(), anyString());

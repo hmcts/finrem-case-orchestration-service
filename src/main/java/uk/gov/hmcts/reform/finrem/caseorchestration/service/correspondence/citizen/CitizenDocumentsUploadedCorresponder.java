@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
  * {@link FinremCaseDetails} using the supplied {@link NotificationParty}.</p>
  */
 @Service
-public class CUIDocumentsUploadedCorresponder {
+public class CitizenDocumentsUploadedCorresponder {
 
     private static final DateTimeFormatter TIME_OF_SUBMISSION_FORMAT = DateTimeFormatter.ofPattern("h:mma 'on' dd/MM/yyyy");
 
