@@ -54,7 +54,7 @@ public class ReassignJudgeSubmittedHandler extends FinremSubmittedCallbackHandle
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         List<String> errors = new ArrayList<>();
-        errors.addAll(sendAssignToJudgeCorrespondences(caseDetails, userAuthorisation));
+        errors.addAll(sendAssignToJudgeCorrespondences(callbackRequest.getEventType(), caseDetails, userAuthorisation));
 
         boolean isHavingErrors = !StringUtils.isAllBlank(errors.toArray(new String[0]));
 
@@ -67,9 +67,9 @@ public class ReassignJudgeSubmittedHandler extends FinremSubmittedCallbackHandle
         }
     }
 
-    private List<String> sendAssignToJudgeCorrespondences(FinremCaseDetails caseDetails, String userAuthorisation) {
+    private List<String> sendAssignToJudgeCorrespondences(EventType eventType, FinremCaseDetails caseDetails, String userAuthorisation) {
         List<SendCorrespondenceEvent> events = assignToJudgeCorresponder
-            .buildSendCorrespondenceEvents(caseDetails, userAuthorisation);
+            .buildSendCorrespondenceEvents(eventType, caseDetails, userAuthorisation);
 
         List<String> errors = new ArrayList<>();
         for (SendCorrespondenceEvent event : events) {

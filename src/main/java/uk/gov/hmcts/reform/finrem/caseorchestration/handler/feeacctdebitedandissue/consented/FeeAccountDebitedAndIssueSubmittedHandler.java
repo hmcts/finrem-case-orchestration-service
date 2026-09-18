@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractIs
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -20,9 +21,10 @@ public class FeeAccountDebitedAndIssueSubmittedHandler extends AbstractIssueAppl
                                                      RetryExecutor retryExecutor,
                                                      AssignToJudgeCorresponder assignToJudgeCorresponder,
                                                      AssignPartiesAccessService assignPartiesAccessService,
-                                                     ApplicationEventPublisher applicationEventPublisher) {
+                                                     ApplicationEventPublisher applicationEventPublisher,
+                                                     NotificationAuditService notificationAuditService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor, assignToJudgeCorresponder,
-            assignPartiesAccessService, applicationEventPublisher);
+            assignPartiesAccessService, applicationEventPublisher, notificationAuditService);
     }
 
     @Override

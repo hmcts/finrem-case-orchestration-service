@@ -43,7 +43,8 @@ public class AssignToJudgeCorresponder {
     private final NotificationAuditService notificationAuditService;
 
     public void createAuditsForCorrespondence(EventType eventType, FinremCaseDetails finremCaseDetails, String userAuthorisation) {
-        List<SendCorrespondenceEvent> events = buildSendCorrespondenceEventsForAuditCreation(finremCaseDetails, userAuthorisation);
+        List<SendCorrespondenceEvent> events = buildSendCorrespondenceEventsForAuditCreation(eventType, finremCaseDetails,
+            userAuthorisation);
         String trackerId = null;
         for (SendCorrespondenceEvent event : events) {
             if (nonNull(trackerId)) {
@@ -53,23 +54,26 @@ public class AssignToJudgeCorresponder {
         }
     }
 
-    public List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(FinremCaseDetails finremCaseDetails,
+    public List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(EventType eventType, FinremCaseDetails finremCaseDetails,
                                                                        String authToken) {
-        return buildSendCorrespondenceEvents(finremCaseDetails, false, authToken);
+        return buildSendCorrespondenceEvents(eventType, finremCaseDetails, false, authToken);
     }
 
-    public List<SendCorrespondenceEvent> buildSendCorrespondenceEventsForAuditCreation(FinremCaseDetails finremCaseDetails,
+    public List<SendCorrespondenceEvent> buildSendCorrespondenceEventsForAuditCreation(EventType eventType,
+                                                                                       FinremCaseDetails finremCaseDetails,
                                                                                        String authToken) {
-        return buildSendCorrespondenceEvents(finremCaseDetails, true, authToken);
+        return buildSendCorrespondenceEvents(eventType, finremCaseDetails, true, authToken);
     }
 
     // replacing FinremSingleLetterOrEmailAllPartiesCorresponder.sendCorrespondence
-    private List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(FinremCaseDetails finremCaseDetails, boolean doNotGenerateReport,
-                                                                       String authToken) {
+    private List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(EventType eventType,
+                                                                        FinremCaseDetails finremCaseDetails,
+                                                                        boolean doNotGenerateReport, String authToken) {
         List<SendCorrespondenceEvent> events = new ArrayList<>();
         events.add(
             // replacing sendApplicantCorrespondence
             SendCorrespondenceEvent.builder()
+                .eventId(eventType.name())
                 .caseDetails(finremCaseDetails)
                 .notificationParties(List.of(NotificationParty.APPLICANT))
                 .emailTemplate(EMAIL_TEMPLATE)
@@ -83,6 +87,7 @@ public class AssignToJudgeCorresponder {
         events.add(
             // replacing sendRespondentCorrespondence
             SendCorrespondenceEvent.builder()
+                .eventId(eventType.name())
                 .caseDetails(finremCaseDetails)
                 .notificationParties(List.of(NotificationParty.RESPONDENT))
                 .emailTemplate(EMAIL_TEMPLATE)
@@ -99,6 +104,7 @@ public class AssignToJudgeCorresponder {
             interveners.forEach(intervenerWrapper ->
                 events.add(
                     SendCorrespondenceEvent.builder()
+                        .eventId(eventType.name())
                         .caseDetails(finremCaseDetails)
                         .notificationParties(List.of(NotificationParty.getNotificationPartyFromRole(intervenerWrapper
                             .getIntervenerSolicitorCaseRole().name())))

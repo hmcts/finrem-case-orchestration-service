@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
@@ -28,9 +29,10 @@ public class HwfAcceptedAndIssueSubmittedHandler extends AbstractIssueApplicatio
                                                AssignToJudgeCorresponder assignToJudgeCorresponder,
                                                AssignPartiesAccessService assignPartiesAccessService,
                                                ApplicationEventPublisher applicationEventPublisher,
-                                               HwfCorrespondenceService hwfNotificationsService) {
+                                               HwfCorrespondenceService hwfNotificationsService,
+                                               NotificationAuditService notificationAuditService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor, assignToJudgeCorresponder,
-            assignPartiesAccessService, applicationEventPublisher);
+            assignPartiesAccessService, applicationEventPublisher, notificationAuditService);
         this.hwfNotificationsService = hwfNotificationsService;
     }
 
