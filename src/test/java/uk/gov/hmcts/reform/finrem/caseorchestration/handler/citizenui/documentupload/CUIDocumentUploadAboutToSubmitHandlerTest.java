@@ -12,14 +12,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 class CUIDocumentUploadAboutToSubmitHandlerTest {
@@ -106,20 +115,50 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("handlers")
+    void handle_shouldCreateNotificationAuditRowsWhenCorrespondenceEventExists(HandlerCase handlerCase) {
+        FinremCaseData before = new FinremCaseData();
+        FinremCaseData current = caseDataFor(handlerCase.party, List.of(doc(LocalDateTime.of(2024, 3, 1, 10, 0))));
+        FinremCallbackRequest request = buildRequest(current, before, handlerCase.eventType);
+
+        handlerCase.handler.handle(request, "auth");
+
+        verify(handlerCase.correspondenceEventAuditOrchestrationService).createPendingAudits(any(), eq(handlerCase.eventType));
+        verify(handlerCase.citizenDocumentsUploadedCorresponder).buildCorrespondenceEvent(
+            any(),
+            anyString(),
+            eq(handlerCase.party == Party.APPLICANT
+                ? NotificationParty.CITIZEN_APPLICANT
+                : NotificationParty.CITIZEN_RESPONDENT)
+        );
+    }
+
     private static Stream<HandlerCase> handlers() {
         FinremCaseDetailsMapper mapper = mock(FinremCaseDetailsMapper.class);
         FeatureToggleService featureToggleService = mock(FeatureToggleService.class);
+        CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService =
+            mock(CorrespondenceEventAuditOrchestrationService.class);
+        CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder = mock(CitizenDocumentsUploadedCorresponder.class);
+        when(citizenDocumentsUploadedCorresponder.buildCorrespondenceEvent(any(), anyString(), any()))
+            .thenReturn(SendCorrespondenceEvent.builder().build());
 
         return Stream.of(
             new HandlerCase(
-                new CUIApplicantDocumentUploadAboutToSubmitHandler(mapper, featureToggleService),
+                new CUIApplicantDocumentUploadAboutToSubmitHandler(mapper, featureToggleService,
+                    correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder),
                 EventType.CUI_APPLICANT_DOCUMENT_UPLOAD,
-                Party.APPLICANT
+                Party.APPLICANT,
+                correspondenceEventAuditOrchestrationService,
+                citizenDocumentsUploadedCorresponder
             ),
             new HandlerCase(
-                new CUIRespondentDocumentUploadAboutToSubmitHandler(mapper, featureToggleService),
+                new CUIRespondentDocumentUploadAboutToSubmitHandler(mapper, featureToggleService,
+                    correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder),
                 EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD,
-                Party.RESPONDENT
+                Party.RESPONDENT,
+                correspondenceEventAuditOrchestrationService,
+                citizenDocumentsUploadedCorresponder
             )
         );
     }
@@ -178,7 +217,9 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
     private record HandlerCase(
         CUIDocumentUploadAboutToSubmitHandler handler,
         EventType eventType,
-        Party party
+        Party party,
+        CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
+        CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder
     ) {
     }
 }

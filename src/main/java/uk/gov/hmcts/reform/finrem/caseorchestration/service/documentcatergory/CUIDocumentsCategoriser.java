@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 
 import java.util.List;
 
-public class CuiDocumentsCategoriser extends DocumentCategoriser {
+public class CUIDocumentsCategoriser extends DocumentCategoriser {
 
     public enum Party {
         APPLICANT,
@@ -19,7 +19,7 @@ public class CuiDocumentsCategoriser extends DocumentCategoriser {
 
     private final Party party;
 
-    public CuiDocumentsCategoriser(FeatureToggleService service, Party party) {
+    public CUIDocumentsCategoriser(FeatureToggleService service, Party party) {
         super(service);
         this.party = party;
     }
