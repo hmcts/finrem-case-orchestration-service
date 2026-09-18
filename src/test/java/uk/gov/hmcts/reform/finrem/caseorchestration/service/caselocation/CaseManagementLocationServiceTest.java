@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -21,47 +20,39 @@ class CaseManagementLocationServiceTest {
     }
 
     @Test
-    void shouldReturnCaseLocationForKnownCourt() {
+    void shouldReturnNullWhenCourtListDoesNotExist() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("consentOrderFRCName", "ABERYSTWYTH JUSTICE CENTRE");
-
-        CaseLocation result = service.getCaseLocation(caseData);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getBaseLocation()).isEqualTo("827534");
-        assertThat(result.getRegion()).isEqualTo("7");
-    }
-
-    @Test
-    void shouldReturnCaseLocationWhenCourtNameMatchesIgnoringCase() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("consentOrderFRCName", "Aberystwyth justice centre");
-
-        CaseLocation result = service.getCaseLocation(caseData);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getBaseLocation()).isEqualTo("827534");
-        assertThat(result.getRegion()).isEqualTo("7");
-    }
-
-    @Test
-    void shouldReturnNullWhenCourtNameDoesNotExist() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("consentOrderFRCName", "Unknown Court");
+        caseData.put("someOtherField", "value");
 
         assertThat(service.getCaseLocation(caseData)).isNull();
     }
 
     @Test
-    void shouldReturnNullWhenCourtNameIsBlank() {
+    void shouldReturnNullWhenCourtListValueIsUnknown() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("consentOrderFRCName", " ");
+        caseData.put("regionMiddleCourtList", "Unknown Court");
 
         assertThat(service.getCaseLocation(caseData)).isNull();
     }
 
     @Test
-    void shouldReturnNullWhenCourtNameIsMissing() {
+    void shouldReturnNullWhenCourtListValueIsBlank() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("regionMiddleCourtList", " ");
+
+        assertThat(service.getCaseLocation(caseData)).isNull();
+    }
+
+    @Test
+    void shouldReturnNullWhenCourtListValueIsNull() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("regionMiddleCourtList", null);
+
+        assertThat(service.getCaseLocation(caseData)).isNull();
+    }
+
+    @Test
+    void shouldReturnNullWhenCaseDataIsEmpty() {
         assertThat(service.getCaseLocation(new HashMap<>())).isNull();
     }
 }

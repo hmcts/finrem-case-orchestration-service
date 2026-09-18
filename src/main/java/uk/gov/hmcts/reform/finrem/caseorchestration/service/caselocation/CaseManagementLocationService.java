@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CourtRefData;
@@ -11,35 +10,32 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Service responsible for resolving CCD case location details
- * (base location and region) from the selected Financial Remedies Court (FRC).
+ * Service responsible for determining CCD case location details
+ * (base location and region) from the Financial Remedies Court
+ * selected on a case.
  *
- * <p>The service loads court reference data from the
- * {@code /json/court-ref-data.json} configuration file during application startup
- * and creates an in-memory lookup for efficient court name searches.</p>
+ * Court reference data is loaded from
+ * /json/court-ref-data.json during application startup and cached
+ * in memory for efficient lookups.
  *
- * <p>When a case contains a {@code consentOrderFRCName} value, the service
- * attempts to find the corresponding court reference data and returns a
- * {@link uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation}
- * populated with the court's Epimms base location and region identifier.</p>
+ * The service searches case data for the selected court field
+ * (ending with "CourtList"), resolves the corresponding court
+ * reference data, and returns a CaseLocation containing the
+ * Epimms base location and region identifier.
  *
- * <p>If the court name is blank or no matching court is found,
- * {@code null} is returned.</p>
+ * Returns null when no court can be identified or mapped.
  */
-
 @Service
 @Slf4j
 public class CaseManagementLocationService {
 
-    private static final String CONSENT_ORDER_FRC_NAME = "consentOrderFRCName";
     private static final String COURT_REF_DATA_FILE = "/json/court-ref-data.json";
+    private static final String COURT_LIST_SUFFIX = "CourtList";
 
     private final Map<String, CourtRefData> courtsByName;
 
@@ -48,31 +44,56 @@ public class CaseManagementLocationService {
                  CourtDetailsConfiguration.class.getResourceAsStream(COURT_REF_DATA_FILE)) {
 
             if (inputStream == null) {
-                throw new IOException("Unable to load court reference data from " + COURT_REF_DATA_FILE);
+                throw new IOException(
+                    "Unable to load court reference data from " + COURT_REF_DATA_FILE
+                );
             }
-            List<CourtRefData> courtsRefDataList = objectMapper.readValue(
-                inputStream,
-                new TypeReference<List<CourtRefData>>() {
-                }
-            );
-            this.courtsByName = courtsRefDataList.stream()
+
+            this.courtsByName = objectMapper.readValue(
+                    inputStream,
+                    new TypeReference<Map<String, CourtRefData>>() {
+                    })
+                .entrySet()
+                .stream()
                 .collect(Collectors.toMap(
-                    court -> court.getCourtName().toLowerCase(),
-                    Function.identity()
+                    entry -> entry.getKey().toLowerCase(Locale.UK),
+                    Map.Entry::getValue
                 ));
         }
     }
 
+    /**
+     * Resolves the CCD case location from the selected court.
+     *
+     * @param caseData CCD case data
+     * @return CaseLocation containing base location and region,
+     *         or null if no matching court is found
+     */
     public CaseLocation getCaseLocation(Map<String, Object> caseData) {
-        String courtName = (String) caseData.get(CONSENT_ORDER_FRC_NAME);
-        if (StringUtils.isBlank(courtName)) {
+
+        Map.Entry<String, Object> courtEntry = caseData.entrySet()
+            .stream()
+            .filter(entry -> entry.getKey().endsWith(COURT_LIST_SUFFIX))
+            .findFirst()
+            .orElse(null);
+
+        if (courtEntry == null || courtEntry.getValue() == null) {
+            log.warn("No court list field found in case data");
             return null;
         }
-        CourtRefData courtRefData = courtsByName.get(courtName.toLowerCase(Locale.UK));
+
+        String courtName = courtEntry.getValue()
+            .toString()
+            .trim()
+            .toLowerCase(Locale.UK);
+
+        CourtRefData courtRefData = courtsByName.get(courtName);
+
         if (courtRefData == null) {
             log.warn("No court reference data found for court name: {}", courtName);
             return null;
         }
+
         return buildCaseLocation(courtRefData);
     }
 
