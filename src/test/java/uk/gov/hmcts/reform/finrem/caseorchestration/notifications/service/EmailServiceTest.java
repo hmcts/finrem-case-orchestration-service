@@ -42,6 +42,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.NotificationConstants.PHONE_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.APPLICANT_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.BARRISTER_REFERENCE_NUMBER;
@@ -464,7 +468,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void shouldBuildTemplateVarsForCuiUploadDocumentWithTimeOfSubmission() {
+    void shouldBuildTemplateVarsForCitizenDocumentUploadWhenCourtNameIsSet() {
         setContestedData();
         notificationRequest.setTimeOfSubmission("3:45pm");
 
@@ -475,7 +479,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void shouldBuildTemplateVarsForCuiUploadDocumentWithoutCourtName() {
+    void shouldBuildTemplateVarsForCitizenDocumentUploadWhenCourtNameIsNotSet() {
         notificationRequest.setCaseType(CONTESTED);
         notificationRequest.setTimeOfSubmission("3:45pm");
 
@@ -483,16 +487,6 @@ class EmailServiceTest {
 
         assertEquals("3:45pm", returnedTemplateVars.get("timeOfSubmission"));
         assertEquals(false, returnedTemplateVars.get("hasCourtName"));
-    }
-
-    @Test
-    void shouldNotBuildTimeOfSubmissionForNonCuiTemplate() {
-        setContestedData();
-        notificationRequest.setTimeOfSubmission("3:45pm");
-
-        Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL.name());
-
-        assertNull(returnedTemplateVars.get("timeOfSubmission"));
     }
 
     @Test
