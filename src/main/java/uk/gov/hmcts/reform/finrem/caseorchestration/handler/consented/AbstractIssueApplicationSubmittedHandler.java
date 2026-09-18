@@ -117,7 +117,8 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
                 ),
                 caseDetails.getCaseIdAsString(),
                 (exception, actionName, caseId1) ->
-                    errors.add("There was a problem sending issue application correspondence. Please send it manually."));
+                    errors.add("There was a problem sending issue application correspondence (%s). Please send it manually."
+                        .formatted(event.describeNotificationParties())));
         }
         return errors;
     }
