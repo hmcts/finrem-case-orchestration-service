@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractIssueApplicationAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
@@ -17,10 +16,8 @@ public class FeeAccountDebitedAndIssueAboutToSubmitHandler extends AbstractIssue
     public FeeAccountDebitedAndIssueAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                          OnlineFormDocumentService onlineFormDocumentService,
                                                          IssueApplicationService issueApplicationService,
-                                                         NotificationAuditService notificationAuditService,
                                                          AssignToJudgeCorresponder assignToJudgeCorresponder) {
-        super(finremCaseDetailsMapper, onlineFormDocumentService, issueApplicationService, notificationAuditService,
-            assignToJudgeCorresponder);
+        super(finremCaseDetailsMapper, onlineFormDocumentService, issueApplicationService, assignToJudgeCorresponder);
     }
 
     @Override

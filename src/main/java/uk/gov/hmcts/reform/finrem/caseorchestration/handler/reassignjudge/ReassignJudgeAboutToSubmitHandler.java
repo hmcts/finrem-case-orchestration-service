@@ -12,13 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
-
-import java.util.List;
-
-import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
@@ -26,14 +20,11 @@ public class ReassignJudgeAboutToSubmitHandler extends FinremAboutToSubmitCallba
 
     private final AssignToJudgeCorresponder assignToJudgeCorresponder;
 
-    private final NotificationAuditService notificationAuditService;
 
     public ReassignJudgeAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                             AssignToJudgeCorresponder assignToJudgeCorresponder,
-                                             NotificationAuditService notificationAuditService) {
+                                             AssignToJudgeCorresponder assignToJudgeCorresponder) {
         super(finremCaseDetailsMapper);
         this.assignToJudgeCorresponder = assignToJudgeCorresponder;
-        this.notificationAuditService = notificationAuditService;
     }
 
     @Override
@@ -49,21 +40,8 @@ public class ReassignJudgeAboutToSubmitHandler extends FinremAboutToSubmitCallba
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        createAuditsForCorrespondence(callbackRequest, userAuthorisation);
+        assignToJudgeCorresponder.createAuditsForCorrespondence(callbackRequest.getEventType(), caseDetails, userAuthorisation);
 
         return response(caseDetails.getData());
-    }
-
-    private void createAuditsForCorrespondence(FinremCallbackRequest callbackRequest,
-                                               String userAuthorisation) {
-        List<SendCorrespondenceEvent> events = assignToJudgeCorresponder
-            .buildSendCorrespondenceEvents(callbackRequest.getCaseDetails(), userAuthorisation);
-        String trackerId = null;
-        for (SendCorrespondenceEvent event : events) {
-            if (nonNull(trackerId)) {
-                event.setNotificationTrackerId(trackerId);
-            }
-            trackerId = notificationAuditService.createAuditsForCorrespondence(event, callbackRequest.getEventType());
-        }
     }
 }
