@@ -308,7 +308,7 @@ public class ContactDetailsValidator {
         return null;
     }
 
-    /*
+    /**
      * Validates the applicant solicitor's email address based on the case type and representation status.
      * Returns true if the email address is valid or not required, and false if it is invalid. Any validation
      * errors are added to the provided errors list.
@@ -355,7 +355,7 @@ public class ContactDetailsValidator {
         }
     }
 
-    /*
+    /**
      * Validates the respondent solicitor's email address based on the case type and representation status.
      * Returns true if the email address is valid or not required, and false if it is invalid. Any validation
      * errors are added to the provided errors list.
@@ -526,13 +526,13 @@ public class ContactDetailsValidator {
     private static void checkForMissingApplicantPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                               EventType eventType, List<String> errors) {
         if (caseData.isApplicantRepresentedByASolicitor()) {
-            if (postalAddressIsMissing(wrapper.getAppSolicitorAddress(caseData.getCcdCaseType()))) {
+            if (postalAddressIsMissing(wrapper.getAppSolicitorAddress(caseData.getCcdCaseType()), YesOrNo.NO)) {
                 errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant solicitor", eventType.getDisplayName()));
             }
             return;
         }
 
-        if (postalAddressIsMissing(wrapper.getApplicantAddress())) {
+        if (postalAddressIsMissing(wrapper.getApplicantAddress(), wrapper.getApplicantResideOutsideUK())) {
             errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Applicant", eventType.getDisplayName()));
         }
     }
@@ -540,23 +540,23 @@ public class ContactDetailsValidator {
     private static void checkForMissingRespondentPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                                EventType eventType, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()) {
-            if (postalAddressIsMissing(wrapper.getRespSolicitorAddress(caseData.getCcdCaseType()))) {
+            if (postalAddressIsMissing(wrapper.getRespSolicitorAddress(caseData.getCcdCaseType()), YesOrNo.NO)) {
                 errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent solicitor", eventType.getDisplayName()));
             }
             return;
         }
 
-        if (postalAddressIsMissing(wrapper.getRespondentAddress())) {
+        if (postalAddressIsMissing(wrapper.getRespondentAddress(), wrapper.getRespondentResideOutsideUK())) {
             errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent", eventType.getDisplayName()));
         }
     }
 
-    private static boolean postalAddressIsMissing(Address address) {
+    private static boolean postalAddressIsMissing(Address address, YesOrNo resideOutsideUK) {
         if (address == null || address.isEmpty()) {
             return true;
         }
 
         return isBlank(address.getAddressLine1())
-            || postCodeIsInvalid(address);
+            || postCodeIsInvalid(address, resideOutsideUK);
     }
 }
