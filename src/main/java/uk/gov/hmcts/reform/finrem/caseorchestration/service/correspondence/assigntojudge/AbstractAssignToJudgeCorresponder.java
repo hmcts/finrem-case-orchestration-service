@@ -8,12 +8,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CorresponderBase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 
@@ -37,7 +43,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
  */
 @Component
 @Slf4j
-public abstract class AbstractAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
+public abstract class AbstractAssignToJudgeCorresponder
+    extends
+    CorresponderBase<FinremCaseDetails>
+{
+
+    private final NotificationService notificationService;
 
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
@@ -46,36 +57,40 @@ public abstract class AbstractAssignToJudgeCorresponder extends FinremSingleLett
     private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
 
     protected AbstractAssignToJudgeCorresponder(NotificationService notificationService,
-                                                BulkPrintService bulkPrintService,
                                                 AssignedToJudgeDocumentService assignedToJudgeDocumentService,
                                                 FinremNotificationRequestMapper finremNotificationRequestMapper,
                                                 CheckSolicitorIsDigitalService checkSolicitorIsDigitalService) {
-        super(notificationService, bulkPrintService);
+        this.notificationService = notificationService;
         this.assignedToJudgeDocumentService = assignedToJudgeDocumentService;
         this.finremNotificationRequestMapper = finremNotificationRequestMapper;
         this.checkSolicitorIsDigitalService = checkSolicitorIsDigitalService;
     }
 
-    @Override
-    protected EmailTemplateNames getApplicantEmailTemplate() {
+    private EmailTemplateNames getApplicantEmailTemplate() {
         return FR_ASSIGNED_TO_JUDGE;
     }
 
-    @Override
-    protected EmailTemplateNames getRespondentEmailTemplate() {
+    private EmailTemplateNames getRespondentEmailTemplate() {
         return FR_ASSIGNED_TO_JUDGE;
     }
 
-    @Override
-    protected NotificationRequest getApplicantEmailNotificationRequest(FinremCaseDetails caseDetails) {
+    private EmailTemplateNames getIntervenerEmailTemplate() {
+        return FR_ASSIGNED_TO_JUDGE;
+    }
+
+    private NotificationRequest getApplicantEmailNotificationRequest(FinremCaseDetails caseDetails) {
         return finremNotificationRequestMapper
             .getNotificationRequestForApplicantSolicitor(caseDetails, !isApplicantSolicitorDigital(caseDetails));
     }
 
-    @Override
-    protected NotificationRequest getRespondentEmailNotificationRequest(FinremCaseDetails caseDetails) {
+    private NotificationRequest getRespondentEmailNotificationRequest(FinremCaseDetails caseDetails) {
         return finremNotificationRequestMapper
             .getNotificationRequestForRespondentSolicitor(caseDetails, !isRespondentSolicitorDigital(caseDetails));
+    }
+
+    protected NotificationRequest getIntervenerEmailNotificationRequest(FinremCaseDetails caseDetails,
+                                                                        SolicitorCaseDataKeysWrapper dataKeysWrapper) {
+        return null;
     }
 
     private boolean isApplicantSolicitorDigital(FinremCaseDetails caseDetails) {
@@ -87,40 +102,82 @@ public abstract class AbstractAssignToJudgeCorresponder extends FinremSingleLett
     }
 
     @Override
-    protected boolean shouldSendIntervenerLetter(IntervenerWrapper intervenerWrapper) {
-        return intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty();
-    }
-
-    @Override
     protected boolean shouldSendRespondentSolicitorEmail(FinremCaseDetails caseDetails) {
-        return notificationService.isRespondentSolicitorEmailPopulated(caseDetails);
+        throw new IllegalStateException();
     }
 
     @Override
     protected boolean shouldSendApplicantSolicitorEmail(FinremCaseDetails caseDetails) {
-        return notificationService.isApplicantSolicitorEmailPopulated(caseDetails);
+        throw new IllegalStateException();
     }
 
-    @Override
-    public CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
+    private CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                            DocumentHelper.PaperNotificationRecipient recipient) {
         return assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(
             caseDetails, authorisationToken, recipient);
     }
 
-    @Override
-    protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
-        notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
+    public List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(FinremCaseDetails finremCaseDetails,
+                                                                       String authToken) {
+        return buildSendCorrespondenceEvents(finremCaseDetails, false, authToken);
     }
 
-    @Override
-    protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
-        notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+    public List<SendCorrespondenceEvent> buildSendCorrespondenceEventsForAuditCreation(FinremCaseDetails finremCaseDetails,
+                                                                                       String authToken) {
+        return buildSendCorrespondenceEvents(finremCaseDetails, true, authToken);
     }
 
-    @Override
-    protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
-        notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails,
-            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
+    // replacing FinremSingleLetterOrEmailAllPartiesCorresponder.sendCorrespondence
+    private List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(FinremCaseDetails finremCaseDetails, boolean doNotGenerateReport,
+                                                                       String authToken) {
+        List<SendCorrespondenceEvent> events = new ArrayList<>();
+        events.add(
+            // replacing sendApplicantCorrespondence
+            SendCorrespondenceEvent.builder()
+                .caseDetails(finremCaseDetails)
+                .notificationParties(List.of(NotificationParty.APPLICANT))
+                .emailTemplate(getApplicantEmailTemplate())
+                .emailNotificationRequest(getApplicantEmailNotificationRequest(finremCaseDetails))
+                .documentsToPost(doNotGenerateReport ? List.of() : List.of(
+                    getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.APPLICANT)
+                ))
+                .authToken(authToken)
+                .build()
+        );
+        events.add(
+            // replacing sendRespondentCorrespondence
+            SendCorrespondenceEvent.builder()
+                .caseDetails(finremCaseDetails)
+                .notificationParties(List.of(NotificationParty.RESPONDENT))
+                .emailTemplate(getRespondentEmailTemplate())
+                .emailNotificationRequest(getRespondentEmailNotificationRequest(finremCaseDetails))
+                .documentsToPost(List.of(
+                    getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT)
+                ))
+                .authToken(authToken)
+                .build()
+        );
+        if (finremCaseDetails.isContestedApplication()) {
+            // replacing sendIntervenerCorrespondence
+            List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
+            interveners.forEach(intervenerWrapper ->
+                events.add(
+                    SendCorrespondenceEvent.builder()
+                        .caseDetails(finremCaseDetails)
+                        .notificationParties(List.of(NotificationParty.getNotificationPartyFromRole(intervenerWrapper
+                            .getIntervenerSolicitorCaseRole().name())))
+                        .emailTemplate(getIntervenerEmailTemplate())
+                        .emailNotificationRequest(getIntervenerEmailNotificationRequest(finremCaseDetails,
+                            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)))
+                        .documentsToPost(List.of(
+                            getDocumentToPrint(finremCaseDetails, authToken, intervenerWrapper.getPaperNotificationRecipient())
+                        ))
+                        .authToken(authToken)
+                        .build()
+                )
+            );
+        }
+
+        return events;
     }
 }
