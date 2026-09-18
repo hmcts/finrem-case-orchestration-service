@@ -1,0 +1,26 @@
+{
+  "FR_swansea_hc_list_2":
+  {
+    "epimmsId": "827534",
+    "regionId": "7",
+    "courtName": "ABERYSTWYTH JUSTICE CENTRE"
+  },
+  "FR_dorsetList_6":
+  {
+    "epimmsId": "450049",
+    "regionId": "6",
+    "courtName": "ALDERSHOT JUSTICE CENTRE"
+  },
+  "FR_s_CFCList_6":
+  {
+    "epimmsId": "229786",
+    "regionId": "1",
+    "courtName": "BARNET CIVIL AND FAMILY COURTS CENTRE"
+  },
+  "FR_humberList_5":
+  {
+    "epimmsId": "574546",
+    "regionId": "3",
+    "courtName": "BARNSLEY LAW COURTS"
+  }
+}

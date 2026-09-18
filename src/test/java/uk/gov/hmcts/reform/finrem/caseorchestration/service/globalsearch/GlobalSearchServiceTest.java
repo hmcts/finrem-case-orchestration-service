@@ -5,7 +5,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +23,9 @@ class GlobalSearchServiceTest {
     @Mock
     private FeatureToggleService featureToggleService;
 
+    @Mock
+    private CaseManagementLocationService caseManagementLocationService;
+
     @InjectMocks
     private GlobalSearchService globalSearchService;
 
@@ -30,10 +36,14 @@ class GlobalSearchServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("ccdCaseId", "12345");
         caseDataMap.put("fullApplicantName", "Jane Doe");
-
+        caseDataMap.put("bristolFRCourtList","FR_bristolList_3");
+        when(caseManagementLocationService.getCaseLocation(caseDataMap)).thenReturn(CaseLocation.builder().region("438850").build());
         globalSearchService.setGlobalSearchDataByMap(caseDataMap);
 
         assertEquals("Jane Doe", caseDataMap.get("caseNameHmctsInternal"));
+        assertEquals("Financial Remedy",
+            ((DynamicList)caseDataMap.get("caseManagementCategory")).getValue().getLabel());
+        assertEquals("438850", ((CaseLocation)caseDataMap.get("caseManagementLocation")).getRegion());
     }
 
     @Test
@@ -47,5 +57,7 @@ class GlobalSearchServiceTest {
         globalSearchService.setGlobalSearchDataByMap(caseDataMap);
 
         assertNull(caseDataMap.get("caseNameHmctsInternal"));
+        assertNull(caseDataMap.get("caseManagementCategory"));
+        assertNull(caseDataMap.get("caseManagementLocation"));
     }
 }
