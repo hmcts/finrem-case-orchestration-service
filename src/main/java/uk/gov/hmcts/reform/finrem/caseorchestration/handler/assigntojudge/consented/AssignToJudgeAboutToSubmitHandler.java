@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.reassignjudge;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.assigntojudge.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,13 +22,22 @@ import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
-public class ReassignJudgeAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
+public class AssignToJudgeAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
+
+    private final List<EventType> assignToJudgeEvents =
+        List.of(EventType.REFER_TO_JUDGE,
+            EventType.REFER_TO_JUDGE_FROM_ORDER_MADE,
+            EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_APPROVED,
+            EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE,
+            EventType.REFER_TO_JUDGE_FROM_AWAITING_RESPONSE,
+            EventType.REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER,
+            EventType.REFER_TO_JUDGE_FROM_CLOSE);
 
     private final AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     private final NotificationAuditService notificationAuditService;
 
-    public ReassignJudgeAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public AssignToJudgeAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                              AssignToJudgeCorresponder assignToJudgeCorresponder,
                                              NotificationAuditService notificationAuditService) {
         super(finremCaseDetailsMapper);
@@ -38,9 +47,9 @@ public class ReassignJudgeAboutToSubmitHandler extends FinremAboutToSubmitCallba
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+        return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.REASSIGN_JUDGE.equals(eventType);
+            && assignToJudgeEvents.contains(eventType);
     }
 
     @Override

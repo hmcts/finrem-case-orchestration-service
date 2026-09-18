@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 @Slf4j
@@ -16,9 +17,10 @@ public class IssueApplicationConsentedAboutToSubmitHandler extends AbstractIssue
     public IssueApplicationConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                          OnlineFormDocumentService onlineFormDocumentService,
                                                          IssueApplicationService issueApplicationService,
-                                                         NotificationAuditService notificationAuditService) {
+                                                         NotificationAuditService notificationAuditService,
+                                                         AssignToJudgeCorresponder assignToJudgeCorresponder) {
         super(finremCaseDetailsMapper, onlineFormDocumentService, issueApplicationService,
-            notificationAuditService);
+            notificationAuditService, assignToJudgeCorresponder);
     }
 
     @Override
