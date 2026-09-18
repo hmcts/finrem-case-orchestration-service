@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 
 import java.util.Map;
 
@@ -16,7 +18,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GlobalSearchService {
 
+    private static final String FINANCIAL_REMEDY = "Financial Remedy";
     private final FeatureToggleService featureToggleService;
+    private final CaseManagementLocationService caseManagementLocationService;
 
     /**
      * Sets the fields required for global search on the provided case data map.
@@ -26,8 +30,11 @@ public class GlobalSearchService {
      */
     public void setGlobalSearchDataByMap(Map<String, Object> caseData) {
         if (featureToggleService.isGlobalSearchEnabled()) {
-            log.info("setGlobalSearchDataByMap::Received request to set global search fields for case with CCD ID: {}", caseData.get("ccdCaseId"));
+            log.info("setGlobalSearchDataByMap::Received request to set global search fields for case with CCD ID: {}",
+                caseData.get("ccdCaseId"));
             caseData.put("caseNameHmctsInternal", caseData.get("fullApplicantName"));
+            caseData.put("caseManagementCategory", FINANCIAL_REMEDY);
+            caseData.put("caseManagementLocation", caseManagementLocationService.getCaseLocation(caseData));
         }
     }
 
