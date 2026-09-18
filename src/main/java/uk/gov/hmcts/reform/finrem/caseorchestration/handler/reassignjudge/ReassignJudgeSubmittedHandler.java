@@ -1,9 +1,12 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.reassignjudge;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremSubmittedCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -13,25 +16,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assig
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
-public class AssignToJudgeSubmittedHandler extends FinremSubmittedCallbackHandler {
-
-    private final List<EventType> assignToJudgeEvents =
-        List.of(EventType.REFER_TO_JUDGE,
-            EventType.REFER_TO_JUDGE_FROM_ORDER_MADE,
-            EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_APPROVED,
-            EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE,
-            EventType.REFER_TO_JUDGE_FROM_AWAITING_RESPONSE,
-            EventType.REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER,
-            EventType.REFER_TO_JUDGE_FROM_CLOSE);
+public class ReassignJudgeSubmittedHandler extends FinremSubmittedCallbackHandler {
 
     private final FinremAssignToJudgeCorresponder assignToJudgeCorresponder;
 
-    public AssignToJudgeSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public ReassignJudgeSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                          EvidenceManagementDeleteService evidenceManagementDeleteService,
                                          RetryExecutor retryExecutor,
                                          FinremAssignToJudgeCorresponder assignToJudgeCorresponder) {
@@ -43,7 +36,7 @@ public class AssignToJudgeSubmittedHandler extends FinremSubmittedCallbackHandle
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && assignToJudgeEvents.contains(eventType);
+            && EventType.REASSIGN_JUDGE.equals(eventType);
     }
 
     @Override
@@ -52,11 +45,12 @@ public class AssignToJudgeSubmittedHandler extends FinremSubmittedCallbackHandle
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
+        //
         String error = sendCorrespondence(caseDetails, userAuthorisation);
 
         if (error != null) {
             return submittedResponse(
-                toConfirmationHeader("Assign to Judge event submitted with errors."),
+                toConfirmationHeader("Reassign Judge event submitted with errors."),
                 toConfirmationBody(error));
         } else {
             return submittedResponse();

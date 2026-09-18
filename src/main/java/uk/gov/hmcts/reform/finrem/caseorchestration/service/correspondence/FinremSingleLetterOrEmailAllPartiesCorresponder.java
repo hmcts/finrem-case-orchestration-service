@@ -9,9 +9,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -23,6 +29,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
 
     protected final BulkPrintService bulkPrintService;
 
+    @Deprecated
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
@@ -31,9 +38,63 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         }
     }
 
+    public List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(FinremCaseDetails finremCaseDetails,
+                                                                       String authToken) {
+        List<SendCorrespondenceEvent> events = new ArrayList<>();
+        events.add(
+            // replacing sendApplicantCorrespondence
+            SendCorrespondenceEvent.builder()
+                .caseDetails(finremCaseDetails)
+                .notificationParties(List.of(NotificationParty.APPLICANT))
+                .emailTemplate(getApplicantEmailTemplate())
+                .emailNotificationRequest(getApplicantEmailNotificationRequest(finremCaseDetails))
+                .documentsToPost(List.of(
+                    getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.APPLICANT)
+                ))
+                .authToken(authToken)
+                .build()
+        );
+        events.add(
+            // replacing sendRespondentCorrespondence
+            SendCorrespondenceEvent.builder()
+                .caseDetails(finremCaseDetails)
+                .notificationParties(List.of(NotificationParty.RESPONDENT))
+                .emailTemplate(getRespondentEmailTemplate())
+                .emailNotificationRequest(getRespondentEmailNotificationRequest(finremCaseDetails))
+                .documentsToPost(List.of(
+                    getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT)
+                ))
+                .authToken(authToken)
+                .build()
+        );
+        if (finremCaseDetails.isContestedApplication()) {
+            // replacing sendIntervenerCorrespondence
+            List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
+            interveners.forEach(intervenerWrapper ->
+                events.add(
+                    SendCorrespondenceEvent.builder()
+                        .caseDetails(finremCaseDetails)
+                        .notificationParties(List.of(NotificationParty.getNotificationPartyFromRole(intervenerWrapper
+                            .getIntervenerSolicitorCaseRole().name())))
+                        .emailTemplate(getIntervenerEmailTemplate())
+                        .emailNotificationRequest(getIntervenerEmailNotificationRequest(finremCaseDetails,
+                            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)))
+                        .documentsToPost(List.of(
+                            getDocumentToPrint(finremCaseDetails, authToken, intervenerWrapper.getPaperNotificationRecipient())
+                        ))
+                        .authToken(authToken)
+                        .build()
+                )
+            );
+        }
+
+        return events;
+    }
+
     public abstract CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                                     DocumentHelper.PaperNotificationRecipient recipient);
 
+    @Deprecated
     protected void sendApplicantCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
@@ -50,6 +111,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         }
     }
 
+    @Deprecated
     protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to respondent for Case ID: {}", caseDetails.getId());
@@ -66,6 +128,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         }
     }
 
+    @Deprecated
     protected void sendIntervenerCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         FinremCaseData caseData = caseDetails.getData();
         List<IntervenerWrapper> interveners = caseData.getInterveners();
@@ -119,4 +182,28 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
 
     protected abstract void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails);
 
+    protected EmailTemplateNames getApplicantEmailTemplate() {
+        return null;
+    }
+
+    protected EmailTemplateNames getRespondentEmailTemplate() {
+        return null;
+    }
+
+    protected EmailTemplateNames getIntervenerEmailTemplate() {
+        return null;
+    }
+
+    protected NotificationRequest getApplicantEmailNotificationRequest(FinremCaseDetails caseDetails) {
+        return null;
+    }
+
+    protected NotificationRequest getRespondentEmailNotificationRequest(FinremCaseDetails caseDetails) {
+        return null;
+    }
+
+    protected NotificationRequest getIntervenerEmailNotificationRequest(FinremCaseDetails caseDetails,
+                                                                        SolicitorCaseDataKeysWrapper dataKeysWrapper) {
+        return null;
+    }
 }

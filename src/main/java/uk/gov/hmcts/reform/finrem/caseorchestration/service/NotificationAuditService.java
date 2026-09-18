@@ -18,9 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_AUDITS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_TO_BE_SENT;
@@ -43,16 +43,17 @@ public class NotificationAuditService {
      * @param event the correspondence event containing the case data and notification audits
      * @param eventType the CCD event type associated with the correspondence
      * @throws IllegalStateException if the correspondence event does not contain case data
+     *
+     * @return tracker id
      */
-    public void createAuditsForCorrespondence(SendCorrespondenceEvent event,
-                                              EventType eventType) {
+    public String createAuditsForCorrespondence(SendCorrespondenceEvent event, EventType eventType) {
         FinremCaseData caseData = event.getCaseData();
         if (caseData == null) {
             throw new IllegalStateException("No caseData found when creating notification audits");
         }
         NotificationAuditWrapper wrapper = caseData.getNotificationAuditWrapper();
 
-        String notificationEventId = UUID.randomUUID().toString();
+        String notificationEventId = ofNullable(event.getNotificationTrackerId()).orElse(UUID.randomUUID().toString());
 
         wrapper.setNotificationEventId(notificationEventId);
 
@@ -70,13 +71,14 @@ public class NotificationAuditService {
                 .toList();
 
         List<NotificationToBeSentCollectionItem> allPending = new ArrayList<>(
-            Optional.ofNullable(wrapper.getNotificationsToBeSent())
+            ofNullable(wrapper.getNotificationsToBeSent())
                 .orElseGet(List::of)
         );
 
         allPending.addAll(pending);
 
         wrapper.setNotificationsToBeSent(allPending);
+        return notificationEventId;
     }
 
     /**
@@ -145,7 +147,7 @@ public class NotificationAuditService {
     private List<NotificationToBeSentCollectionItem> getPendingNotifications(
         NotificationAuditWrapper wrapper
     ) {
-        return Optional.ofNullable(wrapper.getNotificationsToBeSent())
+        return ofNullable(wrapper.getNotificationsToBeSent())
             .orElseGet(List::of);
     }
 
@@ -190,7 +192,7 @@ public class NotificationAuditService {
         List<NotificationAudit> audits
     ) {
         List<NotificationAuditCollectionItem> auditItems = new ArrayList<>(
-            Optional.ofNullable(wrapper.getNotificationsAudits())
+            ofNullable(wrapper.getNotificationsAudits())
                 .orElseGet(List::of)
         );
 
