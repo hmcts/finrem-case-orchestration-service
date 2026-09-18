@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 /**
- * Orchestrates correspondence notifications for callback handlers.
+ * Orchestrates correspondence events and auditing for callback handlers.
  *
  * <p>The expected correspondence flow is:
  * <ol>

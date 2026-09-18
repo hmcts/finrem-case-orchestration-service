@@ -14,6 +14,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citiz
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
+/**
+ * Base submitted-stage handler for citizen document upload events.
+ *
+ * <p>Subclasses provide party-specific routing (applicant/respondent), while this handler
+ * performs the shared flow to:
+ * <ol>
+ *     <li>Build the correspondence event for the citizen upload notification</li>
+ *     <li>Publish the event with retry support</li>
+ *     <li>Reconcile and persist notification audits after a successful publish</li>
+ * </ol>
+ */
 @Slf4j
 public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedCallbackHandler {
 
@@ -30,6 +41,17 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
         this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
     }
 
+    /**
+     * Handles the SUBMITTED callback for citizen document upload notifications.
+     *
+     * <p>Publishes a notification event for the citizen. If publication fails, the handler logs the
+     * failure and returns a standard submitted response without attempting audit reconciliation. On success,
+     * pending audits are reconciled and persisted.</p>
+     *
+     * @param callbackRequest callback payload containing case details and event type
+     * @param userAuthorisation user auth token used by downstream notification listeners
+     * @return submitted callback response
+     */
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                                 String userAuthorisation) {
@@ -77,6 +99,11 @@ public abstract class CUIDocumentUploadSubmittedHandler extends FinremSubmittedC
         return String.format("Send citizen documents uploaded email: %s", getNotificationPartyLabel());
     }
 
+    /**
+     * Returns the target citizen party for the handler implementation.
+     *
+     * @return notification party (citizen applicant or citizen respondent)
+     */
     protected abstract NotificationParty notificationParty();
 
     private String getNotificationPartyLabel() {

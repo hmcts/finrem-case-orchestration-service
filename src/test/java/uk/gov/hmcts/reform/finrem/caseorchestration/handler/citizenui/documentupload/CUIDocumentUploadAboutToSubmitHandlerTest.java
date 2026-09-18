@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -124,6 +125,13 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
         handlerCase.handler.handle(request, "auth");
 
         verify(handlerCase.correspondenceEventAuditOrchestrationService).createPendingAudits(any(), eq(handlerCase.eventType));
+        verify(handlerCase.citizenDocumentsUploadedCorresponder).buildCorrespondenceEvent(
+            any(),
+            anyString(),
+            eq(handlerCase.party == Party.APPLICANT
+                ? NotificationParty.CITIZEN_APPLICANT
+                : NotificationParty.CITIZEN_RESPONDENT)
+        );
     }
 
     private static Stream<HandlerCase> handlers() {
@@ -141,14 +149,16 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
                     correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder),
                 EventType.CUI_APPLICANT_DOCUMENT_UPLOAD,
                 Party.APPLICANT,
-                correspondenceEventAuditOrchestrationService
+                correspondenceEventAuditOrchestrationService,
+                citizenDocumentsUploadedCorresponder
             ),
             new HandlerCase(
                 new CUIRespondentDocumentUploadAboutToSubmitHandler(mapper, featureToggleService,
                     correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder),
                 EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD,
                 Party.RESPONDENT,
-                correspondenceEventAuditOrchestrationService
+                correspondenceEventAuditOrchestrationService,
+                citizenDocumentsUploadedCorresponder
             )
         );
     }
@@ -208,7 +218,8 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
         CUIDocumentUploadAboutToSubmitHandler handler,
         EventType eventType,
         Party party,
-        CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService
+        CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
+        CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder
     ) {
     }
 }
