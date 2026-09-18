@@ -46,18 +46,18 @@ public class FinremAssignToJudgeCorresponder extends AbstractAssignToJudgeCorres
             finremNotificationRequestMapper, checkSolicitorIsDigitalService);
     }
 
-//    /**
-//     * Determines whether a paper letter should be sent to the respondent.
-//     *
-//     * <p>
-//     * Letters will not be sent to respondents who are marked as residing outside the UK.
-//     * </p>
-//     *
-//     * @param caseDetails the case details
-//     * @return {@code true} if the respondent does not reside outside the UK; otherwise {@code false}
-//     */
-//    @Override
-//    protected boolean shouldSendRespondentLetter(FinremCaseDetails caseDetails) {
-//        return isNotInternationalParty(getContactDetailsWrapper(caseDetails).getRespondentResideOutsideUK());
-//    }
+    /**
+     * Determines whether a paper letter should be sent to the respondent.
+     *
+     * <p>
+     * Letters will not be sent to respondents who are marked as residing outside the UK.
+     * </p>
+     *
+     * @param caseDetails the case details
+     * @return {@code true} if the respondent does not reside outside the UK; otherwise {@code false}
+     */
+    @Override
+    protected boolean shouldSendRespondentLetter(FinremCaseDetails caseDetails) {
+        return isNotInternationalParty(getContactDetailsWrapper(caseDetails).getRespondentResideOutsideUK());
+    }
 }

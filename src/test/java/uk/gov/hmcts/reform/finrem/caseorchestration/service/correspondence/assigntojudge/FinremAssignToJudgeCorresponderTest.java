@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
@@ -78,9 +80,14 @@ class FinremAssignToJudgeCorresponderTest {
 
     private CaseDocument expectedIntevenerFourCaseDocument;
 
+    private FinremNotificationRequestMapper finremNotificationRequestMapper;
+
+    private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
+
     @BeforeEach
     void setUp() {
-        assignToJudgeCorresponder = new FinremAssignToJudgeCorresponder(notificationService, bulkPrintService, assignedToJudgeDocumentService);
+        assignToJudgeCorresponder = new FinremAssignToJudgeCorresponder(notificationService, bulkPrintService, assignedToJudgeDocumentService,
+            finremNotificationRequestMapper, checkSolicitorIsDigitalService);
         expectedApplicantCaseDocument = expectedCaseDocument("applicant");
         expectedRespondentCaseDocument = expectedCaseDocument("respondent");
         expectedIntevenerOneCaseDocument = expectedCaseDocument("intevenerOne");
