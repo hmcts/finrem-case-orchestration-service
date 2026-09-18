@@ -36,7 +36,6 @@ public class FinremAssignToJudgeCorresponder extends AbstractAssignToJudgeCorres
 
     @Autowired
     public FinremAssignToJudgeCorresponder(NotificationService notificationService,
-//                                           BulkPrintService bulkPrintService,
                                            AssignedToJudgeDocumentService assignedToJudgeDocumentService,
                                            FinremNotificationRequestMapper finremNotificationRequestMapper,
                                            CheckSolicitorIsDigitalService checkSolicitorIsDigitalService)  {
