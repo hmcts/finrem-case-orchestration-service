@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 import java.util.List;
@@ -33,7 +33,7 @@ public abstract class AbstractIssueApplicationAboutToSubmitHandler extends Finre
 
     private final IssueApplicationService issueApplicationService;
 
-    protected final IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
+    protected final AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     private static final String MISSING_COURT_SELECTION_ERROR = "Case cannot be issued as court selection is missing.";
 
@@ -41,12 +41,12 @@ public abstract class AbstractIssueApplicationAboutToSubmitHandler extends Finre
                                                            OnlineFormDocumentService onlineFormDocumentService,
                                                            IssueApplicationService issueApplicationService,
                                                            NotificationAuditService notificationAuditService,
-                                                           IssueApplicationConsentCorresponder issueApplicationConsentCorresponder) {
+                                                           AssignToJudgeCorresponder assignToJudgeCorresponder) {
         super(finremCaseDetailsMapper);
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.issueApplicationService = issueApplicationService;
         this.notificationAuditService = notificationAuditService;
-        this.issueApplicationConsentCorresponder = issueApplicationConsentCorresponder;
+        this.assignToJudgeCorresponder = assignToJudgeCorresponder;
     }
 
     protected abstract EventType supportedEventType();
@@ -69,13 +69,20 @@ public abstract class AbstractIssueApplicationAboutToSubmitHandler extends Finre
         try {
             generateCoverSheets(caseDetails, userAuthorisation);
         } catch (MissingCourtException e) {
-            return response(caseData, null, List.of(MISSING_COURT_SELECTION_ERROR));
+            return responseWithoutWarnings(caseData, List.of(MISSING_COURT_SELECTION_ERROR));
         }
 
         caseData.setMiniFormA(onlineFormDocumentService.generateMiniFormA(userAuthorisation, caseDetails));
         populateAssignToJudgeFields(caseData);
 
-        List<SendCorrespondenceEvent> events = issueApplicationConsentCorresponder
+        createAuditsForCorrespondence(callbackRequest, userAuthorisation);
+
+        return response(caseData);
+    }
+
+    private void createAuditsForCorrespondence(FinremCallbackRequest callbackRequest,
+                                               String userAuthorisation) {
+        List<SendCorrespondenceEvent> events = assignToJudgeCorresponder
             .buildSendCorrespondenceEvents(callbackRequest.getCaseDetails(), userAuthorisation);
         String trackerId = null;
         for (SendCorrespondenceEvent event : events) {
@@ -84,7 +91,6 @@ public abstract class AbstractIssueApplicationAboutToSubmitHandler extends Finre
             }
             trackerId = notificationAuditService.createAuditsForCorrespondence(event, callbackRequest.getEventType());
         }
-        return response(caseData);
     }
 
     private void populateAssignToJudgeFields(FinremCaseData caseData) {

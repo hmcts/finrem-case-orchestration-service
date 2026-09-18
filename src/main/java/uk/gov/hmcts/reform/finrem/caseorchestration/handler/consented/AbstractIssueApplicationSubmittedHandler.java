@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -30,7 +30,7 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected final IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
+    protected final AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     protected final AssignPartiesAccessService assignPartiesAccessService;
 
@@ -39,11 +39,11 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
     protected AbstractIssueApplicationSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                        EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                        RetryExecutor retryExecutor,
-                                                       IssueApplicationConsentCorresponder issueApplicationConsentCorresponder,
+                                                       AssignToJudgeCorresponder assignToJudgeCorresponder,
                                                        AssignPartiesAccessService assignPartiesAccessService,
                                                        ApplicationEventPublisher applicationEventPublisher) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
-        this.issueApplicationConsentCorresponder = issueApplicationConsentCorresponder;
+        this.assignToJudgeCorresponder = assignToJudgeCorresponder;
         this.assignPartiesAccessService = assignPartiesAccessService;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -105,7 +105,7 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
     }
 
     private List<String> sendIssueApplicationCorrespondences(FinremCaseDetails caseDetails, String userAuthorisation) {
-        List<SendCorrespondenceEvent> events = issueApplicationConsentCorresponder
+        List<SendCorrespondenceEvent> events = assignToJudgeCorresponder
             .buildSendCorrespondenceEvents(caseDetails, userAuthorisation);
 
         List<String> errors = new ArrayList<>();
