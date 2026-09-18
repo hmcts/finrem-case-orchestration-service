@@ -33,7 +33,7 @@ public class GlobalSearchService {
         if (featureToggleService.isGlobalSearchEnabled()) {
             log.info("setGlobalSearchDataByMap::Received request to set global search fields for case with CCD ID: {}",
                 caseData.get("ccdCaseId"));
-            DynamicListElement element = DynamicListElement.builder().code("FR").label("Financial Remedy").build();
+            DynamicListElement element = DynamicListElement.builder().code("Financial Remedy").label("Financial Remedy").build();
             caseData.put("caseManagementCategory", DynamicList.builder().value(element).build());
             caseData.put("caseNameHmctsInternal", caseData.get("fullApplicantName"));
             caseData.put("caseManagementLocation", caseManagementLocationService.getCaseLocation(caseData));
