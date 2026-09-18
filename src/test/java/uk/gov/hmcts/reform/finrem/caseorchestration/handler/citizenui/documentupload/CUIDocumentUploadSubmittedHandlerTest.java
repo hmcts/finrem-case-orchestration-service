@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -47,7 +47,7 @@ class CUIDocumentUploadSubmittedHandlerTest {
     private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     @Test
-    void shouldPublishAndReconcile_whenPublishSucceeds() {
+    void shouldReconcileAuditsWhenNotificationEventPublishSucceeds() {
         TestHandler handler = new TestHandler(
             finremCaseDetailsMapper,
             evidenceManagementDeleteService,
@@ -78,7 +78,7 @@ class CUIDocumentUploadSubmittedHandlerTest {
     }
 
     @Test
-    void shouldNotReconcile_whenPublishFails() {
+    void shouldNotReconcileAuditsWhenNotificationEventPublishFails() {
         TestHandler handler = new TestHandler(
             finremCaseDetailsMapper,
             evidenceManagementDeleteService,
