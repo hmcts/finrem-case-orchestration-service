@@ -2,10 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assi
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 /**
  * Handles correspondence for the "Issue Application" event in consented cases.
@@ -31,16 +31,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Check
 public class IssueApplicationConsentCorresponder extends AbstractAssignToJudgeCorresponder {
 
     public IssueApplicationConsentCorresponder(NotificationService notificationService,
-                                               AssignedToJudgeDocumentService assignedToJudgeDocumentService,
-                                               FinremNotificationRequestMapper finremNotificationRequestMapper,
-                                               CheckSolicitorIsDigitalService checkSolicitorIsDigitalService) {
-        super(notificationService, assignedToJudgeDocumentService, finremNotificationRequestMapper,
-            checkSolicitorIsDigitalService);
+                                               BulkPrintService bulkPrintService,
+                                               AssignedToJudgeDocumentService assignedToJudgeDocumentService) {
+        super(notificationService, bulkPrintService, assignedToJudgeDocumentService);
     }
 
-    // Implemented in RespondentPartyListener
-//    @Override
-//    protected boolean shouldSendRespondentLetter(FinremCaseDetails caseDetails) {
-//        return isNotInternationalParty(getContactDetailsWrapper(caseDetails).getRespondentResideOutsideUK());
-//    }
+    @Override
+    protected boolean shouldSendRespondentLetter(FinremCaseDetails caseDetails) {
+        return isNotInternationalParty(getContactDetailsWrapper(caseDetails).getRespondentResideOutsideUK());
+    }
 }
