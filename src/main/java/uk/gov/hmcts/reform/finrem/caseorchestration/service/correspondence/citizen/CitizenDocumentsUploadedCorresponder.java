@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 public class CitizenDocumentsUploadedCorresponder {
 
     private static final DateTimeFormatter TIME_OF_SUBMISSION_FORMAT = DateTimeFormatter.ofPattern("h:mma 'on' dd/MM/yyyy");
+    private static final ZoneId TIME_OF_SUBMISSION_TIMEZONE = ZoneId.of("Europe/London");
 
     /**
      * Builds a correspondence event for a CUI document upload.
@@ -81,6 +82,6 @@ public class CitizenDocumentsUploadedCorresponder {
     }
 
     private String getCitizenUploadTime() {
-        return TIME_OF_SUBMISSION_FORMAT.format(ZonedDateTime.now(ZoneId.of("Europe/London"))).toLowerCase();
+        return TIME_OF_SUBMISSION_FORMAT.format(ZonedDateTime.now(TIME_OF_SUBMISSION_TIMEZONE)).toLowerCase();
     }
 }
