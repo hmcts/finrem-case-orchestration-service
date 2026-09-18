@@ -13,40 +13,32 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 import java.util.List;
-
-import static java.util.Objects.nonNull;
 
 public abstract class AbstractIssueApplicationAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final NotificationAuditService notificationAuditService;
-
     private final OnlineFormDocumentService onlineFormDocumentService;
 
     private final IssueApplicationService issueApplicationService;
 
-    protected final IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
+    private final AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     private static final String MISSING_COURT_SELECTION_ERROR = "Case cannot be issued as court selection is missing.";
 
     protected AbstractIssueApplicationAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            OnlineFormDocumentService onlineFormDocumentService,
                                                            IssueApplicationService issueApplicationService,
-                                                           NotificationAuditService notificationAuditService,
-                                                           IssueApplicationConsentCorresponder issueApplicationConsentCorresponder) {
+                                                           AssignToJudgeCorresponder assignToJudgeCorresponder) {
         super(finremCaseDetailsMapper);
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.issueApplicationService = issueApplicationService;
-        this.notificationAuditService = notificationAuditService;
-        this.issueApplicationConsentCorresponder = issueApplicationConsentCorresponder;
+        this.assignToJudgeCorresponder = assignToJudgeCorresponder;
     }
 
     protected abstract EventType supportedEventType();
@@ -69,21 +61,14 @@ public abstract class AbstractIssueApplicationAboutToSubmitHandler extends Finre
         try {
             generateCoverSheets(caseDetails, userAuthorisation);
         } catch (MissingCourtException e) {
-            return response(caseData, null, List.of(MISSING_COURT_SELECTION_ERROR));
+            return responseWithoutWarnings(caseData, List.of(MISSING_COURT_SELECTION_ERROR));
         }
 
         caseData.setMiniFormA(onlineFormDocumentService.generateMiniFormA(userAuthorisation, caseDetails));
         populateAssignToJudgeFields(caseData);
 
-        List<SendCorrespondenceEvent> events = issueApplicationConsentCorresponder
-            .buildSendCorrespondenceEvents(callbackRequest.getCaseDetails(), userAuthorisation);
-        String trackerId = null;
-        for (SendCorrespondenceEvent event : events) {
-            if (nonNull(trackerId)) {
-                event.setNotificationTrackerId(trackerId);
-            }
-            trackerId = notificationAuditService.createAuditsForCorrespondence(event, callbackRequest.getEventType());
-        }
+        assignToJudgeCorresponder.createAuditsForCorrespondence(callbackRequest.getEventType(), caseDetails, userAuthorisation);
+
         return response(caseData);
     }
 

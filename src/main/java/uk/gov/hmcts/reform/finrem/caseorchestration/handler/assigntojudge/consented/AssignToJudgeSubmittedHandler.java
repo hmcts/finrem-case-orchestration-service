@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.reassignjudge;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.assigntojudge.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,13 +24,22 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ReassignJudgeSubmittedHandler extends FinremSubmittedCallbackHandler {
+public class AssignToJudgeSubmittedHandler extends FinremSubmittedCallbackHandler {
+
+    private final List<EventType> assignToJudgeEvents =
+        List.of(EventType.REFER_TO_JUDGE,
+            EventType.REFER_TO_JUDGE_FROM_ORDER_MADE,
+            EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_APPROVED,
+            EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE,
+            EventType.REFER_TO_JUDGE_FROM_AWAITING_RESPONSE,
+            EventType.REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER,
+            EventType.REFER_TO_JUDGE_FROM_CLOSE);
 
     private final AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     protected final ApplicationEventPublisher applicationEventPublisher;
 
-    public ReassignJudgeSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public AssignToJudgeSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                          EvidenceManagementDeleteService evidenceManagementDeleteService,
                                          RetryExecutor retryExecutor,
                                          AssignToJudgeCorresponder assignToJudgeCorresponder,
@@ -44,7 +53,7 @@ public class ReassignJudgeSubmittedHandler extends FinremSubmittedCallbackHandle
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.REASSIGN_JUDGE.equals(eventType);
+            && assignToJudgeEvents.contains(eventType);
     }
 
     @Override
@@ -60,14 +69,15 @@ public class ReassignJudgeSubmittedHandler extends FinremSubmittedCallbackHandle
 
         if (isHavingErrors) {
             return submittedResponse(
-                toConfirmationHeader("Reassign Judge event submitted with errors."),
+                toConfirmationHeader("Assign to judge event submitted with errors."),
                 toConfirmationBody(errors.toArray(new String[0])));
         } else {
             return submittedResponse();
         }
     }
 
-    private List<String> sendAssignToJudgeCorrespondences(EventType eventType, FinremCaseDetails caseDetails, String userAuthorisation) {
+    private List<String> sendAssignToJudgeCorrespondences(EventType eventType, FinremCaseDetails caseDetails,
+                                                          String userAuthorisation) {
         List<SendCorrespondenceEvent> events = assignToJudgeCorresponder
             .buildSendCorrespondenceEvents(eventType, caseDetails, userAuthorisation);
 

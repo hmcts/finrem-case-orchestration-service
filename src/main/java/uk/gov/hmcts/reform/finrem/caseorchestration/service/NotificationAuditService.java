@@ -14,11 +14,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Notificati
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -82,13 +85,18 @@ public class NotificationAuditService {
     }
 
     /**
-     * Updates notification audit data after correspondence has been processed.
-     * Matches notifications expected for the current notification event against
-     * notifications actually produced during the submitted event using the party,
-     * notification type and notification tracker ID.
+     * Reconciles notification audit data after correspondence has been sent.
      *
      * <p>
-     * Once the current event has been processed, its pending notification records
+     * Notifications expected for the current notification event (those in the pending
+     * list whose event ID matches the wrapper's current notification event ID) are
+     * matched against the notifications actually produced during the submitted event,
+     * using the party, notification type and notification tracker ID. The matched
+     * results are combined and appended to the existing notification audit history.
+     * </p>
+     *
+     * <p>
+     * Once the current event has been processed, only its pending notification records
      * are removed from the pending list. Any records already in the pending list
      * from an earlier event are preserved because they may be there as a result
      * of that event's submitted handler failing before the records could be
@@ -101,11 +109,25 @@ public class NotificationAuditService {
      * The notification event ID is cleared once processing is complete.
      * </p>
      *
-     * @return a map containing the CCD case data fields that need to be updated,
+     * <p>
+     * All events are expected to relate to the same case. Case data, and therefore the
+     * notification audit wrapper and current notification event ID, is taken from the
+     * first event, while sent audits are collected from every supplied event.
+     * </p>
+     *
+     * @param sentEvents one or more {@link SendCorrespondenceEvent}s published while
+     *                   processing the submitted event; must not be null or empty
+     * @return a map of the CCD case data fields that need to be updated (the updated
+     *         notification audit history and the remaining pending notifications),
      *         or an empty map when case data or the notification event ID is unavailable
+     * @throws IllegalStateException if {@code sentEvents} is null or empty
      */
-    public Map<String, Object> reconcileNotificationAudits(SendCorrespondenceEvent sentEvent) {
-        FinremCaseData caseData = sentEvent.getCaseData();
+    public Map<String, Object> reconcileNotificationAudits(SendCorrespondenceEvent... sentEvents) {
+        if (sentEvents == null || sentEvents.length == 0) {
+            throw new IllegalStateException("Expected one or more non-null SendCorrespondenceEvent");
+        }
+
+        FinremCaseData caseData = sentEvents[0].getCaseData();
         if (caseData == null) {
             log.warn("No caseData found when updating notification audits");
             return Map.of();
@@ -119,16 +141,12 @@ public class NotificationAuditService {
             return Map.of();
         }
 
-        List<NotificationToBeSentCollectionItem> pending =
-            getPendingNotifications(wrapper);
+        List<NotificationToBeSentCollectionItem> pending = getPendingNotifications(wrapper);
 
         List<NotificationToBeSentCollectionItem> currentEventPending =
-            getCurrentEventPendingNotifications(
-                pending,
-                currentNotificationEventId
-            );
+            getCurrentEventPendingNotifications(pending, currentNotificationEventId);
 
-        List<NotificationAudit> audits = getSentAudits(sentEvent);
+        List<NotificationAudit> audits = getSentAudits(sentEvents);
 
         combinePendingAndSentAudits(currentEventPending, audits);
 
@@ -136,10 +154,7 @@ public class NotificationAuditService {
             addAuditsToExistingHistory(wrapper, audits);
 
         List<NotificationToBeSentCollectionItem> remainingPending =
-            removeCurrentEventPendingNotifications(
-                pending,
-                currentNotificationEventId
-            );
+            removeCurrentEventPendingNotifications(pending, currentNotificationEventId);
 
         return buildUpdatedFields(auditItems, remainingPending);
     }
@@ -165,10 +180,12 @@ public class NotificationAuditService {
             .toList();
     }
 
-    private List<NotificationAudit> getSentAudits(
-        SendCorrespondenceEvent sentEvent
-    ) {
-        return new ArrayList<>(emptyIfNull(sentEvent.getAudits()));
+    private List<NotificationAudit> getSentAudits(SendCorrespondenceEvent... sentEvents) {
+        return Stream.ofNullable(sentEvents)
+            .flatMap(Arrays::stream)
+            .filter(Objects::nonNull)
+            .flatMap(event -> emptyIfNull(event.getAudits()).stream())
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private void combinePendingAndSentAudits(

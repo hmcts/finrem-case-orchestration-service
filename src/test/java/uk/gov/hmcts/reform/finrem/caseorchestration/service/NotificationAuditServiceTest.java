@@ -35,8 +35,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 class NotificationAuditServiceTest {
 
     private static final String NOTIFICATION_EVENT_ID = "notificationEventId";
-    private static final String CURRENT_NOTIFICATION_EVENT_ID = "event-123";
-    private static final String PREVIOUS_NOTIFICATION_EVENT_ID = "event-456";
+    private static final String CURRENT_NOTIFICATION_EVENT_ID = "event-current-notification-id";
+    private static final String PREVIOUS_NOTIFICATION_EVENT_ID = "event-previous-notification-id";
 
     @Spy
     private ObjectMapper objectMapper = TestObjectMapperFactory.createObjectMapper();
@@ -257,17 +257,25 @@ class NotificationAuditServiceTest {
         List<NotificationToBeSentCollectionItem> pending,
         List<NotificationAudit> sentAudits
     ) {
-        return SendCorrespondenceEvent.builder()
-            .caseDetails(
-                caseDetails(
+        return buildEventWithPendingAndSentAudits(
+                 caseDetails(
                     NotificationAuditWrapper.builder()
                         .notificationEventId(
                             NotificationAuditServiceTest.CURRENT_NOTIFICATION_EVENT_ID
                         )
                         .notificationsToBeSent(pending)
                         .build()
-                )
-            )
+                ),
+            new ArrayList<>(sentAudits)
+        );
+    }
+
+    private SendCorrespondenceEvent buildEventWithPendingAndSentAudits(
+        FinremCaseDetails caseDetails,
+        List<NotificationAudit> sentAudits
+    ) {
+        return SendCorrespondenceEvent.builder()
+            .caseDetails(caseDetails)
             .audits(new ArrayList<>(sentAudits))
             .build();
     }

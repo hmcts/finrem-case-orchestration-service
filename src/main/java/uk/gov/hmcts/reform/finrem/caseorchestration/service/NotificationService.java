@@ -109,13 +109,11 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, FR_HWF_SUCCESSFUL);
     }
 
-    @Deprecated
     public void sendAssignToJudgeConfirmationEmailToApplicantSolicitor(FinremCaseDetails caseDetails) {
         sendAssignToJudgeConfirmationEmail(finremNotificationRequestMapper
             .getNotificationRequestForApplicantSolicitor(caseDetails, !isApplicantSolicitorDigital(caseDetails)));
     }
 
-    @Deprecated
     public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails finremCaseDetails) {
         NotificationRequest notificationRequestForRespondentSolicitor =
             finremNotificationRequestMapper
@@ -123,7 +121,6 @@ public class NotificationService {
         sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentSolicitor);
     }
 
-    @Deprecated
     public void sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails finremCaseDetails,
                                                                         SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         NotificationRequest notificationRequestForRespondentSolicitor =
@@ -131,7 +128,6 @@ public class NotificationService {
         sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentSolicitor);
     }
 
-    @Deprecated
     private void sendAssignToJudgeConfirmationEmail(NotificationRequest notificationRequest) {
         log.info("Received request for notification email for Case assigned to Judge Case ID : {}",
             notificationRequest.getCaseReferenceNumber());

@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assi
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 /**
  * Corresponder for the "Assign to Judge" event in financial remedy cases.
@@ -36,26 +36,23 @@ public class FinremAssignToJudgeCorresponder extends AbstractAssignToJudgeCorres
 
     @Autowired
     public FinremAssignToJudgeCorresponder(NotificationService notificationService,
-//                                           BulkPrintService bulkPrintService,
-                                           AssignedToJudgeDocumentService assignedToJudgeDocumentService,
-                                           FinremNotificationRequestMapper finremNotificationRequestMapper,
-                                           CheckSolicitorIsDigitalService checkSolicitorIsDigitalService)  {
-        super(notificationService, assignedToJudgeDocumentService,
-            finremNotificationRequestMapper, checkSolicitorIsDigitalService);
+                                           BulkPrintService bulkPrintService,
+                                           AssignedToJudgeDocumentService assignedToJudgeDocumentService) {
+        super(notificationService, bulkPrintService, assignedToJudgeDocumentService);
     }
 
-//    /**
-//     * Determines whether a paper letter should be sent to the respondent.
-//     *
-//     * <p>
-//     * Letters will not be sent to respondents who are marked as residing outside the UK.
-//     * </p>
-//     *
-//     * @param caseDetails the case details
-//     * @return {@code true} if the respondent does not reside outside the UK; otherwise {@code false}
-//     */
-////    @Override
-//    protected boolean shouldSendRespondentLetter(FinremCaseDetails caseDetails) {
-//        return isNotInternationalParty(getContactDetailsWrapper(caseDetails).getRespondentResideOutsideUK());
-//    }
+    /**
+     * Determines whether a paper letter should be sent to the respondent.
+     * 
+     * <p>
+     * Letters will not be sent to respondents who are marked as residing outside the UK.
+     * </p>
+     *
+     * @param caseDetails the case details
+     * @return {@code true} if the respondent does not reside outside the UK; otherwise {@code false}
+     */
+    @Override
+    protected boolean shouldSendRespondentLetter(FinremCaseDetails caseDetails) {
+        return isNotInternationalParty(getContactDetailsWrapper(caseDetails).getRespondentResideOutsideUK());
+    }
 }
