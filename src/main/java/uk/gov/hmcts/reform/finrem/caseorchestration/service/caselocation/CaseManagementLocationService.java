@@ -18,17 +18,6 @@ import java.util.stream.Collectors;
  * Service responsible for determining CCD case location details
  * (base location and region) from the Financial Remedies Court
  * selected on a case.
- *
- * Court reference data is loaded from
- * /json/court-ref-data.json during application startup and cached
- * in memory for efficient lookups.
- *
- * The service searches case data for the selected court field
- * (ending with "CourtList"), resolves the corresponding court
- * reference data, and returns a CaseLocation containing the
- * Epimms base location and region identifier.
- *
- * Returns null when no court can be identified or mapped.
  */
 @Service
 @Slf4j
