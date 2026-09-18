@@ -1,19 +1,34 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.assigntojudge.consented.AssignToJudgeSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.FinremAssignToJudgeCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REASSIGN_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mockRunWithRetryWithHandlerInvokesFirstErrorHandler;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.runSafely;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE_FROM_AWAITING_RESPONSE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE_FROM_CLOSE;
@@ -27,11 +42,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class AssignToJudgeSubmittedHandlerTest {
 
+    @Mock
+    private RetryExecutor retryExecutor;
+
     @InjectMocks
     private AssignToJudgeSubmittedHandler handlerUnderTest;
 
     @Mock
     private FinremAssignToJudgeCorresponder assignToJudgeCorresponder;
+
+    @BeforeEach
+    void setup() {
+        lenient().doNothing().when(retryExecutor).runWithRetryWithHandler(any(), anyString(), any(), any());
+    }
 
     @Test
     void testCanHandle() {
@@ -42,19 +65,48 @@ class AssignToJudgeSubmittedHandlerTest {
             Arguments.of(CallbackType.SUBMITTED, CONSENTED, REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE),
             Arguments.of(CallbackType.SUBMITTED, CONSENTED, REFER_TO_JUDGE_FROM_AWAITING_RESPONSE),
             Arguments.of(CallbackType.SUBMITTED, CONSENTED, REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER),
-            Arguments.of(CallbackType.SUBMITTED, CONSENTED, REFER_TO_JUDGE_FROM_CLOSE),
-            Arguments.of(CallbackType.SUBMITTED, CONSENTED, REASSIGN_JUDGE)
+            Arguments.of(CallbackType.SUBMITTED, CONSENTED, REFER_TO_JUDGE_FROM_CLOSE)
         );
     }
 
     @Test
-    void testHandle() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        handlerUnderTest.handle(callbackRequest, AUTH_TOKEN);
-        verify(assignToJudgeCorresponder).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+    void givenCase_whenSendCorrespondenceFailed_thenPopulateErrorToConfirmationBody() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+
+        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+            retryExecutor,
+            "sending assign to judge correspondence"
+        );
+
+        // Act
+        var response = handlerUnderTest.handle(callbackRequest, AUTH_TOKEN);
+
+        // then
+        assertAll(
+            () -> assertThat(response.getConfirmationHeader()).contains("Assign to Judge event submitted with errors."),
+            () -> assertThat(response.getConfirmationBody())
+                .contains("There was a problem sending assign to judge : %s")
+        );
     }
 
-    private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequestFactory.from(FinremCaseData.builder().ccdCaseType(CONSENTED).build());
+    @Test
+    void givenCase_whenHandled_shouldSendCorrespondence() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.fromId(CASE_ID_IN_LONG);
+
+        // Act
+        handlerUnderTest.handle(callbackRequest, AUTH_TOKEN);
+
+        ArgumentCaptor<ThrowingRunnable> runnableCaptor = getThrowingRunnableCaptor();
+        verify(retryExecutor)
+            .runWithRetryWithHandler(
+                runnableCaptor.capture(),
+                eq("sending assign to judge correspondence"),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
+            );
+        runSafely(runnableCaptor.getValue());
+        verify(assignToJudgeCorresponder).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 }
