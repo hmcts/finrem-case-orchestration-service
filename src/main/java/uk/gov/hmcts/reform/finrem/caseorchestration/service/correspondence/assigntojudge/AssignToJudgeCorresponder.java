@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.util.ArrayList;
@@ -65,41 +66,87 @@ public class AssignToJudgeCorresponder {
         return buildSendCorrespondenceEvents(eventType, finremCaseDetails, true, authToken);
     }
 
-    // replacing FinremSingleLetterOrEmailAllPartiesCorresponder.sendCorrespondence
+    /**
+     * Builds the {@link SendCorrespondenceEvent}s needed to notify all parties of the
+     * given event.
+     *
+     * <p>
+     * This method replaces logic in
+     * {@code FinremSingleLetterOrEmailAllPartiesCorresponder.sendCorrespondence}. That
+     * method sent the correspondence directly, whereas this one only builds the events
+     * that describe it. The logic for each party is carried over from the original:
+     * </p>
+     * <ul>
+     *     <li>the applicant event replaces {@code sendApplicantCorrespondence}</li>
+     *     <li>the respondent event replaces {@code sendRespondentCorrespondence}</li>
+     *     <li>the intervener events replace {@code sendIntervenerCorrespondence}, and are
+     *         built only when the case is a contested application</li>
+     * </ul>
+     *
+     * <p>
+     * One event is created per party, in the order listed above, with interveners in the
+     * order returned by the case data.
+     * </p>
+     *
+     * <p>
+     * Every event carries the same event ID (the name of {@code eventType}), case details,
+     * email template and auth token. Each event targets a single {@link NotificationParty}
+     * and includes the email notification request for that party. When
+     * {@code includeDocumentsToPost} is true, each event also includes a document to post,
+     * generated for that party's paper notification recipient.
+     * </p>
+     *
+     * <p>
+     * This method only builds the events. It does not publish them or send any
+     * correspondence.
+     * </p>
+     *
+     * @param eventType              the event that triggered the correspondence; its name is used
+     *                               as the event ID on each {@link SendCorrespondenceEvent}
+     * @param finremCaseDetails      the case details used to build the email notification requests,
+     *                               the documents to print and, for contested applications, the
+     *                               list of interveners
+     * @param includeDocumentsToPost if {@code true}, a document is generated for each party and
+     *                               added to that party's event for posting; if {@code false}, no
+     *                               documents are generated and every event is built with an empty
+     *                               list of documents to post
+     * @param authToken              the authorisation token used to generate the documents and
+     *                               passed on to each event
+     * @return a list of {@link SendCorrespondenceEvent}s, one per party to be notified; never
+     *         {@code null}, and always contains at least the applicant and respondent events
+     * @see FinremSingleLetterOrEmailAllPartiesCorresponder
+     */
     private List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(EventType eventType,
                                                                         FinremCaseDetails finremCaseDetails,
-                                                                        boolean doNotGenerateReport, String authToken) {
+                                                                        boolean includeDocumentsToPost, String authToken) {
         List<SendCorrespondenceEvent> events = new ArrayList<>();
         events.add(
-            // replacing sendApplicantCorrespondence
             SendCorrespondenceEvent.builder()
                 .eventId(eventType.name())
                 .caseDetails(finremCaseDetails)
                 .notificationParties(List.of(NotificationParty.APPLICANT))
                 .emailTemplate(EMAIL_TEMPLATE)
                 .emailNotificationRequest(getApplicantEmailNotificationRequest(finremCaseDetails))
-                .documentsToPost(doNotGenerateReport ? List.of() : List.of(
+                .documentsToPost(includeDocumentsToPost ? List.of() : List.of(
                     getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.APPLICANT)
                 ))
                 .authToken(authToken)
                 .build()
         );
         events.add(
-            // replacing sendRespondentCorrespondence
             SendCorrespondenceEvent.builder()
                 .eventId(eventType.name())
                 .caseDetails(finremCaseDetails)
                 .notificationParties(List.of(NotificationParty.RESPONDENT))
                 .emailTemplate(EMAIL_TEMPLATE)
                 .emailNotificationRequest(getRespondentEmailNotificationRequest(finremCaseDetails))
-                .documentsToPost(doNotGenerateReport ? List.of() : List.of(
+                .documentsToPost(includeDocumentsToPost ? List.of() : List.of(
                     getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT)
                 ))
                 .authToken(authToken)
                 .build()
         );
         if (finremCaseDetails.isContestedApplication()) {
-            // replacing sendIntervenerCorrespondence
             List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
             interveners.forEach(intervenerWrapper ->
                 events.add(
@@ -111,7 +158,7 @@ public class AssignToJudgeCorresponder {
                         .emailTemplate(EMAIL_TEMPLATE)
                         .emailNotificationRequest(getIntervenerEmailNotificationRequest(finremCaseDetails,
                             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)))
-                        .documentsToPost(doNotGenerateReport ? List.of() : List.of(
+                        .documentsToPost(includeDocumentsToPost ? List.of() : List.of(
                             getDocumentToPrint(finremCaseDetails, authToken, intervenerWrapper.getPaperNotificationRecipient())
                         ))
                         .authToken(authToken)
