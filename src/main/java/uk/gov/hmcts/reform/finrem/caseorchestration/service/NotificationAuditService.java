@@ -141,7 +141,8 @@ public class NotificationAuditService {
             return Map.of();
         }
 
-        List<NotificationToBeSentCollectionItem> pending = getPendingNotifications(wrapper);
+        List<NotificationToBeSentCollectionItem> pending =
+            getPendingNotifications(wrapper);
 
         List<NotificationToBeSentCollectionItem> currentEventPending =
             getCurrentEventPendingNotifications(pending, currentNotificationEventId);
