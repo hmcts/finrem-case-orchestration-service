@@ -145,7 +145,10 @@ public class NotificationAuditService {
             getPendingNotifications(wrapper);
 
         List<NotificationToBeSentCollectionItem> currentEventPending =
-            getCurrentEventPendingNotifications(pending, currentNotificationEventId);
+            getCurrentEventPendingNotifications(
+                pending,
+                currentNotificationEventId
+            );
 
         List<NotificationAudit> audits = getSentAudits(sentEvents);
 
@@ -155,7 +158,10 @@ public class NotificationAuditService {
             addAuditsToExistingHistory(wrapper, audits);
 
         List<NotificationToBeSentCollectionItem> remainingPending =
-            removeCurrentEventPendingNotifications(pending, currentNotificationEventId);
+            removeCurrentEventPendingNotifications(
+                pending,
+                currentNotificationEventId
+            );
 
         return buildUpdatedFields(auditItems, remainingPending);
     }
