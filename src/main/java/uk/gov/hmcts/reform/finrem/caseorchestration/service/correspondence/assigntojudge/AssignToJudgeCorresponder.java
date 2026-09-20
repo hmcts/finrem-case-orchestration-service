@@ -60,12 +60,6 @@ public class AssignToJudgeCorresponder {
         return buildSendCorrespondenceEvents(eventType, finremCaseDetails, false, authToken);
     }
 
-    public List<SendCorrespondenceEvent> buildSendCorrespondenceEventsForAuditCreation(EventType eventType,
-                                                                                       FinremCaseDetails finremCaseDetails,
-                                                                                       String authToken) {
-        return buildSendCorrespondenceEvents(eventType, finremCaseDetails, true, authToken);
-    }
-
     /**
      * Builds the {@link SendCorrespondenceEvent}s needed to notify all parties of the
      * given event.
@@ -168,6 +162,12 @@ public class AssignToJudgeCorresponder {
         }
 
         return events;
+    }
+
+    public List<SendCorrespondenceEvent> buildSendCorrespondenceEventsForAuditCreation(EventType eventType,
+                                                                                       FinremCaseDetails finremCaseDetails,
+                                                                                       String authToken) {
+        return buildSendCorrespondenceEvents(eventType, finremCaseDetails, true, authToken);
     }
 
     private NotificationRequest getApplicantEmailNotificationRequest(FinremCaseDetails caseDetails) {

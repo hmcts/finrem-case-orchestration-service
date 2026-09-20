@@ -45,9 +45,8 @@ public class NotificationAuditService {
      *
      * @param event the correspondence event containing the case data and notification audits
      * @param eventType the CCD event type associated with the correspondence
-     * @throws IllegalStateException if the correspondence event does not contain case data
-     *
      * @return tracker id
+     * @throws IllegalStateException if the correspondence event does not contain case data
      */
     public String createAuditsForCorrespondence(SendCorrespondenceEvent event, EventType eventType) {
         FinremCaseData caseData = event.getCaseData();

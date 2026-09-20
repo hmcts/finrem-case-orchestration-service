@@ -20,7 +20,6 @@ public class ReassignJudgeAboutToSubmitHandler extends FinremAboutToSubmitCallba
 
     private final AssignToJudgeCorresponder assignToJudgeCorresponder;
 
-
     public ReassignJudgeAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                              AssignToJudgeCorresponder assignToJudgeCorresponder) {
         super(finremCaseDetailsMapper);
