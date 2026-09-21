@@ -1,12 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 
@@ -23,7 +22,6 @@ public class GlobalSearchService {
 
     private static final String FINANCIAL_REMEDY = "Financial Remedy";
     private final FeatureToggleService featureToggleService;
-    private final ObjectMapper objectMapper;
     private final CaseManagementLocationService caseManagementLocationService;
 
     /**
@@ -35,15 +33,23 @@ public class GlobalSearchService {
     public void setGlobalSearchDataByMap(Map<String, Object> caseDataMap) {
 
         if (featureToggleService.isGlobalSearchEnabled()) {
-            FinremCaseData caseData  = objectMapper.convertValue(caseDataMap, FinremCaseData.class);
             log.info("setGlobalSearchDataByMap::Received request to set global search fields for case with CCD ID: {}",
                 caseDataMap.get("ccdCaseId"));
-            DynamicListElement element = DynamicListElement.builder().code("Financial Remedy").build();
+            DynamicListElement element = DynamicListElement.builder().code(FINANCIAL_REMEDY).build();
             caseDataMap.put("caseManagementCategory", DynamicList.builder().value(element).build());
-            caseDataMap.put("caseNameHmctsInternal", caseData.getCaseNameHmctsInternal());
+            caseDataMap.put("caseNameHmctsInternal", getCaseNameHmctsInternal(caseDataMap));
             caseDataMap.put("caseManagementLocation", caseManagementLocationService.getCaseLocation(caseDataMap));
             log.info("setGlobalSearchDataByMap::global search fields are set for case with CCD ID: {}",
                 caseDataMap.get("ccdCaseId"));
         }
+    }
+
+    private String getCaseNameHmctsInternal(Map<String, Object> caseDataMap) {
+        if (StringUtils.isNotBlank((String) caseDataMap.get("applicantLname"))
+            && StringUtils.isNotBlank((String) caseDataMap.get("respondentLname"))) {
+            return String.format("%s vs %s",
+                 caseDataMap.get("applicantLname"),  caseDataMap.get("respondentLname"));
+        }
+        return null;
     }
 }

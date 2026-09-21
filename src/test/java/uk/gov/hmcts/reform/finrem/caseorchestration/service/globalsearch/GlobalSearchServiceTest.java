@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 
@@ -17,7 +16,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,12 +40,8 @@ class GlobalSearchServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("ccdCaseId", "12345");
         caseDataMap.put("bristolFRCourtList", "FR_bristolList_3");
-
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        when(caseData.getCaseNameHmctsInternal()).thenReturn("Jane Doe");
-
-        when(objectMapper.convertValue(caseDataMap, FinremCaseData.class))
-            .thenReturn(caseData);
+        caseDataMap.put("respondentLname", "Doe");
+        caseDataMap.put("applicantLname", "Jane");
 
         when(caseManagementLocationService.getCaseLocation(caseDataMap))
             .thenReturn(CaseLocation.builder()
@@ -56,7 +50,7 @@ class GlobalSearchServiceTest {
 
         globalSearchService.setGlobalSearchDataByMap(caseDataMap);
 
-        assertEquals("Jane Doe", caseDataMap.get("caseNameHmctsInternal"));
+        assertEquals("Jane vs Doe", caseDataMap.get("caseNameHmctsInternal"));
 
         assertEquals(
             "Financial Remedy",
