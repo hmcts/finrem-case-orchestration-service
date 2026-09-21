@@ -37,7 +37,7 @@ class GlobalSearchServiceTest {
         caseDataMap.put("ccdCaseId", "12345");
         caseDataMap.put("bristolFRCourtList", "FR_bristolList_3");
         caseDataMap.put("appRespondentLName", "Doe");
-        caseDataMap.put("applicantLname", "Jane");
+        caseDataMap.put("applicantLName", "Jane");
 
         when(caseManagementLocationService.getCaseLocation(caseDataMap))
             .thenReturn(CaseLocation.builder()
