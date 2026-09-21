@@ -9,7 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.IssueApplicationConsentedSubmittedHandlerContractTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.feeacctdebitedandissue.consented.FeeAccountDebitedAndIssueSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
@@ -31,10 +32,13 @@ class FeeAccountDebitedAndIssueSubmittedHandlerTest extends IssueApplicationCons
     private RetryExecutor retryExecutor;
 
     @Mock
-    private IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
+    private AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     @Mock
     private AssignPartiesAccessService assignPartiesAccessService;
+
+    @Mock
+    private NotificationAuditService notificationAuditService;
 
     @Test
     void testCanHandle() {
@@ -52,8 +56,8 @@ class FeeAccountDebitedAndIssueSubmittedHandlerTest extends IssueApplicationCons
     }
 
     @Override
-    protected IssueApplicationConsentCorresponder issueApplicationConsentCorresponder() {
-        return issueApplicationConsentCorresponder;
+    protected AssignToJudgeCorresponder assignToJudgeCorresponder() {
+        return assignToJudgeCorresponder;
     }
 
     @Override

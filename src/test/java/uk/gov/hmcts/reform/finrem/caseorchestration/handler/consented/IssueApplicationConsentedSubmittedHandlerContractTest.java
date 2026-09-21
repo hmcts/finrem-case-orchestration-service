@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UserNotFoundInOrganisationApiException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
@@ -42,35 +42,13 @@ public abstract class IssueApplicationConsentedSubmittedHandlerContractTest {
 
     protected abstract RetryExecutor retryExecutor();
 
-    protected abstract IssueApplicationConsentCorresponder issueApplicationConsentCorresponder();
+    protected abstract AssignToJudgeCorresponder assignToJudgeCorresponder();
 
     protected abstract AssignPartiesAccessService assignPartiesAccessService();
 
     @BeforeEach
     void setup() {
         lenient().doNothing().when(retryExecutor()).runWithRetryWithHandler(any(), anyString(), any(), any());
-    }
-
-    @Test
-    void givenCase_whenSendHwfCorrespondenceFailedAndIssueApplicationCorrespondenceFailed_thenPopulateErrorToConfirmationBody() {
-        // Arrange
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
-
-        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
-            retryExecutor(),
-            "sending issue application correspondence"
-        );
-
-        // Act
-        var response = handler().handle(callbackRequest, AUTH_TOKEN);
-
-        // then
-        assertAll(
-            () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
-            () -> assertThat(response.getConfirmationBody())
-                .contains("There was a problem sending issue application correspondence. Please send it manually.")
-                .doesNotContain("There was a problem granting access to respondent solicitor")
-        );
     }
 
     @Test
@@ -123,26 +101,6 @@ public abstract class IssueApplicationConsentedSubmittedHandlerContractTest {
             () -> assertThat(response.getConfirmationHeader()).isNull(),
             () -> assertThat(response.getConfirmationBody()).isNull()
         );
-    }
-
-    @Test
-    void givenCase_whenHandled_shouldSendIssueApplicationCorrespondence() {
-        // Arrange
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.fromId(CASE_ID_IN_LONG);
-
-        // Act
-        handler().handle(callbackRequest, AUTH_TOKEN);
-
-        ArgumentCaptor<ThrowingRunnable> runnableCaptor = getThrowingRunnableCaptor();
-        verify(retryExecutor())
-            .runWithRetryWithHandler(
-                runnableCaptor.capture(),
-                eq("sending issue application correspondence"),
-                eq(CASE_ID),
-                any(RetryErrorHandler.class)
-            );
-        runSafely(runnableCaptor.getValue());
-        verify(issueApplicationConsentCorresponder()).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test

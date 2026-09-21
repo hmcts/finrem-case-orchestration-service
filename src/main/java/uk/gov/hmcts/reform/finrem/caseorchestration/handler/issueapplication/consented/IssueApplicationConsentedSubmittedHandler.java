@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -22,9 +23,10 @@ public class IssueApplicationConsentedSubmittedHandler extends AbstractIssueAppl
                                                      AssignToJudgeCorresponder assignToJudgeCorresponder,
                                                      AssignPartiesAccessService assignPartiesAccessService,
                                                      ApplicationEventPublisher applicationEventPublisher,
-                                                     NotificationAuditService notificationAuditService) {
+                                                     NotificationAuditService notificationAuditService,
+                                                     CoreCaseDataService coreCaseDataService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor, assignToJudgeCorresponder,
-            assignPartiesAccessService, applicationEventPublisher, notificationAuditService);
+            assignPartiesAccessService, applicationEventPublisher, notificationAuditService, coreCaseDataService);
     }
 
     @Override

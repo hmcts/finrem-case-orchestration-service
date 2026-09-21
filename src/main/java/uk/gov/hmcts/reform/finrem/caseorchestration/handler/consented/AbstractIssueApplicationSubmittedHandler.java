@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -27,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSubmittedCallbackHandler {
 
@@ -40,18 +43,22 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
 
     protected final NotificationAuditService notificationAuditService;
 
+    protected final CoreCaseDataService coreCaseDataService;
+
     protected AbstractIssueApplicationSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                        EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                        RetryExecutor retryExecutor,
                                                        AssignToJudgeCorresponder assignToJudgeCorresponder,
                                                        AssignPartiesAccessService assignPartiesAccessService,
                                                        ApplicationEventPublisher applicationEventPublisher,
-                                                       NotificationAuditService notificationAuditService) {
+                                                       NotificationAuditService notificationAuditService,
+                                                       CoreCaseDataService coreCaseDataService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
         this.assignToJudgeCorresponder = assignToJudgeCorresponder;
         this.assignPartiesAccessService = assignPartiesAccessService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.notificationAuditService = notificationAuditService;
+        this.coreCaseDataService = coreCaseDataService;
     }
 
     protected abstract EventType supportedEventType();
@@ -117,8 +124,6 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
 
         List<String> errors = new ArrayList<>();
         for (SendCorrespondenceEvent event : events) {
-            int originalErrorsSize = errors.size();
-
             String trackerId = caseDetails.getData().getNotificationAuditWrapper().getNotificationEventId();
             event.setNotificationTrackerId(trackerId);
 
@@ -131,10 +136,20 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
                 (exception, actionName, caseId1) ->
                     errors.add("There was a problem sending issue application correspondence (%s). Please send it manually."
                         .formatted(event.describeNotificationParties())));
-
-            Map<String, Object> updatedFields =
-                notificationAuditService.reconcileNotificationAudits(event);
-            System.out.println();
+        }
+        Map<String, Object> updatedFields =
+            notificationAuditService.reconcileNotificationAudits(events.toArray(new SendCorrespondenceEvent[0]));
+        if (!updatedFields.isEmpty()) {
+            retryExecutor.runWithRetrySuppressException(
+                () -> coreCaseDataService.performPostSubmitCallback(
+                    caseDetails.getData().getCcdCaseType(),
+                    caseDetails.getId(),
+                    INTERNAL_CHANGE_UPDATE_CASE.getCcdType(),
+                    latestCaseDetails -> updatedFields
+                ),
+                "markPendingNotificationsAsSent",
+                caseDetails.getCaseIdAsString()
+            );
         }
         return errors;
     }

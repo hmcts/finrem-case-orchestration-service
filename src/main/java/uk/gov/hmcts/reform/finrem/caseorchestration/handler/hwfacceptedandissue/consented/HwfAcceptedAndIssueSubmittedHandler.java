@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
@@ -24,15 +25,16 @@ public class HwfAcceptedAndIssueSubmittedHandler extends AbstractIssueApplicatio
     private final HwfCorrespondenceService hwfNotificationsService;
 
     public HwfAcceptedAndIssueSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                               HwfCorrespondenceService hwfNotificationsService,
                                                EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                RetryExecutor retryExecutor,
                                                AssignToJudgeCorresponder assignToJudgeCorresponder,
                                                AssignPartiesAccessService assignPartiesAccessService,
                                                ApplicationEventPublisher applicationEventPublisher,
-                                               HwfCorrespondenceService hwfNotificationsService,
-                                               NotificationAuditService notificationAuditService) {
+                                               NotificationAuditService notificationAuditService,
+                                               CoreCaseDataService coreCaseDataService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor, assignToJudgeCorresponder,
-            assignPartiesAccessService, applicationEventPublisher, notificationAuditService);
+            assignPartiesAccessService, applicationEventPublisher, notificationAuditService, coreCaseDataService);
         this.hwfNotificationsService = hwfNotificationsService;
     }
 
