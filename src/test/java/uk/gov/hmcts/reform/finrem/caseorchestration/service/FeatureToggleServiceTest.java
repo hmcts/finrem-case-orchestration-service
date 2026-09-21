@@ -96,7 +96,7 @@ public class FeatureToggleServiceTest {
         @Test
         void isGlobalSearchEnabledReturnsTrue() {
             // default value is defined in src/test/resources/application.properties
-            assertThat(featureToggleService.isGlobalSearchEnabled()).isFalse();
+            assertThat(featureToggleService.isGlobalSearchEnabled()).isTrue();
         }
       
         @Test
