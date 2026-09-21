@@ -42,6 +42,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedSubmittedHandlerContractTest {
 
+    private static final String TRACKER_ID = "tracker-id-123";
+
+    private static final String DESCRIBED_NOTIFICATION_PARTIES = "applicant solicitor";
+
     public HwfAcceptedAndIssueSubmittedHandlerTest() {
         this.expectedConfirmationHeader = "HWF accepted and issued with errors";
     }
@@ -129,11 +133,6 @@ class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedS
                 .containsOnlyOnce("There was a problem sending HWF correspondence. Please send it manually.")
         );
     }
-
-
-    private static final String TRACKER_ID = "tracker-id-123";
-
-    private static final String DESCRIBED_NOTIFICATION_PARTIES = "applicant solicitor";
 
     @Test
     void givenCase_whenSendHwfCorrespondenceFailedAndIssueApplicationCorrespondenceFailed_thenPopulateErrorToConfirmationBody() {
