@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -62,8 +62,9 @@ public class AssignToJudgeSubmittedHandler extends FinremSubmittedCallbackHandle
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        List<String> errors = new ArrayList<>();
-        errors.addAll(sendAssignToJudgeCorrespondences(callbackRequest.getEventType(), caseDetails, userAuthorisation));
+        List<String> errors = new ArrayList<>(
+            sendAssignToJudgeCorrespondences(callbackRequest.getEventType(), caseDetails, userAuthorisation)
+        );
 
         boolean isHavingErrors = !StringUtils.isAllBlank(errors.toArray(new String[0]));
 

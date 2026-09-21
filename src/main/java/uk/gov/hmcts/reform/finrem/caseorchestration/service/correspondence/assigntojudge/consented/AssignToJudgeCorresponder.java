@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,15 +8,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.F
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
@@ -26,14 +23,43 @@ import java.util.List;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 
+/**
+ * Builds the correspondence events and audit records for the "assign to judge" notification
+ * in the <strong>consented</strong> journey.
+ *
+ * <p>
+ * This class applies to consented applications only. It is not used for contested cases,
+ * so it deals only with the two parties to a consented case, the applicant and the
+ * respondent. There are no interveners in the consented journey.
+ * </p>
+ *
+ * <p>
+ * When a consented case is assigned to a judge, the parties are told by email
+ * ({@code FR_ASSIGNED_TO_JUDGE} template) and, where needed, by a posted letter. Rather than
+ * sending that correspondence directly, this class builds {@link SendCorrespondenceEvent}s
+ * that describe it, so it can be published and sent elsewhere. It offers two operations:
+ * </p>
+ * <ul>
+ *     <li>{@link #buildSendCorrespondenceEvents(EventType, FinremCaseDetails, String)}
+ *     builds the applicant and respondent events used to send the correspondence</li>
+ *     <li>{@link #createAuditsForCorrespondence(EventType, FinremCaseDetails, String)}
+ *     records notification audits for the same events, linking them with a shared
+ *     notification tracker ID</li>
+ * </ul>
+ *
+ * <p>
+ * Solicitor email requests are built with the digital or non-digital variant depending on
+ * whether each party's solicitor is registered as digital.
+ * </p>
+ *
+ * @see FinremSingleLetterOrEmailAllPartiesCorresponder
+ */
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class AssignToJudgeCorresponder {
 
     private static final EmailTemplateNames EMAIL_TEMPLATE = FR_ASSIGNED_TO_JUDGE;
-
-    private final NotificationService notificationService;
 
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
@@ -73,8 +99,6 @@ public class AssignToJudgeCorresponder {
      * <ul>
      *     <li>the applicant event replaces {@code sendApplicantCorrespondence}</li>
      *     <li>the respondent event replaces {@code sendRespondentCorrespondence}</li>
-     *     <li>the intervener events replace {@code sendIntervenerCorrespondence}, and are
-     *         built only when the case is a contested application</li>
      * </ul>
      *
      * <p>
@@ -125,7 +149,7 @@ public class AssignToJudgeCorresponder {
                     getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.APPLICANT)
                 ))
                 .authToken(authToken)
-                .build()
+            .build()
         );
         events.add(
             SendCorrespondenceEvent.builder()
@@ -138,28 +162,8 @@ public class AssignToJudgeCorresponder {
                     getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT)
                 ))
                 .authToken(authToken)
-                .build()
+            .build()
         );
-        if (finremCaseDetails.isContestedApplication()) {
-            List<IntervenerWrapper> interveners = finremCaseDetails.getData().getInterveners();
-            interveners.forEach(intervenerWrapper ->
-                events.add(
-                    SendCorrespondenceEvent.builder()
-                        .eventId(eventType.name())
-                        .caseDetails(finremCaseDetails)
-                        .notificationParties(List.of(NotificationParty.getNotificationPartyFromRole(intervenerWrapper
-                            .getIntervenerSolicitorCaseRole().name())))
-                        .emailTemplate(EMAIL_TEMPLATE)
-                        .emailNotificationRequest(getIntervenerEmailNotificationRequest(finremCaseDetails,
-                            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper)))
-                        .documentsToPost(includeDocumentsToPost ? List.of() : List.of(
-                            getDocumentToPrint(finremCaseDetails, authToken, intervenerWrapper.getPaperNotificationRecipient())
-                        ))
-                        .authToken(authToken)
-                        .build()
-                )
-            );
-        }
 
         return events;
     }
@@ -178,12 +182,6 @@ public class AssignToJudgeCorresponder {
     private NotificationRequest getRespondentEmailNotificationRequest(FinremCaseDetails caseDetails) {
         return finremNotificationRequestMapper
             .getNotificationRequestForRespondentSolicitor(caseDetails, !isRespondentSolicitorDigital(caseDetails));
-    }
-
-    private NotificationRequest getIntervenerEmailNotificationRequest(FinremCaseDetails caseDetails,
-                                                                      SolicitorCaseDataKeysWrapper dataKeysWrapper) {
-        return finremNotificationRequestMapper
-            .getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper);
     }
 
     private boolean isApplicantSolicitorDigital(FinremCaseDetails caseDetails) {

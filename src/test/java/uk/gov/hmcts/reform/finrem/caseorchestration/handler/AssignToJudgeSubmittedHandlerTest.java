@@ -8,13 +8,19 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.assigntojudge.consented.AssignToJudgeSubmittedHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.FinremAssignToJudgeCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -22,7 +28,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
@@ -41,6 +49,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 
 @ExtendWith(MockitoExtension.class)
 class AssignToJudgeSubmittedHandlerTest {
+    
+    private static final String TRACKER_ID = "tracker-id-123";
+
+    private static final String DESCRIBED_NOTIFICATION_PARTIES = "applicant solicitor";
 
     @Mock
     private RetryExecutor retryExecutor;
@@ -49,7 +61,10 @@ class AssignToJudgeSubmittedHandlerTest {
     private AssignToJudgeSubmittedHandler handlerUnderTest;
 
     @Mock
-    private FinremAssignToJudgeCorresponder assignToJudgeCorresponder;
+    private AssignToJudgeCorresponder assignToJudgeCorresponder;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @BeforeEach
     void setup() {
@@ -72,11 +87,20 @@ class AssignToJudgeSubmittedHandlerTest {
     @Test
     void givenCase_whenSendCorrespondenceFailed_thenPopulateErrorToConfirmationBody() {
         // Arrange
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, REFER_TO_JUDGE);
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getNotificationTrackerId()).thenReturn(TRACKER_ID);
+        when(event.describeNotificationParties()).thenReturn(DESCRIBED_NOTIFICATION_PARTIES);
+
+        List<SendCorrespondenceEvent> events = new ArrayList<>(List.of(event));
+        when(assignToJudgeCorresponder.buildSendCorrespondenceEvents(REFER_TO_JUDGE, callbackRequest.getCaseDetails(),
+            AUTH_TOKEN)).thenReturn(events);
 
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
-            "sending assign to judge correspondence"
+            "sending assign to judge correspondence %s (%s)".formatted(TRACKER_ID,
+                DESCRIBED_NOTIFICATION_PARTIES)
         );
 
         // Act
@@ -84,16 +108,25 @@ class AssignToJudgeSubmittedHandlerTest {
 
         // then
         assertAll(
-            () -> assertThat(response.getConfirmationHeader()).contains("Assign to Judge event submitted with errors."),
+            () -> assertThat(response.getConfirmationHeader()).contains("Assign to judge event submitted with errors."),
             () -> assertThat(response.getConfirmationBody())
-                .contains("There was a problem sending assign to judge : %s")
+                .contains("There was a problem sending assign to judge correspondence (%s). Please send it manually."
+                    .formatted(DESCRIBED_NOTIFICATION_PARTIES))
         );
     }
 
     @Test
-    void givenCase_whenHandled_shouldSendCorrespondence() {
+    void givenCase_whenHandled_shouldPublishSendCorrespondenceEvent() {
         // Arrange
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.fromId(CASE_ID_IN_LONG);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, REFER_TO_JUDGE);
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getNotificationTrackerId()).thenReturn(TRACKER_ID);
+        when(event.describeNotificationParties()).thenReturn(DESCRIBED_NOTIFICATION_PARTIES);
+
+        List<SendCorrespondenceEvent> events = new ArrayList<>(List.of(event));
+        when(assignToJudgeCorresponder.buildSendCorrespondenceEvents(REFER_TO_JUDGE, callbackRequest.getCaseDetails(),
+            AUTH_TOKEN)).thenReturn(events);
 
         // Act
         handlerUnderTest.handle(callbackRequest, AUTH_TOKEN);
@@ -102,11 +135,54 @@ class AssignToJudgeSubmittedHandlerTest {
         verify(retryExecutor)
             .runWithRetryWithHandler(
                 runnableCaptor.capture(),
-                eq("sending assign to judge correspondence"),
+                eq("sending assign to judge correspondence %s (%s)".formatted(TRACKER_ID,
+                    DESCRIBED_NOTIFICATION_PARTIES)),
                 eq(CASE_ID),
                 any(RetryErrorHandler.class)
             );
         runSafely(runnableCaptor.getValue());
-        verify(assignToJudgeCorresponder).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(applicationEventPublisher).publishEvent(event);
+    }
+
+    @Test
+    void givenCase_whenHandled_shouldPublishMultipleSendCorrespondenceEvents() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, REFER_TO_JUDGE);
+
+        SendCorrespondenceEvent firstEvent = mock(SendCorrespondenceEvent.class);
+        when(firstEvent.getNotificationTrackerId()).thenReturn(TRACKER_ID);
+        when(firstEvent.describeNotificationParties()).thenReturn(DESCRIBED_NOTIFICATION_PARTIES);
+
+        SendCorrespondenceEvent secondEvent = mock(SendCorrespondenceEvent.class);
+        when(secondEvent.getNotificationTrackerId()).thenReturn(TRACKER_ID);
+        when(secondEvent.describeNotificationParties()).thenReturn(DESCRIBED_NOTIFICATION_PARTIES + "2");
+
+        List<SendCorrespondenceEvent> events = new ArrayList<>(List.of(firstEvent, secondEvent));
+        when(assignToJudgeCorresponder.buildSendCorrespondenceEvents(REFER_TO_JUDGE, callbackRequest.getCaseDetails(),
+            AUTH_TOKEN)).thenReturn(events);
+
+        // Act
+        handlerUnderTest.handle(callbackRequest, AUTH_TOKEN);
+
+        ArgumentCaptor<ThrowingRunnable> runnableCaptor = getThrowingRunnableCaptor();
+        verify(retryExecutor)
+            .runWithRetryWithHandler(
+                runnableCaptor.capture(),
+                eq("sending assign to judge correspondence %s (%s)".formatted(TRACKER_ID,
+                    DESCRIBED_NOTIFICATION_PARTIES)),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
+            );
+        verify(retryExecutor)
+            .runWithRetryWithHandler(
+                runnableCaptor.capture(),
+                eq("sending assign to judge correspondence %s (%s)".formatted(TRACKER_ID,
+                    DESCRIBED_NOTIFICATION_PARTIES + "2")),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
+            );
+        runnableCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
+        verify(applicationEventPublisher).publishEvent(firstEvent);
+        verify(applicationEventPublisher).publishEvent(secondEvent);
     }
 }
