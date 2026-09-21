@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,9 +25,6 @@ class GlobalSearchServiceTest {
 
     @Mock
     private CaseManagementLocationService caseManagementLocationService;
-
-    @Mock
-    private ObjectMapper objectMapper;
 
     @InjectMocks
     private GlobalSearchService globalSearchService;
