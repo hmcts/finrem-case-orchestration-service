@@ -18,10 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Scheduled task to update cases for Global search.
@@ -39,6 +41,7 @@ public class GlobalSearchMigrationTask extends BaseTask {
 
     private static final String TASK_NAME = "GlobalSearchMigrationTask";
     private static final String SUMMARY = "DFR-4961";
+    private final GlobalSearchService globalSearchService;
 
     @Value("${cron.globalSearchMigration.enabled:false}")
     private boolean taskEnabled;
@@ -49,8 +52,10 @@ public class GlobalSearchMigrationTask extends BaseTask {
 
     public GlobalSearchMigrationTask(CcdService ccdService,
                                      SystemUserService systemUserService,
-                                     FinremCaseDetailsMapper finremCaseDetailsMapper) {
+                                     FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                     GlobalSearchService  globalSearchService) {
         super(ccdService, systemUserService, finremCaseDetailsMapper);
+        this.globalSearchService = globalSearchService;
     }
 
     @Override
@@ -58,6 +63,9 @@ public class GlobalSearchMigrationTask extends BaseTask {
         FinremCaseData caseData = finremCaseDetails.getData();
         String ccdCaseId = String.valueOf(finremCaseDetails.getId());
         caseData.setCcdCaseId(ccdCaseId);
+        Map<String, Object> caseDataToMap = finremCaseDetailsMapper.finremCaseDataToMap(caseData);
+        globalSearchService.setGlobalSearchDataByMap(caseDataToMap);
+
     }
 
     @Override
