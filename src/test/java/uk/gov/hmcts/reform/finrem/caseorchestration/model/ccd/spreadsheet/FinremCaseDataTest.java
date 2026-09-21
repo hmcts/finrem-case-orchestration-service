@@ -516,4 +516,42 @@ class FinremCaseDataTest {
             caseData.getEstimatedAssetsChecklistWrapper().getEstimatedAssetsChecklistVersion()
         );
     }
+
+    @Test
+    void givenApplicantAndRespondentLastNames_whenGetCaseNameHmctsInternal_thenReturnFormattedCaseName() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantLname("Smith")
+                .respondentLname("Jones")
+                .build())
+            .build();
+
+        assertEquals("Smith vs Jones", caseData.getCaseNameHmctsInternal());
+    }
+
+    @Test
+    void givenMissingApplicantOrRespondentLastName_whenGetCaseNameHmctsInternal_thenReturnNull() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantLname("Smith")
+                .respondentLname(null)
+                .build())
+            .build();
+
+        assertNull(caseData.getCaseNameHmctsInternal());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @org.junit.jupiter.params.provider.EmptySource
+    void givenBlankOrNullRespondentLastName_whenGetCaseNameHmctsInternal_thenReturnNull(String respondentLname) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantLname("Smith")
+                .respondentLname(respondentLname)
+                .build())
+            .build();
+
+        assertNull(caseData.getCaseNameHmctsInternal());
+    }
 }

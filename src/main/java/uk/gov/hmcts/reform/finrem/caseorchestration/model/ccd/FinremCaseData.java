@@ -1240,4 +1240,12 @@ public class FinremCaseData implements HasCaseDocument {
         }
         return bin;
     }
+
+    public String getCaseNameHmctsInternal() {
+        if (StringUtils.isNoneBlank(this.contactDetailsWrapper.getApplicantLname(), this.contactDetailsWrapper.getRespondentLname())) {
+            return String.format("%s vs %s",
+                this.contactDetailsWrapper.getApplicantLname(), this.contactDetailsWrapper.getRespondentLname());
+        }
+        return null;
+    }
 }
