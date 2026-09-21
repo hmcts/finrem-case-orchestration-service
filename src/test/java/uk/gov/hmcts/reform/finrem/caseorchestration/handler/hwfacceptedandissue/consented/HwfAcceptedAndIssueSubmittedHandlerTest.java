@@ -6,6 +6,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.IssueAppli
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
@@ -66,11 +68,22 @@ class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedS
     private AssignPartiesAccessService assignPartiesAccessService;
 
     @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    @Mock
     private NotificationAuditService notificationAuditService;
+
+    @Mock
+    private CoreCaseDataService coreCaseDataService;
 
     @Test
     void testCanHandle() {
         assertCanHandle(handler, SUBMITTED, CONSENTED, HWF_ACCEPTED_AND_ISSUE);
+    }
+
+    @Override
+    protected ApplicationEventPublisher applicationEventPublisher() {
+        return applicationEventPublisher;
     }
 
     @Override
@@ -91,6 +104,16 @@ class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedS
     @Override
     protected AssignPartiesAccessService assignPartiesAccessService() {
         return assignPartiesAccessService;
+    }
+
+    @Override
+    protected NotificationAuditService notificationAuditService() {
+        return notificationAuditService;
+    }
+
+    @Override
+    protected CoreCaseDataService coreCaseDataService() {
+        return coreCaseDataService;
     }
 
     @Test

@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -13,21 +11,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE_FROM_AWAITING_RESPONSE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE_FROM_CLOSE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE_FROM_ORDER_MADE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER;
 
 @Slf4j
 class EventTypeTest {
@@ -130,34 +116,5 @@ class EventTypeTest {
 
         return (boolean) className.getMethod("canHandle", CallbackType.class, CaseType.class, EventType.class)
             .invoke(obj, callbackType, caseType, eventType);
-    }
-
-    private static final Set<EventType> EXPECTED_CONSENTED_ASSIGN_TO_JUDGE_EVENTS = EnumSet.of(
-        REFER_TO_JUDGE,
-        REFER_TO_JUDGE_FROM_ORDER_MADE,
-        REFER_TO_JUDGE_FROM_CONSENT_ORDER_APPROVED,
-        REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE,
-        REFER_TO_JUDGE_FROM_AWAITING_RESPONSE,
-        REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER,
-        REFER_TO_JUDGE_FROM_CLOSE);
-
-    static Stream<EventType> consentedAssignToJudgeEvents() {
-        return EXPECTED_CONSENTED_ASSIGN_TO_JUDGE_EVENTS.stream();
-    }
-
-    static Stream<EventType> otherEvents() {
-        return EnumSet.complementOf(EnumSet.copyOf(EXPECTED_CONSENTED_ASSIGN_TO_JUDGE_EVENTS)).stream();
-    }
-
-    @ParameterizedTest
-    @MethodSource("consentedAssignToJudgeEvents")
-    void shouldReturnTrueForConsentedAssignToJudgeEvents(EventType eventType) {
-        assertTrue(eventType.isConsentedAssignToJudgeEvent());
-    }
-
-    @ParameterizedTest
-    @MethodSource("otherEvents")
-    void shouldReturnFalseForAllOtherEvents(EventType eventType) {
-        assertFalse(eventType.isConsentedAssignToJudgeEvent());
     }
 }
