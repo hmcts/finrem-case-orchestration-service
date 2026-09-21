@@ -54,6 +54,9 @@ public class UploadCaseDocumentWrapper implements HasCaseDocument {
     private List<UploadCaseDocumentCollection> respHearingBundlesCollection;
     private List<UploadCaseDocumentCollection> respFormEExhibitsCollection;
     private List<UploadCaseDocumentCollection> respChronologiesCollection;
+    private List<UploadCaseDocumentCollection> appUpdatingDisclosureCollection;
+    private List<UploadCaseDocumentCollection> respUpdatingDisclosureCollection;
+
     @JsonProperty("respQACollection")
     private List<UploadCaseDocumentCollection> respQaCollection;
     private List<UploadCaseDocumentCollection> respStatementsExhibitsCollection;
@@ -236,6 +239,8 @@ public class UploadCaseDocumentWrapper implements HasCaseDocument {
             case APP_CHRONOLOGIES_STATEMENTS_COLLECTION ->
                 appChronologiesCollection = getNonNull(appChronologiesCollection);
             case APP_QUESTIONNAIRES_ANSWERS_COLLECTION -> appQaCollection = getNonNull(appQaCollection);
+            case APP_UPDATING_DISCLOSURE_COLLECTION -> appUpdatingDisclosureCollection = getNonNull(appUpdatingDisclosureCollection);
+            case RESP_UPDATING_DISCLOSURE_COLLECTION -> respUpdatingDisclosureCollection = getNonNull(respUpdatingDisclosureCollection);
             case APP_STATEMENTS_EXHIBITS_COLLECTION ->
                 appStatementsExhibitsCollection = getNonNull(appStatementsExhibitsCollection);
             case APP_CASE_SUMMARIES_COLLECTION -> appCaseSummariesCollection = getNonNull(appCaseSummariesCollection);
@@ -318,4 +323,3 @@ public class UploadCaseDocumentWrapper implements HasCaseDocument {
         return collection;
     }
 }
-
