@@ -36,7 +36,7 @@ class GlobalSearchServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("ccdCaseId", "12345");
         caseDataMap.put("bristolFRCourtList", "FR_bristolList_3");
-        caseDataMap.put("respondentLname", "Doe");
+        caseDataMap.put("appRespondentLName", "Doe");
         caseDataMap.put("applicantLname", "Jane");
 
         when(caseManagementLocationService.getCaseLocation(caseDataMap))
