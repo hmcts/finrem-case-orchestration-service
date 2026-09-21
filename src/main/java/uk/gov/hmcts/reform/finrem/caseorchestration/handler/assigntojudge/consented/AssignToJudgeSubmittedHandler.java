@@ -26,15 +26,6 @@ import java.util.List;
 @Service
 public class AssignToJudgeSubmittedHandler extends FinremSubmittedCallbackHandler {
 
-    private final List<EventType> assignToJudgeEvents =
-        List.of(EventType.REFER_TO_JUDGE,
-            EventType.REFER_TO_JUDGE_FROM_ORDER_MADE,
-            EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_APPROVED,
-            EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE,
-            EventType.REFER_TO_JUDGE_FROM_AWAITING_RESPONSE,
-            EventType.REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER,
-            EventType.REFER_TO_JUDGE_FROM_CLOSE);
-
     private final AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     protected final ApplicationEventPublisher applicationEventPublisher;
@@ -53,7 +44,7 @@ public class AssignToJudgeSubmittedHandler extends FinremSubmittedCallbackHandle
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && assignToJudgeEvents.contains(eventType);
+            && eventType.isConsentedAssignToJudgeEvent();
     }
 
     @Override

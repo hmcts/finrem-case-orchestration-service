@@ -14,20 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 
-import java.util.List;
-
 @Slf4j
 @Service
 public class AssignToJudgeAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
-
-    private final List<EventType> assignToJudgeEvents =
-        List.of(EventType.REFER_TO_JUDGE,
-            EventType.REFER_TO_JUDGE_FROM_ORDER_MADE,
-            EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_APPROVED,
-            EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE,
-            EventType.REFER_TO_JUDGE_FROM_AWAITING_RESPONSE,
-            EventType.REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER,
-            EventType.REFER_TO_JUDGE_FROM_CLOSE);
 
     private final AssignToJudgeCorresponder assignToJudgeCorresponder;
 
@@ -41,7 +30,7 @@ public class AssignToJudgeAboutToSubmitHandler extends FinremAboutToSubmitCallba
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && assignToJudgeEvents.contains(eventType);
+            && eventType.isConsentedAssignToJudgeEvent();
     }
 
     @Override
