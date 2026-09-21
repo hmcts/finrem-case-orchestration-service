@@ -39,7 +39,7 @@ public class AssignToJudgeAboutToSubmitHandler extends FinremAboutToSubmitCallba
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_START.equals(callbackType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
             && assignToJudgeEvents.contains(eventType);
     }
