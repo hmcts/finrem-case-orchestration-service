@@ -21,6 +21,7 @@ public enum CaseDocumentCollectionType {
     APP_CHRONOLOGIES_STATEMENTS_COLLECTION("appChronologiesCollection"),
     APP_QUESTIONNAIRES_ANSWERS_COLLECTION("appQACollection"),
     APP_STATEMENTS_EXHIBITS_COLLECTION("appStatementsExhibitsCollection"),
+    APP_UPDATING_DISCLOSURE_COLLECTION("appUpdatingDisclosureCollection"),
     APP_CASE_SUMMARIES_COLLECTION("appCaseSummariesCollection"),
     APP_FORMS_H_COLLECTION("appFormsHCollection"),
     APP_EXPERT_EVIDENCE_COLLECTION("appExpertEvidenceCollection"),
@@ -30,6 +31,7 @@ public enum CaseDocumentCollectionType {
     RESP_CHRONOLOGIES_STATEMENTS_COLLECTION("respChronologiesCollection"),
     RESP_QUESTIONNAIRES_ANSWERS_COLLECTION("respQACollection"),
     RESP_STATEMENTS_EXHIBITS_COLLECTION("respStatementsExhibitsCollection"),
+    RESP_UPDATING_DISCLOSURE_COLLECTION("respUpdatingDisclosureCollection"),
     RESP_CASE_SUMMARIES_COLLECTION("respCaseSummariesCollection"),
     RESP_FORM_H_COLLECTION("respFormsHCollection"),
     RESP_EXPERT_EVIDENCE_COLLECTION("respExpertEvidenceCollection"),
@@ -37,7 +39,6 @@ public enum CaseDocumentCollectionType {
     RESP_OTHER_COLLECTION("respOtherCollection"),
     CONTESTED_UPLOADED_DOCUMENTS("uploadCaseDocument"),
     CONTESTED_FDR_CASE_DOCUMENT_COLLECTION("fdrCaseDocumentCollection"),
-
 
     //INTERVENER-ONE
     INTERVENER_ONE_SUMMARIES_COLLECTION("intv1Summaries"),
@@ -62,7 +63,6 @@ public enum CaseDocumentCollectionType {
     INTERVENER_TWO_OTHER_COLLECTION("intv2Other"),
     INTERVENER_TWO_QUESTIONNAIRES_ANSWERS_COLLECTION("intv2Qa"),
     INTERVENER_TWO_STATEMENTS_EXHIBITS_COLLECTION("intv2StmtsExhibits"),
-
 
     //INTERVENER-THREE
     INTERVENER_THREE_SUMMARIES_COLLECTION("intv3Summaries"),
