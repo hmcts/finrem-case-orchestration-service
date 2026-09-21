@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import static org.hamcrest.Matchers.empty;
@@ -42,6 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
     CcdCallbackController.class,
     CreateCaseMandatoryDataTestConfiguration.class,
     CallbackDispatchService.class,
+    GlobalSearchService.class,
     SolicitorCreateContestedAboutToSubmitHandler.class,
     ObjectMapper.class, FinremCaseDetailsMapper.class
 })
