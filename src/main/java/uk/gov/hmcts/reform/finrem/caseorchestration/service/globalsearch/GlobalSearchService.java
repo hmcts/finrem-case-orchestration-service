@@ -45,10 +45,10 @@ public class GlobalSearchService {
     }
 
     private String getCaseNameHmctsInternal(Map<String, Object> caseDataMap) {
-        if (StringUtils.isNotBlank((String) caseDataMap.get("applicantLname"))
+        if (StringUtils.isNotBlank((String) caseDataMap.get("applicantLName"))
             && StringUtils.isNotBlank((String) caseDataMap.get("appRespondentLName"))) {
             return String.format("%s vs %s",
-                 caseDataMap.get("applicantLname"),  caseDataMap.get("appRespondentLName"));
+                 caseDataMap.get("applicantLName"),  caseDataMap.get("appRespondentLName"));
         }
         return null;
     }
