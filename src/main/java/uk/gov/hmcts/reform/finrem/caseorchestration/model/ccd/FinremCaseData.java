@@ -1242,7 +1242,7 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     public String getCaseNameHmctsInternal() {
-        if(contactDetailsWrapper != null) {
+        if (contactDetailsWrapper != null) {
             if (StringUtils.isNoneBlank(this.contactDetailsWrapper.getApplicantLname(), this.contactDetailsWrapper.getRespondentLname())) {
                 return String.format("%s vs %s",
                     this.contactDetailsWrapper.getApplicantLname(), this.contactDetailsWrapper.getRespondentLname());
