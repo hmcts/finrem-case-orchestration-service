@@ -3,12 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.springframework.context.ApplicationEventPublisher;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -24,12 +25,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -43,7 +48,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mockRunWithRetryWithHandlerInvokesFirstErrorHandler;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.runSafely;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.ISSUE_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 
 public abstract class IssueApplicationConsentedSubmittedHandlerContractTest {
 
@@ -212,7 +219,7 @@ public abstract class IssueApplicationConsentedSubmittedHandlerContractTest {
         );
         when(spiedFinremCaseData.getRespondentSolicitorEmail()).thenReturn(TEST_RESP_SOLICITOR_EMAIL);
 
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONSENTED, ISSUE_APPLICATION,
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CONSENTED, ISSUE_APPLICATION,
             spiedFinremCaseData);
 
         stubSingleSendCorrespondenceEvent(callbackRequest.getCaseDetails());
@@ -256,7 +263,7 @@ public abstract class IssueApplicationConsentedSubmittedHandlerContractTest {
     }
 
     @Test
-    void givenCase_whenHandled_shouldPublisMultipleSendCorrespondenceEvents() {
+    void givenCase_whenHandled_shouldPublishMultipleSendCorrespondenceEvents() {
         // Arrange
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, ISSUE_APPLICATION);
 
@@ -283,6 +290,57 @@ public abstract class IssueApplicationConsentedSubmittedHandlerContractTest {
         for (SendCorrespondenceEvent event : events) {
             verify(applicationEventPublisher()).publishEvent(event);
         }
+    }
+
+    @Test
+    void givenCase_whenHandled_shouldReconcileNotifications() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CONSENTED,
+            ISSUE_APPLICATION);
+
+        final List<SendCorrespondenceEvent> events = stubMultipleSendCorrespondenceEvents(callbackRequest.getCaseDetails());
+        SendCorrespondenceEvent[] eventInArray = events.toArray(new SendCorrespondenceEvent[0]);
+
+        Map updateFields = Map.of("abc", "def");
+        when(notificationAuditService().reconcileNotificationAudits(eventInArray))
+            .thenReturn(updateFields);
+
+        // Act
+        handler().handle(callbackRequest, AUTH_TOKEN);
+
+        InOrder inOrder = inOrder(retryExecutor(), applicationEventPublisher(), notificationAuditService());
+
+        ArgumentCaptor<ThrowingRunnable> runnableCaptor = getThrowingRunnableCaptor();
+        ArgumentCaptor<ThrowingRunnable> coreCaseDataRunnableCaptor = getThrowingRunnableCaptor();
+        ArgumentCaptor<Function> functionArgumentCaptor = ArgumentCaptor.forClass(Function.class);
+
+        assertAll(
+            () -> inOrder.verify(retryExecutor()).runWithRetryWithHandler(
+                runnableCaptor.capture(),
+                eq("sending issue application correspondence TRACKER-ID-1 (APPLICANT)"),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)),
+            () -> inOrder.verify(retryExecutor()).runWithRetryWithHandler(
+                runnableCaptor.capture(),
+                eq("sending issue application correspondence TRACKER-ID-2 (RESPONDENT)"),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)),
+            () -> runnableCaptor.getAllValues().forEach(TestSetUpUtils::runSafely),
+            () -> verify(applicationEventPublisher()).publishEvent(events.getFirst()),
+            () -> verify(applicationEventPublisher()).publishEvent(events.get(1)),
+            () -> inOrder.verify(notificationAuditService()).reconcileNotificationAudits(eventInArray),
+            () -> inOrder.verify(retryExecutor()).runWithRetrySuppressException(
+                coreCaseDataRunnableCaptor.capture(),
+                eq("markPendingNotificationsAsSent"),
+                eq(CASE_ID)),
+            () -> TestSetUpUtils.runSafely(coreCaseDataRunnableCaptor.getValue()),
+            () -> verify(coreCaseDataService()).performPostSubmitCallback(
+                eq(CONSENTED), eq(CASE_ID_IN_LONG), eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()),
+                functionArgumentCaptor.capture()),
+            () -> assertEquals("def",
+                ((Function<CaseDetails, Map<String, Object>>) functionArgumentCaptor.getValue()).apply(null)
+                    .get("abc"))
+        );
     }
 
     private SendCorrespondenceEvent stubSingleSendCorrespondenceEvent(FinremCaseDetails caseDetails) {
