@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -39,12 +40,17 @@ class GlobalSearchServiceTest {
         caseDataMap.put("appRespondentLName", "Doe");
         caseDataMap.put("applicantLName", "Jane");
 
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseTypeId("FinancialRemedyMVP2")
+            .data(caseDataMap)
+            .build();
+
         when(caseManagementLocationService.getCaseLocation(caseDataMap))
             .thenReturn(CaseLocation.builder()
                 .region("438850")
                 .build());
 
-        globalSearchService.setGlobalSearchDataByMap(caseDataMap);
+        globalSearchService.setGlobalSearchDataByMap(caseDetails);
 
         assertEquals("Jane vs Doe", caseDataMap.get("caseNameHmctsInternal"));
 
@@ -64,13 +70,36 @@ class GlobalSearchServiceTest {
 
     @Test
     void shouldNotSetGlobalSearchFieldsWhenFeatureIsDisabled() {
+
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(false);
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("ccdCaseId", "12345");
         caseDataMap.put("fullApplicantName", "Jane Doe");
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseTypeId("FinancialRemedyMVP2")
+            .data(caseDataMap)
+            .build();
+        globalSearchService.setGlobalSearchDataByMap(caseDetails);
 
-        globalSearchService.setGlobalSearchDataByMap(caseDataMap);
+        assertNull(caseDataMap.get("caseNameHmctsInternal"));
+        assertNull(caseDataMap.get("caseManagementCategory"));
+        assertNull(caseDataMap.get("caseManagementLocation"));
+    }
+
+    @Test
+    void shouldNotSetGlobalSearchFieldsWhenFeatureIsTrueNotConsented() {
+
+        when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("ccdCaseId", "12345");
+        caseDataMap.put("fullApplicantName", "Jane Doe");
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseTypeId("FinancialRemedyContested")
+            .data(caseDataMap)
+            .build();
+        globalSearchService.setGlobalSearchDataByMap(caseDetails);
 
         assertNull(caseDataMap.get("caseNameHmctsInternal"));
         assertNull(caseDataMap.get("caseManagementCategory"));
