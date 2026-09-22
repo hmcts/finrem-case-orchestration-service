@@ -69,6 +69,21 @@ public class AssignToJudgeCorresponder {
 
     private final NotificationAuditService notificationAuditService;
 
+    /**
+     * Creates audit records for all correspondence associated with the given event, linking them
+     * under a common notification tracker ID.
+     *
+     * <p>
+     * The correspondence events to audit are built via
+     * {@link #buildSendCorrespondenceEventsForAuditCreation(EventType, FinremCaseDetails, String)}.
+     * The first audit creates a notification tracker ID, which is then set on every subsequent
+     * {@link SendCorrespondenceEvent} before its audit is created. This ensures that all
+     * correspondence audits created in this call are linked to the same notification tracker.
+     *
+     * @param eventType the type of event that triggered the correspondence
+     * @param finremCaseDetails the case details for which correspondence audits are being created
+     * @param userAuthorisation the authorisation token of the user triggering the action
+     */
     public void createAuditsForCorrespondence(EventType eventType, FinremCaseDetails finremCaseDetails, String userAuthorisation) {
         List<SendCorrespondenceEvent> events = buildSendCorrespondenceEventsForAuditCreation(eventType, finremCaseDetails,
             userAuthorisation);
@@ -81,9 +96,31 @@ public class AssignToJudgeCorresponder {
         }
     }
 
+    /**
+     * Builds the {@link SendCorrespondenceEvent}s needed to notify all parties of the given
+     * event, including a document to post for each party, for use when creating correspondence
+     * audits.
+     *
+     * <p>
+     * This is a convenience overload that delegates to
+     * {@link #buildSendCorrespondenceEvents(EventType, FinremCaseDetails, boolean, String)}
+     * with {@code includeDocumentsToPost} set to {@code true}, so each event includes a
+     * document generated for that party's paper notification recipient.
+     *
+     * @param eventType the event that triggered the correspondence; its name is used as the
+     *                  event ID on each {@link SendCorrespondenceEvent}
+     * @param finremCaseDetails the case details used to build the email notification requests,
+     *                  the documents to print and, for contested applications, the list of
+     *                  interveners
+     * @param authToken the authorisation token used to generate the documents and passed on to
+     *                  each event
+     * @return a list of {@link SendCorrespondenceEvent}s, one per party to be notified; never
+     *         {@code null}, and always contains at least the applicant and respondent events
+     * @see #buildSendCorrespondenceEvents(EventType, FinremCaseDetails, boolean, String)
+     */
     public List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(EventType eventType, FinremCaseDetails finremCaseDetails,
                                                                        String authToken) {
-        return buildSendCorrespondenceEvents(eventType, finremCaseDetails, false, authToken);
+        return buildSendCorrespondenceEvents(eventType, finremCaseDetails, true, authToken);
     }
 
     /**
@@ -145,9 +182,9 @@ public class AssignToJudgeCorresponder {
                 .notificationParties(List.of(NotificationParty.APPLICANT))
                 .emailTemplate(EMAIL_TEMPLATE)
                 .emailNotificationRequest(getApplicantEmailNotificationRequest(finremCaseDetails))
-                .documentsToPost(includeDocumentsToPost ? List.of() : List.of(
-                    getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.APPLICANT)
-                ))
+                .documentsToPost(includeDocumentsToPost
+                    ? List.of(getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.APPLICANT))
+                    : List.of())
                 .authToken(authToken)
             .build()
         );
@@ -158,9 +195,9 @@ public class AssignToJudgeCorresponder {
                 .notificationParties(List.of(NotificationParty.RESPONDENT))
                 .emailTemplate(EMAIL_TEMPLATE)
                 .emailNotificationRequest(getRespondentEmailNotificationRequest(finremCaseDetails))
-                .documentsToPost(includeDocumentsToPost ? List.of() : List.of(
-                    getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT)
-                ))
+                .documentsToPost(includeDocumentsToPost
+                    ? List.of(getDocumentToPrint(finremCaseDetails, authToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT))
+                    : List.of())
                 .authToken(authToken)
             .build()
         );
@@ -168,10 +205,10 @@ public class AssignToJudgeCorresponder {
         return events;
     }
 
-    public List<SendCorrespondenceEvent> buildSendCorrespondenceEventsForAuditCreation(EventType eventType,
+    private List<SendCorrespondenceEvent> buildSendCorrespondenceEventsForAuditCreation(EventType eventType,
                                                                                        FinremCaseDetails finremCaseDetails,
                                                                                        String authToken) {
-        return buildSendCorrespondenceEvents(eventType, finremCaseDetails, true, authToken);
+        return buildSendCorrespondenceEvents(eventType, finremCaseDetails, false, authToken);
     }
 
     private NotificationRequest getApplicantEmailNotificationRequest(FinremCaseDetails caseDetails) {
