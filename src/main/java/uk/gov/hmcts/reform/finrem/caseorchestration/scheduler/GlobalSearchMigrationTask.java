@@ -125,7 +125,7 @@ public class GlobalSearchMigrationTask extends BaseTask {
         String searchQuery = searchSourceBuilder.toString();
         JSONObject jsonObject = new JSONObject(searchQuery);
         jsonObject.put("_source", new String[]{"reference"});
-        return jsonObject.toString();
+        return searchQuery;
     }
 
     @Override
