@@ -38,8 +38,8 @@ public class GlobalSearchService {
 
         if (featureToggleService.isGlobalSearchEnabled() && isConsentedApplication(caseDetails)) {
             Map<String, Object> caseDataMap = caseDetails.getData();
-            log.info("setGlobalSearchDataByMap::Received request to set global search fields " +
-                    "for {} case with CCD ID: {}", caseDetails.getCaseTypeId(), caseDataMap.get("ccdCaseId"));
+            log.info("setGlobalSearchDataByMap::Received request to set global search fields "
+                + "for {} case with CCD ID: {}", caseDetails.getCaseTypeId(), caseDataMap.get("ccdCaseId"));
             DynamicListElement element = DynamicListElement.builder().code(FINANCIAL_REMEDY).build();
             caseDataMap.put("caseManagementCategory", DynamicList.builder().value(element).build());
             caseDataMap.put("caseNameHmctsInternal", getCaseNameHmctsInternal(caseDataMap));
