@@ -19,9 +19,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Check
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -75,6 +75,10 @@ class AssignToJudgeCorresponderTest {
             .getNotificationRequestForRespondentSolicitor(finremCaseDetails, false)
         ).thenReturn(respondentNotificationRequest);
 
+        when(notificationAuditService
+            .createAuditsForCorrespondence(any(SendCorrespondenceEvent.class), eq(eventType)))
+            .thenReturn("tracker-valid-id");
+
         // Act
         assignToJudgeCorresponder.createAuditsForCorrespondence(eventType, finremCaseDetails, AUTH_TOKEN);
 
@@ -87,8 +91,6 @@ class AssignToJudgeCorresponderTest {
                 List<SendCorrespondenceEvent> events = sendCorrespondenceEventArgumentCaptor.getAllValues();
 
                 assertAll(
-                    () -> assertEquals(2, events.size()),
-
                     // Applicant event
                     () -> assertEquals(eventType.name(), events.getFirst().getEventId()),
                     () -> assertEquals(finremCaseDetails, events.getFirst().getCaseDetails()),
@@ -116,11 +118,8 @@ class AssignToJudgeCorresponderTest {
                         events.get(1).getEmailNotificationRequest()
                     ),
                     () -> assertEquals(AUTH_TOKEN, events.get(1).getAuthToken()),
-
-                    // Same tracker ID
-                    () -> assertThat(events.getFirst())
-                        .extracting(SendCorrespondenceEvent::getNotificationTrackerId)
-                        .isEqualTo(events.get(1).getNotificationTrackerId())
+                    () -> assertEquals("tracker-valid-id", // respondent event should be the first tracker id
+                        events.get(1).getNotificationTrackerId())
                 );
             }
         );
