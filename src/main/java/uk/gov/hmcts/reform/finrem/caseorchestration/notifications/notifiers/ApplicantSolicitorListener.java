@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * լս Listener responsible for handling correspondence notifications
@@ -62,7 +62,7 @@ public class ApplicantSolicitorListener extends EmailNotificationOnlyListener {
      */
     @Override
     protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
-        return isNotBlank(ofNullable(event.getCaseDetails()).map(FinremCaseDetails::getAppSolicitorEmail)
+        return !isBlank(ofNullable(event.getCaseDetails()).map(FinremCaseDetails::getAppSolicitorEmail)
             .orElse(null));
     }
 }
