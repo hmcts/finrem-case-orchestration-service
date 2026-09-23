@@ -55,7 +55,7 @@ public class GlobalSearchMigrationTask extends BaseTask {
     public GlobalSearchMigrationTask(CcdService ccdService,
                                      SystemUserService systemUserService,
                                      FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                     GlobalSearchService globalSearchService) {
+                                     GlobalSearchService  globalSearchService) {
         super(ccdService, systemUserService, finremCaseDetailsMapper);
         this.globalSearchService = globalSearchService;
     }
@@ -68,7 +68,7 @@ public class GlobalSearchMigrationTask extends BaseTask {
         Map<String, Object> caseDataToMap = finremCaseDetailsMapper.finremCaseDataToMap(caseData);
         globalSearchService.setGlobalSearchDataByMap(caseDataToMap);
         caseData.setCaseManagementCategory((DynamicList) caseDataToMap.get("caseNameHmctsInternal"));
-        caseData.setCaseNameHmctsInternal((String) caseDataToMap.get("caseNameHmctsInternal"));
+        caseData.setCaseNameHmctsInternal((String)caseDataToMap.get("caseNameHmctsInternal"));
         caseData.setCaseManagementLocation((CaseLocation) caseDataToMap.get("caseManagementLocation"));
 
     }
@@ -78,51 +78,51 @@ public class GlobalSearchMigrationTask extends BaseTask {
         String systemUserToken = getSystemUserToken();
         List<CaseReference> results = new ArrayList<>();
         String searchAfter = null;
-        //while (true) {
-        String searchQuery = getSearchQuery(searchAfter);
-        log.info("Search query: {}", searchQuery);
-        SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
-        log.info("{} cases found for {}", searchResult.getTotal(), caseTypeId);
+        while (true) {
+            String searchQuery = getSearchQuery(searchAfter);
+            log.info("Search query: {}", searchQuery);
+            SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
+            log.info("{} cases found for {}", searchResult.getTotal(), caseTypeId);
 
-        //if (searchResult.getCases().isEmpty()) {
-        //break;
-        //}
+            if (searchResult.getCases().isEmpty()) {
+                break;
+            }
 
-        results.addAll(
-            searchResult.getCases().stream()
-                .map(caseDetails -> new CaseReference(
-                    caseDetails.getId().toString()))
-                .toList()
+            results.addAll(
+                    searchResult.getCases().stream()
+                            .map(caseDetails -> new CaseReference(
+                                    caseDetails.getId().toString()))
+                            .toList()
 
-        );
-        //var lastCase = searchResult.getCases().getLast();
-        //searchAfter = lastCase.getId().toString();
-        //log.info("Last case reference: {}", searchAfter);
+            );
+            var lastCase = searchResult.getCases().getLast();
+            searchAfter = lastCase.getId().toString();
+            log.info("Last case reference: {}", searchAfter);
 
-        //if (searchResult.getCases().size() < gsQuerySize) {
-        //break;
-        //}
-        //}
+            if (searchResult.getCases().size() < gsQuerySize) {
+                break;
+            }
+        }
         return results;
     }
 
     private String getSearchQuery(String searchAfter) {
 
         BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
-            .mustNot(new TermsQueryBuilder("state.keyword", "close", "consentOrderMade"));
+                .mustNot(new TermsQueryBuilder("state.keyword", "close", "consentOrderMade"));
         BoolQueryBuilder supplementaryQuery = QueryBuilders.boolQuery()
-            .mustNot(new ExistsQueryBuilder("supplementary_data.HMCTSServiceId"));
+                .mustNot(new ExistsQueryBuilder("supplementary_data.HMCTSServiceId"));
         BoolQueryBuilder searchCriteriaQuery = QueryBuilders.boolQuery()
-            .mustNot(new ExistsQueryBuilder("data.SearchCriteria"));
+                .mustNot(new ExistsQueryBuilder("data.SearchCriteria"));
         QueryBuilder shouldQuery = QueryBuilders.boolQuery()
-            .must(stateQuery)
-            .must(supplementaryQuery)
-            .must(searchCriteriaQuery);
+                .must(stateQuery)
+                .must(supplementaryQuery)
+                .must(searchCriteriaQuery);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-            .size(gsQuerySize)
-            .query(shouldQuery)
-            .sort("reference.keyword", SortOrder.ASC);
+                .size(gsQuerySize)
+                .query(shouldQuery)
+                .sort("reference.keyword", SortOrder.ASC);
 
         if (searchAfter != null) {
             searchSourceBuilder.searchAfter(new Object[]{searchAfter});
