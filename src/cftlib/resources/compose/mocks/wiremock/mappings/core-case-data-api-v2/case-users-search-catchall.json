@@ -1,0 +1,10 @@
+{
+  "priority": 100,
+  "request": {
+    "method": "POST",
+    "urlPath": "/case-users/search"
+  },
+  "response": {
+    "proxyBaseUrl": "http://localhost:4452"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/case-users/search",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$.case_ids[0]", "equalTo": "12345678" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "case_users": [
+        {
+          "case_id": "12345678",
+          "user_id": "some-solicitor-user-id",
+          "case_role": "[APPSOLICITOR]"
+        }
+      ]
+    }
+  }
+}
