@@ -11,7 +11,7 @@ import java.util.Arrays;
 public enum EventType {
     INTERNAL_CHANGE_UPDATE_CASE("internal-change-UPDATE_CASE"),
     MANAGE_HEARINGS("FR_manageHearings"),
-    SEND_ORDER("FR_sendOrder"),
+    SEND_ORDER("FR_sendOrder", "Send Order"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
     UPLOAD_CONFIDENTIAL_DOCUMENT("FR_uploadConfidentialDocument"),
