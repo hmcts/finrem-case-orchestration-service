@@ -85,6 +85,12 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
+        final List<String> errors = validatePostalAddressErrors(caseData, callbackRequest.getEventType());
+
+        if (!errors.isEmpty()) {
+            return responseWithoutWarnings(caseData, errors);
+        }
+
         helper.populateGeneralApplicationSender(caseData,
             caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
@@ -99,12 +105,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
 
         } else {
             updateApplications(caseDetails, documents, userAuthorisation);
-        }
-
-        final List<String> errors = validatePostalAddressErrors(caseData, callbackRequest.getEventType());
-
-        if (!errors.isEmpty()) {
-            return responseWithoutWarnings(caseData, errors);
         }
 
         try {
