@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,16 +36,18 @@ public class CheckSolicitorIsDigitalService {
     }
 
     private boolean isSolicitorDigital(String caseId, String caseRole) {
-        log.info("{} - Checking if the given caseRole ({}) in case_users table.", caseId, caseRole);
-        CaseAssignmentUserRolesResource rolesResource = assignCaseAccessService.searchUserRoles(caseId);
-        if (rolesResource == null || rolesResource.getCaseAssignmentUserRoles() == null) {
-            log.info("{} - No roles found.", caseId);
+        try {
+            CaseAssignmentUserRolesResource rolesResource = assignCaseAccessService.searchUserRoles(caseId);
+            if (rolesResource == null || rolesResource.getCaseAssignmentUserRoles() == null) {
+                log.info("{} - No roles found.", caseId);
+                return false;
+            }
+            return rolesResource.getCaseAssignmentUserRoles().stream()
+                .map(CaseAssignmentUserRole::getCaseRole)
+                .anyMatch(caseRole::equals);
+        } catch (FeignException e) {
+            log.warn("{} - Failed to look up case-assignment roles, defaulting solicitor digital check to false", caseId, e);
             return false;
         }
-        log.info("{} - Found {} roles, roles are {}", caseId, rolesResource.getCaseAssignmentUserRoles().size(),
-            rolesResource.getCaseAssignmentUserRoles());
-        return rolesResource.getCaseAssignmentUserRoles().stream()
-            .map(CaseAssignmentUserRole::getCaseRole)
-            .anyMatch(caseRole::equals);
     }
 }
