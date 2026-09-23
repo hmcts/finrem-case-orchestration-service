@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import static com.google.common.base.Strings.nullToEmpty;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 
 @Component
@@ -33,7 +35,8 @@ public class ApplicantPartyListener extends AbstractPartyListener {
 
     @Override
     protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
-        return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(event.getCaseDetails());
+        return isNotBlank(ofNullable(event.getCaseDetails()).map(FinremCaseDetails::getAppSolicitorEmail)
+            .orElse(null));
     }
 
     @Override
