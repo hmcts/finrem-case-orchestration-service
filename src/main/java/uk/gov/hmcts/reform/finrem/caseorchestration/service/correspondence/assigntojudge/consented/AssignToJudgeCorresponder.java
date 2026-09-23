@@ -15,12 +15,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 
 /**
@@ -64,8 +64,6 @@ public class AssignToJudgeCorresponder {
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
-
-    private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
 
     private final NotificationAuditService notificationAuditService;
 
@@ -222,11 +220,11 @@ public class AssignToJudgeCorresponder {
     }
 
     private boolean isApplicantSolicitorDigital(FinremCaseDetails caseDetails) {
-        return checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
+        return isNotBlank(caseDetails.getAppSolicitorEmail());
     }
 
     private boolean isRespondentSolicitorDigital(FinremCaseDetails caseDetails) {
-        return checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+        return isNotBlank(caseDetails.getRespSolicitorEmail());
     }
 
     private CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
