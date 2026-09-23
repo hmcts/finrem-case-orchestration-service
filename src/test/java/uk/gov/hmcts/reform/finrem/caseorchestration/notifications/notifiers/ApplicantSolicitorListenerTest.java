@@ -47,9 +47,10 @@ class ApplicantSolicitorListenerTest extends BasePartyListenerTest {
         FinremCaseDetails caseDetailsBefore = mock(FinremCaseDetails.class);
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
+        when(caseDetails.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+
         SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetails, caseDetailsBefore, emailTemplate,
             solicitorReferenceNumber);
-        when(notificationService.isApplicantSolicitorEmailPopulatedAndPresented(caseDetails)).thenReturn(true);
 
         underTest.handleNotification(event);
 
@@ -69,9 +70,10 @@ class ApplicantSolicitorListenerTest extends BasePartyListenerTest {
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
         FinremCaseDetails caseDetailsBefore = mock(FinremCaseDetails.class);
 
+        when(caseDetails.getAppSolicitorEmail()).thenReturn(null);
+
         SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetails, caseDetailsBefore,
             mock(EmailTemplateNames.class));
-        when(notificationService.isApplicantSolicitorEmailPopulatedAndPresented(caseDetails)).thenReturn(false);
 
         underTest.handleNotification(event);
 
