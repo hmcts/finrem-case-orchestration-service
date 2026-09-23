@@ -51,11 +51,18 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
         binDeletedCaseDocuments(finremCaseDataBefore, finremCaseData);
 
         return response(finremCaseData, calculateWarning(isReadyToSubmit), null,
-            calculatePostState(isReadyToSubmit));
+            calculatePostState(callbackRequest, isReadyToSubmit));
     }
 
-    private String calculatePostState(boolean isReadyToSubmit) {
+    private String calculatePostState(FinremCallbackRequest callbackRequest, boolean isReadyToSubmit) {
+        if (isStateReadyForHearing(callbackRequest)) {
+            return null;
+        }
         return isReadyToSubmit ? State.INFO_RECEIVED.getStateId() : null;
+    }
+
+    private boolean isStateReadyForHearing(FinremCallbackRequest callbackRequest) {
+        return State.READY_FOR_HEARING.equals(callbackRequest.getCaseDetails().getState());
     }
 
     private List<String> calculateWarning(boolean isReadyToSubmit) {
