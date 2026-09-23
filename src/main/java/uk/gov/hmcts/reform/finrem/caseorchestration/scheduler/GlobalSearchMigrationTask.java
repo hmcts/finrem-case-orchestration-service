@@ -78,15 +78,15 @@ public class GlobalSearchMigrationTask extends BaseTask {
         String systemUserToken = getSystemUserToken();
         List<CaseReference> results = new ArrayList<>();
         String searchAfter = null;
-        while (true) {
+        //while (true) {
             String searchQuery = getSearchQuery(searchAfter);
             log.info("Search query: {}", searchQuery);
             SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
             log.info("{} cases found for {}", searchResult.getTotal(), caseTypeId);
 
-            if (searchResult.getCases().isEmpty()) {
-                break;
-            }
+            //if (searchResult.getCases().isEmpty()) {
+                //break;
+            //}
 
             results.addAll(
                     searchResult.getCases().stream()
@@ -95,14 +95,14 @@ public class GlobalSearchMigrationTask extends BaseTask {
                             .toList()
 
             );
-            var lastCase = searchResult.getCases().getLast();
-            searchAfter = lastCase.getId().toString();
-            log.info("Last case reference: {}", searchAfter);
+            //var lastCase = searchResult.getCases().getLast();
+            //searchAfter = lastCase.getId().toString();
+            //log.info("Last case reference: {}", searchAfter);
 
-            if (searchResult.getCases().size() < gsQuerySize) {
-                break;
-            }
-        }
+            //if (searchResult.getCases().size() < gsQuerySize) {
+                //break;
+            //}
+        //}
         return results;
     }
 
