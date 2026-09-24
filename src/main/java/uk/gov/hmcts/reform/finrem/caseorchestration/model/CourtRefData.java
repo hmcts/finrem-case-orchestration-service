@@ -5,17 +5,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Value;
 
 @Builder
-@Data
-@NoArgsConstructor
+@Value
 @AllArgsConstructor
 public class CourtRefData {
     @JsonProperty("epimms_id")
-    private String epimmsId;
+    String epimmsId;
     @JsonProperty("region_id")
-    private String regionId;
-    @JsonProperty("court_name")
-    private String courtName;
+    String regionId;
+    @JsonProperty("fr_court_name")
+    String courtName;
 
 }

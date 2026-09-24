@@ -1,18 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CourtRefData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Service responsible for determining CCD case location details
@@ -21,35 +16,13 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CaseManagementLocationService {
 
-    private static final String COURT_REF_DATA_FILE = "/json/court-ref-data.json";
+    private static final String COURT_REF_DATA_FILE = "/json/fr-court-to-refdata-location-mappings.json";
     private static final String COURT_LIST_SUFFIX = "CourtList";
 
-    private final Map<String, CourtRefData> courtsByName;
-
-    public CaseManagementLocationService(ObjectMapper objectMapper) throws IOException {
-        try (InputStream inputStream =
-                 CourtDetailsConfiguration.class.getResourceAsStream(COURT_REF_DATA_FILE)) {
-
-            if (inputStream == null) {
-                throw new IOException(
-                    "Unable to load court reference data from " + COURT_REF_DATA_FILE
-                );
-            }
-
-            this.courtsByName = objectMapper.readValue(
-                    inputStream,
-                    new TypeReference<Map<String, CourtRefData>>() {
-                    })
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                    entry -> entry.getKey().toLowerCase(Locale.UK),
-                    Map.Entry::getValue
-                ));
-        }
-    }
+    private final Map<String, CourtRefData> courtReferenceDataByName;
 
     /**
      * Resolves the CCD case location from the selected court.
@@ -76,20 +49,14 @@ public class CaseManagementLocationService {
             .trim()
             .toLowerCase(Locale.UK);
 
-        CourtRefData courtRefData = courtsByName.get(courtName);
+        CourtRefData courtRefData = courtReferenceDataByName.get(courtName);
 
         if (courtRefData == null) {
             log.warn("No court reference data found for court name: {}", courtName);
             return null;
         }
 
-        return buildCaseLocation(courtRefData);
+        return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
     }
 
-    private CaseLocation buildCaseLocation(CourtRefData courtRefData) {
-        return CaseLocation.builder()
-            .baseLocation(courtRefData.getEpimmsId())
-            .region(courtRefData.getRegionId())
-            .build();
-    }
 }
