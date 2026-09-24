@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -415,8 +416,6 @@ class DocumentRemovalServiceTest {
                 .build()))
             .build();
 
-        when(featureToggleService.isSecureDocEnabled()).thenReturn(false);
-
         FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
 
         verifyNoInteractions(genericDocumentService);
@@ -668,6 +667,71 @@ class DocumentRemovalServiceTest {
             .contains(documentToKeepUrl)
             .doesNotContain(documentToDeleteUrl);
 
+        assertNull(result.getDocumentToKeepCollection());
+        verifyNoInteractions(genericDocumentService);
+    }
+
+    @Test
+    void testRemoveDocuments_GeneralApplicationDraftAndDirectionsDocuments() throws Exception {
+        String documentToKeepUrl = "https://example2.com/456";
+        String draftOrderToDeleteUrl = "https://example3.com/789";
+        String directionsToDeleteUrl = "https://example4.com/101112";
+
+        ObjectMapper objectMapper = createObjectMapper();
+
+        FinremCaseData caseData = objectMapper.readValue(
+            """
+            {
+              "generalApplicationCollection": [
+                {
+                  "value": {
+                    "generalApplicationDocument": {
+                      "document_url": "https://example2.com/456",
+                      "document_filename": "Document-to-keep.pdf",
+                      "document_binary_url": "https://example2.com/binary"
+                    },
+                    "generalApplicationDraftOrder": {
+                      "document_url": "https://example3.com/789",
+                      "document_filename": "Draft-order-to-delete.pdf",
+                      "document_binary_url": "https://example3.com/binary"
+                    },
+                    "generalApplicationDirectionsDocument": {
+                      "document_url": "https://example4.com/101112",
+                      "document_filename": "Directions-to-delete.pdf",
+                      "document_binary_url": "https://example4.com/binary"
+                    }
+                  }
+                }
+              ],
+              "documentToKeepCollection": [
+                {
+                  "value": {
+                    "documentId": "456",
+                    "caseDocument": {
+                      "document_url": "https://example2.com/456",
+                      "document_filename": "Document-to-keep.pdf",
+                      "document_binary_url": "https://example2.com/binary"
+                    }
+                  }
+                }
+              ]
+            }
+            """,
+            FinremCaseData.class
+        );
+
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
+
+        JsonNode resultJson = objectMapper.valueToTree(result);
+        JsonNode generalApplicationValue = resultJson
+            .get("generalApplicationCollection")
+            .get(0)
+            .get("value");
+
+        assertThat(generalApplicationValue.get("generalApplicationDocument").get("document_url").asText())
+            .isEqualTo(documentToKeepUrl);
+        assertThat(generalApplicationValue.has("generalApplicationDraftOrder")).isFalse();
+        assertThat(generalApplicationValue.has("generalApplicationDirectionsDocument")).isFalse();
         assertNull(result.getDocumentToKeepCollection());
         verifyNoInteractions(genericDocumentService);
     }
