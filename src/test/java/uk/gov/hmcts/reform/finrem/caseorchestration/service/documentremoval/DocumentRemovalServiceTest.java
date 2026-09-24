@@ -226,7 +226,8 @@ class DocumentRemovalServiceTest {
         LocalDateTime result = (LocalDateTime) method.invoke(documentRemovalService, documentNode);
 
         assertNull(result);
-        assertThat(logs.getErrors()).contains("Error getting upload timestamp for document url: https://example.com/123.");
+        assertThat(logs.getErrors())
+            .contains("Error getting upload timestamp for document url: https://example.com/123.");
     }
 
     /**
@@ -622,9 +623,11 @@ class DocumentRemovalServiceTest {
     }
 
     @Test
-    void testRemoveDocuments_GeneralApplicationDocument() throws Exception {
+    void testRemoveDocuments_GeneralApplicationDocuments() throws Exception {
         String documentToDeleteUrl = "https://example1.com/123";
         String documentToKeepUrl = "https://example2.com/456";
+        String draftOrderToDeleteUrl = "https://example3.com/789";
+        String directionsToDeleteUrl = "https://example4.com/101112";
 
         ObjectMapper objectMapper = createObjectMapper();
 
@@ -641,66 +644,6 @@ class DocumentRemovalServiceTest {
                     }
                   }
                 },
-                {
-                  "value": {
-                    "generalApplicationDocument": {
-                      "document_url": "https://example2.com/456",
-                      "document_filename": "Document-to-keep.pdf",
-                      "document_binary_url": "https://example2.com/binary"
-                    }
-                  }
-                }
-              ],
-              "documentToKeepCollection": [
-                {
-                  "value": {
-                    "documentId": "456",
-                    "caseDocument": {
-                      "document_url": "https://example2.com/456",
-                      "document_filename": "Document-to-keep.pdf",
-                      "document_binary_url": "https://example2.com/binary"
-                    }
-                  }
-                }
-              ]
-            }
-            """,
-            FinremCaseData.class
-        );
-
-        when(featureToggleService.isSecureDocEnabled()).thenReturn(false);
-
-        FinremCaseData result =
-            documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
-
-        List<GeneralApplicationCollection> generalApplicationCollection =
-            result.getGeneralApplicationWrapper()
-                .getGeneralApplicationDocumentCollection();
-
-        assertThat(generalApplicationCollection)
-            .extracting(GeneralApplicationCollection::getValue)
-            .extracting(GeneralApplication::getGeneralApplicationDocument)
-            .filteredOn(Objects::nonNull)
-            .extracting(CaseDocument::getDocumentUrl)
-            .contains(documentToKeepUrl)
-            .doesNotContain(documentToDeleteUrl);
-
-        assertNull(result.getDocumentToKeepCollection());
-        verifyNoInteractions(genericDocumentService);
-    }
-
-    @Test
-    void testRemoveDocuments_GeneralApplicationDraftAndDirectionsDocuments() throws Exception {
-        String documentToKeepUrl = "https://example2.com/456";
-        String draftOrderToDeleteUrl = "https://example3.com/789";
-        String directionsToDeleteUrl = "https://example4.com/101112";
-
-        ObjectMapper objectMapper = createObjectMapper();
-
-        FinremCaseData caseData = objectMapper.readValue(
-            """
-            {
-              "generalApplicationCollection": [
                 {
                   "value": {
                     "generalApplicationDocument": {
@@ -738,18 +681,35 @@ class DocumentRemovalServiceTest {
             FinremCaseData.class
         );
 
-        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(false);
+
+        FinremCaseData result =
+            documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
+
+        List<GeneralApplicationCollection> generalApplicationCollection =
+            result.getGeneralApplicationWrapper()
+                .getGeneralApplicationDocumentCollection();
+
+        assertThat(generalApplicationCollection)
+            .hasSize(2)
+            .extracting(GeneralApplicationCollection::getValue)
+            .extracting(GeneralApplication::getGeneralApplicationDocument)
+            .filteredOn(Objects::nonNull)
+            .extracting(CaseDocument::getDocumentUrl)
+            .contains(documentToKeepUrl)
+            .doesNotContain(documentToDeleteUrl);
 
         JsonNode resultJson = objectMapper.valueToTree(result);
-        JsonNode generalApplicationValue = resultJson
+        JsonNode secondGeneralApplicationValue = resultJson
             .get("generalApplicationCollection")
-            .get(0)
+            .get(1)
             .get("value");
 
-        assertThat(generalApplicationValue.get("generalApplicationDocument").get("document_url").asText())
-            .isEqualTo(documentToKeepUrl);
-        assertThat(generalApplicationValue.has("generalApplicationDraftOrder")).isFalse();
-        assertThat(generalApplicationValue.has("generalApplicationDirectionsDocument")).isFalse();
+        assertThat(secondGeneralApplicationValue.has("generalApplicationDraftOrder")).isFalse();
+        assertThat(secondGeneralApplicationValue.has("generalApplicationDirectionsDocument")).isFalse();
+        assertThat(resultJson.toString()).doesNotContain(draftOrderToDeleteUrl);
+        assertThat(resultJson.toString()).doesNotContain(directionsToDeleteUrl);
+
         assertNull(result.getDocumentToKeepCollection());
         verifyNoInteractions(genericDocumentService);
     }
