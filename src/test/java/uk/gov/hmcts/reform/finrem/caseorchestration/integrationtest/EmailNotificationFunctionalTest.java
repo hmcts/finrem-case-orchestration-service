@@ -128,6 +128,92 @@ public class EmailNotificationFunctionalTest extends BaseTest {
         assertPreviewCall("FR_CONTEST_ORDER_APPROVED_APPLICANT", personalisation);
     }
 
+    /**
+     * Verifies preview request for FR_CONTEST_ORDER_APPROVED_RESPONDENT.
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrContestOrderApprovedRespondentTemplate() throws Exception {
+        Map<String, Object> personalisation = basePersonalisation("1790237505587220");
+        personalisation.put("solicitorReferenceNumber", "");
+        personalisation.put("notificationEmail", "fr_respondent_solicitor1@mailinator.com");
+        personalisation.put("name", "Sauron");
+
+        assertPreviewCall("FR_CONTEST_ORDER_APPROVED_RESPONDENT", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR.
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrContestedHearingNotificationSolicitorTemplate() throws Exception {
+        Map<String, Object> personalisation = basePersonalisation("1790009654387573");
+        personalisation.put("hearingType", "First Directions Appointment (FDA)");
+        personalisation.put("courtName", "London FRC");
+        personalisation.put("courtEmail", "FRCLondon@justice.gov.uk");
+        personalisation.put("respondentName", "Gollum");
+        personalisation.put("applicantName", "Baggins");
+        personalisation.put("divorceCaseNumber", null);
+        personalisation.put("contactNumber", "0300 123 5577");
+
+        assertPreviewCall("FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN.
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrContestedDraftOrderReadyForReviewAdminTemplate() throws Exception {
+        Map<String, Object> personalisation = basePersonalisation("1790012345678901");
+        personalisation.put("notificationEmail", "admin@email.com");
+        personalisation.put("hearingDate", "1 January 2024");
+        personalisation.put("manageCaseBaseUrl", "http://localhost:3000");
+
+        assertPreviewCall("FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN", personalisation);
+    }
+
+
+    /**
+     * Verifies preview request for FR_CONTESTED_GENERAL_APPLICATION_OUTCOME.
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrContestedGeneralApplicationOutcomeTemplate() throws Exception {
+        Map<String, Object> personalisation = basePersonalisation("1790181252240783");
+        personalisation.put("courtName", "Birmingham FRC");
+
+        assertPreviewCall("FR_CONTESTED_GENERAL_APPLICATION_OUTCOME", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_INTERVENER_SOLICITOR_ADDED_EMAIL.
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrIntervenerSolicitorAddedEmailTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("intervenerSolicitorReferenceNumber", "Finrem1OrgReference");
+        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("intervenerSolicitorFirm", "FinRem-1-Org");
+        personalisation.put("name", "FinRem-1-Org");
+        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("intervenerFullName", "intApp1");
+        personalisation.put("notificationEmail", "fr_applicant_solicitor1@mailinator.com");
+        personalisation.put("caseReferenceNumber", "1790181835590837");
+
+        assertPreviewCall("FR_INTERVENER_SOLICITOR_ADDED_EMAIL", personalisation);
+    }
+
     private Map<String, Object> basePersonalisation(String caseReferenceNumber) {
         Map<String, Object> personalisation = new LinkedHashMap<>();
         personalisation.put("solicitorReferenceNumber", "Y707HZM");
@@ -160,11 +246,18 @@ public class EmailNotificationFunctionalTest extends BaseTest {
         JsonNode actualPersonalisation = payload.path("personalisation");
         assertThat(actualPersonalisation.isMissingNode()).isFalse();
 
-        personalisation.forEach((key, value) ->
-            assertThat(actualPersonalisation.path(key).asText())
-                .as("Personalisation field mismatch: " + key)
-                .isEqualTo(String.valueOf(value))
-        );
+        personalisation.forEach((key, value) -> {
+            JsonNode node = actualPersonalisation.path(key);
+            if (value == null) {
+                assertThat(node.isNull() || node.isMissingNode())
+                    .as("Personalisation field mismatch: " + key)
+                    .isTrue();
+            } else {
+                assertThat(node.asText())
+                    .as("Personalisation field mismatch: " + key)
+                    .isEqualTo(String.valueOf(value));
+            }
+        });
     }
 
     private List<String> functionalFixtureFiles() throws IOException {
