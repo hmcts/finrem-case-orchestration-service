@@ -55,7 +55,7 @@ public class GlobalSearchService {
             return String.format("%s vs %s",
                  caseDataMap.get("applicantLName"),  caseDataMap.get("appRespondentLName"));
         }
-        return null;
+        return FINANCIAL_REMEDY;
     }
 
     private Boolean isConsentedApplication(CaseDetails caseDetails) {

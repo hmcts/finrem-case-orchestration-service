@@ -82,7 +82,7 @@ class GlobalSearchServiceTest {
             .build();
         globalSearchService.setGlobalSearchDataByMap(caseDetails);
 
-        assertNull(caseDataMap.get("caseNameHmctsInternal"));
+        assertEquals("Financial Remedy", caseDataMap.get("caseNameHmctsInternal"));
         assertNull(caseDataMap.get("caseManagementCategory"));
         assertNull(caseDataMap.get("caseManagementLocation"));
     }
