@@ -67,7 +67,7 @@ public class GlobalSearchMigrationTask extends BaseTask {
         caseData.setCcdCaseId(ccdCaseId);
         Map<String, Object> caseDataToMap = finremCaseDetailsMapper.finremCaseDataToMap(caseData);
         globalSearchService.setGlobalSearchDataByMap(caseDataToMap);
-        caseData.setCaseManagementCategory((DynamicList) caseDataToMap.get("caseNameHmctsInternal"));
+        caseData.setCaseManagementCategory((DynamicList) caseDataToMap.get("caseManagementCategory"));
         caseData.setCaseNameHmctsInternal((String)caseDataToMap.get("caseNameHmctsInternal"));
         caseData.setCaseManagementLocation((CaseLocation) caseDataToMap.get("caseManagementLocation"));
 
