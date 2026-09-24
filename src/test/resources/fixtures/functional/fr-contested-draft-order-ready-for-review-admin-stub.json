@@ -1,0 +1,37 @@
+{
+  "templateId": "3b00714e-aee6-40eb-99c9-382f139b054c",
+  "httpMethod": "POST",
+  "url": "/v2/template/3b00714e-aee6-40eb-99c9-382f139b054c/preview",
+  "notificationRequest": {
+    "personalisation": {
+      "frEmail": "contactFinancialRemedy@justice.gov.uk",
+      "linkToSmartSurvey": "http://www.smartsurvey.co.uk/s/KCECE/",
+      "manageCaseBaseUrl": "http://localhost:3000",
+      "hearingDate": "16 December 2026",
+      "contactNumber": "0300 303 0642",
+      "respondentName": "Smeagol Gollum",
+      "applicantName": "Frodo Baggins",
+      "notificationEmail": "fr_applicant_solicitor1@mailinator.com",
+      "caseReferenceNumber": "1790180364725525"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "bodyAsJson": {
+      "postage": null,
+      "subject": "There are orders to review \\u2013 case reference number {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}",
+      "html": "<p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Case number: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">{{jsonPath request.body '$.personalisation.applicantName'}} v {{jsonPath request.body '$.personalisation.respondentName'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Hearing date: {{jsonPath request.body '$.personalisation.hearingDate'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Dear Caseworker,</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">A post hearing draft order has been uploaded by a solicitor in this case with no hearing judge specified.</p><h2 style=\"Margin: 0 0 15px 0; padding: 10px 0 0 0; font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;\">Next steps</h2><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Refer this case to the correct hearing judge so the judge can review the order.</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Access the case manager and review the draft orders in <a style=\"word-wrap: break-word; color: #1D70B8;\" href=\"{{jsonPath request.body '$.personalisation.manageCaseBaseUrl'}}/cases/case-details/{{jsonPath request.body '$.personalisation.caseReferenceNumber'}}#Draft%20orders\">the draft orders tab</a>.</p><h2 style=\"Margin: 0 0 15px 0; padding: 10px 0 0 0; font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;\">HM Courts &amp; Tribunals Service</h2><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">This is an automated message, do not reply to this email.</p>",
+      "id": "{{request.pathSegments.[2]}}",
+      "body": "Case number: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}\\r\\n\\r\\n{{jsonPath request.body '$.personalisation.applicantName'}} v {{jsonPath request.body '$.personalisation.respondentName'}}\\r\\n\\r\\nHearing date: {{jsonPath request.body '$.personalisation.hearingDate'}}\\r\\n\\r\\nDear Caseworker,\\r\\n\\r\\nA post hearing draft order has been uploaded by a solicitor in this case with no hearing judge specified.\\r\\n\\r\\n#Next steps\\r\\n\\r\\nRefer this case to the correct hearing judge so the judge can review the order.\\r\\n\\r\\nAccess the case manager and review the draft orders in [the draft orders tab]({{jsonPath request.body '$.personalisation.manageCaseBaseUrl'}}/cases/case-details/{{jsonPath request.body '$.personalisation.caseReferenceNumber'}}#Draft%20orders).\\r\\n\\r\\n#HM Courts & Tribunals Service\\r\\n\\r\\nThis is an automated message, do not reply to this email.",
+      "type": "email",
+      "version": 2,
+      "template_id": "{{request.pathSegments.[2]}}"
+    }
+  },
+  "expectedContains": [
+    "There are orders to review",
+    "Hearing date: 16 December 2026",
+    "the draft orders tab"
+  ]
+}

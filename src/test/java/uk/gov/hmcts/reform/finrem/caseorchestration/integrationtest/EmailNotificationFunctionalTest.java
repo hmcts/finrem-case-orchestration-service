@@ -149,7 +149,7 @@ public class EmailNotificationFunctionalTest extends BaseTest {
      * @throws Exception when request parsing fails
      */
     @Test
-    public void shouldPreviewFrContestedHearingNotificationSolicitorTemplate() throws Exception {
+    public void shouldPreviewFrContestedHearingNotificationSolicitorApplicantTemplate() throws Exception {
         Map<String, Object> personalisation = basePersonalisation("1790009654387573");
         personalisation.put("hearingType", "First Directions Appointment (FDA)");
         personalisation.put("courtName", "London FRC");
@@ -158,6 +158,29 @@ public class EmailNotificationFunctionalTest extends BaseTest {
         personalisation.put("applicantName", "Baggins");
         personalisation.put("divorceCaseNumber", null);
         personalisation.put("contactNumber", "0300 123 5577");
+
+        assertPreviewCall("FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR (respondent).
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrContestedHearingNotificationSolicitorRespondentTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("solicitorReferenceNumber", "");
+        personalisation.put("hearingType", "Pre-Trial Review (PTR)");
+        personalisation.put("courtName", "London FRC");
+        personalisation.put("courtEmail", "FRCLondon@justice.gov.uk");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("name", "Sauron");
+        personalisation.put("contactNumber", "0300 123 5577");
+        personalisation.put("respondentName", "Gollum");
+        personalisation.put("applicantName", "Baggins");
+        personalisation.put("notificationEmail", "fr_respondent_solicitor1@mailinator.com");
+        personalisation.put("caseReferenceNumber", "1790249931141522");
 
         assertPreviewCall("FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR", personalisation);
     }
@@ -213,6 +236,100 @@ public class EmailNotificationFunctionalTest extends BaseTest {
 
         assertPreviewCall("FR_INTERVENER_SOLICITOR_ADDED_EMAIL", personalisation);
     }
+
+    /**
+     * Verifies preview request for FR_BARRISTER_ACCESS_ADDED (applicant barrister).
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrBarristerAccessAddedApplicantTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("name", "Applicant Barrister");
+        personalisation.put("notificationEmail", "fr_applicant_barrister1@mailinator.com");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("caseReferenceNumber", "1790237505587221");
+        personalisation.put("BarristerReferenceNumber", "APP-BARR-ORG-ID-001");
+        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+
+        assertPreviewCall("FR_BARRISTER_ACCESS_ADDED", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_BARRISTER_ACCESS_ADDED (respondent barrister).
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrBarristerAccessAddedRespondentTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("name", "Respondent Barrister");
+        personalisation.put("notificationEmail", "fr_respondent_barrister1@mailinator.com");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("caseReferenceNumber", "1790237505587222");
+        personalisation.put("BarristerReferenceNumber", "RESP-BARR-ORG-ID-001");
+        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+
+        assertPreviewCall("FR_BARRISTER_ACCESS_ADDED", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR (applicant).
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrContestedVacateNotificationSolicitorApplicantTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("solicitorReferenceNumber", "Y707HZM");
+        personalisation.put("hearingType", "First Directions Appointment (FDA)");
+        personalisation.put("courtEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("applicantName", "Baggins");
+        personalisation.put("vacatedHearingDateTime", "17 December 2026 at 10:00am");
+        personalisation.put("notificationEmail", "fr_applicant_solicitor1@mailinator.com");
+        personalisation.put("courtName", "Manchester");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("vacatedHearingType", "First Directions Appointment (FDA)");
+        personalisation.put("name", "Bilbo Baggins");
+        personalisation.put("contactNumber", "0300 123 5577");
+        personalisation.put("respondentName", "Gollum");
+        personalisation.put("caseReferenceNumber", "1790250537618707");
+
+        assertPreviewCall("FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR (respondent).
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrContestedVacateNotificationSolicitorRespondentTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("solicitorReferenceNumber", "");
+        personalisation.put("hearingType", "First Directions Appointment (FDA)");
+        personalisation.put("courtEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("applicantName", "Baggins");
+        personalisation.put("vacatedHearingDateTime", "17 December 2026 at 10:00am");
+        personalisation.put("notificationEmail", "fr_respondent_solicitor1@mailinator.com");
+        personalisation.put("courtName", "Manchester");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("vacatedHearingType", "First Directions Appointment (FDA)");
+        personalisation.put("name", "Sauron");
+        personalisation.put("contactNumber", "0300 123 5577");
+        personalisation.put("respondentName", "Gollum");
+        personalisation.put("caseReferenceNumber", "1790250537618707");
+
+        assertPreviewCall("FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR", personalisation);
+    }
+
+
 
     private Map<String, Object> basePersonalisation(String caseReferenceNumber) {
         Map<String, Object> personalisation = new LinkedHashMap<>();
