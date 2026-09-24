@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
