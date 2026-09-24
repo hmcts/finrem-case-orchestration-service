@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,8 +36,11 @@ public class GlobalSearchService {
         if (featureToggleService.isGlobalSearchEnabled()) {
             log.info("setGlobalSearchDataByMap::Received request to set global search fields for case with CCD ID: {}",
                 caseDataMap.get("ccdCaseId"));
-            DynamicListElement element = DynamicListElement.builder().code(FINANCIAL_REMEDY).build();
-            caseDataMap.put("caseManagementCategory", DynamicList.builder().value(element).build());
+            DynamicListElement element =
+                DynamicListElement.builder().label(FINANCIAL_REMEDY).code(FINANCIAL_REMEDY).build();
+            caseDataMap.put("caseManagementCategory", DynamicList.builder()
+                .listItems(List.of(element))
+                .value(element).build());
             caseDataMap.put("caseNameHmctsInternal", getCaseNameHmctsInternal(caseDataMap));
             caseDataMap.put("caseManagementLocation", caseManagementLocationService.getCaseLocation(caseDataMap));
             log.info("setGlobalSearchDataByMap::global search fields are set for case with CCD ID: {}",
