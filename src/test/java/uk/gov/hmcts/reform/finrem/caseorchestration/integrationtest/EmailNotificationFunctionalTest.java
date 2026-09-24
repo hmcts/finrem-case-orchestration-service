@@ -329,28 +329,28 @@ public class EmailNotificationFunctionalTest extends BaseTest {
         assertPreviewCall("FR_INTERVENER_SOLICITOR_ADDED_EMAIL", personalisation);
     }
 
-    /**
-     * Verifies preview request for FR_INTERVENER_SOLICITOR_ADDED_EMAIL (respondent recipient).
-     *
-     * @throws Exception when request parsing fails
-     */
-    @Test
-    public void shouldPreviewFrIntervenerSolicitorAddedEmailRespondentTemplate() throws Exception {
-        Map<String, Object> personalisation = new LinkedHashMap<>();
-        personalisation.put("intervenerSolicitorReferenceNumber", "Y707HZM");
-        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
-        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
-        personalisation.put("intervenerSolicitorFirm", "FinRem-1-Org");
-        personalisation.put("name", "Smeagol Gollum");
-        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
-        personalisation.put("respondentName", "Smeagol Gollum");
-        personalisation.put("applicantName", "Frodo Baggins");
-        personalisation.put("intervenerFullName", "Test Intervener");
-        personalisation.put("notificationEmail", "fr_applicant_solicitor1@mailinator.com");
-        personalisation.put("caseReferenceNumber", "1790251496582942");
+/**
+ * Verifies preview request for FR_INTERVENER_SOLICITOR_ADDED_EMAIL (respondent recipient).
+ *
+ * @throws Exception when request parsing fails
+ */
+@Test
+public void shouldPreviewFrIntervenerSolicitorAddedEmailRespondentTemplate() throws Exception {
+    Map<String, Object> personalisation = new LinkedHashMap<>();
+    personalisation.put("intervenerSolicitorReferenceNumber", "");
+    personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
+    personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+    personalisation.put("intervenerSolicitorFirm", "FinRem-1-Org");
+    personalisation.put("name", "Sauron");
+    personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+    personalisation.put("respondentName", "Smeagol Gollum");
+    personalisation.put("applicantName", "Frodo Baggins");
+    personalisation.put("intervenerFullName", "Test Intervener");
+    personalisation.put("notificationEmail", "fr_respondent_solicitor1@mailinator.com");
+    personalisation.put("caseReferenceNumber", "1790251496582942");
 
-        assertPreviewCall("FR_INTERVENER_SOLICITOR_ADDED_EMAIL", personalisation);
-    }
+    assertPreviewCall("FR_INTERVENER_SOLICITOR_ADDED_EMAIL", personalisation);
+}
 
     /**
      * Verifies preview request for FR_INTERVENER_SOLICITOR_ADDED_EMAIL (intervener recipient).
