@@ -213,6 +213,22 @@ class DocumentRemovalServiceTest {
 
     }
 
+    @Test
+    void testGetUploadTimestampFromDocumentNode_InvalidUploadTimestamp() throws Exception {
+        ObjectMapper objectMapper = createObjectMapper();
+        JsonNode documentNode = objectMapper.createObjectNode()
+            .put("document_url", "https://example.com/123")
+            .put("upload_timestamp", "not-a-timestamp");
+
+        var method = DocumentRemovalService.class.getDeclaredMethod("getUploadTimestampFromDocumentNode", JsonNode.class);
+        method.setAccessible(true);
+
+        LocalDateTime result = (LocalDateTime) method.invoke(documentRemovalService, documentNode);
+
+        assertNull(result);
+        assertThat(logs.getErrors()).contains("Error getting upload timestamp for document url: https://example.com/123.");
+    }
+
     /**
      * Sorts files by upload timestamp in reverse ascending order, nulls last.
      * The data for this test includes the various file structures.
@@ -736,5 +752,26 @@ class DocumentRemovalServiceTest {
         assertThat(generalApplicationValue.has("generalApplicationDirectionsDocument")).isFalse();
         assertNull(result.getDocumentToKeepCollection());
         verifyNoInteractions(genericDocumentService);
+    }
+
+    @Test
+    void testIsDocumentEntry_WithDocumentLinkObject() throws Exception {
+        ObjectMapper objectMapper = createObjectMapper();
+        JsonNode node = objectMapper.readTree("""
+            {
+              "value": {
+                "documentLink": {
+                  "document_url": "https://example.com/123"
+                }
+              }
+            }
+            """);
+
+        var method = DocumentRemovalService.class.getDeclaredMethod("isDocumentEntry", JsonNode.class, String.class);
+        method.setAccessible(true);
+
+        boolean result = (boolean) method.invoke(documentRemovalService, node, "https://example.com/123");
+
+        assertThat(result).isTrue();
     }
 }
