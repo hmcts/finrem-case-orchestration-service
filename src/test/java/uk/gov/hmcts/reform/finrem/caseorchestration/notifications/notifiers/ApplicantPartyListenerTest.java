@@ -66,7 +66,6 @@ class ApplicantPartyListenerTest {
             .build();
 
         caseDetails = spy(FinremCaseDetails.builder()
-//            .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder()
                 .ccdCaseId(CASE_ID)
                 .contactDetailsWrapper(
