@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -415,6 +415,8 @@ class DocumentRemovalServiceTest {
                     .build())
                 .build()))
             .build();
+
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(false);
 
         FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
 
