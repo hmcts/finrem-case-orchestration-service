@@ -35,6 +35,8 @@ public class DocumentRemovalService {
     public static final String DOCUMENT_FILENAME = "document_filename";
     private static final String DOCUMENT_BINARY_URL = "document_binary_url";
     private static final String DOCUMENT_UPLOAD_TIMESTAMP = "upload_timestamp";
+    private static final String GENERAL_APPLICATION_DRAFT_ORDER = "generalApplicationDraftOrder";
+    private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT = "generalApplicationDirectionsDocument";
     private final ObjectMapper objectMapper;
 
     private final GenericDocumentService genericDocumentService;
@@ -225,7 +227,7 @@ public class DocumentRemovalService {
 
         for (Map.Entry<String, JsonNode> field : valueNode.properties()) {
 
-            if (GENERAL_APPLICATION_DOCUMENT.equals(field.getKey())) {
+            if (isGeneralApplicationDocumentField(field.getKey())) {
                 continue;
             }
 
@@ -241,6 +243,12 @@ public class DocumentRemovalService {
         }
 
         return false;
+    }
+
+    private boolean isGeneralApplicationDocumentField(String fieldName) {
+        return GENERAL_APPLICATION_DOCUMENT.equals(fieldName)
+            || GENERAL_APPLICATION_DRAFT_ORDER.equals(fieldName)
+            || GENERAL_APPLICATION_DIRECTIONS_DOCUMENT.equals(fieldName);
     }
 
     private void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken, Long caseId) {

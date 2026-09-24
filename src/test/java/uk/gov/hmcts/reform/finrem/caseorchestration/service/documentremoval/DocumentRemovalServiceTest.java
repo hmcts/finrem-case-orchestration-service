@@ -17,11 +17,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -32,7 +31,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -623,7 +621,7 @@ class DocumentRemovalServiceTest {
     }
 
     @Test
-    void testRemoveDocuments_GeneralApplicationDocuments() throws Exception {
+    void testShouldRemoveNestedDocumentsWithoutRemovingGeneralApplication() throws Exception {
         String documentToDeleteUrl = "https://example1.com/123";
         String documentToKeepUrl = "https://example2.com/456";
         String draftOrderToDeleteUrl = "https://example3.com/789";
@@ -634,7 +632,7 @@ class DocumentRemovalServiceTest {
         FinremCaseData caseData = objectMapper.readValue(
             """
             {
-              "generalApplicationCollection": [
+              "generalApplications": [
                 {
                   "value": {
                     "generalApplicationDocument": {
@@ -686,29 +684,21 @@ class DocumentRemovalServiceTest {
         FinremCaseData result =
             documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
 
-        List<GeneralApplicationCollection> generalApplicationCollection =
-            result.getGeneralApplicationWrapper()
-                .getGeneralApplicationDocumentCollection();
+        List<GeneralApplicationsCollection> generalApplications =
+            result.getGeneralApplicationWrapper().getGeneralApplications();
 
-        assertThat(generalApplicationCollection)
-            .hasSize(2)
-            .extracting(GeneralApplicationCollection::getValue)
-            .extracting(GeneralApplication::getGeneralApplicationDocument)
-            .filteredOn(Objects::nonNull)
-            .extracting(CaseDocument::getDocumentUrl)
+        assertThat(generalApplications).hasSize(2);
+
+        List<String> remainingDocumentUrls = documentRemovalService.getCaseDocumentsList(result)
+            .stream()
+            .map(doc -> doc.getValue().getCaseDocument().getDocumentUrl())
+            .toList();
+
+        assertThat(remainingDocumentUrls)
             .contains(documentToKeepUrl)
-            .doesNotContain(documentToDeleteUrl);
-
-        JsonNode resultJson = objectMapper.valueToTree(result);
-        JsonNode secondGeneralApplicationValue = resultJson
-            .get("generalApplicationCollection")
-            .get(1)
-            .get("value");
-
-        assertThat(secondGeneralApplicationValue.has("generalApplicationDraftOrder")).isFalse();
-        assertThat(secondGeneralApplicationValue.has("generalApplicationDirectionsDocument")).isFalse();
-        assertThat(resultJson.toString()).doesNotContain(draftOrderToDeleteUrl);
-        assertThat(resultJson.toString()).doesNotContain(directionsToDeleteUrl);
+            .doesNotContain(documentToDeleteUrl)
+            .doesNotContain(draftOrderToDeleteUrl)
+            .doesNotContain(directionsToDeleteUrl);
 
         assertNull(result.getDocumentToKeepCollection());
         verifyNoInteractions(genericDocumentService);
