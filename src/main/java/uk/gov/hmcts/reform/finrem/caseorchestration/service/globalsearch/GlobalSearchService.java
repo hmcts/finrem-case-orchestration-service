@@ -27,6 +27,7 @@ public class GlobalSearchService {
     private static final String FINANCIAL_REMEDY = "Financial Remedy";
     private final FeatureToggleService featureToggleService;
     private final CaseManagementLocationService caseManagementLocationService;
+    private final DynamicListElement element = DynamicListElement.builder().code(FINANCIAL_REMEDY).label(FINANCIAL_REMEDY).build();
 
     /**
      * Sets the fields required for global search on the provided case data map.
@@ -41,10 +42,13 @@ public class GlobalSearchService {
         if (featureToggleService.isGlobalSearchEnabled() && isConsentedApplication(caseTypeId)) {
             log.info("setGlobalSearchDataByMap::Received request to set global search fields "
                 + "for {} case type with CCD ID: {}", caseTypeId,  caseId);
-            DynamicListElement element = DynamicListElement.builder().code(FINANCIAL_REMEDY).label(FINANCIAL_REMEDY).build();
-            caseDataMap.put("caseManagementCategory", DynamicList.builder().value(element).listItems(List.of(element)).build());
-            caseDataMap.put("caseNameHmctsInternal", getCaseNameHmctsInternal(caseDataMap));
-            caseDataMap.put("caseManagementLocation", caseManagementLocationService.getCaseLocation(caseDataMap));
+            caseDataMap.putIfAbsent("caseManagementCategory",
+                DynamicList.builder().value(element).listItems(List.of(element)).build());
+
+            caseDataMap.putIfAbsent("caseNameHmctsInternal", getCaseNameHmctsInternal(caseDataMap));
+
+            caseDataMap.putIfAbsent("caseManagementLocation",
+                caseManagementLocationService.getCaseLocation(caseDataMap));
             log.info("setGlobalSearchDataByMap::global search fields are set for {} case type with CCD ID: {}",
                 caseTypeId, caseId);
         }

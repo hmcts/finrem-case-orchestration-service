@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CourtRefData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -19,7 +20,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CaseManagementLocationService {
 
-    private static final String COURT_REF_DATA_FILE = "/json/fr-court-to-refdata-location-mappings.json";
     private static final String COURT_LIST_SUFFIX = "CourtList";
 
     private final Map<String, CourtRefData> courtReferenceDataByName;
@@ -33,30 +33,33 @@ public class CaseManagementLocationService {
      */
     public CaseLocation getCaseLocation(Map<String, Object> caseData) {
 
-        Map.Entry<String, Object> courtEntry = caseData.entrySet()
+        List<Map.Entry<String, Object>> courtEntries = caseData.entrySet()
             .stream()
             .filter(entry -> entry.getKey().endsWith(COURT_LIST_SUFFIX))
-            .findFirst()
-            .orElse(null);
+            .toList();
 
-        if (courtEntry == null || courtEntry.getValue() == null) {
+        if (courtEntries.isEmpty()) {
             log.warn("No court list field found in case data");
             return null;
         }
 
-        String courtName = courtEntry.getValue()
-            .toString()
-            .trim()
-            .toLowerCase(Locale.UK);
+        if (courtEntries.size() > 1) {
+            log.warn(
+                "Multiple court list fields found in case data: {}. Using first match: {}",
+                courtEntries.stream().map(Map.Entry::getKey).toList(),
+                courtEntries.getFirst().getKey()
+            );
+        }
 
-        CourtRefData courtRefData = courtReferenceDataByName.get(courtName);
+        Map.Entry<String, Object> courtEntry = courtEntries.getFirst();
+
+        CourtRefData courtRefData = courtReferenceDataByName.get(courtEntry.getValue());
 
         if (courtRefData == null) {
-            log.warn("No court reference data found for court name: {}", courtName);
+            log.warn("No court reference data found for court name: {}", courtEntry.getValue());
             return null;
         }
 
         return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
     }
-
 }
