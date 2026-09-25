@@ -74,7 +74,7 @@
     "region_id": "6",
     "fr_court_name": "BODMIN COUNTY COURT AND FAMILY COURT"
   },
-  "FR_s_NottinghamList_8": {
+  "FR_NottinghamList_8": {
     "epimms_id": "117667",
     "region_id": "2",
     "fr_court_name": "BOSTON COUNTY COURT AND FAMILY COURT"
@@ -154,7 +154,7 @@
     "region_id": "4",
     "fr_court_name": "CHESTER CIVIL AND FAMILY JUSTICE CENTRE"
   },
-  "FR_s_NottinghamList_6": {
+  "FR_NottinghamList_6": {
     "epimms_id": "652852",
     "region_id": "2",
     "fr_court_name": "CHESTERFIELD COUNTY COURT"
@@ -184,7 +184,7 @@
     "region_id": "5",
     "fr_court_name": "DARTFORD COUNTY COURT AND FAMILY COURT"
   },
-  "FR_s_NottinghamList_2": {
+  "FR_NottinghamList_2": {
     "epimms_id": "201339",
     "region_id": "2",
     "fr_court_name": "DERBY COMBINED COURT CENTRE"
@@ -314,7 +314,7 @@
     "region_id": "3",
     "fr_court_name": "LEEDS COMBINED COURT CENTRE"
   },
-  "FR_s_NottinghamList_3": {
+  "FR_NottinghamList_3": {
     "epimms_id": "425094",
     "region_id": "2",
     "fr_court_name": "LEICESTER COUNTY COURT AND FAMILY COURT"
@@ -324,7 +324,7 @@
     "region_id": "4",
     "fr_court_name": "LEYLAND FAMILY HEARING CENTRE"
   },
-  "FR_s_NottinghamList_4": {
+  "FR_NottinghamList_4": {
     "epimms_id": "195465",
     "region_id": "2",
     "fr_court_name": "LINCOLN COUNTY COURT AND FAMILY COURT"
@@ -354,7 +354,7 @@
     "region_id": "4",
     "fr_court_name": "MANCHESTER COUNTY AND FAMILY COURT"
   },
-  "FR_s_NottinghamList_7": {
+  "FR_NottinghamList_7": {
     "epimms_id": "455368",
     "region_id": "2",
     "fr_court_name": "MANSFIELD MAGISTRATES AND COUNTY COURT"
@@ -394,7 +394,7 @@
     "region_id": "3",
     "fr_court_name": "NORTH SHIELDS COUNTY COURT AND FAMILY COURT"
   },
-  "FR_s_NottinghamList_5": {
+  "FR_NottinghamList_5": {
     "epimms_id": "195489",
     "region_id": "2",
     "fr_court_name": "NORTHAMPTON CROWN, COUNTY AND FAMILY COURT"
@@ -404,7 +404,7 @@
     "region_id": "5",
     "fr_court_name": "NORWICH COMBINED COURT CENTRE"
   },
-  "FR_s_NottinghamList_1": {
+  "FR_NottinghamList_1": {
     "epimms_id": "424213",
     "region_id": "2",
     "fr_court_name": "NOTTINGHAM COUNTY COURT AND FAMILY COURT"
@@ -689,7 +689,7 @@
     "region_id": "3",
     "fr_court_name": "DARLINGTON MAGISTRATES COURT"
   },
-  "FR_s_NottinghamList_10": {
+  "FR_NottinghamList_10": {
     "epimms_id": "484482",
     "region_id": "2",
     "fr_court_name": "DERBY MAGISTRATES COURT"
@@ -704,7 +704,7 @@
     "region_id": "5",
     "fr_court_name": "KING'S LYNN MAGISTRATES COURT"
   },
-  "FR_s_NottinghamList_9": {
+  "FR_NottinghamList_9": {
     "epimms_id": "417439",
     "region_id": "2",
     "fr_court_name": "LEICESTER MAGISTRATES COURT"
@@ -724,7 +724,7 @@
     "region_id": "5",
     "fr_court_name": "MEDWAY MAGISTRATES COURT"
   },
-  "FR_s_NottinghamList_11": {
+  "FR_NottinghamList_11": {
     "epimms_id": "618632",
     "region_id": "2",
     "fr_court_name": "NOTTINGHAM JUSTICE CENTRE"
