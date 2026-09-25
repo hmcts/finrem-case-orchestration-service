@@ -504,14 +504,14 @@ public class EmailNotificationFunctionalTest extends BaseTest {
         personalisation.put("courtEmail", "FRCBirmingham@justice.gov.uk");
         personalisation.put("applicantName", "Frodo Baggins");
         personalisation.put("divorceCaseNumber", "LV12D12345");
-        personalisation.put("notificationEmail", "judge@email.com");
+        personalisation.put("notificationEmail", "peter.chapman@yahoo.com");
         personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
-        personalisation.put("courtName", "Birmingham FRC");
+        personalisation.put("courtName", "Coventry Combined Court Centre");
         personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
         personalisation.put("name", "Bilbo Baggins");
         personalisation.put("contactNumber", "0300 303 0642");
         personalisation.put("respondentName", "Smeagol Gollum");
-        personalisation.put("caseReferenceNumber", "1790323889999965");
+        personalisation.put("caseReferenceNumber", "1790323938602164");
         personalisation.put("generalEmailBody", "General application refer to judge details.");
 
         assertPreviewCall("FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE", personalisation);
