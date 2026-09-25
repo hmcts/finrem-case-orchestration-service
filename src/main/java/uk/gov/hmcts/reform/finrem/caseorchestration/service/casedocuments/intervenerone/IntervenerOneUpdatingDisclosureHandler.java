@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -13,21 +12,10 @@ public class IntervenerOneUpdatingDisclosureHandler extends UpdatingDisclosureHa
 
     public IntervenerOneUpdatingDisclosureHandler(FeatureToggleService featureToggleService) {
         super(
-            CaseDocumentCollectionType.INTERVENER_ONE_UPDATING_DISCLOSURE_COLLECTION,
-            CaseDocumentParty.INTERVENER_ONE,
-            featureToggleService
+                CaseDocumentCollectionType.INTERVENER_ONE_UPDATING_DISCLOSURE_COLLECTION,
+                CaseDocumentParty.INTERVENER_ONE,
+                DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SUPPORTING_DOCUMENTS,
+                featureToggleService
         );
-    }
-
-    @Override
-    protected DocumentCategory getDocumentCategoryFromDocumentType(
-        CaseDocumentType caseDocumentType,
-        CaseDocumentParty caseDocumentParty) {
-
-        if (CaseDocumentType.UPDATING_DISCLOSURE.equals(caseDocumentType)) {
-            return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_SUPPORTING_DOCUMENTS;
-        }
-
-        return DocumentCategory.UNCATEGORISED;
     }
 }

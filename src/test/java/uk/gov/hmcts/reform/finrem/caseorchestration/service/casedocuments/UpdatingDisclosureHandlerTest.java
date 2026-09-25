@@ -22,6 +22,17 @@ public abstract class UpdatingDisclosureHandlerTest extends BaseManageDocumentsH
         );
     }
 
+    @Test
+    public void shouldReturnUncategorisedForUnsupportedDocumentType() {
+        assertThat(
+            getDocumentHandler().getDocumentCategoryFromDocumentType(
+                CaseDocumentType.VALUATION_REPORT,
+                getCaseDocumentParty()
+            ),
+            is(DocumentCategory.UNCATEGORISED)
+        );
+    }
+
     protected abstract CaseDocumentParty getCaseDocumentParty();
 
     protected abstract DocumentCategory getExpectedDocumentCategory();
