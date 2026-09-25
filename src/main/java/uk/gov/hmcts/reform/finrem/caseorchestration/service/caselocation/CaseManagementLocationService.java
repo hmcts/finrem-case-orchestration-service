@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.CourtRefData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
