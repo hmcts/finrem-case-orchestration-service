@@ -1,39 +1,39 @@
 {
-  "templateId": "b5f963a9-ef5d-4b44-8183-b3545541cb12",
-  "httpMethod": "POST",
-  "url": "/v2/template/b5f963a9-ef5d-4b44-8183-b3545541cb12/preview",
-  "notificationRequest": {
-    "personalisation": {
-      "solicitorReferenceNumber": "Y707HZM",
-      "hearingType": "",
-      "courtEmail": "FRCBirmingham@justice.gov.uk",
-      "applicantName": "Frodo Baggins",
-      "divorceCaseNumber": "LV12D12345",
-      "notificationEmail": "fr_applicant_solicitor1@mailinator.com",
-      "frEmail": "contactFinancialRemedy@justice.gov.uk",
-      "courtName": "Birmingham FRC",
-      "linkToSmartSurvey": "http://www.smartsurvey.co.uk/s/KCECE/",
-      "name": "Bilbo Baggins",
-      "contactNumber": "0300 303 0642",
-      "respondentName": "Smeagol Gollum",
-      "caseReferenceNumber": "1790181252240783"
+  "templateId" : "b5f963a9-ef5d-4b44-8183-b3545541cb12",
+  "httpMethod" : "POST",
+  "url" : "/v2/template/b5f963a9-ef5d-4b44-8183-b3545541cb12/preview",
+  "notificationRequest" : {
+    "personalisation" : {
+      "solicitorReferenceNumber" : "Y707HZM",
+      "hearingType" : "",
+      "courtEmail" : "FRCBirmingham@justice.gov.uk",
+      "applicantName" : "Frodo Baggins",
+      "divorceCaseNumber" : "LV12D12345",
+      "notificationEmail" : "fr_applicant_solicitor1@mailinator.com",
+      "frEmail" : "contactFinancialRemedy@justice.gov.uk",
+      "courtName" : "Birmingham FRC",
+      "linkToSmartSurvey" : "http://www.smartsurvey.co.uk/s/KCECE/",
+      "name" : "Bilbo Baggins",
+      "contactNumber" : "0300 303 0642",
+      "respondentName" : "Smeagol Gollum",
+      "caseReferenceNumber" : "1790323889999965"
     }
   },
-  "response": {
-    "status": 200,
-    "contentType": "application/json",
-    "bodyAsJson": {
-      "postage": null,
-      "subject": "Case Reference Number {{jsonPath request.body '$.personalisation.caseReferenceNumber'}} \\u2013 General Application Directions",
-      "html": "<p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Reference no: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">{{jsonPath request.body '$.personalisation.applicantName'}} vs {{jsonPath request.body '$.personalisation.respondentName'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Dear {{jsonPath request.body '$.personalisation.courtName'}},</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">A General Application is waiting for directions after a decision made by the Judge.  The application can be found on the \\u2018General Applications\\u2019 tab within the case file.</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Sign in to your account to continue.</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\"><a style=\"word-wrap: break-word; color: #1D70B8;\" href=\"https://manage-case.platform.hmcts.net/\">https://manage-case.platform.hmcts.net/</a></p><h2 style=\"Margin: 0 0 15px 0; padding: 10px 0 0 0; font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;\">Help us improve this service</h2><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">This is a new service which is still being developed. If you haven\\u2019t already, please tell us what you think of it and how it can be improved at <a style=\"word-wrap: break-word; color: #1D70B8;\" href=\"http://www.smartsurvey.co.uk/s/KCECE/\">http://www.smartsurvey.co.uk/s/KCECE/</a>.</p><h2 style=\"Margin: 0 0 15px 0; padding: 10px 0 0 0; font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;\">If you need help</h2><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">You can contact the court if you need help.<br>Financial Remedies Court: {{jsonPath request.body '$.personalisation.courtName'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Email: {{jsonPath request.body '$.personalisation.courtEmail'}}</p><h2 style=\"Margin: 0 0 15px 0; padding: 10px 0 0 0; font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;\">HM Courts &amp; Tribunals Service</h2><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">This is an automated message, please don\\u2019t reply to this email.</p>",
-      "id": "{{request.pathSegments.[2]}}",
-      "body": "Reference no: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}\\r\\n\\r\\n{{jsonPath request.body '$.personalisation.applicantName'}} vs {{jsonPath request.body '$.personalisation.respondentName'}}\\r\\n\\r\\nDear {{jsonPath request.body '$.personalisation.courtName'}},\\r\\n\\r\\nA General Application is waiting for directions after a decision made by the Judge.  The application can be found on the 'General Applications' tab within the case file.\\r\\n\\r\\n\\r\\nSign in to your account to continue.\\r\\n\\r\\n\\r\\nhttps://manage-case.platform.hmcts.net/\\r\\n \\r\\n#Help us improve this service\\r\\nThis is a new service which is still being developed. If you haven\\u2019t already, please tell us what you think of it and how it can be improved at http://www.smartsurvey.co.uk/s/KCECE/.\\r\\n\\r\\n#If you need help\\r\\nYou can contact the court if you need help.\\r\\nFinancial Remedies Court: {{jsonPath request.body '$.personalisation.courtName'}}\\r\\n\\r\\nEmail: {{jsonPath request.body '$.personalisation.courtEmail'}}\\r\\n\\r\\n#HM Courts & Tribunals Service\\r\\nThis is an automated message, please don\\u2019t reply to this email.",
-      "type": "email",
-      "version": 6,
-      "template_id": "{{request.pathSegments.[2]}}"
+  "response" : {
+    "status" : 200,
+    "contentType" : "application/json",
+    "bodyAsJson" : {
+      "postage" : null,
+      "subject" : "Case Reference Number {{jsonPath request.body '$.personalisation.caseReferenceNumber'}} \\u2013 General Application Directions",
+      "html" : "<p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Reference no: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">{{jsonPath request.body '$.personalisation.applicantName'}} vs {{jsonPath request.body '$.personalisation.respondentName'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Dear {{jsonPath request.body '$.personalisation.courtName'}},</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">A General Application is waiting for directions after a decision made by the Judge.  The application can be found on the \\u2018General Applications\\u2019 tab within the case file.</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Sign in to your account to continue.</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\"><a style=\"word-wrap: break-word; color: #1D70B8;\" href=\"https://manage-case.platform.hmcts.net/\">https://manage-case.platform.hmcts.net/</a></p><h2 style=\"Margin: 0 0 15px 0; padding: 10px 0 0 0; font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;\">Help us improve this service</h2><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">This is a new service which is still being developed. If you haven\\u2019t already, please tell us what you think of it and how it can be improved at <a style=\"word-wrap: break-word; color: #1D70B8;\" href=\"http://www.smartsurvey.co.uk/s/KCECE/\">http://www.smartsurvey.co.uk/s/KCECE/</a>.</p><h2 style=\"Margin: 0 0 15px 0; padding: 10px 0 0 0; font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;\">If you need help</h2><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">You can contact the court if you need help.<br>Financial Remedies Court: {{jsonPath request.body '$.personalisation.courtName'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Email: {{jsonPath request.body '$.personalisation.courtEmail'}}</p><h2 style=\"Margin: 0 0 15px 0; padding: 10px 0 0 0; font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;\">HM Courts &amp; Tribunals Service</h2><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">This is an automated message, please don\\u2019t reply to this email.</p>",
+      "id" : "{{request.pathSegments.[2]}}",
+      "body" : "Reference no: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}\\r\\n\\r\\n{{jsonPath request.body '$.personalisation.applicantName'}} vs {{jsonPath request.body '$.personalisation.respondentName'}}\\r\\n\\r\\nDear {{jsonPath request.body '$.personalisation.courtName'}},\\r\\n\\r\\nA General Application is waiting for directions after a decision made by the Judge.  The application can be found on the 'General Applications' tab within the case file.\\r\\n\\r\\n\\r\\nSign in to your account to continue.\\r\\n\\r\\n\\r\\nhttps://manage-case.platform.hmcts.net/\\r\\n \\r\\n#Help us improve this service\\r\\nThis is a new service which is still being developed. If you haven\\u2019t already, please tell us what you think of it and how it can be improved at http://www.smartsurvey.co.uk/s/KCECE/.\\r\\n\\r\\n#If you need help\\r\\nYou can contact the court if you need help.\\r\\nFinancial Remedies Court: {{jsonPath request.body '$.personalisation.courtName'}}\\r\\n\\r\\nEmail: {{jsonPath request.body '$.personalisation.courtEmail'}}\\r\\n\\r\\n#HM Courts & Tribunals Service\\r\\nThis is an automated message, please don\\u2019t reply to this email.",
+      "type" : "email",
+      "version" : 6,
+      "template_id" : "{{request.pathSegments.[2]}}"
     }
   },
-  "expectedContains": [
+  "expectedContains" : [
     "General Application Directions",
     "Financial Remedies Court: Birmingham FRC",
     "Email: FRCBirmingham@justice.gov.uk"

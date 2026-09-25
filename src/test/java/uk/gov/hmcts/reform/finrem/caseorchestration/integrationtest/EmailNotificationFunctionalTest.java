@@ -200,7 +200,6 @@ public class EmailNotificationFunctionalTest extends BaseTest {
         assertPreviewCall("FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN", personalisation);
     }
 
-
     /**
      * Verifies preview request for FR_CONTESTED_GENERAL_APPLICATION_OUTCOME.
      *
@@ -208,53 +207,57 @@ public class EmailNotificationFunctionalTest extends BaseTest {
      */
     @Test
     public void shouldPreviewFrContestedGeneralApplicationOutcomeTemplate() throws Exception {
-        Map<String, Object> personalisation = basePersonalisation("1790181252240783");
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("solicitorReferenceNumber", "Y707HZM");
+        personalisation.put("hearingType", "");
+        personalisation.put("courtEmail", "FRCBirmingham@justice.gov.uk");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("divorceCaseNumber", "LV12D12345");
+        personalisation.put("notificationEmail", "fr_applicant_solicitor1@mailinator.com");
+        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
         personalisation.put("courtName", "Birmingham FRC");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("name", "Bilbo Baggins");
+        personalisation.put("contactNumber", "0300 303 0642");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("caseReferenceNumber", "1790323889999965");
 
         assertPreviewCall("FR_CONTESTED_GENERAL_APPLICATION_OUTCOME", personalisation);
     }
 
-    /**
-     * Verifies preview request for FR_BARRISTER_ACCESS_ADDED (applicant barrister).
-     *
-     * @throws Exception when request parsing fails
-     */
+
     @Test
     public void shouldPreviewFrBarristerAccessAddedApplicantTemplate() throws Exception {
         Map<String, Object> personalisation = new LinkedHashMap<>();
-        personalisation.put("name", "Applicant Barrister");
-        personalisation.put("notificationEmail", "fr_applicant_barrister1@mailinator.com");
-        personalisation.put("applicantName", "Frodo Baggins");
-        personalisation.put("respondentName", "Smeagol Gollum");
-        personalisation.put("caseReferenceNumber", "1790237505587221");
-        personalisation.put("BarristerReferenceNumber", "APP-BARR-ORG-ID-001");
-        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("BarristerReferenceNumber", "Y707HZM");
         personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
         personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("name", "Tester Gollum");
+        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("notificationEmail", "fr_applicant_barrister1@mailinator.com");
+        personalisation.put("caseReferenceNumber", "1790244910219142");
 
         assertPreviewCall("FR_BARRISTER_ACCESS_ADDED", personalisation);
     }
 
-    /**
-     * Verifies preview request for FR_BARRISTER_ACCESS_ADDED (respondent barrister).
-     *
-     * @throws Exception when request parsing fails
-     */
     @Test
     public void shouldPreviewFrBarristerAccessAddedRespondentTemplate() throws Exception {
         Map<String, Object> personalisation = new LinkedHashMap<>();
-        personalisation.put("name", "Respondent Barrister");
-        personalisation.put("notificationEmail", "fr_respondent_barrister1@mailinator.com");
-        personalisation.put("applicantName", "Frodo Baggins");
-        personalisation.put("respondentName", "Smeagol Gollum");
-        personalisation.put("caseReferenceNumber", "1790237505587222");
-        personalisation.put("BarristerReferenceNumber", "RESP-BARR-ORG-ID-001");
-        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("BarristerReferenceNumber", "95V5X7X");
         personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
         personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("name", "Frodo Test Baggins");
+        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("notificationEmail", "fr_res_barrister1@mailinator.com");
+        personalisation.put("caseReferenceNumber", "1790244910219142");
 
         assertPreviewCall("FR_BARRISTER_ACCESS_ADDED", personalisation);
     }
+
 
     /**
      * Verifies preview request for FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR (applicant).
@@ -329,28 +332,28 @@ public class EmailNotificationFunctionalTest extends BaseTest {
         assertPreviewCall("FR_INTERVENER_SOLICITOR_ADDED_EMAIL", personalisation);
     }
 
-/**
- * Verifies preview request for FR_INTERVENER_SOLICITOR_ADDED_EMAIL (respondent recipient).
- *
- * @throws Exception when request parsing fails
- */
-@Test
-public void shouldPreviewFrIntervenerSolicitorAddedEmailRespondentTemplate() throws Exception {
-    Map<String, Object> personalisation = new LinkedHashMap<>();
-    personalisation.put("intervenerSolicitorReferenceNumber", "");
-    personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
-    personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
-    personalisation.put("intervenerSolicitorFirm", "FinRem-1-Org");
-    personalisation.put("name", "Sauron");
-    personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
-    personalisation.put("respondentName", "Smeagol Gollum");
-    personalisation.put("applicantName", "Frodo Baggins");
-    personalisation.put("intervenerFullName", "Test Intervener");
-    personalisation.put("notificationEmail", "fr_respondent_solicitor1@mailinator.com");
-    personalisation.put("caseReferenceNumber", "1790251496582942");
+    /**
+     * Verifies preview request for FR_INTERVENER_SOLICITOR_ADDED_EMAIL (respondent recipient).
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrIntervenerSolicitorAddedEmailRespondentTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("intervenerSolicitorReferenceNumber", "");
+        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("intervenerSolicitorFirm", "FinRem-1-Org");
+        personalisation.put("name", "Sauron");
+        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("intervenerFullName", "Test Intervener");
+        personalisation.put("notificationEmail", "fr_respondent_solicitor1@mailinator.com");
+        personalisation.put("caseReferenceNumber", "1790251496582942");
 
-    assertPreviewCall("FR_INTERVENER_SOLICITOR_ADDED_EMAIL", personalisation);
-}
+        assertPreviewCall("FR_INTERVENER_SOLICITOR_ADDED_EMAIL", personalisation);
+    }
 
     /**
      * Verifies preview request for FR_INTERVENER_SOLICITOR_ADDED_EMAIL (intervener recipient).
@@ -486,6 +489,32 @@ public void shouldPreviewFrIntervenerSolicitorAddedEmailRespondentTemplate() thr
         personalisation.put("caseReferenceNumber", "1790251496582942");
 
         assertPreviewCall("FR_INTERVENER_SOLICITOR_REMOVED_EMAIL", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE.
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrContestedGeneralApplicationReferToJudgeTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("solicitorReferenceNumber", "Y707HZM");
+        personalisation.put("hearingType", "");
+        personalisation.put("courtEmail", "FRCBirmingham@justice.gov.uk");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("divorceCaseNumber", "LV12D12345");
+        personalisation.put("notificationEmail", "judge@email.com");
+        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("courtName", "Birmingham FRC");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("name", "Bilbo Baggins");
+        personalisation.put("contactNumber", "0300 303 0642");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("caseReferenceNumber", "1790323889999965");
+        personalisation.put("generalEmailBody", "General application refer to judge details.");
+
+        assertPreviewCall("FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE", personalisation);
     }
 
     private Map<String, Object> basePersonalisation(String caseReferenceNumber) {

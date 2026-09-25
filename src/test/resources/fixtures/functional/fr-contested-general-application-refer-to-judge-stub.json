@@ -1,0 +1,41 @@
+{
+  "templateId": "ac992e1b-bcd4-44db-807e-d6acd84899d1",
+  "httpMethod": "POST",
+  "url": "/v2/template/ac992e1b-bcd4-44db-807e-d6acd84899d1/preview",
+  "notificationRequest": {
+    "personalisation": {
+      "solicitorReferenceNumber": "Y707HZM",
+      "hearingType": "",
+      "courtEmail": "FRCBirmingham@justice.gov.uk",
+      "applicantName": "Frodo Baggins",
+      "divorceCaseNumber": "LV12D12345",
+      "notificationEmail": "judge@email.com",
+      "frEmail": "contactFinancialRemedy@justice.gov.uk",
+      "courtName": "Birmingham FRC",
+      "linkToSmartSurvey": "http://www.smartsurvey.co.uk/s/KCECE/",
+      "name": "Bilbo Baggins",
+      "contactNumber": "0300 303 0642",
+      "respondentName": "Smeagol Gollum",
+      "caseReferenceNumber": "1790323889999965",
+      "generalEmailBody": "General application refer to judge details."
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "bodyAsJson": {
+      "postage": null,
+      "subject": "REPLACE_FROM_REFER_TO_JUDGE_LOG_SUBJECT",
+      "html": "REPLACE_FROM_REFER_TO_JUDGE_LOG_HTML",
+      "id": "{{request.pathSegments.[2]}}",
+      "body": "REPLACE_FROM_REFER_TO_JUDGE_LOG_BODY",
+      "type": "email",
+      "version": 1,
+      "template_id": "{{request.pathSegments.[2]}}"
+    }
+  },
+  "expectedContains": [
+    "REPLACE_KEY_TEXT_1",
+    "REPLACE_KEY_TEXT_2"
+  ]
+}
