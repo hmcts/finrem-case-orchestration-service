@@ -54,6 +54,13 @@ public class UploadCaseDocumentWrapper implements HasCaseDocument {
     private List<UploadCaseDocumentCollection> respHearingBundlesCollection;
     private List<UploadCaseDocumentCollection> respFormEExhibitsCollection;
     private List<UploadCaseDocumentCollection> respChronologiesCollection;
+    private List<UploadCaseDocumentCollection> appUpdatingDisclosureCollection;
+    private List<UploadCaseDocumentCollection> respUpdatingDisclosureCollection;
+    private List<UploadCaseDocumentCollection> intv1UpdatingDisclosureCollection;
+    private List<UploadCaseDocumentCollection> intv2UpdatingDisclosureCollection;
+    private List<UploadCaseDocumentCollection> intv3UpdatingDisclosureCollection;
+    private List<UploadCaseDocumentCollection> intv4UpdatingDisclosureCollection;
+
     @JsonProperty("respQACollection")
     private List<UploadCaseDocumentCollection> respQaCollection;
     private List<UploadCaseDocumentCollection> respStatementsExhibitsCollection;
@@ -205,7 +212,9 @@ public class UploadCaseDocumentWrapper implements HasCaseDocument {
                 intv3StmtsExhibits, intv4Summaries, intv4Chronologies, intv4CorrespDocs, intv4ExpertEvidence,
                 intv4FormEsExhibits, intv4FormHs, intv4HearingBundles, intv4Other, intv4Qa, intv4StmtsExhibits,
                 intv1FdrCaseDocuments, intv2FdrCaseDocuments, intv3FdrCaseDocuments, intv4FdrCaseDocuments,
-                confidentialDocumentCollection)
+                confidentialDocumentCollection, appUpdatingDisclosureCollection, respUpdatingDisclosureCollection,
+                intv1UpdatingDisclosureCollection, intv2UpdatingDisclosureCollection, intv3UpdatingDisclosureCollection,
+                intv4UpdatingDisclosureCollection)
             .filter(Objects::nonNull)
             .flatMap(Collection::stream).collect(Collectors.toList());
     }
@@ -236,6 +245,12 @@ public class UploadCaseDocumentWrapper implements HasCaseDocument {
             case APP_CHRONOLOGIES_STATEMENTS_COLLECTION ->
                 appChronologiesCollection = getNonNull(appChronologiesCollection);
             case APP_QUESTIONNAIRES_ANSWERS_COLLECTION -> appQaCollection = getNonNull(appQaCollection);
+            case APP_UPDATING_DISCLOSURE_COLLECTION -> appUpdatingDisclosureCollection = getNonNull(appUpdatingDisclosureCollection);
+            case RESP_UPDATING_DISCLOSURE_COLLECTION -> respUpdatingDisclosureCollection = getNonNull(respUpdatingDisclosureCollection);
+            case INTERVENER_ONE_UPDATING_DISCLOSURE_COLLECTION -> intv1UpdatingDisclosureCollection = getNonNull(intv1UpdatingDisclosureCollection);
+            case INTERVENER_TWO_UPDATING_DISCLOSURE_COLLECTION -> intv2UpdatingDisclosureCollection = getNonNull(intv2UpdatingDisclosureCollection);
+            case INTERVENER_THREE_UPDATING_DISCLOSURE_COLLECTION -> intv3UpdatingDisclosureCollection = getNonNull(intv3UpdatingDisclosureCollection);
+            case INTERVENER_FOUR_UPDATING_DISCLOSURE_COLLECTION -> intv4UpdatingDisclosureCollection = getNonNull(intv4UpdatingDisclosureCollection);
             case APP_STATEMENTS_EXHIBITS_COLLECTION ->
                 appStatementsExhibitsCollection = getNonNull(appStatementsExhibitsCollection);
             case APP_CASE_SUMMARIES_COLLECTION -> appCaseSummariesCollection = getNonNull(appCaseSummariesCollection);
@@ -318,4 +333,3 @@ public class UploadCaseDocumentWrapper implements HasCaseDocument {
         return collection;
     }
 }
-
