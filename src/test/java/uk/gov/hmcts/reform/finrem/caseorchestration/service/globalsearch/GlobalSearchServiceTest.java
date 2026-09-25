@@ -43,6 +43,7 @@ class GlobalSearchServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .caseTypeId("FinancialRemedyMVP2")
             .data(caseDataMap)
+            .id(1323222L)
             .build();
 
         when(caseManagementLocationService.getCaseLocation(caseDataMap))
@@ -50,7 +51,8 @@ class GlobalSearchServiceTest {
                 .region("438850")
                 .build());
 
-        globalSearchService.setGlobalSearchDataByMap(caseDetails);
+        globalSearchService.setGlobalSearchDataByMap(caseDetails.getData(),
+            caseDetails.getCaseTypeId(), caseDetails.getId());
 
         assertEquals("Jane vs Doe", caseDataMap.get("caseNameHmctsInternal"));
 
@@ -79,8 +81,10 @@ class GlobalSearchServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .caseTypeId("FinancialRemedyMVP2")
             .data(caseDataMap)
+            .id(1323222L)
             .build();
-        globalSearchService.setGlobalSearchDataByMap(caseDetails);
+        globalSearchService.setGlobalSearchDataByMap(caseDetails.getData(),
+            caseDetails.getCaseTypeId(), caseDetails.getId());
 
         assertNull(caseDataMap.get("caseNameHmctsInternal"));
         assertNull(caseDataMap.get("caseManagementCategory"));
@@ -98,8 +102,10 @@ class GlobalSearchServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .caseTypeId("FinancialRemedyContested")
             .data(caseDataMap)
+            .id(1323222L)
             .build();
-        globalSearchService.setGlobalSearchDataByMap(caseDetails);
+        globalSearchService.setGlobalSearchDataByMap(caseDetails.getData(),
+            caseDetails.getCaseTypeId(), caseDetails.getId());
 
         assertNull(caseDataMap.get("caseNameHmctsInternal"));
         assertNull(caseDataMap.get("caseManagementCategory"));
