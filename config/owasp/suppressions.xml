@@ -155,5 +155,7 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-crypto@.*$</packageUrl>
         <cve>CVE-2026-47841</cve>
         <cve>CVE-2026-47842</cve>
+        <!-- Added 2026-09-25 -->
+        <cve>CVE-2026-41707</cve>
     </suppress>
 </suppressions>
