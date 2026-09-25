@@ -41,7 +41,7 @@ public class GlobalSearchService {
             Map<String, Object> caseDataMap = caseDetails.getData();
             log.info("setGlobalSearchDataByMap::Received request to set global search fields "
                 + "for {} case type with CCD ID: {}", caseDetails.getCaseTypeId(),  caseDetails.getId());
-            DynamicListElement element = DynamicListElement.builder().code(FINANCIAL_REMEDY).build();
+            DynamicListElement element = DynamicListElement.builder().code(FINANCIAL_REMEDY).label(FINANCIAL_REMEDY).build();
             caseDataMap.put("caseManagementCategory", DynamicList.builder().value(element).listItems(List.of(element)).build());
             caseDataMap.put("caseNameHmctsInternal", getCaseNameHmctsInternal(caseDataMap));
             caseDataMap.put("caseManagementLocation", caseManagementLocationService.getCaseLocation(caseDataMap));
