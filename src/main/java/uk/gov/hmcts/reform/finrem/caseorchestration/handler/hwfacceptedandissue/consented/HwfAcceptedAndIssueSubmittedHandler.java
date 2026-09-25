@@ -1,13 +1,16 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.hwfacceptedandissue.consented;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractIssueApplicationSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -22,13 +25,16 @@ public class HwfAcceptedAndIssueSubmittedHandler extends AbstractIssueApplicatio
     private final HwfCorrespondenceService hwfNotificationsService;
 
     public HwfAcceptedAndIssueSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                               HwfCorrespondenceService hwfNotificationsService,
                                                EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                RetryExecutor retryExecutor,
-                                               IssueApplicationConsentCorresponder issueApplicationConsentCorresponder,
+                                               AssignToJudgeCorresponder assignToJudgeCorresponder,
                                                AssignPartiesAccessService assignPartiesAccessService,
-                                               HwfCorrespondenceService hwfNotificationsService) {
-        super(finremCaseDetailsMapper, evidenceManagementDeleteService,
-            retryExecutor, issueApplicationConsentCorresponder, assignPartiesAccessService);
+                                               ApplicationEventPublisher applicationEventPublisher,
+                                               NotificationAuditService notificationAuditService,
+                                               CoreCaseDataService coreCaseDataService) {
+        super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor, assignToJudgeCorresponder,
+            assignPartiesAccessService, applicationEventPublisher, notificationAuditService, coreCaseDataService);
         this.hwfNotificationsService = hwfNotificationsService;
     }
 

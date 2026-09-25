@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Finre
  */
 @Component
 @Slf4j
+@Deprecated(forRemoval = true)
 public abstract class AbstractAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
 
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;

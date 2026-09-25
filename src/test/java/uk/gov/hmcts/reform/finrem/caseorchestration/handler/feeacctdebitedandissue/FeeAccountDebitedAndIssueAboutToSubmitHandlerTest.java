@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.feeacctdebitedandiss
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -25,6 +26,8 @@ class FeeAccountDebitedAndIssueAboutToSubmitHandlerTest extends IssueApplication
     private OnlineFormDocumentService onlineFormDocumentService;
     @Mock
     private IssueApplicationService issueApplicationService;
+    @Mock
+    private AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     @Test
     void testCanHandle() {
@@ -44,5 +47,10 @@ class FeeAccountDebitedAndIssueAboutToSubmitHandlerTest extends IssueApplication
     @Override
     protected IssueApplicationService issueApplicationService() {
         return issueApplicationService;
+    }
+
+    @Override
+    protected AssignToJudgeCorresponder assignToJudgeCorresponder() {
+        return assignToJudgeCorresponder;
     }
 }

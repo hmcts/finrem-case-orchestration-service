@@ -6,22 +6,30 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.IssueApplicationConsentedSubmittedHandlerContractTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
@@ -35,6 +43,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 
 @ExtendWith(MockitoExtension.class)
 class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedSubmittedHandlerContractTest {
+
+    private static final String TRACKER_ID = "tracker-id-123";
+
+    private static final String DESCRIBED_NOTIFICATION_PARTIES = "applicant solicitor";
 
     public HwfAcceptedAndIssueSubmittedHandlerTest() {
         this.expectedConfirmationHeader = "HWF accepted and issued with errors";
@@ -50,14 +62,28 @@ class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedS
     private HwfCorrespondenceService hwfNotificationsService;
 
     @Mock
-    private IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
+    private AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     @Mock
     private AssignPartiesAccessService assignPartiesAccessService;
 
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    @Mock
+    private NotificationAuditService notificationAuditService;
+
+    @Mock
+    private CoreCaseDataService coreCaseDataService;
+
     @Test
     void testCanHandle() {
         assertCanHandle(handler, SUBMITTED, CONSENTED, HWF_ACCEPTED_AND_ISSUE);
+    }
+
+    @Override
+    protected ApplicationEventPublisher applicationEventPublisher() {
+        return applicationEventPublisher;
     }
 
     @Override
@@ -71,13 +97,23 @@ class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedS
     }
 
     @Override
-    protected IssueApplicationConsentCorresponder issueApplicationConsentCorresponder() {
-        return issueApplicationConsentCorresponder;
+    protected AssignToJudgeCorresponder assignToJudgeCorresponder() {
+        return assignToJudgeCorresponder;
     }
 
     @Override
     protected AssignPartiesAccessService assignPartiesAccessService() {
         return assignPartiesAccessService;
+    }
+
+    @Override
+    protected NotificationAuditService notificationAuditService() {
+        return notificationAuditService;
+    }
+
+    @Override
+    protected CoreCaseDataService coreCaseDataService() {
+        return coreCaseDataService;
     }
 
     @Test
@@ -117,16 +153,21 @@ class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedS
         assertAll(
             () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
             () -> assertThat(response.getConfirmationBody())
-                .contains("There was a problem sending HWF correspondence. Please send it manually.")
-                .doesNotContain("There was a problem sending issue application correspondence. Please send it manually.")
-                .doesNotContain("There was a problem granting access to respondent solicitor")
+                .containsOnlyOnce("There was a problem sending HWF correspondence. Please send it manually.")
         );
     }
 
     @Test
     void givenCase_whenSendHwfCorrespondenceFailedAndIssueApplicationCorrespondenceFailed_thenPopulateErrorToConfirmationBody() {
         // Arrange
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, HWF_ACCEPTED_AND_ISSUE);
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getNotificationTrackerId()).thenReturn(TRACKER_ID);
+        when(event.describeNotificationParties()).thenReturn(DESCRIBED_NOTIFICATION_PARTIES);
+        List<SendCorrespondenceEvent> events = List.of(event);
+        when(assignToJudgeCorresponder.buildSendCorrespondenceEvents(HWF_ACCEPTED_AND_ISSUE, callbackRequest.getCaseDetails(),
+            AUTH_TOKEN)).thenReturn(events);
 
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
@@ -134,7 +175,7 @@ class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedS
         );
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
-            "sending issue application correspondence"
+            "sending issue application correspondence %s (%s)".formatted(TRACKER_ID, DESCRIBED_NOTIFICATION_PARTIES)
         );
 
         // Act
@@ -145,7 +186,8 @@ class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedS
             () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
             () -> assertThat(response.getConfirmationBody())
                 .contains("There was a problem sending HWF correspondence. Please send it manually.")
-                .contains("There was a problem sending issue application correspondence. Please send it manually.")
+                .contains("There was a problem sending issue application correspondence (%s). Please send it manually."
+                    .formatted(DESCRIBED_NOTIFICATION_PARTIES))
                 .doesNotContain("There was a problem granting access to respondent solicitor")
         );
     }

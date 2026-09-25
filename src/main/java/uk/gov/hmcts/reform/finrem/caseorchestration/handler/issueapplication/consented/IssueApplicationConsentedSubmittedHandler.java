@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.feeacctdebitedandissue.consented;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.issueapplication.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -15,9 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 @Slf4j
 @Service
-public class FeeAccountDebitedAndIssueSubmittedHandler extends AbstractIssueApplicationSubmittedHandler {
+public class IssueApplicationConsentedSubmittedHandler extends AbstractIssueApplicationSubmittedHandler {
 
-    public FeeAccountDebitedAndIssueSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    public IssueApplicationConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                      RetryExecutor retryExecutor,
                                                      AssignToJudgeCorresponder assignToJudgeCorresponder,
@@ -31,11 +31,6 @@ public class FeeAccountDebitedAndIssueSubmittedHandler extends AbstractIssueAppl
 
     @Override
     protected EventType supportedEventType() {
-        return EventType.FEE_ACCOUNT_DEBITED_AND_ISSUE;
-    }
-
-    @Override
-    protected String getConfirmationHeader() {
-        return "Fee account debited and issued with errors";
+        return EventType.ISSUE_APPLICATION;
     }
 }

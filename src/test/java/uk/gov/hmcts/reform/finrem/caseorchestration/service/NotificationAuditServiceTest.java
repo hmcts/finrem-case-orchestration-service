@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTIFICATIONS_AUDITS;
@@ -35,8 +36,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 class NotificationAuditServiceTest {
 
     private static final String NOTIFICATION_EVENT_ID = "notificationEventId";
-    private static final String CURRENT_NOTIFICATION_EVENT_ID = "event-123";
-    private static final String PREVIOUS_NOTIFICATION_EVENT_ID = "event-456";
+    private static final String CURRENT_NOTIFICATION_EVENT_ID = "event-current-notification-id";
+    private static final String PREVIOUS_NOTIFICATION_EVENT_ID = "event-previous-notification-id";
 
     @Spy
     private ObjectMapper objectMapper = TestObjectMapperFactory.createObjectMapper();
@@ -253,21 +254,118 @@ class NotificationAuditServiceTest {
             .containsEntry(NOTIFICATION_EVENT_ID, null);
     }
 
+    @Test
+    void whenReconcilingSentAuditsFromMultipleEvents_thenAllAreRecordedAndOnlyPreviousEventPendingRemains() {
+        NotificationAudit previousPendingAudit = audit(
+            NotificationParty.RESPONDENT,
+            NotificationType.POSTAL,
+            PREVIOUS_NOTIFICATION_EVENT_ID,
+            YesOrNo.NO
+        );
+
+        NotificationAudit currentPendingAudit = audit(
+            NotificationParty.APPLICANT,
+            NotificationType.EMAIL,
+            CURRENT_NOTIFICATION_EVENT_ID,
+            YesOrNo.NO
+        );
+
+        NotificationAudit intervenerFourPendingAudit = audit(
+            NotificationParty.INTERVENER_FOUR,
+            NotificationType.EMAIL,
+            CURRENT_NOTIFICATION_EVENT_ID,
+            YesOrNo.NO
+        );
+
+        NotificationAudit currentSentAudit = audit(
+            NotificationParty.APPLICANT,
+            NotificationType.EMAIL,
+            CURRENT_NOTIFICATION_EVENT_ID,
+            YesOrNo.YES
+        );
+
+        NotificationAudit intervenerFourSentAudit = audit(
+            NotificationParty.INTERVENER_FOUR,
+            NotificationType.EMAIL,
+            CURRENT_NOTIFICATION_EVENT_ID,
+            YesOrNo.YES
+        );
+
+        FinremCaseDetails cd = caseDetails(
+            NotificationAuditWrapper.builder()
+                .notificationEventId(
+                    NotificationAuditServiceTest.CURRENT_NOTIFICATION_EVENT_ID
+                )
+                .notificationsToBeSent(List.of(
+                    pendingItem(previousPendingAudit),
+                    pendingItem(currentPendingAudit),
+                    pendingItem(intervenerFourPendingAudit)
+                ))
+                .build()
+        );
+
+        SendCorrespondenceEvent applicantSentEvent = buildEventWithPendingAndSentAudits(
+            cd,
+            List.of(currentSentAudit)
+        );
+
+        SendCorrespondenceEvent intervenerFourSentEvent = buildEventWithPendingAndSentAudits(
+            cd,
+            List.of(intervenerFourSentAudit)
+        );
+
+        Map<String, Object> result =
+            notificationAuditService.reconcileNotificationAudits(applicantSentEvent, intervenerFourSentEvent);
+
+        assertAll(
+            () -> assertThat(notificationToBeSentValues(result))
+                .singleElement()
+                .satisfies(pending -> assertThat(pending)
+                    .containsEntry("party", NotificationParty.RESPONDENT.name())
+                    .containsEntry("type", "postal")
+                    .containsEntry("notificationTrackerId", PREVIOUS_NOTIFICATION_EVENT_ID)),
+
+            () -> assertThat(notificationAuditValues(result)).satisfiesExactlyInAnyOrder(
+                audit -> assertThat(audit)
+                    .containsEntry("party", NotificationParty.APPLICANT.name())
+                    .containsEntry("type", "email")
+                    .containsEntry("wasSent", "Yes")
+                    .containsEntry("eventId", EventType.MANAGE_HEARINGS.getCcdType())
+                    .containsEntry("notificationTrackerId", CURRENT_NOTIFICATION_EVENT_ID),
+                audit -> assertThat(audit)
+                    .containsEntry("party", NotificationParty.INTERVENER_FOUR.name())
+                    .containsEntry("type", "email")
+                    .containsEntry("wasSent", "Yes")
+                    .containsEntry("eventId", EventType.MANAGE_HEARINGS.getCcdType())
+                    .containsEntry("notificationTrackerId", CURRENT_NOTIFICATION_EVENT_ID)),
+
+            () -> assertThat(result).containsEntry(NOTIFICATION_EVENT_ID, null)
+        );
+    }
+
     private SendCorrespondenceEvent buildEventWithPendingAndSentAudits(
         List<NotificationToBeSentCollectionItem> pending,
         List<NotificationAudit> sentAudits
     ) {
-        return SendCorrespondenceEvent.builder()
-            .caseDetails(
-                caseDetails(
+        return buildEventWithPendingAndSentAudits(
+                 caseDetails(
                     NotificationAuditWrapper.builder()
                         .notificationEventId(
                             NotificationAuditServiceTest.CURRENT_NOTIFICATION_EVENT_ID
                         )
                         .notificationsToBeSent(pending)
                         .build()
-                )
-            )
+                ),
+            new ArrayList<>(sentAudits)
+        );
+    }
+
+    private SendCorrespondenceEvent buildEventWithPendingAndSentAudits(
+        FinremCaseDetails caseDetails,
+        List<NotificationAudit> sentAudits
+    ) {
+        return SendCorrespondenceEvent.builder()
+            .caseDetails(caseDetails)
             .audits(new ArrayList<>(sentAudits))
             .build();
     }
