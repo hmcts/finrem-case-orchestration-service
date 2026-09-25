@@ -5,7 +5,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +24,9 @@ class GlobalSearchServiceTest {
     @Mock
     private FeatureToggleService featureToggleService;
 
+    @Mock
+    private CaseManagementLocationService caseManagementLocationService;
+
     @InjectMocks
     private GlobalSearchService globalSearchService;
 
@@ -29,23 +36,79 @@ class GlobalSearchServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("ccdCaseId", "12345");
-        caseDataMap.put("fullApplicantName", "Jane Doe");
+        caseDataMap.put("bristolFRCourtList", "FR_bristolList_3");
+        caseDataMap.put("appRespondentLName", "Doe");
+        caseDataMap.put("applicantLName", "Jane");
 
-        globalSearchService.setGlobalSearchDataByMap(caseDataMap);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseTypeId("FinancialRemedyMVP2")
+            .data(caseDataMap)
+            .id(1323222L)
+            .build();
 
-        assertEquals("Jane Doe", caseDataMap.get("caseNameHmctsInternal"));
+        when(caseManagementLocationService.getCaseLocation(caseDataMap))
+            .thenReturn(CaseLocation.builder()
+                .region("438850")
+                .build());
+
+        globalSearchService.setGlobalSearchDataByMap(caseDetails.getData(),
+            caseDetails.getCaseTypeId(), caseDetails.getId());
+
+        assertEquals("Jane vs Doe", caseDataMap.get("caseNameHmctsInternal"));
+
+        assertEquals(
+            "Financial Remedy",
+            ((DynamicList) caseDataMap.get("caseManagementCategory"))
+                .getValue()
+                .getCode()
+        );
+
+        assertEquals(
+            "438850",
+            ((CaseLocation) caseDataMap.get("caseManagementLocation"))
+                .getRegion()
+        );
     }
 
     @Test
     void shouldNotSetGlobalSearchFieldsWhenFeatureIsDisabled() {
+
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(false);
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("ccdCaseId", "12345");
         caseDataMap.put("fullApplicantName", "Jane Doe");
-
-        globalSearchService.setGlobalSearchDataByMap(caseDataMap);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseTypeId("FinancialRemedyMVP2")
+            .data(caseDataMap)
+            .id(1323222L)
+            .build();
+        globalSearchService.setGlobalSearchDataByMap(caseDetails.getData(),
+            caseDetails.getCaseTypeId(), caseDetails.getId());
 
         assertNull(caseDataMap.get("caseNameHmctsInternal"));
+        assertNull(caseDataMap.get("caseManagementCategory"));
+        assertNull(caseDataMap.get("caseManagementLocation"));
+    }
+
+    @Test
+    void shouldNotSetGlobalSearchFieldsWhenFeatureIsTrueNotConsented() {
+
+        when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("ccdCaseId", "12345");
+        caseDataMap.put("fullApplicantName", "Jane Doe");
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseTypeId("FinancialRemedyContested")
+            .data(caseDataMap)
+            .id(1323222L)
+            .build();
+        globalSearchService.setGlobalSearchDataByMap(caseDetails.getData(),
+            caseDetails.getCaseTypeId(), caseDetails.getId());
+
+        assertNull(caseDataMap.get("caseNameHmctsInternal"));
+        assertNull(caseDataMap.get("caseManagementCategory"));
+        assertNull(caseDataMap.get("caseManagementLocation"));
     }
 }
