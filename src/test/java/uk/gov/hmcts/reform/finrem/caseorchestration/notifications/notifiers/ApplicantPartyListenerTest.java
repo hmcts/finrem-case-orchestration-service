@@ -25,14 +25,15 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,6 +89,8 @@ class ApplicantPartyListenerTest {
         applicantPartyListener = new ApplicantPartyListener(
             bulkPrintService, emailService, notificationService, internationalPostalService
         );
+        lenient().when(caseDetails.isApplicantSolicitorDigital()).thenReturn(false);
+        clearInvocations(caseDetails);
     }
 
     @Test
@@ -169,6 +172,7 @@ class ApplicantPartyListenerTest {
     @Test
     void shouldSendDigitalNotificationWhenPartyIsDigitalViaHandleNotification() {
         when(caseDetails.getAppSolicitorEmail()).thenReturn(APPLICANT_EMAIL);
+        when(caseDetails.isApplicantSolicitorDigital()).thenReturn(true);
 
         // Set up event with applicant as notification party
         applicantPartyListener.handleNotification(event);
@@ -177,13 +181,13 @@ class ApplicantPartyListenerTest {
         assertThat(event.getEmailNotificationRequest().getName()).isEqualTo(APPLICANT_NAME);
         assertThat(event.getEmailNotificationRequest().getNotificationEmail()).isEqualTo(APPLICANT_EMAIL);
         assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(APPLICANT_REF);
-
+        verify(caseDetails).isApplicantSolicitorDigital();
         verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplate()));
     }
 
     @Test
     void shouldThrowIllegalArgumentWhenNotificationRequestIsNullOnSendDigitalNotification() {
-        when(caseDetails.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(caseDetails.isApplicantSolicitorDigital()).thenReturn(true);
 
         SendCorrespondenceEvent newEvent = SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
@@ -198,13 +202,13 @@ class ApplicantPartyListenerTest {
             () -> applicantPartyListener.handleNotification(newEvent));
 
         verifyNoInteractions(emailService);
+        verify(caseDetails).isApplicantSolicitorDigital();
 
         assertThat(exception.getMessage()).isEqualTo("Notification Request is required for digital notifications, case ID: " + CASE_ID);
     }
 
     @Test
     void shouldThrowIllegalArgumentWhenEmailTemplateIsNullOnSendDigitalNotification() {
-
         SendCorrespondenceEvent newEvent = SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
             .emailNotificationRequest(NotificationRequest.builder().build())
@@ -213,14 +217,14 @@ class ApplicantPartyListenerTest {
             .documentsToPost(List.of())
             .authToken(AUTH_TOKEN)
             .build();
-
-        when(caseDetails.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(caseDetails.isApplicantSolicitorDigital()).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> applicantPartyListener.handleNotification(newEvent));
 
         verifyNoInteractions(emailService);
 
+        verify(caseDetails).isApplicantSolicitorDigital();
         assertThat(exception.getMessage()).isEqualTo("Email template is required for digital notifications, case ID: " + CASE_ID);
     }
 

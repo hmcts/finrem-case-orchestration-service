@@ -32,8 +32,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 
@@ -59,11 +57,10 @@ class AssignToJudgeCorresponderTest {
     void shouldCreateAuditsForCorrespondence() {
         // Arrange
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.isApplicantSolicitorDigital()).thenReturn(true);
+        when(finremCaseDetails.isRespondentSolicitorDigital()).thenReturn(true);
 
         EventType eventType = EventType.ISSUE_APPLICATION;
-
-        when(finremCaseDetails.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
-        when(finremCaseDetails.getRespSolicitorEmail()).thenReturn(TEST_RESP_SOLICITOR_EMAIL);
 
         NotificationRequest applicantNotificationRequest = mock(NotificationRequest.class);
         when(finremNotificationRequestMapper
@@ -84,6 +81,8 @@ class AssignToJudgeCorresponderTest {
 
         // Verify
         assertAll(
+            () -> verify(finremCaseDetails).isApplicantSolicitorDigital(),
+            () -> verify(finremCaseDetails).isRespondentSolicitorDigital(),
             () -> verify(notificationAuditService, times(2))
                 .createAuditsForCorrespondence(sendCorrespondenceEventArgumentCaptor.capture(), eq(eventType)),
             () -> verifyNoInteractions(assignedToJudgeDocumentService),
@@ -131,11 +130,10 @@ class AssignToJudgeCorresponderTest {
     void shouldGenerateDocument_whenBuildSendCorrespondenceEvents() {
         // Arrange
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.isApplicantSolicitorDigital()).thenReturn(true);
+        when(finremCaseDetails.isRespondentSolicitorDigital()).thenReturn(true);
 
         EventType eventType = EventType.ISSUE_APPLICATION;
-
-        when(finremCaseDetails.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
-        when(finremCaseDetails.getRespSolicitorEmail()).thenReturn(TEST_RESP_SOLICITOR_EMAIL);
 
         NotificationRequest applicantNotificationRequest = mock(NotificationRequest.class);
         when(finremNotificationRequestMapper
@@ -159,6 +157,8 @@ class AssignToJudgeCorresponderTest {
 
         // Verify
         assertAll(
+            () -> verify(finremCaseDetails).isApplicantSolicitorDigital(),
+            () -> verify(finremCaseDetails).isRespondentSolicitorDigital(),
             () -> verifyNoInteractions(notificationAuditService),
             // Applicant event
             () -> assertEquals(eventType.name(), events.getFirst().getEventId()),
