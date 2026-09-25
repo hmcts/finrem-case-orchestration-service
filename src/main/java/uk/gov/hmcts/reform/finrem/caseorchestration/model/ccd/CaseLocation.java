@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Value;
 
-@Data
+@Value
 @Builder(toBuilder = true)
 public class CaseLocation {
-    private final String region;
-    private final String baseLocation;
+    String region;
+    String baseLocation;
 }

@@ -1,10 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.CourtRefData;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,8 +14,10 @@ class CaseManagementLocationServiceTest {
     private CaseManagementLocationService service;
 
     @BeforeEach
-    void setUp() throws IOException {
-        service = new CaseManagementLocationService(new ObjectMapper());
+    void setUp() {
+        Map<String, CourtRefData> courtReferenceDataByName = new HashMap<>();
+
+        service = new CaseManagementLocationService(courtReferenceDataByName);
     }
 
     @Test
