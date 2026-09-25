@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
@@ -79,7 +80,8 @@ public class CcdCallbackController {
             callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
-        globalSearchService.setGlobalSearchDataByMap(callbackRequest.getCaseDetails());
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        globalSearchService.setGlobalSearchDataByMap(caseDetails.getData(), caseDetails.getCaseTypeId(), caseDetails.getId());
 
         return performRequest(ABOUT_TO_SUBMIT, callbackRequest, authorisationToken);
     }

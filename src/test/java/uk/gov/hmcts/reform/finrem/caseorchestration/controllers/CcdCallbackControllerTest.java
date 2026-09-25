@@ -65,7 +65,7 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
         result.andDo(print());
 
         verify(callbackDispatchService).dispatchToHandlers(eq(CallbackType.ABOUT_TO_SUBMIT), any(), eq(AUTH_TOKEN));
-        verify(globalSearchService).setGlobalSearchDataByMap(any());
+        verify(globalSearchService).setGlobalSearchDataByMap(any(), any(),any());
     }
 
     @Test
