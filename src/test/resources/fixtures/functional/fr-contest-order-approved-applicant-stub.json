@@ -1,0 +1,25 @@
+{
+  "templateId": "47d652d0-2abd-40ea-ab83-28b4681d0e0d",
+  "httpMethod": "POST",
+  "url": "/v2/template/47d652d0-2abd-40ea-ab83-28b4681d0e0d/preview",
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "bodyAsJson": {
+      "postage": null,
+      "subject": "Case Reference Number {{jsonPath request.body '$.personalisation.caseReferenceNumber'}} - General Order",
+      "html": "<p>Reference no: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}</p><p>Your Ref: {{jsonPath request.body '$.personalisation.solicitorReferenceNumber'}}</p><p>{{jsonPath request.body '$.personalisation.applicantName'}} vs {{jsonPath request.body '$.personalisation.respondentName'}}</p><p>Dear {{jsonPath request.body '$.personalisation.name'}},</p><p>The Court has made a General Order in response to this case.</p><p>You can view this Order on the Applicant Documents tab.</p><p>Sign in to your account to continue.</p><p><a href='https://manage-case.platform.hmcts.net/'>https://manage-case.platform.hmcts.net/</a></p><p>Help us improve this service: <a href='{{jsonPath request.body '$.personalisation.linkToSmartSurvey'}}'>{{jsonPath request.body '$.personalisation.linkToSmartSurvey'}}</a></p><p>Financial Remedies Court: {{jsonPath request.body '$.personalisation.courtName'}}</p><p>Email: {{jsonPath request.body '$.personalisation.courtEmail'}}</p><p>Contact: {{jsonPath request.body '$.personalisation.contactNumber'}}</p><p>Financial Remedies email: {{jsonPath request.body '$.personalisation.frEmail'}}</p>",
+      "id": "47d652d0-2abd-40ea-ab83-28b4681d0e0d",
+      "body": "Reference no: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}\\n\\nYour Ref: {{jsonPath request.body '$.personalisation.solicitorReferenceNumber'}}\\n\\n{{jsonPath request.body '$.personalisation.applicantName'}} vs {{jsonPath request.body '$.personalisation.respondentName'}}\\n\\nDear {{jsonPath request.body '$.personalisation.name'}},\\n\\nThe Court has made a General Order in response to this case.\\n\\nYou can view this Order on the Applicant Documents tab.\\n\\nSign in to your account to continue.\\n\\nhttps://manage-case.platform.hmcts.net/\\n\\nHelp us improve this service: {{jsonPath request.body '$.personalisation.linkToSmartSurvey'}}\\n\\nFinancial Remedies Court: {{jsonPath request.body '$.personalisation.courtName'}}\\nEmail: {{jsonPath request.body '$.personalisation.courtEmail'}}\\nContact: {{jsonPath request.body '$.personalisation.contactNumber'}}\\nFinancial Remedies email: {{jsonPath request.body '$.personalisation.frEmail'}}",
+      "type": "email",
+      "version": 4,
+      "template_id": "{{request.pathSegments.[2]}}"
+    }
+  },
+  "expectedContains": [
+    "Case Reference Number 1789038571945893",
+    "General Order",
+    "Applicant Documents",
+    "FRCBirmingham@justice.gov.uk"
+  ]
+}

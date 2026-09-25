@@ -1,0 +1,39 @@
+{
+  "templateId": "821c106b-511b-4dbd-8b3b-230df55c6305",
+  "httpMethod": "POST",
+  "url": "/v2/template/821c106b-511b-4dbd-8b3b-230df55c6305/preview",
+  "notificationRequest": {
+    "personalisation": {
+      "intervenerSolicitorReferenceNumber": "Y707HZM",
+      "frEmail": "contactFinancialRemedy@justice.gov.uk",
+      "linkToSmartSurvey": "http://www.smartsurvey.co.uk/s/KCECE/",
+      "intervenerSolicitorFirm": "FinRem-1-Org",
+      "name": "Bilbo Baggins",
+      "phoneOpeningHours": "from 8am to 6pm, Monday to Friday",
+      "respondentName": "Smeagol Gollum",
+      "applicantName": "Frodo Baggins",
+      "intervenerFullName": "Test Intervener",
+      "notificationEmail": "fr_applicant_solicitor1@mailinator.com",
+      "caseReferenceNumber": "1790251496582942"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "bodyAsJson": {
+      "postage": null,
+      "subject": "Case Reference Number {{jsonPath request.body '$.personalisation.caseReferenceNumber'}} \\u2013 Intervener solicitor access removed",
+      "html": "<p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Reference no: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Your Ref: {{jsonPath request.body '$.personalisation.intervenerSolicitorReferenceNumber'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">{{jsonPath request.body '$.personalisation.applicantName'}} vs {{jsonPath request.body '$.personalisation.respondentName'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Dear {{jsonPath request.body '$.personalisation.name'}},</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">{{jsonPath request.body '$.personalisation.intervenerSolicitorFirm'}} have been removed from the Financial Remedy proceedings between {{jsonPath request.body '$.personalisation.applicantName'}} vs {{jsonPath request.body '$.personalisation.respondentName'}}. Access to this case has been removed.</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">You can now view case details by signing into <a style=\"word-wrap: break-word; color: #1D70B8;\" href=\"https://manage-case.platform.hmcts.net/case/{{jsonPath request.body '$.personalisation.caseReferenceNumber'}}\">https://manage-case.platform.hmcts.net/case/{{jsonPath request.body '$.personalisation.caseReferenceNumber'}}</a></p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Help us improve this service</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">This is a new service which is still being developed. If you haven\\u2019t already, please tell us what you think of it and how it can be improved at <a style=\"word-wrap: break-word; color: #1D70B8;\" href=\"http://www.smartsurvey.co.uk/s/KCECE/\">http://www.smartsurvey.co.uk/s/KCECE/</a>.</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">If you need help<br>You can contact the court if you need help.</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">HM Courts &amp; Tribunals Service<br>Phone: 0300 303 0642<br>Hours: {{jsonPath request.body '$.personalisation.phoneOpeningHours'}}<br>Find out about call charges: <a style=\"word-wrap: break-word; color: #1D70B8;\" href=\"https://www.gov.uk/call-charges\">https://www.gov.uk/call-charges</a><br>Email: ContactFinancialRemedy@justice.gov.uk</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">HM Courts &amp; Tribunals Service<br>This is an automated message, please don\\u2019t reply to this email.</p>",
+      "id": "{{request.pathSegments.[2]}}",
+      "body": "Reference no: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}\\r\\n\\r\\nYour Ref: {{jsonPath request.body '$.personalisation.intervenerSolicitorReferenceNumber'}}\\r\\n\\r\\n{{jsonPath request.body '$.personalisation.applicantName'}} vs {{jsonPath request.body '$.personalisation.respondentName'}}\\r\\n\\r\\nDear {{jsonPath request.body '$.personalisation.name'}},\\r\\n\\r\\n{{jsonPath request.body '$.personalisation.intervenerSolicitorFirm'}} have been removed from the Financial Remedy proceedings between {{jsonPath request.body '$.personalisation.applicantName'}} vs {{jsonPath request.body '$.personalisation.respondentName'}}. Access to this case has been removed.\\r\\n\\r\\nYou can now view case details by signing into https://manage-case.platform.hmcts.net/case/{{jsonPath request.body '$.personalisation.caseReferenceNumber'}}\\r\\n\\r\\nHelp us improve this service\\r\\n\\r\\nThis is a new service which is still being developed. If you haven\\u2019t already, please tell us what you think of it and how it can be improved at http://www.smartsurvey.co.uk/s/KCECE/.\\r\\n\\r\\nIf you need help\\r\\nYou can contact the court if you need help.\\r\\n\\r\\nHM Courts & Tribunals Service\\r\\nPhone: 0300 303 0642\\r\\nHours: {{jsonPath request.body '$.personalisation.phoneOpeningHours'}}\\r\\nFind out about call charges: https://www.gov.uk/call-charges\\r\\nEmail: ContactFinancialRemedy@justice.gov.uk\\r\\n\\r\\nHM Courts & Tribunals Service\\r\\nThis is an automated message, please don\\u2019t reply to this email.",
+      "type": "email",
+      "version": 2,
+      "template_id": "{{request.pathSegments.[2]}}"
+    }
+  },
+  "expectedContains": [
+    "Intervener solicitor access removed",
+    "Access to this case has been removed.",
+    "https://manage-case.platform.hmcts.net/case/1790251496582942"
+  ]
+}
