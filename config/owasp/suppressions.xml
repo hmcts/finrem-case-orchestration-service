@@ -156,4 +156,14 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-47841</cve>
         <cve>CVE-2026-47842</cve>
     </suppress>
+    <suppress until="2026-10-01Z">
+    <notes><![CDATA[
+      CVE-2026-41707 affects DPoPProofJwtDecoderFactory in Spring Security OAuth2 JWT support.
+      This service only includes spring-security-crypto and does not include
+      spring-security-oauth2-jose on the runtime classpath, so the affected implementation
+      is not present.
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-crypto@.*$</packageUrl>
+    <cve>CVE-2026-41707</cve>
+</suppress>
 </suppressions>
