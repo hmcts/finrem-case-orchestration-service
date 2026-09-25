@@ -93,7 +93,7 @@ class GlobalSearchMigrationTaskTest {
         verify(ccdService, times(1)).esSearchCases(any(CaseType.class), anyString(), anyString());
         verifyCcdEvent();
         verifySupplementaryDataUpdate();
-        verify(globalSearchService).setGlobalSearchDataByMap(any());
+        verify(globalSearchService).setGlobalSearchDataByMap(any(), anyString(), any());
     }
 
     @Test
