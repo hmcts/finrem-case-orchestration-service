@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 
 /**
@@ -211,20 +210,12 @@ public class AssignToJudgeCorresponder {
 
     private NotificationRequest getApplicantEmailNotificationRequest(FinremCaseDetails caseDetails) {
         return finremNotificationRequestMapper
-            .getNotificationRequestForApplicantSolicitor(caseDetails, !isApplicantSolicitorDigital(caseDetails));
+            .getNotificationRequestForApplicantSolicitor(caseDetails, !caseDetails.isApplicantSolicitorDigital());
     }
 
     private NotificationRequest getRespondentEmailNotificationRequest(FinremCaseDetails caseDetails) {
         return finremNotificationRequestMapper
-            .getNotificationRequestForRespondentSolicitor(caseDetails, !isRespondentSolicitorDigital(caseDetails));
-    }
-
-    private boolean isApplicantSolicitorDigital(FinremCaseDetails caseDetails) {
-        return isNotBlank(caseDetails.getAppSolicitorEmail());
-    }
-
-    private boolean isRespondentSolicitorDigital(FinremCaseDetails caseDetails) {
-        return isNotBlank(caseDetails.getRespSolicitorEmail());
+            .getNotificationRequestForRespondentSolicitor(caseDetails, !caseDetails.isRespondentSolicitorDigital());
     }
 
     private CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,

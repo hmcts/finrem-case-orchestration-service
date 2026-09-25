@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -27,6 +26,9 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -63,7 +65,7 @@ class RespondentPartyListenerTest {
             .documentFilename(TEST_DOC_NAME)
             .build();
 
-        caseDetails = FinremCaseDetails.builder()
+        caseDetails = spy(FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder()
                 .contactDetailsWrapper(
@@ -73,7 +75,7 @@ class RespondentPartyListenerTest {
                         .respondentSolicitorEmail(RESPONDENT_EMAIL)
                         .respondentSolicitorReference(RESPONDENT_REF)
                         .build()
-                ).build()).build();
+                ).build()).build());
 
         event = SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
@@ -87,6 +89,9 @@ class RespondentPartyListenerTest {
         respondentPartyListener = new RespondentPartyListener(
             bulkPrintService, emailService, notificationService, internationalPostalService
         );
+
+        lenient().when(caseDetails.isRespondentSolicitorDigital()).thenReturn(false);
+        clearInvocations(caseDetails);
     }
 
     @Test
@@ -144,8 +149,8 @@ class RespondentPartyListenerTest {
     }
 
     @Test
-    void givenContestedCase_shouldSendDigitalNotificationWhenPartyIsDigitalViaHandleNotification() {
-        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+    void givenAnyCase_shouldSendDigitalNotificationWhenPartyIsDigitalViaHandleNotification() {
+        when(caseDetails.isRespondentSolicitorDigital()).thenReturn(true);
 
         // Set up event with respondent as notification party
         respondentPartyListener.handleNotification(event);
@@ -156,22 +161,7 @@ class RespondentPartyListenerTest {
         assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(RESPONDENT_REF);
 
         verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplate()));
-    }
-
-    @Test
-    void givenConsentedCase_shouldSendDigitalNotificationWhenPartyIsDigitalViaHandleNotification() {
-        caseDetails.setCaseType(CaseType.CONSENTED);
-        caseDetails.getData().getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
-
-        // Set up event with respondent as notification party
-        respondentPartyListener.handleNotification(event);
-
-        // Verify email notification is sent
-        assertThat(event.getEmailNotificationRequest().getName()).isEqualTo(RESPONDENT_NAME);
-        assertThat(event.getEmailNotificationRequest().getNotificationEmail()).isEqualTo(RESPONDENT_EMAIL);
-        assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(RESPONDENT_REF);
-
-        verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplate()));
+        verify(caseDetails).isRespondentSolicitorDigital();
     }
 
     /**
