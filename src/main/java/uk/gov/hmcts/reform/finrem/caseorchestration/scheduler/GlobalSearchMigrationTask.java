@@ -47,7 +47,7 @@ public class GlobalSearchMigrationTask extends BaseTask {
 
     @Value("${cron.globalSearchMigration.enabled:false}")
     private boolean taskEnabled;
-    @Value("${cron.globalSearchMigration.caseTypeId:FinancialRemedyContested}")
+    @Value("${cron.globalSearchMigration.caseTypeId:FinancialRemedyMVP2}")
     private String caseTypeId;
     @Value("${cron.globalSearchMigration.batchSize:500}")
     private int gsQuerySize;
@@ -63,14 +63,11 @@ public class GlobalSearchMigrationTask extends BaseTask {
     @Override
     public void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
-        String ccdCaseId = String.valueOf(finremCaseDetails.getId());
-        caseData.setCcdCaseId(ccdCaseId);
         Map<String, Object> caseDataToMap = finremCaseDetailsMapper.finremCaseDataToMap(caseData);
-        globalSearchService.setGlobalSearchDataByMap(caseDataToMap, caseTypeId, Long.valueOf(ccdCaseId));
+        globalSearchService.setGlobalSearchDataByMap(caseDataToMap, caseTypeId, finremCaseDetails.getId());
         caseData.setCaseManagementCategory((DynamicList) caseDataToMap.get("caseManagementCategory"));
-        caseData.setCaseNameHmctsInternal((String)caseDataToMap.get("caseNameHmctsInternal"));
+        caseData.setCaseNameHmctsInternal((String) caseDataToMap.get("caseNameHmctsInternal"));
         caseData.setCaseManagementLocation((CaseLocation) caseDataToMap.get("caseManagementLocation"));
-
     }
 
     @Override
@@ -106,7 +103,7 @@ public class GlobalSearchMigrationTask extends BaseTask {
         return results;
     }
 
-    private String getSearchQuery(String searchAfter) {
+    public String getSearchQuery(String searchAfter) {
 
         BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
                 .mustNot(new TermsQueryBuilder("state.keyword", "close", "consentOrderMade"));
@@ -116,8 +113,9 @@ public class GlobalSearchMigrationTask extends BaseTask {
                 .mustNot(new ExistsQueryBuilder("data.SearchCriteria"));
         QueryBuilder shouldQuery = QueryBuilders.boolQuery()
                 .must(stateQuery)
-                .must(supplementaryQuery)
-                .must(searchCriteriaQuery);
+                .should(supplementaryQuery)
+                .should(searchCriteriaQuery)
+                .minimumShouldMatch(1);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
                 .size(gsQuerySize)

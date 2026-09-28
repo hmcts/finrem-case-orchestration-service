@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalS
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,7 +43,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CASE_CRON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalSearchMigrationTaskTest {
@@ -67,7 +69,7 @@ class GlobalSearchMigrationTaskTest {
         ReflectionTestUtils.setField(globalSearchMigrationTask, "gsQuerySize", 10);
         ReflectionTestUtils.setField(globalSearchMigrationTask, "dryRun", false);
         ReflectionTestUtils.setField(globalSearchMigrationTask, "supplementaryDataRequired", true);
-        ReflectionTestUtils.setField(globalSearchMigrationTask, "caseTypeId", CaseType.CONTESTED.getCcdType());
+        ReflectionTestUtils.setField(globalSearchMigrationTask, "caseTypeId", CONSENTED.getCcdType());
         ReflectionTestUtils.setField(globalSearchMigrationTask, "finremCaseDetailsMapper", finremCaseDetailsMapper);
     }
 
@@ -125,6 +127,66 @@ class GlobalSearchMigrationTaskTest {
         verifyNoMoreInteractions(ccdService);
     }
 
+    @Test
+    void shouldBuildQueryWithoutSearchAfter() {
+        String query = globalSearchMigrationTask.getSearchQuery(null);
+
+        JSONObject json = new JSONObject(query);
+
+        assertThat(json.getInt("size")).isEqualTo(10); // or expected gsQuerySize
+
+        JSONArray source = json.getJSONArray("_source");
+        assertThat(source.length()).isEqualTo(1);
+        assertThat(source.getString(0)).isEqualTo("reference");
+
+        assertThat(query).contains("state.keyword");
+        assertThat(query).contains("supplementary_data.HMCTSServiceId");
+        assertThat(query).contains("data.SearchCriteria");
+        assertThat(query).contains("reference.keyword");
+        assertThat(query).doesNotContain("search_after");
+    }
+
+    @Test
+    void shouldBuildQueryWithSearchAfter() {
+        String searchAfter = "1695723578123";
+
+        String query = globalSearchMigrationTask.getSearchQuery(searchAfter);
+
+        JSONObject json = new JSONObject(query);
+
+        JSONArray searchAfterArray = json.getJSONArray("search_after");
+
+        assertThat(searchAfterArray.length()).isEqualTo(1);
+        assertThat(searchAfterArray.getString(0)).isEqualTo(searchAfter);
+
+        JSONArray source = json.getJSONArray("_source");
+        assertThat(source.getString(0)).isEqualTo("reference");
+    }
+
+    @Test
+    void shouldIncludeReferenceAsOnlySourceField() {
+        String query = globalSearchMigrationTask.getSearchQuery(null);
+
+        JSONObject json = new JSONObject(query);
+
+        JSONArray source = json.getJSONArray("_source");
+
+        assertThat(source.length()).isEqualTo(1);
+        assertThat(source.getString(0)).isEqualTo("reference");
+    }
+
+    @Test
+    void shouldContainRequiredMustNotClauses() {
+        String query = globalSearchMigrationTask.getSearchQuery(null);
+
+        assertThat(query)
+                .contains("\"state.keyword\"")
+                .contains("\"close\"")
+                .contains("\"consentOrderMade\"")
+                .contains("\"supplementary_data.HMCTSServiceId\"")
+                .contains("\"data.SearchCriteria\"");
+    }
+
     private void mockSystemUserToken() {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
     }
@@ -141,7 +203,7 @@ class GlobalSearchMigrationTaskTest {
                 .cases(List.of(caseDetails))
                 .total(1)
                 .build();
-        when(ccdService.getCaseByCaseId(REFERENCE, CaseType.CONTESTED, AUTH_TOKEN)).thenReturn(searchResult);
+        when(ccdService.getCaseByCaseId(REFERENCE, CaseType.CONSENTED, AUTH_TOKEN)).thenReturn(searchResult);
     }
 
     private void mockStartEvent(CaseDetails caseDetails) {
@@ -149,15 +211,15 @@ class GlobalSearchMigrationTaskTest {
                 .caseDetails(caseDetails)
                 .build();
 
-        when(ccdService.startEventForCaseWorker(AUTH_TOKEN, REFERENCE, CONTESTED.getCcdType(),
+        when(ccdService.startEventForCaseWorker(AUTH_TOKEN, REFERENCE, CONSENTED.getCcdType(),
                 AMEND_CASE_CRON.getCcdType())).thenReturn(startEventResponse);
     }
 
     private void verifyCcdEvent() {
-        verify(ccdService, times(1)).startEventForCaseWorker(AUTH_TOKEN, REFERENCE, CONTESTED.getCcdType(),
+        verify(ccdService, times(1)).startEventForCaseWorker(AUTH_TOKEN, REFERENCE, CONSENTED.getCcdType(),
                 AMEND_CASE_CRON.getCcdType());
         verify(ccdService).submitEventForCaseWorker(any(StartEventResponse.class), eq(AUTH_TOKEN), eq(REFERENCE),
-                eq(CONTESTED.getCcdType()), eq(AMEND_CASE_CRON.getCcdType()),
+                eq(CONSENTED.getCcdType()), eq(AMEND_CASE_CRON.getCcdType()),
                 eq("DFR-4961"),
                 eq("DFR-4961"));
     }
