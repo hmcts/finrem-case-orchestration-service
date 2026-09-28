@@ -16,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class CaseManagementLocationServiceTest {
 
-
     @Autowired
     private Map<String, CourtRefData> courtReferenceDataByName;
     @Autowired

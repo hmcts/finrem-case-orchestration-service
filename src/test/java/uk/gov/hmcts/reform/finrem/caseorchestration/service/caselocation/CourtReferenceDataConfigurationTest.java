@@ -17,8 +17,7 @@ import static org.mockito.Mockito.when;
 
 class CourtReferenceDataConfigurationTest {
 
-    private final CourtReferenceDataConfiguration configuration =
-        new CourtReferenceDataConfiguration();
+    private final CourtReferenceDataConfiguration configuration = new CourtReferenceDataConfiguration();
 
     @Test
     void shouldLoadCourtReferenceDataAndConvertKeysToLowerCase() throws Exception {
