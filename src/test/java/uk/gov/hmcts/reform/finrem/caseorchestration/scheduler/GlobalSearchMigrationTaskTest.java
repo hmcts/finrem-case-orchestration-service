@@ -128,6 +128,42 @@ class GlobalSearchMigrationTaskTest {
     }
 
     @Test
+    void shouldBuildBoolQueryWithMustAndShouldClauses() {
+        String query = globalSearchMigrationTask.getSearchQuery(null);
+
+        JSONObject json = new JSONObject(query);
+
+        JSONObject bool = json.getJSONObject("query")
+                        .getJSONObject("bool");
+
+        JSONArray must = bool.getJSONArray("must");
+        assertThat(must).hasSize(1);
+
+        JSONArray should = bool.getJSONArray("should");
+        assertThat(should).hasSize(2);
+
+        assertThat(bool.getInt("minimum_should_match"))
+                .isEqualTo(1);
+    }
+
+    @Test
+    void shouldContainExpectedStateMustClause() {
+        String query = globalSearchMigrationTask.getSearchQuery(null);
+
+        JSONObject json = new JSONObject(query);
+
+        JSONObject mustClause = json.getJSONObject("query")
+                .getJSONObject("bool")
+                .getJSONArray("must")
+                .getJSONObject(0);
+
+        assertThat(mustClause.toString())
+                .contains("state.keyword")
+                .contains("close")
+                .contains("consentOrderMade");
+    }
+
+    @Test
     void shouldBuildQueryWithoutSearchAfter() {
         String query = globalSearchMigrationTask.getSearchQuery(null);
 
