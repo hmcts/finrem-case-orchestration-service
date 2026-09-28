@@ -453,7 +453,6 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api'
     implementation 'org.apache.logging.log4j:log4j-core'
     implementation 'org.apache.logging.log4j:log4j-to-slf4j'
-    implementation 'org.springframework.hateoas:spring-hateoas'
     implementation group: 'org.apache.tika', name: 'tika-core', version: versions.tika
     implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
     implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
