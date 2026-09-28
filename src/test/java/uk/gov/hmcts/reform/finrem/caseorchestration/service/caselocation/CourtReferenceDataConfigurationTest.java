@@ -61,7 +61,7 @@ class CourtReferenceDataConfigurationTest {
     }
 
     @Test
-    void shouldThrowIOExceptionWhenResourceCannotBeLoaded() {
+    void shouldThrowIoExceptionWhenResourceCannotBeLoaded() {
         ObjectMapper objectMapper = mock(ObjectMapper.class);
 
         CourtReferenceDataConfiguration configurationWithoutResource =
