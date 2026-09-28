@@ -52,7 +52,11 @@ public class CaseManagementLocationService {
 
         Map.Entry<String, Object> courtEntry = courtEntries.getFirst();
 
-        CourtRefData courtRefData = courtReferenceDataByName.get(courtEntry.getValue());
+        if (courtEntry == null || courtEntry.getValue() == null || courtEntry.getValue().toString().isBlank()) {
+            return null;
+        }
+
+        CourtRefData courtRefData = courtReferenceDataByName.get(courtEntry.getValue().toString().toLowerCase());
 
         if (courtRefData == null) {
             log.warn("No court reference data found for court name: {}", courtEntry.getValue());

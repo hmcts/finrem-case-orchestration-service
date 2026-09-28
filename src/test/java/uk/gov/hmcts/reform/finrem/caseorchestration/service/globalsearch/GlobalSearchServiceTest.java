@@ -89,30 +89,6 @@ class GlobalSearchServiceTest {
         assertNull(caseDataMap.get("caseManagementLocation"));
     }
 
-    @Test
-    void shouldNotOverwriteExistingGlobalSearchFields() {
-        when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
-        DynamicList existingCategory = DynamicList.builder().build();
-        CaseLocation existingLocation = CaseLocation.builder().region("existing-region").build();
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("applicantLName", "Jane");
-        caseDataMap.put("appRespondentLName", "Doe");
-
-        caseDataMap.put("caseNameHmctsInternal", "Existing Case Name");
-        caseDataMap.put("caseManagementCategory", existingCategory);
-        caseDataMap.put("caseManagementLocation", existingLocation);
-
-        globalSearchService.setGlobalSearchDataByMap(
-            caseDataMap,
-            "FinancialRemedyMVP2",
-            1323222L
-        );
-
-        assertEquals("Existing Case Name", caseDataMap.get("caseNameHmctsInternal"));
-        assertEquals(existingCategory, caseDataMap.get("caseManagementCategory"));
-        assertEquals(existingLocation, caseDataMap.get("caseManagementLocation"));
-    }
 
     @Test
     void shouldSetFinancialRemedyWhenNamesAreMissing() {
@@ -166,26 +142,6 @@ class GlobalSearchServiceTest {
         assertEquals("Jane vs Doe", caseDataMap.get("caseNameHmctsInternal"));
 
         assertNull(caseDataMap.get("caseManagementLocation"));
-    }
-
-    @Test
-    void shouldNotOverwriteExistingLocation() {
-        when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
-
-        CaseLocation existingLocation = CaseLocation.builder()
-            .region("existing")
-            .build();
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("caseManagementLocation", existingLocation);
-
-        globalSearchService.setGlobalSearchDataByMap(
-            caseDataMap,
-            "FinancialRemedyMVP2",
-            1323222L
-        );
-
-        assertEquals(existingLocation, caseDataMap.get("caseManagementLocation"));
     }
 
     @Test

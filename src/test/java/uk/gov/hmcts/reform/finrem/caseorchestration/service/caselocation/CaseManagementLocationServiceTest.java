@@ -21,7 +21,7 @@ class CaseManagementLocationServiceTest {
         courtReferenceDataByName = new HashMap<>();
 
         courtReferenceDataByName.put(
-            "FR_bristolList_3",
+            "fr_bristollist_3",
             CourtRefData.builder()
                 .epimmsId("123456")
                 .regionId("1")
@@ -29,7 +29,7 @@ class CaseManagementLocationServiceTest {
         );
 
         courtReferenceDataByName.put(
-            "FR_londonList_1",
+            "fr_londonlist_1",
             CourtRefData.builder()
                 .epimmsId("654321")
                 .regionId("2")
