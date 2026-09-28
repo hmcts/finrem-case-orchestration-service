@@ -65,7 +65,7 @@ public final class NotifyWireMockFixtureLoader {
     }
 
     private static JsonNode readFixture(String fixtureFile) throws Exception {
-        String path = FIXTURE_BASE + fixtureFile;
+        String path = fixtureFile.startsWith(FIXTURE_BASE) ? fixtureFile : FIXTURE_BASE + fixtureFile;
         try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path)) {
             return OBJECT_MAPPER.readTree(Objects.requireNonNull(inputStream, "Missing fixture: " + path));
         }

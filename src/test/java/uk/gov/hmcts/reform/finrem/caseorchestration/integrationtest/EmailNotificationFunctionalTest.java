@@ -94,6 +94,11 @@ public class EmailNotificationFunctionalTest extends BaseTest {
         NotifyWireMockFixtureLoader.registerFixtureStubs(functionalFixtureFiles());
     }
 
+
+    /**
+     * CONTESTED CASES
+     */
+
     /**
      * Verifies preview request for FR_CONTESTED_HWF_SUCCESSFUL.
      *
@@ -517,6 +522,150 @@ public class EmailNotificationFunctionalTest extends BaseTest {
         assertPreviewCall("FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE", personalisation);
     }
 
+
+    /**
+     * CONSENTED CASES
+     */
+
+    /**
+     * Verifies preview request for FR_HWF_SUCCESSFUL (consented).
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrHwfSuccessfulTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("solicitorReferenceNumber", "Y707HZM");
+        personalisation.put("hearingType", "");
+        personalisation.put("courtEmail", "FRCNottingham@justice.gov.uk");
+        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("divorceCaseNumber", "ZZ21D47302");
+        personalisation.put("notificationEmail", "fr_applicant_solicitor1@mailinator.com");
+        personalisation.put("camelCaseOrderType", "Consent");
+        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("courtName", "Leicester County Court And Family Court");
+        personalisation.put("caseOrderType", "consent");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("name", "Bilbo Baggins");
+        personalisation.put("contactNumber", "0300 303 0642");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("caseReferenceNumber", "1790354535494523");
+
+        assertPreviewCall("FR_HWF_SUCCESSFUL", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_ASSIGNED_TO_JUDGE (consented applicant solicitor).
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrAssignedToJudgeApplicantTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("solicitorReferenceNumber", "Y707HZM");
+        personalisation.put("hearingType", "");
+        personalisation.put("courtEmail", "FRCNottingham@justice.gov.uk");
+        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("divorceCaseNumber", "ZZ21D47302");
+        personalisation.put("notificationEmail", "fr_applicant_solicitor1@mailinator.com");
+        personalisation.put("isNotDigital", false);
+        personalisation.put("camelCaseOrderType", "Consent");
+        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("courtName", "Leicester County Court And Family Court");
+        personalisation.put("caseOrderType", "consent");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("name", "Bilbo Baggins");
+        personalisation.put("contactNumber", "0300 303 0642");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("caseReferenceNumber", "1790354535494523");
+
+        assertPreviewCall("FR_ASSIGNED_TO_JUDGE", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_ASSIGNED_TO_JUDGE (consented respondent solicitor).
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrAssignedToJudgeRespondentTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("solicitorReferenceNumber", "");
+        personalisation.put("hearingType", "");
+        personalisation.put("courtEmail", "FRCNottingham@justice.gov.uk");
+        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("divorceCaseNumber", "ZZ21D47302");
+        personalisation.put("notificationEmail", "fr_respondent_solicitor1@mailinator.com");
+        personalisation.put("isNotDigital", false);
+        personalisation.put("camelCaseOrderType", "Consent");
+        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("courtName", "Leicester County Court And Family Court");
+        personalisation.put("caseOrderType", "consent");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("name", "Sauron");
+        personalisation.put("contactNumber", "0300 303 0642");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("caseReferenceNumber", "1790354535494523");
+
+        assertPreviewCall("FR_ASSIGNED_TO_JUDGE", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_CONSENT_ORDER_AVAILABLE (consented applicant solicitor).
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrConsentOrderAvailableApplicantTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("solicitorReferenceNumber", "Y707HZM");
+        personalisation.put("hearingType", "");
+        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("divorceCaseNumber", "ZZ21D47302");
+        personalisation.put("notificationEmail", "fr_applicant_solicitor1@mailinator.com");
+        personalisation.put("camelCaseOrderType", "Consent");
+        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("caseOrderType", "consent");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("name", "Bilbo Baggins");
+        personalisation.put("contactNumber", "0300 303 0642");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("caseReferenceNumber", "1790354535494523");
+
+        assertPreviewCall("FR_CONSENT_ORDER_AVAILABLE", personalisation);
+    }
+
+    /**
+     * Verifies preview request for FR_CONSENT_ORDER_AVAILABLE (consented respondent solicitor).
+     *
+     * @throws Exception when request parsing fails
+     */
+    @Test
+    public void shouldPreviewFrConsentOrderAvailableRespondentTemplate() throws Exception {
+        Map<String, Object> personalisation = new LinkedHashMap<>();
+        personalisation.put("solicitorReferenceNumber", "");
+        personalisation.put("hearingType", "");
+        personalisation.put("phoneOpeningHours", "from 8am to 6pm, Monday to Friday");
+        personalisation.put("applicantName", "Frodo Baggins");
+        personalisation.put("divorceCaseNumber", "ZZ21D47302");
+        personalisation.put("notificationEmail", "fr_respondent_solicitor1@mailinator.com");
+        personalisation.put("camelCaseOrderType", "Consent");
+        personalisation.put("frEmail", "contactFinancialRemedy@justice.gov.uk");
+        personalisation.put("caseOrderType", "consent");
+        personalisation.put("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
+        personalisation.put("name", "Sauron");
+        personalisation.put("contactNumber", "0300 303 0642");
+        personalisation.put("respondentName", "Smeagol Gollum");
+        personalisation.put("caseReferenceNumber", "1790354535494523");
+
+        assertPreviewCall("FR_CONSENT_ORDER_AVAILABLE", personalisation);
+    }
+
+
     private Map<String, Object> basePersonalisation(String caseReferenceNumber) {
         Map<String, Object> personalisation = new LinkedHashMap<>();
         personalisation.put("solicitorReferenceNumber", "Y707HZM");
@@ -565,9 +714,17 @@ public class EmailNotificationFunctionalTest extends BaseTest {
 
     private List<String> functionalFixtureFiles() throws IOException {
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource[] resources = resolver.getResources("classpath:fixtures/functional/*.json");
+        Resource[] resources = resolver.getResources("classpath:fixtures/functional/**/*.json");
         return Arrays.stream(resources)
-            .map(Resource::getFilename)
+            .map(resource -> {
+                try {
+                    String uri = resource.getURI().toString();
+                    int idx = uri.indexOf("fixtures/functional/");
+                    return idx >= 0 ? uri.substring(idx + "fixtures/functional/".length()) : resource.getFilename();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            })
             .filter(Objects::nonNull)
             .sorted()
             .toList();
