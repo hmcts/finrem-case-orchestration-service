@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CourtRefData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 
@@ -11,32 +13,17 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
 class CaseManagementLocationServiceTest {
 
-    private CaseManagementLocationService service;
+
+    @Autowired
     private Map<String, CourtRefData> courtReferenceDataByName;
+    @Autowired
+    private CaseManagementLocationService service;
 
     @BeforeEach
     void setUp() {
-        courtReferenceDataByName = new HashMap<>();
-
-        courtReferenceDataByName.put(
-            "fr_bristollist_3",
-            CourtRefData.builder()
-                .epimmsId("123456")
-                .regionId("1")
-                .build()
-        );
-
-        courtReferenceDataByName.put(
-            "fr_londonlist_1",
-            CourtRefData.builder()
-                .epimmsId("654321")
-                .regionId("2")
-                .build()
-        );
-
-        service = new CaseManagementLocationService(courtReferenceDataByName);
     }
 
     @Test
@@ -47,8 +34,8 @@ class CaseManagementLocationServiceTest {
         CaseLocation location = service.getCaseLocation(caseData);
 
         assertThat(location).isNotNull();
-        assertThat(location.getBaseLocation()).isEqualTo("123456");
-        assertThat(location.getRegion()).isEqualTo("1");
+        assertThat(location.getBaseLocation()).isEqualTo("438850");
+        assertThat(location.getRegion()).isEqualTo("6");
     }
 
     @Test
@@ -98,7 +85,7 @@ class CaseManagementLocationServiceTest {
         CaseLocation location = service.getCaseLocation(caseData);
 
         assertThat(location).isNotNull();
-        assertThat(location.getBaseLocation()).isEqualTo("123456");
-        assertThat(location.getRegion()).isEqualTo("1");
+        assertThat(location.getBaseLocation()).isEqualTo("438850");
+        assertThat(location.getRegion()).isEqualTo("6");
     }
 }
