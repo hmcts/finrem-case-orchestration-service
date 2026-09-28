@@ -89,7 +89,6 @@ class GlobalSearchServiceTest {
         assertNull(caseDataMap.get("caseManagementLocation"));
     }
 
-
     @Test
     void shouldSetFinancialRemedyWhenNamesAreMissing() {
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
