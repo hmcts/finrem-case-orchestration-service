@@ -549,3 +549,12 @@ tasks.withType(Tar).configureEach {
 tasks.withType(Zip).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
+
+ccdSdk {
+    jackson2ClasspathGuard {
+        firstPartyGroups = ['com.github.hmcts', 'uk.gov.hmcts']
+        allowedComponents = [
+            'com.github.hmcts:core-case-data-store-client:6.0.0'
+        ]
+    }
+}
