@@ -130,6 +130,17 @@ configurations.functionalRuntimeClasspath {
         }
     }
 }
+configurations.configureEach {
+     resolutionStrategy.capabilitiesResolution.withCapability('org.lz4:lz4-java') {
+        def fork = candidates.find {
+            it.id instanceof ModuleComponentIdentifier && it.id.group == 'at.yawk.lz4'
+        }
+        if (fork != null) {
+            select(fork)
+        }
+        because 'at.yawk.lz4 is the maintained fork of org.lz4:lz4-java'
+    }
+}
 
 processTestResources {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
