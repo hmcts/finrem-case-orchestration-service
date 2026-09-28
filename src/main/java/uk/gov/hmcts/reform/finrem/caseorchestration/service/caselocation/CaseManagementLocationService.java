@@ -61,6 +61,8 @@ public class CaseManagementLocationService {
         if (courtRefData == null) {
             log.warn("No court reference data found for court name: {}", courtEntry.getValue());
             return null;
+        } else {
+            log.info("Found court reference data for court name: {}: {}", courtEntry.getValue(), courtRefData);
         }
 
         return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
