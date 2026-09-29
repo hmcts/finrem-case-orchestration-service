@@ -61,7 +61,7 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$[0].lastModifiedBy", is("testuser")))
             .andExpect(jsonPath("$[0].modifiedOn", is("2017-09-01T13:12:36.862")))
             .andExpect(jsonPath("$[0].mimeType", is(MediaType.TEXT_PLAIN_VALUE)))
-            .andExpect(jsonPath("$[0].status", is("200 OK")));
+            .andExpect(jsonPath("$[0].status", is("OK")));
 
         verify(emUploadService).upload(multipartFileList, CaseType.CONSENTED, AUTH_TOKEN);
     }
