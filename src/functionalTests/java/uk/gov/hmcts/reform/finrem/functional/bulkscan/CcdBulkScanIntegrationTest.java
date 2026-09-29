@@ -93,11 +93,6 @@ public class CcdBulkScanIntegrationTest {
         assertThat(persistedCaseData, hasKey("divorceUploadEvidence2"));//DecreeAbsolute
     }
 
-    @After
-    public void cleanUp() {
-        idamUtils.deleteTestUsers();
-    }
-
     private String transformOcrData(String body) {
         String token = idamUtils.generateServiceTokenWithValidMicroservice(bulkScanTransformationAndUpdateMicroservice);
         Response response = SerenityRest.given()
