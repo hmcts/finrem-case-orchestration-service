@@ -53,6 +53,11 @@ public class IdamUtils {
         return serviceTokenCache.computeIfAbsent(microserviceName, this::fetchServiceToken);
     }
 
+    public String generateTestingSupportToken() {
+        String cacheKey = "finrem";
+        return testingTokenCache.computeIfAbsent(cacheKey, key -> fetchTestingSupportToken());
+    }
+
     public String getUserId(String jwt) {
         return userIdCache.computeIfAbsent(jwt, this::fetchUserId);
     }
@@ -150,7 +155,7 @@ public class IdamUtils {
             "caseworker-divorce-bulkscan"
         };
 
-        createUser(username, password, "caseworker", roles);
+        createUser(username, password, roles);
 
         String authToken = generateUserTokenWithNoRoles(username, password);
         String userId = getUserId(authToken);
@@ -164,23 +169,22 @@ public class IdamUtils {
             .build();
     }
 
-    public void createUser(String username, String password, String userGroup, String... roles) {
-        List<UserGroup> rolesList = new ArrayList<>();
-        Stream.of(roles).forEach(role -> rolesList.add(UserGroup.builder().code(role).build()));
-        UserGroup[] rolesArray = new UserGroup[roles.length];
-
-        RegisterUserRequest registerUserRequest =
-            RegisterUserRequest.builder()
+    public void createUser(String username, String password, String... roles) {
+        RegisterUserRequest registerUserRequest = RegisterUserRequest.builder()
+            .password(password)
+            .user(RegisterUser.builder()
                 .email(username)
                 .forename("Esme")
                 .surname("Weatherwax")
-                .password(password)
-                .roles(rolesList.toArray(rolesArray))
-                .userGroup(UserGroup.builder().code(userGroup).build())
-                .build();
+                .roleNames(List.of(roles))
+                .build())
+            .build();
+
+        String testingSupportToken = generateTestingSupportToken();
 
         Response response = SerenityRest.given()
-            .header("Content-Type", "application/json")
+            .header(AUTHORIZATION_HEADER, BEARER_PREFIX + testingSupportToken)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
             .relaxedHTTPSValidation()
             .body(registerUserRequest)
             .post(idamCreateUrl());
