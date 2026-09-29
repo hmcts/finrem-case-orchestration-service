@@ -58,6 +58,26 @@ public class IdamUtils {
         return userIdCache.computeIfAbsent(jwt, this::fetchUserId);
     }
 
+    private String fetchTestingSupportToken() {
+        Response response = RestAssured.given()
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .formParam("grant_type", "client_credentials")
+            .formParam("client_id", "finrem")
+            .formParam("client_secret", idamSecret)
+            .formParam("scope", "profile roles")
+            .relaxedHTTPSValidation()
+            .post(idamTokenUrl());
+
+        assert response.getStatusCode() == HttpStatus.OK.value()
+            : String.format(
+            "Testing support token generation failed with code: %d, body: %s",
+            response.getStatusCode(),
+            response.getBody().prettyPrint()
+        );
+
+        return response.getBody().path("access_token");
+    }
+
     private String fetchUserToken(String username, String password) {
         int retryCount = 0;
         Response response;
