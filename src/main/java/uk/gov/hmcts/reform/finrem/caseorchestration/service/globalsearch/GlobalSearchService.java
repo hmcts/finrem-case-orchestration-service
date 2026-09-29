@@ -59,7 +59,7 @@ public class GlobalSearchService {
         return FINANCIAL_REMEDY;
     }
 
-    private Boolean isConsentedApplication(String caseTypeId) {
+    private boolean isConsentedApplication(String caseTypeId) {
         return CaseType.CONSENTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseTypeId));
     }
 }
