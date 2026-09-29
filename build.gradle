@@ -420,6 +420,12 @@ dependencyManagement {
 }
 
 dependencies {
+    // Narrow exception: core-case-data-store-client's CoreCaseDataConfiguration
+    // references tools.jackson.databind.ObjectMapper in a bean method signature.
+    // Boot's Jackson 3 auto-configuration (spring-boot-jackson / spring-boot-starter-json)
+    // stays excluded elsewhere, so this does not affect the app's HTTP mapper.
+    implementation 'tools.jackson.core:jackson-databind'
+
     implementation group: 'com.ibm.icu', name: 'icu4j', version: versions.ibmIcu
     implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
@@ -553,6 +559,9 @@ tasks.withType(Zip).configureEach {
 ccdSdk {
     jackson2ClasspathGuard {
         firstPartyGroups = ['com.github.hmcts', 'uk.gov.hmcts']
+        allowedSourceFiles = [
+            'src/main/java/uk/gov/hmcts/reform/finrem/caseorchestration/config/CcdClientJacksonConfig.java'
+        ]
         allowedComponents = [
             'com.github.hmcts:core-case-data-store-client:6.0.0'
         ]
