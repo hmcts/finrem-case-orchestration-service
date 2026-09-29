@@ -31,7 +31,7 @@ public class CaseManagementLocationService {
      *         or null if no matching court is found
      */
     public CaseLocation getCaseLocation(Map<String, Object> caseData) {
-
+        log.info("caseDataMap: {}", caseData);
         List<Map.Entry<String, Object>> courtEntries = caseData.entrySet()
             .stream()
             .filter(entry -> entry.getKey().endsWith(COURT_LIST_SUFFIX))
