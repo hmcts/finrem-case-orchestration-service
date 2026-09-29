@@ -44,13 +44,13 @@ public class CaseManagementLocationService {
 
         if (courtEntries.size() > 1) {
             log.warn(
-                "Multiple court list fields found in case data: {}. Using first match: {}",
+                "Multiple court list fields found in case data: {}. Using last match: {}",
                 courtEntries.stream().map(Map.Entry::getKey).toList(),
-                courtEntries.getFirst().getKey()
+                courtEntries.getLast().getKey()
             );
         }
 
-        Map.Entry<String, Object> courtEntry = courtEntries.getFirst();
+        Map.Entry<String, Object> courtEntry = courtEntries.getLast();
 
         if (courtEntry == null || courtEntry.getValue() == null || courtEntry.getValue().toString().isBlank()) {
             return null;
