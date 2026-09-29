@@ -8,16 +8,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.functional.model.RegisterUser;
 import uk.gov.hmcts.reform.finrem.functional.model.RegisterUserRequest;
 import uk.gov.hmcts.reform.finrem.functional.model.UserDetails;
-import uk.gov.hmcts.reform.finrem.functional.model.UserGroup;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
@@ -32,9 +30,7 @@ public class IdamUtils {
     private final Map<String, String> userTokenCache = new ConcurrentHashMap<>();
     private final Map<String, String> serviceTokenCache = new ConcurrentHashMap<>();
     private final Map<String, String> userIdCache = new ConcurrentHashMap<>();
-
-    @Value("${idam.api.url}")
-    private String idamApiBaseUrl;
+    private final Map<String, String> testingTokenCache = new ConcurrentHashMap<>();
 
     @Value("${idam.oidc.url}")
     private String idamOidcBaseUrl;
@@ -44,6 +40,9 @@ public class IdamUtils {
 
     @Value("${idam.api.secret}")
     private String idamSecret;
+
+    @Value("${idam.testing-support.url}")
+    private String idamTestingSupportUrl;
 
     public String generateUserTokenWithNoRoles(String username, String password) {
         String cacheKey = username + ":" + password;
@@ -198,6 +197,6 @@ public class IdamUtils {
     }
 
     private String idamCreateUrl() {
-        return idamApiBaseUrl + "/testing-support/accounts";
+        return idamTestingSupportUrl + "/test/idam/users";
     }
 }
