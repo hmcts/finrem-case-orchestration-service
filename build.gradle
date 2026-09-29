@@ -464,14 +464,16 @@ dependencies {
         }
     }
     implementation 'org.apache.commons:commons-text'
-    implementation(
-        group: 'com.github.hmcts',
-        name: 'ccd-case-document-am-client',
-        version: versions.amClient
-    ) {
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-jackson'
-        exclude group: 'org.springframework.boot', module: 'spring-boot-jackson'
-    }
+
+    implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
+//    implementation(
+//        group: 'com.github.hmcts',
+//        name: 'ccd-case-document-am-client',
+//        version: versions.amClient
+//    ) {
+//        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-jackson'
+//        exclude group: 'org.springframework.boot', module: 'spring-boot-jackson'
+//    }
     implementation group: 'org.elasticsearch', name: 'elasticsearch', version: versions.elasticSearch
     // To configure ObjectMapper bean to include the Jackson 2 ParameterNamesModule for backward compatibility:
     implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
