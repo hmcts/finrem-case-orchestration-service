@@ -45,8 +45,6 @@ public class IdamUtils {
     @Value("${idam.api.secret}")
     private String idamSecret;
 
-    List<UserDetails> createdUsers = new ArrayList<>();
-
     public String generateUserTokenWithNoRoles(String username, String password) {
         String cacheKey = username + ":" + password;
         return userTokenCache.computeIfAbsent(cacheKey, key -> fetchUserToken(username, password));
@@ -138,17 +136,13 @@ public class IdamUtils {
         String authToken = generateUserTokenWithNoRoles(username, password);
         String userId = getUserId(authToken);
 
-        UserDetails userDetails = UserDetails.builder()
+        return UserDetails.builder()
             .username(username)
             .emailAddress(username)
             .password(password)
             .authToken(authToken)
             .id(userId)
             .build();
-
-        createdUsers.add(userDetails);
-
-        return userDetails;
     }
 
     public void createUser(String username, String password, String userGroup, String... roles) {
@@ -177,34 +171,6 @@ public class IdamUtils {
             response.getStatusCode(), response.getBody().prettyPrint());
 
         log.info("Test user created: {}", username);
-    }
-
-    public void deleteTestUsers() {
-        createdUsers.stream()
-            .map(UserDetails::getUsername)
-            .forEach(this::deleteTestUser);
-    }
-
-    public void clearCaches() {
-        userTokenCache.clear();
-        serviceTokenCache.clear();
-        userIdCache.clear();
-    }
-
-    private void deleteTestUser(String username) {
-        Response response = SerenityRest.given()
-            .relaxedHTTPSValidation()
-            .delete(idamDeleteUserUrl(username));
-
-        if (response.getStatusCode() < 300) {
-            log.info("Deleted test user {}", username);
-        } else {
-            log.error("Failed to delete test user {}", username);
-        }
-    }
-
-    private String idamDeleteUserUrl(String username) {
-        return idamApiBaseUrl + "/testing-support/accounts/" + username;
     }
 
     private String idamTokenUrl() {
