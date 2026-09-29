@@ -420,12 +420,6 @@ dependencyManagement {
 }
 
 dependencies {
-    // Narrow exception: core-case-data-store-client's CoreCaseDataConfiguration
-    // references tools.jackson.databind.ObjectMapper in a bean method signature.
-    // Boot's Jackson 3 auto-configuration (spring-boot-jackson / spring-boot-starter-json)
-    // stays excluded elsewhere, so this does not affect the app's HTTP mapper.
-    implementation 'tools.jackson.core:jackson-databind'
-
     implementation group: 'com.ibm.icu', name: 'icu4j', version: versions.ibmIcu
     implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
@@ -446,10 +440,10 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3'
     implementation 'org.projectlombok:lombok'
     implementation group: 'com.github.hmcts', name: 'idam-java-client', version: versions.idamClient
-    implementation(group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient) {
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-json'
-        exclude group: 'org.springframework.boot', module: 'spring-boot-jackson'
-    }
+    // Keep the client's transitive Jackson 3 (spring-boot-starter-json): 6.x loads
+    // tools.jackson.databind.ObjectMapper and needs Boot's Jackson 3 mapper bean. HTTP
+    // conversion stays on Jackson 2 because the CCD SDK forces preferred-json-mapper=jackson2.
+    implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
     implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
     implementation(group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib) {
@@ -559,9 +553,6 @@ tasks.withType(Zip).configureEach {
 ccdSdk {
     jackson2ClasspathGuard {
         firstPartyGroups = ['com.github.hmcts', 'uk.gov.hmcts']
-        allowedSourceFiles = [
-            'src/main/java/uk/gov/hmcts/reform/finrem/caseorchestration/config/CcdClientJacksonConfig.java'
-        ]
         allowedComponents = [
             'com.github.hmcts:core-case-data-store-client:6.0.0'
         ]
