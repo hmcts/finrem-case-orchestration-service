@@ -18,7 +18,7 @@ plugins {
 def versions = [
         guava                : '33.6.0-jre',
         bspCommonLib         : '0.2.0',
-        ccdClient            : '6.0.0',
+        ccdClient            : '5.4.0',
         hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
         mockito              : '5.21.0',
@@ -440,9 +440,6 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3'
     implementation 'org.projectlombok:lombok'
     implementation group: 'com.github.hmcts', name: 'idam-java-client', version: versions.idamClient
-    // Keep the client's transitive Jackson 3 (spring-boot-starter-json): 6.x loads
-    // tools.jackson.databind.ObjectMapper and needs Boot's Jackson 3 mapper bean. HTTP
-    // conversion stays on Jackson 2 because the CCD SDK forces preferred-json-mapper=jackson2.
     implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
     implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
@@ -544,11 +541,3 @@ tasks.withType(Zip).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-ccdSdk {
-    jackson2ClasspathGuard {
-        firstPartyGroups = ['com.github.hmcts', 'uk.gov.hmcts']
-        allowedComponents = [
-            'com.github.hmcts:core-case-data-store-client:6.0.0'
-        ]
-    }
-}
