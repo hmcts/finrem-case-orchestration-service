@@ -38,7 +38,7 @@ public abstract class BaseTask implements Runnable {
     @Value("${cron.supplementaryDataUpdate:false}")
     private boolean supplementaryDataRequired;
 
-    private HashMap<String, String> taskFailures = new HashMap<>();
+    protected HashMap<String, String> taskFailures = new HashMap<>();
 
     protected BaseTask(CcdService ccdService, SystemUserService systemUserService,
                        FinremCaseDetailsMapper finremCaseDetailsMapper) {

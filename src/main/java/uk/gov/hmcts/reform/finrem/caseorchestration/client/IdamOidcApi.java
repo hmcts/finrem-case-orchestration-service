@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.idam.client.models.TokenRequest;
 import uk.gov.hmcts.reform.idam.client.models.TokenResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
-@FeignClient(name = "idam-oidc", url = "${idam.oidc.url}", configuration = CoreFeignConfiguration.class
+@FeignClient(name = "idam-oidc", url = "${¡}", configuration = CoreFeignConfiguration.class
 )
 public interface IdamOidcApi {
 

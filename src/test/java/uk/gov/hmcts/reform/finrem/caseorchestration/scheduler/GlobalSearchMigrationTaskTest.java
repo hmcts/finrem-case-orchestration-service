@@ -35,6 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -99,6 +100,24 @@ class GlobalSearchMigrationTaskTest {
     }
 
     @Test
+    void whenTaskRun_AndCaseDataUpdatesFails_thenMigrationAbortsForTheCase() {
+        mockSystemUserToken();
+        CaseDetails caseDetails = createCaseData();
+        mockSearchCases(caseDetails);
+        mockStartEvent(caseDetails);
+        SearchResult searchResult = createSearchResult(List.of(caseDetails));
+        when(ccdService.esSearchCases(any(CaseType.class), anyString(), anyString())).thenReturn(searchResult);
+        doThrow(new RuntimeException("")).when(ccdService).submitEventForCaseWorker(any(), anyString(), anyString(),
+                anyString(), anyString(), anyString(), anyString());
+        globalSearchMigrationTask.run();
+
+        verify(ccdService, times(1)).esSearchCases(any(CaseType.class), anyString(), anyString());
+        verifyCcdEvent();
+        verify(ccdService, never()).submitSupplementaryDataToCcd(AUTH_TOKEN, REFERENCE);
+        assertThat(globalSearchMigrationTask.taskFailures).containsEntry("1234567890123456", "Unexpected error");
+    }
+
+    @Test
     void whenTaskRun_AndSupplementaryUpdatesFails_thenMigrationAbortsForTheCase() {
         mockSystemUserToken();
         CaseDetails caseDetails = createCaseData();
@@ -112,6 +131,7 @@ class GlobalSearchMigrationTaskTest {
         verify(ccdService, times(1)).esSearchCases(any(CaseType.class), anyString(), anyString());
         verifyCcdEvent();
         verifySupplementaryDataUpdate();
+        assertThat(globalSearchMigrationTask.taskFailures).containsEntry("1234567890123456", "Unexpected error");
     }
 
     @Test
