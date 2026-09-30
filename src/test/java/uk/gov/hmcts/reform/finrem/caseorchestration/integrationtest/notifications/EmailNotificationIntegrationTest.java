@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
+package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.notifications;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserTokenProvider;
 
@@ -37,8 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Category(IntegrationTest.class)
 @ActiveProfiles("local")
 @Slf4j
-public class EmailNotificationLiveIntegrationTest extends BaseTest {
-
+public class EmailNotificationIntegrationTest extends BaseTest {
 
     @MockitoBean
     private SystemUserTokenProvider systemUserTokenProvider;
@@ -206,10 +206,6 @@ public class EmailNotificationLiveIntegrationTest extends BaseTest {
         }
         return value
             .replace("\r\n", "\n")
-            .replace('\u2013', '-') // en dash
-            .replace('\u2014', '-') // em dash
-            .replace('\u2019', '\'') // curly apostrophe
-            .replace('\u2018', '\'')
             .replace('\u00A0', ' ')  // nbsp
             .trim();
     }
@@ -227,7 +223,7 @@ public class EmailNotificationLiveIntegrationTest extends BaseTest {
         String rendered = templateNode.toString().replace(TEMPLATE_ID_TOKEN, fixture.templateId);
 
         Matcher matcher = JSON_PATH_TOKEN.matcher(rendered);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             String jsonPath = matcher.group(1);
             JsonNode valueNode = resolveSimplePath(requestNode, jsonPath);
