@@ -63,7 +63,6 @@ public class CcdBulkScanIntegrationTest {
     private String bulkScanTransformationAndUpdateMicroservice;
 
     @Test
-    @Ignore
     public void givenOcrPayload_whenTransformedPayloadUploadedToCcd_thenCaseIsCreated() throws Exception {
         var formA = ResourceLoader.loadJsonToObject(FORM_A_JSON, Map.class);
         setScannedDocumentsUrls(formA);
