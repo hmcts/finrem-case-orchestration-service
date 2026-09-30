@@ -80,6 +80,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintSe
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
@@ -117,7 +118,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 @WebMvcTest(CcdCallbackController.class)
 @ContextConfiguration(classes = {
     ManageBarristerTestConfiguration.class, PrdOrganisationService.class, PrdOrganisationConfiguration.class,
-    AssignCaseAccessService.class, CaseAssignedRoleService.class, CcdCallbackController.class,
+    AssignCaseAccessService.class, CaseAssignedRoleService.class, CcdCallbackController.class, GlobalSearchService.class,
     CallbackDispatchService.class, NotificationService.class, NotificationServiceConfiguration.class,
     NotificationRequestMapper.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class,
     EvidenceManagementDownloadService.class, LetterAddresseeGeneratorMapper.class, ApplicantLetterAddresseeGenerator.class,
