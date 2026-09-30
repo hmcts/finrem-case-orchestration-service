@@ -19,11 +19,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
 
 @Service
 @Slf4j
@@ -33,7 +35,8 @@ public class DocumentRemovalService {
     public static final String DOCUMENT_FILENAME = "document_filename";
     private static final String DOCUMENT_BINARY_URL = "document_binary_url";
     private static final String DOCUMENT_UPLOAD_TIMESTAMP = "upload_timestamp";
-    private static final String VALUE_KEY = "value";
+    private static final String GENERAL_APPLICATION_DRAFT_ORDER = "generalApplicationDraftOrder";
+    private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT = "generalApplicationDirectionsDocument";
     private final ObjectMapper objectMapper;
 
     private final GenericDocumentService genericDocumentService;
@@ -78,7 +81,7 @@ public class DocumentRemovalService {
 
         documentsUserWantsDeletedList.forEach(documentToDeleteCollection ->
             removeDocumentFromJson(
-                caseDataJson, documentToDeleteCollection.getValue()));
+                caseDataJson, documentToDeleteCollection.getValue().getCaseDocument().getDocumentUrl()));
 
         log.info(format("Document removal complete, removing DocumentToKeep collection "
             + "from CaseData JSON for case ID: %s", caseId));
@@ -167,62 +170,85 @@ public class DocumentRemovalService {
         }
     }
 
-    private void removeDocumentFromJson(JsonNode root, DocumentToKeep documentToDelete) {
-        List<String> fieldsToRemove = new ArrayList<>();
+    private void removeDocumentFromJson(JsonNode node, String documentUrl) {
+        if (node == null) {
+            return;
+        }
 
-        if (root.isObject()) {
-            Iterator<String> fieldNames = root.fieldNames();
+        if (node.isArray()) {
+            removeDocumentFromArray((ArrayNode) node, documentUrl);
 
-            while (fieldNames.hasNext()) {
-                String fieldName = fieldNames.next();
-                JsonNode fieldValue = root.get(fieldName);
+        } else if (node.isObject()) {
+            ObjectNode objectNode = (ObjectNode) node;
+            List<String> fieldsToRemove = new ArrayList<>();
 
-                if (shouldRemoveDocument(fieldValue,
-                    documentToDelete.getCaseDocument().getDocumentUrl())) {
-                    log.info(String.format("Deleting doc from CaseData JSON root with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
+            for (Map.Entry<String, JsonNode> field : objectNode.properties()) {
+                String fieldName = field.getKey();
+                JsonNode fieldValue = field.getValue();
+
+
+                if (isDocumentEntry(fieldValue, documentUrl)) {
                     fieldsToRemove.add(fieldName);
                 } else {
-                    removeDocumentFromJson(fieldValue, documentToDelete);
+                    removeDocumentFromJson(fieldValue, documentUrl);
                 }
             }
-        } else if (root.isArray()) {
-            processArrayNode(root, documentToDelete);
-        }
-
-        for (String fieldName : fieldsToRemove) {
-            ((ObjectNode) root).remove(fieldName);
+            fieldsToRemove.forEach(objectNode::remove);
         }
     }
 
-    private void processArrayNode(JsonNode root, DocumentToKeep documentToDelete) {
-        ArrayNode arrayNode = (ArrayNode) root;
-        for (int i = 0; i < arrayNode.size(); i++) {
-            JsonNode arrayElement = arrayNode.get(i);
-            if (arrayElement.has(VALUE_KEY)) {
-                JsonNode valueObject = arrayElement.get(VALUE_KEY);
-                Iterator<String> fieldNames = valueObject.fieldNames();
+    private void removeDocumentFromArray(ArrayNode arrayNode, String documentUrl) {
+        for (int i = arrayNode.size() - 1; i >= 0; i--) {
+            JsonNode element = arrayNode.get(i);
 
-                while (fieldNames.hasNext()) {
-                    String fieldName = fieldNames.next();
-                    JsonNode fieldValue = valueObject.get(fieldName);
-
-                    if (fieldValue.asText().equals(
-                        documentToDelete.getCaseDocument().getDocumentUrl())
-                        || shouldRemoveDocument(fieldValue,
-                        documentToDelete.getCaseDocument().getDocumentUrl())) {
-                        log.info(String.format("Deleting doc from CaseData JSON array node with url %s",
-                            documentToDelete.getCaseDocument().getDocumentUrl()));
-                        ((ArrayNode) root).remove(i);
-                    }
-                }
+            if (isDocumentArrayElement(element, documentUrl)) {
+                log.info("Removing document entry with URL: {}", documentUrl);
+                arrayNode.remove(i);
+            } else {
+                removeDocumentFromJson(element, documentUrl);
             }
-            removeDocumentFromJson(arrayElement, documentToDelete);
         }
     }
 
-    private boolean shouldRemoveDocument(JsonNode fieldValue, String documentToKeepUrl) {
-        return fieldValue.has(DOCUMENT_URL)
-            && fieldValue.get(DOCUMENT_URL).asText().equals(documentToKeepUrl);
+    private boolean isDocumentArrayElement(JsonNode element, String documentUrl) {
+        if (isDocumentEntry(element, documentUrl)) {
+            return true;
+        }
+
+        if (element == null || !element.isObject()) {
+            return false;
+        }
+
+        JsonNode valueNode = element.get("value");
+
+        if (valueNode == null || !valueNode.isObject()) {
+            return false;
+        }
+
+        for (Map.Entry<String, JsonNode> field : valueNode.properties()) {
+
+            if (isGeneralApplicationDocumentField(field.getKey())) {
+                continue;
+            }
+
+            JsonNode fieldValue = field.getValue();
+
+            if (fieldValue.isTextual() && documentUrl.equals(fieldValue.asText())) {
+                return true;
+            }
+
+            if (isDocumentEntry(fieldValue, documentUrl)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isGeneralApplicationDocumentField(String fieldName) {
+        return GENERAL_APPLICATION_DOCUMENT.equals(fieldName)
+            || GENERAL_APPLICATION_DRAFT_ORDER.equals(fieldName)
+            || GENERAL_APPLICATION_DIRECTIONS_DOCUMENT.equals(fieldName);
     }
 
     private void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken, Long caseId) {
@@ -252,5 +278,43 @@ public class DocumentRemovalService {
             throw new DocumentDeleteException(e.getMessage(), e);
         }
         return amendedCaseData;
+    }
+
+    private boolean isDocumentEntry(JsonNode node, String documentUrl) {
+        if (node == null || !node.isObject()) {
+            return false;
+        }
+
+        JsonNode directDocumentUrl = node.get(DOCUMENT_URL);
+
+        if (directDocumentUrl != null && directDocumentUrl.isTextual() && documentUrl.equals(directDocumentUrl.asText())) {
+            return true;
+        }
+
+        JsonNode valueNode = node.get("value");
+
+        if (valueNode == null || !valueNode.isObject()) {
+            return false;
+        }
+
+        JsonNode valueDocumentUrl = valueNode.get(DOCUMENT_URL);
+
+        if (valueDocumentUrl != null && valueDocumentUrl.isTextual() && documentUrl.equals(valueDocumentUrl.asText())) {
+            return true;
+        }
+
+        JsonNode documentLinkNode = valueNode.get("documentLink");
+
+        if (documentLinkNode == null) {
+            documentLinkNode = valueNode.get("document_link");
+        }
+
+        if (documentLinkNode != null && documentLinkNode.isObject()) {
+            JsonNode documentLinkUrl = documentLinkNode.get(DOCUMENT_URL);
+
+            return documentLinkUrl != null && documentLinkUrl.isTextual() && documentUrl.equals(documentLinkUrl.asText());
+        }
+
+        return false;
     }
 }
