@@ -52,6 +52,4 @@ public class GlobalSearchService {
         }
         return FINANCIAL_REMEDY;
     }
-
-
 }
