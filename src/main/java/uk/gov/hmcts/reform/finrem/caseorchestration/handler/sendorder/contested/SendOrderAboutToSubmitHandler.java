@@ -65,7 +65,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 
 @Slf4j
 @Service
-public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
+public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final GeneralOrderService generalOrderService;
     private final DraftOrderService draftOrderService;
@@ -75,13 +75,13 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremAboutToSubmitC
     private final OrderDateService orderDateService;
     private final SendOrdersCategoriser sendOrdersCategoriser;
 
-    public SendOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                  GeneralOrderService generalOrderService, DraftOrderService draftOrderService,
-                                                  GenericDocumentService genericDocumentService,
-                                                  DocumentHelper documentHelper,
-                                                  List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList,
-                                                  OrderDateService orderDateService,
-                                                  SendOrdersCategoriser sendOrdersCategoriser) {
+    public SendOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                         GeneralOrderService generalOrderService, DraftOrderService draftOrderService,
+                                         GenericDocumentService genericDocumentService,
+                                         DocumentHelper documentHelper,
+                                         List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList,
+                                         OrderDateService orderDateService,
+                                         SendOrdersCategoriser sendOrdersCategoriser) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.draftOrderService = draftOrderService;

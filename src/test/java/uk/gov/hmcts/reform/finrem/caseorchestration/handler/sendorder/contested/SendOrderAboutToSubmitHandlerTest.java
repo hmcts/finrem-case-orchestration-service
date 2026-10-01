@@ -98,9 +98,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class SendOrderContestedAboutToSubmitHandlerTest {
+class SendOrderAboutToSubmitHandlerTest {
 
-    private SendOrderContestedAboutToSubmitHandler underTest;
+    private SendOrderAboutToSubmitHandler underTest;
     @Mock
     private GeneralOrderService generalOrderService;
     @Mock
@@ -168,7 +168,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             = spy(new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService,
             notificationService));
 
-        underTest = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper,
+        underTest = new SendOrderAboutToSubmitHandler(finremCaseDetailsMapper,
             generalOrderService,
             draftOrderService,
             genericDocumentService,

@@ -29,9 +29,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 
 @Slf4j
 @Service
-public class SendOrderContestedMidHandler extends FinremCallbackHandler {
+public class SendOrderMidHandler extends FinremCallbackHandler {
 
-    public SendOrderContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    public SendOrderMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
     }
 

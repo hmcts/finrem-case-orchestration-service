@@ -21,15 +21,15 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
+public class SendOrderSubmittedHandler extends FinremCallbackHandler {
     private final GeneralOrderService generalOrderService;
     private final CcdService ccdService;
     private final FinremContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
-    public SendOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                              GeneralOrderService generalOrderService,
-                                              CcdService ccdService,
-                                              FinremContestedSendOrderCorresponder contestedSendOrderCorresponder) {
+    public SendOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                     GeneralOrderService generalOrderService,
+                                     CcdService ccdService,
+                                     FinremContestedSendOrderCorresponder contestedSendOrderCorresponder) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.ccdService = ccdService;
@@ -56,8 +56,7 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
 
         updateCaseWithPostStateOption(caseDetails, userAuthorisation);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseDetails.getData()).build();
+        return submittedResponse();
     }
 
     private void updateCaseWithPostStateOption(FinremCaseDetails caseDetails, String userAuthorisation) {

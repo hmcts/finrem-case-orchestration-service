@@ -46,12 +46,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class SendOrderContestedSubmittedHandlerTest {
+class SendOrderSubmittedHandlerTest {
 
     private static final String UUID = java.util.UUID.fromString("a23ce12a-81b3-416f-81a7-a5159606f5ae").toString();
 
     @InjectMocks
-    private SendOrderContestedSubmittedHandler sendOrderContestedSubmittedHandler;
+    private SendOrderSubmittedHandler sendOrderSubmittedHandler;
     @Mock
     private GeneralOrderService generalOrderService;
     @Mock
@@ -61,7 +61,7 @@ class SendOrderContestedSubmittedHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(sendOrderContestedSubmittedHandler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SEND_ORDER);
+        assertCanHandle(sendOrderSubmittedHandler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SEND_ORDER);
     }
 
     private void setupData(FinremCaseDetails caseDetails) {
@@ -98,7 +98,7 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
         caseDetails.getData().getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        sendOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
             caseDetails.getCaseType().getCcdType(), EventType.PREPARE_FOR_HEARING.getCcdType());
@@ -111,7 +111,7 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
         caseDetails.getData().getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.CLOSE);
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        sendOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
             caseDetails.getCaseType().getCcdType(), EventType.CLOSE.getCcdType());
@@ -124,7 +124,7 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
         caseDetails.getData().getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        sendOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService, never()).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
             caseDetails.getCaseType().getCcdType(), EventType.SEND_ORDER.getCcdType());
@@ -136,7 +136,7 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.NONE);
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        sendOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService, never()).executeCcdEventOnCase(any(), any(), any(), any());
         verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
@@ -155,7 +155,7 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(List.of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.RESP_SOLICITOR.getCcdCode()));
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        sendOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verifyNoInteractions(ccdService);
         verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
@@ -168,7 +168,7 @@ class SendOrderContestedSubmittedHandlerTest {
         setupData(caseDetails);
         FinremCaseData data = caseDetails.getData();
         data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.NONE);
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        sendOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verifyNoInteractions(ccdService);
         verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
@@ -187,7 +187,7 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(singletonList(CaseRole.RESP_SOLICITOR.getCcdCode()));
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        sendOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verifyNoInteractions(ccdService);
         verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
@@ -206,7 +206,7 @@ class SendOrderContestedSubmittedHandlerTest {
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getCcdCode()));
 
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        sendOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
         verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
@@ -229,7 +229,7 @@ class SendOrderContestedSubmittedHandlerTest {
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.RESP_SOLICITOR.getCcdCode()));
 
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        sendOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
         verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
@@ -254,7 +254,7 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getCcdCode()));
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        sendOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
         verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
@@ -281,7 +281,7 @@ class SendOrderContestedSubmittedHandlerTest {
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.RESP_SOLICITOR.getCcdCode()));
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        sendOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
         verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
