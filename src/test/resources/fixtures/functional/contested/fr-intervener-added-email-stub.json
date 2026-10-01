@@ -13,7 +13,7 @@
       "applicantName": "Frodo Baggins",
       "intervenerFullName": "Test Intervener 2",
       "notificationEmail": "fr_applicant_solicitor1@mailinator.com",
-      "caseReferenceNumber": "1790251496582942"
+      "caseReferenceNumber": "1790176658106935"
     }
   },
   "response": {
@@ -32,7 +32,10 @@
   },
   "expectedContains": [
     "Intervener solicitor access",
+    "Reference no: 1790176658106935",
+    "Your Ref: Y707HZM",
     "Intervener Test Intervener 2 have been added",
-    "https://manage-case.platform.hmcts.net/case/1790251496582942"
+    "https://manage-case.platform.hmcts.net/case/1790176658106935",
+    "Email: ContactFinancialRemedy@justice.gov.uk"
   ]
 }
