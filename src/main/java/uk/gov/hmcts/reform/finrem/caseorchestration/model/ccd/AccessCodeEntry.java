@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -15,4 +17,6 @@ public class AccessCodeEntry {
 
     private String accessCode;
     private YesOrNo isValid;
+    private String userIdamID;
+    private LocalDateTime usedAt;
 }
