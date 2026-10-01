@@ -131,7 +131,6 @@ class AbstractPartyListenerTest {
         protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
             return true;
         }
-
     }
 
     class NotificationPartySelectedListener extends SendEmailNotificationListener {
@@ -140,7 +139,6 @@ class AbstractPartyListenerTest {
         protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
             return true;
         }
-
     }
 
     class SendEmailNotificationWithPartySpecificDetailsListener extends SendEmailNotificationListener {
@@ -157,7 +155,6 @@ class AbstractPartyListenerTest {
         protected boolean shouldSendPaperNotification(SendCorrespondenceEvent event) {
             return true;
         }
-
     }
 
     class SendPaperNotificationListener extends RelevantPartyListener {
