@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -77,6 +79,9 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     @Mock
     CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
+    @Mock
+    private GlobalSearchService globalSearchService;
+
     @BeforeEach
     void init() {
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
@@ -87,6 +92,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             representationWorkflowService,
             expressCaseService,
             createCaseMandatoryDataValidator);
+        ReflectionTestUtils.setField(handler, "globalSearchService", globalSearchService);
     }
 
     @Test
