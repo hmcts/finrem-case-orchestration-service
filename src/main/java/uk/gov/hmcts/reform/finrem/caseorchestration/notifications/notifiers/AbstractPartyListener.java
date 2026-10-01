@@ -32,6 +32,8 @@ public abstract class AbstractPartyListener {
     protected final NotificationService notificationService;
     protected final InternationalPostalService internationalPostalService;
 
+    protected abstract boolean isNotificationPartySelected(SendCorrespondenceEvent event);
+
     protected abstract String getNotificationParty();
 
     protected abstract NotificationParty getNotificationPartyEnum();
@@ -90,6 +92,12 @@ public abstract class AbstractPartyListener {
     private void sendNotification(SendCorrespondenceEvent event) {
         boolean simulatingCorrespondence = event.isSimulatingCorrespondence();
         NotificationParty notificationParty = getNotificationPartyEnum();
+
+        if (event.shouldCheckNotificationPartySelection()) {
+            if (isNotificationPartySelected(event)) {
+
+            }
+        }
 
         if (!event.isLetterNotificationOnly() && shouldSendEmailNotification(event)) {
             if (!simulatingCorrespondence) {

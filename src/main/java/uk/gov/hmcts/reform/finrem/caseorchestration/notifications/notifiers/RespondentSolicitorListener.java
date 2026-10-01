@@ -34,4 +34,9 @@ public class RespondentSolicitorListener extends EmailNotificationOnlyListener {
             return false;
         }
     }
+
+    @Override
+    protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
+        return event.getCaseData().isRespondentCorrespondenceEnabled();
+    }
 }

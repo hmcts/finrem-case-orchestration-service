@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ibm.icu.text.ListFormatter;
 import io.micrometer.common.util.StringUtils;
 import lombok.Builder;
@@ -36,6 +37,13 @@ public class SendCorrespondenceEvent {
     String authToken;
     Barrister barrister;
     boolean letterNotificationOnly;
+    @Setter
+    boolean checkNotificationPartySelection;
+
+    @JsonIgnore
+    boolean shouldCheckNotificationPartySelection() {
+        return checkNotificationPartySelection;
+    }
 
     @Builder.Default
     List<NotificationAudit> audits = new ArrayList<>();

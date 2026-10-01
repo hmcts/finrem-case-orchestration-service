@@ -99,6 +99,11 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     public abstract void removeIntervenerWrapperFromCaseData(FinremCaseData caseData);
 
     @JsonIgnore
+    public boolean isExistence() {
+        return StringUtils.isNotBlank(intervenerName);
+    }
+
+    @JsonIgnore
     public boolean isIntervenerSolicitorPopulated() {
         return StringUtils.isNotEmpty(nullToEmpty(this.getIntervenerSolEmail()));
     }

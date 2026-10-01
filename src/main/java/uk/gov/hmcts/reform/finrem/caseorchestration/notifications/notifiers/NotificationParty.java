@@ -71,6 +71,15 @@ public enum NotificationParty {
             .findFirst();
     }
 
+    public static NotificationParty getIntervener(IntervenerType intervenerType) {
+        return switch(intervenerType) {
+            case INTERVENER_ONE -> INTERVENER_ONE;
+            case INTERVENER_TWO -> INTERVENER_TWO;
+            case INTERVENER_THREE -> INTERVENER_THREE;
+            case INTERVENER_FOUR -> INTERVENER_FOUR;
+        };
+    }
+
     /**
      * Returns the {@link NotificationParty} representing the former barrister of a given intervener.
      *

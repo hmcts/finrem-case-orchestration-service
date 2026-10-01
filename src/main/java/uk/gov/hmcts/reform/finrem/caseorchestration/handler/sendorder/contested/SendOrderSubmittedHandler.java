@@ -1,39 +1,51 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.sendorder.contested;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremSubmittedCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremContestedSendOrderCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.sendorder.SendOrderCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @Service
-public class SendOrderSubmittedHandler extends FinremCallbackHandler {
+public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
     private final GeneralOrderService generalOrderService;
     private final CcdService ccdService;
-    private final FinremContestedSendOrderCorresponder contestedSendOrderCorresponder;
+    private final SendOrderCorresponder sendOrderCorresponder;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public SendOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                     EvidenceManagementDeleteService evidenceManagementDeleteService,
+                                     RetryExecutor retryExecutor,
                                      GeneralOrderService generalOrderService,
                                      CcdService ccdService,
-                                     FinremContestedSendOrderCorresponder contestedSendOrderCorresponder) {
-        super(finremCaseDetailsMapper);
+                                     SendOrderCorresponder sendOrderCorresponder,
+                                     ApplicationEventPublisher applicationEventPublisher) {
+        super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
         this.generalOrderService = generalOrderService;
         this.ccdService = ccdService;
-        this.contestedSendOrderCorresponder = contestedSendOrderCorresponder;
+        this.sendOrderCorresponder = sendOrderCorresponder;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -49,14 +61,17 @@ public class SendOrderSubmittedHandler extends FinremCallbackHandler {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        List<String> parties = generalOrderService.getParties(caseDetails);
-        log.info("Selected parties {} on Case ID: {}", parties, caseDetails.getId());
-
-        sendNotifications(callbackRequest, parties, userAuthorisation);
+        List<String> errors = sendNotifications(callbackRequest, generalOrderService.getParties(caseDetails), userAuthorisation);
 
         updateCaseWithPostStateOption(caseDetails, userAuthorisation);
 
-        return submittedResponse();
+        if (errors.isEmpty()) {
+            return submittedResponse();
+        } else {
+            return submittedResponse(
+                toConfirmationHeader("Send order event submitted with errors"),
+                toConfirmationBody(errors.toArray(new String[0])));
+        }
     }
 
     private void updateCaseWithPostStateOption(FinremCaseDetails caseDetails, String userAuthorisation) {
@@ -76,12 +91,31 @@ public class SendOrderSubmittedHandler extends FinremCallbackHandler {
             || postStateOption.getEventToTrigger().equals(EventType.CLOSE);
     }
 
-    private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        generalOrderService.setPartiesToReceiveCommunication(caseDetails, parties);
-        log.info("About to start send order correspondence for Case ID: {}", caseDetails.getId());
-        contestedSendOrderCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
-        log.info("Finish sending order correspondence for Case ID: {}", caseDetails.getId());
+    private List<String> sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+
+        // Setting party correspondence enabled flags
+        generalOrderService.setPartiesToReceiveCommunication(finremCaseDetails, parties);
+
+        List<SendCorrespondenceEvent> events = sendOrderCorresponder.buildCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation);
+        final List<String> errors = new ArrayList<>();
+        for (SendCorrespondenceEvent event : events) {
+            if (!emptyIfNull(event.getNotificationParties()).isEmpty()) {
+                String party = event.getNotificationParties().getFirst().name();
+                String caseId = finremCaseDetails.getCaseIdAsString();
+                String task = "Send order corresponder to party: %s on send order event"
+                    .formatted(party);
+                log.info("{} - {}", caseId, task);
+
+                retryExecutor.runWithRetryWithHandler(
+                    () -> applicationEventPublisher.publishEvent(event), task, caseId,
+                    (exception, actionName, caseId1) ->
+                        errors.add("Cannot deliver send order correspondence to %s. Please send it manually."
+                            .formatted(party))
+                );
+            }
+        }
+        return errors;
     }
 
 }
