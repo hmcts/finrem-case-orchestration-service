@@ -57,7 +57,7 @@ public class SendOrderMidHandler extends FinremCallbackHandler {
                 .forEach(order -> errors.add("You chose to include a supporting document but none have been selected."));
         }
 
-        return response(caseData, null, errors);
+        return responseWithoutWarnings(caseData, errors);
     }
 
     private boolean containsSupportingDocumentNotSelected(OrderToShare orderToShare) {
