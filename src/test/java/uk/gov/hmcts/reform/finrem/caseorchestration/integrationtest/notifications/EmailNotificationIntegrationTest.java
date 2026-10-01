@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * Live integration parity tests between fixture-rendered Notify previews and real Notify previews.
  */
@@ -59,8 +58,13 @@ public class EmailNotificationIntegrationTest extends BaseTest {
     // -------------------------
 
     @Test
-    public void shouldMatchFrConsentedAssignedToJudgeStub() throws Exception {
+    public void shouldMatchFrConsentedAssignedToJudgeApplicantStub() throws Exception {
         assertFixtureMatchesLiveNotify("fixtures/functional/consented/fr-consented-assigned-to-judge-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrConsentedAssignedToJudgeRespondentStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/consented/fr-consented-assigned-to-judge-respondent-stub.json");
     }
 
     @Test
@@ -71,6 +75,21 @@ public class EmailNotificationIntegrationTest extends BaseTest {
     @Test
     public void shouldMatchFrConsentedHwfSuccessfulStub() throws Exception {
         assertFixtureMatchesLiveNotify("fixtures/functional/consented/fr-consented-hwf-successful-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrConsentedListForHearingStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/consented/fr-consented-list-for-hearing-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrConsentOrderNotApprovedStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/consented/fr-consent-order-not-approved-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrConsentOrderNotApprovedRespondentStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/consented/fr-consent-order-not-approved-respondent-stub.json");
     }
 
     // -------------------------
@@ -169,7 +188,6 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         // Keep subject strict (after normalization) to detect true template drift.
         String expectedSubject = normalize(expected.path("subject").asText(""));
         String liveSubject = normalize(livePreview.getSubject().orElse(""));
-        log.info("expectedSubject: {} liveSubject: {}", expectedSubject, liveSubject);
 
         assertThat(liveSubject)
             .as("subject mismatch for fixture " + fixtureClasspath)
@@ -177,13 +195,10 @@ public class EmailNotificationIntegrationTest extends BaseTest {
 
         String liveBody = normalize(livePreview.getBody());
         String liveHtml = normalizeHtml(livePreview.getHtml().orElse(""));
-        log.info("liveBody: {}", liveBody);
-        log.info("liveHtml: {}", liveHtml);
 
         if (fixture.expectedContains != null && !fixture.expectedContains.isEmpty()) {
             String combined = normalize(liveSubject + "\n" + liveBody + "\n" + liveHtml);
             for (String expectedFragment : fixture.expectedContains) {
-                log.info("expectedFragment: {}", expectedFragment);
                 assertThat(combined)
                     .as("expectedContains fragment missing for fixture " + fixtureClasspath + ": " + expectedFragment)
                     .contains(normalize(expectedFragment));
@@ -191,13 +206,10 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         } else {
             // Fallback mode for fixtures without expectedContains.
             String expectedBody = normalize(expected.path("body").asText(""));
-            log.info("expectedBody: {}", expectedBody);
             assertThat(liveBody)
                 .as("body prefix mismatch for fixture " + fixtureClasspath)
                 .startsWith(expectedBody);
         }
-
-        log.info("Fixture parity passed: {}", fixtureClasspath);
     }
 
     private String normalize(String value) {

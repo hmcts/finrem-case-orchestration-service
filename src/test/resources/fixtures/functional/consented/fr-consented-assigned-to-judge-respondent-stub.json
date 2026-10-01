@@ -4,20 +4,20 @@
   "url": "/v2/template/49d19307-b057-4081-bf4c-3a68f98cf69c/preview",
   "notificationRequest": {
     "personalisation": {
-      "solicitorReferenceNumber": "Y707HZM",
+      "solicitorReferenceNumber": "",
       "hearingType": "",
       "courtEmail": "FRCNottingham@justice.gov.uk",
       "phoneOpeningHours": "from 8am to 6pm, Monday to Friday",
       "applicantName": "Frodo Baggins",
       "divorceCaseNumber": "ZZ21D47302",
-      "notificationEmail": "fr_applicant_solicitor1@mailinator.com",
+      "notificationEmail": "fr_respondent_solicitor1@mailinator.com",
       "isNotDigital": false,
       "camelCaseOrderType": "Consent",
       "frEmail": "contactFinancialRemedy@justice.gov.uk",
       "courtName": "Leicester County Court And Family Court",
       "caseOrderType": "consent",
       "linkToSmartSurvey": "http://www.smartsurvey.co.uk/s/KCECE/",
-      "name": "Bilbo Baggins",
+      "name": "Sauron",
       "contactNumber": "0300 303 0642",
       "respondentName": "Smeagol Gollum",
       "caseReferenceNumber": "1790612052274804"
@@ -40,7 +40,7 @@
   "expectedContains": [
     "Application Referred",
     "Reference no: 1790612052274804",
-    "Your Ref: Y707HZM",
+    "Dear Sauron",
     "The above application has been referred to a Judge for consideration.",
     "Phone: 0300 303 0642",
     "Hours: from 8am to 6pm, Monday to Friday",
