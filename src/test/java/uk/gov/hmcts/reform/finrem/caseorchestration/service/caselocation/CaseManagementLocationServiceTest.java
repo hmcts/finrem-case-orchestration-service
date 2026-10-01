@@ -24,7 +24,7 @@ class CaseManagementLocationServiceTest {
     @BeforeEach
     void setUp() {
         service = new CaseManagementLocationService(Map.of(
-            "fr_bristolist_3", CourtRefData.builder()
+            "fr_bristollist_3", CourtRefData.builder()
                 .epimmsId("438850")
                 .regionId("6")
                 .courtName("Swindon Combined Court")
@@ -68,7 +68,9 @@ class CaseManagementLocationServiceTest {
     void shouldReturnNullWhenCaseDataIsEmpty() {
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .workingHearing(WorkingHearing.builder().hearingCourtSelection(Court.builder().build()).build())
+                .workingHearing(WorkingHearing.builder()
+                    .hearingCourtSelection(Court.builder().region(Region.SOUTHWEST).build())
+                    .build())
                 .build())
             .build();
 

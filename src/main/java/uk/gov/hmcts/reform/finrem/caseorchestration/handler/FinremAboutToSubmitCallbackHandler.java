@@ -21,7 +21,7 @@ public abstract class FinremAboutToSubmitCallbackHandler extends FinremCallbackH
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response,
         FinremCaseData finremCaseData, String userAuthorisation) {
 
-        super.postHandle(response, finremCaseData, userAuthorisation);
+        response = super.postHandle(response, finremCaseData, userAuthorisation);
         globalSearchService.setGlobalSearchDataByMap(finremCaseData);
 
         return response;
