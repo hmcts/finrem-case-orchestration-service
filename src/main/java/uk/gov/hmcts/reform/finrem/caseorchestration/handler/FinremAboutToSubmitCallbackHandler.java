@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 
-
 public abstract class FinremAboutToSubmitCallbackHandler extends FinremCallbackHandler {
 
     @Autowired

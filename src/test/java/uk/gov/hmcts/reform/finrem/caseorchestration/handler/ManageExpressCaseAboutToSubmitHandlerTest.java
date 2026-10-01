@@ -62,6 +62,7 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
 
     @BeforeEach
     void setUp() {
+        underTest.globalSearchService = globalSearchService;
         callbackRequest = mock(FinremCallbackRequest.class);
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
         caseData = mock(FinremCaseData.class);
