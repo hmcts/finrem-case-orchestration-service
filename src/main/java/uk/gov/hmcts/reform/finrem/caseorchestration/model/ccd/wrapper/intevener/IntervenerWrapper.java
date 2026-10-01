@@ -98,6 +98,18 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
 
     public abstract void removeIntervenerWrapperFromCaseData(FinremCaseData caseData);
 
+    /**
+     * Indicates whether this intervener exists, i.e. whether a name has been recorded for them.
+     *
+     * <p>An intervener is considered to exist when {@code intervenerName} is not blank
+     * (not {@code null}, empty, or whitespace only).
+     *
+     * <p>Annotated with {@link JsonIgnore} because this is a derived value, so it is
+     * excluded from JSON serialization and deserialization.
+     *
+     * @return {@code true} if {@code intervenerName} contains non-whitespace text,
+     *         {@code false} otherwise
+     */
     @JsonIgnore
     public boolean isExistence() {
         return StringUtils.isNotBlank(intervenerName);
