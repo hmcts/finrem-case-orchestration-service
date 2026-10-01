@@ -93,10 +93,9 @@ public abstract class AbstractPartyListener {
         boolean simulatingCorrespondence = event.isSimulatingCorrespondence();
         NotificationParty notificationParty = getNotificationPartyEnum();
 
-        if (event.shouldCheckNotificationPartySelection()) {
-            if (isNotificationPartySelected(event)) {
-
-            }
+        if (event.shouldCheckNotificationPartySelection() && !isNotificationPartySelected(event)) {
+            log.info("{} - Not sending any notification because party was not selected", event.getCaseId());
+            return;
         }
 
         if (!event.isLetterNotificationOnly() && shouldSendEmailNotification(event)) {
