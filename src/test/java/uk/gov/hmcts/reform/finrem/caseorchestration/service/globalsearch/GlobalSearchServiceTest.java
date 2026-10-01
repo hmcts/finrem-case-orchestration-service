@@ -6,15 +6,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,142 +30,69 @@ class GlobalSearchServiceTest {
     private GlobalSearchService globalSearchService;
 
     @Test
-    void shouldSetGlobalSearchFieldsFromMap() {
+    void shouldSetGlobalSearchFieldsForConsentedCaseWhenFeatureIsEnabled() {
+        FinremCaseData caseData = createConsentedCaseData();
+        CaseLocation expectedLocation = CaseLocation.builder().region("6").baseLocation("438850").build();
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
+        when(caseManagementLocationService.getCaseLocation(caseData)).thenReturn(expectedLocation);
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("ccdCaseId", "12345");
-        caseDataMap.put("bristolFRCourtList", "FR_bristolList_3");
-        caseDataMap.put("appRespondentLName", "Doe");
-        caseDataMap.put("applicantLName", "Jane");
+        globalSearchService.setGlobalSearchDataByMap(caseData);
 
-        when(caseManagementLocationService.getCaseLocation(caseDataMap))
-            .thenReturn(CaseLocation.builder()
-                .region("438850")
-                .build());
-
-        globalSearchService.setGlobalSearchDataByMap(caseDataMap, "FinancialRemedyMVP2", 1323222L);
-
-        assertEquals("Jane vs Doe", caseDataMap.get("caseNameHmctsInternal"));
-
-        assertEquals("Financial Remedy", ((DynamicList) caseDataMap.get("caseManagementCategory"))
-                .getValue()
-                .getCode()
-        );
-
-        assertEquals("438850", ((CaseLocation) caseDataMap.get("caseManagementLocation")).getRegion()
-        );
+        assertEquals("Jane vs Doe", caseData.getCaseNameHmctsInternal());
+        assertEquals("Financial Remedy", caseData.getCaseManagementCategory().getValue().getCode());
+        assertEquals(expectedLocation, caseData.getCaseManagementLocation());
+        verify(caseManagementLocationService).getCaseLocation(caseData);
     }
 
     @Test
     void shouldNotSetGlobalSearchFieldsWhenFeatureIsDisabled() {
-
+        FinremCaseData caseData = createConsentedCaseData();
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(false);
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("ccdCaseId", "12345");
-        caseDataMap.put("fullApplicantName", "Jane Doe");
+        globalSearchService.setGlobalSearchDataByMap(caseData);
 
-        globalSearchService.setGlobalSearchDataByMap(caseDataMap, "FinancialRemedyMVP2", 1323222L);
-
-        assertNull(caseDataMap.get("caseNameHmctsInternal"));
-        assertNull(caseDataMap.get("caseManagementCategory"));
-        assertNull(caseDataMap.get("caseManagementLocation"));
+        assertNull(caseData.getCaseNameHmctsInternal());
+        assertNull(caseData.getCaseManagementCategory());
+        assertNull(caseData.getCaseManagementLocation());
+        verifyNoInteractions(caseManagementLocationService);
     }
 
     @Test
-    void shouldNotSetGlobalSearchFieldsWhenFeatureIsTrueNotConsented() {
-
+    void shouldNotSetGlobalSearchFieldsForContestedCase() {
+        FinremCaseData caseData = createConsentedCaseData().toBuilder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .build();
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("ccdCaseId", "12345");
-        caseDataMap.put("fullApplicantName", "Jane Doe");
+        globalSearchService.setGlobalSearchDataByMap(caseData);
 
-        globalSearchService.setGlobalSearchDataByMap(caseDataMap, "FinancialRemedyContested", 1323222L);
-
-        assertNull(caseDataMap.get("caseNameHmctsInternal"));
-        assertNull(caseDataMap.get("caseManagementCategory"));
-        assertNull(caseDataMap.get("caseManagementLocation"));
+        assertNull(caseData.getCaseNameHmctsInternal());
+        assertNull(caseData.getCaseManagementCategory());
+        assertNull(caseData.getCaseManagementLocation());
+        verifyNoInteractions(caseManagementLocationService);
     }
 
     @Test
-    void shouldSetFinancialRemedyWhenNamesAreMissing() {
+    void shouldUseFinancialRemedyWhenEitherNameIsMissing() {
+        FinremCaseData caseData = createConsentedCaseData();
+        caseData.getContactDetailsWrapper().setRespondentLname(null);
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("bristolFRCourtList", "FR_bristolList_3");
-        when(caseManagementLocationService.getCaseLocation(caseDataMap))
-            .thenReturn(CaseLocation.builder()
-                .region("438850")
-                .build());
+        when(caseManagementLocationService.getCaseLocation(caseData)).thenReturn(null);
 
-        globalSearchService.setGlobalSearchDataByMap(caseDataMap, "FinancialRemedyMVP2", 1323222L);
+        globalSearchService.setGlobalSearchDataByMap(caseData);
 
-        assertEquals("Financial Remedy", caseDataMap.get("caseNameHmctsInternal"));
+        assertEquals("Financial Remedy", caseData.getCaseNameHmctsInternal());
+        assertEquals("Financial Remedy", caseData.getCaseManagementCategory().getValue().getCode());
+        assertNull(caseData.getCaseManagementLocation());
     }
 
-    @Test
-    void shouldPopulateFieldsWhenExistingValuesAreNull() {
-        when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("applicantLName", "Jane");
-        caseDataMap.put("appRespondentLName", "Doe");
-
-        caseDataMap.put("caseNameHmctsInternal", null);
-        caseDataMap.put("caseManagementCategory", null);
-        caseDataMap.put("caseManagementLocation", null);
-
-        when(caseManagementLocationService.getCaseLocation(caseDataMap)).thenReturn(CaseLocation.builder()
-                .region("438850")
-                .build());
-
-        globalSearchService.setGlobalSearchDataByMap(caseDataMap, "FinancialRemedyMVP2", 1323222L);
-
-        assertEquals("Jane vs Doe", caseDataMap.get("caseNameHmctsInternal"));
-        assertEquals("438850", ((CaseLocation) caseDataMap.get("caseManagementLocation")).getRegion());
-    }
-
-    @Test
-    void shouldSetNullLocationWhenLocationServiceReturnsNull() {
-        when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("applicantLName", "Jane");
-        caseDataMap.put("appRespondentLName", "Doe");
-
-        when(caseManagementLocationService.getCaseLocation(caseDataMap)).thenReturn(null);
-
-        globalSearchService.setGlobalSearchDataByMap(caseDataMap, "FinancialRemedyMVP2", 1323222L);
-
-        assertEquals("Jane vs Doe", caseDataMap.get("caseNameHmctsInternal"));
-
-        assertNull(caseDataMap.get("caseManagementLocation"));
-    }
-
-    @Test
-    void shouldNotSetCaseManagementLocationWhenLocationServiceReturnsNull() {
-        when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("applicantLName", "Jane");
-        caseDataMap.put("appRespondentLName", "Doe");
-
-        when(caseManagementLocationService.getCaseLocation(caseDataMap)).thenReturn(null);
-
-        globalSearchService.setGlobalSearchDataByMap(
-            caseDataMap,
-            "FinancialRemedyMVP2",
-            1323222L
-        );
-
-        assertEquals("Jane vs Doe", caseDataMap.get("caseNameHmctsInternal"));
-
-        assertEquals("Financial Remedy",
-            ((DynamicList) caseDataMap.get("caseManagementCategory"))
-                .getValue()
-                .getCode());
-
-        assertNull(caseDataMap.get("caseManagementLocation"));
+    private FinremCaseData createConsentedCaseData() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId("12345")
+            .ccdCaseType(CaseType.CONSENTED)
+            .build();
+        caseData.getContactDetailsWrapper().setApplicantLname("Jane");
+        caseData.getContactDetailsWrapper().setRespondentLname("Doe");
+        return caseData;
     }
 }
