@@ -111,7 +111,7 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
      *         {@code false} otherwise
      */
     @JsonIgnore
-    public boolean isExistence() {
+    public boolean isPresent() {
         return StringUtils.isNotBlank(intervenerName);
     }
 

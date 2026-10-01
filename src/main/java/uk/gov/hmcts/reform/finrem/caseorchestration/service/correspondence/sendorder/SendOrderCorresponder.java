@@ -74,7 +74,7 @@ public class SendOrderCorresponder {
 
         // Interveners
         finremCaseDetails.getData().getInterveners().stream()
-            .filter(IntervenerWrapper::isExistence)
+            .filter(IntervenerWrapper::isPresent)
             .forEach(intervener ->
             ret.add(
                 baseEventBuilder(
