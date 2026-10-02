@@ -807,8 +807,12 @@ class SendOrderAboutToSubmitHandlerTest {
             .thenReturn(expectedErrors);
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(response.getErrors()).isEqualTo(expectedErrors);
-        verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService);
+        assertAll(
+            () -> assertThat(response.getErrors()).isEqualTo(expectedErrors),
+            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService),
+            () -> verify(partyService).isApplicantPartySelected(callbackRequest.getCaseDetails()),
+            () -> verify(partyService).isRespondentPartySelected(callbackRequest.getCaseDetails())
+        );
     }
 
     private OrderToShareCollection toSelectedOrderToShare(String documentName) {
