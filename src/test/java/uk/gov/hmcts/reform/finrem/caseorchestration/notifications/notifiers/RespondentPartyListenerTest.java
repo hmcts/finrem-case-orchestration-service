@@ -26,6 +26,9 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -62,7 +65,7 @@ class RespondentPartyListenerTest {
             .documentFilename(TEST_DOC_NAME)
             .build();
 
-        caseDetails = FinremCaseDetails.builder()
+        caseDetails = spy(FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder()
                 .contactDetailsWrapper(
@@ -72,7 +75,7 @@ class RespondentPartyListenerTest {
                         .respondentSolicitorEmail(RESPONDENT_EMAIL)
                         .respondentSolicitorReference(RESPONDENT_REF)
                         .build()
-                ).build()).build();
+                ).build()).build());
 
         event = SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
@@ -86,6 +89,9 @@ class RespondentPartyListenerTest {
         respondentPartyListener = new RespondentPartyListener(
             bulkPrintService, emailService, notificationService, internationalPostalService
         );
+
+        lenient().when(caseDetails.isRespondentSolicitorDigital()).thenReturn(false);
+        clearInvocations(caseDetails);
     }
 
     @Test
@@ -143,8 +149,8 @@ class RespondentPartyListenerTest {
     }
 
     @Test
-    void shouldSendDigitalNotificationWhenPartyIsDigitalViaHandleNotification() {
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+    void givenAnyCase_shouldSendDigitalNotificationWhenPartyIsDigitalViaHandleNotification() {
+        when(caseDetails.isRespondentSolicitorDigital()).thenReturn(true);
 
         // Set up event with respondent as notification party
         respondentPartyListener.handleNotification(event);
@@ -154,8 +160,8 @@ class RespondentPartyListenerTest {
         assertThat(event.getEmailNotificationRequest().getNotificationEmail()).isEqualTo(RESPONDENT_EMAIL);
         assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(RESPONDENT_REF);
 
-        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplate()));
+        verify(caseDetails).isRespondentSolicitorDigital();
     }
 
     /**
@@ -174,7 +180,6 @@ class RespondentPartyListenerTest {
             .build();
 
         // Cover sheet should be at the beginning of the documents sent for bulk print
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))

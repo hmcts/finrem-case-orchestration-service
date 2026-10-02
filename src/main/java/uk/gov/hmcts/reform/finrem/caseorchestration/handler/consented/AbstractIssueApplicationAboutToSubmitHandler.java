@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 import java.util.List;
@@ -26,14 +27,18 @@ public abstract class AbstractIssueApplicationAboutToSubmitHandler extends Finre
 
     private final IssueApplicationService issueApplicationService;
 
+    private final AssignToJudgeCorresponder assignToJudgeCorresponder;
+
     private static final String MISSING_COURT_SELECTION_ERROR = "Case cannot be issued as court selection is missing.";
 
     protected AbstractIssueApplicationAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            OnlineFormDocumentService onlineFormDocumentService,
-                                                           IssueApplicationService issueApplicationService) {
+                                                           IssueApplicationService issueApplicationService,
+                                                           AssignToJudgeCorresponder assignToJudgeCorresponder) {
         super(finremCaseDetailsMapper);
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.issueApplicationService = issueApplicationService;
+        this.assignToJudgeCorresponder = assignToJudgeCorresponder;
     }
 
     protected abstract EventType supportedEventType();
@@ -56,11 +61,13 @@ public abstract class AbstractIssueApplicationAboutToSubmitHandler extends Finre
         try {
             generateCoverSheets(caseDetails, userAuthorisation);
         } catch (MissingCourtException e) {
-            return response(caseData, null, List.of(MISSING_COURT_SELECTION_ERROR));
+            return responseWithoutWarnings(caseData, List.of(MISSING_COURT_SELECTION_ERROR));
         }
 
         caseData.setMiniFormA(onlineFormDocumentService.generateMiniFormA(userAuthorisation, caseDetails));
         populateAssignToJudgeFields(caseData);
+
+        assignToJudgeCorresponder.createAuditsForCorrespondence(callbackRequest.getEventType(), caseDetails, userAuthorisation);
 
         return response(caseData);
     }
