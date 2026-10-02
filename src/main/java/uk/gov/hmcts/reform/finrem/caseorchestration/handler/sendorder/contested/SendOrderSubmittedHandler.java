@@ -94,19 +94,19 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
     private List<String> sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
-        // Setting party correspondence enabled flags and it will not be persisted.
+        // Set the party correspondence enabled flags. These changes will not be persisted.
         generalOrderService.setPartiesToReceiveCommunication(finremCaseDetails, parties);
 
         List<SendCorrespondenceEvent> events = sendOrderCorresponder.buildCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation);
         final List<String> errors = new ArrayList<>();
         for (SendCorrespondenceEvent event : events) {
             if (!emptyIfNull(event.getNotificationParties()).isEmpty()) {
-                String party = event.getNotificationParties().getFirst().name();
-                String actionName = "Send order corresponder to party: %s on send order event"
+                String party = event.describeNotificationParties();
+                String actionName = "Send order correspondence to party: %s for the send order event"
                     .formatted(party);
                 correspondenceEventAuditOrchestrationService.publishEvent(event, actionName,
                     () -> errors.add(
-                        "Cannot deliver send order correspondence to %s. Please send it manually.".formatted(party))
+                        "Unable to deliver send order correspondence to %s. Please send it manually.".formatted(party))
                 );
             }
         }
