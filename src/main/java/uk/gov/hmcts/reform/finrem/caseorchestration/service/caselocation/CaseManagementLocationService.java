@@ -30,22 +30,24 @@ public class CaseManagementLocationService {
      *         or null if no matching court is found
      */
     public CaseLocation getCaseLocation(FinremCaseData finremCaseData) {
+        if(finremCaseData.getManageHearingsWrapper().getWorkingHearing() != null) {
+            CourtRefData courtRefData = courtReferenceDataByName.get(
+                Optional.ofNullable(finremCaseData.getSelectedHearingCourt())
+                    .map(Object::toString)
+                    .map(String::toLowerCase)
+                    .orElse(null)
+            );
 
-        CourtRefData courtRefData = courtReferenceDataByName.get(
-            Optional.ofNullable(finremCaseData.getSelectedHearingCourt())
-                .map(Object::toString)
-                .map(String::toLowerCase)
-                .orElse(null)
-        );
-
-        if (courtRefData == null) {
-            log.warn("No court reference data found for case id: {}, court name: {}",
-                finremCaseData.getCcdCaseId(), finremCaseData.getSelectedHearingCourt());
-            return null;
-        } else {
-            log.info("Found court reference data for case id: {}, court name: {}: {}",
-                finremCaseData.getCcdCaseId(), finremCaseData.getSelectedHearingCourt(), courtRefData);
-            return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
+            if (courtRefData == null) {
+                log.warn("No court reference data found for case id: {}, court name: {}",
+                    finremCaseData.getCcdCaseId(), finremCaseData.getSelectedHearingCourt());
+                return null;
+            } else {
+                log.info("Found court reference data for case id: {}, court name: {}: {}",
+                    finremCaseData.getCcdCaseId(), finremCaseData.getSelectedHearingCourt(), courtRefData);
+                return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
+            }
         }
+        return null;
     }
 }
