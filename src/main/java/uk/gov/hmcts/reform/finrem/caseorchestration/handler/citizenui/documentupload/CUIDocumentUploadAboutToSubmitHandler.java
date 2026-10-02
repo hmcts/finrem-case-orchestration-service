@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentupload;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.documentupload;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -11,6 +11,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -41,10 +45,17 @@ import static java.util.Optional.ofNullable;
  * {@link #setDocuments(FinremCaseData, List)}.
  */
 @Slf4j
-public abstract class CuiDocumentUploadAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
+public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
-    protected CuiDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
+    private final CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder;
+
+    protected CUIDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                    CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
+                                                    CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder) {
         super(finremCaseDetailsMapper);
+        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
+        this.citizenDocumentsUploadedCorresponder = citizenDocumentsUploadedCorresponder;
     }
 
     /**
@@ -95,7 +106,27 @@ public abstract class CuiDocumentUploadAboutToSubmitHandler extends FinremAboutT
 
         categoriseDocuments(currentCaseData);
 
+        createNotificationAuditRows(callbackRequest, userAuthorisation);
+
         return response(currentCaseData);
+    }
+
+    private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
+                                             String userAuthorisation) {
+        correspondenceEventAuditOrchestrationService.createPendingAudits(
+            buildSendCorrespondenceEvent(callbackRequest, userAuthorisation),
+            handledEventType()
+        );
+    }
+
+    private SendCorrespondenceEvent buildSendCorrespondenceEvent(
+        FinremCallbackRequest callbackRequest,
+        String userAuthorisation) {
+        return citizenDocumentsUploadedCorresponder.buildCorrespondenceEvent(
+            callbackRequest.getCaseDetails(),
+            userAuthorisation,
+            notificationParty()
+        );
     }
 
     /**
@@ -154,6 +185,8 @@ public abstract class CuiDocumentUploadAboutToSubmitHandler extends FinremAboutT
         FinremCaseData caseData,
         List<CitizenDocumentCollection> documents
     );
+
+    protected abstract NotificationParty notificationParty();
 
     protected abstract void handleLog(FinremCallbackRequest callbackRequest);
 
