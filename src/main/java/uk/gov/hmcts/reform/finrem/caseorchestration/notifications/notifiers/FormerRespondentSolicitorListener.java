@@ -22,6 +22,11 @@ public class FormerRespondentSolicitorListener extends EmailNotificationOnlyList
     }
 
     @Override
+    protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
+        return event.getCaseData().isRespondentCorrespondenceEnabled();
+    }
+
+    @Override
     protected String getNotificationParty() {
         return "former respondent solicitor";
     }

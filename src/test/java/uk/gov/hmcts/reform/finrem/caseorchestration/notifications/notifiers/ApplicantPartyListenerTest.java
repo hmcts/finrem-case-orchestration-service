@@ -24,9 +24,12 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -56,6 +59,7 @@ class ApplicantPartyListenerTest {
     private CaseDocument testDocument;
     private FinremCaseDetails caseDetails;
     private SendCorrespondenceEvent event;
+    private FinremCaseData caseData;
 
     @BeforeEach
     void setUp() {
@@ -66,7 +70,7 @@ class ApplicantPartyListenerTest {
 
         caseDetails = FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
-            .data(FinremCaseData.builder()
+            .data(caseData = spy(FinremCaseData.builder()
                 .ccdCaseId(CASE_ID)
                 .contactDetailsWrapper(
                     ContactDetailsWrapper
@@ -75,7 +79,7 @@ class ApplicantPartyListenerTest {
                         .applicantSolicitorEmail(APPLICANT_EMAIL)
                         .solicitorReference(APPLICANT_REF)
                         .build()
-                ).build()).build();
+                ).build())).build();
 
         event = SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
@@ -288,5 +292,19 @@ class ApplicantPartyListenerTest {
         assertThat(exception.getMessage()).isEqualTo("No documents to post provided for paper notification, case ID: " + CASE_ID);
 
         verifyNoInteractions(bulkPrintService);
+    }
+
+    @Test
+    void givenApplicantCorrespondenceEnabled_whenIsNotificationPartySelected_thenReturnsTrue() {
+        when(caseData.isApplicantCorrespondenceEnabled()).thenReturn(true);
+
+        assertTrue(applicantPartyListener.isNotificationPartySelected(event));
+    }
+
+    @Test
+    void givenApplicantCorrespondenceDisabled_whenIsNotificationPartySelected_thenReturnsFalse() {
+        when(caseData.isApplicantCorrespondenceEnabled()).thenReturn(false);
+
+        assertFalse(applicantPartyListener.isNotificationPartySelected(event));
     }
 }

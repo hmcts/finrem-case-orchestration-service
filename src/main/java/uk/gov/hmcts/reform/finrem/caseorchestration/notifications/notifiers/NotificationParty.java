@@ -74,6 +74,27 @@ public enum NotificationParty {
     }
 
     /**
+     * Maps an {@link IntervenerType} to its corresponding {@link NotificationParty}.
+     *
+     * <p>The switch expression is exhaustive over {@code IntervenerType}, so every
+     * intervener type resolves to exactly one notification party. Adding a new
+     * {@code IntervenerType} constant will cause a compile error here until a
+     * matching case is added.
+     *
+     * @param intervenerType the intervener type to convert; must not be {@code null}
+     * @return the {@link NotificationParty} matching the given intervener type
+     * @throws NullPointerException if {@code intervenerType} is {@code null}
+     */
+    public static NotificationParty getIntervener(IntervenerType intervenerType) {
+        return switch(intervenerType) {
+            case INTERVENER_ONE -> INTERVENER_ONE;
+            case INTERVENER_TWO -> INTERVENER_TWO;
+            case INTERVENER_THREE -> INTERVENER_THREE;
+            case INTERVENER_FOUR -> INTERVENER_FOUR;
+        };
+    }
+
+    /**
      * Returns the {@link NotificationParty} representing the former barrister of a given intervener.
      *
      * <p>This is used when sending notifications to a barrister after their representation of

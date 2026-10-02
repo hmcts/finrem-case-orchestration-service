@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.sendorder.contested
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,10 +12,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -53,6 +57,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
@@ -63,7 +68,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderI
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderRespondentDocumentHandler;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -77,6 +85,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -91,12 +100,13 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class SendOrderContestedAboutToSubmitHandlerTest {
+class SendOrderAboutToSubmitHandlerTest {
 
-    private SendOrderContestedAboutToSubmitHandler underTest;
+    private SendOrderAboutToSubmitHandler underTest;
     @Mock
     private GeneralOrderService generalOrderService;
     @Mock
@@ -139,6 +149,13 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     final String approvalJudge = "Peter Chapman";
     @Mock
     private CaseDocument coversheet;
+    @Mock
+    private PartyService partyService;
+    private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
+
+    private static final Instant FIXED_INSTANT = Instant.parse("2026-10-02T10:00:00Z");
+
+    private final Clock clock = Clock.fixed(FIXED_INSTANT, ZoneId.of("Europe/London"));
 
     private List<SendOrderPartyDocumentHandler> handlers;
 
@@ -163,7 +180,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             = spy(new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService,
             notificationService));
 
-        underTest = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper,
+        underTest = new SendOrderAboutToSubmitHandler(finremCaseDetailsMapper,
             generalOrderService,
             draftOrderService,
             genericDocumentService,
@@ -176,17 +193,27 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 sendOrderIntervenerThreeDocumentHandler,
                 sendOrderIntervenerFourDocumentHandler
             ),
-            orderDateService, sendOrdersCategoriser);
+            orderDateService, sendOrdersCategoriser, clock, partyService);
 
-        lenient().when(generalOrderService.getParties(any(FinremCaseDetails.class))).thenReturn(parties);
+        lenient().when(partyService.getCheckedActiveParties(any(FinremCaseDetails.class))).thenReturn(parties);
         lenient().when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
             .thenReturn(mock(Triple.class));
         lenient().when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(stampType);
+
+        mockedContactDetailsValidator = Mockito.mockStatic(ContactDetailsValidator.class);
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                any(FinremCaseData.class), any(EventType.class), anyBoolean(), anyBoolean()))
+            .thenReturn(List.of());
+    }
+
+    @AfterEach
+    void tearDownStatics() {
+        mockedContactDetailsValidator.close();
     }
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SEND_ORDER);
+        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, SEND_ORDER);
     }
 
     @Test
@@ -767,6 +794,25 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .contains(tuple(
                 newProcessedOrder, submittedDate, submittedBy, finalOrder, approvalDate, approvalJudge,
                 coversheet));
+    }
+
+    @Test
+    void givenInvalidCaseDataAddresses_whenHandled_thenPopulateErrors() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+
+        List<String> expectedErrors = List.of("some error message");
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+            eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean()))
+            .thenReturn(expectedErrors);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+        assertAll(
+            () -> assertThat(response.getErrors()).isEqualTo(expectedErrors),
+            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService),
+            () -> verify(partyService).isApplicantPartySelected(callbackRequest.getCaseDetails()),
+            () -> verify(partyService).isRespondentPartySelected(callbackRequest.getCaseDetails())
+        );
     }
 
     private OrderToShareCollection toSelectedOrderToShare(String documentName) {
