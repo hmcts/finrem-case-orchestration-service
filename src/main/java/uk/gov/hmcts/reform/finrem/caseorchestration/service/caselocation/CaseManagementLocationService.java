@@ -54,7 +54,7 @@ public class CaseManagementLocationService {
         }
 
         log.info("Found court reference data for case id: {}, court name: {}: {}",
-            finremCaseData.getCcdCaseId(), finremCaseData.getSelectedHearingCourt(), courtRefData);
+            finremCaseData.getCcdCaseId(), finremCaseData.getSelectedAllocatedCourt(), courtRefData);
         return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
     }
 }
