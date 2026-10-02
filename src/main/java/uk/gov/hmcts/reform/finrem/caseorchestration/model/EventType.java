@@ -41,7 +41,7 @@ public enum EventType {
     NEW_PAPER_CASE("FR_newPaperCase"),
     GENERAL_APPLICATION_REFER_TO_JUDGE("FR_generalApplicationReferToJudge"),
     GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
-   GENERAL_APPLICATION_DIRECTIONS_MH("FR_GeneralApplicationDirectionsMH", "General Application Directions"),
+    GENERAL_APPLICATION_DIRECTIONS_MH("FR_GeneralApplicationDirectionsMH", "General Application Directions"),
     GENERAL_ORDER_CONSENT_IN_CONTESTED("FR_generalOrderConsent"),
     GENERAL_ORDER("FR_generalOrder"),
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
@@ -98,11 +98,12 @@ public enum EventType {
     FR_HWF_DECISION_MADE_FROM_AWAITING_PAYMENT("FR_HWFDecisionMadeFromAwaitingPayment"),
     STOP_REPRESENTING_CLIENT("FR_stopRepresentingClient"),
     APPLY_NOC_DECISION("applyNocDecision"),
-    INVALIDATE_APPLICANT_ACCESS_CODE("CUI_invalidateApplicantAccessCode"),
-    INVALIDATE_RESPONDENT_ACCESS_CODE("CUI_invalidateRespondentAccessCode"),
+    LINK_APPLICANT_TO_CASE("CUI_linkApplicantToCase"),
+    LINK_RESPONDENT_TO_CASE("CUI_linkRespondentToCase"),
     CUI_APPLICANT_DOCUMENT_UPLOAD("CUI_applicantUploadDocuments"),
     CUI_RESPONDENT_DOCUMENT_UPLOAD("CUI_respondentUploadDocuments"),
     HWF_ACCEPTED_AND_ISSUE("FR_HWFAcceptedAndIssue"),
+    FEE_ACCOUNT_DEBITED_AND_ISSUE("FR_feeAccountDebitedAndIssue"),
     @JsonEnumDefaultValue
     NONE("");
 

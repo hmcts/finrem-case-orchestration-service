@@ -14,6 +14,5 @@ curl --insecure --fail --show-error --silent -X POST \
   --data-urlencode "password=${IMPORTER_PASSWORD}" \
   --data-urlencode "client_id=${CLIENT_ID}" \
   --data-urlencode "client_secret=${CLIENT_SECRET}" \
-  --data-urlencode "redirect_uri=${REDIRECT_URI}" \
   --data-urlencode "scope=openid profile roles" \
   "${IDAM_URI}/o/token" | docker run --rm --interactive ghcr.io/jqlang/jq:latest -r .access_token

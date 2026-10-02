@@ -77,8 +77,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BarristerLetterServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
@@ -116,14 +118,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 @WebMvcTest(CcdCallbackController.class)
 @ContextConfiguration(classes = {
     ManageBarristerTestConfiguration.class, PrdOrganisationService.class, PrdOrganisationConfiguration.class,
-    AssignCaseAccessService.class, CaseAssignedRoleService.class, CcdCallbackController.class,
+    AssignCaseAccessService.class, CaseAssignedRoleService.class, CcdCallbackController.class, GlobalSearchService.class,
     CallbackDispatchService.class, NotificationService.class, NotificationServiceConfiguration.class,
     NotificationRequestMapper.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class,
     EvidenceManagementDownloadService.class, LetterAddresseeGeneratorMapper.class, ApplicantLetterAddresseeGenerator.class,
     RespondentLetterAddresseeGenerator.class, IntervenerOneLetterAddresseeGenerator.class, IntervenerTwoLetterAddresseeGenerator.class,
     IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class,
     InternationalPostalService.class, CourtDetailsConfiguration.class, BarristerLetterServiceAdapter.class,
-    FinremNotificationRequestMapper.class, CaseRoleService.class, NotificationRequestBuilderFactory.class})
+    FinremNotificationRequestMapper.class, CitizenDocumentsUploadedCorresponder.class, CaseRoleService.class,
+    NotificationRequestBuilderFactory.class})
 class ManageBarristersITest implements IntegrationTest {
 
     private static final String APP_BARRISTER_EMAIL_ONE = "appbarr@gmail.com";
