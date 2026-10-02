@@ -133,23 +133,46 @@ public class PartyService {
      * data from the supplied case details.
      *
      * @param caseDetails the case details containing the case data
-     * @return a {@link DynamicMultiSelectList} of the active parties that can be selected
+     * @return a {@link DynamicMultiSelectList} of the active parties that can be selected,
+     *         with the applicant and respondent parties pre-selected
+     * @see #getAllActivePartyList(FinremCaseData)
      */
     public DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
         return getAllActivePartyList(caseDetails.getData());
     }
 
+    /**
+     * Builds the list of all active parties on the case, used to populate
+     * party-selection checkboxes such as "Who should receive this order?".
+     *
+     * <p>The returned list items contain, in order:
+     * <ol>
+     *   <li>active solicitors (applicant and respondent),</li>
+     *   <li>unrepresented parties, and</li>
+     *   <li>active interveners.</li>
+     * </ol>
+     *
+     * <p>Only the solicitors and unrepresented parties are pre-selected in the
+     * returned {@link DynamicMultiSelectList#getValue() value}. Interveners are
+     * available to select but are not selected by default.
+     *
+     * @param caseData the case data used to determine which parties are active
+     * @return a {@link DynamicMultiSelectList} whose list items are all active parties
+     *         and whose value is the pre-selected subset (solicitors and unrepresented parties)
+     */
     public DynamicMultiSelectList getAllActivePartyList(FinremCaseData caseData) {
-        log.info("Case ID: {} Fetching all parties solicitor case role", caseData.getCcdCaseId());
+        List<DynamicMultiSelectListElement> activeSolicitors = getActiveSolicitors(caseData);
+        List<DynamicMultiSelectListElement> unrepresentedParties = getUnrepresentedParties(caseData);
+        List<DynamicMultiSelectListElement> activeInterveners = getActiveInterveners(caseData);
 
         List<DynamicMultiSelectListElement> selectedActiveCaseParties = new ArrayList<>();
-        selectedActiveCaseParties.addAll(getActiveSolicitors(caseData));
-        selectedActiveCaseParties.addAll(getUnrepresentedParties(caseData));
+        selectedActiveCaseParties.addAll(activeSolicitors);
+        selectedActiveCaseParties.addAll(unrepresentedParties);
 
         List<DynamicMultiSelectListElement> activeCaseParties = new ArrayList<>();
-        activeCaseParties.addAll(getActiveSolicitors(caseData));
-        activeCaseParties.addAll(getUnrepresentedParties(caseData));
-        activeCaseParties.addAll(getActiveInterveners(caseData));
+        activeCaseParties.addAll(activeSolicitors);
+        activeCaseParties.addAll(unrepresentedParties);
+        activeCaseParties.addAll(activeInterveners);
 
         return DynamicMultiSelectList.builder()
             .value(selectedActiveCaseParties)
@@ -158,7 +181,6 @@ public class PartyService {
     }
 
     private List<DynamicMultiSelectListElement> getActiveSolicitors(FinremCaseData caseData) {
-
         List<DynamicMultiSelectListElement> activeSolicitors = new ArrayList<>();
         if (caseData.getApplicantOrganisationPolicy() != null
             && caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole() != null) {
