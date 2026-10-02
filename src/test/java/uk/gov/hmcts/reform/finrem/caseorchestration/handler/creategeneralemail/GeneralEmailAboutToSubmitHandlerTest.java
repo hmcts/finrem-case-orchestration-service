@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.creategeneralemail;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -8,7 +7,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentConversionException;
@@ -27,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralEmailDocumentCategoriser;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.HashMap;
@@ -70,13 +67,6 @@ class GeneralEmailAboutToSubmitHandlerTest {
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
     private GeneralEmailDocumentCategoriser generalEmailCategoriser;
-    @Mock
-    private GlobalSearchService globalSearchService;
-
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(handler, "globalSearchService", globalSearchService);
-    }
 
     @Test
     void shouldHandleAllCaseTypes() {

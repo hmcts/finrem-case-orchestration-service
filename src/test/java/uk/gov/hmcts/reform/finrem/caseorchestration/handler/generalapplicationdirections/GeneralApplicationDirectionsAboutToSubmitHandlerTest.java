@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -43,7 +42,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
 import java.io.InputStream;
@@ -105,8 +103,6 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     private HearingCorrespondenceHelper hearingCorrespondenceHelper;
     @Mock
     private PartyService partyService;
-    @Mock
-    private GlobalSearchService globalSearchService;
 
     private ObjectMapper objectMapper;
 
@@ -123,7 +119,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         aboutToSubmitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
             finremCaseDetailsMapper, helper, gaDirectionService, gaService, manageHearingActionService, generalApplicationsCategoriser,
             hearingCorrespondenceHelper);
-        ReflectionTestUtils.setField(aboutToSubmitHandler, "globalSearchService", globalSearchService);
+
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(
             List.of()
         ).build();

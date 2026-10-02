@@ -70,6 +70,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
@@ -77,7 +78,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BarristerLetterServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -127,7 +127,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
     IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class,
     InternationalPostalService.class, CourtDetailsConfiguration.class, BarristerLetterServiceAdapter.class,
     FinremNotificationRequestMapper.class, CitizenDocumentsUploadedCorresponder.class, CaseRoleService.class,
-    NotificationRequestBuilderFactory.class, CaseManagementLocationService.class})
+    NotificationRequestBuilderFactory.class})
 class ManageBarristersITest implements IntegrationTest {
 
     private static final String APP_BARRISTER_EMAIL_ONE = "appbarr@gmail.com";
@@ -196,6 +196,8 @@ class ManageBarristersITest implements IntegrationTest {
     private PaperNotificationService paperNotificationService;
     @MockitoBean
     private ExpressCaseService expressCaseService;
+    @MockitoBean
+    private CaseManagementLocationService caseManagementLocationService;
     @Autowired
     private ObjectMapper objectMapper;  // satisfies PrdOrganisationService injection
 

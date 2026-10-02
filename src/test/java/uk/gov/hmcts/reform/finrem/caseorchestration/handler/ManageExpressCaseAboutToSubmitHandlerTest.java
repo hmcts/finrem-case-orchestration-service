@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -50,9 +49,6 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
     @Mock
     private ExpressCaseService expressCaseService;
 
-    @Mock
-    private GlobalSearchService globalSearchService;
-
     @InjectMocks
     private ManageExpressCaseAboutToSubmitHandler underTest;
 
@@ -62,7 +58,6 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
 
     @BeforeEach
     void setUp() {
-        underTest.globalSearchService = globalSearchService;
         callbackRequest = mock(FinremCallbackRequest.class);
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
         caseData = mock(FinremCaseData.class);

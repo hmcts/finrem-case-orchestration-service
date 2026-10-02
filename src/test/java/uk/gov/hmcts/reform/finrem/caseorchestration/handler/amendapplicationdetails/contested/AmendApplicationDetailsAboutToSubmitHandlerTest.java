@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.contested;
 
 import org.assertj.core.api.ObjectEnumerableAssert;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
@@ -46,7 +44,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.time.LocalDate;
@@ -84,9 +81,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
     private AmendApplicationDetailsAboutToSubmitHandler handler;
 
     @Mock
-    private GlobalSearchService globalSearchService;
-
-    @Mock
     private OnlineFormDocumentService onlineFormDocumentService;
     @Mock
     private CaseFlagsService caseFlagsService;
@@ -98,11 +92,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
     private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(handler, "globalSearchService", globalSearchService);
-    }
 
     @Test
     void testCanHandle() {

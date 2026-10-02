@@ -22,9 +22,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -46,8 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
     CallbackDispatchService.class,
     GlobalSearchService.class,
     SolicitorCreateContestedAboutToSubmitHandler.class,
-    ObjectMapper.class, FinremCaseDetailsMapper.class,
-    CaseManagementLocationService.class
+    ObjectMapper.class, FinremCaseDetailsMapper.class
 })
 class CreateCaseMandatoryDataIntegrationTest {
 
@@ -69,6 +68,8 @@ class CreateCaseMandatoryDataIntegrationTest {
     private ExpressCaseService expressCaseService;
     @MockitoBean
     private SelectedCourtService selectedCourtService;
+    @MockitoBean
+    private CaseManagementLocationService caseManagementLocationService;
 
     @Test
     void testCreateCaseValidateMandatoryData() throws Exception {

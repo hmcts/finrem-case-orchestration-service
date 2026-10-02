@@ -11,7 +11,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -49,7 +48,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.time.LocalDateTime;
@@ -119,9 +117,6 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    @Mock
-    private GlobalSearchService globalSearchService;
-
     @Test
     void canHandle() {
         assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.DRAFT_ORDERS);
@@ -130,7 +125,6 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     @BeforeEach
     void setup() {
         UserDetails mockedUserDetails = mock(UserDetails.class);
-        ReflectionTestUtils.setField(handler, "globalSearchService", globalSearchService);
         lenient().when(idamAuthService.getUserDetails(AUTH_TOKEN)).thenReturn(mockedUserDetails);
         lenient().when(mockedUserDetails.getFullName()).thenReturn("Hamzah");
         lenient().when(mockedUserDetails.getEmail()).thenReturn("Hamzah@hamzah.com");
