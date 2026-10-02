@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Set;
 
 @Slf4j
 public enum EventType {
@@ -130,6 +132,29 @@ public enum EventType {
     EventType(String ccdType, String displayName) {
         this.ccdType = ccdType;
         this.displayName = displayName;
+    }
+
+    /**
+     * Events that refer a consented case to a judge, i.e. the events that trigger
+     * the assign-to-judge handling for consented cases.
+     */
+    private static final Set<EventType> CONSENTED_ASSIGN_TO_JUDGE_EVENTS = EnumSet.of(
+        REFER_TO_JUDGE,
+        REFER_TO_JUDGE_FROM_ORDER_MADE,
+        REFER_TO_JUDGE_FROM_CONSENT_ORDER_APPROVED,
+        REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE,
+        REFER_TO_JUDGE_FROM_AWAITING_RESPONSE,
+        REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER,
+        REFER_TO_JUDGE_FROM_CLOSE);
+
+    /**
+     * Checks whether this event refers a consented case to a judge.
+     *
+     * @return {@code true} if this event is one of the consented assign-to-judge events,
+     *         {@code false} otherwise
+     */
+    public boolean isConsentedAssignToJudgeEvent() {
+        return CONSENTED_ASSIGN_TO_JUDGE_EVENTS.contains(this);
     }
 
     @JsonValue
