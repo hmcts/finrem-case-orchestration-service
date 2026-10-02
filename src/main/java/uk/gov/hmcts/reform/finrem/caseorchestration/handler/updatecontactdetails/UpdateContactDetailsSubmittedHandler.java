@@ -85,8 +85,8 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
             // Notifications will still be sent if the case assignment is only partially completed (e.g.,
             // applicant solicitor granted but revocation of the previous solicitor failed).
             // Further enhancement can refine notification accuracy if needed.
-            List<SendCorrespondenceEvent> events = prepareNocEmailToLitigantSolicitor(caseDetails);
-            sendNocEmailToLitigantSolicitorWithRetry(events, errors);
+            sendNocEmailToLitigantSolicitorWithRetry(prepareNocEmailToLitigantSolicitor(result,
+                caseDetails), errors);
             sendNocLetterToLitigantsWithRetry(caseDetails, caseDetailsBefore, userAuthorisation, errors);
         }
 
@@ -140,10 +140,18 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         );
     }
 
-    private List<SendCorrespondenceEvent> prepareNocEmailToLitigantSolicitor(FinremCaseDetails caseDetails) {
-        return List.of(
-            updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(caseDetails)
-        );
+    private List<SendCorrespondenceEvent> prepareNocEmailToLitigantSolicitor(SolicitorAccessChangeResult result,
+                                                                             FinremCaseDetails caseDetails) {
+        boolean applicantSolicitorGranted = result.applicantSolicitorGranted;
+        boolean respondentSolicitorGranted = result.respondentSolicitorGranted;
+
+        List<SendCorrespondenceEvent> events = new ArrayList<>();
+        if (applicantSolicitorGranted || respondentSolicitorGranted) {
+            events.add(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(caseDetails,
+                respondentSolicitorGranted));
+        }
+
+        return events;
     }
 
     private void sendNocEmailToLitigantSolicitor(SendCorrespondenceEvent event) {
