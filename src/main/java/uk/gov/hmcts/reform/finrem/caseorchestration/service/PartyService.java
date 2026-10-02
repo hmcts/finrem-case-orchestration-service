@@ -9,10 +9,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -28,6 +30,76 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @Slf4j
 public class PartyService {
 
+    /**
+     * Returns the role codes of the active parties that have been checked in a
+     * party-selection question such as "Who should receive this order?".
+     *
+     * <p>The codes are taken from the selected values of the {@code partiesOnCase}
+     * multi-select list, for example {@code [APP_SOLICITOR]}.
+     *
+     * @param caseDetails the case details containing the party selection
+     * @return the role codes of the checked parties
+     */
+    public List<String> getCheckedActiveParties(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        DynamicMultiSelectList parties = data.getPartiesOnCase();
+        return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
+    }
+
+    /**
+     * Checks whether the applicant has been selected in a party-selection
+     * question such as "Who should receive this order?".
+     *
+     * <p>The applicant's role is taken from the case-assigned role on the
+     * applicant organisation policy and compared with the checked party codes
+     * returned by {@link #getCheckedActiveParties(FinremCaseDetails)}. If the
+     * applicant organisation policy or its role is not set, the applicant is
+     * treated as not selected.
+     *
+     * @param caseDetails the case details containing the party selection
+     * @return {@code true} if the applicant is among the checked parties,
+     *         {@code false} otherwise
+     */
+    public boolean isApplicantPartySelected(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        return getCheckedActiveParties(caseDetails).contains(
+            Optional.ofNullable(data.getApplicantOrganisationPolicy())
+                .map(OrganisationPolicy::getOrgPolicyCaseAssignedRole)
+                .orElse(""));
+    }
+    
+    /**
+     * Checks whether the respondent has been selected in a party-selection
+     * question such as "Who should receive this order?".
+     *
+     * <p>The respondent's role is taken from the case-assigned role on the
+     * respondent organisation policy and compared with the checked party codes
+     * returned by {@link #getCheckedActiveParties(FinremCaseDetails)}. If the
+     * respondent organisation policy or its role is not set, the respondent is
+     * treated as not selected.
+     *
+     * @param caseDetails the case details containing the party selection
+     * @return {@code true} if the respondent is among the checked parties,
+     *         {@code false} otherwise
+     */
+    public boolean isRespondentPartySelected(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        return getCheckedActiveParties(caseDetails).contains(
+            Optional.ofNullable(data.getRespondentOrganisationPolicy())
+                .map(OrganisationPolicy::getOrgPolicyCaseAssignedRole)
+                .orElse(""));
+    }
+
+    /**
+     * Builds the list of all active parties on the case, used to populate
+     * party-selection checkboxes such as "Who should receive this order?".
+     *
+     * <p>Delegates to {@link #getAllActivePartyList(FinremCaseData)} using the
+     * data from the supplied case details.
+     *
+     * @param caseDetails the case details containing the case data
+     * @return a {@link DynamicMultiSelectList} of the active parties that can be selected
+     */
     public DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
         return getAllActivePartyList(caseDetails.getData());
     }

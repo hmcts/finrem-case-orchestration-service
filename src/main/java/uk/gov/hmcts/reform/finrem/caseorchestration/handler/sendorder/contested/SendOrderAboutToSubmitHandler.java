@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 
@@ -76,6 +77,7 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
     private final OrderDateService orderDateService;
     private final SendOrdersCategoriser sendOrdersCategoriser;
     private final Clock clock;
+    private final PartyService partyService;
 
     public SendOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                          GeneralOrderService generalOrderService, DraftOrderService draftOrderService,
@@ -84,7 +86,8 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
                                          List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList,
                                          OrderDateService orderDateService,
                                          SendOrdersCategoriser sendOrdersCategoriser,
-                                         Clock clock) {
+                                         Clock clock,
+                                         PartyService partyService) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.draftOrderService = draftOrderService;
@@ -94,6 +97,7 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
         this.orderDateService = orderDateService;
         this.sendOrdersCategoriser = sendOrdersCategoriser;
         this.clock = clock;
+        this.partyService = partyService;
     }
 
     @Override
@@ -108,18 +112,19 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        List<String> errors = validateRequiredPostalAddresses(caseData, SEND_ORDER);
+        List<String> errors = validateRequiredPostalAddresses(caseData, SEND_ORDER,
+            partyService.isApplicantPartySelected(caseDetails), partyService.isRespondentPartySelected(caseDetails));
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(caseData, errors);
         }
 
-        List<String> parties = generalOrderService.getParties(caseDetails);
+        List<String> selectedParties = partyService.getCheckedActiveParties(caseDetails);
         List<OrderToShare> selectedOrders = getSelectedOrders(caseData);
 
         List<OrderSentToPartiesCollection> ordersSentToPartiesCollection = new ArrayList<>();
 
         handleAdditionalDocumentsUploadedAndPrint(caseData, ordersSentToPartiesCollection, userAuthorisation);
-        setUpGeneralOrderAdditionalDocumentOnCaseAndPrint(caseDetails, parties, selectedOrders, ordersSentToPartiesCollection);
+        setUpGeneralOrderAdditionalDocumentOnCaseAndPrint(caseDetails, selectedParties, selectedOrders, ordersSentToPartiesCollection);
 
         Triple<List<CaseDocument>, List<CaseDocument>, Map<CaseDocument, List<CaseDocument>>> hearingOrders
             = generalOrderService.hearingOrdersToShare(caseDetails, selectedOrders);
@@ -133,7 +138,7 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
                 order2AttachmentMap.values().stream().flatMap(List::stream)
             ).toList();
             // Add order approved cover letter and add orders (legacy and new) to ordersSentToPartiesCollection
-            setUpHearingDocumentPackOnCaseAndPrint(caseDetails, caseDocumentsToShare, parties, ordersSentToPartiesCollection, userAuthorisation);
+            setUpHearingDocumentPackOnCaseAndPrint(caseDetails, caseDocumentsToShare, selectedParties, ordersSentToPartiesCollection, userAuthorisation);
 
             // Handle legacy documents
             stampLegacyHearingOrdersAndPopulateFinalOrderCollection(caseDetails, legacyHearingOrders, order2AttachmentMap, userAuthorisation);
@@ -142,7 +147,7 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
         }
         caseData.setOrdersSentToPartiesCollection(ordersSentToPartiesCollection); // will be sent in the submitted event
 
-        setUpOrderDocumentsOnPartiesTab(caseDetails, parties);
+        setUpOrderDocumentsOnPartiesTab(caseDetails, selectedParties);
         resetFields(caseData.getDraftOrdersWrapper());
         sendOrdersCategoriser.categorise(caseDetails.getData());
         draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);

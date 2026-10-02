@@ -57,6 +57,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
@@ -84,6 +85,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -98,6 +100,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -146,6 +149,8 @@ class SendOrderAboutToSubmitHandlerTest {
     final String approvalJudge = "Peter Chapman";
     @Mock
     private CaseDocument coversheet;
+    @Mock
+    private PartyService partyService;
     private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
 
     private static final Instant FIXED_INSTANT = Instant.parse("2026-10-02T10:00:00Z");
@@ -188,16 +193,16 @@ class SendOrderAboutToSubmitHandlerTest {
                 sendOrderIntervenerThreeDocumentHandler,
                 sendOrderIntervenerFourDocumentHandler
             ),
-            orderDateService, sendOrdersCategoriser, clock);
+            orderDateService, sendOrdersCategoriser, clock, partyService);
 
-        lenient().when(generalOrderService.getParties(any(FinremCaseDetails.class))).thenReturn(parties);
+        lenient().when(partyService.getCheckedActiveParties(any(FinremCaseDetails.class))).thenReturn(parties);
         lenient().when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
             .thenReturn(mock(Triple.class));
         lenient().when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(stampType);
 
         mockedContactDetailsValidator = Mockito.mockStatic(ContactDetailsValidator.class);
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-                any(FinremCaseData.class), any(EventType.class)))
+                any(FinremCaseData.class), any(EventType.class), anyBoolean(), anyBoolean()))
             .thenReturn(List.of());
     }
 
@@ -208,7 +213,7 @@ class SendOrderAboutToSubmitHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SEND_ORDER);
+        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, SEND_ORDER);
     }
 
     @Test
@@ -798,7 +803,7 @@ class SendOrderAboutToSubmitHandlerTest {
 
         List<String> expectedErrors = List.of("some error message");
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-            caseData, EventType.SEND_ORDER))
+            eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean()))
             .thenReturn(expectedErrors);
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
