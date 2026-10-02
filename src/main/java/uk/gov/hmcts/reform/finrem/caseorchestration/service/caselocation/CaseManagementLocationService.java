@@ -31,7 +31,7 @@ public class CaseManagementLocationService {
      */
     public CaseLocation getCaseLocation(FinremCaseData finremCaseData) {
         log.info("Getting case location for court reference data: {}", finremCaseData);
-        if(finremCaseData.getManageHearingsWrapper().getWorkingHearing() != null) {
+        if (finremCaseData.getManageHearingsWrapper().getWorkingHearing() != null) {
             CourtRefData courtRefData = courtReferenceDataByName.get(
                 Optional.ofNullable(finremCaseData.getSelectedHearingCourt())
                     .map(Object::toString)
