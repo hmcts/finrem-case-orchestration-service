@@ -5,13 +5,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.IssueApplicationConsentedSubmittedHandlerContractTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.feeacctdebitedandissue.consented.FeeAccountDebitedAndIssueSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -40,13 +38,7 @@ class FeeAccountDebitedAndIssueSubmittedHandlerTest extends IssueApplicationCons
     private AssignPartiesAccessService assignPartiesAccessService;
 
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
-
-    @Mock
-    private NotificationAuditService notificationAuditService;
-
-    @Mock
-    private CoreCaseDataService coreCaseDataService;
+    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     @Test
     void testCanHandle() {
@@ -54,18 +46,13 @@ class FeeAccountDebitedAndIssueSubmittedHandlerTest extends IssueApplicationCons
     }
 
     @Override
-    protected ApplicationEventPublisher applicationEventPublisher() {
-        return applicationEventPublisher;
+    protected RetryExecutor retryExecutor() {
+        return retryExecutor;
     }
 
     @Override
     protected FinremCallbackHandler handler() {
         return handler;
-    }
-
-    @Override
-    protected RetryExecutor retryExecutor() {
-        return retryExecutor;
     }
 
     @Override
@@ -79,13 +66,7 @@ class FeeAccountDebitedAndIssueSubmittedHandlerTest extends IssueApplicationCons
     }
 
     @Override
-    protected NotificationAuditService notificationAuditService() {
-        return notificationAuditService;
+    protected CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService() {
+        return correspondenceEventAuditOrchestrationService;
     }
-
-    @Override
-    protected CoreCaseDataService coreCaseDataService() {
-        return coreCaseDataService;
-    }
-
 }

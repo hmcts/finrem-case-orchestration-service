@@ -5,12 +5,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.IssueApplicationConsentedSubmittedHandlerContractTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -35,22 +33,11 @@ class IssueApplicationConsentedSubmittedHandlerTest extends IssueApplicationCons
     private AssignPartiesAccessService assignPartiesAccessService;
 
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
-
-    @Mock
-    private NotificationAuditService notificationAuditService;
-
-    @Mock
-    private CoreCaseDataService coreCaseDataService;
+    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     @Test
     void testCanHandle() {
         assertCanHandle(handler, SUBMITTED, CONSENTED, ISSUE_APPLICATION);
-    }
-
-    @Override
-    protected ApplicationEventPublisher applicationEventPublisher() {
-        return applicationEventPublisher;
     }
 
     @Override
@@ -74,12 +61,7 @@ class IssueApplicationConsentedSubmittedHandlerTest extends IssueApplicationCons
     }
 
     @Override
-    protected NotificationAuditService notificationAuditService() {
-        return notificationAuditService;
-    }
-
-    @Override
-    protected CoreCaseDataService coreCaseDataService() {
-        return coreCaseDataService;
+    protected CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService() {
+        return correspondenceEventAuditOrchestrationService;
     }
 }

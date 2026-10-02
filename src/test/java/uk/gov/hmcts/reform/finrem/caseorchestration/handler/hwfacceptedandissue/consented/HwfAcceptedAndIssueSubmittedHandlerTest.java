@@ -6,15 +6,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.IssueApplicationConsentedSubmittedHandlerContractTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
@@ -27,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,22 +67,11 @@ class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedS
     private AssignPartiesAccessService assignPartiesAccessService;
 
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
-
-    @Mock
-    private NotificationAuditService notificationAuditService;
-
-    @Mock
-    private CoreCaseDataService coreCaseDataService;
+    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     @Test
     void testCanHandle() {
         assertCanHandle(handler, SUBMITTED, CONSENTED, HWF_ACCEPTED_AND_ISSUE);
-    }
-
-    @Override
-    protected ApplicationEventPublisher applicationEventPublisher() {
-        return applicationEventPublisher;
     }
 
     @Override
@@ -107,13 +95,8 @@ class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedS
     }
 
     @Override
-    protected NotificationAuditService notificationAuditService() {
-        return notificationAuditService;
-    }
-
-    @Override
-    protected CoreCaseDataService coreCaseDataService() {
-        return coreCaseDataService;
+    protected CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService() {
+        return correspondenceEventAuditOrchestrationService;
     }
 
     @Test
@@ -173,9 +156,13 @@ class HwfAcceptedAndIssueSubmittedHandlerTest extends IssueApplicationConsentedS
             retryExecutor,
             "sending HWF correspondence"
         );
-        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
-            retryExecutor,
-            "sending issue application correspondence %s (%s)".formatted(TRACKER_ID, DESCRIBED_NOTIFICATION_PARTIES)
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(2)).run();
+            return null;
+        }).when(correspondenceEventAuditOrchestrationService()).publishEvent(
+            eq(event),
+            eq("sending issue application correspondence %s (%s)".formatted(TRACKER_ID, DESCRIBED_NOTIFICATION_PARTIES)),
+            any(Runnable.class)
         );
 
         // Act
