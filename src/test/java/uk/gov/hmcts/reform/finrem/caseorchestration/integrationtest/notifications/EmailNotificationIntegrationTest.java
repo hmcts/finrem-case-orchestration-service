@@ -156,10 +156,10 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-vacate-notification-solicitor-stub.json");
     }
 
-    @Test
-    public void shouldMatchFrIntervenerAddedEmailStub() throws Exception {
-        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-intervener-added-email-stub.json");
-    }
+
+    // -------------------------
+    // INTERVENERS SCENARIOS
+    // -------------------------
 
     @Test
     public void shouldMatchFrIntervenerSolicitorAddedEmailStub() throws Exception {
@@ -170,6 +170,17 @@ public class EmailNotificationIntegrationTest extends BaseTest {
     public void shouldMatchFrIntervenerSolicitorRemovedEmailStub() throws Exception {
         assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-intervener-solicitor-removed-email-stub.json");
     }
+
+    @Test
+    public void shouldMatchFrIntervenerAddedEmailStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-intervener-added-email-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrRejectGeneralApplicationStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-reject-general-application-stub.json");
+    }
+
 
     private void assertFixtureMatchesLiveNotify(String fixtureClasspath) throws Exception {
         Fixture fixture = readFixture(fixtureClasspath);
