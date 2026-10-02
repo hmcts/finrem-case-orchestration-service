@@ -10,8 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthWestFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 
 import java.util.Map;
 
@@ -109,8 +111,16 @@ class CaseManagementLocationServiceTest {
     }
 
     private FinremCaseData buildCaseDataWithCourt(Court court) {
+        DefaultCourtListWrapper defaultCourtListWrapper = court.getDefaultCourtListWrapper();
         return FinremCaseData.builder()
             .ccdCaseId("1234")
+            .regionWrapper(RegionWrapper.builder()
+                .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
+                    .regionList(court.getRegion())
+                    .southWestFrcList(RegionSouthWestFrc.BRISTOL)
+                    .courtListWrapper(defaultCourtListWrapper)
+                    .build())
+                .build())
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .workingHearing(WorkingHearing.builder()
                     .hearingCourtSelection(court)

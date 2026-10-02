@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.CourtRefData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -31,24 +32,29 @@ public class CaseManagementLocationService {
      */
     public CaseLocation getCaseLocation(FinremCaseData finremCaseData) {
         log.info("Getting case location for court reference data: {}", finremCaseData);
-        if (finremCaseData.getManageHearingsWrapper().getWorkingHearing() != null) {
-            CourtRefData courtRefData = courtReferenceDataByName.get(
-                Optional.ofNullable(finremCaseData.getSelectedHearingCourt())
-                    .map(Object::toString)
-                    .map(String::toLowerCase)
-                    .orElse(null)
-            );
 
-            if (courtRefData == null) {
-                log.warn("No court reference data found for case id: {}, court name: {}",
-                    finremCaseData.getCcdCaseId(), finremCaseData.getSelectedHearingCourt());
-                return null;
-            } else {
-                log.info("Found court reference data for case id: {}, court name: {}: {}",
-                    finremCaseData.getCcdCaseId(), finremCaseData.getSelectedHearingCourt(), courtRefData);
-                return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
-            }
+        String selectedAllocatedCourt = Optional.ofNullable(finremCaseData)
+            .map(FinremCaseData::getSelectedAllocatedCourt)
+            .map(String::trim)
+            .filter(value -> !value.isEmpty())
+            .orElse(null);
+
+        if (selectedAllocatedCourt == null) {
+            log.warn("No court set case id: {}", finremCaseData != null ? finremCaseData.getCcdCaseId() : null);
+            return null;
         }
-        return null;
+
+        String courtKey = selectedAllocatedCourt.toLowerCase(Locale.ROOT);
+        CourtRefData courtRefData = courtReferenceDataByName.get(courtKey);
+
+        if (courtRefData == null) {
+            log.warn("No court reference data found for case id: {}, court name: {}",
+                finremCaseData.getCcdCaseId(), selectedAllocatedCourt);
+            return null;
+        }
+
+        log.info("Found court reference data for case id: {}, court name: {}: {}",
+            finremCaseData.getCcdCaseId(), finremCaseData.getSelectedHearingCourt(), courtRefData);
+        return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
     }
 }
