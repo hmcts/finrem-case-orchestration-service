@@ -10,7 +10,7 @@ import java.util.Arrays;
 @Slf4j
 public enum EventType {
     INTERNAL_CHANGE_UPDATE_CASE("internal-change-UPDATE_CASE"),
-    MANAGE_HEARINGS("FR_manageHearings"),
+    MANAGE_HEARINGS("FR_manageHearings", "Manage Hearings"),
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
