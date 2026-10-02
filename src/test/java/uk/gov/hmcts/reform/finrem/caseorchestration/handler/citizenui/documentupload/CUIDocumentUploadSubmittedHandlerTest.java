@@ -69,7 +69,7 @@ class CUIDocumentUploadSubmittedHandlerTest {
         verify(citizenDocumentsUploadedCorresponder)
             .buildCorrespondenceEvent(caseDetails, AUTH_TOKEN, NotificationParty.CITIZEN_APPLICANT);
         verify(correspondenceEventAuditOrchestrationService)
-            .publishEvent(event, "Send citizen documents uploaded email: CITIZEN_APPLICANT");
+            .publishEvent(event, "Send citizen documents uploaded email: [APPLICANT]");
         verify(correspondenceEventAuditOrchestrationService)
             .reconcileAndPersistAudits(caseDetails, event, "markPendingNotificationsAsSent");
 
@@ -100,7 +100,7 @@ class CUIDocumentUploadSubmittedHandlerTest {
         verify(citizenDocumentsUploadedCorresponder)
             .buildCorrespondenceEvent(caseDetails, AUTH_TOKEN, NotificationParty.CITIZEN_APPLICANT);
         verify(correspondenceEventAuditOrchestrationService)
-            .publishEvent(event, "Send citizen documents uploaded email: CITIZEN_APPLICANT");
+            .publishEvent(event, "Send citizen documents uploaded email: [APPLICANT]");
         verify(correspondenceEventAuditOrchestrationService, never())
             .reconcileAndPersistAudits(any(), any(), anyString());
 
