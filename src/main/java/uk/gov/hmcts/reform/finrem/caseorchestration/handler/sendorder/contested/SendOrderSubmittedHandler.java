@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.sendorder.contested;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -16,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.sendorder.SendOrderCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
@@ -32,7 +32,7 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
     private final GeneralOrderService generalOrderService;
     private final CcdService ccdService;
     private final SendOrderCorresponder sendOrderCorresponder;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     public SendOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                      EvidenceManagementDeleteService evidenceManagementDeleteService,
@@ -40,12 +40,12 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
                                      GeneralOrderService generalOrderService,
                                      CcdService ccdService,
                                      SendOrderCorresponder sendOrderCorresponder,
-                                     ApplicationEventPublisher applicationEventPublisher) {
+                                     CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
         this.generalOrderService = generalOrderService;
         this.ccdService = ccdService;
         this.sendOrderCorresponder = sendOrderCorresponder;
-        this.applicationEventPublisher = applicationEventPublisher;
+        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
     }
 
     @Override
@@ -94,7 +94,7 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
     private List<String> sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
-        // Setting party correspondence enabled flags
+        // Setting party correspondence enabled flags and it will not be persisted.
         generalOrderService.setPartiesToReceiveCommunication(finremCaseDetails, parties);
 
         List<SendCorrespondenceEvent> events = sendOrderCorresponder.buildCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation);
@@ -102,20 +102,14 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
         for (SendCorrespondenceEvent event : events) {
             if (!emptyIfNull(event.getNotificationParties()).isEmpty()) {
                 String party = event.getNotificationParties().getFirst().name();
-                String caseId = finremCaseDetails.getCaseIdAsString();
-                String task = "Send order corresponder to party: %s on send order event"
+                String actionName = "Send order corresponder to party: %s on send order event"
                     .formatted(party);
-                log.info("{} - {}", caseId, task);
-
-                retryExecutor.runWithRetryWithHandler(
-                    () -> applicationEventPublisher.publishEvent(event), task, caseId,
-                    (exception, actionName, caseId1) ->
-                        errors.add("Cannot deliver send order correspondence to %s. Please send it manually."
-                            .formatted(party))
+                correspondenceEventAuditOrchestrationService.publishEvent(event, actionName,
+                    () -> errors.add(
+                        "Cannot deliver send order correspondence to %s. Please send it manually.".formatted(party))
                 );
             }
         }
         return errors;
     }
-
 }
