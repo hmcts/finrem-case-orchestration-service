@@ -17,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class UpdateCourtInfoMidHandler extends FinremCallbackHandler {
+public class UpdateCourtInfoMidHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final ConsentedApplicationHelper consentedApplicationHelper;
 
