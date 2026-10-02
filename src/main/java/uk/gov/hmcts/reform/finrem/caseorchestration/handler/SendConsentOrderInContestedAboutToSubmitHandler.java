@@ -26,6 +26,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderP
 import java.util.ArrayList;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_CONSENT_IN_CONTESTED_ORDER;
+
 @Slf4j
 @Service
 public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallbackHandler {
@@ -57,7 +60,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.SEND_CONSENT_IN_CONTESTED_ORDER.equals(eventType);
+            && SEND_CONSENT_IN_CONTESTED_ORDER.equals(eventType);
     }
 
     @Override
@@ -65,10 +68,15 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
         String caseId = caseDetails.getCaseIdAsString();
 
+        List<String> errors = validateRequiredPostalAddresses(caseData, SEND_CONSENT_IN_CONTESTED_ORDER);
+        if (!errors.isEmpty()) {
+            return responseWithoutWarnings(caseData, errors);
+        }
+
         try {
-            FinremCaseData caseData = caseDetails.getData();
             List<String> parties = generalOrderService.getParties(caseDetails);
             log.info("Selected parties {} on Case ID: {}", parties, caseId);
 
