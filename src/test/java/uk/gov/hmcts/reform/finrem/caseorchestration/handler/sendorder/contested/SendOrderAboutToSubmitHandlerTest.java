@@ -67,7 +67,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderI
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderRespondentDocumentHandler;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -145,6 +148,10 @@ class SendOrderAboutToSubmitHandlerTest {
     private CaseDocument coversheet;
     private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
 
+    private static final Instant FIXED_INSTANT = Instant.parse("2026-10-02T10:00:00Z");
+
+    private final Clock clock = Clock.fixed(FIXED_INSTANT, ZoneId.of("Europe/London"));
+
     private List<SendOrderPartyDocumentHandler> handlers;
 
     @BeforeEach
@@ -181,7 +188,7 @@ class SendOrderAboutToSubmitHandlerTest {
                 sendOrderIntervenerThreeDocumentHandler,
                 sendOrderIntervenerFourDocumentHandler
             ),
-            orderDateService, sendOrdersCategoriser);
+            orderDateService, sendOrdersCategoriser, clock);
 
         lenient().when(generalOrderService.getParties(any(FinremCaseDetails.class))).thenReturn(parties);
         lenient().when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))

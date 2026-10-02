@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +75,7 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
     private final List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList;
     private final OrderDateService orderDateService;
     private final SendOrdersCategoriser sendOrdersCategoriser;
+    private final Clock clock;
 
     public SendOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                          GeneralOrderService generalOrderService, DraftOrderService draftOrderService,
@@ -81,7 +83,8 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
                                          DocumentHelper documentHelper,
                                          List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList,
                                          OrderDateService orderDateService,
-                                         SendOrdersCategoriser sendOrdersCategoriser) {
+                                         SendOrdersCategoriser sendOrdersCategoriser,
+                                         Clock clock) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.draftOrderService = draftOrderService;
@@ -90,6 +93,7 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
         this.sendOrderPartyDocumentList = sendOrderPartyDocumentList;
         this.orderDateService = orderDateService;
         this.sendOrdersCategoriser = sendOrdersCategoriser;
+        this.clock = clock;
     }
 
     @Override
@@ -399,7 +403,7 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
     private DirectionOrderCollection prepareFinalOrderList(CaseDocument document, List<CaseDocument> additionalDocuments) {
         return DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(document)
-                .orderDateTime(LocalDateTime.now())
+                .orderDateTime(LocalDateTime.now(clock))
                 .isOrderStamped(YesOrNo.YES)
                 .additionalDocuments(additionalDocuments == null || additionalDocuments.isEmpty() ? null : additionalDocuments.stream()
                     .map(a -> DocumentCollectionItem.builder().value(a).build()).toList())
