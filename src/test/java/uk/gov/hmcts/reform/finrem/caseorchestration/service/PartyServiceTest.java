@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -17,14 +19,11 @@ import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
+@ExtendWith(MockitoExtension.class)
 class PartyServiceTest {
 
+    @InjectMocks
     private PartyService partyService;
-
-    @BeforeEach
-    void setup() {
-        partyService =  new PartyService();
-    }
 
     @Test
     void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAreNotDigital_thenPartyListDefaultSelectedAppAndResp() {
@@ -58,9 +57,7 @@ class PartyServiceTest {
             CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
         data.getIntervenerFour().setIntervenerName("Intv4");
 
-
         DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyList(caseDetails);
-
 
         Assertions.assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
         Assertions.assertEquals(2, partiesOnCase.getValue().size(), "pre-selected parties");
@@ -84,7 +81,6 @@ class PartyServiceTest {
             CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
         data.getIntervenerFour().setIntervenerOrganisation(getOrganisation("ORGINTV4","intervener4",
             CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
-
 
         List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getCcdCode()),
             getDynamicElementList(CaseRole.RESP_SOLICITOR.getCcdCode()),

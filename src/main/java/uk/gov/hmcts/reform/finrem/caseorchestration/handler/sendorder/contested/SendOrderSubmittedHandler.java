@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPost
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.sendorder.SendOrderCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -29,7 +29,7 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 @Slf4j
 @Service
 public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
-    private final GeneralOrderService generalOrderService;
+    private final PartyService partyService;
     private final CcdService ccdService;
     private final SendOrderCorresponder sendOrderCorresponder;
     private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
@@ -37,12 +37,12 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
     public SendOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                      EvidenceManagementDeleteService evidenceManagementDeleteService,
                                      RetryExecutor retryExecutor,
-                                     GeneralOrderService generalOrderService,
+                                     PartyService partyService,
                                      CcdService ccdService,
                                      SendOrderCorresponder sendOrderCorresponder,
                                      CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
-        this.generalOrderService = generalOrderService;
+        this.partyService = partyService;
         this.ccdService = ccdService;
         this.sendOrderCorresponder = sendOrderCorresponder;
         this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
@@ -61,7 +61,7 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        List<String> errors = sendNotifications(callbackRequest, generalOrderService.getParties(caseDetails), userAuthorisation);
+        List<String> errors = sendNotifications(callbackRequest, userAuthorisation);
 
         updateCaseWithPostStateOption(caseDetails, userAuthorisation);
 
@@ -91,11 +91,11 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
             || postStateOption.getEventToTrigger().equals(EventType.CLOSE);
     }
 
-    private List<String> sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
+    private List<String> sendNotifications(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
         // Set the party correspondence enabled flags. These changes will not be persisted.
-        generalOrderService.setPartiesToReceiveCommunication(finremCaseDetails, parties);
+        partyService.updateCorrespondenceEnabledFromSelectedParties(finremCaseDetails);
 
         List<SendCorrespondenceEvent> events = sendOrderCorresponder.buildCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation);
         final List<String> errors = new ArrayList<>();

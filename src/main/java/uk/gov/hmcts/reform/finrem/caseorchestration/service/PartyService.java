@@ -31,6 +31,41 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 public class PartyService {
 
     /**
+     * Updates the correspondence-enabled flags for the applicant, respondent and each
+     * intervener based on the parties checked in a party-selection question such as
+     * "Who should receive this order?".
+     *
+     * <p>
+     * A party's flag is set to {@code true} if either their solicitor or their barrister
+     * role code is among the checked parties returned by
+     * {@link #getCheckedActiveParties(FinremCaseDetails)}, and {@code false} otherwise.
+     * Every flag is set on each call, so parties who are not checked are explicitly
+     * disabled rather than left unchanged.
+     * </p>
+     *
+     * <p>
+     * This method modifies the case data in place. It assumes that the intervener wrappers
+     * for interveners one to four are present on the case data.
+     * </p>
+     *
+     * @param caseDetails the case details containing the party selection, which is updated
+     *                    with the correspondence-enabled flags
+     */
+    public void updateCorrespondenceEnabledFromSelectedParties(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        data.setApplicantCorrespondenceEnabled(isOrderSharedWithApplicant(caseDetails));
+        data.setRespondentCorrespondenceEnabled(isOrderSharedWithRespondent(caseDetails));
+        data.getIntervenerOne()
+            .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener1(caseDetails));
+        data.getIntervenerTwo()
+            .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener2(caseDetails));
+        data.getIntervenerThree()
+            .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener3(caseDetails));
+        data.getIntervenerFour()
+            .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener4(caseDetails));
+    }
+
+    /**
      * Returns the role codes of the active parties that have been checked in a
      * party-selection question such as "Who should receive this order?".
      *
@@ -67,7 +102,7 @@ public class PartyService {
                 .map(OrganisationPolicy::getOrgPolicyCaseAssignedRole)
                 .orElse(""));
     }
-    
+
     /**
      * Checks whether the respondent has been selected in a party-selection
      * question such as "Who should receive this order?".
@@ -192,10 +227,46 @@ public class PartyService {
         }
     }
 
-    public DynamicMultiSelectListElement getDynamicMultiSelectListElement(String code, String label) {
+    private DynamicMultiSelectListElement getDynamicMultiSelectListElement(String code, String label) {
         return DynamicMultiSelectListElement.builder()
             .code(code)
             .label(label)
             .build();
+    }
+
+    private boolean isOrderSharedWithApplicant(FinremCaseDetails caseDetails) {
+        List<String> parties = getCheckedActiveParties(caseDetails);
+        return (parties.contains(CaseRole.APP_SOLICITOR.getCcdCode())
+            || parties.contains(CaseRole.APP_BARRISTER.getCcdCode()));
+    }
+
+    private boolean isOrderSharedWithRespondent(FinremCaseDetails caseDetails) {
+        List<String> parties = getCheckedActiveParties(caseDetails);
+        return (parties.contains(CaseRole.RESP_SOLICITOR.getCcdCode())
+            || parties.contains(CaseRole.RESP_BARRISTER.getCcdCode()));
+    }
+
+    private boolean isOrderSharedWithIntervener1(FinremCaseDetails caseDetails) {
+        List<String> parties = getCheckedActiveParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_1.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
+    }
+
+    private boolean isOrderSharedWithIntervener2(FinremCaseDetails caseDetails) {
+        List<String> parties = getCheckedActiveParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_2.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
+    }
+
+    private boolean isOrderSharedWithIntervener3(FinremCaseDetails caseDetails) {
+        List<String> parties = getCheckedActiveParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_3.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
+    }
+
+    private boolean isOrderSharedWithIntervener4(FinremCaseDetails caseDetails) {
+        List<String> parties = getCheckedActiveParties(caseDetails);
+        return (parties.contains(CaseRole.INTVR_BARRISTER_4.getCcdCode())
+            || parties.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
     }
 }
