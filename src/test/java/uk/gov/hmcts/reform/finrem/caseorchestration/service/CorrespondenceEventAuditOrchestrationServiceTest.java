@@ -25,13 +25,12 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 @ExtendWith(MockitoExtension.class)
 class CorrespondenceEventAuditOrchestrationServiceTest {
 
+    private static final String CASE_ID = "12345";
     private static final String ACTION_NAME = "test action";
 
     @Mock
@@ -110,20 +109,6 @@ class CorrespondenceEventAuditOrchestrationServiceTest {
     }
 
     @Test
-    void shouldNotPersistAuditsWhenNoUpdatedFieldsExist_new() {
-        SendCorrespondenceEvent event = event();
-        FinremCaseDetails caseDetails = caseDetails();
-
-        when(notificationAuditService.reconcileNotificationAudits(event)).thenReturn(Map.of());
-
-        correspondenceEventAuditOrchestrationService
-            .reconcileAndPersistAudits(caseDetails, ACTION_NAME, event);
-
-        verify(retryExecutor, never()).runWithRetrySuppressException(any(), any(), any());
-        verify(coreCaseDataService, never()).performPostSubmitCallback(any(), any(), any(), any());
-    }
-
-    @Test
     void shouldPersistAuditsWhenUpdatedFieldsExist() {
         SendCorrespondenceEvent event = event();
         FinremCaseDetails caseDetails = caseDetails();
@@ -139,64 +124,10 @@ class CorrespondenceEventAuditOrchestrationServiceTest {
         correspondenceEventAuditOrchestrationService
             .reconcileAndPersistAudits(caseDetails, event, ACTION_NAME);
 
-        verify(notificationAuditService).reconcileNotificationAudits(event);
         verify(retryExecutor).runWithRetrySuppressException(any(), eq(ACTION_NAME), eq(CASE_ID));
         verify(coreCaseDataService).performPostSubmitCallback(
             eq(CaseType.CONTESTED),
-            eq(CASE_ID_IN_LONG),
-            eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()),
-            any()
-        );
-    }
-
-    @Test
-    void shouldPersistAuditsWhenUpdatedFieldsExist_new() {
-        SendCorrespondenceEvent event = event();
-        FinremCaseDetails caseDetails = caseDetails();
-        Map<String, Object> updatedFields = Map.of("notificationsAudits", "updated");
-
-        when(notificationAuditService.reconcileNotificationAudits(event)).thenReturn(updatedFields);
-        doAnswer(invocation -> {
-            ThrowingRunnable action = invocation.getArgument(0);
-            action.run();
-            return null;
-        }).when(retryExecutor).runWithRetrySuppressException(any(), eq(ACTION_NAME), eq(CASE_ID));
-
-        correspondenceEventAuditOrchestrationService
-            .reconcileAndPersistAudits(caseDetails, ACTION_NAME, event);
-
-        verify(notificationAuditService).reconcileNotificationAudits(event);
-        verify(retryExecutor).runWithRetrySuppressException(any(), eq(ACTION_NAME), eq(CASE_ID));
-        verify(coreCaseDataService).performPostSubmitCallback(
-            eq(CaseType.CONTESTED),
-            eq(CASE_ID_IN_LONG),
-            eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()),
-            any()
-        );
-    }
-
-    @Test
-    void givenMultipleEvents_shouldPersistAuditsWhenUpdatedFieldsExist() {
-        SendCorrespondenceEvent event = event();
-        SendCorrespondenceEvent event2 = event();
-        FinremCaseDetails caseDetails = caseDetails();
-        Map<String, Object> updatedFields = Map.of("notificationsAudits", "updated");
-
-        when(notificationAuditService.reconcileNotificationAudits(event, event2)).thenReturn(updatedFields);
-        doAnswer(invocation -> {
-            ThrowingRunnable action = invocation.getArgument(0);
-            action.run();
-            return null;
-        }).when(retryExecutor).runWithRetrySuppressException(any(), eq(ACTION_NAME), eq(CASE_ID));
-
-        correspondenceEventAuditOrchestrationService
-            .reconcileAndPersistAudits(caseDetails, ACTION_NAME, event, event2);
-
-        verify(notificationAuditService).reconcileNotificationAudits(event, event2);
-        verify(retryExecutor).runWithRetrySuppressException(any(), eq(ACTION_NAME), eq(CASE_ID));
-        verify(coreCaseDataService).performPostSubmitCallback(
-            eq(CaseType.CONTESTED),
-            eq(CASE_ID_IN_LONG),
+            eq(12345L),
             eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()),
             any()
         );
@@ -213,7 +144,7 @@ class CorrespondenceEventAuditOrchestrationServiceTest {
         caseData.setCcdCaseId(CASE_ID);
 
         return FinremCaseDetails.builder()
-            .id(CASE_ID_IN_LONG)
+            .id(12345L)
             .caseType(CaseType.CONTESTED)
             .data(caseData)
             .build();
