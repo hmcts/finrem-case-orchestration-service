@@ -156,6 +156,15 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-vacate-notification-solicitor-stub.json");
     }
 
+    @Test
+    public void shouldMatchFrContestedGeneralOrderConsentStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-general-order-consent-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrContestedGeneralEmailStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-general-email-stub.json");
+    }
 
     // -------------------------
     // NOC SCENARIOS
