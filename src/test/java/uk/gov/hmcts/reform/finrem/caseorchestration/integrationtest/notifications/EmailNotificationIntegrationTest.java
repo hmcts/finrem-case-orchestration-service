@@ -158,6 +158,16 @@ public class EmailNotificationIntegrationTest extends BaseTest {
 
 
     // -------------------------
+    // NOC SCENARIOS
+    // -------------------------
+
+    @Test
+    public void shouldMatchFrContestedNoticeOfChangeStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-notice-of-change-stub.json");
+    }
+
+
+    // -------------------------
     // INTERVENERS SCENARIOS
     // -------------------------
 
