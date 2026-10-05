@@ -97,7 +97,8 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
         // Set the party correspondence enabled flags. These changes will not be persisted.
         partyService.updateCorrespondenceEnabledFromSelectedParties(finremCaseDetails);
 
-        List<SendCorrespondenceEvent> events = sendOrderCorresponder.buildCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation);
+        List<SendCorrespondenceEvent> events = sendOrderCorresponder.buildCorrespondenceEventIfNeeded(finremCaseDetails,
+            userAuthorisation);
         final List<String> errors = new ArrayList<>();
         for (SendCorrespondenceEvent event : events) {
             if (!emptyIfNull(event.getNotificationParties()).isEmpty()) {
