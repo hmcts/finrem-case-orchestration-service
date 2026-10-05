@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
@@ -28,11 +27,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 
 @ExtendWith(MockitoExtension.class)
 class IntervenerThreePartyListenerTest extends BasePartyListenerTest {
@@ -73,14 +74,14 @@ class IntervenerThreePartyListenerTest extends BasePartyListenerTest {
                     .build())
                 .build())
             .build();
-        event = SendCorrespondenceEvent.builder()
+        event = spy(SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
             .emailNotificationRequest(NotificationRequest.builder().build())
             .notificationParties(List.of(NotificationParty.INTERVENER_THREE))
-            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .documentsToPost(List.of(CaseDocument.builder().documentFilename(TEST_DOC_NAME).build()))
             .authToken(AUTH_TOKEN)
-            .build();
+            .build());
 
         intervenerThreePartyListener = new IntervenerThreePartyListener(
             bulkPrintService, emailService, notificationService, internationalPostalService
@@ -155,7 +156,7 @@ class IntervenerThreePartyListenerTest extends BasePartyListenerTest {
         assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(INTERVENER_THREE_REF);
 
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerThree(), caseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplate()));
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR));
     }
 
     /**
