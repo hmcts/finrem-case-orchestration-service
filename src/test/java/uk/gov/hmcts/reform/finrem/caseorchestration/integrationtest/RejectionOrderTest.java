@@ -17,7 +17,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 
-// to upgrade ccd-case-document-am-client library (EM-7149)
 public class RejectionOrderTest extends AbstractDocumentTest {
 
     private static final String API_URL = "/case-orchestration/ccdAboutToSubmitEvent";
