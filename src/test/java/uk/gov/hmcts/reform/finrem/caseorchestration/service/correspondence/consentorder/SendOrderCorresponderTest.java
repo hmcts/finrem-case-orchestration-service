@@ -8,8 +8,13 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNotice;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -20,6 +25,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.sendorder.SendOrderCorresponder;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,6 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
@@ -76,6 +85,11 @@ class SendOrderCorresponderTest {
 
     @Mock
     private NotificationRequest intervenerRequest;
+
+    private static final Instant FIXED_INSTANT = Instant.parse("2026-10-02T10:00:00Z");
+
+    @Spy
+    private Clock clock = Clock.fixed(FIXED_INSTANT, ZoneId.of("Europe/London"));
 
     @BeforeEach
     void setup() {
@@ -129,6 +143,20 @@ class SendOrderCorresponderTest {
         when(intervenerOne.isPresent()).thenReturn(true);
         when(caseData.getIntervenerOne()).thenReturn(intervenerOne);
 
+        // documents
+        CaseDocument docOne = caseDocument("1");
+        CaseDocument docA = caseDocument("a");
+        List<OrderSentToPartiesCollection> ordersSentToPartiesCollection = List.of(
+            orderSentToPartiesCollection(docOne)
+        );
+        List<IntervenerHearingNoticeCollection> intervenerHearingNoticeCollectionList = List.of(
+            intervenerHearingNoticeCollection(docA)
+        );
+        when(intervenerOne.getIntervenerHearingNoticesCollection(caseData))
+            .thenReturn(intervenerHearingNoticeCollectionList);
+        when(caseData.getOrdersSentToPartiesCollection())
+            .thenReturn(ordersSentToPartiesCollection);
+
         SolicitorCaseDataKeysWrapper intervenerKey = mock(SolicitorCaseDataKeysWrapper.class);
 
         when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(finremCaseDetails))
@@ -154,7 +182,9 @@ class SendOrderCorresponderTest {
         assertThat(events.get(2))
             .returns(intervenerRequest, SendCorrespondenceEvent::getEmailNotificationRequest)
             .returns(FR_CONTEST_ORDER_APPROVED_INTERVENER1, SendCorrespondenceEvent::getEmailTemplate)
-            .returns(AUTH_TOKEN, SendCorrespondenceEvent::getAuthToken);
+            .returns(AUTH_TOKEN, SendCorrespondenceEvent::getAuthToken)
+            .satisfies(event -> assertThat(event.getDocumentsToPost())
+                .containsExactlyInAnyOrder(docOne, docA));
     }
 
     @Test
@@ -166,5 +196,17 @@ class SendOrderCorresponderTest {
 
         assertThat(events).hasSize(2);
         verify(notificationService, never()).getCaseDataKeysForIntervenerSolicitor(any());
+    }
+
+    private static OrderSentToPartiesCollection orderSentToPartiesCollection(CaseDocument caseDocument) {
+        return OrderSentToPartiesCollection.builder()
+            .value(SendOrderDocuments.builder().caseDocument(caseDocument).build())
+            .build();
+    }
+
+    private static IntervenerHearingNoticeCollection intervenerHearingNoticeCollection(CaseDocument caseDocument) {
+        return IntervenerHearingNoticeCollection.builder()
+            .value(IntervenerHearingNotice.builder().caseDocument(caseDocument).build())
+            .build();
     }
 }
