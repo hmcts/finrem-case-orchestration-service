@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -14,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
@@ -36,9 +36,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 
 @ExtendWith(MockitoExtension.class)
-class ApplicantPartyListenerTest {
+class ApplicantPartyListenerTest extends BasePartyListenerTest {
 
     @Mock
     private BulkPrintService bulkPrintService;
@@ -81,14 +82,14 @@ class ApplicantPartyListenerTest {
                         .build()
                 ).build())).build();
 
-        event = SendCorrespondenceEvent.builder()
+        event = spy(SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
             .emailNotificationRequest(NotificationRequest.builder().build())
             .notificationParties(List.of(NotificationParty.APPLICANT))
-            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .documentsToPost(List.of(testDocument))
             .authToken(AUTH_TOKEN)
-            .build();
+            .build());
 
         applicantPartyListener = new ApplicantPartyListener(
             bulkPrintService, emailService, notificationService, internationalPostalService
@@ -183,7 +184,7 @@ class ApplicantPartyListenerTest {
         assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(APPLICANT_REF);
 
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplate()));
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR));
     }
 
     @Test
@@ -193,7 +194,7 @@ class ApplicantPartyListenerTest {
             .caseDetails(caseDetails)
             .emailNotificationRequest(null)
             .notificationParties(List.of(NotificationParty.APPLICANT))
-            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .documentsToPost(List.of())
             .authToken(AUTH_TOKEN)
             .build();
@@ -281,7 +282,7 @@ class ApplicantPartyListenerTest {
             .caseDetails(caseDetails)
             .emailNotificationRequest(NotificationRequest.builder().build())
             .notificationParties(List.of(NotificationParty.APPLICANT))
-            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .documentsToPost(List.of())
             .authToken(AUTH_TOKEN)
             .build();
@@ -306,5 +307,15 @@ class ApplicantPartyListenerTest {
         when(caseData.isApplicantCorrespondenceEnabled()).thenReturn(false);
 
         assertFalse(applicantPartyListener.isNotificationPartySelected(event));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void isNotificationPartySelected_shouldMatchApplicantCorrespondenceEnabled(
+        boolean isApplicantCorrespondenceEnabled) {
+        when(event.getCaseData()).thenReturn(finremCaseData);
+        when(finremCaseData.isApplicantCorrespondenceEnabled()).thenReturn(isApplicantCorrespondenceEnabled);
+
+        assertThat(applicantPartyListener.isNotificationPartySelected(event)).isEqualTo(isApplicantCorrespondenceEnabled);
     }
 }

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -29,6 +30,10 @@ abstract class BasePartyListenerTest {
     protected NotificationService notificationService;
     @Mock
     protected InternationalPostalService internationalPostalService;
+    @Mock
+    protected FinremCaseData finremCaseData;
+    @Mock
+    protected SendCorrespondenceEvent event;
 
     protected static NotificationRequest emailNotificationRequest(String solicitorReferenceNumber) {
         return NotificationRequest.builder()
