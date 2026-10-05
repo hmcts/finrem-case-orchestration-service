@@ -952,6 +952,9 @@ class ContactDetailsValidatorTest {
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
         assertThat(errors).isEqualTo(expectedResult);
+        errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType,
+            false, true));
+        assertThat(errors).isEmpty();
     }
 
     @ParameterizedTest(name = "{index}: {0}")
@@ -972,6 +975,9 @@ class ContactDetailsValidatorTest {
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
         assertThat(errors).isEqualTo(expectedResult);
+        errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType,
+            false, true));
+        assertThat(errors).isEmpty();
     }
 
     @ParameterizedTest(name = "{index}: {0}")
@@ -992,6 +998,9 @@ class ContactDetailsValidatorTest {
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
         assertThat(errors).isEqualTo(expectedResult);
+        errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType,
+            true, false));
+        assertThat(errors).isEmpty();
     }
 
     @ParameterizedTest(name = "{index}: {0}")
@@ -1012,6 +1021,9 @@ class ContactDetailsValidatorTest {
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
         assertThat(errors).isEqualTo(expectedResult);
+        errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType,
+            true, false));
+        assertThat(errors).isEmpty();
     }
 
     private static Stream<Arguments> applicantPostalAddressScenarios() {
