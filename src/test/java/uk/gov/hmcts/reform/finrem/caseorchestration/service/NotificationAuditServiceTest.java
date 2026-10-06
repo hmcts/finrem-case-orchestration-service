@@ -348,14 +348,14 @@ class NotificationAuditServiceTest {
         List<NotificationAudit> sentAudits
     ) {
         return buildEventWithPendingAndSentAudits(
-                 caseDetails(
-                    NotificationAuditWrapper.builder()
-                        .notificationEventId(
-                            NotificationAuditServiceTest.CURRENT_NOTIFICATION_EVENT_ID
-                        )
-                        .notificationsToBeSent(pending)
-                        .build()
-                ),
+            caseDetails(
+                NotificationAuditWrapper.builder()
+                    .notificationEventId(
+                        NotificationAuditServiceTest.CURRENT_NOTIFICATION_EVENT_ID
+                    )
+                    .notificationsToBeSent(pending)
+                    .build()
+            ),
             new ArrayList<>(sentAudits)
         );
     }

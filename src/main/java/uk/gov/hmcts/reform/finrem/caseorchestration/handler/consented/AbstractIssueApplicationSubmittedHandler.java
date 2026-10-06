@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
@@ -18,18 +17,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSubmittedCallbackHandler {
 
@@ -39,26 +34,18 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
 
     protected final AssignPartiesAccessService assignPartiesAccessService;
 
-    protected final ApplicationEventPublisher applicationEventPublisher;
-
-    protected final NotificationAuditService notificationAuditService;
-
-    protected final CoreCaseDataService coreCaseDataService;
+    protected final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     protected AbstractIssueApplicationSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                        EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                        RetryExecutor retryExecutor,
                                                        AssignToJudgeCorresponder assignToJudgeCorresponder,
                                                        AssignPartiesAccessService assignPartiesAccessService,
-                                                       ApplicationEventPublisher applicationEventPublisher,
-                                                       NotificationAuditService notificationAuditService,
-                                                       CoreCaseDataService coreCaseDataService) {
+                                                       CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
         this.assignToJudgeCorresponder = assignToJudgeCorresponder;
         this.assignPartiesAccessService = assignPartiesAccessService;
-        this.applicationEventPublisher = applicationEventPublisher;
-        this.notificationAuditService = notificationAuditService;
-        this.coreCaseDataService = coreCaseDataService;
+        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
     }
 
     protected abstract EventType supportedEventType();
@@ -127,30 +114,19 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
             String trackerId = caseDetails.getData().getNotificationAuditWrapper().getNotificationEventId();
             event.setNotificationTrackerId(trackerId);
 
-            retryExecutor.runWithRetryWithHandler(() -> applicationEventPublisher.publishEvent(event),
+            correspondenceEventAuditOrchestrationService.publishEvent(
+                event,
                 "sending issue application correspondence %s (%s)".formatted(
                     event.getNotificationTrackerId(),
                     event.describeNotificationParties()
                 ),
-                caseDetails.getCaseIdAsString(),
-                (exception, actionName, caseId1) ->
-                    errors.add("There was a problem sending issue application correspondence (%s). Please send it manually."
-                        .formatted(event.describeNotificationParties())));
-        }
-        Map<String, Object> updatedFields =
-            notificationAuditService.reconcileNotificationAudits(events.toArray(new SendCorrespondenceEvent[0]));
-        if (!updatedFields.isEmpty()) {
-            retryExecutor.runWithRetrySuppressException(
-                () -> coreCaseDataService.performPostSubmitCallback(
-                    caseDetails.getData().getCcdCaseType(),
-                    caseDetails.getId(),
-                    INTERNAL_CHANGE_UPDATE_CASE.getCcdType(),
-                    latestCaseDetails -> updatedFields
-                ),
-                "markPendingNotificationsAsSent",
-                caseDetails.getCaseIdAsString()
+                () -> errors.add("There was a problem sending issue application correspondence (%s). Please send it manually."
+                    .formatted(event.describeNotificationParties()))
             );
         }
+
+        correspondenceEventAuditOrchestrationService.reconcileAndPersistAudits(caseDetails,
+            "markPendingNotificationsAsSent", events.toArray(new SendCorrespondenceEvent[0]));
         return errors;
     }
 
