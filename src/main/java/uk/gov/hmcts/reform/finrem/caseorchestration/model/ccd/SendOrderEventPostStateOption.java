@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
@@ -14,15 +15,12 @@ public enum SendOrderEventPostStateOption {
     NONE("", EventType.NONE);
 
     private final String value;
+    @Getter
     private final EventType eventToTrigger;
 
     @JsonValue
     public String getValue() {
         return value;
-    }
-
-    public EventType getEventToTrigger() {
-        return eventToTrigger;
     }
 
     public static SendOrderEventPostStateOption forValue(String value) {

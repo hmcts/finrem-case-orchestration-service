@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
@@ -22,8 +23,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
@@ -75,9 +78,13 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
     }
 
     private void updateCaseWithPostStateOption(FinremCaseDetails caseDetails, String userAuthorisation) {
-        SendOrderEventPostStateOption sendOrderPostStateOption = caseDetails.getData().getSendOrderWrapper().getSendOrderPostStateOption();
-        if (isOptionThatRequireUpdate(sendOrderPostStateOption)) {
-            caseDetails.getData().getSendOrderWrapper().setSendOrderPostStateOption(null);
+        FinremCaseData caseData = caseDetails.getData();
+        SendOrderEventPostStateOption sendOrderPostStateOption = ofNullable(caseData)
+            .map(FinremCaseData::getSendOrderWrapper)
+            .map(SendOrderWrapper::getSendOrderPostStateOption)
+            .orElse(null);
+
+        if (sendOrderPostStateOption != null && isOptionThatRequireUpdate(sendOrderPostStateOption)) {
             ccdService.executeCcdEventOnCase(
                 userAuthorisation,
                 String.valueOf(caseDetails.getId()),
@@ -87,8 +94,10 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
     }
 
     private boolean isOptionThatRequireUpdate(SendOrderEventPostStateOption postStateOption) {
-        return postStateOption.getEventToTrigger().equals(EventType.PREPARE_FOR_HEARING)
-            || postStateOption.getEventToTrigger().equals(EventType.CLOSE);
+        return Arrays.asList(EventType.PREPARE_FOR_HEARING, EventType.CLOSE)
+            .contains(ofNullable(postStateOption)
+                .map(SendOrderEventPostStateOption::getEventToTrigger)
+                .orElse(null));
     }
 
     private List<String> sendNotifications(FinremCallbackRequest callbackRequest, String userAuthorisation) {
