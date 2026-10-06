@@ -190,6 +190,7 @@ class FinremCallbackHandlerTest {
     private ResponseWithoutWarningsTestHandler responseWithoutWarningsTestHandler;
     private ResponseTestHandler responseTestHandler;
     private ValidateCaseDataTestHandler validateCaseDataTestHandler;
+    private
 
     @BeforeEach
     void setUp() {

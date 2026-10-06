@@ -31,30 +31,29 @@ public class CaseManagementLocationService {
      *         or null if no matching court is found
      */
     public CaseLocation getCaseLocation(FinremCaseData finremCaseData) {
-        log.info("Getting case location for court reference data: {}", finremCaseData);
 
-        String selectedAllocatedCourt = Optional.ofNullable(finremCaseData)
+        Optional<String> selectedAllocatedCourtOptional = Optional.ofNullable(finremCaseData)
             .map(FinremCaseData::getSelectedAllocatedCourt)
             .map(String::trim)
-            .filter(value -> !value.isEmpty())
-            .orElse(null);
+            .filter(value -> !value.isEmpty());
 
-        if (selectedAllocatedCourt == null) {
+        if (selectedAllocatedCourtOptional.isPresent()) {
+            String selectedAllocatedCourt = selectedAllocatedCourtOptional.get();
+            String courtKey = selectedAllocatedCourt.toLowerCase(Locale.ROOT);
+            CourtRefData courtRefData = courtReferenceDataByName.get(courtKey);
+
+            if (courtRefData == null) {
+                log.warn("No court reference data found for case id: {}, court name: {}",
+                    finremCaseData.getCcdCaseId(), selectedAllocatedCourt);
+                return null;
+            }
+
+            log.info("Found court reference data for case id: {}, court name: {}: {}",
+                finremCaseData.getCcdCaseId(), selectedAllocatedCourt, courtRefData);
+            return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
+        } else {
             log.warn("No court set case id: {}", finremCaseData != null ? finremCaseData.getCcdCaseId() : null);
             return null;
         }
-
-        String courtKey = selectedAllocatedCourt.toLowerCase(Locale.ROOT);
-        CourtRefData courtRefData = courtReferenceDataByName.get(courtKey);
-
-        if (courtRefData == null) {
-            log.warn("No court reference data found for case id: {}, court name: {}",
-                finremCaseData.getCcdCaseId(), selectedAllocatedCourt);
-            return null;
-        }
-
-        log.info("Found court reference data for case id: {}, court name: {}: {}",
-            finremCaseData.getCcdCaseId(), finremCaseData.getSelectedAllocatedCourt(), courtRefData);
-        return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
     }
 }
