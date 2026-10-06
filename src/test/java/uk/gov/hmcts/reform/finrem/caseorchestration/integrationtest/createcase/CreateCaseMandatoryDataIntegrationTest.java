@@ -46,7 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
     CallbackDispatchService.class,
     GlobalSearchService.class,
     SolicitorCreateContestedAboutToSubmitHandler.class,
-    FinremCaseDetailsMapper.class
+    FinremCaseDetailsMapper.class,
     CaseManagementLocationService.class
 })
 class CreateCaseMandatoryDataIntegrationTest {
