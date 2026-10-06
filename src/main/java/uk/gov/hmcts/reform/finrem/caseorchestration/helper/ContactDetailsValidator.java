@@ -398,6 +398,12 @@ public class ContactDetailsValidator {
      * Validates that the applicant and respondent have the required postal addresses.
      *
      * <p>
+     * This is a convenience overload that validates both parties. It is equivalent to calling
+     * {@link #validateRequiredPostalAddresses(FinremCaseData, EventType, boolean, boolean)}
+     * with both {@code validateApplicant} and {@code validateRespondent} set to {@code true}.
+     * </p>
+     *
+     * <p>
      * This method checks the appropriate postal address for each party based on whether
      * they are represented by a solicitor. For represented parties, the solicitor's
      * address is validated; otherwise, the party's own address is validated.
@@ -423,12 +429,54 @@ public class ContactDetailsValidator {
      * @return a list of validation error messages for any missing postal addresses
      */
     public static List<String> validateRequiredPostalAddresses(FinremCaseData caseData, EventType eventType) {
+        return validateRequiredPostalAddresses(caseData, eventType, true, true);
+    }
+
+    /**
+     * Validates that the selected parties have the required postal addresses.
+     *
+     * <p>
+     * This method checks the appropriate postal address for each party being validated, based on
+     * whether they are represented by a solicitor. For represented parties, the solicitor's
+     * address is validated; otherwise, the party's own address is validated. Each party is only
+     * checked if the corresponding flag is {@code true}, which allows callers to validate only
+     * the parties who will receive postal notifications, for example those selected in
+     * "Who should receive this order?".
+     * </p>
+     *
+     * <p>
+     * A validation error is generated when the relevant address:
+     * </p>
+     * <ul>
+     *   <li>Is null or empty.</li>
+     *   <li>Does not contain {@code addressLine1}.</li>
+     *   <li>Does not contain {@code postcode}.</li>
+     * </ul>
+     *
+     * <p>
+     * This validation is intended to be used during about-to-submit callbacks to ensure that
+     * postal notifications can be issued successfully. It assumes that a UK postcode is provided
+     * for the addresses being validated, and does not account for non-UK addresses.
+     * </p>
+     *
+     * @param caseData the {@link FinremCaseData} containing the addresses to validate
+     * @param eventType the event context to include in validation error messages
+     * @param validateApplicant {@code true} to validate the applicant's postal address
+     * @param validateRespondent {@code true} to validate the respondent's postal address
+     * @return a list of validation error messages for any missing postal addresses; empty if
+     *         neither party is validated or all validated addresses are complete
+     */
+    public static List<String> validateRequiredPostalAddresses(FinremCaseData caseData, EventType eventType,
+                                                               boolean validateApplicant, boolean validateRespondent) {
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
-        checkForMissingApplicantPostalAddress(caseData, wrapper, eventType, errors);
-        checkForMissingRespondentPostalAddress(caseData, wrapper, eventType, errors);
-
+        if (validateApplicant) {
+            checkForMissingApplicantPostalAddress(caseData, wrapper, eventType, errors);
+        }
+        if (validateRespondent) {
+            checkForMissingRespondentPostalAddress(caseData, wrapper, eventType, errors);
+        }
         return errors;
     }
 
