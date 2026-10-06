@@ -7,8 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.F
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNotice;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
@@ -18,8 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,8 +37,6 @@ public class SendOrderCorresponder {
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
 
     private final NotificationService notificationService;
-
-    private final Clock clock;
 
     /**
      * Builds the {@link SendCorrespondenceEvent}s required to notify each party on the case
@@ -164,15 +158,11 @@ public class SendOrderCorresponder {
                                                                IntervenerWrapper intervenerWrapper) {
         // Copied from FinremMultiLetterOrEmailAllPartiesCorresponder.returnAndAddCaseDocumentsToIntervenerHearingNotices
         List<CaseDocument> caseDocuments = getDocumentsToPostForApplicantAndRespondent(caseDetails);
+        /* TODO clarifying https://hmcts.atlassian.net/browse/DFR-5782?focusedCommentId=2178599
         List<IntervenerHearingNoticeCollection> intervenerHearingNoticesCollection =
             intervenerWrapper.getIntervenerHearingNoticesCollection(caseDetails.getData());
         caseDocuments.forEach(cd -> intervenerHearingNoticesCollection.add(getHearingNoticesDocumentCollection(cd)));
+         */
         return caseDocuments;
-    }
-
-    private IntervenerHearingNoticeCollection getHearingNoticesDocumentCollection(CaseDocument hearingNotice) {
-        return IntervenerHearingNoticeCollection.builder()
-            .value(IntervenerHearingNotice.builder().caseDocument(hearingNotice)
-                .noticeReceivedAt(LocalDateTime.now(clock)).build()).build();
     }
 }

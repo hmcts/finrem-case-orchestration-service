@@ -25,9 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.sendorder.SendOrderCorresponder;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 
@@ -86,11 +83,6 @@ class SendOrderCorresponderTest {
     @Mock
     private NotificationRequest intervenerRequest;
 
-    private static final Instant FIXED_INSTANT = Instant.parse("2026-10-02T10:00:00Z");
-
-    @Spy
-    private Clock clock = Clock.fixed(FIXED_INSTANT, ZoneId.of("Europe/London"));
-
     @BeforeEach
     void setup() {
         when(finremCaseDetails.getData()).thenReturn(caseData);
@@ -145,15 +137,9 @@ class SendOrderCorresponderTest {
 
         // documents
         CaseDocument docOne = caseDocument("1");
-        CaseDocument docA = caseDocument("a");
         List<OrderSentToPartiesCollection> ordersSentToPartiesCollection = List.of(
             orderSentToPartiesCollection(docOne)
         );
-        List<IntervenerHearingNoticeCollection> intervenerHearingNoticeCollectionList = List.of(
-            intervenerHearingNoticeCollection(docA)
-        );
-        when(intervenerOne.getIntervenerHearingNoticesCollection(caseData))
-            .thenReturn(intervenerHearingNoticeCollectionList);
         when(caseData.getOrdersSentToPartiesCollection())
             .thenReturn(ordersSentToPartiesCollection);
 
@@ -184,7 +170,7 @@ class SendOrderCorresponderTest {
             .returns(FR_CONTEST_ORDER_APPROVED_INTERVENER1, SendCorrespondenceEvent::getEmailTemplate)
             .returns(AUTH_TOKEN, SendCorrespondenceEvent::getAuthToken)
             .satisfies(event -> assertThat(event.getDocumentsToPost())
-                .containsExactlyInAnyOrder(docOne, docA));
+                .containsExactlyInAnyOrder(docOne));
     }
 
     @Test
