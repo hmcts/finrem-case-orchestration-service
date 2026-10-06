@@ -52,17 +52,25 @@ public class CorrespondenceEventAuditOrchestrationService {
      */
     public boolean publishEvent(SendCorrespondenceEvent event, String actionName) {
         AtomicBoolean success = new AtomicBoolean(true);
+        publishEvent(event, actionName, () -> success.set(false));
+        return success.get();
+    }
 
+    /**
+     * Publishes a correspondence event with retry, invoking a callback if publishing
+     * ultimately fails.
+     *
+     * @param event the correspondence event to publish
+     * @param actionName action label used for retry/audit logging
+     * @param onFailure invoked once if publishing still fails after retries
+     */
+    public void publishEvent(SendCorrespondenceEvent event, String actionName, Runnable onFailure) {
         retryExecutor.runWithRetryWithHandler(
             () -> applicationEventPublisher.publishEvent(event),
             actionName,
             event.getCaseId(),
-            (exception, action, caseId) -> {
-                success.set(false);
-            }
+            (exception, action, caseId) -> onFailure.run()
         );
-
-        return success.get();
     }
 
     /**
@@ -71,11 +79,33 @@ public class CorrespondenceEventAuditOrchestrationService {
      * @param caseDetails case details used for post-submit update
      * @param event published correspondence event used for reconciliation
      * @param actionName action label used for retry/audit logging
+     * @deprecated use
+     *     {@link #reconcileAndPersistAudits(FinremCaseDetails, String, SendCorrespondenceEvent...)}
+     *     instead, which accepts one or more events in a single call.
      */
+    @Deprecated(forRemoval = true)
     public void reconcileAndPersistAudits(FinremCaseDetails caseDetails,
                                           SendCorrespondenceEvent event,
                                           String actionName) {
-        Map<String, Object> updatedFields = notificationAuditService.reconcileNotificationAudits(event);
+        reconcileAndPersistAudits(caseDetails, actionName, event);
+    }
+
+    /**
+     * Reconciles notification audit rows for one or more correspondence events and persists
+     * any resulting updates to CCD in a single post-submit callback.
+     *
+     * <p>If reconciliation produces no updates, CCD is not called. Failures while persisting
+     * are retried and then suppressed, so this method does not throw if the CCD update
+     * ultimately fails.</p>
+     *
+     * @param caseDetails case details used for the post-submit update
+     * @param actionName action label used for retry/audit logging
+     * @param events published correspondence events used for reconciliation
+     */
+    public void reconcileAndPersistAudits(FinremCaseDetails caseDetails,
+                                          String actionName,
+                                          SendCorrespondenceEvent... events) {
+        Map<String, Object> updatedFields = notificationAuditService.reconcileNotificationAudits(events);
 
         if (!updatedFields.isEmpty()) {
             retryExecutor.runWithRetrySuppressException(
