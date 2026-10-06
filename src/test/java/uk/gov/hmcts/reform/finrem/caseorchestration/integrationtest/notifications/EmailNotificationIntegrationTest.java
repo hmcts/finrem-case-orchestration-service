@@ -166,6 +166,11 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-general-email-stub.json");
     }
 
+    @Test
+    public void shouldMatchFrContestedDraftOrderReadyForReviewJudgeStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-draft-order-ready-for-review-judge-stub.json");
+    }
+
     // -------------------------
     // NOC SCENARIOS
     // -------------------------
@@ -200,6 +205,15 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-reject-general-application-stub.json");
     }
 
+    @Test
+    public void shouldMatchFrIntervenerRemovedEmailStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-intervener-removed-email-stub.json");
+    }
+
+    @Test
+public void shouldMatchFrContestOrderApprovedIntervener1Stub() throws Exception {
+    assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contest-order-approved-intervener1-stub.json");
+}
 
     private void assertFixtureMatchesLiveNotify(String fixtureClasspath) throws Exception {
         Fixture fixture = readFixture(fixtureClasspath);
