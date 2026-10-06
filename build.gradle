@@ -354,7 +354,10 @@ task fortifyScan(type: JavaExec) {
 
 task buildCCDXlsx(type: Exec) {
     group 'ccd tasks'
+
+    def isEnableProdCcdForLocal = project.hasProperty('ENABLE_PROD_CCD_FOR_LOCAL') ? project.property('ENABLE_PROD_CCD_FOR_LOCAL').toBoolean() : false
     commandLine './bin/build-finrem-xlxs-definitions.sh'
+    args isEnableProdCcdForLocal.toString()
 }
 
 bootWithCCD {
