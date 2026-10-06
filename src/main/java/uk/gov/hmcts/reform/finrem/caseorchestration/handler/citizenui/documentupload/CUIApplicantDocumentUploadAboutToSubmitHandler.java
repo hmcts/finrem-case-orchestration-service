@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentupload;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.documentupload;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,8 +8,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CuiDocumentsCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser;
 
 import java.util.List;
 
@@ -25,17 +28,19 @@ import java.util.List;
  * </ul>
  *
  * <p>All core merge and sort logic is implemented in
- * {@link CuiDocumentUploadAboutToSubmitHandler}.
+ * {@link CUIDocumentUploadAboutToSubmitHandler}.
  */
 @Slf4j
 @Service
-public class CuiApplicantDocumentUploadAboutToSubmitHandler extends CuiDocumentUploadAboutToSubmitHandler {
+public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentUploadAboutToSubmitHandler {
 
     private final FeatureToggleService featureToggleService;
 
-    public CuiApplicantDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                          FeatureToggleService featureToggleService) {
-        super(finremCaseDetailsMapper);
+    public CUIApplicantDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                           FeatureToggleService featureToggleService,
+                                                           CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
+                                                           CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder) {
+        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder);
         this.featureToggleService = featureToggleService;
     }
 
@@ -78,8 +83,13 @@ public class CuiApplicantDocumentUploadAboutToSubmitHandler extends CuiDocumentU
 
     @Override
     protected void categoriseDocuments(FinremCaseData caseData) {
-        new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT)
+        new CUIDocumentsCategoriser(featureToggleService, CUIDocumentsCategoriser.Party.APPLICANT)
             .categorise(caseData);
+    }
+
+    @Override
+    protected NotificationParty notificationParty() {
+        return NotificationParty.CITIZEN_APPLICANT;
     }
 
 }
