@@ -92,7 +92,7 @@ class GlobalSearchServiceTest {
             .ccdCaseType(CaseType.CONSENTED)
             .build();
         caseData.getContactDetailsWrapper().setApplicantLname("Jane");
-        caseData.getContactDetailsWrapper().setRespondentLname("Doe");
+        caseData.getContactDetailsWrapper().setAppRespondentLName("Doe");
         return caseData;
     }
 }

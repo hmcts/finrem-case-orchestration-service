@@ -48,7 +48,7 @@ public class GlobalSearchService {
         if (StringUtils.isNotBlank(finremCaseData.getApplicantLastName())
             && StringUtils.isNotBlank(finremCaseData.getRespondentLastName())) {
             return String.format("%s vs %s",
-                finremCaseData.getApplicantLastName(), finremCaseData.getRespondentLastName());
+                finremCaseData.getApplicantLastName(), finremCaseData.getContactDetailsWrapper().getAppRespondentLName());
         }
         return FINANCIAL_REMEDY;
     }
