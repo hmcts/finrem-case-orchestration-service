@@ -32,7 +32,7 @@ public class ContestedAboutToSubmitHandlerTestConfiguration {
     @Bean
     public GlobalSearchService globalSearchService() {
         GlobalSearchService globalSearchService = Mockito.mock(GlobalSearchService.class);
-        doNothing().when(globalSearchService).setGlobalSearchDataByMap(any(FinremCaseData.class));
+        doNothing().when(globalSearchService).setGlobalSearchData(any(FinremCaseData.class));
         return globalSearchService;
     }
 }

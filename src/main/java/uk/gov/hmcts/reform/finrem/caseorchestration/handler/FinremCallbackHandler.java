@@ -71,7 +71,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         FinremCaseData finremCaseData, String userAuthorisation) {
 
         if (nonNull(globalSearchService)) {
-            globalSearchService.setGlobalSearchDataByMap(finremCaseData);
+            globalSearchService.setGlobalSearchData(response.getData());
         }
 
         if (shouldClearTemporaryFieldsAfterHandle()) {

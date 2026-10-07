@@ -36,7 +36,7 @@ class GlobalSearchServiceTest {
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
         when(caseManagementLocationService.getCaseLocation(caseData)).thenReturn(expectedLocation);
 
-        globalSearchService.setGlobalSearchDataByMap(caseData);
+        globalSearchService.setGlobalSearchData(caseData);
 
         assertEquals("Jane vs Doe", caseData.getCaseNameHmctsInternal());
         assertEquals("Financial Remedy", caseData.getCaseManagementCategory().getValue().getCode());
@@ -49,7 +49,7 @@ class GlobalSearchServiceTest {
         FinremCaseData caseData = createConsentedCaseData();
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(false);
 
-        globalSearchService.setGlobalSearchDataByMap(caseData);
+        globalSearchService.setGlobalSearchData(caseData);
 
         assertNull(caseData.getCaseNameHmctsInternal());
         assertNull(caseData.getCaseManagementCategory());
@@ -64,7 +64,7 @@ class GlobalSearchServiceTest {
             .build();
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
 
-        globalSearchService.setGlobalSearchDataByMap(caseData);
+        globalSearchService.setGlobalSearchData(caseData);
 
         assertNull(caseData.getCaseNameHmctsInternal());
         assertNull(caseData.getCaseManagementCategory());
@@ -79,7 +79,7 @@ class GlobalSearchServiceTest {
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
         when(caseManagementLocationService.getCaseLocation(caseData)).thenReturn(null);
 
-        globalSearchService.setGlobalSearchDataByMap(caseData);
+        globalSearchService.setGlobalSearchData(caseData);
 
         assertEquals("Financial Remedy", caseData.getCaseNameHmctsInternal());
         assertEquals("Financial Remedy", caseData.getCaseManagementCategory().getValue().getCode());

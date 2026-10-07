@@ -32,7 +32,7 @@ public class GlobalSearchService {
      *
      * @param finremCaseData -  the case data map to update
      */
-    public void setGlobalSearchDataByMap(FinremCaseData finremCaseData) {
+    public void setGlobalSearchData(FinremCaseData finremCaseData) {
         if (featureToggleService.isGlobalSearchEnabled() && finremCaseData.isConsentedApplication()) {
             log.info("setGlobalSearchDataByMap::Received request to set global search fields "
                 + "for {} case type with CCD ID: {}", finremCaseData.getCcdCaseType(), finremCaseData.getCcdCaseId());

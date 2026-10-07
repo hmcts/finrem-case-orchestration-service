@@ -353,7 +353,7 @@ class FinremCallbackHandlerTest {
                     () -> verify(finremCaseDetailsMapper).mapToFinremCaseData(argThat(
                         map -> map.size() == 1 && map.containsKey(PROPERTY_TO_BE_RETAINED)
                     )),
-                    () -> verify(globalSearchService).setGlobalSearchDataByMap(nonSanitisedFinremCaseData)
+                    () -> verify(globalSearchService).setGlobalSearchData(any(FinremCaseData.class))
                 );
             }
         }
