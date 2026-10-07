@@ -71,21 +71,6 @@ public class PartyService {
     }
 
     /**
-     * Returns the role codes of the active parties that have been checked in the
-     * working hearing's party-selection question, for example "Who should see this order?"
-     *
-     * <p>The codes are taken from the selected values of the working hearing's
-     * {@code partiesOnCaseMultiSelectList}, for example {@code [APP_SOLICITOR]}.
-     *
-     * @param caseDetails the case details containing the working hearing
-     * @return the role codes of the checked parties, or an empty list if none are selected
-     */
-    public List<String> getCheckedActivePartiesForWorkingHearing(FinremCaseDetails caseDetails) {
-        return getCheckedCodes(caseDetails, data ->
-            data.getManageHearingsWrapper().getWorkingHearing().getPartiesOnCaseMultiSelectList());
-    }
-
-    /**
      * Returns the role codes of the active parties that have been checked in a
      * party-selection question such as "Who should receive this order?".
      *
