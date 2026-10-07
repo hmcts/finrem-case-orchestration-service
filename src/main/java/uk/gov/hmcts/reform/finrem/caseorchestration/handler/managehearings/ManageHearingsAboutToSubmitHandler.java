@@ -73,8 +73,8 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         List<String> errors = new ArrayList<>(validateRequiredPostalAddresses(finremCaseData,
-            EventType.MANAGE_HEARINGS, partyService.isApplicantPartySelectedForWorkingHearing(finremCaseDetails),
-            partyService.isRespondentPartySelectedForWorkingHearing(finremCaseDetails)));
+            EventType.MANAGE_HEARINGS, partyService.isApplicantPartySelected(finremCaseDetails),
+            partyService.isRespondentPartySelected(finremCaseDetails)));
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(finremCaseData, errors);
         }
