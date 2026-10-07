@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -67,21 +66,6 @@ public class PartyService {
     }
 
     /**
-     * Returns the role codes of the active parties that have been checked in the
-     * working hearing's party-selection question, for example "Who should see this order?"
-     *
-     * <p>The codes are taken from the selected values of the working hearing's
-     * {@code partiesOnCaseMultiSelectList}, for example {@code [APP_SOLICITOR]}.
-     *
-     * @param caseDetails the case details containing the working hearing
-     * @return the role codes of the checked parties, or an empty list if none are selected
-     */
-    public List<String> getCheckedActivePartiesForWorkingHearing(FinremCaseDetails caseDetails) {
-        return getCheckedCodes(caseDetails, data ->
-            data.getManageHearingsWrapper().getWorkingHearing().getPartiesOnCaseMultiSelectList());
-    }
-
-    /**
      * Returns the role codes of the active parties that have been checked in a
      * party-selection question such as "Who should receive this order?".
      *
@@ -92,27 +76,9 @@ public class PartyService {
      * @return the role codes of the checked parties
      */
     public List<String> getCheckedActiveParties(FinremCaseDetails caseDetails) {
-        return getCheckedCodes(caseDetails, FinremCaseData::getPartiesOnCase);
-    }
-
-    /**
-     * Extracts the codes of the selected elements from a multi-select list
-     * obtained from the given case data.
-     *
-     * @param caseDetails   the case details holding the case data
-     * @param listExtractor function that retrieves the multi-select list from the case data
-     * @return the codes of the selected elements, or an empty list if the list or its
-     *         selected values are {@code null}
-     */
-    private List<String> getCheckedCodes(FinremCaseDetails caseDetails,
-                                         Function<FinremCaseData, DynamicMultiSelectList> listExtractor) {
-        DynamicMultiSelectList parties = listExtractor.apply(caseDetails.getData());
-        return Optional.ofNullable(parties)
-            .map(DynamicMultiSelectList::getValue)
-            .orElseGet(List::of)
-            .stream()
-            .map(DynamicMultiSelectListElement::getCode)
-            .toList();
+        FinremCaseData data = caseDetails.getData();
+        DynamicMultiSelectList parties = data.getPartiesOnCase();
+        return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
 
     /**
@@ -130,30 +96,11 @@ public class PartyService {
      *         {@code false} otherwise
      */
     public boolean isApplicantPartySelected(FinremCaseDetails caseDetails) {
-        return isPartyInCodes(caseDetails,
-            FinremCaseData::getApplicantOrganisationPolicy,
-            getCheckedActiveParties(caseDetails));
-    }
-
-    /**
-     * Checks whether the applicant has been selected in the working hearing's
-     * party-selection question, for example when choosing who should be notified
-     * about a hearing.
-     *
-     * <p>The applicant's role is taken from the case-assigned role on the
-     * applicant organisation policy and compared with the checked party codes
-     * returned by {@link #getCheckedActivePartiesForWorkingHearing(FinremCaseDetails)}.
-     * If the applicant organisation policy or its role is not set, the applicant is
-     * treated as not selected.
-     *
-     * @param caseDetails the case details containing the working hearing
-     * @return {@code true} if the applicant is among the checked parties,
-     *         {@code false} otherwise
-     */
-    public boolean isApplicantPartySelectedForWorkingHearing(FinremCaseDetails caseDetails) {
-        return isPartyInCodes(caseDetails,
-            FinremCaseData::getApplicantOrganisationPolicy,
-            getCheckedActivePartiesForWorkingHearing(caseDetails));
+        FinremCaseData data = caseDetails.getData();
+        return getCheckedActiveParties(caseDetails).contains(
+            Optional.ofNullable(data.getApplicantOrganisationPolicy())
+                .map(OrganisationPolicy::getOrgPolicyCaseAssignedRole)
+                .orElse(""));
     }
 
     /**
@@ -171,39 +118,11 @@ public class PartyService {
      *         {@code false} otherwise
      */
     public boolean isRespondentPartySelected(FinremCaseDetails caseDetails) {
-        return isPartyInCodes(caseDetails,
-            FinremCaseData::getRespondentOrganisationPolicy,
-            getCheckedActiveParties(caseDetails));
-    }
-
-    /**
-     * Checks whether the respondent has been selected in the working hearing's
-     * party-selection question, for example when choosing who should be notified
-     * about a hearing.
-     *
-     * <p>The respondent's role is taken from the case-assigned role on the
-     * respondent organisation policy and compared with the checked party codes
-     * returned by {@link #getCheckedActivePartiesForWorkingHearing(FinremCaseDetails)}.
-     * If the respondent organisation policy or its role is not set, the respondent is
-     * treated as not selected.
-     *
-     * @param caseDetails the case details containing the working hearing
-     * @return {@code true} if the respondent is among the checked parties,
-     *         {@code false} otherwise
-     */
-    public boolean isRespondentPartySelectedForWorkingHearing(FinremCaseDetails caseDetails) {
-        return isPartyInCodes(caseDetails,
-            FinremCaseData::getRespondentOrganisationPolicy,
-            getCheckedActivePartiesForWorkingHearing(caseDetails));
-    }
-
-    private boolean isPartyInCodes(FinremCaseDetails caseDetails,
-                                   Function<FinremCaseData, OrganisationPolicy> policyExtractor,
-                                   List<String> checkedCodes) {
-        return Optional.ofNullable(policyExtractor.apply(caseDetails.getData()))
-            .map(OrganisationPolicy::getOrgPolicyCaseAssignedRole)
-            .map(checkedCodes::contains)
-            .orElse(false);
+        FinremCaseData data = caseDetails.getData();
+        return getCheckedActiveParties(caseDetails).contains(
+            Optional.ofNullable(data.getRespondentOrganisationPolicy())
+                .map(OrganisationPolicy::getOrgPolicyCaseAssignedRole)
+                .orElse(""));
     }
 
     /**
