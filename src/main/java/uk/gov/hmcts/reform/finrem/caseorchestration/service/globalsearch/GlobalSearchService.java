@@ -45,8 +45,9 @@ public class GlobalSearchService {
     }
 
     private String getCaseNameHmctsInternal(FinremCaseData finremCaseData) {
-        if (StringUtils.isNotBlank(finremCaseData.getApplicantLastName())
-            && StringUtils.isNotBlank(finremCaseData.getRespondentLastName())) {
+        if (finremCaseData.getContactDetailsWrapper() != null
+            && StringUtils.isNotBlank(finremCaseData.getApplicantLastName())
+            && StringUtils.isNotBlank(finremCaseData.getContactDetailsWrapper().getAppRespondentLName())) {
             return String.format("%s vs %s",
                 finremCaseData.getApplicantLastName(), finremCaseData.getContactDetailsWrapper().getAppRespondentLName());
         }

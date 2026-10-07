@@ -75,7 +75,7 @@ class GlobalSearchServiceTest {
     @Test
     void shouldUseFinancialRemedyWhenEitherNameIsMissing() {
         FinremCaseData caseData = createConsentedCaseData();
-        caseData.getContactDetailsWrapper().setRespondentLname(null);
+        caseData.getContactDetailsWrapper().setAppRespondentLName(null);
         when(featureToggleService.isGlobalSearchEnabled()).thenReturn(true);
         when(caseManagementLocationService.getCaseLocation(caseData)).thenReturn(null);
 
