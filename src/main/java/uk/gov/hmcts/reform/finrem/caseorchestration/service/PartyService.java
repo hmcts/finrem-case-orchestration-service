@@ -81,9 +81,7 @@ public class PartyService {
      * @return the role codes of the checked parties
      */
     public List<String> getCheckedActiveParties(FinremCaseDetails caseDetails) {
-        FinremCaseData data = caseDetails.getData();
-        DynamicMultiSelectList parties = data.getPartiesOnCase();
-        return emptyIfNull(parties.getValue()).stream().map(DynamicMultiSelectListElement::getCode).toList();
+        return toRoleCodes(caseDetails.getData().getPartiesOnCase());
     }
 
     /**
@@ -98,8 +96,7 @@ public class PartyService {
      * @return the role codes of the checked parties
      */
     public List<String> getCheckedActiveParties(WorkingHearing workingHearing) {
-        DynamicMultiSelectList parties = workingHearing.getPartiesOnCaseMultiSelectList();
-        return emptyIfNull(parties.getValue()).stream().map(DynamicMultiSelectListElement::getCode).toList();
+        return toRoleCodes(workingHearing.getPartiesOnCaseMultiSelectList());
     }
 
     /**
@@ -340,5 +337,14 @@ public class PartyService {
         return Arrays.stream(roles)
             .map(CaseRole::getCcdCode)
             .anyMatch(activeParties::contains);
+    }
+
+    private static List<String> toRoleCodes(DynamicMultiSelectList parties) {
+        if (parties == null) {
+            return List.of();
+        }
+        return emptyIfNull(parties.getValue()).stream()
+            .map(DynamicMultiSelectListElement::getCode)
+            .toList();
     }
 }
