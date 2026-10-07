@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 
@@ -72,13 +75,6 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
-        List<String> errors = new ArrayList<>(validateRequiredPostalAddresses(finremCaseData,
-            EventType.MANAGE_HEARINGS, partyService.isApplicantPartySelected(finremCaseDetails),
-            partyService.isRespondentPartySelected(finremCaseDetails)));
-        if (!errors.isEmpty()) {
-            return responseWithoutWarnings(finremCaseData, errors);
-        }
-
         ManageHearingsWrapper hearingsWrapper = finremCaseData.getManageHearingsWrapper();
         ManageHearingsAction actionSelection = hearingsWrapper.getManageHearingsActionSelection();
 
@@ -94,21 +90,55 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
 
         manageHearingActionService.updateTabData(finremCaseData);
 
-        createNotificationAuditRows(callbackRequest, userAuthorisation, actionSelection);
-
-        return response(finremCaseData);
-    }
-
-    private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
-                                             String userAuthorisation,
-                                             ManageHearingsAction actionSelection) {
-
-        SendCorrespondenceEvent event = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+        SendCorrespondenceEvent sendCorrespondenceEvent = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
             actionSelection,
             callbackRequest,
             userAuthorisation
         );
 
+        List<String> errors = new ArrayList<>(validateRequiredPostalAddresses(finremCaseData, EventType.MANAGE_HEARINGS,
+            shouldValidateApplicantAddress(finremCaseData, sendCorrespondenceEvent),
+            shouldValidateRespondentAddress(finremCaseData, sendCorrespondenceEvent)));
+        if (!errors.isEmpty()) {
+            return responseWithoutWarnings(finremCaseData, errors);
+        }
+        createNotificationAuditRows(callbackRequest, sendCorrespondenceEvent);
+
+        return response(finremCaseData);
+    }
+
+    private boolean shouldValidateApplicantAddress(FinremCaseData finremCaseData,
+                                                   SendCorrespondenceEvent sendCorrespondenceEvent) {
+        ManageHearingsWrapper hearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        WorkingHearing workingHearing = hearingsWrapper.getWorkingHearing();
+        return isApplicantNotified(sendCorrespondenceEvent)
+            && partyService.isApplicantPartySelected(finremCaseData, workingHearing);
+    }
+
+    private boolean shouldValidateRespondentAddress(FinremCaseData finremCaseData,
+                                                    SendCorrespondenceEvent sendCorrespondenceEvent) {
+        ManageHearingsWrapper hearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        WorkingHearing workingHearing = hearingsWrapper.getWorkingHearing();
+        return isRespondentNotified(sendCorrespondenceEvent)
+            && partyService.isRespondentPartySelected(finremCaseData, workingHearing);
+    }
+
+    private boolean isApplicantNotified(SendCorrespondenceEvent sendCorrespondenceEvent) {
+        return isPartyNotified(sendCorrespondenceEvent, NotificationParty.APPLICANT);
+    }
+
+    private boolean isRespondentNotified(SendCorrespondenceEvent sendCorrespondenceEvent) {
+        return isPartyNotified(sendCorrespondenceEvent, NotificationParty.RESPONDENT);
+    }
+
+    private boolean isPartyNotified(SendCorrespondenceEvent sendCorrespondenceEvent, NotificationParty party) {
+        return ofNullable(sendCorrespondenceEvent)
+            .map(SendCorrespondenceEvent::getNotificationParties)
+            .orElse(List.of())
+            .contains(party);
+    }
+
+    private void createNotificationAuditRows(FinremCallbackRequest callbackRequest, SendCorrespondenceEvent event) {
         if (nonNull(event)) {
             notificationAuditService.createAuditsForCorrespondence(
                 event,
