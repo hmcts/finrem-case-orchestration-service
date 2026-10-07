@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
@@ -50,6 +51,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -77,6 +79,9 @@ class ManageHearingsAboutToSubmitHandlerTest {
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    @Mock
+    private PartyService partyService;
+
     private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
 
     @InjectMocks
@@ -86,7 +91,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
     void setUp() {
         mockedContactDetailsValidator = Mockito.mockStatic(ContactDetailsValidator.class);
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-                any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS)))
+                any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS), anyBoolean(), anyBoolean()))
             .thenReturn(List.of());
     }
 
@@ -301,8 +306,8 @@ class ManageHearingsAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
 
         List<String> expectedErrors = List.of("some error message");
-        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-                caseData, EventType.MANAGE_HEARINGS))
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+            .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), anyBoolean(), anyBoolean()))
             .thenReturn(expectedErrors);
 
         var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
