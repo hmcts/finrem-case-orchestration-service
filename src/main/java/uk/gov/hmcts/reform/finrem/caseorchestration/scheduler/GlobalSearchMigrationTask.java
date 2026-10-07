@@ -33,7 +33,7 @@ import java.util.Map;
  * <ul>
  *     <li>CRON_GLOBAL_SEARCH_MIGRATION_ENABLED=true</li>
  *     <li>TASK_NAME=GlobalSearchMigrationTask</li>
- *     <li>CRON_GLOBAL_SEARCH_MIGRATION_CASE_TYPE_ID=FinancialRemedyContested | FinancialRemedyMVP2</li>
+ *     <li>CRON_GLOBAL_SEARCH_MIGRATION_CASE_TYPE_ID=FinancialRemedyMVP2 (Consented only, Contested not currently supported)</li>
  *     <li>CRON_GLOBAL_SEARCH_MIGRATION_BATCH_SIZE=number of cases to search for</li>
  * </ul>
  */
@@ -79,7 +79,6 @@ public class GlobalSearchMigrationTask extends BaseTask {
             String searchQuery = getSearchQuery(searchAfter);
             log.info("Search query: {}", searchQuery);
             SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
-            log.info("{} cases found for {}", searchResult.getTotal(), caseTypeId);
 
             if (searchResult.getCases().isEmpty()) {
                 break;
@@ -100,6 +99,11 @@ public class GlobalSearchMigrationTask extends BaseTask {
                 break;
             }
         }
+        log.info("Total candidate Cases for migration found: {}, for Batch Task: {}",
+            results.size(),
+            TASK_NAME
+        );
+
         return results;
     }
 
@@ -111,10 +115,13 @@ public class GlobalSearchMigrationTask extends BaseTask {
                 .mustNot(new ExistsQueryBuilder("supplementary_data.HMCTSServiceId"));
         BoolQueryBuilder searchCriteriaQuery = QueryBuilders.boolQuery()
                 .mustNot(new ExistsQueryBuilder("data.SearchCriteria"));
+        BoolQueryBuilder caseManagementLocationQuery = QueryBuilders.boolQuery()
+                .mustNot(new ExistsQueryBuilder("data.caseManagementLocation"));
         QueryBuilder shouldQuery = QueryBuilders.boolQuery()
                 .must(stateQuery)
                 .should(supplementaryQuery)
                 .should(searchCriteriaQuery)
+                .should(caseManagementLocationQuery)
                 .minimumShouldMatch(1);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()

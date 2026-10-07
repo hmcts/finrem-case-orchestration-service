@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +17,10 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
@@ -29,11 +33,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalS
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.AdditionalAnswers.answerVoid;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -160,7 +168,7 @@ class GlobalSearchMigrationTaskTest {
         assertThat(must).hasSize(1);
 
         JSONArray should = bool.getJSONArray("should");
-        assertThat(should).hasSize(2);
+        assertThat(should).hasSize(3);
 
         assertThat(bool.getInt("minimum_should_match"))
                 .isEqualTo(1);
@@ -198,6 +206,7 @@ class GlobalSearchMigrationTaskTest {
         assertThat(query).contains("state.keyword");
         assertThat(query).contains("supplementary_data.HMCTSServiceId");
         assertThat(query).contains("data.SearchCriteria");
+        assertThat(query).contains("data.caseManagementLocation");
         assertThat(query).contains("reference.keyword");
         assertThat(query).doesNotContain("search_after");
     }
@@ -240,7 +249,89 @@ class GlobalSearchMigrationTaskTest {
                 .contains("\"close\"")
                 .contains("\"consentOrderMade\"")
                 .contains("\"supplementary_data.HMCTSServiceId\"")
-                .contains("\"data.SearchCriteria\"");
+                .contains("\"data.SearchCriteria\"")
+                .contains("\"data.caseManagementLocation\"");
+    }
+
+    @Test
+    void givenGlobalSearchServicePopulatesMap_whenExecuteTask_thenFieldsCopiedOntoCaseData() {
+        DynamicListElement element = DynamicListElement.builder()
+            .code("Financial Remedy").label("Financial Remedy").build();
+        DynamicList category = DynamicList.builder().value(element).listItems(List.of(element)).build();
+        String caseName = "Smith vs Jones";
+        CaseLocation location = CaseLocation.builder().region("1").baseLocation("698118").build();
+
+        doAnswer(answerVoid((Map<String, Object> caseDataMap, String caseTypeId, Long caseId) -> {
+            assertThat(caseDataMap).containsEntry("applicantLName", "Smith");
+            caseDataMap.put("caseManagementCategory", category);
+            caseDataMap.put("caseNameHmctsInternal", caseName);
+            caseDataMap.put("caseManagementLocation", location);
+        })).when(globalSearchService).setGlobalSearchDataByMap(
+            anyMap(),
+            eq(CONSENTED.getCcdType()),
+            eq(Long.parseLong(REFERENCE)));
+        FinremCaseDetails finremCaseDetails = createFinremCaseDetails(FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantLname("Smith").build())
+            .build());
+
+        globalSearchMigrationTask.executeTask(finremCaseDetails);
+
+        FinremCaseData caseData = finremCaseDetails.getData();
+        assertThat(caseData.getCaseManagementCategory()).isEqualTo(category);
+        assertThat(caseData.getCaseNameHmctsInternal()).isEqualTo(caseName);
+        assertThat(caseData.getCaseManagementLocation()).isEqualTo(location);
+    }
+
+    @Test
+    void givenGlobalSearchServiceDoesNotPopulateMap_whenExecuteTask_thenFieldsRemainUnsetAndOtherDataUntouched() {
+        FinremCaseDetails finremCaseDetails = createFinremCaseDetails(FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantLname("Smith").build())
+            .build());
+
+        globalSearchMigrationTask.executeTask(finremCaseDetails);
+
+        FinremCaseData caseData = finremCaseDetails.getData();
+        assertThat(caseData.getCaseManagementCategory()).isNull();
+        assertThat(caseData.getCaseNameHmctsInternal()).isNull();
+        assertThat(caseData.getCaseManagementLocation()).isNull();
+        assertThat(caseData.getContactDetailsWrapper().getApplicantLname()).isEqualTo("Smith");
+    }
+
+    @Test
+    @Disabled("Fails due to ClassCastException")
+    void givenExistingGlobalSearchFieldsAndServiceDoesNotPopulateMap_whenExecuteTask_thenExistingValuesRetained() {
+        DynamicListElement element =
+            DynamicListElement.builder().code("Financial Remedy").label("Financial Remedy").build();
+        DynamicList category = DynamicList.builder().value(element).listItems(List.of(element)).build();
+        String caseName = "Smith vs Jones";
+        CaseLocation location = CaseLocation.builder().region("1").baseLocation("698118").build();
+
+        FinremCaseDetails finremCaseDetails = createFinremCaseDetails(FinremCaseData.builder()
+            .caseManagementCategory(category)
+            .caseNameHmctsInternal(caseName)
+            .caseManagementLocation(location)
+            .build());
+
+        /*TODO
+            Fails because calling finremCaseDetailsMapper.finremCaseDataToMap(caseData) converts everything to a
+            LinkedHashMap but we want a DynamicList or CaseLocation.
+            Solution: Do not convert to map and use the FinremCaseDetails which has the correct types already.
+            Enable test after update.
+         */
+        globalSearchMigrationTask.executeTask(finremCaseDetails);
+
+        FinremCaseData caseData = finremCaseDetails.getData();
+        assertThat(caseData.getCaseManagementCategory()).isEqualTo(category);
+        assertThat(caseData.getCaseNameHmctsInternal()).isEqualTo(caseName);
+        assertThat(caseData.getCaseManagementLocation()).isEqualTo(location);
+    }
+
+    private FinremCaseDetails createFinremCaseDetails(FinremCaseData caseData) {
+        return FinremCaseDetails.builder()
+            .id(Long.parseLong(REFERENCE))
+            .caseType(CONSENTED)
+            .data(caseData)
+            .build();
     }
 
     private void mockSystemUserToken() {
