@@ -75,11 +75,10 @@ class CaseManagementLocationServiceTest {
     }
 
     @Test
-    void shouldUseFirstCourtListWhenMultipleCourtListFieldsFound() {
+    void shouldUseLastCourtListWhenMultipleCourtListFieldsFound() {
         Map<String, Object> caseData = new LinkedHashMap<>();
-
-        caseData.put("bristolFRCourtList", "FR_bristolList_3");
         caseData.put("londonFRCourtList", "FR_londonList_1");
+        caseData.put("bristolFRCourtList", "FR_bristolList_3");
 
         CaseLocation location = service.getCaseLocation(caseData);
 

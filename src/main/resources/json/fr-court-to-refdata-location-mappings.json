@@ -9,7 +9,7 @@
     "region_id": "6",
     "fr_court_name": "ALDERSHOT JUSTICE CENTRE"
   },
-  "FR_s_CFCList_6": {
+  "FR_londonList_6": {
     "epimms_id": "229786",
     "region_id": "1",
     "fr_court_name": "BARNET CIVIL AND FAMILY COURTS CENTRE"
@@ -89,7 +89,7 @@
     "region_id": "3",
     "fr_court_name": "BRADFORD COMBINED COURT CENTRE"
   },
-  "FR_s_CFCList_8": {
+  "FR_londonList_5": {
     "epimms_id": "36791",
     "region_id": "1",
     "fr_court_name": "BRENTFORD COUNTY AND FAMILY COURT"
@@ -104,7 +104,7 @@
     "region_id": "6",
     "fr_court_name": "BRISTOL CIVIL AND FAMILY JUSTICE CENTRE"
   },
-  "FR_s_CFCList_1": {
+  "FR_londonList_11": {
     "epimms_id": "29656",
     "region_id": "1",
     "fr_court_name": "BROMLEY COUNTY COURT AND FAMILY COURT"
@@ -139,7 +139,7 @@
     "region_id": "7",
     "fr_court_name": "CARMARTHEN COUNTY AND FAMILY COURT"
   },
-  "FR_s_CFCList_9": {
+  "FR_londonList_1": {
     "epimms_id": "356855",
     "region_id": "1",
     "fr_court_name": "CENTRAL FAMILY COURT"
@@ -169,12 +169,12 @@
     "region_id": "4",
     "fr_court_name": "CREWE COUNTY COURT AND FAMILY COURT "
   },
-  "FR_s_CFCList_2": {
+  "FR_londonList_10": {
     "epimms_id": "407494",
     "region_id": "1",
     "fr_court_name": "CROYDON COUNTY COURT AND FAMILY COURT"
   },
-  "FR_cleavelandList_8": {
+  "FR_clevelandList_8": {
     "epimms_id": "288691",
     "region_id": "3",
     "fr_court_name": "DARLINGTON COUNTY COURT AND FAMILY COURT"
@@ -199,7 +199,7 @@
     "region_id": "2",
     "fr_court_name": "DUDLEY COUNTY COURT AND FAMILY COURT"
   },
-  "FR_cleavelandList_2": {
+  "FR_clevelandList_2": {
     "epimms_id": "491107",
     "region_id": "3",
     "fr_court_name": "DURHAM JUSTICE CENTRE"
@@ -209,7 +209,7 @@
     "region_id": "1",
     "fr_court_name": "EAST LONDON FAMILY COURT"
   },
-  "FR_s_CFCList_3": {
+  "FR_londonList_9": {
     "epimms_id": "25463",
     "region_id": "1",
     "fr_court_name": "EDMONTON COUNTY COURT AND FAMILY COURT"
@@ -219,7 +219,7 @@
     "region_id": "6",
     "fr_court_name": "EXETER COMBINED COURT CENTRE"
   },
-  "FR_cleavelandList_5": {
+  "FR_clevelandList_5": {
     "epimms_id": "427519",
     "region_id": "3",
     "fr_court_name": "GATESHEAD COUNTY COURT AND FAMILY COURT"
@@ -294,7 +294,7 @@
     "region_id": "6",
     "fr_court_name": "ISLE OF WIGHT COMBINED COURT"
   },
-  "FR_s_CFCList_4": {
+  "FR_londonList_8": {
     "epimms_id": "13660",
     "region_id": "1",
     "fr_court_name": "KINGSTON-UPON-THAMES COUNTY COURT AND FAMILY COURT"
@@ -379,7 +379,7 @@
     "region_id": "7",
     "fr_court_name": "Mold County"
   },
-  "FR_cleavelandList_1": {
+  "FR_clevelandList_1": {
     "epimms_id": "366796",
     "region_id": "3",
     "fr_court_name": "NEWCASTLE CIVIL AND FAMILY COURTS AND TRIBUNALS CENTRE"
@@ -389,7 +389,7 @@
     "region_id": "7",
     "fr_court_name": "NEWPORT CIVIL AND FAMILY COURT"
   },
-  "FR_cleavelandList_7": {
+  "FR_clevelandList_7": {
     "epimms_id": "562808",
     "region_id": "3",
     "fr_court_name": "NORTH SHIELDS COUNTY COURT AND FAMILY COURT"
@@ -459,12 +459,12 @@
     "region_id": "4",
     "fr_court_name": "REEDLEY FAMILY HEARING CENTRE"
   },
-  "FR_s_CFCList_5": {
+  "FR_londonList_7": {
     "epimms_id": "400947",
     "region_id": "1",
     "fr_court_name": "ROMFORD COUNTY AND FAMILY COURT"
   },
-  "FR_s_CFCList_17": {
+  "FR_londonList_13": {
     "epimms_id": "20262",
     "region_id": "1",
     "fr_court_name": "THE ROYAL COURT OF JUSTICE"
@@ -494,7 +494,7 @@
     "region_id": "5",
     "fr_court_name": "SLOUGH COUNTY COURT AND FAMILY COURT"
   },
-  "FR_cleavelandList_6": {
+  "FR_clevelandList_6": {
     "epimms_id": "563156",
     "region_id": "3",
     "fr_court_name": "SOUTH SHIELDS COUNTY COURT AND FAMILY COURT"
@@ -534,7 +534,7 @@
     "region_id": "2",
     "fr_court_name": "STOKE ON TRENT COMBINED COURT"
   },
-  "FR_cleavelandList_3": {
+  "FR_clevelandList_3": {
     "epimms_id": "517400",
     "region_id": "3",
     "fr_court_name": "SUNDERLAND COUNTY AND FAMILY COURT"
@@ -554,7 +554,7 @@
     "region_id": "6",
     "fr_court_name": "TAUNTON CROWN, COUNTY AND FAMILY COURT"
   },
-  "FR_cleavelandList_4": {
+  "FR_clevelandList_4": {
     "epimms_id": "195537",
     "region_id": "3",
     "fr_court_name": "MIDDLESBROUGH COUNTY COURT AT TEESSIDE COMBINED COURT"
@@ -579,7 +579,7 @@
     "region_id": "6",
     "fr_court_name": "TRURO COUNTY COURT AND FAMILY COURT"
   },
-  "FR_s_CFCList_14": {
+  "FR_londonList_3": {
     "epimms_id": "621184",
     "region_id": "1",
     "fr_court_name": "UXBRIDGE COUNTY COURT AND FAMILY COURT"
@@ -624,7 +624,7 @@
     "region_id": "4",
     "fr_court_name": "WIGAN COUNTY COURT AND FAMILY COURT"
   },
-  "FR_s_CFCList_16": {
+  "FR_londonList_2": {
     "epimms_id": "228015",
     "region_id": "1",
     "fr_court_name": "WILLESDEN COUNTY COURT AND FAMILY COURT"
@@ -669,7 +669,7 @@
     "region_id": "5",
     "fr_court_name": "ASHFORD TRIBUNAL CENTRE"
   },
-  "FR_cleavelandList_10": {
+  "FR_clevelandList_10": {
     "epimms_id": "500233",
     "region_id": "3",
     "fr_court_name": "BERWICK MAGISTRATES COURT"
@@ -684,7 +684,7 @@
     "region_id": "5",
     "fr_court_name": "BURY ST EDMUNDS COUNTY COURT AND FAMILY COURT"
   },
-  "FR_cleavelandList_9": {
+  "FR_clevelandList_9": {
     "epimms_id": "476820",
     "region_id": "3",
     "fr_court_name": "DARLINGTON MAGISTRATES COURT"
@@ -734,7 +734,7 @@
     "region_id": "6",
     "fr_court_name": "SALISBURY LAW COURTS"
   },
-  "FR_cleavelandList_11": {
+  "FR_clevelandList_11": {
     "epimms_id": "572158",
     "region_id": "3",
     "fr_court_name": "SOUTH EAST NORTHUMBERLAND"

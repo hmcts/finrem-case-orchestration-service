@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Service responsible for determining CCD case location details
@@ -31,7 +32,6 @@ public class CaseManagementLocationService {
      *         or null if no matching court is found
      */
     public CaseLocation getCaseLocation(Map<String, Object> caseData) {
-
         List<Map.Entry<String, Object>> courtEntries = caseData.entrySet()
             .stream()
             .filter(entry -> entry.getKey().endsWith(COURT_LIST_SUFFIX))
@@ -44,27 +44,31 @@ public class CaseManagementLocationService {
 
         if (courtEntries.size() > 1) {
             log.warn(
-                "Multiple court list fields found in case data: {}. Using first match: {}",
+                "Multiple court list fields found in case data: {}. Using last match: {}",
                 courtEntries.stream().map(Map.Entry::getKey).toList(),
-                courtEntries.getFirst().getKey()
+                courtEntries.getLast().getKey()
             );
         }
 
-        Map.Entry<String, Object> courtEntry = courtEntries.getFirst();
+        Map.Entry<String, Object> courtEntry = courtEntries.getLast();
 
         if (courtEntry == null || courtEntry.getValue() == null || courtEntry.getValue().toString().isBlank()) {
             return null;
         }
 
-        CourtRefData courtRefData = courtReferenceDataByName.get(courtEntry.getValue().toString().toLowerCase());
+        CourtRefData courtRefData = courtReferenceDataByName.get(
+            Optional.ofNullable(courtEntry.getValue())
+                .map(Object::toString)
+                .map(String::toLowerCase)
+                .orElse(null)
+        );
 
         if (courtRefData == null) {
             log.warn("No court reference data found for court name: {}", courtEntry.getValue());
             return null;
         } else {
             log.info("Found court reference data for court name: {}: {}", courtEntry.getValue(), courtRefData);
+            return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
         }
-
-        return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
     }
 }
