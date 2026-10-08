@@ -14,12 +14,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
@@ -39,18 +37,15 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
     private final ManageHearingActionService manageHearingActionService;
     private final NotificationAuditService notificationAuditService;
     private final ManageHearingsCorresponder manageHearingsCorresponder;
-    private final PartyService partyService;
 
     public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               ManageHearingActionService manageHearingActionService,
                                               NotificationAuditService notificationAuditService,
-                                              ManageHearingsCorresponder manageHearingsCorresponder,
-                                              PartyService partyService) {
+                                              ManageHearingsCorresponder manageHearingsCorresponder) {
         super(finremCaseDetailsMapper);
         this.manageHearingActionService = manageHearingActionService;
         this.notificationAuditService = notificationAuditService;
         this.manageHearingsCorresponder = manageHearingsCorresponder;
-        this.partyService = partyService;
     }
 
     @Override
@@ -97,7 +92,7 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
             userAuthorisation
         );
 
-        List<String> errors = validatePostalAddresses(finremCaseData, actionSelection, sendCorrespondenceEvents);
+        List<String> errors = validatePostalAddresses(finremCaseData, sendCorrespondenceEvents);
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(finremCaseData, errors);
         }
@@ -108,29 +103,10 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
     }
 
     private List<String> validatePostalAddresses(FinremCaseData finremCaseData,
-                                                 ManageHearingsAction actionSelection,
                                                  List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
         return new ArrayList<>(validateRequiredPostalAddresses(finremCaseData, EventType.MANAGE_HEARINGS,
-            shouldValidateApplicantAddress(finremCaseData, actionSelection, sendCorrespondenceEvents),
-            shouldValidateRespondentAddress(finremCaseData, actionSelection, sendCorrespondenceEvents)));
-    }
-
-    private boolean shouldValidateApplicantAddress(FinremCaseData finremCaseData, ManageHearingsAction actionSelection,
-                                                   List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
-        return isApplicantNotified(sendCorrespondenceEvents)
-            && (actionSelection != ManageHearingsAction.ADD_HEARING
-            || partyService.isApplicantPartySelected(finremCaseData, getWorkingHearing(finremCaseData)));
-    }
-
-    private boolean shouldValidateRespondentAddress(FinremCaseData finremCaseData, ManageHearingsAction actionSelection,
-                                                    List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
-        return isRespondentNotified(sendCorrespondenceEvents)
-            && (actionSelection != ManageHearingsAction.ADD_HEARING
-            || partyService.isRespondentPartySelected(finremCaseData, getWorkingHearing(finremCaseData)));
-    }
-
-    private WorkingHearing getWorkingHearing(FinremCaseData finremCaseData) {
-        return Objects.requireNonNull(finremCaseData.getManageHearingsWrapper().getWorkingHearing());
+            isApplicantNotified(sendCorrespondenceEvents),
+            isRespondentNotified(sendCorrespondenceEvents)));
     }
 
     private boolean isApplicantNotified(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {

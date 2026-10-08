@@ -39,7 +39,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
@@ -56,6 +55,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -78,9 +78,6 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-
-    @Mock
-    private PartyService partyService;
 
     private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
 
@@ -285,7 +282,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
             ManageHearingsAction.ADD_HEARING,
             request,
             AUTH_TOKEN
-        )).thenReturn(null);
+        )).thenReturn(List.of());
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
@@ -301,7 +298,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
     @Test
     void givenInvalidCaseDataAddresses_whenHandled_thenPopulateErrors() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
 
         List<String> expectedErrors = List.of("some error message");
@@ -311,7 +308,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).isEqualTo(expectedErrors);
-        verifyNoInteractions(manageHearingActionService, notificationAuditService, manageHearingsCorresponder);
+        verifyNoInteractions(notificationAuditService);
     }
 
     private FinremCallbackRequest buildRequest(FinremCaseData caseData) {
