@@ -57,7 +57,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             case FAMILY_MEDIATION_INFORMATION_AND_ASSESSMENT_MEETING_MIAM_FORM_FM1 ->
                 DocumentCategory.APPLICATIONS_MAIN_APPLICATION.getDocumentCategoryId();
             case POINTS_OF_CLAIM_DEFENCE -> getPointsOfClaimDefenceCategory();
-            case STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5 -> getFm5FolderCategory(doc);
+            case STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5 -> getFm5FolderCategory();
             case FINANCIAL_STATEMENT_FORM_E_E1_OR_E2,
                  ATTACHMENTS_TO_FORM_E -> getFromECategory();
             case ESTIMATE_OF_COSTS_INCURRED_FORM_H,
@@ -88,7 +88,10 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             case WITNESS_STATEMENT -> getWitnessStatementCategory(doc);
             case WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT -> getWithoutPrejudiceCategory();
             case PENSION_REPORT_EXPERT_REPORT,
-                 MEDICAL_REPORT -> getExportReportCategory(doc);
+                 MEDICAL_REPORT,
+                 BUSINESS_VALUATION,
+                 OTHER_PROPERTY_VALUATION
+                 -> getExportReportCategory(doc);
             case HEARING_BUNDLE -> getHearingBundleCategory(doc);
             case FDR_BUNDLE -> DocumentCategory.FDR_BUNDLE.getDocumentCategoryId();
             case PRE_HEARING_DRAFT_ORDER -> getPreHearingDraftOrderCategory(doc);
@@ -116,9 +119,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
                  TAX_ASSESSMENTS,
                  INCOME_EVIDENCE,
                  PENSION_STATEMENT,
-                 OTHER_PROPERTY_VALUATION,
                  LIFE_INSURANCE_INCLUDING_ENDOWMENT_POLICIES,
-                 BUSINESS_VALUATION,
                  MANAGEMENT_ACCOUNTS-> getUpdatingDisclosureCategory();
             default -> null;
         };
@@ -168,12 +169,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.RESPONDENT_DOCUMENTS_FORM_E.getDocumentCategoryId();
     }
 
-    private String getFm5FolderCategory(CitizenUploadDocument document) {
-        if (document.getIsFdr().isYes()) {
-            return isApplicant()
-                ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER.getDocumentCategoryId()
-                : DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER.getDocumentCategoryId();
-        }
+    private String getFm5FolderCategory() {
         return isApplicant()
             ? DocumentCategory.HEARING_DOCUMENTS_APPLICANT_FM5.getDocumentCategoryId()
             : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_FM5.getDocumentCategoryId();
