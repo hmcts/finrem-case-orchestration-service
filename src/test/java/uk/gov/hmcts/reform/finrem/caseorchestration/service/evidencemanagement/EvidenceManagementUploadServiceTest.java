@@ -1,16 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockMultipartFile;
@@ -31,18 +28,24 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static java.nio.file.Files.readAllBytes;
 import static java.nio.file.Paths.get;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
-@RunWith(MockitoJUnitRunner.class)
-public class EvidenceManagementUploadServiceTest {
+@ExtendWith(MockitoExtension.class)
+class EvidenceManagementUploadServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
@@ -61,14 +64,11 @@ public class EvidenceManagementUploadServiceTest {
 
     private ArgumentCaptor<HttpEntity> httpEntityReqEntity;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setup() throws IOException {
+    @BeforeEach
+    void setup() throws IOException {
         ReflectionTestUtils.setField(emUploadService,"documentManagementStoreUploadUrl", "emuri");
-        when(authTokenGenerator.generate()).thenReturn("xxxx");
-        when(idamAuthService.getUserDetails(authKey())).thenReturn(UserDetails.builder().id("19").build());
+        lenient().when(authTokenGenerator.generate()).thenReturn("xxxx");
+        lenient().when(idamAuthService.getUserDetails(AUTH_TOKEN)).thenReturn(UserDetails.builder().id("19").build());
         mockRestTemplate();
 
         Document.Links links = new Document.Links();
@@ -83,74 +83,67 @@ public class EvidenceManagementUploadServiceTest {
             new UploadResponse(Collections.singletonList(
                 document));
 
-        when(idamAuthService.getIdamToken(any())).thenReturn(IdamToken.builder().build());
+        lenient().when(idamAuthService.getIdamToken(any())).thenReturn(IdamToken.builder().build());
         when(featureToggleService.isSecureDocEnabled()).thenReturn(false);
     }
 
     @Test
-    public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectUploadToSucceed() {
+    void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectUploadToSucceed() {
         List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CONTESTED,
-            authKey());
-        assertTrue(responses.size() > 0);
+            AUTH_TOKEN);
+        assertFalse(responses.isEmpty());
     }
 
     @Test
-    public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmRequestWith3Headers() {
-        emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
+    void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmRequestWith3Headers() {
+        emUploadService.upload(getMultipartFiles(), CONTESTED, AUTH_TOKEN);
         List<HttpEntity> allValues = httpEntityReqEntity.getAllValues();
-        assertEquals(3, allValues.get(0).getHeaders().size());
+        assertEquals(3, allValues.getFirst().getHeaders().size());
     }
 
     @Test
-    public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveSecurityAuthHeader() {
-        emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
+    void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveSecurityAuthHeader() {
+        emUploadService.upload(getMultipartFiles(), CONTESTED, AUTH_TOKEN);
         assertTrue(getEmRequestHeaders().containsKey("ServiceAuthorization"));
     }
 
     @Test
-    public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveUserIdHeader() {
-        emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
+    void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveUserIdHeader() {
+        emUploadService.upload(getMultipartFiles(), CONTESTED, AUTH_TOKEN);
         assertTrue(getEmRequestHeaders().containsKey("user-id"));
     }
 
     @Test
-    public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveValidContentTypeHeader() {
-        emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
-        assertEquals("multipart/form-data", getEmRequestHeaders().get("Content-Type").get(0));
+    void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveValidContentTypeHeader() {
+        emUploadService.upload(getMultipartFiles(), CONTESTED, AUTH_TOKEN);
+        assertEquals("multipart/form-data", Objects.requireNonNull(getEmRequestHeaders().get("Content-Type")).getFirst());
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectAuthKeyIsParsedForUserId() {
-        emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
-        assertEquals("19", getEmRequestHeaders().get("user-id").get(0));
+        emUploadService.upload(getMultipartFiles(), CONTESTED, AUTH_TOKEN);
+        assertEquals("19", Objects.requireNonNull(getEmRequestHeaders().get("user-id")).getFirst());
     }
 
     @Test
-    public void givenNullFileParamIsPassed_whenUploadIsCalled_thenExpectError() {
-        expectedException.expect(NullPointerException.class);
-        expectedException.expectMessage("files");
-        emUploadService.upload(null, CONTESTED, authKey());
-        httpEntityReqEntity.getAllValues();
+    void givenNullFileParamIsPassed_whenUploadIsCalled_thenExpectError() {
+        assertThrows(NullPointerException.class, () -> emUploadService.upload(null, CONTESTED, AUTH_TOKEN));
     }
 
     @Test
-    public void givenUploadResponseReturned_whenUploadIsCalled_thenExpectUploadToSucceed() {
+    void givenUploadResponseReturned_whenUploadIsCalled_thenExpectUploadToSucceed() {
         when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
-        List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
-        assertTrue(responses.size() > 0);
+        List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CONTESTED, AUTH_TOKEN);
+        assertFalse(responses.isEmpty());
     }
 
     @Test
-    public void givenNotUploadResponseReturned_whenUploadIsCalled_thenExpectUploadToNotSucceed() {
+    void givenNotUploadResponseReturned_whenUploadIsCalled_thenExpectUploadToNotSucceed() {
         when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(null);
-        List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
+        List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CONTESTED, AUTH_TOKEN);
         assertTrue(responses.isEmpty());
-    }
-
-    private static String authKey() {
-        return "dummykey";
     }
 
     private List<MultipartFile> getMultipartFiles() {
@@ -161,15 +154,15 @@ public class EvidenceManagementUploadServiceTest {
 
     private void mockRestTemplate() throws IOException {
         this.httpEntityReqEntity = ArgumentCaptor.forClass(HttpEntity.class);
-        when(restTemplate.postForObject(eq("emuri"), httpEntityReqEntity.capture(), any())).thenReturn(getResponse());
+        lenient().when(restTemplate.postForObject(eq("emuri"), httpEntityReqEntity.capture(), any())).thenReturn(getResponse());
     }
 
     private HttpHeaders getEmRequestHeaders() {
-        return httpEntityReqEntity.getAllValues().get(0).getHeaders();
+        return httpEntityReqEntity.getAllValues().getFirst().getHeaders();
     }
 
     private ObjectNode getResponse() throws IOException {
         final String response = new String(readAllBytes(get("src/test/resources/fixtures/fileuploadresponse.json")));
-        return (ObjectNode) new ObjectMapper().readTree(response);
+        return (ObjectNode) createObjectMapper().readTree(response);
     }
 }
