@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
@@ -387,7 +388,7 @@ public class ManageHearingsCorresponder {
      * @return the parties on the case, or an empty list if none are set
      */
     private List<PartyOnCaseCollectionItem> partiesOnCase(HearingLike hearing) {
-        return Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
+        return emptyIfNull(hearing.getPartiesOnCase());
     }
 
     /**
