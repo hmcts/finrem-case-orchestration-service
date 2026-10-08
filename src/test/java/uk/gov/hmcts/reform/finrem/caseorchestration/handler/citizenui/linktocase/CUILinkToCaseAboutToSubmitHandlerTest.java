@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.linktocase;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -14,8 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InvalidateAccessCodeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.SignInConfirmationCorresponder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,12 +46,29 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    @Mock
+    private SignInConfirmationCorresponder signInConfirmationCorresponder;
+
+    @Mock
+    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
+
     public static final String CITIZEN_IDAM_USER_ID = "citizen-user-id";
+
+    private TestHandler handler;
+
+    @BeforeEach
+    void setUp() {
+        handler = new TestHandler(
+            finremCaseDetailsMapper,
+            invalidateAccessCodeService,
+            assignCaseAccessService,
+            signInConfirmationCorresponder,
+            correspondenceEventAuditOrchestrationService
+        );
+    }
 
     @Test
     void shouldAssignCitizenRoleUsingLatestMergedAccessCode() {
-        TestHandler handler = new TestHandler(finremCaseDetailsMapper, invalidateAccessCodeService, assignCaseAccessService);
-
         AccessCodeCollection oldAccessCode = accessCode(UUID.randomUUID(), null, null);
         AccessCodeCollection latestAccessCode = accessCode(UUID.randomUUID(), CITIZEN_IDAM_USER_ID, LocalDateTime.now());
 
@@ -78,8 +99,6 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
 
     @Test
     void shouldThrowWhenMergedAccessCodesHaveNoCitizenUserId() {
-        TestHandler handler = new TestHandler(finremCaseDetailsMapper, invalidateAccessCodeService, assignCaseAccessService);
-
         AccessCodeCollection mergedAccessCode = accessCode(UUID.randomUUID(), null, LocalDateTime.now());
 
         FinremCaseData beforeData = FinremCaseData.builder().applicantAccessCodes(List.of(mergedAccessCode)).build();
@@ -102,7 +121,6 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
 
     @Test
     void testCanHandle() {
-        TestHandler handler = new TestHandler(finremCaseDetailsMapper, invalidateAccessCodeService, assignCaseAccessService);
         assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LINK_APPLICANT_TO_CASE);
     }
 
@@ -116,8 +134,16 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
     private static final class TestHandler extends CUILinkToCaseAboutToSubmitHandler {
         private TestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                             InvalidateAccessCodeService invalidateAccessCodeService,
-                            AssignCaseAccessService assignCaseAccessService) {
-            super(finremCaseDetailsMapper, invalidateAccessCodeService, assignCaseAccessService);
+                            AssignCaseAccessService assignCaseAccessService,
+                            SignInConfirmationCorresponder signInConfirmationCorresponder,
+                            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
+            super(finremCaseDetailsMapper, invalidateAccessCodeService, assignCaseAccessService,
+                signInConfirmationCorresponder, correspondenceEventAuditOrchestrationService);
+        }
+
+        @Override
+        protected NotificationParty notificationParty() {
+            return NotificationParty.CITIZEN_APPLICANT;
         }
 
         @Override
