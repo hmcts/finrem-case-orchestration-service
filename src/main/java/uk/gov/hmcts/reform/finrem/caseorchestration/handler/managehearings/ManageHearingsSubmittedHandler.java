@@ -80,8 +80,6 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
 
         String error = null;
         for (SendCorrespondenceEvent correspondenceEvent : correspondenceEvents) {
-            log.info("Sending hearing correspondence for {} action. Case reference: {}",
-                actionSelection.getDescription(), finremCaseData.getCcdCaseId());
             correspondenceEvent.setEventId(callbackRequest.getEventType().getCcdType());
 
             correspondenceEvent.setNotificationTrackerId(
