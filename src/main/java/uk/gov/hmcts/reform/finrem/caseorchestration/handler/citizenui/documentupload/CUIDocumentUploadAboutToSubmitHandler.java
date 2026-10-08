@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
@@ -84,18 +84,18 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
         FinremCaseData currentCaseData = callbackRequest.getFinremCaseData();
         FinremCaseData dataBefore = callbackRequest.getFinremCaseDataBefore();
 
-        List<CitizenDocumentCollection> existingDocuments = new ArrayList<>(
+        List<CitizenDocumentCollectionItem> existingDocuments = new ArrayList<>(
             ofNullable(getDocuments(dataBefore)).orElse(List.of())
         );
 
-        List<CitizenDocumentCollection> currentlyUploadedDocuments = new ArrayList<>(
+        List<CitizenDocumentCollectionItem> currentlyUploadedDocuments = new ArrayList<>(
             ofNullable(getDocuments(currentCaseData)).orElse(List.of())
         );
 
         existingDocuments.addAll(currentlyUploadedDocuments);
 
         existingDocuments.sort(comparing(
-            CitizenDocumentCollection::getValue,
+            CitizenDocumentCollectionItem::getValue,
             nullsLast(comparing(
                 CitizenUploadDocument::getGeneralDocumentUploadDateTime,
                 nullsLast(Comparator.reverseOrder())
@@ -170,7 +170,7 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
      * @param caseData case data
      * @return list of documents (may be null)
      */
-    protected abstract List<CitizenDocumentCollection> getDocuments(FinremCaseData caseData);
+    protected abstract List<CitizenDocumentCollectionItem> getDocuments(FinremCaseData caseData);
 
     /**
      * Sets the updated document collection onto case data.
@@ -183,7 +183,7 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
      */
     protected abstract void setDocuments(
         FinremCaseData caseData,
-        List<CitizenDocumentCollection> documents
+        List<CitizenDocumentCollectionItem> documents
     );
 
     protected abstract NotificationParty notificationParty();

@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -36,9 +36,9 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
     @ParameterizedTest
     @MethodSource("handlers")
     void handle_shouldMergeAndSortDocumentsDescending_whenValidDocumentsPresent(HandlerCase handlerCase) {
-        CitizenDocumentCollection oldDoc = doc(LocalDateTime.of(2024, 1, 1, 10, 0));
-        CitizenDocumentCollection midDoc = doc(LocalDateTime.of(2024, 2, 1, 10, 0));
-        CitizenDocumentCollection newDoc = doc(LocalDateTime.of(2024, 3, 1, 10, 0));
+        CitizenDocumentCollectionItem oldDoc = doc(LocalDateTime.of(2024, 1, 1, 10, 0));
+        CitizenDocumentCollectionItem midDoc = doc(LocalDateTime.of(2024, 2, 1, 10, 0));
+        CitizenDocumentCollectionItem newDoc = doc(LocalDateTime.of(2024, 3, 1, 10, 0));
 
         FinremCaseData before = caseDataFor(handlerCase.party, List.of(oldDoc, midDoc));
         FinremCaseData current = caseDataFor(handlerCase.party, List.of(newDoc));
@@ -53,7 +53,7 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
     @ParameterizedTest
     @MethodSource("handlers")
     void handle_shouldReturnOnlyCurrentDocuments_whenExistingDocumentsAreNull(HandlerCase handlerCase) {
-        CitizenDocumentCollection newDoc = doc(LocalDateTime.of(2024, 3, 1, 10, 0));
+        CitizenDocumentCollectionItem newDoc = doc(LocalDateTime.of(2024, 3, 1, 10, 0));
 
         FinremCaseData before = new FinremCaseData();
         FinremCaseData current = caseDataFor(handlerCase.party, List.of(newDoc));
@@ -68,7 +68,7 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
     @ParameterizedTest
     @MethodSource("handlers")
     void handle_shouldReturnOnlyExistingDocuments_whenCurrentDocumentsAreNull(HandlerCase handlerCase) {
-        CitizenDocumentCollection existing = doc(LocalDateTime.of(2024, 1, 1, 10, 0));
+        CitizenDocumentCollectionItem existing = doc(LocalDateTime.of(2024, 1, 1, 10, 0));
 
         FinremCaseData before = caseDataFor(handlerCase.party, List.of(existing));
         FinremCaseData current = new FinremCaseData();
@@ -91,9 +91,9 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
     @ParameterizedTest
     @MethodSource("handlers")
     void handle_shouldUpdateOnlyRelevantCollection_whenApplicantOrRespondentEvent(HandlerCase handlerCase) {
-        CitizenDocumentCollection existingApplicant = doc(LocalDateTime.of(2024, 1, 1, 10, 0));
-        CitizenDocumentCollection existingRespondent = doc(LocalDateTime.of(2024, 2, 1, 10, 0));
-        CitizenDocumentCollection newDoc = doc(LocalDateTime.of(2024, 3, 1, 10, 0));
+        CitizenDocumentCollectionItem existingApplicant = doc(LocalDateTime.of(2024, 1, 1, 10, 0));
+        CitizenDocumentCollectionItem existingRespondent = doc(LocalDateTime.of(2024, 2, 1, 10, 0));
+        CitizenDocumentCollectionItem newDoc = doc(LocalDateTime.of(2024, 3, 1, 10, 0));
 
         FinremCaseData before = new FinremCaseData();
         before.getCitizenDocumentWrapper().setCitizenApplicantDocument(List.of(existingApplicant));
@@ -163,7 +163,7 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
         );
     }
 
-    private FinremCaseData caseDataFor(Party party, List<CitizenDocumentCollection> documents) {
+    private FinremCaseData caseDataFor(Party party, List<CitizenDocumentCollectionItem> documents) {
         FinremCaseData caseData = new FinremCaseData();
 
         if (party == Party.APPLICANT) {
@@ -175,7 +175,7 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
         return caseData;
     }
 
-    private List<CitizenDocumentCollection> documentsFor(FinremCaseData caseData, Party party) {
+    private List<CitizenDocumentCollectionItem> documentsFor(FinremCaseData caseData, Party party) {
         return party == Party.APPLICANT
             ? caseData.getCitizenDocumentWrapper().getCitizenApplicantDocument()
             : caseData.getCitizenDocumentWrapper().getCitizenRespondentDocument();
@@ -199,11 +199,11 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
             .build();
     }
 
-    private CitizenDocumentCollection doc(LocalDateTime dateTime) {
+    private CitizenDocumentCollectionItem doc(LocalDateTime dateTime) {
         CitizenUploadDocument document = new CitizenUploadDocument();
         document.setGeneralDocumentUploadDateTime(dateTime);
 
-        CitizenDocumentCollection wrapper = new CitizenDocumentCollection();
+        CitizenDocumentCollectionItem wrapper = new CitizenDocumentCollectionItem();
         wrapper.setValue(document);
 
         return wrapper;

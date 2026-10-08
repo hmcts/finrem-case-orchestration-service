@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
 import org.apache.commons.collections.CollectionUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -34,7 +34,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             return;
         }
 
-        List<CitizenDocumentCollection> documents =
+        List<CitizenDocumentCollectionItem> documents =
             isApplicant()
                 ? citizenWrapper.getCitizenApplicantDocument()
                 : citizenWrapper.getCitizenRespondentDocument();
@@ -43,7 +43,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             return;
         }
 
-        for (CitizenDocumentCollection collection : documents) {
+        for (CitizenDocumentCollectionItem collection : documents) {
             applyCategory(collection.getValue());
         }
     }

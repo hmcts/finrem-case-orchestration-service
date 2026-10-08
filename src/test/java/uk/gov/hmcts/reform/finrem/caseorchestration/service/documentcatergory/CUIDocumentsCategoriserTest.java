@@ -6,7 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -122,7 +122,7 @@ class CUIDocumentsCategoriserTest {
         return doc;
     }
 
-    private FinremCaseData buildCaseData(List<CitizenDocumentCollection> docs, CUIDocumentsCategoriser.Party party) {
+    private FinremCaseData buildCaseData(List<CitizenDocumentCollectionItem> docs, CUIDocumentsCategoriser.Party party) {
         FinremCaseData caseData = new FinremCaseData();
         CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
 
@@ -136,8 +136,8 @@ class CUIDocumentsCategoriserTest {
         return caseData;
     }
 
-    private CitizenDocumentCollection wrap(CitizenUploadDocument doc) {
-        CitizenDocumentCollection c = new CitizenDocumentCollection();
+    private CitizenDocumentCollectionItem wrap(CitizenUploadDocument doc) {
+        CitizenDocumentCollectionItem c = new CitizenDocumentCollectionItem();
         c.setValue(doc);
         return c;
     }

@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogge
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
@@ -61,7 +61,7 @@ public class CUIRespondentDocumentUploadAboutToSubmitHandler extends CUIDocument
      * @return list of respondent documents (may be null)
      */
     @Override
-    protected List<CitizenDocumentCollection> getDocuments(FinremCaseData caseData) {
+    protected List<CitizenDocumentCollectionItem> getDocuments(FinremCaseData caseData) {
         return caseData.getCitizenDocumentWrapper().getCitizenRespondentDocument();
     }
 
@@ -72,7 +72,7 @@ public class CUIRespondentDocumentUploadAboutToSubmitHandler extends CUIDocument
      * @param documents merged and sorted respondent documents
      */
     @Override
-    protected void setDocuments(FinremCaseData caseData, List<CitizenDocumentCollection> documents) {
+    protected void setDocuments(FinremCaseData caseData, List<CitizenDocumentCollectionItem> documents) {
         caseData.getCitizenDocumentWrapper().setCitizenRespondentDocument(documents);
     }
 

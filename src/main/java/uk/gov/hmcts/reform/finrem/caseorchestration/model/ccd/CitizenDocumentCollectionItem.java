@@ -13,6 +13,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class CitizenDocumentCollection {
+public class CitizenDocumentCollectionItem {
+    private String id;
     private CitizenUploadDocument value;
 }
