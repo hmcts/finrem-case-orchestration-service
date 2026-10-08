@@ -307,12 +307,6 @@ class GlobalSearchMigrationTaskTest {
             .caseManagementLocation(location)
             .build());
 
-        /*TODO
-            Fails because calling finremCaseDetailsMapper.finremCaseDataToMap(caseData) converts everything to a
-            LinkedHashMap but we want a DynamicList or CaseLocation.
-            Solution: Do not convert to map and use the FinremCaseDetails which has the correct types already.
-            Enable test after update.
-         */
         globalSearchMigrationTask.executeTask(finremCaseDetails);
 
         FinremCaseData caseData = finremCaseDetails.getData();
