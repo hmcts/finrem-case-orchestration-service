@@ -59,19 +59,21 @@ public class ManageHearingsCorresponder {
 
     /**
      * Builds a {@link SendCorrespondenceEvent} for a hearing notification to be sent to the solicitor,
-     * if notification is required.
+     * if a notification is required.
      *
      * <p>
-     * This method retrieves the active hearing in context and checks whether notifications
-     * should be sent. If notifications are enabled, it gathers all relevant documents including
-     * additional hearing documents, any required mini Form A, and associated working hearing
-     * documents. It then constructs a single correspondence event covering all parties.
+     * This method prepares the hearing correspondence context for the active hearing. If no context
+     * is available (that is, no notification is required), an empty {@link Optional} is returned.
+     * Otherwise, the context's documents to post (including any additional hearing documents,
+     * required mini Form A and associated working hearing documents) are used to construct a single
+     * correspondence event for the {@link ManageHearingsAction#ADD_HEARING} action, using the
+     * {@code FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR} notification type.
      * </p>
      *
      * @param callbackRequest   the callback request containing case details and data
-     * @param userAuthorisation the authorization token of the user initiating this action
-     * @return a {@link SendCorrespondenceEvent} containing the hearing notification details,
-     *         or {@code null} if no notification is required
+     * @param userAuthorisation the authorisation token of the user initiating this action
+     * @return an {@link Optional} containing the {@link SendCorrespondenceEvent} with the hearing
+     *         notification details, or {@link Optional#empty()} if no notification is required
      */
     public Optional<SendCorrespondenceEvent> buildHearingCorrespondenceEventIfNeeded(
         FinremCallbackRequest callbackRequest, String userAuthorisation) {
