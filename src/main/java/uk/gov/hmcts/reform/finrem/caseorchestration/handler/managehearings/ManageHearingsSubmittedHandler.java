@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremSubmittedCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.List;
@@ -30,9 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTER
 
 @Slf4j
 @Service
-public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
-
-    private final RetryExecutor retryExecutor;
+public class ManageHearingsSubmittedHandler extends FinremSubmittedCallbackHandler {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -43,14 +42,14 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
     private final NotificationAuditService notificationAuditService;
 
     public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                          ManageHearingsCorresponder manageHearingsCorresponder,
+                                          EvidenceManagementDeleteService evidenceManagementDeleteService,
                                           RetryExecutor retryExecutor,
+                                          ManageHearingsCorresponder manageHearingsCorresponder,
                                           ApplicationEventPublisher applicationEventPublisher,
                                           CoreCaseDataService coreCaseDataService,
                                           NotificationAuditService notificationAuditService) {
-        super(finremCaseDetailsMapper);
+        super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
-        this.retryExecutor = retryExecutor;
         this.applicationEventPublisher = applicationEventPublisher;
         this.coreCaseDataService = coreCaseDataService;
         this.notificationAuditService = notificationAuditService;
