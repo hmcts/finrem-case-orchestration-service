@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.ArrayList;
@@ -59,18 +58,6 @@ public class PartyService {
     }
 
     /**
-     * Updates the correspondence-enabled flags as above, using the parties checked on the
-     * given working hearing, as returned by {@link #getCheckedActiveParties(WorkingHearing)}.
-     *
-     * @param finremCaseData the case data to update with the correspondence-enabled flags
-     * @param workingHearing the working hearing containing the party selection
-     */
-    public void updateCorrespondenceEnabledFromSelectedParties(FinremCaseData finremCaseData,
-                                                               WorkingHearing workingHearing) {
-        applyCorrespondenceEnabled(finremCaseData, getCheckedActiveParties(workingHearing));
-    }
-
-    /**
      * Returns the role codes of the active parties that have been checked in a
      * party-selection question such as "Who should receive this order?".
      *
@@ -82,21 +69,6 @@ public class PartyService {
      */
     public List<String> getCheckedActiveParties(FinremCaseDetails caseDetails) {
         return toRoleCodes(caseDetails.getData().getPartiesOnCase());
-    }
-
-    /**
-     * Returns the role codes of the active parties that have been checked in the
-     * party-selection question on the given working hearing, such as "Who should
-     * receive this order?".
-     *
-     * <p>The codes are taken from the selected values of the working hearing's
-     * {@code partiesOnCaseMultiSelectList}, for example {@code [APP_SOLICITOR]}.
-     *
-     * @param workingHearing the working hearing containing the party selection
-     * @return the role codes of the checked parties
-     */
-    public List<String> getCheckedActiveParties(WorkingHearing workingHearing) {
-        return toRoleCodes(workingHearing.getPartiesOnCaseMultiSelectList());
     }
 
     /**
@@ -119,28 +91,6 @@ public class PartyService {
     }
 
     /**
-     * Checks whether the applicant has been selected in the party-selection
-     * question on the given working hearing, such as "Who should receive this
-     * order?".
-     *
-     * <p>The applicant's role is taken from the case-assigned role on the
-     * applicant organisation policy of the given case data and compared with the
-     * checked party codes returned by
-     * {@link #getCheckedActiveParties(WorkingHearing)}. If the applicant
-     * organisation policy or its role is not set, the applicant is treated as not
-     * selected.
-     *
-     * @param finremCaseData the case data containing the applicant organisation policy
-     * @param workingHearing the working hearing containing the party selection
-     * @return {@code true} if the applicant is among the checked parties,
-     *         {@code false} otherwise
-     */
-    public boolean isApplicantPartySelected(FinremCaseData finremCaseData, WorkingHearing workingHearing) {
-        return isPolicyRoleChecked(finremCaseData.getApplicantOrganisationPolicy(),
-            getCheckedActiveParties(workingHearing));
-    }
-
-    /**
      * Checks whether the respondent has been selected in a party-selection
      * question such as "Who should receive this order?".
      *
@@ -157,28 +107,6 @@ public class PartyService {
     public boolean isRespondentPartySelected(FinremCaseDetails caseDetails) {
         return isPolicyRoleChecked(caseDetails.getData().getRespondentOrganisationPolicy(),
             getCheckedActiveParties(caseDetails));
-    }
-
-    /**
-     * Checks whether the respondent has been selected in the party-selection
-     * question on the given working hearing, such as "Who should receive this
-     * order?".
-     *
-     * <p>The respondent's role is taken from the case-assigned role on the
-     * respondent organisation policy of the given case data and compared with the
-     * checked party codes returned by
-     * {@link #getCheckedActiveParties(WorkingHearing)}. If the respondent
-     * organisation policy or its role is not set, the respondent is treated as not
-     * selected.
-     *
-     * @param finremCaseData the case data containing the respondent organisation policy
-     * @param workingHearing the working hearing containing the party selection
-     * @return {@code true} if the respondent is among the checked parties,
-     *         {@code false} otherwise
-     */
-    public boolean isRespondentPartySelected(FinremCaseData finremCaseData, WorkingHearing workingHearing) {
-        return isPolicyRoleChecked(finremCaseData.getRespondentOrganisationPolicy(),
-            getCheckedActiveParties(workingHearing));
     }
 
     /**
