@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -45,7 +46,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,6 +64,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
 
@@ -88,8 +92,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
     void setUp() {
         mockedContactDetailsValidator = Mockito.mockStatic(ContactDetailsValidator.class);
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-                any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS), anyBoolean(), anyBoolean()))
-            .thenReturn(List.of());
+            any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS), anyBoolean(), anyBoolean())).thenReturn(List.of());
     }
 
     @AfterEach
@@ -309,6 +312,19 @@ class ManageHearingsAboutToSubmitHandlerTest {
         var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).isEqualTo(expectedErrors);
         verifyNoInteractions(notificationAuditService);
+    }
+
+
+   @Test
+    void shouldRemoveTemporaryFieldsInManageHearingsWrapperWhenHandled() {
+        verifyTemporaryFieldsWereSanitised(manageHearingsAboutToSubmitHandler,
+            finremCaseDetailsMapper, new HashMap<>(Map.of(
+                "workingHearing", WorkingHearing.builder().build(),
+                "workingVacatedHearing", WorkingVacatedHearing.builder().build(),
+                "isRelistSelected", mock(YesOrNo.class),
+                "shouldSendVacateOrAdjNotice", mock(YesOrNo.class)
+            ))
+        );
     }
 
     private FinremCallbackRequest buildRequest(FinremCaseData caseData) {
