@@ -124,7 +124,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
             ManageHearingsAction.ADD_HEARING,
             request,
             AUTH_TOKEN
-        )).thenReturn(event);
+        )).thenReturn(List.of(event));
         doAnswer(invocation -> {
             UUID workingHearingID = UUID.randomUUID();
             ManageHearingsCollectionItem manageHearingsCollectionItem = ManageHearingsCollectionItem.builder()
@@ -225,8 +225,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
             request,
             AUTH_TOKEN
-        )).thenReturn(event);
-
+        )).thenReturn(List.of(event));
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
@@ -256,7 +255,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
             request,
             AUTH_TOKEN
-        )).thenReturn(event);
+        )).thenReturn(List.of(event));
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 

@@ -107,7 +107,7 @@ class ManageHearingsSubmittedHandlerTest {
             ManageHearingsAction.ADD_HEARING,
             callbackRequest,
             AUTH_TOKEN
-        )).thenReturn(event);
+        )).thenReturn(List.of(event));
 
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
@@ -144,7 +144,7 @@ class ManageHearingsSubmittedHandlerTest {
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
             callbackRequest,
             AUTH_TOKEN
-        )).thenReturn(event);
+        )).thenReturn(List.of(event));
 
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
@@ -180,7 +180,7 @@ class ManageHearingsSubmittedHandlerTest {
             ManageHearingsAction.ADD_HEARING,
             callbackRequest,
             AUTH_TOKEN
-        )).thenReturn(event);
+        )).thenReturn(List.of(event));
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -223,7 +223,7 @@ class ManageHearingsSubmittedHandlerTest {
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
             callbackRequest,
             AUTH_TOKEN
-        )).thenReturn(event);
+        )).thenReturn(List.of(event));
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
@@ -267,7 +267,7 @@ class ManageHearingsSubmittedHandlerTest {
             ManageHearingsAction.ADD_HEARING,
             callbackRequest,
             AUTH_TOKEN
-        )).thenReturn(event);
+        )).thenReturn(List.of(event));
 
         Map<String, Object> updatedFields = new HashMap<>();
         updatedFields.put(

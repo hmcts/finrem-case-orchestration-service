@@ -330,15 +330,19 @@ class ManageHearingsCorresponderTest {
 
         when(hearingCorrespondenceHelper.getVacateHearingNotice(callbackRequest.getCaseDetails().getData())).thenReturn(
             CaseDocument
-            .builder()
-            .documentFilename("VacateHearingNotice.pdf")
-            .build()
+                .builder()
+                .documentFilename("VacateHearingNotice.pdf")
+                .build()
         );
 
-        //Act
-        SendCorrespondenceEvent actualEvent = corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
+        // Act
+        List<SendCorrespondenceEvent> actualEvents =
+            corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
 
         // Assert
+        assertThat(actualEvents).hasSize(1);
+        SendCorrespondenceEvent actualEvent = actualEvents.getFirst();
+
         SendCorrespondenceEvent expectedEvent = getExpectedVacatedOrAdjournedHearingEvent(callbackRequest.getCaseDetails());
 
         assertThat(actualEvent.getEmailNotificationRequest())
@@ -377,9 +381,11 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.getVacateHearingNotice(callbackRequest.getCaseDetails().getData())).thenReturn(
             CaseDocument.builder().documentFilename("VacateHearingNotice.pdf").build());
 
-        SendCorrespondenceEvent actualEvent = corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
+        List<SendCorrespondenceEvent> actualEvents =
+            corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
 
-        assertThat(actualEvent.getEmailTemplate())
+        assertThat(actualEvents).hasSize(1);
+        assertThat(actualEvents.getFirst().getEmailTemplate())
             .isEqualTo(EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR);
     }
 
@@ -473,7 +479,7 @@ class ManageHearingsCorresponderTest {
             try (
                 MockedStatic<CourtHelper> mockedCourtHelperStatic = Mockito.mockStatic(CourtHelper.class);
                 MockedStatic<NotificationParty> mockedNotificationPartyStatic = Mockito.mockStatic(NotificationParty.class)
-                ) {
+            ) {
                 mockedCourtHelperStatic.when(() -> CourtHelper.getFRCForHearing(hearing)).thenReturn("selectedFRC");
 
                 mockedNotificationPartyStatic.when(() -> NotificationParty.getNotificationPartyFromRole(
@@ -483,10 +489,15 @@ class ManageHearingsCorresponderTest {
                     CaseRole.RESP_SOLICITOR.getCcdCode()
                 )).thenReturn(NotificationParty.RESPONDENT);
 
-                var event = corresponder.buildHearingCorrespondenceEventIfNeeded(callback, AUTH_TOKEN);
+                Optional<SendCorrespondenceEvent> result =
+                    corresponder.buildHearingCorrespondenceEventIfNeeded(callback, AUTH_TOKEN);
 
                 verify(hearingCorrespondenceHelper).getActiveHearingInContext(
                     callback.getFinremCaseData().getManageHearingsWrapper(), workingHearingId);
+
+                assertThat(result).isPresent();
+                SendCorrespondenceEvent event = result.get();
+
                 assertThat(event)
                     .extracting(
                         SendCorrespondenceEvent::getCaseDetails,
