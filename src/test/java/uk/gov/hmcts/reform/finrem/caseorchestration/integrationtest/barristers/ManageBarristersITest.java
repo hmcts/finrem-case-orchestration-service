@@ -77,6 +77,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BarristerLetterServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
@@ -124,7 +126,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
     RespondentLetterAddresseeGenerator.class, IntervenerOneLetterAddresseeGenerator.class, IntervenerTwoLetterAddresseeGenerator.class,
     IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class,
     InternationalPostalService.class, CourtDetailsConfiguration.class, BarristerLetterServiceAdapter.class,
-    FinremNotificationRequestMapper.class, CaseRoleService.class, NotificationRequestBuilderFactory.class})
+    FinremNotificationRequestMapper.class, CitizenDocumentsUploadedCorresponder.class, CaseRoleService.class,
+    NotificationRequestBuilderFactory.class})
 class ManageBarristersITest implements IntegrationTest {
 
     private static final String APP_BARRISTER_EMAIL_ONE = "appbarr@gmail.com";
@@ -193,6 +196,8 @@ class ManageBarristersITest implements IntegrationTest {
     private PaperNotificationService paperNotificationService;
     @MockitoBean
     private ExpressCaseService expressCaseService;
+    @MockitoBean
+    private CaseManagementLocationService caseManagementLocationService;
     @Autowired
     private ObjectMapper objectMapper;  // satisfies PrdOrganisationService injection
 

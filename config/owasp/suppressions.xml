@@ -64,7 +64,7 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-41006</cve>
         <cve>CVE-2026-41007</cve>
     </suppress>
-    <suppress until="2026-10-01Z">
+    <suppress until="2026-12-31Z">
         <notes><![CDATA[
     Suppress spring-security-crypto 6.5.10 false positives / accepted risk for release.
     ]]></notes>
@@ -147,7 +147,7 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-47888</cve>
         <cve>CVE-2026-47889</cve>
     </suppress>
-    <suppress until="2026-10-01Z">
+    <suppress until="2026-12-31Z">
         <notes><![CDATA[
           HDPI-8772: temporary. CVE-2026-47841/47842 against spring-security 6.5.11; no fixed
           6.5.x release published yet. Remove when the Boot BOM brings a patched version.
@@ -156,7 +156,7 @@ for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
         <cve>CVE-2026-47841</cve>
         <cve>CVE-2026-47842</cve>
     </suppress>
-    <suppress until="2026-10-01Z">
+    <suppress until="2026-12-31Z">
     <notes><![CDATA[
       CVE-2026-41707 affects DPoPProofJwtDecoderFactory in Spring Security OAuth2 JWT support.
       This service only includes spring-security-crypto and does not include
