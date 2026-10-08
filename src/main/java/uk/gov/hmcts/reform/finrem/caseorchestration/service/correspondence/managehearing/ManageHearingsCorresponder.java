@@ -169,26 +169,30 @@ public class ManageHearingsCorresponder {
     }
 
     /**
-     * Builds a {@link SendCorrespondenceEvent} to notify the solicitor when a hearing
-     * is adjourned or vacated, if notification is required.
+     * Builds the {@link SendCorrespondenceEvent}s needed to notify parties when a hearing
+     * is adjourned or vacated.
      *
      * <p>
-     * This method determines whether the hearing has been vacated and relisted. In such cases,
-     * a hearing correspondence is always sent via {@code sendHearingCorrespondence}, as the user
-     * cannot opt out of notifications. It then retrieves the vacated or adjourned hearing in context
-     * and evaluates whether a notification should be sent.
+     * If the hearing has been vacated and relisted, the events returned by
+     * {@link #buildHearingCorrespondenceEventIfNeeded(FinremCallbackRequest, String)} are
+     * added first, so that the new hearing is notified. In this scenario the user cannot opt
+     * out of notifications, so the vacate or adjourn notice is always built as well.
      * </p>
      *
      * <p>
-     * If notification is required, it prepares the relevant hearing notice document and selects
-     * the appropriate email template based on whether the hearing was adjourned or vacated,
-     * before constructing the correspondence event.
+     * The vacated or adjourned hearing in context is then retrieved to decide whether a
+     * vacate or adjourn notification is required. If it is, the hearing notice document is
+     * prepared and the email template is selected according to whether the hearing was
+     * adjourned ({@code FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR}) or vacated
+     * ({@code FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR}). A
+     * {@link SendCorrespondenceEvent} is then built and added after any relisting events.
      * </p>
      *
-     * @param callbackRequest the callback request containing case details and data
-     * @param userAuthorisation the authorization token of the user initiating this action
-     * @return a {@link SendCorrespondenceEvent} containing the hearing notification details,
-     *         or {@code null} if notification should not be sent
+     * @param callbackRequest   the callback request containing case details and data
+     * @param userAuthorisation the authorisation token of the user initiating this action
+     * @return the correspondence events to publish, in order: relisted hearing events (if any),
+     *         followed by the vacate or adjourn notification event (if required);
+     *         an empty list if no notification should be sent, never {@code null}
      */
     public List<SendCorrespondenceEvent> buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(
         FinremCallbackRequest callbackRequest,
