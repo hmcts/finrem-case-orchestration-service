@@ -314,7 +314,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
         verifyNoInteractions(notificationAuditService);
     }
 
-   @Test
+    @Test
     void shouldRemoveTemporaryFieldsInManageHearingsWrapperWhenHandled() {
         verifyTemporaryFieldsWereSanitised(manageHearingsAboutToSubmitHandler,
             finremCaseDetailsMapper, new HashMap<>(Map.of(
