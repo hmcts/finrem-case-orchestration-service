@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Finre
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated(forRemoval = true)
 @Component
 @Slf4j
 public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEmailAllPartiesCorresponder {
