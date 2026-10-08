@@ -58,7 +58,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -412,7 +411,8 @@ class ManageHearingsCorresponderTest {
                 workingHearingId
             )).thenReturn(hearing);
 
-            assertNull(corresponder.buildHearingCorrespondenceEventIfNeeded(callback, AUTH_TOKEN));
+            assertThat(corresponder.buildHearingCorrespondenceEventIfNeeded(callback, AUTH_TOKEN))
+                .isEqualTo(Optional.empty());
             verify(hearingCorrespondenceHelper).getActiveHearingInContext(
                 callback.getFinremCaseData().getManageHearingsWrapper(),
                 workingHearingId);
