@@ -96,10 +96,7 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
             userAuthorisation
         );
 
-
-        List<String> errors = new ArrayList<>(validateRequiredPostalAddresses(finremCaseData, EventType.MANAGE_HEARINGS,
-            shouldValidateApplicantAddress(finremCaseData, actionSelection, sendCorrespondenceEvents),
-            shouldValidateRespondentAddress(finremCaseData, actionSelection, sendCorrespondenceEvents)));
+        List<String> errors = validatePostalAddresses(finremCaseData, actionSelection, sendCorrespondenceEvents);
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(finremCaseData, errors);
         }
@@ -107,6 +104,14 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
             .toArray(new SendCorrespondenceEvent[0]));
 
         return response(finremCaseData);
+    }
+
+    private List<String> validatePostalAddresses(FinremCaseData finremCaseData,
+                                                 ManageHearingsAction actionSelection,
+                                                 List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return new ArrayList<>(validateRequiredPostalAddresses(finremCaseData, EventType.MANAGE_HEARINGS,
+            shouldValidateApplicantAddress(finremCaseData, actionSelection, sendCorrespondenceEvents),
+            shouldValidateRespondentAddress(finremCaseData, actionSelection, sendCorrespondenceEvents)));
     }
 
     private boolean shouldValidateApplicantAddress(FinremCaseData finremCaseData, ManageHearingsAction actionSelection,
