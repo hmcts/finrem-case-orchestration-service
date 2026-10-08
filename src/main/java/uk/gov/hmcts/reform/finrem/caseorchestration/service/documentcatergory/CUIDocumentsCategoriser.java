@@ -52,7 +52,8 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
                 DocumentCategory.APPLICATIONS_MAIN_APPLICATION.getDocumentCategoryId();
             case POINTS_OF_CLAIM_DEFENCE -> getPointsOfClaimDefenceCategory();
             case STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5 -> getFm5FolderCategory(doc);
-            case FINANCIAL_STATEMENT_FORM_E_E1_OR_E2 -> getFromECategory();
+            case FINANCIAL_STATEMENT_FORM_E_E1_OR_E2,
+                 ATTACHMENTS_TO_FORM_E -> getFromECategory();
             case ESTIMATE_OF_COSTS_INCURRED_FORM_H,
                  STATEMENT_OF_COSTS_FORM_H1,
                  STATEMENT_OF_COSTS_SUMMARY_ASSESSMENT_FORM_N260 -> getStatementOfCostsCategory();
@@ -86,8 +87,33 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             case FDR_BUNDLE -> DocumentCategory.FDR_BUNDLE.getDocumentCategoryId();
             case PRE_HEARING_DRAFT_ORDER -> getPreHearingDraftOrderCategory(doc);
             case REPLY_TO_QUESTIONNAIRE,
-                 REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES -> getReplyToQuestionaireCategory();
-            case UPDATING_DISCLOSURE -> getUpdatingDisclosureCategory();
+                 REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES,
+                 REPLY_TO_QUESTIONNAIRE_SUPPORTING_DOCUMENTS,
+                 REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES_SUPPORTING_DOCUMENTS -> getReplyToQuestionaireCategory();
+            case UPDATING_DISCLOSURE,
+                 BANK_STATEMENTS,
+                 PAYSLIPS,
+                 P60,
+                 P45,
+                 DEBT_STATEMENT,
+                 LIST_OF_ASSETS,
+                 LOAN_STATEMENT,
+                 CAR_INSURANCE_LOAN_STATEMENT ,
+                 PERSONAL_SELLING_SIGHT_STATEMENT,
+                 SELF_ASSESSMENT_TAX_FORMS,
+                 UNIVERSAL_CREDIT_STATEMENT,
+                 MORTGAGE_STATEMENTS_FOR_FAMILY_HOME,
+                 MORTGAGE_STATEMENTS_FOR_OTHER_PROPERTIES,
+                 INVESTMENT_STATEMENTS,
+                 BUSINESS_ACCOUNTS,
+                 P11D,
+                 TAX_ASSESSMENTS,
+                 INCOME_EVIDENCE,
+                 PENSION_STATEMENT,
+                 OTHER_PROPERTY_VALUATION,
+                 LIFE_INSURANCE_INCLUDING_ENDOWMENT_POLICIES,
+                 BUSINESS_VALUATION,
+                 MANAGEMENT_ACCOUNTS-> getUpdatingDisclosureCategory();
             default -> null;
         };
 
@@ -305,6 +331,12 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
         return party == Party.APPLICANT
             ? DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER.getDocumentCategoryId()
             : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER.getDocumentCategoryId();
+    }
+
+    private String getUpdatingDisclosureCategory() {
+        return party == Party.APPLICANT
+            ? DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE.getDocumentCategoryId()
+            : DocumentCategory.RESPONDENT_DOCUMENTS_UPDATING_DISCLOSURE.getDocumentCategoryId();
     }
 
     private void setCategory(CitizenUploadDocument doc, String category) {
