@@ -4,16 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 
 import java.util.List;
-import java.util.Map;
-
-import static com.google.common.base.Strings.nullToEmpty;
 
 /**
  * Service responsible for populating global search related fields on case data.
@@ -33,33 +30,27 @@ public class GlobalSearchService {
      * Sets the fields required for global search on the provided case data map.
      * If the global search feature is disabled, this method does nothing.
      *
-     * @param caseDataMap -  the case data map to update
-     * @param caseTypeId - the type of the case
-     * @param caseId - the ID of the case
+     * @param finremCaseData -  the case data map to update
      */
-    public void setGlobalSearchDataByMap(Map<String, Object> caseDataMap, String caseTypeId, Long caseId) {
-
-        if (featureToggleService.isGlobalSearchEnabled() && isConsentedApplication(caseTypeId)) {
+    public void setGlobalSearchData(FinremCaseData finremCaseData) {
+        if (featureToggleService.isGlobalSearchEnabled() && finremCaseData != null && finremCaseData.isConsentedApplication()) {
             log.info("setGlobalSearchDataByMap::Received request to set global search fields "
-                + "for {} case type with CCD ID: {}", caseTypeId,  caseId);
-            caseDataMap.put("caseManagementCategory", DynamicList.builder().value(element).listItems(List.of(element)).build());
-            caseDataMap.put("caseNameHmctsInternal", getCaseNameHmctsInternal(caseDataMap));
-            caseDataMap.put("caseManagementLocation", caseManagementLocationService.getCaseLocation(caseDataMap));
+                + "for {} case type with CCD ID: {}", finremCaseData.getCcdCaseType(), finremCaseData.getCcdCaseId());
+            finremCaseData.setCaseManagementCategory(DynamicList.builder().value(element).listItems(List.of(element)).build());
+            finremCaseData.setCaseNameHmctsInternal(getCaseNameHmctsInternal(finremCaseData));
+            finremCaseData.setCaseManagementLocation(caseManagementLocationService.getCaseLocation(finremCaseData));
             log.info("setGlobalSearchDataByMap::global search fields are set for {} case type with CCD ID: {}",
-                caseTypeId, caseId);
+                finremCaseData.getCcdCaseType(), finremCaseData.getCcdCaseId());
         }
     }
 
-    private String getCaseNameHmctsInternal(Map<String, Object> caseDataMap) {
-        if (StringUtils.isNotBlank((String) caseDataMap.get("applicantLName"))
-            && StringUtils.isNotBlank((String) caseDataMap.get("appRespondentLName"))) {
+    private String getCaseNameHmctsInternal(FinremCaseData finremCaseData) {
+        if (finremCaseData.getContactDetailsWrapper() != null
+            && StringUtils.isNotBlank(finremCaseData.getApplicantLastName())
+            && StringUtils.isNotBlank(finremCaseData.getContactDetailsWrapper().getAppRespondentLName())) {
             return String.format("%s vs %s",
-                 caseDataMap.get("applicantLName"),  caseDataMap.get("appRespondentLName"));
+                finremCaseData.getApplicantLastName(), finremCaseData.getContactDetailsWrapper().getAppRespondentLName());
         }
         return FINANCIAL_REMEDY;
-    }
-
-    private boolean isConsentedApplication(String caseTypeId) {
-        return CaseType.CONSENTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseTypeId));
     }
 }
