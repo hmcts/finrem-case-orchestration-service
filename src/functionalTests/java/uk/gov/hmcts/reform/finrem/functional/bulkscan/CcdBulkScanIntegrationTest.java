@@ -4,8 +4,6 @@ import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +62,6 @@ public class CcdBulkScanIntegrationTest {
     private String bulkScanTransformationAndUpdateMicroservice;
 
     @Test
-    @Ignore
     public void givenOcrPayload_whenTransformedPayloadUploadedToCcd_thenCaseIsCreated() throws Exception {
         var formA = ResourceLoader.loadJsonToObject(FORM_A_JSON, Map.class);
         setScannedDocumentsUrls(formA);
@@ -91,11 +88,6 @@ public class CcdBulkScanIntegrationTest {
         assertThat(persistedCaseData, hasKey("latestConsentOrder"));//Draft consent order
         assertThat(persistedCaseData, hasKey("divorceUploadEvidence1"));//DecreeNisi
         assertThat(persistedCaseData, hasKey("divorceUploadEvidence2"));//DecreeAbsolute
-    }
-
-    @After
-    public void cleanUp() {
-        idamUtils.deleteTestUsers();
     }
 
     private String transformOcrData(String body) {
