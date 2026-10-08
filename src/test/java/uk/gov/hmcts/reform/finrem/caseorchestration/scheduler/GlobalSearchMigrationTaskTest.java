@@ -294,7 +294,6 @@ class GlobalSearchMigrationTaskTest {
     }
 
     @Test
-    @Disabled("Fails due to ClassCastException")
     void givenExistingGlobalSearchFieldsAndServiceDoesNotPopulateMap_whenExecuteTask_thenExistingValuesRetained() {
         DynamicListElement element =
             DynamicListElement.builder().code("Financial Remedy").label("Financial Remedy").build();
