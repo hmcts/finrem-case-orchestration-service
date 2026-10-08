@@ -54,9 +54,7 @@ public class ManageHearingsCorresponder {
      */
     public void sendHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         Optional<SendCorrespondenceEvent> event = buildHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation);
-        if (event.isPresent()) {
-            applicationEventPublisher.publishEvent(event);
-        }
+        event.ifPresent(applicationEventPublisher::publishEvent);
     }
 
     /**

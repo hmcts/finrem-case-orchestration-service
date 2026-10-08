@@ -312,7 +312,7 @@ class ManageHearingsCorresponderTest {
 
         //Act
         assertThat(corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN))
-            .isNull();
+            .isEmpty();
     }
 
     @Test
