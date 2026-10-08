@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -68,9 +66,6 @@ class PartyServiceTest {
 
     @Mock
     private FinremCaseData finremCaseData;
-
-    @Mock
-    private WorkingHearing workingHearing;
 
     @Mock
     private IntervenerOne intervenerOne;
@@ -220,7 +215,7 @@ class PartyServiceTest {
     // ---------------------------------------------------------------------
 
     @Test
-    void givenCheckedParties_getCheckedActiveParties_fromCaseDetails_returnsCodesInOrder() {
+    void givenCheckedParties_getCheckedActiveParties_returnsCodesInOrder() {
         when(finremCaseData.getPartiesOnCase())
             .thenReturn(dynamicMultiSelectList(CaseRole.RESP_BARRISTER, CaseRole.APP_SOLICITOR));
 
@@ -229,26 +224,17 @@ class PartyServiceTest {
     }
 
     @Test
-    void givenNoCheckedParties_getCheckedActiveParties_fromCaseDetails_returnsEmptyList() {
+    void givenNoCheckedParties_getCheckedActiveParties_returnsEmptyList() {
         when(finremCaseData.getPartiesOnCase()).thenReturn(dynamicMultiSelectList());
 
         assertThat(partyService.getCheckedActiveParties(finremCaseDetails)).isEmpty();
     }
 
     @Test
-    void givenCheckedParties_getCheckedActiveParties_fromWorkingHearing_returnsCodesInOrder() {
-        when(workingHearing.getPartiesOnCaseMultiSelectList())
-            .thenReturn(dynamicMultiSelectList(CaseRole.INTVR_BARRISTER_2, CaseRole.APP_BARRISTER));
+    void givenNullPartiesOnCase_getCheckedActiveParties_returnsEmptyList() {
+        when(finremCaseData.getPartiesOnCase()).thenReturn(null);
 
-        assertThat(partyService.getCheckedActiveParties(workingHearing))
-            .containsExactly(CaseRole.INTVR_BARRISTER_2.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode());
-    }
-
-    @Test
-    void givenNoCheckedParties_getCheckedActiveParties_fromWorkingHearing_returnsEmptyList() {
-        when(workingHearing.getPartiesOnCaseMultiSelectList()).thenReturn(dynamicMultiSelectList());
-
-        assertThat(partyService.getCheckedActiveParties(workingHearing)).isEmpty();
+        assertThat(partyService.getCheckedActiveParties(finremCaseDetails)).isEmpty();
     }
 
     // ---------------------------------------------------------------------
@@ -257,7 +243,7 @@ class PartyServiceTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("selectedRoleToExpectedFlags")
-    void givenSelectedRole_updateCorrespondenceEnabled_fromCaseDetails_enablesOnlyThatParty(
+    void givenSelectedRole_updateCorrespondenceEnabled_enablesOnlyThatParty(
         CaseRole selectedRole, boolean applicant, boolean respondent,
         boolean intervener1, boolean intervener2, boolean intervener3, boolean intervener4) {
         FinremCaseData caseData = caseDataWithMockInterveners();
@@ -269,21 +255,8 @@ class PartyServiceTest {
         verifyFlags(caseData, applicant, respondent, intervener1, intervener2, intervener3, intervener4);
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("selectedRoleToExpectedFlags")
-    void givenSelectedRole_updateCorrespondenceEnabled_fromWorkingHearing_enablesOnlyThatParty(
-        CaseRole selectedRole, boolean applicant, boolean respondent,
-        boolean intervener1, boolean intervener2, boolean intervener3, boolean intervener4) {
-        FinremCaseData caseData = caseDataWithMockInterveners();
-        when(workingHearing.getPartiesOnCaseMultiSelectList()).thenReturn(dynamicMultiSelectList(selectedRole));
-
-        partyService.updateCorrespondenceEnabledFromSelectedParties(caseData, workingHearing);
-
-        verifyFlags(caseData, applicant, respondent, intervener1, intervener2, intervener3, intervener4);
-    }
-
     @Test
-    void givenNoPartiesSelected_updateCorrespondenceEnabled_fromCaseDetails_disablesEveryParty() {
+    void givenNoPartiesSelected_updateCorrespondenceEnabled_disablesEveryParty() {
         FinremCaseData caseData = caseDataWithMockInterveners();
         when(caseData.getPartiesOnCase()).thenReturn(dynamicMultiSelectList());
         when(finremCaseDetails.getData()).thenReturn(caseData);
@@ -294,17 +267,7 @@ class PartyServiceTest {
     }
 
     @Test
-    void givenNoPartiesSelected_updateCorrespondenceEnabled_fromWorkingHearing_disablesEveryParty() {
-        FinremCaseData caseData = caseDataWithMockInterveners();
-        when(workingHearing.getPartiesOnCaseMultiSelectList()).thenReturn(dynamicMultiSelectList());
-
-        partyService.updateCorrespondenceEnabledFromSelectedParties(caseData, workingHearing);
-
-        verifyFlags(caseData, false, false, false, false, false, false);
-    }
-
-    @Test
-    void givenSolicitorAndBarristerOfDifferentParties_updateCorrespondenceEnabled_fromCaseDetails_enablesBoth() {
+    void givenSolicitorAndBarristerOfDifferentParties_updateCorrespondenceEnabled_enablesBoth() {
         FinremCaseData caseData = caseDataWithMockInterveners();
         when(caseData.getPartiesOnCase())
             .thenReturn(dynamicMultiSelectList(CaseRole.APP_BARRISTER, CaseRole.INTVR_SOLICITOR_3));
@@ -315,133 +278,86 @@ class PartyServiceTest {
         verifyFlags(caseData, true, false, false, false, true, false);
     }
 
-    @Test
-    void givenSolicitorAndBarristerOfDifferentParties_updateCorrespondenceEnabled_fromWorkingHearing_enablesBoth() {
-        FinremCaseData caseData = caseDataWithMockInterveners();
-        when(workingHearing.getPartiesOnCaseMultiSelectList())
-            .thenReturn(dynamicMultiSelectList(CaseRole.RESP_SOLICITOR, CaseRole.INTVR_BARRISTER_4));
-
-        partyService.updateCorrespondenceEnabledFromSelectedParties(caseData, workingHearing);
-
-        verifyFlags(caseData, false, true, false, false, false, true);
-    }
-
-    @Test
-    void givenSolicitorAndBarristerOfSameParty_updateCorrespondenceEnabled_enablesThatPartyOnce() {
-        FinremCaseData caseData = caseDataWithMockInterveners();
-        when(workingHearing.getPartiesOnCaseMultiSelectList())
-            .thenReturn(dynamicMultiSelectList(CaseRole.APP_SOLICITOR, CaseRole.APP_BARRISTER));
-
-        partyService.updateCorrespondenceEnabledFromSelectedParties(caseData, workingHearing);
-
-        verifyFlags(caseData, true, false, false, false, false, false);
-    }
-
     // ---------------------------------------------------------------------
     // isApplicantPartySelected / isRespondentPartySelected
     // ---------------------------------------------------------------------
 
-    @ParameterizedTest(name = "workingHearingOverload={0}")
-    @ValueSource(booleans = {false, true})
-    void givenApplicantRoleChecked_isApplicantPartySelected_returnsTrue(boolean useWorkingHearing) {
+    @Test
+    void givenApplicantRoleChecked_isApplicantPartySelected_returnsTrue() {
         when(finremCaseData.getApplicantOrganisationPolicy())
             .thenReturn(organisationPolicy(TEST_ORG_ID, APPLICANT_ORG_POLICY_ASSIGNED_ROLE));
-        givenCheckedPartyCodes(useWorkingHearing, APPLICANT_ORG_POLICY_ASSIGNED_ROLE, "SOME_OTHER_ROLE");
+        givenCheckedPartyCodes(APPLICANT_ORG_POLICY_ASSIGNED_ROLE, "SOME_OTHER_ROLE");
 
-        assertThat(isApplicantPartySelected(useWorkingHearing)).isTrue();
+        assertThat(partyService.isApplicantPartySelected(finremCaseDetails)).isTrue();
     }
 
-    @ParameterizedTest(name = "workingHearingOverload={0}")
-    @ValueSource(booleans = {false, true})
-    void givenApplicantRoleNotChecked_isApplicantPartySelected_returnsFalse(boolean useWorkingHearing) {
+    @Test
+    void givenApplicantRoleNotChecked_isApplicantPartySelected_returnsFalse() {
         when(finremCaseData.getApplicantOrganisationPolicy())
             .thenReturn(organisationPolicy(TEST_ORG_ID, APPLICANT_ORG_POLICY_ASSIGNED_ROLE));
-        givenCheckedPartyCodes(useWorkingHearing, RESPONDENT_ORG_POLICY_ASSIGNED_ROLE);
+        givenCheckedPartyCodes(RESPONDENT_ORG_POLICY_ASSIGNED_ROLE);
 
-        assertThat(isApplicantPartySelected(useWorkingHearing)).isFalse();
+        assertThat(partyService.isApplicantPartySelected(finremCaseDetails)).isFalse();
     }
 
-    @ParameterizedTest(name = "workingHearingOverload={0}")
-    @ValueSource(booleans = {false, true})
-    void givenNoApplicantPolicy_isApplicantPartySelected_returnsFalse(boolean useWorkingHearing) {
+    @Test
+    void givenNoApplicantPolicy_isApplicantPartySelected_returnsFalse() {
         when(finremCaseData.getApplicantOrganisationPolicy()).thenReturn(null);
-        givenCheckedPartyCodes(useWorkingHearing, APPLICANT_ORG_POLICY_ASSIGNED_ROLE);
+        givenCheckedPartyCodes(APPLICANT_ORG_POLICY_ASSIGNED_ROLE);
 
-        assertThat(isApplicantPartySelected(useWorkingHearing)).isFalse();
+        assertThat(partyService.isApplicantPartySelected(finremCaseDetails)).isFalse();
     }
 
-    @ParameterizedTest(name = "workingHearingOverload={0}")
-    @ValueSource(booleans = {false, true})
-    void givenApplicantPolicyWithoutRole_isApplicantPartySelected_returnsFalse(boolean useWorkingHearing) {
+    @Test
+    void givenApplicantPolicyWithoutRole_isApplicantPartySelected_returnsFalse() {
         when(finremCaseData.getApplicantOrganisationPolicy())
             .thenReturn(organisationPolicy(TEST_ORG_ID, null));
-        givenCheckedPartyCodes(useWorkingHearing, APPLICANT_ORG_POLICY_ASSIGNED_ROLE);
+        givenCheckedPartyCodes(APPLICANT_ORG_POLICY_ASSIGNED_ROLE);
 
-        assertThat(isApplicantPartySelected(useWorkingHearing)).isFalse();
+        assertThat(partyService.isApplicantPartySelected(finremCaseDetails)).isFalse();
     }
 
-    @ParameterizedTest(name = "workingHearingOverload={0}")
-    @ValueSource(booleans = {false, true})
-    void givenRespondentRoleChecked_isRespondentPartySelected_returnsTrue(boolean useWorkingHearing) {
+    @Test
+    void givenRespondentRoleChecked_isRespondentPartySelected_returnsTrue() {
         when(finremCaseData.getRespondentOrganisationPolicy())
             .thenReturn(organisationPolicy(TEST_ORG_ID, RESPONDENT_ORG_POLICY_ASSIGNED_ROLE));
-        givenCheckedPartyCodes(useWorkingHearing, RESPONDENT_ORG_POLICY_ASSIGNED_ROLE, "SOME_OTHER_ROLE");
+        givenCheckedPartyCodes(RESPONDENT_ORG_POLICY_ASSIGNED_ROLE, "SOME_OTHER_ROLE");
 
-        assertThat(isRespondentPartySelected(useWorkingHearing)).isTrue();
+        assertThat(partyService.isRespondentPartySelected(finremCaseDetails)).isTrue();
     }
 
-    @ParameterizedTest(name = "workingHearingOverload={0}")
-    @ValueSource(booleans = {false, true})
-    void givenRespondentRoleNotChecked_isRespondentPartySelected_returnsFalse(boolean useWorkingHearing) {
+    @Test
+    void givenRespondentRoleNotChecked_isRespondentPartySelected_returnsFalse() {
         when(finremCaseData.getRespondentOrganisationPolicy())
             .thenReturn(organisationPolicy(TEST_ORG_ID, RESPONDENT_ORG_POLICY_ASSIGNED_ROLE));
-        givenCheckedPartyCodes(useWorkingHearing, APPLICANT_ORG_POLICY_ASSIGNED_ROLE);
+        givenCheckedPartyCodes(APPLICANT_ORG_POLICY_ASSIGNED_ROLE);
 
-        assertThat(isRespondentPartySelected(useWorkingHearing)).isFalse();
+        assertThat(partyService.isRespondentPartySelected(finremCaseDetails)).isFalse();
     }
 
-    @ParameterizedTest(name = "workingHearingOverload={0}")
-    @ValueSource(booleans = {false, true})
-    void givenNoRespondentPolicy_isRespondentPartySelected_returnsFalse(boolean useWorkingHearing) {
+    @Test
+    void givenNoRespondentPolicy_isRespondentPartySelected_returnsFalse() {
         when(finremCaseData.getRespondentOrganisationPolicy()).thenReturn(null);
-        givenCheckedPartyCodes(useWorkingHearing, RESPONDENT_ORG_POLICY_ASSIGNED_ROLE);
+        givenCheckedPartyCodes(RESPONDENT_ORG_POLICY_ASSIGNED_ROLE);
 
-        assertThat(isRespondentPartySelected(useWorkingHearing)).isFalse();
+        assertThat(partyService.isRespondentPartySelected(finremCaseDetails)).isFalse();
     }
 
-    @ParameterizedTest(name = "workingHearingOverload={0}")
-    @ValueSource(booleans = {false, true})
-    void givenRespondentPolicyWithoutRole_isRespondentPartySelected_returnsFalse(boolean useWorkingHearing) {
+    @Test
+    void givenRespondentPolicyWithoutRole_isRespondentPartySelected_returnsFalse() {
         when(finremCaseData.getRespondentOrganisationPolicy())
             .thenReturn(organisationPolicy(TEST_ORG_ID, null));
-        givenCheckedPartyCodes(useWorkingHearing, RESPONDENT_ORG_POLICY_ASSIGNED_ROLE);
+        givenCheckedPartyCodes(RESPONDENT_ORG_POLICY_ASSIGNED_ROLE);
 
-        assertThat(isRespondentPartySelected(useWorkingHearing)).isFalse();
+        assertThat(partyService.isRespondentPartySelected(finremCaseDetails)).isFalse();
     }
 
     // ---------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------
 
-    private boolean isApplicantPartySelected(boolean useWorkingHearing) {
-        return useWorkingHearing
-            ? partyService.isApplicantPartySelected(finremCaseData, workingHearing)
-            : partyService.isApplicantPartySelected(finremCaseDetails);
-    }
-
-    private boolean isRespondentPartySelected(boolean useWorkingHearing) {
-        return useWorkingHearing
-            ? partyService.isRespondentPartySelected(finremCaseData, workingHearing)
-            : partyService.isRespondentPartySelected(finremCaseDetails);
-    }
-
-    private void givenCheckedPartyCodes(boolean useWorkingHearing, String... codes) {
-        DynamicMultiSelectList list = dynamicMultiSelectListOfCodes(codes);
-        if (useWorkingHearing) {
-            when(workingHearing.getPartiesOnCaseMultiSelectList()).thenReturn(list);
-        } else {
-            when(finremCaseData.getPartiesOnCase()).thenReturn(list);
-        }
+    private void givenCheckedPartyCodes(String... codes) {
+        when(finremCaseData.getPartiesOnCase()).thenReturn(dynamicMultiSelectListOfCodes(codes));
     }
 
     private FinremCaseData caseDataWithMockInterveners() {
