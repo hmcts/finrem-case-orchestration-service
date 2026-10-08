@@ -33,11 +33,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -139,18 +141,19 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
             SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
             when(event.getCaseId()).thenReturn(CASE_ID);
-            when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
+            when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean()))
                 .thenReturn(event);
 
             // Act
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+            var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
             // Verify
             ArgumentCaptor<ThrowingRunnable> nocNotificationCaptor = getThrowingRunnableCaptor();
             assertAll(
                 () -> assertThat(response.getConfirmationBody()).isNull(),
                 () -> assertThat(response.getConfirmationHeader()).isNull(),
-                () -> verify(updateContactDetailsNotificationService).prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()),
+                () -> verify(updateContactDetailsNotificationService).prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()),
+                    anyBoolean()),
                 () -> verify(retryExecutor).runWithRetryWithHandler(
                     nocNotificationCaptor.capture(),
                     eq("Sending NOC email to litigant solicitor"),
@@ -195,7 +198,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
             simulateGrantAndRevokeOperationsWorkingFine();
             SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
             when(event.getCaseId()).thenReturn(CASE_ID);
-            when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
+            when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(callbackRequest.getCaseDetails(), false))
                 .thenReturn(event);
 
             if (nocEmailToLitigantSolicitorFailure) {
@@ -222,7 +225,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
             }
 
             // Act
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+            var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
             // then
             if (!nocEmailToLitigantSolicitorFailure && !nocLetterFailure) {
@@ -237,7 +240,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                         nocLetterFailure),
                     () -> assertCondition(response.getConfirmationBody(), "Fail to send notice of change email to litigant solicitor.",
                         nocEmailToLitigantSolicitorFailure),
-                    () -> verify(updateContactDetailsNotificationService).prepareNocEmailToLitigantSolicitor(any(FinremCaseDetails.class))
+                    () -> verify(updateContactDetailsNotificationService).prepareNocEmailToNewSolicitor(any(FinremCaseDetails.class), eq(false))
                 );
             }
         }
@@ -266,7 +269,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 finremCaseData));
             when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(true);
             when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(false);
-            when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
+            lenient().when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean()))
                 .thenReturn(mock(SendCorrespondenceEvent.class));
 
             // Simulate error in checkAndAssignSolicitorAccess by making retryExecutor set the error
@@ -278,6 +281,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                         String caseId = invocation.getArgument(2);
                         RetryErrorHandler errorHandler = invocation.getArgument(3);
                         errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
+                        return Optional.of(Boolean.FALSE);
                     }
                     return Optional.of(Boolean.TRUE);
                 });
@@ -289,13 +293,13 @@ class UpdateContactDetailsSubmittedHandlerTest {
                         String caseId = invocation.getArgument(2);
                         RetryErrorHandler errorHandler = invocation.getArgument(3);
                         errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
-                        return Optional.empty();
+                        return Optional.of(Boolean.FALSE);
                     }
                     return Optional.of(Boolean.TRUE);
                 });
 
             // Act
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+            var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
             // Assert
             String body = response.getConfirmationBody();
@@ -319,7 +323,9 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 ),
                 () -> assertThat(header).contains("Contact details updated with errors"),
                 () -> assertCondition(body, grantMsg, failGrant),
-                () -> assertCondition(body, revokeMsg, failRevoke)
+                () -> assertCondition(body, revokeMsg, failRevoke),
+                () -> verify(updateContactDetailsNotificationService, times(failGrant ? 0 : 1))
+                    .prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean())
             );
         }
 
@@ -335,7 +341,8 @@ class UpdateContactDetailsSubmittedHandlerTest {
             when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(true);
             when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(false);
 
-            when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
+            when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()),
+                anyBoolean()))
                 .thenReturn(mock(SendCorrespondenceEvent.class));
             // Simulate grant/revoke applicant solicitor success
             when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
@@ -378,7 +385,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 () -> verifyNoMoreInteractions(assignPartiesAccessService),
                 // to verify notifying parties
                 () -> verify(updateContactDetailsNotificationService)
-                    .prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()),
+                    .prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean()),
                 // to verify happy path that return null
                 () -> assertThat(response.getConfirmationHeader()).isNull(),
                 () -> assertThat(response.getConfirmationBody()).isNull()
@@ -401,7 +408,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 finremCaseData));
             when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(false);
             when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(true);
-            when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
+            lenient().when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean()))
                 .thenReturn(mock(SendCorrespondenceEvent.class));
 
             when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class), eq("Update Contact Details - granting respondent solicitor"),
@@ -411,6 +418,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                         String caseId = invocation.getArgument(2);
                         RetryErrorHandler errorHandler = invocation.getArgument(3);
                         errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
+                        return Optional.of(Boolean.FALSE);
                     }
                     return Optional.of(Boolean.TRUE);
                 });
@@ -422,13 +430,13 @@ class UpdateContactDetailsSubmittedHandlerTest {
                         String caseId = invocation.getArgument(2);
                         RetryErrorHandler errorHandler = invocation.getArgument(3);
                         errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
-                        return Optional.empty();
+                        return Optional.of(Boolean.FALSE);
                     }
                     return Optional.of(Boolean.TRUE);
                 });
 
             // Act
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+            var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
             // Assert
             String body = response.getConfirmationBody();
@@ -452,7 +460,9 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 ),
                 () -> assertThat(header).contains("Contact details updated with errors"),
                 () -> assertCondition(body, grantMsg, failGrant),
-                () -> assertCondition(body, revokeMsg, failRevoke)
+                () -> assertCondition(body, revokeMsg, failRevoke),
+                () -> verify(updateContactDetailsNotificationService, times(failGrant ? 0 : 1))
+                    .prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean())
             );
         }
 
@@ -468,7 +478,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
             when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(false);
             when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(true);
 
-            when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
+            when(updateContactDetailsNotificationService.prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean()))
                 .thenReturn(mock(SendCorrespondenceEvent.class));
             // Simulate grant/revoke respondent solicitor success
             when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
@@ -511,13 +521,12 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 () -> verifyNoMoreInteractions(assignPartiesAccessService),
                 // to verify notifying parties
                 () -> verify(updateContactDetailsNotificationService)
-                    .prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()),
+                    .prepareNocEmailToNewSolicitor(eq(callbackRequest.getCaseDetails()), anyBoolean()),
                 // to verify happy path that return null
                 () -> assertThat(response.getConfirmationHeader()).isNull(),
                 () -> assertThat(response.getConfirmationBody()).isNull()
             );
         }
-
     }
 
     @Test
