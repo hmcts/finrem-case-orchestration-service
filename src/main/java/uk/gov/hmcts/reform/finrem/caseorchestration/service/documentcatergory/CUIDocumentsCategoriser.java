@@ -48,69 +48,112 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
 
         String category = switch (doc.getDocumentType()) {
 
-            case POINTS_OF_CLAIM_DEFENCE -> pointsOfClaimDefence(doc);
-            case STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5 -> party == Party.APPLICANT
-                ? DocumentCategory.HEARING_DOCUMENTS_APPLICANT_FM5.getDocumentCategoryId()
-                : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_FM5.getDocumentCategoryId();
-            case FINANCIAL_STATEMENT_FORM_E_E1_OR_E2 -> party == Party.APPLICANT
-                ? DocumentCategory.APPLICANT_DOCUMENTS_FORM_E.getDocumentCategoryId()
-                : DocumentCategory.RESPONDENT_DOCUMENTS_FORM_E.getDocumentCategoryId();
-            case ESTIMATE_OF_COSTS_INCURRED_FORM_H, STATEMENT_OF_COSTS_FORM_H1, STATEMENT_OF_COSTS_SUMMARY_ASSESSMENT_FORM_N260 ->
-                party == Party.APPLICANT
-                    ? DocumentCategory.HEARING_DOCUMENTS_APPLICANT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260.getDocumentCategoryId()
-                    : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260.getDocumentCategoryId();
-            case CERTIFICATE_OF_SERVICE_FORM_FP6 -> party == Party.APPLICANT
-                ? DocumentCategory.APPLICANT_DOCUMENTS_CERTIFICATES_OF_SERVICE.getDocumentCategoryId()
-                : DocumentCategory.RESPONDENT_DOCUMENTS_CERTIFICATES_OF_SERVICE.getDocumentCategoryId();
-            case RESPONSE_TO_THE_NOTICE_OF_FIRST_APPOINTMENT_FORM_G -> party == Party.APPLICANT
-                ? DocumentCategory.APPLICANT_DOCUMENTS_FORM_G.getDocumentCategoryId()
-                : DocumentCategory.RESPONDENT_DOCUMENTS_FORM_G.getDocumentCategoryId();
-            case SCHEDULE_OF_DEFICIENCIES -> resolveScheduleOfDeficiencies(doc);
-            case CASE_SUMMARY -> resolveCaseSummary(doc);
-            case POSITION_STATEMENT -> resolvePositionStatement(doc);
-            case CHRONOLOGY -> resolveChronology(doc);
-            case STATEMENT_OF_ISSUES -> resolveStatementOfIssues(doc);
-            case DIVORCE_APPLICATION_PETITION -> DocumentCategory.DIVORCE_DOCUMENTS_APPLICATION_OR_PETITION.getDocumentCategoryId();
-            case DIVORCE_CONDITIONAL_ORDER_DECREE_NISI -> DocumentCategory.DIVORCE_DOCUMENTS_CONDITIONAL_ORDER_OR_DECREE_NISI.getDocumentCategoryId();
-            case DIVORCE_FINAL_ORDER_DECREE_ABSOLUTE -> DocumentCategory.DIVORCE_DOCUMENTS_FINAL_ORDER_OR_DECREE_ABSOLUTE.getDocumentCategoryId();
-            case COMPOSITE_CASE_SUMMARY_FORM_ES1 -> resolveES1(doc);
-            case COMPOSITE_SCHEDULE_OF_ASSETS_AND_INCOME_FORM_ES2 -> resolveES2(doc);
-            case MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME -> resolveMarketAppraisal(doc);
-            case HOUSING_NEEDS_PROPERTY_PARTICULARS, POTENTIAL_BORROWING_CAPACITY_MORTGAGE_CAPACITIES -> resolveHousingParticulars(doc);
-            case OPEN_OFFERS -> resolveOpenOffers(doc);
-            case QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS, SUPPLEMENTAL_QUESTIONNAIRE -> resolveQuestionnaire(doc);
-            case SECTION_25_STATEMENT -> resolveS25(doc);
-            case WITNESS_STATEMENT -> resolveWitnessStatement(doc);
-            case WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT ->  resolveWithoutPrejudice(doc);
-            case PENSION_REPORT_EXPERT_REPORT, MEDICAL_REPORT -> doc.getIsFdr().isYes()
-                ? DocumentCategory.FDR_REPORTS.getDocumentCategoryId()
-                : DocumentCategory.REPORTS.getDocumentCategoryId();
-            case HEARING_BUNDLE -> doc.getIsFdr().isYes()
-                ? DocumentCategory.FDR_BUNDLE.getDocumentCategoryId()
-                : DocumentCategory.HEARING_BUNDLE.getDocumentCategoryId();
-            case FDR_BUNDLE -> doc.getIsFdr().isYes()
-                ? DocumentCategory.FDR_BUNDLE.getDocumentCategoryId()
-                : null;
-            case PRE_HEARING_DRAFT_ORDER ->  resolvePreHearingDraftOrder(doc);
-            case REPLY_TO_QUESTIONNAIRE, REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES ->  party == Party.APPLICANT
-                ? DocumentCategory.APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE.getDocumentCategoryId()
-                : DocumentCategory.RESPONDENT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE.getDocumentCategoryId();
+            case FAMILY_MEDIATION_INFORMATION_AND_ASSESSMENT_MEETING_MIAM_FORM_FM1 ->
+                DocumentCategory.APPLICATIONS_MAIN_APPLICATION.getDocumentCategoryId();
+            case POINTS_OF_CLAIM_DEFENCE -> getPointsOfClaimDefenceCategory();
+            case STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5 -> getFm5FolderCategory(doc);
+            case FINANCIAL_STATEMENT_FORM_E_E1_OR_E2 -> getFromECategory();
+            case ESTIMATE_OF_COSTS_INCURRED_FORM_H,
+                 STATEMENT_OF_COSTS_FORM_H1,
+                 STATEMENT_OF_COSTS_SUMMARY_ASSESSMENT_FORM_N260 -> getStatementOfCostsCategory();
+            case CERTIFICATE_OF_SERVICE_FORM_FP6 -> getCertificateOfServiceCategory();
+            case RESPONSE_TO_THE_NOTICE_OF_FIRST_APPOINTMENT_FORM_G -> getFormGCategory();
+            case SCHEDULE_OF_DEFICIENCIES -> getScheduleOfDeficienciesCategory(doc);
+            case CASE_SUMMARY -> getCaseSummaryCategory(doc);
+            case POSITION_STATEMENT -> getPositionStatementCategory(doc);
+            case CHRONOLOGY -> getChronologyCategory(doc);
+            case STATEMENT_OF_ISSUES -> getStatementOfIssuesCategory(doc);
+            case DIVORCE_APPLICATION_PETITION ->
+                DocumentCategory.DIVORCE_DOCUMENTS_APPLICATION_OR_PETITION.getDocumentCategoryId();
+            case DIVORCE_CONDITIONAL_ORDER_DECREE_NISI ->
+                DocumentCategory.DIVORCE_DOCUMENTS_CONDITIONAL_ORDER_OR_DECREE_NISI.getDocumentCategoryId();
+            case DIVORCE_FINAL_ORDER_DECREE_ABSOLUTE ->
+                DocumentCategory.DIVORCE_DOCUMENTS_FINAL_ORDER_OR_DECREE_ABSOLUTE.getDocumentCategoryId();
+            case COMPOSITE_CASE_SUMMARY_FORM_ES1 -> getEs1Category(doc);
+            case COMPOSITE_SCHEDULE_OF_ASSETS_AND_INCOME_FORM_ES2 -> getEs2Category(doc);
+            case MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME -> getMarketAppraisalCategory(doc);
+            case HOUSING_NEEDS_PROPERTY_PARTICULARS,
+                 POTENTIAL_BORROWING_CAPACITY_MORTGAGE_CAPACITIES -> getHousingParticularsCategory(doc);
+            case OPEN_OFFERS -> getOpenOffersCategory(doc);
+            case QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS,
+                 SUPPLEMENTAL_QUESTIONNAIRE -> getQuestionnaireCategory(doc);
+            case SECTION_25_STATEMENT -> getS25Category(doc);
+            case WITNESS_STATEMENT -> getWitnessStatementCategory(doc);
+            case WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT -> getWithoutPrejudiceCategory();
+            case PENSION_REPORT_EXPERT_REPORT,
+                 MEDICAL_REPORT -> getExportReportCategory(doc);
+            case HEARING_BUNDLE -> getHeringBundleCategory(doc);
+            case FDR_BUNDLE -> DocumentCategory.FDR_BUNDLE.getDocumentCategoryId();
+            case PRE_HEARING_DRAFT_ORDER -> getPreHearingDraftOrderCategory(doc);
+            case REPLY_TO_QUESTIONNAIRE,
+                 REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES -> getReplyToQuestionaireCategory();
+            case UPDATING_DISCLOSURE -> getUpdatingDisclosureCategory();
             default -> null;
         };
 
         setCategory(doc, category);
     }
 
-    private String pointsOfClaimDefence(CitizenUploadDocument doc) {
-        if (doc.getIsFdr().isYes()) {
-            return null;
+    private String getReplyToQuestionaireCategory() {
+        return party == Party.APPLICANT
+            ? DocumentCategory.APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE.getDocumentCategoryId()
+            : DocumentCategory.RESPONDENT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE.getDocumentCategoryId();
+    }
+
+    private static String getHeringBundleCategory(CitizenUploadDocument doc) {
+        return doc.getIsFdr().isYes()
+            ? DocumentCategory.FDR_BUNDLE.getDocumentCategoryId()
+            : DocumentCategory.HEARING_BUNDLE.getDocumentCategoryId();
+    }
+
+    private static String getExportReportCategory(CitizenUploadDocument doc) {
+        return doc.getIsFdr().isYes()
+            ? DocumentCategory.FDR_REPORTS.getDocumentCategoryId()
+            : DocumentCategory.REPORTS.getDocumentCategoryId();
+    }
+
+    private String getFormGCategory() {
+        return party == Party.APPLICANT
+            ? DocumentCategory.APPLICANT_DOCUMENTS_FORM_G.getDocumentCategoryId()
+            : DocumentCategory.RESPONDENT_DOCUMENTS_FORM_G.getDocumentCategoryId();
+    }
+
+    private String getCertificateOfServiceCategory() {
+        return party == Party.APPLICANT
+            ? DocumentCategory.APPLICANT_DOCUMENTS_CERTIFICATES_OF_SERVICE.getDocumentCategoryId()
+            : DocumentCategory.RESPONDENT_DOCUMENTS_CERTIFICATES_OF_SERVICE.getDocumentCategoryId();
+    }
+
+    private String getStatementOfCostsCategory() {
+        return party == Party.APPLICANT
+            ? DocumentCategory.HEARING_DOCUMENTS_APPLICANT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260.getDocumentCategoryId()
+            : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260.getDocumentCategoryId();
+    }
+
+    private String getFromECategory() {
+        return party == Party.APPLICANT
+            ? DocumentCategory.APPLICANT_DOCUMENTS_FORM_E.getDocumentCategoryId()
+            : DocumentCategory.RESPONDENT_DOCUMENTS_FORM_E.getDocumentCategoryId();
+    }
+
+    private String getFm5FolderCategory(CitizenUploadDocument document) {
+        if (document.getIsFdr().isYes()) {
+            return party == Party.APPLICANT
+                ? DocumentCategory.HEARING_DOCUMENTS_APPLICANT_FM5.getDocumentCategoryId()
+                : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_FM5.getDocumentCategoryId();
         }
+        return party == Party.APPLICANT
+            ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER.getDocumentCategoryId()
+            : DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER.getDocumentCategoryId();
+    }
+
+    private String getPointsOfClaimDefenceCategory() {
         return party == Party.APPLICANT
             ? DocumentCategory.APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE.getDocumentCategoryId()
             : DocumentCategory.RESPONDENT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE.getDocumentCategoryId();
     }
 
-    private String resolveScheduleOfDeficiencies(CitizenUploadDocument doc) {
+    private String getScheduleOfDeficienciesCategory(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return party == Party.APPLICANT
                 ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER.getDocumentCategoryId()
@@ -121,7 +164,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_REPLIES_TO_QUESTIONNAIRE.getDocumentCategoryId();
     }
 
-    private String resolveCaseSummary(CitizenUploadDocument doc) {
+    private String getCaseSummaryCategory(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return party == Party.APPLICANT
                 ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER.getDocumentCategoryId()
@@ -132,7 +175,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CASE_SUMMARY.getDocumentCategoryId();
     }
 
-    private String resolvePositionStatement(CitizenUploadDocument doc) {
+    private String getPositionStatementCategory(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return party == Party.APPLICANT
                 ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS.getDocumentCategoryId()
@@ -143,7 +186,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_POSITION_STATEMENT.getDocumentCategoryId();
     }
 
-    private String resolveChronology(CitizenUploadDocument doc) {
+    private String getChronologyCategory(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return DocumentCategory.FDR_JOINT_DOCUMENTS_CHRONOLOGY.getDocumentCategoryId();
         }
@@ -152,7 +195,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CHRONOLOGY.getDocumentCategoryId();
     }
 
-    private String resolveStatementOfIssues(CitizenUploadDocument doc) {
+    private String getStatementOfIssuesCategory(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return party == Party.APPLICANT
                 ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS.getDocumentCategoryId()
@@ -163,7 +206,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CONCISE_STATEMENT_OF_ISSUES.getDocumentCategoryId();
     }
 
-    private String resolveES1(CitizenUploadDocument doc) {
+    private String getEs1Category(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return DocumentCategory.FDR_JOINT_DOCUMENTS_ES1.getDocumentCategoryId();
         }
@@ -172,7 +215,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_ES1.getDocumentCategoryId();
     }
 
-    private String resolveES2(CitizenUploadDocument doc) {
+    private String getEs2Category(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return DocumentCategory.FDR_JOINT_DOCUMENTS_ES2.getDocumentCategoryId();
         }
@@ -181,7 +224,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_ES2.getDocumentCategoryId();
     }
 
-    private String resolveMarketAppraisal(CitizenUploadDocument doc) {
+    private String getMarketAppraisalCategory(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return party == Party.APPLICANT
                 ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER.getDocumentCategoryId()
@@ -192,7 +235,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL.getDocumentCategoryId();
     }
 
-    private String resolveHousingParticulars(CitizenUploadDocument doc) {
+    private String getHousingParticularsCategory(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return party == Party.APPLICANT
                 ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER.getDocumentCategoryId()
@@ -203,7 +246,18 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS.getDocumentCategoryId();
     }
 
-    private String resolveQuestionnaire(CitizenUploadDocument doc) {
+    private String getOpenOffersCategory(CitizenUploadDocument doc) {
+        if (doc.getIsFdr().isYes()) {
+            return party == Party.APPLICANT
+                ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER.getDocumentCategoryId()
+                : DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER.getDocumentCategoryId();
+        }
+        return party == Party.APPLICANT
+            ? DocumentCategory.APPLICANT_DOCUMENTS_OPEN_OFFERS.getDocumentCategoryId()
+            : DocumentCategory.RESPONDENT_DOCUMENTS_OPEN_OFFERS.getDocumentCategoryId();
+    }
+
+    private String getQuestionnaireCategory(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return party == Party.APPLICANT
                 ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER.getDocumentCategoryId()
@@ -214,7 +268,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_QUESTIONNAIRES.getDocumentCategoryId();
     }
 
-    private String resolveS25(CitizenUploadDocument doc) {
+    private String getS25Category(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return party == Party.APPLICANT
                 ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER.getDocumentCategoryId()
@@ -225,7 +279,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.RESPONDENT_DOCUMENTS_S25_STATEMENT.getDocumentCategoryId();
     }
 
-    private String resolveWitnessStatement(CitizenUploadDocument doc) {
+    private String getWitnessStatementCategory(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return party == Party.APPLICANT
                 ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER.getDocumentCategoryId()
@@ -236,16 +290,13 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
             : DocumentCategory.RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS.getDocumentCategoryId();
     }
 
-    private String resolveWithoutPrejudice(CitizenUploadDocument doc) {
-        if (doc.getIsFdr().isYes()) {
-            return party == Party.APPLICANT
-                ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS.getDocumentCategoryId()
-                : DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS.getDocumentCategoryId();
-        }
-        return null;
+    private String getWithoutPrejudiceCategory() {
+        return party == Party.APPLICANT
+            ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS.getDocumentCategoryId()
+            : DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS.getDocumentCategoryId();
     }
 
-    private String resolvePreHearingDraftOrder(CitizenUploadDocument doc) {
+    private String getPreHearingDraftOrderCategory(CitizenUploadDocument doc) {
         if (doc.getIsFdr().isYes()) {
             return party == Party.APPLICANT
                 ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_DRAFT_ORDER.getDocumentCategoryId()
@@ -254,17 +305,6 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
         return party == Party.APPLICANT
             ? DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER.getDocumentCategoryId()
             : DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER.getDocumentCategoryId();
-    }
-
-    private String resolveOpenOffers(CitizenUploadDocument doc) {
-        if (doc.getIsFdr().isYes()) {
-            return party == Party.APPLICANT
-                ? DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER.getDocumentCategoryId()
-                : DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER.getDocumentCategoryId();
-        }
-        return party == Party.APPLICANT
-            ? DocumentCategory.APPLICANT_DOCUMENTS_OPEN_OFFERS.getDocumentCategoryId()
-            : DocumentCategory.RESPONDENT_DOCUMENTS_OPEN_OFFERS.getDocumentCategoryId();
     }
 
     private void setCategory(CitizenUploadDocument doc, String category) {
