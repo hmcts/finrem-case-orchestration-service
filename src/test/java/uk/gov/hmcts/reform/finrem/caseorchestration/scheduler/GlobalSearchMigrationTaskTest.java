@@ -33,12 +33,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalS
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.answerVoid;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -104,7 +102,7 @@ class GlobalSearchMigrationTaskTest {
         verify(ccdService, times(1)).esSearchCases(any(CaseType.class), anyString(), anyString());
         verifyCcdEvent();
         verifySupplementaryDataUpdate();
-        verify(globalSearchService).setGlobalSearchDataByMap(any(), anyString(), any());
+        verify(globalSearchService).setGlobalSearchData(any());
     }
 
     @Test
@@ -261,15 +259,13 @@ class GlobalSearchMigrationTaskTest {
         String caseName = "Smith vs Jones";
         CaseLocation location = CaseLocation.builder().region("1").baseLocation("698118").build();
 
-        doAnswer(answerVoid((Map<String, Object> caseDataMap, String caseTypeId, Long caseId) -> {
-            assertThat(caseDataMap).containsEntry("applicantLName", "Smith");
-            caseDataMap.put("caseManagementCategory", category);
-            caseDataMap.put("caseNameHmctsInternal", caseName);
-            caseDataMap.put("caseManagementLocation", location);
-        })).when(globalSearchService).setGlobalSearchDataByMap(
-            anyMap(),
-            eq(CONSENTED.getCcdType()),
-            eq(Long.parseLong(REFERENCE)));
+        doAnswer(answerVoid((FinremCaseData caseData) -> {
+            assertThat(caseData.getApplicantLastName()).isEqualTo("Smith");
+            caseData.setCaseManagementCategory(category);
+            caseData.setCaseNameHmctsInternal(caseName);
+            caseData.setCaseManagementLocation(location);
+        })).when(globalSearchService).setGlobalSearchData(
+            any(FinremCaseData.class));
         FinremCaseDetails finremCaseDetails = createFinremCaseDetails(FinremCaseData.builder()
             .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantLname("Smith").build())
             .build());

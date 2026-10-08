@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
@@ -25,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Scheduled task to update cases for Global search.
@@ -63,11 +60,7 @@ public class GlobalSearchMigrationTask extends BaseTask {
     @Override
     public void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
-        Map<String, Object> caseDataToMap = finremCaseDetailsMapper.finremCaseDataToMap(caseData);
-        globalSearchService.setGlobalSearchDataByMap(caseDataToMap, caseTypeId, finremCaseDetails.getId());
-        caseData.setCaseManagementCategory((DynamicList) caseDataToMap.get("caseManagementCategory"));
-        caseData.setCaseNameHmctsInternal((String) caseDataToMap.get("caseNameHmctsInternal"));
-        caseData.setCaseManagementLocation((CaseLocation) caseDataToMap.get("caseManagementLocation"));
+        globalSearchService.setGlobalSearchData(caseData);
     }
 
     @Override
