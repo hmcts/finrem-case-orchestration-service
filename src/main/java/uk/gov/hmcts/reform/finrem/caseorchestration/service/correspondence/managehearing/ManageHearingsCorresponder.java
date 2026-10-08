@@ -52,8 +52,8 @@ public class ManageHearingsCorresponder {
      * @param userAuthorisation the authorization token of the user initiating this action
      */
     public void sendHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        SendCorrespondenceEvent event = buildHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation);
-        if (event != null) {
+        Optional<SendCorrespondenceEvent> event = buildHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation);
+        if (event.isPresent()) {
             applicationEventPublisher.publishEvent(event);
         }
     }
@@ -74,21 +74,21 @@ public class ManageHearingsCorresponder {
      * @return a {@link SendCorrespondenceEvent} containing the hearing notification details,
      *         or {@code null} if no notification is required
      */
-    public SendCorrespondenceEvent buildHearingCorrespondenceEventIfNeeded(FinremCallbackRequest callbackRequest,
-                                                                           String userAuthorisation) {
+    public Optional<SendCorrespondenceEvent> buildHearingCorrespondenceEventIfNeeded(
+        FinremCallbackRequest callbackRequest, String userAuthorisation) {
         HearingCorrespondenceContext context = prepareHearingCorrespondenceContext(callbackRequest);
         if (isNull(context)) {
-            return null;
+            return Optional.empty();
         }
 
-        return buildSendCorrespondenceEvent(
+        return Optional.of(buildSendCorrespondenceEvent(
             context.caseDetails(),
             context.hearing(),
             ManageHearingsAction.ADD_HEARING,
             userAuthorisation,
             context.documentsToPost(),
             FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
-        );
+        ));
     }
 
     /**
@@ -145,7 +145,7 @@ public class ManageHearingsCorresponder {
         ManageHearingsWrapper wrapper = finremCaseData.getManageHearingsWrapper();
         Hearing hearing = hearingCorrespondenceHelper.getActiveHearingInContext(wrapper, wrapper.getWorkingHearingId());
 
-        if (!hearing.shouldSendNotifications()) {
+        if (!hearing.shouldSendNotifications()) { // e.g. Set by "Do you want to send notices?" question
             return null;
         }
 
@@ -191,17 +191,21 @@ public class ManageHearingsCorresponder {
      * @return a {@link SendCorrespondenceEvent} containing the hearing notification details,
      *         or {@code null} if notification should not be sent
      */
-    public SendCorrespondenceEvent buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(FinremCallbackRequest callbackRequest,
-                                                                                             String userAuthorisation) {
+    public List<SendCorrespondenceEvent> buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(
+        FinremCallbackRequest callbackRequest,
+        String userAuthorisation) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         ManageHearingsWrapper wrapper = finremCaseData.getManageHearingsWrapper();
+        List<SendCorrespondenceEvent> events = new ArrayList<>();
 
         boolean isVacatedAndRelistedHearing = hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseData);
 
         if (isVacatedAndRelistedHearing) {
-            sendHearingCorrespondence(callbackRequest, userAuthorisation);
+            events.addAll(buildHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation)
+                .stream()
+                .toList());
         }
 
         VacateOrAdjournedHearing vacateOrAdjournedHearing = hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(
@@ -209,7 +213,7 @@ public class ManageHearingsCorresponder {
 
         // Always send vacate hearing notice when relisted, as user cannot select to send or not in this scenario
         if (shouldNotSendVacateOrAdjournNotification(isVacatedAndRelistedHearing, vacateOrAdjournedHearing)) {
-            return null;
+            return events;
         }
 
         VacateOrAdjournAction action = vacateOrAdjournedHearing.getHearingStatus();
@@ -220,14 +224,15 @@ public class ManageHearingsCorresponder {
             ? FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR
             : FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
 
-        return buildSendCorrespondenceEvent(
+        events.add(buildSendCorrespondenceEvent(
             finremCaseDetails,
             vacateOrAdjournedHearing,
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
             userAuthorisation,
             documentsToPost,
             templateName
-        );
+        ));
+        return events;
     }
 
     /**
@@ -397,14 +402,12 @@ public class ManageHearingsCorresponder {
      * @param userAuthorisation the authorisation token used when building correspondence
      * @return a {@link SendCorrespondenceEvent}, or {@code null} if no correspondence is required
      */
-    public SendCorrespondenceEvent buildCorrespondenceEventIfNeeded(ManageHearingsAction actionSelection,
-                                                                    FinremCallbackRequest callbackRequest,
-                                                                    String userAuthorisation) {
+    public List<SendCorrespondenceEvent> buildCorrespondenceEventIfNeeded(
+        ManageHearingsAction actionSelection, FinremCallbackRequest callbackRequest, String userAuthorisation) {
         return switch (actionSelection) {
-            case ADD_HEARING -> buildHearingCorrespondenceEventIfNeeded(
-                callbackRequest,
-                userAuthorisation
-            );
+            case ADD_HEARING -> buildHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation)
+                .stream()
+                .toList();
             case ADJOURN_OR_VACATE_HEARING -> buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(
                 callbackRequest,
                 userAuthorisation

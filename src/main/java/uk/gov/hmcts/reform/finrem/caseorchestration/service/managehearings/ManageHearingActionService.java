@@ -180,11 +180,6 @@ public class ManageHearingActionService {
         hearingsWrapper.setWasRelistSelected(
             YesOrNo.YES.equals(hearingsWrapper.getIsRelistSelected()) ? YesOrNo.YES : YesOrNo.NO
         );
-
-        // clear the working hearing
-        hearingsWrapper.setWorkingVacatedHearing(null);
-        hearingsWrapper.setIsRelistSelected(null);
-        hearingsWrapper.setShouldSendVacateOrAdjNotice(null);
     }
 
     /**

@@ -20,12 +20,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 @Slf4j
@@ -72,14 +72,14 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
 
-        SendCorrespondenceEvent correspondenceEvent = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+        List<SendCorrespondenceEvent> correspondenceEvents = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
             actionSelection,
             callbackRequest,
             userAuthorisation
         );
 
         String error = null;
-        if (nonNull(correspondenceEvent)) {
+        for (SendCorrespondenceEvent correspondenceEvent : correspondenceEvents) {
             log.info("Sending hearing correspondence for {} action. Case reference: {}",
                 actionSelection.getDescription(), finremCaseData.getCcdCaseId());
             correspondenceEvent.setEventId(callbackRequest.getEventType().getCcdType());

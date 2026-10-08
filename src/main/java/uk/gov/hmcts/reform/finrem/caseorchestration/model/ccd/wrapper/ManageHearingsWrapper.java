@@ -43,12 +43,15 @@ public class ManageHearingsWrapper {
     private UUID workingHearingId;
     @TemporaryField
     private WorkingHearing workingHearing;
+    @TemporaryField
     private WorkingVacatedHearing workingVacatedHearing;
     private UUID workingVacatedHearingId;
+    @TemporaryField
     private YesOrNo isRelistSelected;
     private YesOrNo wasRelistSelected;
     private YesOrNo isAddHearingChosen;
     private YesOrNo isFinalOrder;
+    @TemporaryField
     private YesOrNo shouldSendVacateOrAdjNotice;
 
     // Hearing data Repositories

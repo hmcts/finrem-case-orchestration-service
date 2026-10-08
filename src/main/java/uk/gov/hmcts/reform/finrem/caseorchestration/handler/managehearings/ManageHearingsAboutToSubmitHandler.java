@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
@@ -24,9 +23,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.manag
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
@@ -90,60 +90,77 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
 
         manageHearingActionService.updateTabData(finremCaseData);
 
-        SendCorrespondenceEvent sendCorrespondenceEvent = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+        List<SendCorrespondenceEvent> sendCorrespondenceEvents = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
             actionSelection,
             callbackRequest,
             userAuthorisation
         );
 
+
         List<String> errors = new ArrayList<>(validateRequiredPostalAddresses(finremCaseData, EventType.MANAGE_HEARINGS,
-            shouldValidateApplicantAddress(finremCaseData, sendCorrespondenceEvent),
-            shouldValidateRespondentAddress(finremCaseData, sendCorrespondenceEvent)));
+            shouldValidateApplicantAddress(finremCaseData, actionSelection, sendCorrespondenceEvents),
+            shouldValidateRespondentAddress(finremCaseData, actionSelection, sendCorrespondenceEvents)));
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(finremCaseData, errors);
         }
-        createNotificationAuditRows(callbackRequest, sendCorrespondenceEvent);
+        createNotificationAuditRows(callbackRequest, sendCorrespondenceEvents
+            .toArray(new SendCorrespondenceEvent[0]));
 
         return response(finremCaseData);
     }
 
-    private boolean shouldValidateApplicantAddress(FinremCaseData finremCaseData,
-                                                   SendCorrespondenceEvent sendCorrespondenceEvent) {
+    private boolean shouldValidateApplicantAddress(FinremCaseData finremCaseData, ManageHearingsAction actionSelection,
+                                                   List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
         ManageHearingsWrapper hearingsWrapper = finremCaseData.getManageHearingsWrapper();
-        WorkingHearing workingHearing = hearingsWrapper.getWorkingHearing();
-        return isApplicantNotified(sendCorrespondenceEvent)
-            && partyService.isApplicantPartySelected(finremCaseData, workingHearing);
+
+        if (actionSelection == ManageHearingsAction.ADD_HEARING) {
+            return isApplicantNotified(sendCorrespondenceEvents)
+                && partyService.isApplicantPartySelected(finremCaseData, Objects.requireNonNull(hearingsWrapper.getWorkingHearing()));
+        } else {
+            return isApplicantNotified(sendCorrespondenceEvents);
+        }
     }
 
-    private boolean shouldValidateRespondentAddress(FinremCaseData finremCaseData,
-                                                    SendCorrespondenceEvent sendCorrespondenceEvent) {
+    private boolean shouldValidateRespondentAddress(FinremCaseData finremCaseData, ManageHearingsAction actionSelection,
+                                                    List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
         ManageHearingsWrapper hearingsWrapper = finremCaseData.getManageHearingsWrapper();
-        WorkingHearing workingHearing = hearingsWrapper.getWorkingHearing();
-        return isRespondentNotified(sendCorrespondenceEvent)
-            && partyService.isRespondentPartySelected(finremCaseData, workingHearing);
+
+        if (actionSelection == ManageHearingsAction.ADD_HEARING) {
+            return isRespondentNotified(sendCorrespondenceEvents)
+                && partyService.isRespondentPartySelected(finremCaseData, Objects.requireNonNull(hearingsWrapper.getWorkingHearing()));
+        } else {
+            return isRespondentNotified(sendCorrespondenceEvents);
+        }
     }
 
-    private boolean isApplicantNotified(SendCorrespondenceEvent sendCorrespondenceEvent) {
-        return isPartyNotified(sendCorrespondenceEvent, NotificationParty.APPLICANT);
+    private boolean isApplicantNotified(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return isPartyNotified(sendCorrespondenceEvents, NotificationParty.APPLICANT);
     }
 
-    private boolean isRespondentNotified(SendCorrespondenceEvent sendCorrespondenceEvent) {
-        return isPartyNotified(sendCorrespondenceEvent, NotificationParty.RESPONDENT);
+    private boolean isRespondentNotified(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return isPartyNotified(sendCorrespondenceEvents, NotificationParty.RESPONDENT);
     }
 
-    private boolean isPartyNotified(SendCorrespondenceEvent sendCorrespondenceEvent, NotificationParty party) {
-        return ofNullable(sendCorrespondenceEvent)
-            .map(SendCorrespondenceEvent::getNotificationParties)
+    private boolean isPartyNotified(List<SendCorrespondenceEvent> sendCorrespondenceEvents,
+                                    NotificationParty party) {
+        return ofNullable(sendCorrespondenceEvents)
             .orElse(List.of())
-            .contains(party);
+            .stream()
+            .map(SendCorrespondenceEvent::getNotificationParties)
+            .filter(Objects::nonNull)
+            .anyMatch(parties -> parties.contains(party));
     }
 
-    private void createNotificationAuditRows(FinremCallbackRequest callbackRequest, SendCorrespondenceEvent event) {
-        if (nonNull(event)) {
-            notificationAuditService.createAuditsForCorrespondence(
+    private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
+                                             SendCorrespondenceEvent... events) {
+        if (events == null) {
+            return;
+        }
+        Arrays.stream(events)
+            .filter(Objects::nonNull)
+            .forEach(event -> notificationAuditService.createAuditsForCorrespondence(
                 event,
                 callbackRequest.getEventType()
-            );
-        }
+            ));
     }
 }
