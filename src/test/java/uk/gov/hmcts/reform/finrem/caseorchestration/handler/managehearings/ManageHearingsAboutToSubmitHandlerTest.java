@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -40,10 +39,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Wor
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
@@ -78,9 +74,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.manageheari
 class ManageHearingsAboutToSubmitHandlerTest {
 
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
-
-    @Mock
     private ManageHearingActionService manageHearingActionService;
 
     @Mock
@@ -94,18 +87,30 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
     private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
 
+    private MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent;
+
     @InjectMocks
     private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
 
     @BeforeEach
     void setUp() {
+        mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class);
+
         mockedContactDetailsValidator = Mockito.mockStatic(ContactDetailsValidator.class);
-        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-            any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS), anyBoolean(), anyBoolean())).thenReturn(List.of());
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredPostalAddresses(any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS), eq(true), anyBoolean()))
+            .thenReturn(List.of("ERROR"));
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredPostalAddresses(any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS), anyBoolean(), eq(true)))
+            .thenReturn(List.of("ERROR"));
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredPostalAddresses(any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS), eq(false), eq(false)))
+            .thenReturn(List.of());
     }
 
     @AfterEach
     void tearDownStatics() {
+        mockedSendCorrespondenceEvent.close();
         mockedContactDetailsValidator.close();
     }
 
@@ -324,11 +329,12 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
     @ParameterizedTest
     @CsvSource({
-        "APPLICANT,POSTAL",
-        "RESPONDENT,POSTAL"
+        "true,true",
+        "true,false",
+        "false,true"
     })
     void givenPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenPopulateErrors(
-        NotificationParty eventNotificationParty, NotificationType auditType
+        boolean isApplicantAddressRequired, boolean isRespondentAddressRequired
     ) {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
@@ -337,42 +343,26 @@ class ManageHearingsAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData)
             .toBuilder().eventType(EventType.MANAGE_HEARINGS).build();
 
-        NotificationAudit audit = NotificationAudit.builder().build();
-        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
-            .notificationParties(List.of(eventNotificationParty))
-            .audits(List.of(audit))
-            .build();
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         List<SendCorrespondenceEvent> events = List.of(event);
         when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
             eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
-        doAnswer(invocation -> {
-            SendCorrespondenceEvent e = invocation.getArgument(0, SendCorrespondenceEvent.class);
-            e.getAudits().getFirst().setType(auditType);
-            return null;
-        }).when(applicationEventPublisher).publishEvent(event);
 
-        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-                .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), eq(true), anyBoolean()))
-            .thenReturn(List.of("ERROR"));
-        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-                .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), anyBoolean(), eq(true)))
-            .thenReturn(List.of("ERROR"));
-        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-                .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), eq(false), eq(false)))
-            .thenReturn(List.of());
+        mockedSendCorrespondenceEvent.when(() -> SendCorrespondenceEvent.isApplicantAddressRequired(events))
+            .thenReturn(isApplicantAddressRequired);
+        mockedSendCorrespondenceEvent.when(() -> SendCorrespondenceEvent.isRespondentAddressRequired(events))
+            .thenReturn(isRespondentAddressRequired);
 
         var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).contains("ERROR");
-        verifyNoInteractions(notificationAuditService);
     }
 
     @ParameterizedTest
     @CsvSource({
-        "APPLICANT,EMAIL",
-        "RESPONDENT,EMAIL"
+        "false,false"
     })
     void givenPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenDoNotPopulateErrors(
-        NotificationParty eventNotificationParty, NotificationType auditType
+        boolean isApplicantAddressRequired, boolean isRespondentAddressRequired
     ) {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
@@ -381,29 +371,15 @@ class ManageHearingsAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData)
             .toBuilder().eventType(EventType.MANAGE_HEARINGS).build();
 
-        NotificationAudit audit = NotificationAudit.builder().build();
-        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
-            .notificationParties(List.of(eventNotificationParty))
-            .audits(List.of(audit))
-            .build();
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         List<SendCorrespondenceEvent> events = List.of(event);
         when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
             eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
-        doAnswer(invocation -> {
-            SendCorrespondenceEvent e = invocation.getArgument(0, SendCorrespondenceEvent.class);
-            e.getAudits().getFirst().setType(auditType);
-            return null;
-        }).when(applicationEventPublisher).publishEvent(event);
 
-        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-            .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), eq(true), anyBoolean()))
-            .thenReturn(List.of("ERROR"));
-        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-                .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), anyBoolean(), eq(true)))
-            .thenReturn(List.of("ERROR"));
-        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-                .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), eq(false), eq(false)))
-            .thenReturn(List.of());
+        mockedSendCorrespondenceEvent.when(() -> SendCorrespondenceEvent.isApplicantAddressRequired(events))
+            .thenReturn(isApplicantAddressRequired);
+        mockedSendCorrespondenceEvent.when(() -> SendCorrespondenceEvent.isRespondentAddressRequired(events))
+            .thenReturn(isRespondentAddressRequired);
 
         var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).isEmpty();
