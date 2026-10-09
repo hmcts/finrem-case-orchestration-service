@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,15 +88,11 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
     private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
 
-    private MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent;
-
     @InjectMocks
     private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
 
     @BeforeEach
     void setUp() {
-        mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class);
-
         mockedContactDetailsValidator = Mockito.mockStatic(ContactDetailsValidator.class);
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator
                 .validateRequiredPostalAddresses(any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS), eq(true), anyBoolean()))
@@ -110,7 +107,6 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
     @AfterEach
     void tearDownStatics() {
-        mockedSendCorrespondenceEvent.close();
         mockedContactDetailsValidator.close();
     }
 
@@ -255,7 +251,6 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseData_whenHandleVacateWithRelist_thenPerformPerformAddAndVacateHearingCalled() {
-
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .manageHearingsActionSelection(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING)
@@ -348,13 +343,39 @@ class ManageHearingsAboutToSubmitHandlerTest {
         when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
             eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
 
-        mockedSendCorrespondenceEvent.when(() -> SendCorrespondenceEvent.isApplicantAddressRequired(events))
-            .thenReturn(isApplicantAddressRequired);
-        mockedSendCorrespondenceEvent.when(() -> SendCorrespondenceEvent.isRespondentAddressRequired(events))
-            .thenReturn(isRespondentAddressRequired);
 
-        var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(response.getErrors()).contains("ERROR");
+        try (MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class)) {
+            List<String> calls = new ArrayList<>();
+
+            // record the static call (adjust the return value to whatever the method returns)
+            mockedSendCorrespondenceEvent
+                .when(() -> SendCorrespondenceEvent.isApplicantAddressRequired(events))
+                .thenAnswer(inv -> {
+                    calls.add("isApplicantAddressRequired");
+                    return isApplicantAddressRequired;
+                });
+            mockedSendCorrespondenceEvent
+                .when(() -> SendCorrespondenceEvent.isRespondentAddressRequired(events))
+                .thenAnswer(inv -> {
+                    calls.add("isRespondentAddressRequired");
+                    return isRespondentAddressRequired;
+                });
+
+            // record the instance call (doAnswer works for void methods)
+            doAnswer(inv -> {
+                calls.add("createAuditsForCorrespondence");
+                return null;
+            }).when(notificationAuditService)
+                .createAuditsForCorrespondence(any(SendCorrespondenceEvent.class), any(EventType.class));
+
+            var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+            assertThat(response.getErrors()).contains("ERROR");
+            // to guarantee the simulation should goes first before checking applicant or respondent address required
+            assertThat(calls).containsExactly(
+                "createAuditsForCorrespondence",
+                "isApplicantAddressRequired",
+                "isRespondentAddressRequired");
+        }
     }
 
     @ParameterizedTest
@@ -376,13 +397,37 @@ class ManageHearingsAboutToSubmitHandlerTest {
         when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
             eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
 
-        mockedSendCorrespondenceEvent.when(() -> SendCorrespondenceEvent.isApplicantAddressRequired(events))
-            .thenReturn(isApplicantAddressRequired);
-        mockedSendCorrespondenceEvent.when(() -> SendCorrespondenceEvent.isRespondentAddressRequired(events))
-            .thenReturn(isRespondentAddressRequired);
+        try (MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class)) {
+            List<String> calls = new ArrayList<>();
+            // record the static call (adjust the return value to whatever the method returns)
+            mockedSendCorrespondenceEvent
+                .when(() -> SendCorrespondenceEvent.isApplicantAddressRequired(events))
+                .thenAnswer(inv -> {
+                    calls.add("isApplicantAddressRequired");
+                    return isApplicantAddressRequired;
+                });
+            mockedSendCorrespondenceEvent
+                .when(() -> SendCorrespondenceEvent.isRespondentAddressRequired(events))
+                .thenAnswer(inv -> {
+                    calls.add("isRespondentAddressRequired");
+                    return isRespondentAddressRequired;
+                });
 
-        var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(response.getErrors()).isEmpty();
+            // record the instance call (doAnswer works for void methods)
+            doAnswer(inv -> {
+                calls.add("createAuditsForCorrespondence");
+                return null;
+            }).when(notificationAuditService)
+                .createAuditsForCorrespondence(any(SendCorrespondenceEvent.class), any(EventType.class));
+
+            var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+            assertThat(response.getErrors()).isEmpty();
+            // to guarantee the simulation should goes first before checking applicant or respondent address required
+            assertThat(calls).containsExactly(
+                "createAuditsForCorrespondence",
+                "isApplicantAddressRequired",
+                "isRespondentAddressRequired");
+        }
     }
 
     @Test
