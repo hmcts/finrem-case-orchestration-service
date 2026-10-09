@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -38,18 +37,15 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
     private final ManageHearingActionService manageHearingActionService;
     private final NotificationAuditService notificationAuditService;
     private final ManageHearingsCorresponder manageHearingsCorresponder;
-    private final ApplicationEventPublisher applicationEventPublisher;
 
     public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               ManageHearingActionService manageHearingActionService,
                                               NotificationAuditService notificationAuditService,
-                                              ManageHearingsCorresponder manageHearingsCorresponder,
-                                              ApplicationEventPublisher applicationEventPublisher) {
+                                              ManageHearingsCorresponder manageHearingsCorresponder) {
         super(finremCaseDetailsMapper);
         this.manageHearingActionService = manageHearingActionService;
         this.notificationAuditService = notificationAuditService;
         this.manageHearingsCorresponder = manageHearingsCorresponder;
-        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -90,29 +86,18 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
 
         manageHearingActionService.updateTabData(finremCaseData);
 
-        List<SendCorrespondenceEvent> sendCorrespondenceEvents = simulateEvents(
-            manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
-                actionSelection,
-                callbackRequest,
-                userAuthorisation
-            ));
-
+        List<SendCorrespondenceEvent> sendCorrespondenceEvents = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+            actionSelection, callbackRequest, userAuthorisation);
+        createNotificationAuditRows(callbackRequest, sendCorrespondenceEvents
+            .toArray(new SendCorrespondenceEvent[0]));
+        // Note: sendCorrespondenceEvents was simulated under notificationAuditService.createNotificationAuditRows
+        // The following validation should be invoked after createNotificationAuditRows
         List<String> errors = validateRequiredPostalAddresses(finremCaseData, sendCorrespondenceEvents);
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(finremCaseData, errors);
         }
-        createNotificationAuditRows(callbackRequest, sendCorrespondenceEvents
-            .toArray(new SendCorrespondenceEvent[0]));
 
         return response(finremCaseData);
-    }
-
-    private List<SendCorrespondenceEvent> simulateEvents(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
-        sendCorrespondenceEvents.forEach(correspondenceEvent -> {
-            correspondenceEvent.setSimulatingCorrespondence(true);
-            applicationEventPublisher.publishEvent(correspondenceEvent);
-        });
-        return sendCorrespondenceEvents;
     }
 
     private List<String> validateRequiredPostalAddresses(FinremCaseData finremCaseData,
@@ -124,9 +109,6 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
 
     private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
                                              SendCorrespondenceEvent... events) {
-        if (events == null) {
-            return;
-        }
         Arrays.stream(events)
             .filter(Objects::nonNull)
             .forEach(event -> notificationAuditService.createAuditsForCorrespondence(
