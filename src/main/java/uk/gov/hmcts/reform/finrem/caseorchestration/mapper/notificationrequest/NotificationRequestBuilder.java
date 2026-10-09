@@ -64,6 +64,7 @@ public class NotificationRequestBuilder {
     private String vacatedHearingType;
     private String dateOfIssue;
     private String timeOfSubmission;
+    private Boolean hasDivorceAccount;
 
     /**
      * Sets default values for the NotificationRequestBuilder based on the provided case details.
@@ -212,6 +213,7 @@ public class NotificationRequestBuilder {
         notificationRequest.setIntervenerFullName(intervenerFullName);
         notificationRequest.setIntervenerSolicitorFirm(intervenerSolicitorFirm);
         notificationRequest.setDocumentContentsList(documentContentsList);
+        notificationRequest.setHasDivorceAccount(hasDivorceAccount);
         notificationRequest.setIsNotDigital(isNotDigital);
         notificationRequest.setHearingDate(hearingDate);
         notificationRequest.setJudgeName(judgeName);
@@ -391,6 +393,11 @@ public class NotificationRequestBuilder {
 
     public NotificationRequestBuilder timeOfSubmission(String timeOfSubmission) {
         this.timeOfSubmission = timeOfSubmission;
+        return this;
+    }
+
+    public NotificationRequestBuilder hasDivorceAccount(Boolean hasDivorceAccount) {
+        this.hasDivorceAccount = hasDivorceAccount;
         return this;
     }
 }

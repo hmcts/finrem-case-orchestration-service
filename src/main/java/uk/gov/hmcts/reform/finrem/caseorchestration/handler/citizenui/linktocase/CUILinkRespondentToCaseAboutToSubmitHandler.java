@@ -27,6 +27,7 @@ public class CUILinkRespondentToCaseAboutToSubmitHandler extends CUILinkToCaseAb
         super(finremCaseDetailsMapper, invalidateAccessCodeService, assignCaseAccessService,
             signInConfirmationCorresponder, correspondenceEventAuditOrchestrationService);
     }
+
     @Override
     protected EventType handledEventType() {
         return EventType.LINK_RESPONDENT_TO_CASE;
