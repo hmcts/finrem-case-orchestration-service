@@ -9,11 +9,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
@@ -28,20 +32,129 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @Slf4j
 public class PartyService {
 
+    /**
+     * Updates the correspondence-enabled flags for the applicant, respondent and each
+     * intervener based on the parties checked in a party-selection question such as
+     * "Who should receive this order?".
+     *
+     * <p>
+     * A party's flag is set to {@code true} if either their solicitor or their barrister
+     * role code is among the checked parties returned by
+     * {@link #getCheckedActiveParties(FinremCaseDetails)}, and {@code false} otherwise.
+     * Every flag is set on each call, so parties who are not checked are explicitly
+     * disabled rather than left unchanged.
+     * </p>
+     *
+     * <p>
+     * This method modifies the case data in place. It assumes that the intervener wrappers
+     * for interveners one to four are present on the case data.
+     * </p>
+     *
+     * @param caseDetails the case details containing the party selection, which is updated
+     *                    with the correspondence-enabled flags
+     */
+    public void updateCorrespondenceEnabledFromSelectedParties(FinremCaseDetails caseDetails) {
+        applyCorrespondenceEnabled(caseDetails.getData(), getCheckedActiveParties(caseDetails));
+    }
+
+    /**
+     * Returns the role codes of the active parties that have been checked in a
+     * party-selection question such as "Who should receive this order?".
+     *
+     * <p>The codes are taken from the selected values of the {@code partiesOnCase}
+     * multi-select list, for example {@code [APP_SOLICITOR]}.
+     *
+     * @param caseDetails the case details containing the party selection
+     * @return the role codes of the checked parties
+     */
+    public List<String> getCheckedActiveParties(FinremCaseDetails caseDetails) {
+        return toRoleCodes(caseDetails.getData().getPartiesOnCase());
+    }
+
+    /**
+     * Checks whether the applicant has been selected in a party-selection
+     * question such as "Who should receive this order?".
+     *
+     * <p>The applicant's role is taken from the case-assigned role on the
+     * applicant organisation policy and compared with the checked party codes
+     * returned by {@link #getCheckedActiveParties(FinremCaseDetails)}. If the
+     * applicant organisation policy or its role is not set, the applicant is
+     * treated as not selected.
+     *
+     * @param caseDetails the case details containing the party selection
+     * @return {@code true} if the applicant is among the checked parties,
+     *         {@code false} otherwise
+     */
+    public boolean isApplicantPartySelected(FinremCaseDetails caseDetails) {
+        return isPolicyRoleChecked(caseDetails.getData().getApplicantOrganisationPolicy(),
+            getCheckedActiveParties(caseDetails));
+    }
+
+    /**
+     * Checks whether the respondent has been selected in a party-selection
+     * question such as "Who should receive this order?".
+     *
+     * <p>The respondent's role is taken from the case-assigned role on the
+     * respondent organisation policy and compared with the checked party codes
+     * returned by {@link #getCheckedActiveParties(FinremCaseDetails)}. If the
+     * respondent organisation policy or its role is not set, the respondent is
+     * treated as not selected.
+     *
+     * @param caseDetails the case details containing the party selection
+     * @return {@code true} if the respondent is among the checked parties,
+     *         {@code false} otherwise
+     */
+    public boolean isRespondentPartySelected(FinremCaseDetails caseDetails) {
+        return isPolicyRoleChecked(caseDetails.getData().getRespondentOrganisationPolicy(),
+            getCheckedActiveParties(caseDetails));
+    }
+
+    /**
+     * Builds the list of all active parties on the case, used to populate
+     * party-selection checkboxes such as "Who should receive this order?".
+     *
+     * <p>Delegates to {@link #getAllActivePartyList(FinremCaseData)} using the
+     * data from the supplied case details.
+     *
+     * @param caseDetails the case details containing the case data
+     * @return a {@link DynamicMultiSelectList} of the active parties that can be selected,
+     *         with the applicant and respondent parties pre-selected
+     * @see #getAllActivePartyList(FinremCaseData)
+     */
     public DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
         return getAllActivePartyList(caseDetails.getData());
     }
 
+    /**
+     * Builds the list of all active parties on the case, used to populate
+     * party-selection checkboxes such as "Who should receive this order?".
+     *
+     * <p>The returned list items contain, in order:
+     * <ol>
+     *   <li>active solicitors (applicant and respondent),</li>
+     *   <li>unrepresented parties, and</li>
+     *   <li>active interveners.</li>
+     * </ol>
+     *
+     * <p>Only the solicitors and unrepresented parties are pre-selected in the
+     * returned {@link DynamicMultiSelectList#getValue() value}. Interveners are
+     * available to select but are not selected by default.
+     *
+     * @param caseData the case data used to determine which parties are active
+     * @return a {@link DynamicMultiSelectList} whose list items are all active parties
+     *         and whose value is the pre-selected subset (solicitors and unrepresented parties)
+     */
     public DynamicMultiSelectList getAllActivePartyList(FinremCaseData caseData) {
-        log.info("Case ID: {} Fetching all parties solicitor case role", caseData.getCcdCaseId());
+        List<DynamicMultiSelectListElement> activeSolicitors = getActiveSolicitors(caseData);
+        List<DynamicMultiSelectListElement> unrepresentedParties = getUnrepresentedParties(caseData);
 
         List<DynamicMultiSelectListElement> selectedActiveCaseParties = new ArrayList<>();
-        selectedActiveCaseParties.addAll(getActiveSolicitors(caseData));
-        selectedActiveCaseParties.addAll(getUnrepresentedParties(caseData));
+        selectedActiveCaseParties.addAll(activeSolicitors);
+        selectedActiveCaseParties.addAll(unrepresentedParties);
 
         List<DynamicMultiSelectListElement> activeCaseParties = new ArrayList<>();
-        activeCaseParties.addAll(getActiveSolicitors(caseData));
-        activeCaseParties.addAll(getUnrepresentedParties(caseData));
+        activeCaseParties.addAll(activeSolicitors);
+        activeCaseParties.addAll(unrepresentedParties);
         activeCaseParties.addAll(getActiveInterveners(caseData));
 
         return DynamicMultiSelectList.builder()
@@ -51,7 +164,6 @@ public class PartyService {
     }
 
     private List<DynamicMultiSelectListElement> getActiveSolicitors(FinremCaseData caseData) {
-
         List<DynamicMultiSelectListElement> activeSolicitors = new ArrayList<>();
         if (caseData.getApplicantOrganisationPolicy() != null
             && caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole() != null) {
@@ -120,10 +232,47 @@ public class PartyService {
         }
     }
 
-    public DynamicMultiSelectListElement getDynamicMultiSelectListElement(String code, String label) {
+    private DynamicMultiSelectListElement getDynamicMultiSelectListElement(String code, String label) {
         return DynamicMultiSelectListElement.builder()
             .code(code)
             .label(label)
             .build();
+    }
+
+    private void applyCorrespondenceEnabled(FinremCaseData data, List<String> activeParties) {
+        data.setApplicantCorrespondenceEnabled(
+            isSharedWithAny(activeParties, CaseRole.APP_SOLICITOR, CaseRole.APP_BARRISTER));
+        data.setRespondentCorrespondenceEnabled(
+            isSharedWithAny(activeParties, CaseRole.RESP_SOLICITOR, CaseRole.RESP_BARRISTER));
+        data.getIntervenerOne().setIntervenerCorrespondenceEnabled(
+            isSharedWithAny(activeParties, CaseRole.INTVR_SOLICITOR_1, CaseRole.INTVR_BARRISTER_1));
+        data.getIntervenerTwo().setIntervenerCorrespondenceEnabled(
+            isSharedWithAny(activeParties, CaseRole.INTVR_SOLICITOR_2, CaseRole.INTVR_BARRISTER_2));
+        data.getIntervenerThree().setIntervenerCorrespondenceEnabled(
+            isSharedWithAny(activeParties, CaseRole.INTVR_SOLICITOR_3, CaseRole.INTVR_BARRISTER_3));
+        data.getIntervenerFour().setIntervenerCorrespondenceEnabled(
+            isSharedWithAny(activeParties, CaseRole.INTVR_SOLICITOR_4, CaseRole.INTVR_BARRISTER_4));
+    }
+
+    private static boolean isPolicyRoleChecked(OrganisationPolicy policy, List<String> checkedParties) {
+        return checkedParties.contains(
+            ofNullable(policy)
+                .map(OrganisationPolicy::getOrgPolicyCaseAssignedRole)
+                .orElse(""));
+    }
+
+    private static boolean isSharedWithAny(List<String> activeParties, CaseRole... roles) {
+        return Arrays.stream(roles)
+            .map(CaseRole::getCcdCode)
+            .anyMatch(activeParties::contains);
+    }
+
+    private static List<String> toRoleCodes(DynamicMultiSelectList parties) {
+        if (parties == null) {
+            return List.of();
+        }
+        return emptyIfNull(parties.getValue()).stream()
+            .map(DynamicMultiSelectListElement::getCode)
+            .toList();
     }
 }
