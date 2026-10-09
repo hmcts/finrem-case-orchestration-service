@@ -201,4 +201,34 @@ public class SendCorrespondenceEvent {
             default -> throw new IllegalStateException("Unable to describe notification party: " + notificationParty);
         };
     }
+
+    /**
+     * Determines whether the applicant's address is required for the given correspondence events.
+     *
+     * @param sendCorrespondenceEvents the correspondence events to evaluate
+     * @return {@code true} if any of the events involves sending correspondence to the applicant
+     *         that requires an address, otherwise {@code false}
+     */
+    public static boolean isApplicantAddressRequired(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return isPartyAddressRequired(sendCorrespondenceEvents, NotificationParty.APPLICANT);
+    }
+
+    /**
+     * Determines whether the respondent's address is required for the given correspondence events.
+     *
+     * @param sendCorrespondenceEvents the correspondence events to evaluate
+     * @return {@code true} if any of the events involves sending correspondence to the respondent
+     *         that requires an address, otherwise {@code false}
+     */
+    public static boolean isRespondentAddressRequired(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return isPartyAddressRequired(sendCorrespondenceEvents, NotificationParty.RESPONDENT);
+    }
+
+    private static boolean isPartyAddressRequired(List<SendCorrespondenceEvent> events, NotificationParty party) {
+        return events.stream()
+            .filter(event -> event.getNotificationParties().contains(party))
+            .map(SendCorrespondenceEvent::getAudits)
+            .flatMap(List::stream)
+            .anyMatch(audit -> NotificationType.POSTAL.equals(audit.getType()));
+    }
 }

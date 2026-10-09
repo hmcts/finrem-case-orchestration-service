@@ -85,9 +85,6 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
             );
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData)
-            .build();
+        return response(finremCaseData);
     }
-
 }
