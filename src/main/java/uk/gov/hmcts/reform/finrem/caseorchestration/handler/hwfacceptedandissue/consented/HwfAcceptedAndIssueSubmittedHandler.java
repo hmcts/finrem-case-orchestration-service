@@ -7,7 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -24,11 +25,12 @@ public class HwfAcceptedAndIssueSubmittedHandler extends AbstractIssueApplicatio
     public HwfAcceptedAndIssueSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                RetryExecutor retryExecutor,
-                                               IssueApplicationConsentCorresponder issueApplicationConsentCorresponder,
+                                               AssignToJudgeCorresponder assignToJudgeCorresponder,
                                                AssignPartiesAccessService assignPartiesAccessService,
+                                               CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
                                                HwfCorrespondenceService hwfNotificationsService) {
-        super(finremCaseDetailsMapper, evidenceManagementDeleteService,
-            retryExecutor, issueApplicationConsentCorresponder, assignPartiesAccessService);
+        super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor, assignToJudgeCorresponder,
+            assignPartiesAccessService, correspondenceEventAuditOrchestrationService);
         this.hwfNotificationsService = hwfNotificationsService;
     }
 

@@ -3,25 +3,34 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UserNotFoundInOrganisationApiException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -33,6 +42,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mockRunWithRetryWithHandlerInvokesFirstErrorHandler;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.runSafely;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.ISSUE_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 
 public abstract class IssueApplicationConsentedSubmittedHandlerContractTest {
 
@@ -42,35 +53,15 @@ public abstract class IssueApplicationConsentedSubmittedHandlerContractTest {
 
     protected abstract RetryExecutor retryExecutor();
 
-    protected abstract IssueApplicationConsentCorresponder issueApplicationConsentCorresponder();
+    protected abstract AssignToJudgeCorresponder assignToJudgeCorresponder();
 
     protected abstract AssignPartiesAccessService assignPartiesAccessService();
+
+    protected abstract CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService();
 
     @BeforeEach
     void setup() {
         lenient().doNothing().when(retryExecutor()).runWithRetryWithHandler(any(), anyString(), any(), any());
-    }
-
-    @Test
-    void givenCase_whenSendHwfCorrespondenceFailedAndIssueApplicationCorrespondenceFailed_thenPopulateErrorToConfirmationBody() {
-        // Arrange
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
-
-        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
-            retryExecutor(),
-            "sending issue application correspondence"
-        );
-
-        // Act
-        var response = handler().handle(callbackRequest, AUTH_TOKEN);
-
-        // then
-        assertAll(
-            () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
-            () -> assertThat(response.getConfirmationBody())
-                .contains("There was a problem sending issue application correspondence. Please send it manually.")
-                .doesNotContain("There was a problem granting access to respondent solicitor")
-        );
     }
 
     @Test
@@ -123,26 +114,6 @@ public abstract class IssueApplicationConsentedSubmittedHandlerContractTest {
             () -> assertThat(response.getConfirmationHeader()).isNull(),
             () -> assertThat(response.getConfirmationBody()).isNull()
         );
-    }
-
-    @Test
-    void givenCase_whenHandled_shouldSendIssueApplicationCorrespondence() {
-        // Arrange
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.fromId(CASE_ID_IN_LONG);
-
-        // Act
-        handler().handle(callbackRequest, AUTH_TOKEN);
-
-        ArgumentCaptor<ThrowingRunnable> runnableCaptor = getThrowingRunnableCaptor();
-        verify(retryExecutor())
-            .runWithRetryWithHandler(
-                runnableCaptor.capture(),
-                eq("sending issue application correspondence"),
-                eq(CASE_ID),
-                any(RetryErrorHandler.class)
-            );
-        runSafely(runnableCaptor.getValue());
-        verify(issueApplicationConsentCorresponder()).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
@@ -224,5 +195,130 @@ public abstract class IssueApplicationConsentedSubmittedHandlerContractTest {
                 any(RetryErrorHandler.class)
             );
         verify(assignPartiesAccessService(), never()).grantRespondentSolicitor(caseData);
+    }
+
+    @Test
+    void givenSendIssueApplicationCorrespondenceFailed_thenPopulateErrorToConfirmationBody() {
+        // Arrange
+        FinremCaseData spiedFinremCaseData = spy(
+            FinremCaseData.builder()
+                .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                    .consentedRespondentRepresented(YesOrNo.YES).build())
+                .build()
+        );
+        when(spiedFinremCaseData.getRespondentSolicitorEmail()).thenReturn(TEST_RESP_SOLICITOR_EMAIL);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CONSENTED, ISSUE_APPLICATION,
+            spiedFinremCaseData);
+
+        SendCorrespondenceEvent event = stubSingleSendCorrespondenceEvent(callbackRequest.getCaseDetails());
+
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(2)).run();
+            return null;
+        }).when(correspondenceEventAuditOrchestrationService()).publishEvent(
+            eq(event),
+            eq("sending issue application correspondence TRACKER-ID (APPLICANT AND RESPONDENT)"),
+            any(Runnable.class)
+        );
+
+        // Act
+        var response = handler().handle(callbackRequest, AUTH_TOKEN);
+
+        // then
+        assertAll(
+            () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
+            () -> assertThat(response.getConfirmationBody())
+                .containsOnlyOnce("There was a problem sending issue application correspondence (%s). Please send it manually."
+                    .formatted("APPLICANT AND RESPONDENT"))
+        );
+    }
+
+    @Test
+    void givenCase_whenHandled_shouldPublishSendCorrespondenceEvent() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, ISSUE_APPLICATION);
+
+        final SendCorrespondenceEvent event = stubSingleSendCorrespondenceEvent(callbackRequest.getCaseDetails());
+        // Act
+        handler().handle(callbackRequest, AUTH_TOKEN);
+
+        verify(correspondenceEventAuditOrchestrationService()).publishEvent(eq(event),
+            eq("sending issue application correspondence TRACKER-ID (APPLICANT AND RESPONDENT)"),
+            any(Runnable.class));
+    }
+
+    @Test
+    void givenCase_whenHandled_shouldPublishMultipleSendCorrespondenceEvents() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, ISSUE_APPLICATION);
+
+        final List<SendCorrespondenceEvent> events = stubMultipleSendCorrespondenceEvents(callbackRequest.getCaseDetails());
+        // Act
+        handler().handle(callbackRequest, AUTH_TOKEN);
+
+        verify(correspondenceEventAuditOrchestrationService()).publishEvent(
+            eq(events.getFirst()),
+            eq("sending issue application correspondence TRACKER-ID-1 (APPLICANT)"),
+            any(Runnable.class));
+        verify(correspondenceEventAuditOrchestrationService()).publishEvent(
+            eq(events.getLast()),
+            eq("sending issue application correspondence TRACKER-ID-2 (RESPONDENT)"),
+            any(Runnable.class));
+    }
+
+    @Test
+    void givenCase_whenHandled_shouldReconcileNotifications() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CONSENTED,
+            ISSUE_APPLICATION);
+
+        final List<SendCorrespondenceEvent> events = stubMultipleSendCorrespondenceEvents(callbackRequest.getCaseDetails());
+        SendCorrespondenceEvent[] eventInArray = events.toArray(new SendCorrespondenceEvent[0]);
+
+        // Act
+        handler().handle(callbackRequest, AUTH_TOKEN);
+
+        InOrder inOrder = Mockito.inOrder(correspondenceEventAuditOrchestrationService());
+
+        assertAll(
+            () -> inOrder.verify(correspondenceEventAuditOrchestrationService()).publishEvent(
+                eq(events.getFirst()),
+                eq("sending issue application correspondence TRACKER-ID-1 (APPLICANT)"),
+                any(Runnable.class)),
+            () -> inOrder.verify(correspondenceEventAuditOrchestrationService()).publishEvent(
+                eq(events.getLast()),
+                eq("sending issue application correspondence TRACKER-ID-2 (RESPONDENT)"),
+                any(Runnable.class)),
+
+            () -> inOrder.verify(correspondenceEventAuditOrchestrationService()).reconcileAndPersistAudits(
+                callbackRequest.getCaseDetails(), "markPendingNotificationsAsSent", eventInArray)
+        );
+    }
+
+    private SendCorrespondenceEvent stubSingleSendCorrespondenceEvent(FinremCaseDetails caseDetails) {
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getNotificationTrackerId()).thenReturn("TRACKER-ID");
+        when(event.describeNotificationParties()).thenReturn("APPLICANT AND RESPONDENT");
+        List<SendCorrespondenceEvent> events = List.of(event);
+        when(assignToJudgeCorresponder().buildSendCorrespondenceEvents(ISSUE_APPLICATION, caseDetails,
+            AUTH_TOKEN)).thenReturn(events);
+        return event;
+    }
+
+    private List<SendCorrespondenceEvent> stubMultipleSendCorrespondenceEvents(FinremCaseDetails caseDetails) {
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getNotificationTrackerId()).thenReturn("TRACKER-ID-1");
+        when(event.describeNotificationParties()).thenReturn("APPLICANT");
+
+        SendCorrespondenceEvent event2 = mock(SendCorrespondenceEvent.class);
+        when(event2.getNotificationTrackerId()).thenReturn("TRACKER-ID-2");
+        when(event2.describeNotificationParties()).thenReturn("RESPONDENT");
+
+        List<SendCorrespondenceEvent> events = List.of(event, event2);
+        when(assignToJudgeCorresponder().buildSendCorrespondenceEvents(ISSUE_APPLICATION, caseDetails,
+            AUTH_TOKEN)).thenReturn(events);
+
+        return events;
     }
 }
