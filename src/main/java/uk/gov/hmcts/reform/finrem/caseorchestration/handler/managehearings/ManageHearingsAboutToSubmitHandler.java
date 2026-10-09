@@ -1,12 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -20,8 +22,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
-import static java.util.Objects.nonNull;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isApplicantAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isRespondentAddressRequired;
 
 @Slf4j
 @Service
@@ -30,15 +38,18 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
     private final ManageHearingActionService manageHearingActionService;
     private final NotificationAuditService notificationAuditService;
     private final ManageHearingsCorresponder manageHearingsCorresponder;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               ManageHearingActionService manageHearingActionService,
                                               NotificationAuditService notificationAuditService,
-                                              ManageHearingsCorresponder manageHearingsCorresponder) {
+                                              ManageHearingsCorresponder manageHearingsCorresponder,
+                                              ApplicationEventPublisher applicationEventPublisher) {
         super(finremCaseDetailsMapper);
         this.manageHearingActionService = manageHearingActionService;
         this.notificationAuditService = notificationAuditService;
         this.manageHearingsCorresponder = manageHearingsCorresponder;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -64,7 +75,6 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
-
         ManageHearingsWrapper hearingsWrapper = finremCaseData.getManageHearingsWrapper();
         ManageHearingsAction actionSelection = hearingsWrapper.getManageHearingsActionSelection();
 
@@ -80,27 +90,48 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
 
         manageHearingActionService.updateTabData(finremCaseData);
 
-        createNotificationAuditRows(callbackRequest, userAuthorisation, actionSelection);
+        List<SendCorrespondenceEvent> sendCorrespondenceEvents = simulateEvents(
+            manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+                actionSelection,
+                callbackRequest,
+                userAuthorisation
+            ));
+
+        List<String> errors = validateRequiredPostalAddresses(finremCaseData, sendCorrespondenceEvents);
+        if (!errors.isEmpty()) {
+            return responseWithoutWarnings(finremCaseData, errors);
+        }
+        createNotificationAuditRows(callbackRequest, sendCorrespondenceEvents
+            .toArray(new SendCorrespondenceEvent[0]));
 
         return response(finremCaseData);
     }
 
+    private List<SendCorrespondenceEvent> simulateEvents(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        sendCorrespondenceEvents.forEach(correspondenceEvent -> {
+            correspondenceEvent.setSimulatingCorrespondence(true);
+            applicationEventPublisher.publishEvent(correspondenceEvent);
+        });
+        return sendCorrespondenceEvents;
+    }
+
+    private List<String> validateRequiredPostalAddresses(FinremCaseData finremCaseData,
+                                                         List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(finremCaseData, EventType.MANAGE_HEARINGS,
+            isApplicantAddressRequired(sendCorrespondenceEvents),
+            isRespondentAddressRequired(sendCorrespondenceEvents)));
+    }
+
     private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
-                                             String userAuthorisation,
-                                             ManageHearingsAction actionSelection) {
-
-        SendCorrespondenceEvent event = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
-            actionSelection,
-            callbackRequest,
-            userAuthorisation
-        );
-
-        if (nonNull(event)) {
-            notificationAuditService.createAuditsForCorrespondence(
+                                             SendCorrespondenceEvent... events) {
+        if (events == null) {
+            return;
+        }
+        Arrays.stream(events)
+            .filter(Objects::nonNull)
+            .forEach(event -> notificationAuditService.createAuditsForCorrespondence(
                 event,
                 callbackRequest.getEventType()
-            );
-        }
-
+            ));
     }
 }
