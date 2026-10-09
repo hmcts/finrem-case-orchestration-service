@@ -201,6 +201,47 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-adjourn-notification-solicitor-stub.json");
     }
 
+    @Test
+    public void shouldMatchFrContestedRepresentativeStopRepresentingIntervenerStub() throws Exception {
+        assertFixtureMatchesLiveNotify(
+            "fixtures/functional/contested/fr-contested-representative-stop-representing-intervener-stub.json"
+        );
+    }
+
+    @Test
+    public void shouldMatchFrContestedRepresentativeStopRepresentingApplicantStub() throws Exception {
+        assertFixtureMatchesLiveNotify(
+            "fixtures/functional/contested/fr-contested-representative-stop-representing-applicant-stub.json"
+        );
+    }
+
+    @Test
+    public void shouldMatchFrContestedRepresentativeStopRepresentingRespondentStub() throws Exception {
+        assertFixtureMatchesLiveNotify(
+            "fixtures/functional/contested/fr-contested-representative-stop-representing-respondent-stub.json"
+        );
+    }
+
+    @Test
+    public void shouldMatchFrConsentedNocCaseworkerStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-consented-noc-caseworker-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrConsentedRepresentativeStopRepresentingApplicantStub() throws Exception {
+        assertFixtureMatchesLiveNotify(
+            "fixtures/functional/contested/fr-consented-representative-stop-representing-applicant-stub.json"
+        );
+    }
+
+    @Test
+    public void shouldMatchFrConsentedRepresentativeStopRepresentingRespondentStub() throws Exception {
+        assertFixtureMatchesLiveNotify(
+            "fixtures/functional/consented/fr-consented-representative-stop-representing-respondent-stub.json"
+        );
+    }
+
+
     // -------------------------
     // NOC SCENARIOS
     // -------------------------
@@ -210,6 +251,12 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-notice-of-change-stub.json");
     }
 
+    @Test
+    public void shouldMatchFrConsentedNoticeOfChangeStub() throws Exception {
+        assertFixtureMatchesLiveNotify(
+            "fixtures/functional/contested/fr-consented-notice-of-change-stub.json"
+        );
+    }
 
     // -------------------------
     // INTERVENERS SCENARIOS
