@@ -171,6 +171,36 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-draft-order-ready-for-review-judge-stub.json");
     }
 
+    @Test
+    public void shouldMatchFrContestedUpdateFrcSolStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-update-frc-sol-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrContestedUpdateFrcCourtStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-update-frc-court-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrContestedNocCaseworkerStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-noc-caseworker-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrBarristerAccessRemovedStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-barrister-access-removed-applicant-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrBarristerAccessRemovedRespondentStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-barrister-access-removed-respondent-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrContestedAdjournNotificationSolicitorStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-adjourn-notification-solicitor-stub.json");
+    }
+
     // -------------------------
     // NOC SCENARIOS
     // -------------------------
@@ -211,9 +241,9 @@ public class EmailNotificationIntegrationTest extends BaseTest {
     }
 
     @Test
-public void shouldMatchFrContestOrderApprovedIntervener1Stub() throws Exception {
-    assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contest-order-approved-intervener1-stub.json");
-}
+    public void shouldMatchFrContestOrderApprovedIntervener1Stub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contest-order-approved-intervener1-stub.json");
+    }
 
     private void assertFixtureMatchesLiveNotify(String fixtureClasspath) throws Exception {
         Fixture fixture = readFixture(fixtureClasspath);
