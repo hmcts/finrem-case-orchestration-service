@@ -24,15 +24,21 @@ public final class AccessCodeGenerator {
     }
 
     public static void setAccessCode(FinremCaseData caseData) {
-        ensureAccessCodePresent(
-            caseData::getApplicantAccessCodes,
-            caseData::setApplicantAccessCodes
-        );
+        boolean shouldGenerateApplicantCode = !caseData.isApplicantRepresentedByASolicitor();
+        if (shouldGenerateApplicantCode) {
+            ensureAccessCodePresent(
+                caseData::getApplicantAccessCodes,
+                caseData::setApplicantAccessCodes
+            );
+        }
 
-        ensureAccessCodePresent(
-            caseData::getRespondentAccessCodes,
-            caseData::setRespondentAccessCodes
-        );
+        boolean shouldGenerateRespondentCode = !caseData.isRespondentRepresentedByASolicitor();
+        if (shouldGenerateRespondentCode) {
+            ensureAccessCodePresent(
+                caseData::getRespondentAccessCodes,
+                caseData::setRespondentAccessCodes
+            );
+        }
     }
 
     private static void ensureAccessCodePresent(
