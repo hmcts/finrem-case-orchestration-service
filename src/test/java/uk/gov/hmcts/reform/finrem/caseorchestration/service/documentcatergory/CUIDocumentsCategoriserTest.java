@@ -95,7 +95,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL;
 
-class CuiDocumentsCategoriserTest {
+class CUIDocumentsCategoriserTest {
 
     private FeatureToggleService featureToggleService;
 
@@ -136,8 +136,8 @@ class CuiDocumentsCategoriserTest {
 
     @Test
     void shouldHandleEmptyDocumentsGracefully() {
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
+        CUIDocumentsCategoriser categoriser =
+            new CUIDocumentsCategoriser(featureToggleService, CUIDocumentsCategoriser.Party.APPLICANT);
 
         assertThatCode(() -> categoriser.categorise(buildCaseData(null, true)))
             .doesNotThrowAnyException();
@@ -147,8 +147,8 @@ class CuiDocumentsCategoriserTest {
     void shouldIgnoreInvalidDocument() {
         CitizenUploadDocument doc = new CitizenUploadDocument();
 
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
+        CUIDocumentsCategoriser categoriser =
+            new CUIDocumentsCategoriser(featureToggleService, CUIDocumentsCategoriser.Party.APPLICANT);
 
         categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
 
@@ -157,8 +157,8 @@ class CuiDocumentsCategoriserTest {
 
     @Test
     void shouldHandleNullWrapper() {
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, CuiDocumentsCategoriser.Party.APPLICANT);
+        CUIDocumentsCategoriser categoriser =
+            new CUIDocumentsCategoriser(featureToggleService, CUIDocumentsCategoriser.Party.APPLICANT);
 
         FinremCaseData caseData = new FinremCaseData();
 
@@ -177,9 +177,9 @@ class CuiDocumentsCategoriserTest {
         CitizenUploadDocument doc3 =
             buildDocument(CitizenUploadDocumentType.PRE_HEARING_DRAFT_ORDER, false);
 
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService,
-                CuiDocumentsCategoriser.Party.RESPONDENT);
+        CUIDocumentsCategoriser categoriser =
+            new CUIDocumentsCategoriser(featureToggleService,
+                CUIDocumentsCategoriser.Party.RESPONDENT);
 
         categoriser.categorise(buildCaseData(
             List.of(wrap(doc1), wrap(doc2), wrap(doc3)), false));
@@ -194,14 +194,14 @@ class CuiDocumentsCategoriserTest {
     void shouldCategorise(
         CitizenUploadDocumentType type,
         boolean isFdr,
-        CuiDocumentsCategoriser.Party party,
+        CUIDocumentsCategoriser.Party party,
         boolean applicant,
         DocumentCategory expected
     ) {
         CitizenUploadDocument doc = buildDocument(type, isFdr);
 
-        CuiDocumentsCategoriser categoriser =
-            new CuiDocumentsCategoriser(featureToggleService, party);
+        CUIDocumentsCategoriser categoriser =
+            new CUIDocumentsCategoriser(featureToggleService, party);
 
         FinremCaseData caseData =
             buildCaseData(List.of(wrap(doc)), applicant);
@@ -220,197 +220,197 @@ class CuiDocumentsCategoriserTest {
         return Stream.of(
 
             Arguments.of(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true, APPLICANT_DOCUMENTS_FORM_E),
+                CUIDocumentsCategoriser.Party.APPLICANT, true, APPLICANT_DOCUMENTS_FORM_E),
 
             Arguments.of(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false, RESPONDENT_DOCUMENTS_FORM_E),
+                CUIDocumentsCategoriser.Party.RESPONDENT, false, RESPONDENT_DOCUMENTS_FORM_E),
 
             Arguments.of(PENSION_REPORT_EXPERT_REPORT, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true, FDR_REPORTS),
+                CUIDocumentsCategoriser.Party.APPLICANT, true, FDR_REPORTS),
 
             Arguments.of(PENSION_REPORT_EXPERT_REPORT, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true, REPORTS),
+                CUIDocumentsCategoriser.Party.APPLICANT, true, REPORTS),
 
             Arguments.of(STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5,
-                false, CuiDocumentsCategoriser.Party.APPLICANT, true,
+                false, CUIDocumentsCategoriser.Party.APPLICANT, true,
                 HEARING_DOCUMENTS_APPLICANT_FM5),
 
             Arguments.of(STATEMENT_OF_COSTS_FORM_H1, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260),
 
             Arguments.of(SCHEDULE_OF_DEFICIENCIES, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 HEARING_DOCUMENTS_APPLICANT_REPLIES_TO_QUESTIONNAIRE),
 
             Arguments.of(SCHEDULE_OF_DEFICIENCIES, true,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
 
             Arguments.of(CASE_SUMMARY, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 HEARING_DOCUMENTS_APPLICANT_CASE_SUMMARY),
 
             Arguments.of(CASE_SUMMARY, true,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
 
             Arguments.of(POSITION_STATEMENT, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS),
 
             Arguments.of(POSITION_STATEMENT, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 HEARING_DOCUMENTS_RESPONDENT_POSITION_STATEMENT),
 
             Arguments.of(CHRONOLOGY, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_JOINT_DOCUMENTS_CHRONOLOGY),
 
             Arguments.of(CHRONOLOGY, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 HEARING_DOCUMENTS_RESPONDENT_CHRONOLOGY),
 
             Arguments.of(STATEMENT_OF_ISSUES, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 HEARING_DOCUMENTS_APPLICANT_CONCISE_STATEMENT_OF_ISSUES),
 
             Arguments.of(COMPOSITE_CASE_SUMMARY_FORM_ES1, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_JOINT_DOCUMENTS_ES1),
 
             Arguments.of(COMPOSITE_SCHEDULE_OF_ASSETS_AND_INCOME_FORM_ES2, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 HEARING_DOCUMENTS_RESPONDENT_ES2),
 
             Arguments.of(MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
 
             Arguments.of(MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 RESPONDENT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL),
 
             Arguments.of(HOUSING_NEEDS_PROPERTY_PARTICULARS, true,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
 
             Arguments.of(HOUSING_NEEDS_PROPERTY_PARTICULARS, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS),
 
             Arguments.of(QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
 
             Arguments.of(QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 HEARING_DOCUMENTS_RESPONDENT_QUESTIONNAIRES),
 
             Arguments.of(SECTION_25_STATEMENT, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 RESPONDENT_DOCUMENTS_S25_STATEMENT),
 
             Arguments.of(WITNESS_STATEMENT, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
 
             Arguments.of(WITNESS_STATEMENT, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS),
 
             Arguments.of(WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS),
 
             Arguments.of(WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 null),
 
             Arguments.of(OPEN_OFFERS, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
 
             Arguments.of(OPEN_OFFERS, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 RESPONDENT_DOCUMENTS_OPEN_OFFERS),
 
             Arguments.of(HEARING_BUNDLE, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_BUNDLE),
 
             Arguments.of(PRE_HEARING_DRAFT_ORDER, true,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_DRAFT_ORDER),
 
             Arguments.of(PRE_HEARING_DRAFT_ORDER, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER),
 
             Arguments.of(POINTS_OF_CLAIM_DEFENCE, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE),
 
             Arguments.of(POINTS_OF_CLAIM_DEFENCE, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 null),
 
             Arguments.of(ESTIMATE_OF_COSTS_INCURRED_FORM_H, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 HEARING_DOCUMENTS_APPLICANT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260),
 
             Arguments.of(STATEMENT_OF_COSTS_SUMMARY_ASSESSMENT_FORM_N260, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260),
 
             Arguments.of(SUPPLEMENTAL_QUESTIONNAIRE, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 HEARING_DOCUMENTS_APPLICANT_QUESTIONNAIRES),
 
             Arguments.of(REPLY_TO_QUESTIONNAIRE, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE),
 
             Arguments.of(REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 RESPONDENT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE),
 
             Arguments.of(DIVORCE_APPLICATION_PETITION, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 DIVORCE_DOCUMENTS_APPLICATION_OR_PETITION),
 
             Arguments.of(DIVORCE_CONDITIONAL_ORDER_DECREE_NISI, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 DIVORCE_DOCUMENTS_CONDITIONAL_ORDER_OR_DECREE_NISI),
 
             Arguments.of(DIVORCE_FINAL_ORDER_DECREE_ABSOLUTE, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 DIVORCE_DOCUMENTS_FINAL_ORDER_OR_DECREE_ABSOLUTE),
 
             Arguments.of(CERTIFICATE_OF_SERVICE_FORM_FP6, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 APPLICANT_DOCUMENTS_CERTIFICATES_OF_SERVICE),
 
             Arguments.of(RESPONSE_TO_THE_NOTICE_OF_FIRST_APPOINTMENT_FORM_G, false,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 RESPONDENT_DOCUMENTS_FORM_G),
 
             Arguments.of(MEDICAL_REPORT, true,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 FDR_REPORTS),
 
             Arguments.of(MEDICAL_REPORT, false,
-                CuiDocumentsCategoriser.Party.APPLICANT, true,
+                CUIDocumentsCategoriser.Party.APPLICANT, true,
                 REPORTS),
 
             Arguments.of(SUPPLEMENTAL_QUESTIONNAIRE, true,
-                CuiDocumentsCategoriser.Party.RESPONDENT, false,
+                CUIDocumentsCategoriser.Party.RESPONDENT, false,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
 
             Arguments.of(
                 CitizenUploadDocumentType.STATEMENT_OF_ISSUES,
                 true,
-                CuiDocumentsCategoriser.Party.RESPONDENT,
+                CUIDocumentsCategoriser.Party.RESPONDENT,
                 false,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_POSITION_STATEMENTS
             ),
@@ -418,7 +418,7 @@ class CuiDocumentsCategoriserTest {
             Arguments.of(
                 CitizenUploadDocumentType.MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME,
                 false,
-                CuiDocumentsCategoriser.Party.APPLICANT,
+                CUIDocumentsCategoriser.Party.APPLICANT,
                 true,
                 APPLICANT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL
             ),
@@ -426,7 +426,7 @@ class CuiDocumentsCategoriserTest {
             Arguments.of(
                 CitizenUploadDocumentType.HOUSING_NEEDS_PROPERTY_PARTICULARS,
                 true,
-                CuiDocumentsCategoriser.Party.APPLICANT,
+                CUIDocumentsCategoriser.Party.APPLICANT,
                 true,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER
             ),
@@ -434,7 +434,7 @@ class CuiDocumentsCategoriserTest {
             Arguments.of(
                 CitizenUploadDocumentType.PRE_HEARING_DRAFT_ORDER,
                 false,
-                CuiDocumentsCategoriser.Party.RESPONDENT,
+                CUIDocumentsCategoriser.Party.RESPONDENT,
                 false,
                 HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER
             ),
@@ -442,7 +442,7 @@ class CuiDocumentsCategoriserTest {
             Arguments.of(
                 CitizenUploadDocumentType.FDR_BUNDLE,
                 true,
-                CuiDocumentsCategoriser.Party.RESPONDENT,
+                CUIDocumentsCategoriser.Party.RESPONDENT,
                 false,
                 FDR_BUNDLE
             )
