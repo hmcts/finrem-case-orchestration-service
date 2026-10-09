@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InvalidateAccessCodeService;
@@ -31,7 +32,9 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CITIZEN_IDAM_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,8 +55,6 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
     @Mock
     private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
-    public static final String CITIZEN_IDAM_USER_ID = "citizen-user-id";
-
     private TestHandler handler;
 
     @BeforeEach
@@ -68,14 +69,14 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldAssignCitizenRoleUsingLatestMergedAccessCode() {
+    void shouldAssignCitizenRoleUsingLatestMergedAccessCodeAndCreatePendingNotificationAudit() {
         AccessCodeCollection oldAccessCode = accessCode(UUID.randomUUID(), null, null);
         AccessCodeCollection latestAccessCode = accessCode(UUID.randomUUID(), CITIZEN_IDAM_USER_ID, LocalDateTime.now());
 
         FinremCaseData beforeData = FinremCaseData.builder().applicantAccessCodes(List.of(oldAccessCode, latestAccessCode)).build();
         FinremCaseData currentData = FinremCaseData.builder().applicantAccessCodes(List.of()).build();
 
-        var callbackRequest = FinremCallbackRequestFactory.from(
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
             Long.valueOf(CASE_ID),
             CaseType.CONTESTED,
             EventType.LINK_APPLICANT_TO_CASE,
@@ -83,28 +84,54 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
             beforeData
         );
 
+        List<AccessCodeCollection> mergedAccessCodes = List.of(oldAccessCode, latestAccessCode);
+
+        SendCorrespondenceEvent correspondenceEvent =
+            SendCorrespondenceEvent.builder()
+                .caseDetails(callbackRequest.getCaseDetails())
+                .build();
+
         when(invalidateAccessCodeService.mergeForInvalidation(anyList(), anyList()))
-            .thenReturn(List.of(oldAccessCode, latestAccessCode));
+            .thenReturn(mergedAccessCodes);
 
-        var response = handler.handle(callbackRequest, TestConstants.AUTH_TOKEN);
+        when(signInConfirmationCorresponder.buildCorrespondenceEvent(
+            callbackRequest.getCaseDetails(),
+            AUTH_TOKEN,
+            NotificationParty.CITIZEN_APPLICANT
+        )).thenReturn(correspondenceEvent);
 
-        assertThat(response.getData().getApplicantAccessCodes()).containsExactly(oldAccessCode, latestAccessCode);
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getData().getApplicantAccessCodes())
+            .containsExactly(oldAccessCode, latestAccessCode);
+
         verify(assignCaseAccessService).grantCaseRoleToUser(
             Long.valueOf(CASE_ID),
             CITIZEN_IDAM_USER_ID,
             CaseRole.CITIZEN_APPLICANT.getCcdCode(),
             null
         );
+
+        verify(signInConfirmationCorresponder).buildCorrespondenceEvent(
+            callbackRequest.getCaseDetails(),
+            AUTH_TOKEN,
+            NotificationParty.CITIZEN_APPLICANT
+        );
+
+        verify(correspondenceEventAuditOrchestrationService).createPendingAudits(
+            correspondenceEvent,
+            EventType.LINK_APPLICANT_TO_CASE
+        );
     }
 
     @Test
-    void shouldThrowWhenMergedAccessCodesHaveNoCitizenUserId() {
+    void shouldThrowWhenMergedAccessCodesHaveNoCitizenUserIdAndNotCreateNotificationAudit() {
         AccessCodeCollection mergedAccessCode = accessCode(UUID.randomUUID(), null, LocalDateTime.now());
 
         FinremCaseData beforeData = FinremCaseData.builder().applicantAccessCodes(List.of(mergedAccessCode)).build();
         FinremCaseData currentData = FinremCaseData.builder().applicantAccessCodes(List.of()).build();
 
-        var callbackRequest = FinremCallbackRequestFactory.from(
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
             Long.valueOf(CASE_ID),
             CaseType.CONTESTED,
             EventType.LINK_APPLICANT_TO_CASE,
@@ -115,13 +142,24 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
         when(invalidateAccessCodeService.mergeForInvalidation(anyList(), anyList()))
             .thenReturn(List.of(mergedAccessCode));
 
-        assertThrows(IllegalStateException.class, () -> handler.handle(callbackRequest, TestConstants.AUTH_TOKEN));
+        assertThrows(
+            IllegalStateException.class,
+            () -> handler.handle(callbackRequest, AUTH_TOKEN)
+        );
+
         verifyNoInteractions(assignCaseAccessService);
+        verifyNoInteractions(signInConfirmationCorresponder);
+        verifyNoInteractions(correspondenceEventAuditOrchestrationService);
     }
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LINK_APPLICANT_TO_CASE);
+        assertCanHandle(
+            handler,
+            CallbackType.ABOUT_TO_SUBMIT,
+            CaseType.CONTESTED,
+            EventType.LINK_APPLICANT_TO_CASE
+        );
     }
 
     public static AccessCodeCollection accessCode(UUID id, String userIdamId, LocalDateTime usedAt) {
@@ -132,13 +170,20 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
     }
 
     private static final class TestHandler extends CUILinkToCaseAboutToSubmitHandler {
-        private TestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                            InvalidateAccessCodeService invalidateAccessCodeService,
-                            AssignCaseAccessService assignCaseAccessService,
-                            SignInConfirmationCorresponder signInConfirmationCorresponder,
-                            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
-            super(finremCaseDetailsMapper, invalidateAccessCodeService, assignCaseAccessService,
-                signInConfirmationCorresponder, correspondenceEventAuditOrchestrationService);
+
+        private TestHandler(
+            FinremCaseDetailsMapper finremCaseDetailsMapper,
+            InvalidateAccessCodeService invalidateAccessCodeService,
+            AssignCaseAccessService assignCaseAccessService,
+            SignInConfirmationCorresponder signInConfirmationCorresponder,
+            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
+            super(
+                finremCaseDetailsMapper,
+                invalidateAccessCodeService,
+                assignCaseAccessService,
+                signInConfirmationCorresponder,
+                correspondenceEventAuditOrchestrationService
+            );
         }
 
         @Override
