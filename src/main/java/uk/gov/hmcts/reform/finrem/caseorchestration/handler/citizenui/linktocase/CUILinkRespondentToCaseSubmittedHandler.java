@@ -29,7 +29,7 @@ public class CUILinkRespondentToCaseSubmittedHandler extends CUILinkToCaseSubmit
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.LINK_APPLICANT_TO_CASE.equals(eventType);
+            && EventType.LINK_RESPONDENT_TO_CASE.equals(eventType);
     }
 
     @Override
