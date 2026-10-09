@@ -68,4 +68,7 @@ public class TestConstants {
     public static final String TEST_DOCUMENT_BINARY_URL = "http://test.com/document/1234567890/binary";
     public static final String TEST_DOCUMENT_URL = "http://test.com/document/1234567890";
     public static final String TEST_DOCUMENT_FILENAME = "test.pdf";
+
+    public static final String CITIZEN_IDAM_USER_ID = "citizen-user-id";
+
 }
