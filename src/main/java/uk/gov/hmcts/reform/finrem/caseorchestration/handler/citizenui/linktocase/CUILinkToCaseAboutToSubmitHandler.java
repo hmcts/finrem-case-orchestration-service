@@ -13,8 +13,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollecti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InvalidateAccessCodeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.SignInConfirmationCorresponder;
 
 import java.util.Comparator;
 import java.util.List;
@@ -28,13 +32,19 @@ public abstract class CUILinkToCaseAboutToSubmitHandler extends FinremCallbackHa
 
     private final InvalidateAccessCodeService invalidateAccessCodeService;
     private final AssignCaseAccessService assignCaseAccessService;
+    private final SignInConfirmationCorresponder signInConfirmationCorresponder;
+    private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     protected CUILinkToCaseAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                 InvalidateAccessCodeService invalidateAccessCodeService,
-                                                AssignCaseAccessService assignCaseAccessService) {
+                                                AssignCaseAccessService assignCaseAccessService,
+                                                SignInConfirmationCorresponder signInConfirmationCorresponder,
+                                                CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
         super(finremCaseDetailsMapper);
         this.invalidateAccessCodeService = invalidateAccessCodeService;
         this.assignCaseAccessService = assignCaseAccessService;
+        this.signInConfirmationCorresponder = signInConfirmationCorresponder;
+        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
     }
 
     @Override
@@ -63,7 +73,27 @@ public abstract class CUILinkToCaseAboutToSubmitHandler extends FinremCallbackHa
 
         assignCitizenCaseRole(callbackRequest, merged);
 
+        createNotificationAuditRows(callbackRequest, userAuthorisation);
+
         return response(data);
+    }
+
+    private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
+                                             String userAuthorisation) {
+        correspondenceEventAuditOrchestrationService.createPendingAudits(
+            buildSendCorrespondenceEvent(callbackRequest, userAuthorisation),
+            handledEventType()
+        );
+    }
+
+    private SendCorrespondenceEvent buildSendCorrespondenceEvent(
+        FinremCallbackRequest callbackRequest,
+        String userAuthorisation) {
+        return signInConfirmationCorresponder.buildCorrespondenceEvent(
+            callbackRequest.getCaseDetails(),
+            userAuthorisation,
+            notificationParty()
+        );
     }
 
     private void assignCitizenCaseRole(FinremCallbackRequest callbackRequest,
@@ -93,6 +123,8 @@ public abstract class CUILinkToCaseAboutToSubmitHandler extends FinremCallbackHa
             .max(Comparator.comparing(AccessCodeEntry::getUsedAt, Comparator.nullsFirst(Comparator.naturalOrder())))
             .map(AccessCodeEntry::getUserIdamID);
     }
+
+    protected abstract NotificationParty notificationParty();
 
     protected abstract EventType handledEventType();
 

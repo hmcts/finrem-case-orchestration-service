@@ -192,6 +192,7 @@ class NotificationRequestBuilderTest {
             .vacatedHearingType("FDA")
             .dateOfIssue("2025-06-02")
             .timeOfSubmission("3:45pm")
+            .hasDivorceAccount(Boolean.TRUE)
             .build();
 
         // Assert all fields are non-null

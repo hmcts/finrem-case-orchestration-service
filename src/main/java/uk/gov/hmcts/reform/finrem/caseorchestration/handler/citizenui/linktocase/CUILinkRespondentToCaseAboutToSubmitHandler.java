@@ -7,8 +7,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InvalidateAccessCodeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.SignInConfirmationCorresponder;
 
 import java.util.List;
 
@@ -17,9 +20,12 @@ import java.util.List;
 public class CUILinkRespondentToCaseAboutToSubmitHandler extends CUILinkToCaseAboutToSubmitHandler {
 
     public CUILinkRespondentToCaseAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                        InvalidateAccessCodeService invalidateAccessCodeService,
-                                                        AssignCaseAccessService assignCaseAccessService) {
-        super(finremCaseDetailsMapper, invalidateAccessCodeService, assignCaseAccessService);
+                                                       InvalidateAccessCodeService invalidateAccessCodeService,
+                                                       AssignCaseAccessService assignCaseAccessService,
+                                                       SignInConfirmationCorresponder signInConfirmationCorresponder,
+                                                       CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
+        super(finremCaseDetailsMapper, invalidateAccessCodeService, assignCaseAccessService,
+            signInConfirmationCorresponder, correspondenceEventAuditOrchestrationService);
     }
 
     @Override
@@ -40,5 +46,10 @@ public class CUILinkRespondentToCaseAboutToSubmitHandler extends CUILinkToCaseAb
     @Override
     protected void setAccessCodes(FinremCaseData data, List<AccessCodeCollection> accessCodes) {
         data.setRespondentAccessCodes(accessCodes);
+    }
+
+    @Override
+    protected NotificationParty notificationParty() {
+        return NotificationParty.CITIZEN_RESPONDENT;
     }
 }
