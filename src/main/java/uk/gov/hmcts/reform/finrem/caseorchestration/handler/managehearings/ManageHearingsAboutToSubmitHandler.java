@@ -16,9 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
@@ -30,6 +28,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isApplicantAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isRespondentAddressRequired;
 
 @Slf4j
 @Service
@@ -118,24 +118,8 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
     private List<String> validateRequiredPostalAddresses(FinremCaseData finremCaseData,
                                                          List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
         return new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(finremCaseData, EventType.MANAGE_HEARINGS,
-            isApplicantNotified(sendCorrespondenceEvents),
-            isRespondentNotified(sendCorrespondenceEvents)));
-    }
-
-    private boolean isApplicantNotified(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
-        return isPartyNotified(sendCorrespondenceEvents, NotificationParty.APPLICANT);
-    }
-
-    private boolean isRespondentNotified(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
-        return isPartyNotified(sendCorrespondenceEvents, NotificationParty.RESPONDENT);
-    }
-
-    private boolean isPartyNotified(List<SendCorrespondenceEvent> events, NotificationParty party) {
-        return events.stream()
-            .filter(event -> event.getNotificationParties().contains(party))
-            .map(SendCorrespondenceEvent::getAudits)
-            .flatMap(List::stream)
-            .anyMatch(audit -> NotificationType.POSTAL.equals(audit.getType()));
+            isApplicantAddressRequired(sendCorrespondenceEvents),
+            isRespondentAddressRequired(sendCorrespondenceEvents)));
     }
 
     private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,

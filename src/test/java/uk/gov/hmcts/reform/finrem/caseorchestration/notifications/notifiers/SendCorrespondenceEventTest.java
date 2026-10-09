@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -29,6 +30,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifie
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isApplicantAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isRespondentAddressRequired;
 
 class SendCorrespondenceEventTest {
 
@@ -155,6 +158,128 @@ class SendCorrespondenceEventTest {
                 .build();
 
             assertNull(event.getCaseData());
+        }
+    }
+
+    @Nested
+    class IsPartyAddressRequiredTests {
+        // ---------- applicant ----------
+
+        @Test
+        void shouldReturnTrueWhenApplicantHasPostalAudit() {
+            var events = List.of(event(List.of(NotificationParty.APPLICANT), audit(NotificationType.POSTAL)));
+
+            assertThat(isApplicantAddressRequired(events)).isTrue();
+        }
+
+        @Test
+        void shouldReturnFalseForApplicantWhenOnlyRespondentHasPostalAudit() {
+            var events = List.of(event(List.of(NotificationParty.RESPONDENT), audit(NotificationType.POSTAL)));
+
+            assertThat(isApplicantAddressRequired(events)).isFalse();
+        }
+
+        // ---------- respondent ----------
+
+        @Test
+        void shouldReturnTrueWhenRespondentHasPostalAudit() {
+            var events = List.of(event(List.of(NotificationParty.RESPONDENT), audit(NotificationType.POSTAL)));
+
+            assertThat(isRespondentAddressRequired(events)).isTrue();
+        }
+
+        @Test
+        void shouldReturnFalseForRespondentWhenOnlyApplicantHasPostalAudit() {
+            var events = List.of(event(List.of(NotificationParty.APPLICANT), audit(NotificationType.POSTAL)));
+
+            assertThat(isRespondentAddressRequired(events)).isFalse();
+        }
+
+        // ---------- shared behaviour (both parties) ----------
+
+        @Test
+        void shouldReturnFalseWhenEventListIsEmpty() {
+            assertThat(isApplicantAddressRequired(List.of())).isFalse();
+            assertThat(isRespondentAddressRequired(List.of())).isFalse();
+        }
+
+        @Test
+        void shouldThrowNullPointerExceptionWhenEventListIsNull() {
+            // Documents current behaviour; remove or change if you add null handling
+            assertThatThrownBy(() -> isApplicantAddressRequired(null))
+                .isInstanceOf(NullPointerException.class);
+            assertThatThrownBy(() -> isRespondentAddressRequired(null))
+                .isInstanceOf(NullPointerException.class);
+        }
+
+        @Test
+        void shouldReturnTrueWhenEventNotifiesBothPartiesWithPostalAudit() {
+            var events = List.of(event(
+                List.of(NotificationParty.APPLICANT, NotificationParty.RESPONDENT),
+                audit(NotificationType.POSTAL)));
+
+            assertThat(isApplicantAddressRequired(events)).isTrue();
+            assertThat(isRespondentAddressRequired(events)).isTrue();
+        }
+
+        @Test
+        void shouldReturnTrueWhenAnyOneOfSeveralEventsMatches() {
+            var events = List.of(
+                event(List.of(NotificationParty.APPLICANT), audit(NotificationType.EMAIL)),
+                event(List.of(NotificationParty.RESPONDENT), audit(NotificationType.POSTAL)),
+                event(List.of(NotificationParty.APPLICANT)));
+
+            assertThat(isRespondentAddressRequired(events)).isTrue();
+            assertThat(isApplicantAddressRequired(events)).isFalse();
+        }
+
+        @Test
+        void shouldReturnTrueWhenPostalAuditIsAmongMixedAudits() {
+            var events = List.of(event(
+                List.of(NotificationParty.APPLICANT),
+                audit(NotificationType.EMAIL),
+                audit(NotificationType.POSTAL)));
+
+            assertThat(isApplicantAddressRequired(events)).isTrue();
+        }
+
+        @Test
+        void shouldReturnFalseWhenPartyMatchesButEventHasNoAudits() {
+            var events = List.of(event(List.of(NotificationParty.APPLICANT)));
+
+            assertThat(isApplicantAddressRequired(events)).isFalse();
+        }
+
+        @Test
+        void shouldReturnFalseWhenEventHasNoNotificationParties() {
+            var events = List.of(event(List.of(), audit(NotificationType.POSTAL)));
+
+            assertThat(isApplicantAddressRequired(events)).isFalse();
+            assertThat(isRespondentAddressRequired(events)).isFalse();
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = NotificationType.class, names = "POSTAL", mode = EnumSource.Mode.EXCLUDE)
+        void shouldReturnFalseWhenAuditsAreNotPostal(NotificationType type) {
+            var events = List.of(event(
+                List.of(NotificationParty.APPLICANT, NotificationParty.RESPONDENT),
+                audit(type)));
+
+            assertThat(isApplicantAddressRequired(events)).isFalse();
+            assertThat(isRespondentAddressRequired(events)).isFalse();
+        }
+
+        // ---------- helpers (adapt to your model) ----------
+
+        private static SendCorrespondenceEvent event(List<NotificationParty> parties, NotificationAudit... audits) {
+            return SendCorrespondenceEvent.builder()
+                .notificationParties(parties)
+                .audits(List.of(audits))
+                .build();
+        }
+
+        private static NotificationAudit audit(NotificationType type) {
+            return NotificationAudit.builder().type(type).build();
         }
     }
 
