@@ -27,8 +27,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
@@ -55,6 +57,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
     private final ManageHearingActionService manageHearingActionService;
     private final GeneralApplicationsCategoriser generalApplicationsCategoriser;
     private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
+    private final ManageHearingsCorresponder manageHearingsCorresponder;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public GeneralApplicationDirectionsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -64,6 +67,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
                                                             ManageHearingActionService manageHearingActionService,
                                                             GeneralApplicationsCategoriser generalApplicationsCategoriser,
                                                             HearingCorrespondenceHelper hearingCorrespondenceHelper,
+                                                            ManageHearingsCorresponder manageHearingsCorresponder,
                                                             ApplicationEventPublisher applicationEventPublisher) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
@@ -72,6 +76,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         this.manageHearingActionService = manageHearingActionService;
         this.generalApplicationsCategoriser = generalApplicationsCategoriser;
         this.hearingCorrespondenceHelper = hearingCorrespondenceHelper;
+        this.manageHearingsCorresponder = manageHearingsCorresponder;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -89,16 +94,18 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        final List<String> errors = validateRequiredPostalAddresses(caseData, callbackRequest.getEventType());
-
-        if (!errors.isEmpty()) {
-            return responseWithoutWarnings(caseData, errors);
+        boolean isHearingRequired = isHearingRequired(caseDetails);
+        List<String> errors = new ArrayList<>();
+        if (isHearingRequired) {
+            errors = validateRequiredPostalAddresses(callbackRequest, userAuthorisation);
+            if (!errors.isEmpty()) {
+                return responseWithoutWarnings(caseData, errors);
+            }
         }
 
         helper.populateGeneralApplicationSender(caseData,
             caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
-        boolean isHearingRequired = isHearingRequired(caseDetails);
         performAddHearingIfNecessary(caseDetails, isHearingRequired, userAuthorisation);
 
         List<BulkPrintDocument> documents = new ArrayList<>();
@@ -303,8 +310,15 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         }
     }
 
-    private List<String> validateRequiredPostalAddresses(FinremCaseData caseData, EventType eventType) {
-        return new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
+    private List<String> validateRequiredPostalAddresses(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+        // TODO
+        List<SendCorrespondenceEvent> events = manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
+
+        boolean validateApplicant = false;
+        boolean validateRespondent = false;
+
+        return new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(callbackRequest.getFinremCaseData(),
+            callbackRequest.getEventType(), validateApplicant, validateRespondent));
     }
 
     private boolean isHearingRequired(FinremCaseDetails finremCaseDetails) {
