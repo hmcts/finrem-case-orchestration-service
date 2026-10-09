@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremSubmittedCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -15,45 +14,33 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 @Slf4j
 @Service
-public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
-
-    private final RetryExecutor retryExecutor;
-
-    private final ApplicationEventPublisher applicationEventPublisher;
+public class ManageHearingsSubmittedHandler extends FinremSubmittedCallbackHandler {
 
     private final ManageHearingsCorresponder manageHearingsCorresponder;
 
-    private final CoreCaseDataService coreCaseDataService;
-
-    private final NotificationAuditService notificationAuditService;
+    private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                          ManageHearingsCorresponder manageHearingsCorresponder,
+                                          EvidenceManagementDeleteService evidenceManagementDeleteService,
                                           RetryExecutor retryExecutor,
-                                          ApplicationEventPublisher applicationEventPublisher,
-                                          CoreCaseDataService coreCaseDataService,
-                                          NotificationAuditService notificationAuditService) {
-        super(finremCaseDetailsMapper);
+                                          ManageHearingsCorresponder manageHearingsCorresponder,
+                                          CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
+        super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
-        this.retryExecutor = retryExecutor;
-        this.applicationEventPublisher = applicationEventPublisher;
-        this.coreCaseDataService = coreCaseDataService;
-        this.notificationAuditService = notificationAuditService;
+        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
     }
 
     @Override
@@ -72,16 +59,14 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
 
-        SendCorrespondenceEvent correspondenceEvent = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+        List<SendCorrespondenceEvent> correspondenceEvents = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
             actionSelection,
             callbackRequest,
             userAuthorisation
         );
 
         String error = null;
-        if (nonNull(correspondenceEvent)) {
-            log.info("Sending hearing correspondence for {} action. Case reference: {}",
-                actionSelection.getDescription(), finremCaseData.getCcdCaseId());
+        for (SendCorrespondenceEvent correspondenceEvent : correspondenceEvents) {
             correspondenceEvent.setEventId(callbackRequest.getEventType().getCcdType());
 
             correspondenceEvent.setNotificationTrackerId(
@@ -111,37 +96,17 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
     }
 
     private String publishEvent(String eventDescription, SendCorrespondenceEvent event) {
-        String notifyingPartyInString = event.describeNotificationParties();
-
         AtomicReference<String> error = new AtomicReference<>();
-        retryExecutor.runWithRetryWithHandler(
-            () -> applicationEventPublisher.publishEvent(event),
-            eventDescription,
-            event.getCaseId(),
-            (exception, actionName, caseId1) ->
-                error.set(format("Notification to %s has failed. Please send notification to %s manually.",
-                    notifyingPartyInString, notifyingPartyInString))
+        correspondenceEventAuditOrchestrationService.publishEvent(event, eventDescription, () ->
+            error.set(format("Notification to %s has failed. Please send notification to %s manually.",
+                event.describeNotificationParties(), event.describeNotificationParties()))
         );
         return error.get();
     }
 
     private void markPendingNotificationsAsSent(FinremCaseDetails caseDetails,
                                                 SendCorrespondenceEvent correspondenceEvent) {
-
-        Map<String, Object> updatedFields =
-            notificationAuditService.reconcileNotificationAudits(correspondenceEvent);
-
-        if (!updatedFields.isEmpty()) {
-            retryExecutor.runWithRetrySuppressException(
-                () -> coreCaseDataService.performPostSubmitCallback(
-                    caseDetails.getData().getCcdCaseType(),
-                    caseDetails.getId(),
-                    INTERNAL_CHANGE_UPDATE_CASE.getCcdType(),
-                    latestCaseDetails -> updatedFields
-                ),
-                "markPendingNotificationsAsSent",
-                caseDetails.getCaseIdAsString()
-            );
-        }
+        correspondenceEventAuditOrchestrationService.reconcileAndPersistAudits(caseDetails,
+            "markPendingNotificationsAsSent", correspondenceEvent);
     }
 }

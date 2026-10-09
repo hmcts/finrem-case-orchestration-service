@@ -1,14 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -28,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -40,22 +48,31 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
 
 @ExtendWith(MockitoExtension.class)
-class HearingsAboutToSubmitHandlerTest {
+class ManageHearingsAboutToSubmitHandlerTest {
 
     @Mock
     private ManageHearingActionService manageHearingActionService;
@@ -69,8 +86,29 @@ class HearingsAboutToSubmitHandlerTest {
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
+
     @InjectMocks
     private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
+
+    @BeforeEach
+    void setUp() {
+        mockedContactDetailsValidator = Mockito.mockStatic(ContactDetailsValidator.class);
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredPostalAddresses(any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS), eq(true), anyBoolean()))
+            .thenReturn(List.of("ERROR"));
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredPostalAddresses(any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS), anyBoolean(), eq(true)))
+            .thenReturn(List.of("ERROR"));
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredPostalAddresses(any(FinremCaseData.class), eq(EventType.MANAGE_HEARINGS), eq(false), eq(false)))
+            .thenReturn(List.of());
+    }
+
+    @AfterEach
+    void tearDownStatics() {
+        mockedContactDetailsValidator.close();
+    }
 
     @Test
     void testCanHandle() {
@@ -96,7 +134,7 @@ class HearingsAboutToSubmitHandlerTest {
             ManageHearingsAction.ADD_HEARING,
             request,
             AUTH_TOKEN
-        )).thenReturn(event);
+        )).thenReturn(List.of(event));
         doAnswer(invocation -> {
             UUID workingHearingID = UUID.randomUUID();
             ManageHearingsCollectionItem manageHearingsCollectionItem = ManageHearingsCollectionItem.builder()
@@ -197,8 +235,7 @@ class HearingsAboutToSubmitHandlerTest {
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
             request,
             AUTH_TOKEN
-        )).thenReturn(event);
-
+        )).thenReturn(List.of(event));
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
@@ -214,7 +251,6 @@ class HearingsAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseData_whenHandleVacateWithRelist_thenPerformPerformAddAndVacateHearingCalled() {
-
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .manageHearingsActionSelection(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING)
@@ -228,7 +264,7 @@ class HearingsAboutToSubmitHandlerTest {
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
             request,
             AUTH_TOKEN
-        )).thenReturn(event);
+        )).thenReturn(List.of(event));
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
@@ -241,7 +277,6 @@ class HearingsAboutToSubmitHandlerTest {
             AUTH_TOKEN
         );
         verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
-
     }
 
     @Test
@@ -258,7 +293,7 @@ class HearingsAboutToSubmitHandlerTest {
             ManageHearingsAction.ADD_HEARING,
             request,
             AUTH_TOKEN
-        )).thenReturn(null);
+        )).thenReturn(List.of());
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
@@ -270,6 +305,141 @@ class HearingsAboutToSubmitHandlerTest {
             AUTH_TOKEN
         );
         verify(notificationAuditService, never()).createAuditsForCorrespondence(any(), any());
+    }
+
+    @Test
+    void givenPostalAddressMissing_whenHandled_thenPopulateErrors() {
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+
+        List<String> expectedErrors = List.of("some error message");
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+            .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), anyBoolean(), anyBoolean()))
+            .thenReturn(expectedErrors);
+
+        var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).isEqualTo(expectedErrors);
+        verifyNoInteractions(notificationAuditService);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "true,true",
+        "true,false",
+        "false,true"
+    })
+    void givenPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenPopulateErrors(
+        boolean isApplicantAddressRequired, boolean isRespondentAddressRequired
+    ) {
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.getManageHearingsActionSelection()).thenReturn(ManageHearingsAction.ADD_HEARING);
+        when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData)
+            .toBuilder().eventType(EventType.MANAGE_HEARINGS).build();
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        List<SendCorrespondenceEvent> events = List.of(event);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
+            eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
+
+
+        try (MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class)) {
+            List<String> calls = new ArrayList<>();
+
+            // record the static call (adjust the return value to whatever the method returns)
+            mockedSendCorrespondenceEvent
+                .when(() -> SendCorrespondenceEvent.isApplicantAddressRequired(events))
+                .thenAnswer(inv -> {
+                    calls.add("isApplicantAddressRequired");
+                    return isApplicantAddressRequired;
+                });
+            mockedSendCorrespondenceEvent
+                .when(() -> SendCorrespondenceEvent.isRespondentAddressRequired(events))
+                .thenAnswer(inv -> {
+                    calls.add("isRespondentAddressRequired");
+                    return isRespondentAddressRequired;
+                });
+
+            // record the instance call (doAnswer works for void methods)
+            doAnswer(inv -> {
+                calls.add("createAuditsForCorrespondence");
+                return null;
+            }).when(notificationAuditService)
+                .createAuditsForCorrespondence(any(SendCorrespondenceEvent.class), any(EventType.class));
+
+            var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+            assertThat(response.getErrors()).contains("ERROR");
+            // to guarantee the simulation should goes first before checking applicant or respondent address required
+            assertThat(calls).containsExactly(
+                "createAuditsForCorrespondence",
+                "isApplicantAddressRequired",
+                "isRespondentAddressRequired");
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "false,false"
+    })
+    void givenPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenDoNotPopulateErrors(
+        boolean isApplicantAddressRequired, boolean isRespondentAddressRequired
+    ) {
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.getManageHearingsActionSelection()).thenReturn(ManageHearingsAction.ADD_HEARING);
+        when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData)
+            .toBuilder().eventType(EventType.MANAGE_HEARINGS).build();
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        List<SendCorrespondenceEvent> events = List.of(event);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
+            eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
+
+        try (MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class)) {
+            List<String> calls = new ArrayList<>();
+            // record the static call (adjust the return value to whatever the method returns)
+            mockedSendCorrespondenceEvent
+                .when(() -> SendCorrespondenceEvent.isApplicantAddressRequired(events))
+                .thenAnswer(inv -> {
+                    calls.add("isApplicantAddressRequired");
+                    return isApplicantAddressRequired;
+                });
+            mockedSendCorrespondenceEvent
+                .when(() -> SendCorrespondenceEvent.isRespondentAddressRequired(events))
+                .thenAnswer(inv -> {
+                    calls.add("isRespondentAddressRequired");
+                    return isRespondentAddressRequired;
+                });
+
+            // record the instance call (doAnswer works for void methods)
+            doAnswer(inv -> {
+                calls.add("createAuditsForCorrespondence");
+                return null;
+            }).when(notificationAuditService)
+                .createAuditsForCorrespondence(any(SendCorrespondenceEvent.class), any(EventType.class));
+
+            var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+            assertThat(response.getErrors()).isEmpty();
+            // to guarantee the simulation should goes first before checking applicant or respondent address required
+            assertThat(calls).containsExactly(
+                "createAuditsForCorrespondence",
+                "isApplicantAddressRequired",
+                "isRespondentAddressRequired");
+        }
+    }
+
+    @Test
+    void shouldRemoveTemporaryFieldsInManageHearingsWrapperWhenHandled() {
+        verifyTemporaryFieldsWereSanitised(manageHearingsAboutToSubmitHandler,
+            finremCaseDetailsMapper, new HashMap<>(Map.of(
+                "workingHearing", WorkingHearing.builder().build(),
+                "workingVacatedHearing", WorkingVacatedHearing.builder().build(),
+                "isRelistSelected", mock(YesOrNo.class),
+                "shouldSendVacateOrAdjNotice", mock(YesOrNo.class)
+            ))
+        );
     }
 
     private FinremCallbackRequest buildRequest(FinremCaseData caseData) {

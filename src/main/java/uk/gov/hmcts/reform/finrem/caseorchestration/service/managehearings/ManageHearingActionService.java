@@ -122,8 +122,6 @@ public class ManageHearingActionService {
         }
 
         addDocumentsToCollection(documentMap, hearingWrapper);
-        // Although the working hearing is cleared, the working hearing ID is retained for use in submitted handler.
-        hearingWrapper.setWorkingHearing(null);
     }
 
     /**
@@ -182,11 +180,6 @@ public class ManageHearingActionService {
         hearingsWrapper.setWasRelistSelected(
             YesOrNo.YES.equals(hearingsWrapper.getIsRelistSelected()) ? YesOrNo.YES : YesOrNo.NO
         );
-
-        // clear the working hearing
-        hearingsWrapper.setWorkingVacatedHearing(null);
-        hearingsWrapper.setIsRelistSelected(null);
-        hearingsWrapper.setShouldSendVacateOrAdjNotice(null);
     }
 
     /**
