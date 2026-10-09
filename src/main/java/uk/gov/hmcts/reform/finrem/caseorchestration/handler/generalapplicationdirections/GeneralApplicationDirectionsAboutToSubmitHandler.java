@@ -46,6 +46,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isApplicantAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isRespondentAddressRequired;
 
 @Slf4j
 @Service
@@ -311,14 +313,14 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
     }
 
     private List<String> validateRequiredPostalAddresses(FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        // TODO
         List<SendCorrespondenceEvent> events = manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
-
-        boolean validateApplicant = false;
-        boolean validateRespondent = false;
+        events.forEach(event -> {
+            event.setSimulatingCorrespondence(true);
+            applicationEventPublisher.publishEvent(event);
+        });
 
         return new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(callbackRequest.getFinremCaseData(),
-            callbackRequest.getEventType(), validateApplicant, validateRespondent));
+            callbackRequest.getEventType(), isApplicantAddressRequired(events), isRespondentAddressRequired(events)));
     }
 
     private boolean isHearingRequired(FinremCaseDetails finremCaseDetails) {
