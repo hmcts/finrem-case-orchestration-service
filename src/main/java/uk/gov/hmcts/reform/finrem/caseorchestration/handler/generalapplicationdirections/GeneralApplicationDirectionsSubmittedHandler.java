@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationdirections;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -14,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
@@ -21,8 +21,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
 
 @Slf4j
@@ -31,18 +32,19 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmitte
 
     private final ManageHearingsCorresponder manageHearingsCorresponder;
     private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     public GeneralApplicationDirectionsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         EvidenceManagementDeleteService evidenceManagementDeleteService,
+                                                        RetryExecutor retryExecutor,
                                                         ManageHearingsCorresponder manageHearingsCorresponder,
                                                         GeneralApplicationDirectionsService generalApplicationDirectionsService,
-                                                        RetryExecutor retryExecutor,
-                                                        ApplicationEventPublisher applicationEventPublisher) {
+                                                        CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService
+    ) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
         this.generalApplicationDirectionsService = generalApplicationDirectionsService;
-        this.applicationEventPublisher = applicationEventPublisher;
+        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
     }
 
     @Override
@@ -67,19 +69,11 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmitte
                 .buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
 
             for (SendCorrespondenceEvent event : events) {
-                if (!emptyIfNull(event.getNotificationParties()).isEmpty()) {
-                    String party = event.getNotificationParties().getFirst().name();
-                    String caseId = finremCaseDetails.getCaseIdAsString();
-                    String task = "Send hearing corresponder to party: %s on general application direction event"
-                        .formatted(party);
-                    log.info("{} - {}", caseId, task);
-
-                    retryExecutor.runWithRetryWithHandler(
-                        () -> applicationEventPublisher.publishEvent(event), task, caseId,
-                        (exception, actionName, caseId1) ->
-                            errors.add("Notification to %s has failed. Please send notification manually."
-                                .formatted(party))
-                    );
+                String task = "Send hearing corresponder to party: %s on general application direction event"
+                    .formatted(event.describeNotificationParties());
+                String error = publishEvent(task, event);
+                if (nonNull(error)) {
+                    errors.add(error);
                 }
             }
         }
@@ -91,5 +85,14 @@ public class GeneralApplicationDirectionsSubmittedHandler extends FinremSubmitte
             toConfirmationHeader("General Application Direction completed with error"),
             toConfirmationBody(errors.toArray(new String[0]))
         );
+    }
+
+    private String publishEvent(String eventDescription, SendCorrespondenceEvent event) {
+        AtomicReference<String> error = new AtomicReference<>();
+        correspondenceEventAuditOrchestrationService.publishEvent(event, eventDescription, () ->
+            error.set("Notification to %s has failed. Please send notification manually."
+                .formatted(event.describeNotificationParties()))
+        );
+        return error.get();
     }
 }
