@@ -4,11 +4,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -37,7 +40,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Wor
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
@@ -70,6 +76,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.manageheari
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsAboutToSubmitHandlerTest {
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Mock
     private ManageHearingActionService manageHearingActionService;
@@ -268,7 +277,6 @@ class ManageHearingsAboutToSubmitHandlerTest {
             AUTH_TOKEN
         );
         verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
-
     }
 
     @Test
@@ -300,7 +308,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenInvalidCaseDataAddresses_whenHandled_thenPopulateErrors() {
+    void givenPostalAddressMissing_whenHandled_thenPopulateErrors() {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
 
@@ -312,6 +320,93 @@ class ManageHearingsAboutToSubmitHandlerTest {
         var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).isEqualTo(expectedErrors);
         verifyNoInteractions(notificationAuditService);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "APPLICANT,POSTAL",
+        "RESPONDENT,POSTAL"
+    })
+    void givenPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenPopulateErrors(
+        NotificationParty eventNotificationParty, NotificationType auditType
+    ) {
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.getManageHearingsActionSelection()).thenReturn(ManageHearingsAction.ADD_HEARING);
+        when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData)
+            .toBuilder().eventType(EventType.MANAGE_HEARINGS).build();
+
+        NotificationAudit audit = NotificationAudit.builder().build();
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .notificationParties(List.of(eventNotificationParty))
+            .audits(List.of(audit))
+            .build();
+        List<SendCorrespondenceEvent> events = List.of(event);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
+            eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
+        doAnswer(invocation -> {
+            SendCorrespondenceEvent e = invocation.getArgument(0, SendCorrespondenceEvent.class);
+            e.getAudits().getFirst().setType(auditType);
+            return null;
+        }).when(applicationEventPublisher).publishEvent(event);
+
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), eq(true), anyBoolean()))
+            .thenReturn(List.of("ERROR"));
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), anyBoolean(), eq(true)))
+            .thenReturn(List.of("ERROR"));
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), eq(false), eq(false)))
+            .thenReturn(List.of());
+
+        var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).contains("ERROR");
+        verifyNoInteractions(notificationAuditService);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "APPLICANT,EMAIL",
+        "RESPONDENT,EMAIL"
+    })
+    void givenPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenDoNotPopulateErrors(
+        NotificationParty eventNotificationParty, NotificationType auditType
+    ) {
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(manageHearingsWrapper.getManageHearingsActionSelection()).thenReturn(ManageHearingsAction.ADD_HEARING);
+        when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData)
+            .toBuilder().eventType(EventType.MANAGE_HEARINGS).build();
+
+        NotificationAudit audit = NotificationAudit.builder().build();
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .notificationParties(List.of(eventNotificationParty))
+            .audits(List.of(audit))
+            .build();
+        List<SendCorrespondenceEvent> events = List.of(event);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
+            eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
+        doAnswer(invocation -> {
+            SendCorrespondenceEvent e = invocation.getArgument(0, SendCorrespondenceEvent.class);
+            e.getAudits().getFirst().setType(auditType);
+            return null;
+        }).when(applicationEventPublisher).publishEvent(event);
+
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+            .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), eq(true), anyBoolean()))
+            .thenReturn(List.of("ERROR"));
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), anyBoolean(), eq(true)))
+            .thenReturn(List.of("ERROR"));
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), eq(false), eq(false)))
+            .thenReturn(List.of());
+
+        var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).isEmpty();
     }
 
     @Test

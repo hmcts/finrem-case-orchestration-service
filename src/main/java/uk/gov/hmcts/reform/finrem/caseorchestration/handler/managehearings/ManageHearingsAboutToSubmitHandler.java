@@ -1,12 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
@@ -26,8 +29,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 
 @Slf4j
@@ -37,15 +38,18 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
     private final ManageHearingActionService manageHearingActionService;
     private final NotificationAuditService notificationAuditService;
     private final ManageHearingsCorresponder manageHearingsCorresponder;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               ManageHearingActionService manageHearingActionService,
                                               NotificationAuditService notificationAuditService,
-                                              ManageHearingsCorresponder manageHearingsCorresponder) {
+                                              ManageHearingsCorresponder manageHearingsCorresponder,
+                                              ApplicationEventPublisher applicationEventPublisher) {
         super(finremCaseDetailsMapper);
         this.manageHearingActionService = manageHearingActionService;
         this.notificationAuditService = notificationAuditService;
         this.manageHearingsCorresponder = manageHearingsCorresponder;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -86,13 +90,14 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
 
         manageHearingActionService.updateTabData(finremCaseData);
 
-        List<SendCorrespondenceEvent> sendCorrespondenceEvents = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
-            actionSelection,
-            callbackRequest,
-            userAuthorisation
-        );
+        List<SendCorrespondenceEvent> sendCorrespondenceEvents = simulateEvents(
+            manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+                actionSelection,
+                callbackRequest,
+                userAuthorisation
+            ));
 
-        List<String> errors = validatePostalAddresses(finremCaseData, sendCorrespondenceEvents);
+        List<String> errors = validateRequiredPostalAddresses(finremCaseData, sendCorrespondenceEvents);
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(finremCaseData, errors);
         }
@@ -102,9 +107,17 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
         return response(finremCaseData);
     }
 
-    private List<String> validatePostalAddresses(FinremCaseData finremCaseData,
-                                                 List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
-        return new ArrayList<>(validateRequiredPostalAddresses(finremCaseData, EventType.MANAGE_HEARINGS,
+    private List<SendCorrespondenceEvent> simulateEvents(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        sendCorrespondenceEvents.forEach(correspondenceEvent -> {
+            correspondenceEvent.setSimulatingCorrespondence(true);
+            applicationEventPublisher.publishEvent(correspondenceEvent);
+        });
+        return sendCorrespondenceEvents;
+    }
+
+    private List<String> validateRequiredPostalAddresses(FinremCaseData finremCaseData,
+                                                         List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(finremCaseData, EventType.MANAGE_HEARINGS,
             isApplicantNotified(sendCorrespondenceEvents),
             isRespondentNotified(sendCorrespondenceEvents)));
     }
@@ -117,14 +130,12 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
         return isPartyNotified(sendCorrespondenceEvents, NotificationParty.RESPONDENT);
     }
 
-    private boolean isPartyNotified(List<SendCorrespondenceEvent> sendCorrespondenceEvents,
-                                    NotificationParty party) {
-        return ofNullable(sendCorrespondenceEvents)
-            .orElse(List.of())
-            .stream()
-            .map(SendCorrespondenceEvent::getNotificationParties)
-            .filter(Objects::nonNull)
-            .anyMatch(parties -> parties.contains(party));
+    private boolean isPartyNotified(List<SendCorrespondenceEvent> events, NotificationParty party) {
+        return events.stream()
+            .filter(event -> event.getNotificationParties().contains(party))
+            .map(SendCorrespondenceEvent::getAudits)
+            .flatMap(List::stream)
+            .anyMatch(audit -> NotificationType.POSTAL.equals(audit.getType()));
     }
 
     private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
