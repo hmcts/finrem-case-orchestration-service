@@ -163,8 +163,7 @@ class CorrespondenceSubmittedHandlerTest {
             .build();
     }
 
-    private static final class TestHandler
-        extends CorrespondenceSubmittedHandler {
+    private static final class TestHandler extends CorrespondenceSubmittedHandler {
 
         private SendCorrespondenceEvent correspondenceEvent;
 

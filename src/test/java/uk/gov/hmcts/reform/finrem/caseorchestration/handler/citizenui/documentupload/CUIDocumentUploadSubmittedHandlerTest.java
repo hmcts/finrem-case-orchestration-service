@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.documentupload;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -19,17 +20,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class CUIDocumentUploadSubmittedHandlerTest {
-
-    public static final String AUTH_TOKEN = "auth";
-    public static final String NOTIFICATION_EVENT_ID = "notification-event-id";
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
@@ -46,95 +42,89 @@ class CUIDocumentUploadSubmittedHandlerTest {
     @Mock
     private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
-    @Test
-    void shouldReconcileAuditsWhenNotificationEventPublishSucceeds() {
-        TestHandler handler = new TestHandler(
+    private TestHandler handler;
+
+    @BeforeEach
+    void setUp() {
+        handler = new TestHandler(
             finremCaseDetailsMapper,
             evidenceManagementDeleteService,
             retryExecutor,
             citizenDocumentsUploadedCorresponder,
             correspondenceEventAuditOrchestrationService
         );
-
-        FinremCaseDetails caseDetails = caseDetails();
-        FinremCallbackRequest callbackRequest = callbackRequest(caseDetails, EventType.CUI_APPLICANT_DOCUMENT_UPLOAD);
-        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder().caseDetails(caseDetails).build();
-
-        when(citizenDocumentsUploadedCorresponder.buildCorrespondenceEvent(caseDetails, AUTH_TOKEN, NotificationParty.CITIZEN_APPLICANT))
-            .thenReturn(event);
-        when(correspondenceEventAuditOrchestrationService.publishEvent(any(), anyString())).thenReturn(true);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(citizenDocumentsUploadedCorresponder)
-            .buildCorrespondenceEvent(caseDetails, AUTH_TOKEN, NotificationParty.CITIZEN_APPLICANT);
-        verify(correspondenceEventAuditOrchestrationService)
-            .publishEvent(event, "Send citizen documents uploaded email: [APPLICANT]");
-        verify(correspondenceEventAuditOrchestrationService)
-            .reconcileAndPersistAudits(caseDetails, event, "markPendingNotificationsAsSent");
-
-        assertThat(event.getEventId()).isEqualTo(EventType.CUI_APPLICANT_DOCUMENT_UPLOAD.getCcdType());
-        assertThat(event.getNotificationTrackerId()).isEqualTo(NOTIFICATION_EVENT_ID);
     }
 
     @Test
-    void shouldNotReconcileAuditsWhenNotificationEventPublishFails() {
-        TestHandler handler = new TestHandler(
-            finremCaseDetailsMapper,
-            evidenceManagementDeleteService,
-            retryExecutor,
-            citizenDocumentsUploadedCorresponder,
-            correspondenceEventAuditOrchestrationService
-        );
-
-        FinremCaseDetails caseDetails = caseDetails();
-        FinremCallbackRequest callbackRequest = callbackRequest(caseDetails, EventType.CUI_APPLICANT_DOCUMENT_UPLOAD);
-        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder().caseDetails(caseDetails).build();
-
-        when(citizenDocumentsUploadedCorresponder.buildCorrespondenceEvent(caseDetails, AUTH_TOKEN, NotificationParty.CITIZEN_APPLICANT))
-            .thenReturn(event);
-        when(correspondenceEventAuditOrchestrationService.publishEvent(any(), anyString())).thenReturn(false);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(citizenDocumentsUploadedCorresponder)
-            .buildCorrespondenceEvent(caseDetails, AUTH_TOKEN, NotificationParty.CITIZEN_APPLICANT);
-        verify(correspondenceEventAuditOrchestrationService)
-            .publishEvent(event, "Send citizen documents uploaded email: [APPLICANT]");
-        verify(correspondenceEventAuditOrchestrationService, never())
-            .reconcileAndPersistAudits(any(), any(), anyString());
-
-        assertThat(event.getEventId()).isEqualTo(EventType.CUI_APPLICANT_DOCUMENT_UPLOAD.getCcdType());
-        assertThat(event.getNotificationTrackerId()).isEqualTo(NOTIFICATION_EVENT_ID);
-    }
-
-    public static FinremCaseDetails caseDetails() {
-        FinremCaseData caseData = new FinremCaseData();
-        caseData.getNotificationAuditWrapper().setNotificationEventId(NOTIFICATION_EVENT_ID);
-
+    void givenNotificationParty_whenBuildingDocumentUploadCorrespondenceEvent_thenUsesExpectedParty() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .id(12345L)
-            .data(caseData)
+            .data(new FinremCaseData())
             .build();
-        caseDetails.setCaseType(CaseType.CONTESTED);
-        return caseDetails;
-    }
 
-    public static FinremCallbackRequest callbackRequest(FinremCaseDetails caseDetails, EventType eventType) {
-        return FinremCallbackRequest.builder()
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(caseDetails)
-            .eventType(eventType)
+            .eventType(EventType.CUI_APPLICANT_DOCUMENT_UPLOAD)
             .build();
+
+        SendCorrespondenceEvent expectedEvent = SendCorrespondenceEvent.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        when(citizenDocumentsUploadedCorresponder.buildCorrespondenceEvent(
+            caseDetails,
+            AUTH_TOKEN,
+            NotificationParty.CITIZEN_APPLICANT
+        )).thenReturn(expectedEvent);
+
+        SendCorrespondenceEvent actualEvent =
+            handler.buildCorrespondenceEventForTest(callbackRequest, AUTH_TOKEN);
+
+        assertThat(actualEvent).isSameAs(expectedEvent);
+
+        verify(citizenDocumentsUploadedCorresponder)
+            .buildCorrespondenceEvent(
+                caseDetails,
+                AUTH_TOKEN,
+                NotificationParty.CITIZEN_APPLICANT
+            );
     }
 
-    private static final class TestHandler extends CUIDocumentUploadSubmittedHandler {
-        private TestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                            EvidenceManagementDeleteService evidenceManagementDeleteService,
-                            RetryExecutor retryExecutor,
-                            CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
-                            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
-            super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor,
-                citizenDocumentsUploadedCorresponder, correspondenceEventAuditOrchestrationService);
+    @Test
+    void shouldReturnCitizenDocumentsUploadedTaskDescription() {
+        assertThat(handler.correspondenceTaskDescriptionForTest())
+            .isEqualTo("Send citizen documents uploaded email: [APPLICANT]");
+    }
+
+    private static final class TestHandler
+        extends CUIDocumentUploadSubmittedHandler {
+
+        private TestHandler(
+            FinremCaseDetailsMapper finremCaseDetailsMapper,
+            EvidenceManagementDeleteService evidenceManagementDeleteService,
+            RetryExecutor retryExecutor,
+            CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
+            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
+            super(
+                finremCaseDetailsMapper,
+                evidenceManagementDeleteService,
+                retryExecutor,
+                citizenDocumentsUploadedCorresponder,
+                correspondenceEventAuditOrchestrationService
+            );
+        }
+
+        SendCorrespondenceEvent buildCorrespondenceEventForTest(
+            FinremCallbackRequest callbackRequest,
+            String userAuthorisation) {
+            return buildSendCorrespondenceEvent(
+                callbackRequest,
+                userAuthorisation
+            );
+        }
+
+        String correspondenceTaskDescriptionForTest() {
+            return correspondenceTaskDescription();
         }
 
         @Override

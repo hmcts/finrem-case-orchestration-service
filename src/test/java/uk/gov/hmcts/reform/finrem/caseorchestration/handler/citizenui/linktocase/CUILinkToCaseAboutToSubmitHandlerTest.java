@@ -103,7 +103,7 @@ class CUILinkToCaseAboutToSubmitHandlerTest {
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData().getApplicantAccessCodes())
-            .containsExactly(oldAccessCode, latestAccessCode);
+            .containsExactlyElementsOf(mergedAccessCodes);
 
         verify(assignCaseAccessService).grantCaseRoleToUser(
             Long.valueOf(CASE_ID),
