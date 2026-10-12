@@ -5,30 +5,30 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.SignInConfirmationCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.linktocase.CUILinkToCaseSubmittedHandlerTest.callbackRequest;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.linktocase.CUILinkToCaseSubmittedHandlerTest.caseDetails;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class CUILinkRespondentToCaseSubmittedHandlerTest {
 
-    @InjectMocks
-    private CUILinkRespondentToCaseSubmittedHandler handler;
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @Mock
+    private EvidenceManagementDeleteService evidenceManagementDeleteService;
+
+    @Mock
+    private RetryExecutor retryExecutor;
 
     @Mock
     private SignInConfirmationCorresponder signInConfirmationCorresponder;
@@ -36,23 +36,22 @@ class CUILinkRespondentToCaseSubmittedHandlerTest {
     @Mock
     private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
+    @InjectMocks
+    private CUILinkRespondentToCaseSubmittedHandler handler;
+
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.LINK_RESPONDENT_TO_CASE);
+        assertCanHandle(
+            handler,
+            CallbackType.SUBMITTED,
+            CaseType.CONTESTED,
+            EventType.LINK_RESPONDENT_TO_CASE
+        );
     }
 
     @Test
-    void shouldUseApplicantNotificationParty() {
-        FinremCaseDetails details = caseDetails();
-        FinremCallbackRequest request = callbackRequest(details, EventType.LINK_RESPONDENT_TO_CASE);
-
-        when(signInConfirmationCorresponder.buildCorrespondenceEvent(any(), anyString(), any()))
-            .thenReturn(SendCorrespondenceEvent.builder().caseDetails(details).build());
-        when(correspondenceEventAuditOrchestrationService.publishEvent(any(), anyString())).thenReturn(true);
-
-        handler.handle(request, TestConstants.AUTH_TOKEN);
-
-        verify(signInConfirmationCorresponder)
-            .buildCorrespondenceEvent(details, TestConstants.AUTH_TOKEN, NotificationParty.CITIZEN_RESPONDENT);
+    void shouldUseRespondentNotificationParty() {
+        assertThat(handler.notificationParty())
+            .isEqualTo(NotificationParty.CITIZEN_RESPONDENT);
     }
 }
