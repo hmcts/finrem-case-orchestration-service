@@ -77,6 +77,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BarristerLetterServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.caselocation.CaseManagementLocationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -195,6 +196,8 @@ class ManageBarristersITest implements IntegrationTest {
     private PaperNotificationService paperNotificationService;
     @MockitoBean
     private ExpressCaseService expressCaseService;
+    @MockitoBean
+    private CaseManagementLocationService caseManagementLocationService;
     @Autowired
     private ObjectMapper objectMapper;  // satisfies PrdOrganisationService injection
 
