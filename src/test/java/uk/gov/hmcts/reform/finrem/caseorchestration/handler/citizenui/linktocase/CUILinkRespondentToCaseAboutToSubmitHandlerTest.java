@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CITIZEN_IDAM_USER_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.linktocase.CUILinkToCaseSubmittedHandlerTest.accessCode;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.linktocase.CUILinkToCaseAboutToSubmitHandlerTest.accessCode;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
