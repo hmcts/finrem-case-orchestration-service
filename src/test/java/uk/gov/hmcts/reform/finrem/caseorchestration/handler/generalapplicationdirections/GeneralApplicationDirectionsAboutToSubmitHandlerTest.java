@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -37,6 +38,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -56,12 +58,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -110,6 +114,8 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     private PartyService partyService;
     @Mock
     private ManageHearingsCorresponder manageHearingsCorresponder;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private ObjectMapper objectMapper;
 
@@ -516,37 +522,52 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         );
 
         when(gaDirectionService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
+        SendCorrespondenceEvent event1 = mock(SendCorrespondenceEvent.class);
+        SendCorrespondenceEvent event2 = mock(SendCorrespondenceEvent.class);
+        List<SendCorrespondenceEvent> events = List.of(event1, event2);
+        when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN))
+            .thenReturn(events);
         contactDetailsValidatorMockedStatic.when(() -> validateRequiredPostalAddresses(
             eq(caseData), eq(callbackRequest.getEventType()), anyBoolean(), anyBoolean())).thenReturn(expectedErrors);
 
         var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
-
-        verifyNoInteractions(helper, gaService, generalApplicationsCategoriser,
-            manageHearingActionService, hearingCorrespondenceHelper);
+        assertAll(
+            () -> assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors),
+            () -> verify(gaDirectionService).isHearingRequired(callbackRequest.getCaseDetails()),
+            () -> verify(event1).setSimulatingCorrespondence(true),
+            () -> verify(event2).setSimulatingCorrespondence(true),
+            () -> verify(applicationEventPublisher).publishEvent(event1),
+            () -> verify(applicationEventPublisher).publishEvent(event2),
+            () -> verifyNoInteractions(helper, gaService, generalApplicationsCategoriser,
+                manageHearingActionService, hearingCorrespondenceHelper)
+        );
     }
 
     @Test
     void givenNoPostalValidationErrors_whenHandle_thenResponseContainsEmptyErrorList() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        when(gaDirectionService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
+        SendCorrespondenceEvent event1 = mock(SendCorrespondenceEvent.class);
+        SendCorrespondenceEvent event2 = mock(SendCorrespondenceEvent.class);
+        List<SendCorrespondenceEvent> events = List.of(event1, event2);
+        when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN))
+            .thenReturn(events);
 
-        List<String> expectedErrors = List.of();
+        var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        contactDetailsValidatorMockedStatic.when(() -> validateRequiredPostalAddresses(
-                caseData, callbackRequest.getEventType()))
-            .thenReturn(expectedErrors);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors()).isEmpty();
-
-        verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any());
-        verify(gaDirectionService).getEventPostState(any(), any());
-        verify(generalApplicationsCategoriser).categorise(any());
+        assertAll(
+            () -> assertThat(response.getErrors()).isEmpty(),
+            () -> verify(gaDirectionService).isHearingRequired(callbackRequest.getCaseDetails()),
+            () -> verify(event1).setSimulatingCorrespondence(true),
+            () -> verify(event2).setSimulatingCorrespondence(true),
+            () -> verify(applicationEventPublisher).publishEvent(event1),
+            () -> verify(applicationEventPublisher).publishEvent(event2),
+            () -> verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any()),
+            () -> verify(gaDirectionService).getEventPostState(any(), any()),
+            () -> verify(generalApplicationsCategoriser).categorise(any())
+        );
     }
 
     @Test
