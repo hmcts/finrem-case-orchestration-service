@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -118,12 +117,12 @@ public class ContactDetailsValidator {
      */
     public static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         // DFR-4704 - to simplify the logic by FinremCaseData.getAppSolicitorAddress
-        if (isContested(caseData)) {
+        if (caseData.isContestedApplication()) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && postCodeIsInvalid(wrapper.getApplicantSolicitorAddress())) {
                 errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
             }
-        } else if (isConsented(caseData)
+        } else if (caseData.isConsentedApplication()
             && caseData.isApplicantRepresentedByASolicitor()
             && postCodeIsInvalid(wrapper.getSolicitorAddress())) {
             errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
@@ -319,13 +318,13 @@ public class ContactDetailsValidator {
      */
     public static boolean checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                                  List<String> errors) {
-        if (isContested(caseData)) {
+        if (caseData.isContestedApplication()) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && !isValidEmailAddress(wrapper.getApplicantSolicitorEmail())) {
                 errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getApplicantSolicitorEmail()));
                 return false;
             }
-        } else if (isConsented(caseData)
+        } else if (caseData.isConsentedApplication()
             && caseData.isApplicantRepresentedByASolicitor()
             && !isValidEmailAddress(wrapper.getSolicitorEmail())) {
             errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getSolicitorEmail()));
@@ -561,14 +560,6 @@ public class ContactDetailsValidator {
             && !isValidEmailAddress(respondentEmail, true)) {
             errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, respondentEmail));
         }
-    }
-
-    private static boolean isContested(FinremCaseData caseData) {
-        return caseData.getCcdCaseType() == CaseType.CONTESTED;
-    }
-
-    private static boolean isConsented(FinremCaseData caseData) {
-        return caseData.getCcdCaseType() == CaseType.CONSENTED;
     }
 
     private static void checkForMissingApplicantPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
