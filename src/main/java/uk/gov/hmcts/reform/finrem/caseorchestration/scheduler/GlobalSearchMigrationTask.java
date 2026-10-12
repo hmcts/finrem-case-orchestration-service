@@ -108,13 +108,13 @@ public class GlobalSearchMigrationTask extends BaseTask {
                 .mustNot(new ExistsQueryBuilder("supplementary_data.HMCTSServiceId"));
         BoolQueryBuilder searchCriteriaQuery = QueryBuilders.boolQuery()
                 .mustNot(new ExistsQueryBuilder("data.SearchCriteria"));
-        BoolQueryBuilder caseManagementLocationQuery = QueryBuilders.boolQuery()
-                .mustNot(new ExistsQueryBuilder("data.caseManagementLocation"));
+        BoolQueryBuilder caseNameHmctsInternalQuery = QueryBuilders.boolQuery()
+                .mustNot(new ExistsQueryBuilder("data.caseNameHmctsInternal"));
         QueryBuilder shouldQuery = QueryBuilders.boolQuery()
                 .must(stateQuery)
                 .should(supplementaryQuery)
                 .should(searchCriteriaQuery)
-                .should(caseManagementLocationQuery)
+                .should(caseNameHmctsInternalQuery)
                 .minimumShouldMatch(1);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()

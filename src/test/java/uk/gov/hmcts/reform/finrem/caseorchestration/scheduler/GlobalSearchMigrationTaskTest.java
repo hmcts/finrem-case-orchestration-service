@@ -204,7 +204,7 @@ class GlobalSearchMigrationTaskTest {
         assertThat(query).contains("state.keyword");
         assertThat(query).contains("supplementary_data.HMCTSServiceId");
         assertThat(query).contains("data.SearchCriteria");
-        assertThat(query).contains("data.caseManagementLocation");
+        assertThat(query).contains("data.caseNameHmctsInternal");
         assertThat(query).contains("reference.keyword");
         assertThat(query).doesNotContain("search_after");
     }
@@ -248,7 +248,7 @@ class GlobalSearchMigrationTaskTest {
                 .contains("\"consentOrderMade\"")
                 .contains("\"supplementary_data.HMCTSServiceId\"")
                 .contains("\"data.SearchCriteria\"")
-                .contains("\"data.caseManagementLocation\"");
+                .contains("\"data.caseNameHmctsInternal\"");
     }
 
     @Test
