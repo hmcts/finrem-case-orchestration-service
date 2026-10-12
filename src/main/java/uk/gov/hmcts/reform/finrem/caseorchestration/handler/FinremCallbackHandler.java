@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCase
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -46,6 +48,9 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
 
     protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    @Autowired
+    protected GlobalSearchService globalSearchService;
+
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
@@ -65,6 +70,10 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> postHandle(
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response,
         FinremCaseData finremCaseData, String userAuthorisation) {
+
+        if (nonNull(globalSearchService)) {
+            globalSearchService.setGlobalSearchData(response.getData());
+        }
 
         if (shouldClearTemporaryFieldsAfterHandle()) {
             return removeTemporaryFieldsAfterHandled(response);
