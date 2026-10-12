@@ -17,11 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.ResponseEntity.ok;
@@ -39,8 +37,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.Callback
 public class CcdCallbackController {
 
     private final CallbackDispatchService callbackDispatchService;
-
-    private final GlobalSearchService globalSearchService;
 
     @PostMapping(path = "/ccdAboutToStartEvent")
     @Operation(summary = "Handles AboutToStart callback requests from CCD")
@@ -80,8 +76,6 @@ public class CcdCallbackController {
             callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        globalSearchService.setGlobalSearchDataByMap(caseDetails.getData(), caseDetails.getCaseTypeId(), caseDetails.getId());
 
         return performRequest(ABOUT_TO_SUBMIT, callbackRequest, authorisationToken);
     }
