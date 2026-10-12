@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
@@ -1147,5 +1148,58 @@ class ContactDetailsValidatorTest {
             .addressLine1("")
             .postCode("")
             .build();
+    }
+
+    private static Stream<Arguments> intervenerOnePostalAddressScenarios() {
+        return Stream.of(
+            Arguments.of(
+                "Intervener 1 not represented + Valid address",
+                YesOrNo.NO,
+                getValidAddress(),
+                TEST_EVENT,
+                List.of()
+            ),
+            Arguments.of(
+                "Intervener 1 not represented + Missing address",
+                YesOrNo.NO,
+                getInvalidAddress(),
+                TEST_EVENT,
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Intervener 1", TEST_EVENT.getDisplayName()))
+            ),
+            Arguments.of(
+                "Intervener 1 not represented + Null address",
+                YesOrNo.NO,
+                null,
+                TEST_EVENT,
+                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Intervener 1", TEST_EVENT.getDisplayName()))
+            )
+        );
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("intervenerOnePostalAddressScenarios")
+    void shouldCheckForMissingIntervenerOnePostalAddress(String description, YesOrNo intervenerRepresented, Address address,
+                                                         EventType eventType, List<String> expectedResult) {
+        IntervenerOne intervenerOne = IntervenerOne.builder()
+            .intervenerRepresented(intervenerRepresented)
+            .intervenerAddress(address)
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .intervenerOne(intervenerOne)
+            .ccdCaseType(CaseType.CONTESTED)
+            .build();
+
+        // Only intervener 1 selected: expect the scenario's result
+        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+            caseData, eventType, true, false, false, false));
+        assertThat(errors).isEqualTo(expectedResult);
+
+        // Intervener 1 not selected (all others selected): never reports an error for intervener 1
+        errors = new ArrayList<>(ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+            caseData, eventType, false, true, true, true));
+        assertThat(errors).doesNotContain(
+            ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Intervener 1", TEST_EVENT.getDisplayName())
+        );
     }
 }

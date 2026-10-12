@@ -479,6 +479,43 @@ public class ContactDetailsValidator {
         return errors;
     }
 
+    /**
+     * Validates that the selected interveners on a case have a postal address, returning an error
+     * message for each intervener that is missing one.
+     *
+     * <p>Each {@code validateIntervenerN} flag controls whether the corresponding intervener
+     * (one to four) is checked. Interveners whose flag is {@code false} are skipped, so callers
+     * can restrict validation to only the interveners relevant to the current event.</p>
+     *
+     * @param caseData            the {@link FinremCaseData} containing the addresses to validate
+     * @param eventType           the event being processed, used when generating the error messages
+     * @param validateIntervener1 {@code true} to validate intervener one's postal address
+     * @param validateIntervener2 {@code true} to validate intervener two's postal address
+     * @param validateIntervener3 {@code true} to validate intervener three's postal address
+     * @param validateIntervener4 {@code true} to validate intervener four's postal address
+     * @return a list of validation error messages; empty if no selected intervener is missing a
+     *         postal address
+     */
+    public static List<String> validateRequiredIntervenersPostalAddresses(
+        FinremCaseData caseData, EventType eventType,
+        boolean validateIntervener1, boolean validateIntervener2, boolean validateIntervener3, boolean validateIntervener4) {
+        List<String> errors = new ArrayList<>();
+
+        if (validateIntervener1) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerOne(), eventType, errors);
+        }
+        if (validateIntervener2) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerTwo(), eventType, errors);
+        }
+        if (validateIntervener3) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerThree(), eventType, errors);
+        }
+        if (validateIntervener4) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerFour(), eventType, errors);
+        }
+        return errors;
+    }
+
     private static String getOrganisationId(OrganisationPolicy policy) {
         return Optional.ofNullable(policy)
             .map(OrganisationPolicy::getOrganisation)
@@ -587,6 +624,14 @@ public class ContactDetailsValidator {
 
         if (postalAddressIsMissing(wrapper.getRespondentAddress(), wrapper.getRespondentResideOutsideUK())) {
             errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent", eventType.getDisplayName()));
+        }
+    }
+
+    private static void checkForMissingIntervenerPostalAddress(IntervenerWrapper wrapper,
+                                                               EventType eventType, List<String> errors) {
+        if (postalAddressIsMissing(wrapper.getIntervenerAddress(), wrapper.getIntervenerResideOutsideUK())) {
+            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Intervener %s"
+                .formatted(wrapper.getIntervenerType().getIntervenerId()), eventType.getDisplayName()));
         }
     }
 

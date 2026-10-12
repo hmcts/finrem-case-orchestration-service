@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
@@ -61,6 +62,7 @@ import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.ListUtils.defaultIfNull;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredIntervenersPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -112,13 +114,18 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        List<String> errors = validateRequiredPostalAddresses(caseData, SEND_ORDER,
+        List<String> selectedParties = partyService.getCheckedActiveParties(caseDetails);
+        List<String> errors = validateRequiredPostalAddresses(caseData, callbackRequest.getEventType(),
             partyService.isApplicantPartySelected(caseDetails), partyService.isRespondentPartySelected(caseDetails));
+        errors.addAll(validateRequiredIntervenersPostalAddresses(caseData, callbackRequest.getEventType(),
+            selectedParties.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
+            selectedParties.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
+            selectedParties.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
+            selectedParties.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode())));
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(caseData, errors);
         }
 
-        List<String> selectedParties = partyService.getCheckedActiveParties(caseDetails);
         List<OrderToShare> selectedOrders = getSelectedOrders(caseData);
 
         List<OrderSentToPartiesCollection> ordersSentToPartiesCollection = new ArrayList<>();

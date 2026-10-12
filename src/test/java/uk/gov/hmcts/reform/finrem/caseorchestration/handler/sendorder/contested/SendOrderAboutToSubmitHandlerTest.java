@@ -800,8 +800,9 @@ class SendOrderAboutToSubmitHandlerTest {
     void givenInvalidCaseDataAddresses_whenHandled_thenPopulateErrors() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+        callbackRequest.setEventType(SEND_ORDER);
 
-        List<String> expectedErrors = List.of("some error message");
+        List<String> expectedErrors = new ArrayList<>(List.of("some error message"));
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
                 eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean()))
             .thenReturn(expectedErrors);
