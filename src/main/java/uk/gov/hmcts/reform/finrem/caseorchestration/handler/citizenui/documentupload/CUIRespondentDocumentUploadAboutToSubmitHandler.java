@@ -8,11 +8,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CitizenDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentsorter.CitizenDocumentSorter;
 
 import java.util.List;
 
@@ -39,8 +41,9 @@ public class CUIRespondentDocumentUploadAboutToSubmitHandler extends CUIDocument
     public CUIRespondentDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                             FeatureToggleService featureToggleService,
                                                             CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
-                                                            CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder) {
-        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder);
+                                                            CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
+                                                            CitizenDocumentSorter citizenDocumentSorter) {
+        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder, citizenDocumentSorter);
         this.featureToggleService = featureToggleService;
     }
 
@@ -92,4 +95,8 @@ public class CUIRespondentDocumentUploadAboutToSubmitHandler extends CUIDocument
         return NotificationParty.CITIZEN_RESPONDENT;
     }
 
+    @Override
+    protected void sortDocs(CitizenDocumentWrapper citizenDocumentWrapper) {
+        citizenDocumentSorter.sortDocuments(citizenDocumentWrapper, CUIDocumentsCategoriser.Party.RESPONDENT);
+    }
 }

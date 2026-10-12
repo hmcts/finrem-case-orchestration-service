@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,15 +22,44 @@ public class CitizenDocumentWrapper {
     private List<CitizenDocumentCollectionItem> citizenApplicantDocument;
     private List<CitizenDocumentCollectionItem> citizenRespondentDocument;
 
-    private List<CitizenDocumentCollectionItem> applicantTabDocs;
-    private List<CitizenDocumentCollectionItem> respondentTabDocs;
-    private List<CitizenDocumentCollectionItem> fdrTabDocs;
-    // WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT
-    private List<CitizenDocumentCollectionItem> divorceSolutionTabDocs;
-    // DIVORCE_APPLICATION_PETITION
-    // DIVORCE_CONDITIONAL_ORDER_DECREE_NISI
-    // DIVORCE_FINAL_ORDER_DECREE_ABSOLUTE
-    private List<CitizenDocumentCollectionItem> hearingBundleTabDocs;
-    // HEARING_BUNDLE
-    // FDR_BUNDLE
+    private List<CitizenDocumentCollectionItem> applicantDocCollection;
+    private List<CitizenDocumentCollectionItem> respondentDocCollection;
+    private List<CitizenDocumentCollectionItem> fdrDocCollection;
+    private List<CitizenDocumentCollectionItem> divorceSolutionDocCollection;
+    private List<CitizenDocumentCollectionItem> hearingBundleDocCollection;
+
+    public List<CitizenDocumentCollectionItem> getApplicantDocCollection() {
+        if (applicantDocCollection == null) {
+            applicantDocCollection = new ArrayList<>();
+        }
+        return applicantDocCollection;
+    }
+
+    public List<CitizenDocumentCollectionItem> getRespondentDocCollection() {
+        if (respondentDocCollection == null) {
+            respondentDocCollection = new ArrayList<>();
+        }
+        return respondentDocCollection;
+    }
+
+    public List<CitizenDocumentCollectionItem> getFdrDocCollection() {
+        if (fdrDocCollection == null) {
+            fdrDocCollection = new ArrayList<>();
+        }
+        return fdrDocCollection;
+    }
+
+    public List<CitizenDocumentCollectionItem> getDivorceSolutionDocCollection() {
+        if (divorceSolutionDocCollection == null) {
+            divorceSolutionDocCollection = new ArrayList<>();
+        }
+        return divorceSolutionDocCollection;
+    }
+
+    public List<CitizenDocumentCollectionItem> getHearingBundleDocCollection() {
+        if (hearingBundleDocCollection == null) {
+            hearingBundleDocCollection = new ArrayList<>();
+        }
+        return hearingBundleDocCollection;
+    }
 }

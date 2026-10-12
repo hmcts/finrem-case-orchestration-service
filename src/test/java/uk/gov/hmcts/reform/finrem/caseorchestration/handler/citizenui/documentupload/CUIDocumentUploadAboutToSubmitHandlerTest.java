@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentsorter.CitizenDocumentSorter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -139,6 +140,7 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
         FeatureToggleService featureToggleService = mock(FeatureToggleService.class);
         CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService =
             mock(CorrespondenceEventAuditOrchestrationService.class);
+        CitizenDocumentSorter citizenDocumentSorter = mock(CitizenDocumentSorter.class);
         CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder = mock(CitizenDocumentsUploadedCorresponder.class);
         when(citizenDocumentsUploadedCorresponder.buildCorrespondenceEvent(any(), anyString(), any()))
             .thenReturn(SendCorrespondenceEvent.builder().build());
@@ -146,7 +148,7 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
         return Stream.of(
             new HandlerCase(
                 new CUIApplicantDocumentUploadAboutToSubmitHandler(mapper, featureToggleService,
-                    correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder),
+                    correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder, citizenDocumentSorter),
                 EventType.CUI_APPLICANT_DOCUMENT_UPLOAD,
                 Party.APPLICANT,
                 correspondenceEventAuditOrchestrationService,
@@ -154,7 +156,7 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
             ),
             new HandlerCase(
                 new CUIRespondentDocumentUploadAboutToSubmitHandler(mapper, featureToggleService,
-                    correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder),
+                    correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder, citizenDocumentSorter),
                 EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD,
                 Party.RESPONDENT,
                 correspondenceEventAuditOrchestrationService,

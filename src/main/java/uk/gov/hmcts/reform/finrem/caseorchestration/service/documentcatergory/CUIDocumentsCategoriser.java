@@ -14,6 +14,7 @@ import java.util.List;
 
 public class CUIDocumentsCategoriser extends DocumentCategoriser {
 
+    //TODO: Move enum outside of class as used in other places.
     public enum Party {
         APPLICANT,
         RESPONDENT

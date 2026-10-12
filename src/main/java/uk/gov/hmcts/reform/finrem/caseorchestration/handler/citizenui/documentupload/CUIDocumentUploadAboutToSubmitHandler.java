@@ -9,20 +9,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CitizenDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentsorter.CitizenDocumentSorter;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.nullsLast;
-import static java.util.Optional.ofNullable;
 
 /**
  * Abstract handler for CUI document upload events (Applicant/Respondent).
@@ -49,18 +44,21 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
 
     private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
     private final CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder;
+    protected final CitizenDocumentSorter citizenDocumentSorter;
 
     protected CUIDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
-                                                    CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder) {
+                                                    CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
+                                                    CitizenDocumentSorter citizenDocumentSorter) {
         super(finremCaseDetailsMapper);
         this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
         this.citizenDocumentsUploadedCorresponder = citizenDocumentsUploadedCorresponder;
+        this.citizenDocumentSorter = citizenDocumentSorter;
     }
 
     /**
      * Handles the ABOUT_TO_SUBMIT callback by merging and sorting document collections.
-     *
+     * TODO: Update with new sorted temp list pattern notes
      * <p>Flow:
      * <ol>
      *     <li>Read existing documents from {@code dataBefore}</li>
@@ -82,30 +80,8 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
         handleLog(callbackRequest);
 
         FinremCaseData currentCaseData = callbackRequest.getFinremCaseData();
-        FinremCaseData dataBefore = callbackRequest.getFinremCaseDataBefore();
-
-        List<CitizenDocumentCollectionItem> existingDocuments = new ArrayList<>(
-            ofNullable(getDocuments(dataBefore)).orElse(List.of())
-        );
-
-        List<CitizenDocumentCollectionItem> currentlyUploadedDocuments = new ArrayList<>(
-            ofNullable(getDocuments(currentCaseData)).orElse(List.of())
-        );
-
-        existingDocuments.addAll(currentlyUploadedDocuments);
-
-        existingDocuments.sort(comparing(
-            CitizenDocumentCollectionItem::getValue,
-            nullsLast(comparing(
-                CitizenUploadDocument::getGeneralDocumentUploadDateTime,
-                nullsLast(Comparator.reverseOrder())
-            ))
-        ));
-
-        setDocuments(currentCaseData, existingDocuments);
-
         categoriseDocuments(currentCaseData);
-
+        sortDocs(currentCaseData.getCitizenDocumentWrapper());
         createNotificationAuditRows(callbackRequest, userAuthorisation);
 
         return response(currentCaseData);
@@ -191,4 +167,6 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
     protected abstract void handleLog(FinremCallbackRequest callbackRequest);
 
     protected abstract void categoriseDocuments(FinremCaseData caseData);
+
+    protected abstract void sortDocs(CitizenDocumentWrapper citizenDocumentWrapper);
 }
