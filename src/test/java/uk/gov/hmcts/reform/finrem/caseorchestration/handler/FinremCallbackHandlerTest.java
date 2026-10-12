@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrls;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrlsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
@@ -39,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -97,8 +99,10 @@ class FinremCallbackHandlerTest {
 
     static class GenericAboutToSubmitCallbackHandler extends FinremAboutToSubmitCallbackHandler {
 
-        public GenericAboutToSubmitCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+        public GenericAboutToSubmitCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                   GlobalSearchService globalSearchService) {
             super(finremCaseDetailsMapper);
+            this.globalSearchService = globalSearchService;
         }
 
         @Override
@@ -115,8 +119,9 @@ class FinremCallbackHandlerTest {
 
     static class ResponseWithoutWarningsTestHandler extends GenericAboutToSubmitCallbackHandler {
 
-        public ResponseWithoutWarningsTestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
-            super(finremCaseDetailsMapper);
+        public ResponseWithoutWarningsTestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                  GlobalSearchService globalSearchService) {
+            super(finremCaseDetailsMapper, globalSearchService);
         }
 
         @Override
@@ -129,8 +134,9 @@ class FinremCallbackHandlerTest {
 
     static class ResponseTestHandler extends GenericAboutToSubmitCallbackHandler {
 
-        public ResponseTestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
-            super(finremCaseDetailsMapper);
+        public ResponseTestHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                   GlobalSearchService globalSearchService) {
+            super(finremCaseDetailsMapper, globalSearchService);
         }
 
         @Override
@@ -171,6 +177,9 @@ class FinremCallbackHandlerTest {
     private EvidenceManagementDeleteService evidenceManagementDeleteService;
 
     @Mock
+    private GlobalSearchService globalSearchService;
+
+    @Mock
     private RetryExecutor retryExecutor;
 
     private final CaseDocument documentToBeBinned = caseDocument();
@@ -185,11 +194,12 @@ class FinremCallbackHandlerTest {
     @BeforeEach
     void setUp() {
         finremCallbackHandler = spy(new GenericFinremCallbackHandler(finremCaseDetailsMapper));
-        aboutToSubmitCallbackHandler = spy(new GenericAboutToSubmitCallbackHandler(finremCaseDetailsMapper));
+        aboutToSubmitCallbackHandler = spy(new GenericAboutToSubmitCallbackHandler(
+            finremCaseDetailsMapper, globalSearchService));
         submittedCallbackHandler = spy(new GenericSubmittedCallbackHandler(finremCaseDetailsMapper,
             evidenceManagementDeleteService, retryExecutor));
-        responseWithoutWarningsTestHandler = new ResponseWithoutWarningsTestHandler(finremCaseDetailsMapper);
-        responseTestHandler = new ResponseTestHandler(finremCaseDetailsMapper);
+        responseWithoutWarningsTestHandler = new ResponseWithoutWarningsTestHandler(finremCaseDetailsMapper, globalSearchService);
+        responseTestHandler = new ResponseTestHandler(finremCaseDetailsMapper, globalSearchService);
         validateCaseDataTestHandler = new ValidateCaseDataTestHandler(finremCaseDetailsMapper);
     }
 
@@ -330,9 +340,6 @@ class FinremCallbackHandlerTest {
                 TEMP_PROPERTY_TO_BE_CLEARED_1, "Yes",
                 TEMP_PROPERTY_TO_BE_CLEARED_2, Map.of("AddressLine1", "ABC")
             ));
-            when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
-                map -> map.size() == 1 && map.containsKey(PROPERTY_TO_BE_RETAINED)
-            ))).thenReturn(sanitisedFinremCaseData);
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
                 mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
@@ -342,7 +349,11 @@ class FinremCallbackHandlerTest {
 
                 assertAll(
                     // only return sanitisedFinremCaseData if TESTING_DATA_IN_MAP is sanitised
-                    () -> assertEquals(sanitisedFinremCaseData, response.getData())
+                    () -> assertEquals(sanitisedFinremCaseData, response.getData()),
+                    () -> verify(finremCaseDetailsMapper).mapToFinremCaseData(argThat(
+                        map -> map.size() == 1 && map.containsKey(PROPERTY_TO_BE_RETAINED)
+                    )),
+                    () -> verify(globalSearchService).setGlobalSearchData(any(FinremCaseData.class))
                 );
             }
         }
@@ -356,9 +367,6 @@ class FinremCallbackHandlerTest {
                     "document_binary_url", documentToBeBinned.getDocumentBinaryUrl()
                 )
             ));
-            when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
-                Map::isEmpty
-            ))).thenReturn(sanitisedFinremCaseData);
             CaseDocument binnedCaseDocument = mock(CaseDocument.class);
             when(finremCaseDetailsMapper.mapToCaseDocument(Map.of(
                 "document_filename", documentToBeBinned.getDocumentFilename(),
@@ -376,6 +384,7 @@ class FinremCallbackHandlerTest {
                 assertAll(
                     // only return sanitisedFinremCaseData if TESTING_DATA_IN_MAP is sanitised
                     () -> assertEquals(sanitisedFinremCaseData, response.getData()),
+                    () -> verify(finremCaseDetailsMapper).mapToFinremCaseData(argThat(Map::isEmpty)),
                     () -> verify(mockedBin).binCaseDocument(binnedCaseDocument)
                 );
             }
@@ -387,10 +396,6 @@ class FinremCallbackHandlerTest {
                 TEMP_PROPERTY_TO_BE_BINNED, documentToBeBinned,
                 PROPERTY_TO_BE_RETAINED_IN_CASE_DOCUMENT, documentToBeBinned
             ));
-            when(finremCaseDetailsMapper.mapToFinremCaseData(argThat(
-                map -> map.size() == 1 && map.containsKey(PROPERTY_TO_BE_RETAINED_IN_CASE_DOCUMENT)
-            ))).thenReturn(sanitisedFinremCaseData);
-
             try (MockedStatic<EventType> mockedStatic = Mockito.mockStatic(EventType.class)) {
                 EventType eventType = mock(EventType.class);
                 mockedStatic.when(() -> EventType.getEventType(MOCKED_EVENT_CCD_TYPE))
@@ -401,6 +406,9 @@ class FinremCallbackHandlerTest {
                 assertAll(
                     // only return sanitisedFinremCaseData if TESTING_DATA_IN_MAP is sanitised
                     () -> assertEquals(sanitisedFinremCaseData, response.getData()),
+                    () -> verify(finremCaseDetailsMapper).mapToFinremCaseData(argThat(
+                        map -> map.size() == 1 && map.containsKey(PROPERTY_TO_BE_RETAINED_IN_CASE_DOCUMENT)
+                    )),
                     () -> verify(mockedBin, never()).binCaseDocument(documentToBeBinned)
                 );
             }
@@ -426,6 +434,8 @@ class FinremCallbackHandlerTest {
             toBeSanitisedMap = new HashMap<>(dataMap);
             when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)).thenReturn(toBeSanitisedMap);
             sanitisedFinremCaseData = spy(FinremCaseData.builder().build());
+            lenient().when(finremCaseDetailsMapper.mapToFinremCaseData(anyMap()))
+                .thenReturn(sanitisedFinremCaseData);
         }
     }
 
@@ -464,7 +474,7 @@ class FinremCallbackHandlerTest {
             lenient().when(finremCaseDetailsMapper.finremCaseDataToMap(nonSanitisedFinremCaseData)
             ).thenReturn(toBeSanitisedMap);
             sanitisedFinremCaseData = mock(FinremCaseData.class);
-            lenient().when(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedMap))
+            lenient().when(finremCaseDetailsMapper.mapToFinremCaseData(anyMap()))
                 .thenReturn(sanitisedFinremCaseData);
         }
 
@@ -491,6 +501,7 @@ class FinremCallbackHandlerTest {
 
                 assertAll(
                     () -> verify(spiedBin).clearBin(),
+                    () -> verify(finremCaseDetailsMapper).mapToFinremCaseData(argThat(Map::isEmpty)),
                     () -> assertEquals(sanitisedFinremCaseData, response.getData())
                 );
             }
