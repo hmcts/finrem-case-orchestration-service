@@ -6,9 +6,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
@@ -57,6 +58,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
@@ -84,7 +86,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
+    @InjectMocks
     private GeneralApplicationDirectionsAboutToStartHandler startHandler;
+    @InjectMocks
     private GeneralApplicationDirectionsAboutToSubmitHandler aboutToSubmitHandler;
     @Mock
     private GeneralApplicationHelper helper;
@@ -104,6 +108,8 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     private HearingCorrespondenceHelper hearingCorrespondenceHelper;
     @Mock
     private PartyService partyService;
+    @Mock
+    private ManageHearingsCorresponder manageHearingsCorresponder;
 
     private ObjectMapper objectMapper;
 
@@ -113,13 +119,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
         objectMapper = createObjectMapper();
-        startHandler = new GeneralApplicationDirectionsAboutToStartHandler(
-            assignCaseAccessService, finremCaseDetailsMapper, helper, gaDirectionService, partyService);
-        aboutToSubmitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
-            finremCaseDetailsMapper, helper, gaDirectionService, gaService, manageHearingActionService, generalApplicationsCategoriser,
-            hearingCorrespondenceHelper);
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(
             List.of()
@@ -129,7 +129,8 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         contactDetailsValidatorMockedStatic = mockStatic(ContactDetailsValidator.class);
         contactDetailsValidatorMockedStatic
-            .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH)))
+            .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH),
+                anyBoolean(), anyBoolean()))
             .thenReturn(List.of());
     }
 
@@ -259,7 +260,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         when(gaDirectionService.generateGeneralApplicationDirectionsDocumentIfNeeded(eq(AUTH_TOKEN), any(FinremCaseDetails.class)))
             .thenReturn(generatedDocument);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        var startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
@@ -277,7 +278,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         when(hearingCorrespondenceHelper.getHearingInContextFromTab(any())).thenReturn(buildHearingTabItem());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> aboutToSubmitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        var aboutToSubmitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = aboutToSubmitHandle.getData();
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
@@ -489,19 +490,17 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         // Arrange
         FinremCaseDetails caseDetails = buildFinremCallbackRequest().getCaseDetails();
-        when(gaDirectionService.isHearingRequired(caseDetails)).thenReturn(true);
-        String userAuthorisation = "Bearer test-token";
 
         // Act, call performAddHearingIfNecessary using reflection
         Method method = GeneralApplicationDirectionsAboutToSubmitHandler.class.getDeclaredMethod(
-            "performAddHearingIfNecessary", FinremCaseDetails.class, String.class);
+            "performAddHearingIfNecessary", FinremCaseDetails.class, boolean.class, String.class);
         method.setAccessible(true);
-        method.invoke(aboutToSubmitHandler, caseDetails, userAuthorisation);
+        method.invoke(aboutToSubmitHandler, caseDetails, true, AUTH_TOKEN);
 
         // Assert
         assertThat(caseDetails.getData().getManageHearingsWrapper().getManageHearingsActionSelection())
             .isEqualTo(ManageHearingsAction.ADD_HEARING);
-        verify(manageHearingActionService).performAddHearing(caseDetails, userAuthorisation);
+        verify(manageHearingActionService).performAddHearing(caseDetails, AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(caseDetails.getData());
     }
 
@@ -516,15 +515,15 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             "Respondent's postal address is missing"
         );
 
+        when(gaDirectionService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
         contactDetailsValidatorMockedStatic.when(() -> validateRequiredPostalAddresses(
-                caseData, callbackRequest.getEventType()))
-            .thenReturn(expectedErrors);
+            eq(caseData), eq(callbackRequest.getEventType()), anyBoolean(), anyBoolean())).thenReturn(expectedErrors);
 
         var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors);
 
-        verifyNoInteractions(helper, gaService, gaDirectionService, generalApplicationsCategoriser,
+        verifyNoInteractions(helper, gaService, generalApplicationsCategoriser,
             manageHearingActionService, hearingCorrespondenceHelper);
     }
 
