@@ -10,7 +10,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 
 import java.io.File;
 
@@ -35,9 +34,6 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
 
     @MockitoBean
     private CallbackDispatchService callbackDispatchService;
-
-    @MockitoBean
-    private GlobalSearchService globalSearchService;
 
     @Before
     public void testSetup() throws Exception {
@@ -70,7 +66,6 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
         result.andDo(print());
 
         verify(callbackDispatchService).dispatchToHandlers(eq(CallbackType.ABOUT_TO_SUBMIT), any(), eq(AUTH_TOKEN));
-        verify(globalSearchService).setGlobalSearchDataByMap(any(), any(),any());
     }
 
     @Test

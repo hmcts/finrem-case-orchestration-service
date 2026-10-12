@@ -69,6 +69,8 @@ class CreateCaseMandatoryDataIntegrationTest {
     private ExpressCaseService expressCaseService;
     @MockitoBean
     private SelectedCourtService selectedCourtService;
+    @MockitoBean
+    private CaseManagementLocationService caseManagementLocationService;
 
     @Test
     void testCreateCaseValidateMandatoryData() throws Exception {
