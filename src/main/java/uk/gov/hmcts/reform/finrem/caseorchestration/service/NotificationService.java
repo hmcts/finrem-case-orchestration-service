@@ -1290,8 +1290,6 @@ public class NotificationService {
     /**
      * Do not expect any return.
      *
-     * <p>Please use @{@link #sendNoticeOfChangeEmail(FinremCaseDetails)}</p>
-     *
      * @param caseDetails instance of CaseDetails
      * @deprecated Use {@link CaseDetails caseDetails}
      */
@@ -1299,13 +1297,6 @@ public class NotificationService {
     public void sendNoticeOfChangeEmail(CaseDetails caseDetails) {
         EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
         NotificationRequest notificationRequest = notificationRequestMapper
-            .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendNocEmail(notificationRequest, template);
-    }
-
-    public void sendNoticeOfChangeEmail(FinremCaseDetails caseDetails) {
-        EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
-        NotificationRequest notificationRequest = finremNotificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
         sendNocEmail(notificationRequest, template);
     }
