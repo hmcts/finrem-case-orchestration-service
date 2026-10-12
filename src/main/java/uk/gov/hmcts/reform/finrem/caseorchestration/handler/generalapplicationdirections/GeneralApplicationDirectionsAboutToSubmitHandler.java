@@ -313,7 +313,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
     }
 
     private List<String> validateRequiredPostalAddresses(FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        List<SendCorrespondenceEvent> events = manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
+        List<SendCorrespondenceEvent> events = manageHearingsCorresponder
+            .buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
         events.forEach(event -> {
             event.setSimulatingCorrespondence(true);
             applicationEventPublisher.publishEvent(event);
