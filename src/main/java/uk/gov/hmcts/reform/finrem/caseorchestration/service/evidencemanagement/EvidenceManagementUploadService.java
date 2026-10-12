@@ -150,8 +150,8 @@ public class EvidenceManagementUploadService {
     }
 
     private String getTextFromJsonNode(JsonNode document, String attribute) {
-        return Optional.ofNullable(document)
-            .flatMap(file -> Optional.ofNullable(attribute).map(file::asText))
+        return Optional.ofNullable(document.get(attribute))
+            .map(JsonNode::asText)
             .orElse(null);
     }
 
