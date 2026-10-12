@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
@@ -797,7 +798,7 @@ class SendOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenInvalidCaseDataAddresses_whenHandled_thenPopulateErrors() {
+    void givenMissingApplicantOrRespondentAddresses_whenHandled_thenPopulateErrors() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
         callbackRequest.setEventType(SEND_ORDER);
@@ -805,6 +806,58 @@ class SendOrderAboutToSubmitHandlerTest {
         List<String> expectedErrors = new ArrayList<>(List.of("some error message"));
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
                 eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean()))
+            .thenReturn(expectedErrors);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+        assertAll(
+            () -> assertThat(response.getErrors()).isEqualTo(expectedErrors),
+            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService),
+            () -> verify(partyService).isApplicantPartySelected(callbackRequest.getCaseDetails()),
+            () -> verify(partyService).isRespondentPartySelected(callbackRequest.getCaseDetails())
+        );
+    }
+
+    @Test
+    void givenMissingIntervenersAddresses_whenHandled_thenPopulateErrors() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+        callbackRequest.setEventType(SEND_ORDER);
+
+        List<String> expectedErrors = new ArrayList<>(List.of("some error message"));
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean()))
+            .thenReturn(new ArrayList<>());
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
+            .thenReturn(expectedErrors);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+        assertAll(
+            () -> assertThat(response.getErrors()).isEqualTo(expectedErrors),
+            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService),
+            () -> verify(partyService).isApplicantPartySelected(callbackRequest.getCaseDetails()),
+            () -> verify(partyService).isRespondentPartySelected(callbackRequest.getCaseDetails())
+        );
+    }
+
+    @Test
+    void givenIntervenerOneSelectedAndMissingItsAddress_whenHandled_thenPopulateErrors() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+        callbackRequest.setEventType(SEND_ORDER);
+
+        when(partyService.getCheckedActiveParties(callbackRequest.getCaseDetails())).thenReturn(List.of(
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode()
+        ));
+        List<String> expectedErrors = new ArrayList<>(List.of("some error message"));
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean()))
+            .thenReturn(new ArrayList<>());
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
+            .thenReturn(List.of());
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), eq(true), anyBoolean(), anyBoolean(), anyBoolean()))
             .thenReturn(expectedErrors);
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
