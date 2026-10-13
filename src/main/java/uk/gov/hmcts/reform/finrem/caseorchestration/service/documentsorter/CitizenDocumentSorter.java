@@ -19,9 +19,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUplo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser.Party.APPLICANT;
 
-/**
- * Sorts uploaded citizen documents into their target CCD collections.
- */
 @Slf4j
 @Service
 public class CitizenDocumentSorter {
@@ -43,7 +40,6 @@ public class CitizenDocumentSorter {
      * @param citizenDocumentWrapper wrapper containing source uploads and destination collections
      * @param party party whose documents should be sorted
      */
-    //TODO: Create seperate list for applicant and respondent FDR/DIVORCE/HEARING tabs
     public void sortDocuments(CitizenDocumentWrapper citizenDocumentWrapper, CUIDocumentsCategoriser.Party party) {
         if (APPLICANT.equals(party)) {
             sortPartyDocuments(
@@ -75,11 +71,12 @@ public class CitizenDocumentSorter {
             var documentItem = documents.next();
             var documentType = documentItem.getValue().getDocumentType();
 
-            if (WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT.equals(documentType) || FDR_BUNDLE.equals(documentType)) {
+            if (WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT.equals(documentType)) {
                 fdrDocumentsDocumentsCollection.add(documentItem);
             } else if (DIVORCE_DOCUMENT_TYPES.contains(documentType)) {
                 divorceSolutionDocumentsCollection.add(documentItem);
-            } else if (HEARING_BUNDLE_DOCUMENT_TYPES.contains(documentType)) {
+            } else if (HEARING_BUNDLE_DOCUMENT_TYPES.contains(documentType)
+                || FDR_BUNDLE.equals(documentType)) {
                 hearingBundleDocCollectionCollection.add(documentItem);
             } else {
                 partyDocumentsCollection.add(documentItem);
