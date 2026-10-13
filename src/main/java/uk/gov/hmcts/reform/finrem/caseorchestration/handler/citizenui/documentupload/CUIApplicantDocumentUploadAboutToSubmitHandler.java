@@ -20,9 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentsorter.Citiz
  * <p>This handler processes {@link EventType#CUI_APPLICANT_DOCUMENT_UPLOAD} events and is responsible for:
  * <ul>
  *     <li>Retrieving the applicant document collection</li>
- *     <li>Merging newly uploaded documents with existing ones</li>
- *     <li>Sorting documents by upload datetime (handled in the abstract class)</li>
- *     <li>Updating the applicant document collection on the case data</li>
+ *     <li>Assigns each document it's CFV category</li>
+ *     <li>Sorts the documents into their tab-specific collections</li>
  * </ul>
  *
  * <p>All core merge and sort logic is implemented in

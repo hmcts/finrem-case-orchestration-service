@@ -20,9 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentsorter.Citiz
  * <p>This handler processes {@link EventType#CUI_RESPONDENT_DOCUMENT_UPLOAD} events and is responsible for:
  * <ul>
  *     <li>Retrieving the respondent document collection</li>
- *     <li>Merging newly uploaded documents with existing ones</li>
- *     <li>Sorting documents by upload datetime (delegated to the abstract class)</li>
- *     <li>Updating the respondent document collection on the case data</li>
+ *     <li>Assigns each document it's CFV category</li>
+ *     <li>Sorts the documents into their tab-specific collections</li>
  * </ul>
  *
  * <p>All core merge and sort logic is implemented in
@@ -33,10 +32,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentsorter.Citiz
 public class CUIRespondentDocumentUploadAboutToSubmitHandler extends CUIDocumentUploadAboutToSubmitHandler {
 
     public CUIRespondentDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
-                                                            CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
-                                                            CUIDocumentsCategoriser documentsCategoriser,
-                                                            CitizenDocumentSorter citizenDocumentSorter) {
+                                                           CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
+                                                           CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
+                                                           CUIDocumentsCategoriser documentsCategoriser,
+                                                           CitizenDocumentSorter citizenDocumentSorter) {
         super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, documentsCategoriser, citizenDocumentsUploadedCorresponder, citizenDocumentSorter);
     }
 

@@ -34,27 +34,32 @@ public class CitizenDocumentSorter {
     );
 
     /**
-     * Sorts applicant or respondent uploads into the corresponding collections.
+     * Sorts applicant or respondent uploads into the corresponding destination collections.
      *
-     * @param citizenDocumentWrapper wrapper containing source uploads and destination collections
-     * @param party party whose documents should be sorted
+     * <p>The {@code citizenApplicantDocument} and {@code citizenRespondentDocument}
+     * fields are temporary transfer collections used between COS and CUI. Their
+     * contents are moved into the relevant applicant or respondent document
+     * collections and then cleared as part of the sorting process.</p>
+     *
+     * @param citizenDocumentWrapper wrapper containing the temporary uploads and destination collections
+     * @param party the party whose documents should be sorted
      */
     public void sortDocuments(CitizenDocumentWrapper citizenDocumentWrapper, CitizenPartyType party) {
         if (CitizenPartyType.APPLICANT.equals(party)) {
             sortPartyDocuments(
                 citizenDocumentWrapper.getCitizenApplicantDocument(),
-                citizenDocumentWrapper.getApplicantDocCollection(),
-                citizenDocumentWrapper.getFdrApplicantDocCollection(),
-                citizenDocumentWrapper.getDivorceApplicantDocCollection(),
-                citizenDocumentWrapper.getHearingApplicantDocCollection()
+                citizenDocumentWrapper.ensureApplicantDocCollection(),
+                citizenDocumentWrapper.ensureFdrApplicantDocCollection(),
+                citizenDocumentWrapper.ensureDivorceApplicantDocCollection(),
+                citizenDocumentWrapper.ensureHearingApplicantDocCollection()
             );
         } else {
             sortPartyDocuments(
                 citizenDocumentWrapper.getCitizenRespondentDocument(),
-                citizenDocumentWrapper.getRespondentDocCollection(),
-                citizenDocumentWrapper.getFdrRespondentDocCollection(),
-                citizenDocumentWrapper.getDivorceRespondentDocCollection(),
-                citizenDocumentWrapper.getHearingRespondentDocCollection()
+                citizenDocumentWrapper.ensureRespondentDocCollection(),
+                citizenDocumentWrapper.ensureFdrRespondentDocCollection(),
+                citizenDocumentWrapper.ensureDivorceRespondentDocCollection(),
+                citizenDocumentWrapper.ensureHearingRespondentDocCollection()
             );
         }
     }

@@ -34,56 +34,56 @@ public class CitizenDocumentWrapper {
     private List<CitizenDocumentCollectionItem> hearingApplicantDocCollection;
     private List<CitizenDocumentCollectionItem> hearingRespondentDocCollection;
 
-    public List<CitizenDocumentCollectionItem> getApplicantDocCollection() {
+    public List<CitizenDocumentCollectionItem> ensureApplicantDocCollection() {
         if (applicantDocCollection == null) {
             applicantDocCollection = new ArrayList<>();
         }
         return applicantDocCollection;
     }
 
-    public List<CitizenDocumentCollectionItem> getRespondentDocCollection() {
+    public List<CitizenDocumentCollectionItem> ensureRespondentDocCollection() {
         if (respondentDocCollection == null) {
             respondentDocCollection = new ArrayList<>();
         }
         return respondentDocCollection;
     }
 
-    public List<CitizenDocumentCollectionItem> getFdrRespondentDocCollection() {
+    public List<CitizenDocumentCollectionItem> ensureFdrRespondentDocCollection() {
         if (fdrRespondentDocCollection == null) {
             fdrRespondentDocCollection = new ArrayList<>();
         }
         return fdrRespondentDocCollection;
     }
 
-    public List<CitizenDocumentCollectionItem> getFdrApplicantDocCollection() {
+    public List<CitizenDocumentCollectionItem> ensureFdrApplicantDocCollection() {
         if (fdrApplicantDocCollection == null) {
             fdrApplicantDocCollection = new ArrayList<>();
         }
         return fdrApplicantDocCollection;
     }
 
-    public List<CitizenDocumentCollectionItem> getDivorceRespondentDocCollection() {
+    public List<CitizenDocumentCollectionItem> ensureDivorceRespondentDocCollection() {
         if (divorceRespondentDocCollection == null) {
             divorceRespondentDocCollection = new ArrayList<>();
         }
         return divorceRespondentDocCollection;
     }
 
-    public List<CitizenDocumentCollectionItem> getDivorceApplicantDocCollection() {
+    public List<CitizenDocumentCollectionItem> ensureDivorceApplicantDocCollection() {
         if (divorceApplicantDocCollection == null) {
             divorceApplicantDocCollection = new ArrayList<>();
         }
         return divorceApplicantDocCollection;
     }
 
-    public List<CitizenDocumentCollectionItem> getHearingApplicantDocCollection() {
+    public List<CitizenDocumentCollectionItem> ensureHearingApplicantDocCollection() {
         if (hearingApplicantDocCollection == null) {
             hearingApplicantDocCollection = new ArrayList<>();
         }
         return hearingApplicantDocCollection;
     }
 
-    public List<CitizenDocumentCollectionItem> getHearingRespondentDocCollection() {
+    public List<CitizenDocumentCollectionItem> ensureHearingRespondentDocCollection() {
         if (hearingRespondentDocCollection == null) {
             hearingRespondentDocCollection = new ArrayList<>();
         }
