@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -22,6 +23,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -433,5 +436,81 @@ class PartyServiceTest {
                     .intervenerOrganisation(organisationPolicy("TEST_ORG_ID_INTV4", INTERVENER_ORG_POLICY_ASSIGNED_ROLE))
                     .build()))
         );
+    }
+
+    // ---------------------------------------------------------------------
+    // isIntervenerOneActive / Two / Three / Four
+    // ---------------------------------------------------------------------
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("intervenerActiveAccessors")
+    void givenIntervenerWithOrganisation_isIntervenerActive_returnsTrue(IntervenerAccessor accessor) {
+        accessor.stubWithOrganisation()
+            .accept(finremCaseData, organisationPolicy(TEST_ORG_ID, INTERVENER_ORG_POLICY_ASSIGNED_ROLE));
+
+        assertThat(accessor.isActive().test(partyService, finremCaseDetails)).isTrue();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("intervenerActiveAccessors")
+    void givenIntervenerWithoutOrganisation_isIntervenerActive_returnsFalse(IntervenerAccessor accessor) {
+        accessor.stubWithOrganisation().accept(finremCaseData, null);
+
+        assertThat(accessor.isActive().test(partyService, finremCaseDetails)).isFalse();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("intervenerActiveAccessors")
+    void givenNullIntervener_isIntervenerActive_returnsFalse(IntervenerAccessor accessor) {
+        accessor.stubNullWrapper().accept(finremCaseData);
+
+        assertThat(accessor.isActive().test(partyService, finremCaseDetails)).isFalse();
+    }
+
+    @Test
+    void givenOnlyIntervenerOneHasOrganisation_isIntervenerActive_onlyIntervenerOneIsActive() {
+        when(finremCaseData.getIntervenerOne()).thenReturn(IntervenerOne.builder()
+            .intervenerOrganisation(organisationPolicy(TEST_ORG_ID, INTERVENER_ORG_POLICY_ASSIGNED_ROLE))
+            .build());
+        when(finremCaseData.getIntervenerTwo()).thenReturn(null);
+        when(finremCaseData.getIntervenerThree()).thenReturn(IntervenerThree.builder().build());
+        when(finremCaseData.getIntervenerFour()).thenReturn(null);
+
+        assertThat(partyService.isIntervenerOneActive(finremCaseDetails)).isTrue();
+        assertThat(partyService.isIntervenerTwoActive(finremCaseDetails)).isFalse();
+        assertThat(partyService.isIntervenerThreeActive(finremCaseDetails)).isFalse();
+        assertThat(partyService.isIntervenerFourActive(finremCaseDetails)).isFalse();
+    }
+
+    private static Stream<Arguments> intervenerActiveAccessors() {
+        return Stream.of(
+            arguments(new IntervenerAccessor("Intervener one",
+                (data, org) -> when(data.getIntervenerOne())
+                    .thenReturn(IntervenerOne.builder().intervenerOrganisation(org).build()),
+                data -> when(data.getIntervenerOne()).thenReturn(null),
+                PartyService::isIntervenerOneActive)),
+            arguments(new IntervenerAccessor("Intervener two",
+                (data, org) -> when(data.getIntervenerTwo())
+                    .thenReturn(IntervenerTwo.builder().intervenerOrganisation(org).build()),
+                data -> when(data.getIntervenerTwo()).thenReturn(null),
+                PartyService::isIntervenerTwoActive)),
+            arguments(new IntervenerAccessor("Intervener three",
+                (data, org) -> when(data.getIntervenerThree())
+                    .thenReturn(IntervenerThree.builder().intervenerOrganisation(org).build()),
+                data -> when(data.getIntervenerThree()).thenReturn(null),
+                PartyService::isIntervenerThreeActive)),
+            arguments(new IntervenerAccessor("Intervener four",
+                (data, org) -> when(data.getIntervenerFour())
+                    .thenReturn(IntervenerFour.builder().intervenerOrganisation(org).build()),
+                data -> when(data.getIntervenerFour()).thenReturn(null),
+                PartyService::isIntervenerFourActive))
+        );
+    }
+
+    private record IntervenerAccessor(
+        String label,
+        BiConsumer<FinremCaseData, OrganisationPolicy> stubWithOrganisation,
+        Consumer<FinremCaseData> stubNullWrapper,
+        BiPredicate<PartyService, FinremCaseDetails> isActive) {
     }
 }
