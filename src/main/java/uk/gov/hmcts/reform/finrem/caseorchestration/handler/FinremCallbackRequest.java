@@ -100,7 +100,7 @@ public class FinremCallbackRequest {
         OrganisationPolicy currentPolicy = ofNullable(getFinremCaseData()).map(policyExtractor).orElse(null);
         OrganisationPolicy beforePolicy = ofNullable(getFinremCaseDataBefore()).map(policyExtractor).orElse(null);
 
-        if (currentPolicy == null  && beforePolicy == null) {
+        if (currentPolicy == null && beforePolicy == null) {
             return false;
         }
 
