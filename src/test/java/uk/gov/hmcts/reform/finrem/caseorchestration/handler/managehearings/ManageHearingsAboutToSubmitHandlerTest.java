@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
@@ -85,6 +86,9 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @Mock
+    private PartyService partyService;
 
     private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
 
@@ -308,11 +312,27 @@ class ManageHearingsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenPostalAddressMissing_whenHandled_thenPopulateErrors() {
+    void givenIntervenerPostalAddressMissing_whenHandled_thenPopulateErrors() {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
 
-        List<String> expectedErrors = List.of("some error message");
+        List<String> expectedErrors = List.of("some error messages");
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredIntervenersPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), anyBoolean(),
+                    anyBoolean(), anyBoolean(), anyBoolean()))
+            .thenReturn(expectedErrors);
+
+        var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).isEqualTo(expectedErrors);
+        verifyNoInteractions(notificationAuditService);
+    }
+
+    @Test
+    void givenApplicantOrRespondentPostalAddressMissing_whenHandled_thenPopulateErrors() {
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+
+        List<String> expectedErrors = List.of("some error messages");
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator
             .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), anyBoolean(), anyBoolean()))
             .thenReturn(expectedErrors);
@@ -328,7 +348,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
         "true,false",
         "false,true"
     })
-    void givenPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenPopulateErrors(
+    void givenApplicantOrRespondentPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenPopulateErrors(
         boolean isApplicantAddressRequired, boolean isRespondentAddressRequired
     ) {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
@@ -342,7 +362,6 @@ class ManageHearingsAboutToSubmitHandlerTest {
         List<SendCorrespondenceEvent> events = List.of(event);
         when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
             eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
-
 
         try (MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class)) {
             List<String> calls = new ArrayList<>();
@@ -370,7 +389,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
             var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
             assertThat(response.getErrors()).contains("ERROR");
-            // to guarantee the simulation should goes first before checking applicant or respondent address required
+            // to guarantee the simulation should go first before checking applicant or respondent address required
             assertThat(calls).containsExactly(
                 "createAuditsForCorrespondence",
                 "isApplicantAddressRequired",
@@ -382,7 +401,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
     @CsvSource({
         "false,false"
     })
-    void givenPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenDoNotPopulateErrors(
+    void givenApplicantOrRespondentPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenDoNotPopulateErrors(
         boolean isApplicantAddressRequired, boolean isRespondentAddressRequired
     ) {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
