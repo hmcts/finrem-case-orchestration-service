@@ -15,8 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenPartyType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentsorter.CitizenDocumentSorter;
 
 import java.time.LocalDateTime;
@@ -30,56 +31,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 class CUIDocumentUploadAboutToSubmitHandlerTest {
-
-    @ParameterizedTest
-    @MethodSource("handlers")
-    void handle_shouldMergeAndSortDocumentsDescending_whenValidDocumentsPresent(HandlerCase handlerCase) {
-        CitizenDocumentCollectionItem oldDoc = doc(LocalDateTime.of(2024, 1, 1, 10, 0));
-        CitizenDocumentCollectionItem midDoc = doc(LocalDateTime.of(2024, 2, 1, 10, 0));
-        CitizenDocumentCollectionItem newDoc = doc(LocalDateTime.of(2024, 3, 1, 10, 0));
-
-        FinremCaseData before = caseDataFor(handlerCase.party, List.of(oldDoc, midDoc));
-        FinremCaseData current = caseDataFor(handlerCase.party, List.of(newDoc));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handlerCase.handler.handle(buildRequest(current, before, handlerCase.eventType), "auth");
-
-        assertThat(documentsFor(response.getData(), handlerCase.party))
-            .containsExactly(newDoc, midDoc, oldDoc);
-    }
-
-    @ParameterizedTest
-    @MethodSource("handlers")
-    void handle_shouldReturnOnlyCurrentDocuments_whenExistingDocumentsAreNull(HandlerCase handlerCase) {
-        CitizenDocumentCollectionItem newDoc = doc(LocalDateTime.of(2024, 3, 1, 10, 0));
-
-        FinremCaseData before = new FinremCaseData();
-        FinremCaseData current = caseDataFor(handlerCase.party, List.of(newDoc));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handlerCase.handler.handle(buildRequest(current, before, handlerCase.eventType), "auth");
-
-        assertThat(documentsFor(response.getData(), handlerCase.party))
-            .containsExactly(newDoc);
-    }
-
-    @ParameterizedTest
-    @MethodSource("handlers")
-    void handle_shouldReturnOnlyExistingDocuments_whenCurrentDocumentsAreNull(HandlerCase handlerCase) {
-        CitizenDocumentCollectionItem existing = doc(LocalDateTime.of(2024, 1, 1, 10, 0));
-
-        FinremCaseData before = caseDataFor(handlerCase.party, List.of(existing));
-        FinremCaseData current = new FinremCaseData();
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handlerCase.handler.handle(buildRequest(current, before, handlerCase.eventType), "auth");
-
-        assertThat(documentsFor(response.getData(), handlerCase.party))
-            .containsExactly(existing);
-    }
 
     @ParameterizedTest
     @MethodSource("handlers")
@@ -91,84 +46,103 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
 
     @ParameterizedTest
     @MethodSource("handlers")
-    void handle_shouldUpdateOnlyRelevantCollection_whenApplicantOrRespondentEvent(HandlerCase handlerCase) {
-        CitizenDocumentCollectionItem existingApplicant = doc(LocalDateTime.of(2024, 1, 1, 10, 0));
-        CitizenDocumentCollectionItem existingRespondent = doc(LocalDateTime.of(2024, 2, 1, 10, 0));
-        CitizenDocumentCollectionItem newDoc = doc(LocalDateTime.of(2024, 3, 1, 10, 0));
-
-        FinremCaseData before = new FinremCaseData();
-        before.getCitizenDocumentWrapper().setCitizenApplicantDocument(List.of(existingApplicant));
-        before.getCitizenDocumentWrapper().setCitizenRespondentDocument(List.of(existingRespondent));
-
+    void handle_shouldCategoriseSortCreateAuditAndReturnCurrentCaseData(HandlerCase handlerCase) {
+        CitizenDocumentCollectionItem newDoc = doc(LocalDateTime.of(2026, 3, 1, 10, 0));
         FinremCaseData current = caseDataFor(handlerCase.party, List.of(newDoc));
+        FinremCallbackRequest request = buildRequest(current, handlerCase.eventType);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handlerCase.handler.handle(buildRequest(current, before, handlerCase.eventType), "auth");
+            handlerCase.handler.handle(request, AUTH_TOKEN);
 
-        if (handlerCase.party == Party.APPLICANT) {
-            assertThat(response.getData().getCitizenDocumentWrapper().getCitizenApplicantDocument())
-                .containsExactly(newDoc, existingApplicant);
-            assertThat(response.getData().getCitizenDocumentWrapper().getCitizenRespondentDocument()).isNull();
-        } else {
-            assertThat(response.getData().getCitizenDocumentWrapper().getCitizenRespondentDocument())
-                .containsExactly(newDoc, existingRespondent);
-            assertThat(response.getData().getCitizenDocumentWrapper().getCitizenApplicantDocument()).isNull();
-        }
+        assertThat(response.getData()).isSameAs(current);
+        assertThat(documentsFor(response.getData(), handlerCase.party))
+            .containsExactly(newDoc);
+
+        verify(handlerCase.documentsCategoriser).categorise(current);
+        verify(handlerCase.citizenDocumentSorter)
+            .sortDocuments(current.getCitizenDocumentWrapper(), handlerCase.party);
+        verify(handlerCase.citizenDocumentsUploadedCorresponder).buildCorrespondenceEvent(
+            request.getCaseDetails(),
+            AUTH_TOKEN,
+            handlerCase.notificationParty
+        );
+        verify(handlerCase.correspondenceEventAuditOrchestrationService)
+            .createPendingAudits(handlerCase.sendCorrespondenceEvent, handlerCase.eventType);
     }
 
     @ParameterizedTest
     @MethodSource("handlers")
     void handle_shouldCreateNotificationAuditRowsWhenCorrespondenceEventExists(HandlerCase handlerCase) {
-        FinremCaseData before = new FinremCaseData();
-        FinremCaseData current = caseDataFor(handlerCase.party, List.of(doc(LocalDateTime.of(2024, 3, 1, 10, 0))));
-        FinremCallbackRequest request = buildRequest(current, before, handlerCase.eventType);
+        FinremCaseData current = caseDataFor(handlerCase.party, List.of(doc(LocalDateTime.of(2026, 3, 1, 10, 0))));
+        FinremCallbackRequest request = buildRequest(current, handlerCase.eventType);
 
-        handlerCase.handler.handle(request, "auth");
+        handlerCase.handler.handle(request, AUTH_TOKEN);
 
         verify(handlerCase.correspondenceEventAuditOrchestrationService).createPendingAudits(any(), eq(handlerCase.eventType));
         verify(handlerCase.citizenDocumentsUploadedCorresponder).buildCorrespondenceEvent(
             any(),
             anyString(),
-            eq(handlerCase.party == Party.APPLICANT
-                ? NotificationParty.CITIZEN_APPLICANT
-                : NotificationParty.CITIZEN_RESPONDENT)
+            eq(handlerCase.notificationParty)
         );
     }
 
     private static Stream<HandlerCase> handlers() {
+        return Stream.of(
+            handlerCase(CitizenPartyType.APPLICANT),
+            handlerCase(CitizenPartyType.RESPONDENT)
+        );
+    }
+
+    private static HandlerCase handlerCase(CitizenPartyType party) {
         FinremCaseDetailsMapper mapper = mock(FinremCaseDetailsMapper.class);
-        FeatureToggleService featureToggleService = mock(FeatureToggleService.class);
+        CUIDocumentsCategoriser documentsCategoriser = mock(CUIDocumentsCategoriser.class);
         CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService =
             mock(CorrespondenceEventAuditOrchestrationService.class);
         CitizenDocumentSorter citizenDocumentSorter = mock(CitizenDocumentSorter.class);
         CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder = mock(CitizenDocumentsUploadedCorresponder.class);
+        SendCorrespondenceEvent sendCorrespondenceEvent = SendCorrespondenceEvent.builder().build();
         when(citizenDocumentsUploadedCorresponder.buildCorrespondenceEvent(any(), anyString(), any()))
-            .thenReturn(SendCorrespondenceEvent.builder().build());
+            .thenReturn(sendCorrespondenceEvent);
 
-        return Stream.of(
-            new HandlerCase(
-                new CUIApplicantDocumentUploadAboutToSubmitHandler(mapper, featureToggleService,
-                    correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder, citizenDocumentSorter),
-                EventType.CUI_APPLICANT_DOCUMENT_UPLOAD,
-                Party.APPLICANT,
-                correspondenceEventAuditOrchestrationService,
-                citizenDocumentsUploadedCorresponder
-            ),
-            new HandlerCase(
-                new CUIRespondentDocumentUploadAboutToSubmitHandler(mapper, featureToggleService,
-                    correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder, citizenDocumentSorter),
-                EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD,
-                Party.RESPONDENT,
-                correspondenceEventAuditOrchestrationService,
-                citizenDocumentsUploadedCorresponder
-            )
+        EventType eventType = CitizenPartyType.APPLICANT.equals(party)
+            ? EventType.CUI_APPLICANT_DOCUMENT_UPLOAD
+            : EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD;
+        NotificationParty notificationParty = CitizenPartyType.APPLICANT.equals(party)
+            ? NotificationParty.CITIZEN_APPLICANT
+            : NotificationParty.CITIZEN_RESPONDENT;
+        CUIDocumentUploadAboutToSubmitHandler handler = CitizenPartyType.APPLICANT.equals(party)
+            ? new CUIApplicantDocumentUploadAboutToSubmitHandler(
+            mapper,
+            correspondenceEventAuditOrchestrationService,
+            citizenDocumentsUploadedCorresponder,
+            documentsCategoriser,
+            citizenDocumentSorter
+        )
+            : new CUIRespondentDocumentUploadAboutToSubmitHandler(
+            mapper,
+            correspondenceEventAuditOrchestrationService,
+            citizenDocumentsUploadedCorresponder,
+            documentsCategoriser,
+            citizenDocumentSorter
+        );
+
+        return new HandlerCase(
+            handler,
+            eventType,
+            party,
+            notificationParty,
+            correspondenceEventAuditOrchestrationService,
+            citizenDocumentsUploadedCorresponder,
+            documentsCategoriser,
+            citizenDocumentSorter,
+            sendCorrespondenceEvent
         );
     }
 
-    private FinremCaseData caseDataFor(Party party, List<CitizenDocumentCollectionItem> documents) {
+    private FinremCaseData caseDataFor(CitizenPartyType party, List<CitizenDocumentCollectionItem> documents) {
         FinremCaseData caseData = new FinremCaseData();
 
-        if (party == Party.APPLICANT) {
+        if (CitizenPartyType.APPLICANT.equals(party)) {
             caseData.getCitizenDocumentWrapper().setCitizenApplicantDocument(documents);
         } else {
             caseData.getCitizenDocumentWrapper().setCitizenRespondentDocument(documents);
@@ -177,26 +151,22 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
         return caseData;
     }
 
-    private List<CitizenDocumentCollectionItem> documentsFor(FinremCaseData caseData, Party party) {
-        return party == Party.APPLICANT
+    private List<CitizenDocumentCollectionItem> documentsFor(FinremCaseData caseData, CitizenPartyType party) {
+        return CitizenPartyType.APPLICANT.equals(party)
             ? caseData.getCitizenDocumentWrapper().getCitizenApplicantDocument()
             : caseData.getCitizenDocumentWrapper().getCitizenRespondentDocument();
     }
 
     private FinremCallbackRequest buildRequest(
         FinremCaseData current,
-        FinremCaseData before,
         EventType eventType
     ) {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         caseDetails.setData(current);
 
-        FinremCaseDetails caseDetailsBefore = new FinremCaseDetails();
-        caseDetailsBefore.setData(before);
-
         return FinremCallbackRequest.builder()
             .caseDetails(caseDetails)
-            .caseDetailsBefore(caseDetailsBefore)
+            .caseDetailsBefore(null)
             .eventType(eventType)
             .build();
     }
@@ -211,17 +181,16 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
         return wrapper;
     }
 
-    private enum Party {
-        APPLICANT,
-        RESPONDENT
-    }
-
     private record HandlerCase(
         CUIDocumentUploadAboutToSubmitHandler handler,
         EventType eventType,
-        Party party,
+        CitizenPartyType party,
+        NotificationParty notificationParty,
         CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
-        CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder
+        CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
+        CUIDocumentsCategoriser documentsCategoriser,
+        CitizenDocumentSorter citizenDocumentSorter,
+        SendCorrespondenceEvent sendCorrespondenceEvent
     ) {
     }
 }

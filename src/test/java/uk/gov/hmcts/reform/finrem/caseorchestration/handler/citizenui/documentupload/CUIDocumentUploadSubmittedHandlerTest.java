@@ -24,11 +24,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class CUIDocumentUploadSubmittedHandlerTest {
 
-    public static final String AUTH_TOKEN = "auth";
     public static final String NOTIFICATION_EVENT_ID = "notification-event-id";
 
     @Mock

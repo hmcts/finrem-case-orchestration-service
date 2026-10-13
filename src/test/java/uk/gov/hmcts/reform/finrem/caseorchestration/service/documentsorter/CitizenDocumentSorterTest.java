@@ -16,8 +16,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUplo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.FDR_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.HEARING_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser.Party.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser.Party.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenPartyType.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenPartyType.RESPONDENT;
 
 class CitizenDocumentSorterTest {
 

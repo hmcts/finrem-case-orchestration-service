@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CitizenDocumentWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenPartyType;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -17,7 +17,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUplo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.FDR_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.HEARING_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser.Party.APPLICANT;
 
 @Slf4j
 @Service
@@ -40,8 +39,8 @@ public class CitizenDocumentSorter {
      * @param citizenDocumentWrapper wrapper containing source uploads and destination collections
      * @param party party whose documents should be sorted
      */
-    public void sortDocuments(CitizenDocumentWrapper citizenDocumentWrapper, CUIDocumentsCategoriser.Party party) {
-        if (APPLICANT.equals(party)) {
+    public void sortDocuments(CitizenDocumentWrapper citizenDocumentWrapper, CitizenPartyType party) {
+        if (CitizenPartyType.APPLICANT.equals(party)) {
             sortPartyDocuments(
                 citizenDocumentWrapper.getCitizenApplicantDocument(),
                 citizenDocumentWrapper.getApplicantDocCollection(),

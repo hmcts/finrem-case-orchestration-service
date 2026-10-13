@@ -6,17 +6,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogge
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CitizenDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenPartyType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentsorter.CitizenDocumentSorter;
-
-import java.util.List;
 
 /**
  * Handler for Applicant CUI document upload events.
@@ -36,15 +32,12 @@ import java.util.List;
 @Service
 public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentUploadAboutToSubmitHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public CUIApplicantDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                          FeatureToggleService featureToggleService,
                                                           CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
                                                           CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
+                                                          CUIDocumentsCategoriser documentsCategoriser,
                                                           CitizenDocumentSorter citizenDocumentSorter) {
-        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder, citizenDocumentSorter);
-        this.featureToggleService = featureToggleService;
+        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, documentsCategoriser, citizenDocumentsUploadedCorresponder, citizenDocumentSorter);
     }
 
     /**
@@ -57,38 +50,9 @@ public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentU
         return EventType.CUI_APPLICANT_DOCUMENT_UPLOAD;
     }
 
-    /**
-     * Retrieves the applicant document collection from case data.
-     *
-     * @param caseData case data
-     * @return list of applicant documents (may be null)
-     */
-    @Override
-    protected List<CitizenDocumentCollectionItem> getDocuments(FinremCaseData caseData) {
-        return caseData.getCitizenDocumentWrapper().getCitizenApplicantDocument();
-    }
-
-    /**
-     * Sets the updated applicant document collection onto case data.
-     *
-     * @param caseData  case data
-     * @param documents merged and sorted applicant documents
-     */
-    @Override
-    protected void setDocuments(FinremCaseData caseData, List<CitizenDocumentCollectionItem> documents) {
-        caseData.getCitizenDocumentWrapper().setCitizenApplicantDocument(documents);
-    }
-
     @Override
     protected void handleLog(FinremCallbackRequest callbackRequest) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
-    }
-
-    @Override
-    protected void categoriseDocuments(FinremCaseData caseData) {
-        //TODO: Can we use DI here instead of creating a new instance?
-        new CUIDocumentsCategoriser(featureToggleService, CUIDocumentsCategoriser.Party.APPLICANT)
-            .categorise(caseData);
     }
 
     @Override
@@ -98,6 +62,6 @@ public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentU
 
     @Override
     protected void sortDocs(CitizenDocumentWrapper citizenDocumentWrapper) {
-        citizenDocumentSorter.sortDocuments(citizenDocumentWrapper, CUIDocumentsCategoriser.Party.APPLICANT);
+        citizenDocumentSorter.sortDocuments(citizenDocumentWrapper, CitizenPartyType.APPLICANT);
     }
 }

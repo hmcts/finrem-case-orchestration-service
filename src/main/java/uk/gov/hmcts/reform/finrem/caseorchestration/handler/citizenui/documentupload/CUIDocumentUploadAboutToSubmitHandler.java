@@ -8,13 +8,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CitizenDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentsorter.CitizenDocumentSorter;
 
 import java.util.List;
@@ -44,14 +44,16 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
 
     private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
     private final CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder;
+    protected final CUIDocumentsCategoriser documentsCategoriser;
     protected final CitizenDocumentSorter citizenDocumentSorter;
 
     protected CUIDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                    CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
+                                                    CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService, CUIDocumentsCategoriser documentsCategoriser,
                                                     CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
                                                     CitizenDocumentSorter citizenDocumentSorter) {
         super(finremCaseDetailsMapper);
         this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
+        this.documentsCategoriser = documentsCategoriser;
         this.citizenDocumentsUploadedCorresponder = citizenDocumentsUploadedCorresponder;
         this.citizenDocumentSorter = citizenDocumentSorter;
     }
@@ -134,39 +136,13 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
      */
     protected abstract EventType handledEventType();
 
-    /**
-     * Retrieves the relevant document collection from case data.
-     *
-     * <p>Implemented by subclasses to return either:
-     * <ul>
-     *     <li>Applicant document collection</li>
-     *     <li>Respondent document collection</li>
-     * </ul>
-     *
-     * @param caseData case data
-     * @return list of documents (may be null)
-     */
-    protected abstract List<CitizenDocumentCollectionItem> getDocuments(FinremCaseData caseData);
-
-    /**
-     * Sets the updated document collection onto case data.
-     *
-     * <p>Implemented by subclasses to update the correct field
-     * (Applicant or Respondent collection).
-     *
-     * @param caseData  case data
-     * @param documents merged and sorted documents
-     */
-    protected abstract void setDocuments(
-        FinremCaseData caseData,
-        List<CitizenDocumentCollectionItem> documents
-    );
-
     protected abstract NotificationParty notificationParty();
 
     protected abstract void handleLog(FinremCallbackRequest callbackRequest);
 
-    protected abstract void categoriseDocuments(FinremCaseData caseData);
+    private void categoriseDocuments(FinremCaseData caseData) {
+        documentsCategoriser.categorise(caseData);
+    }
 
     protected abstract void sortDocs(CitizenDocumentWrapper citizenDocumentWrapper);
 }

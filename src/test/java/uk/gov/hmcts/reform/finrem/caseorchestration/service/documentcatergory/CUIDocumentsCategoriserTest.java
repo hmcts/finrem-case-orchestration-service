@@ -2,9 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
@@ -21,6 +24,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.BUSINESS_VALUATION;
@@ -97,20 +101,24 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_S25_STATEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser.Party.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser.Party.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenPartyType.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenPartyType.RESPONDENT;
 
+@ExtendWith(MockitoExtension.class)
 class CUIDocumentsCategoriserTest {
 
     private static final boolean FDR = true;
     private static final boolean NON_FDR = false;
 
+    @Mock
     private FeatureToggleService featureToggleService;
+
+    private CUIDocumentsCategoriser categoriser;
 
     @BeforeEach
     void setUp() {
-        featureToggleService = mock(FeatureToggleService.class);
-        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
+        lenient().when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
+        categoriser = new CUIDocumentsCategoriser(featureToggleService);
     }
 
     private CitizenUploadDocument buildDocument(CitizenUploadDocumentType type, boolean isFdr) {
@@ -122,11 +130,11 @@ class CUIDocumentsCategoriserTest {
         return doc;
     }
 
-    private FinremCaseData buildCaseData(List<CitizenDocumentCollectionItem> docs, CUIDocumentsCategoriser.Party party) {
+    private FinremCaseData buildCaseData(List<CitizenDocumentCollectionItem> docs, CitizenPartyType party) {
         FinremCaseData caseData = new FinremCaseData();
         CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
 
-        if (party == APPLICANT) {
+        if (APPLICANT.equals(party)) {
             wrapper.setCitizenApplicantDocument(docs);
         } else {
             wrapper.setCitizenRespondentDocument(docs);
@@ -144,9 +152,6 @@ class CUIDocumentsCategoriserTest {
 
     @Test
     void shouldHandleEmptyDocumentsGracefully() {
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, APPLICANT);
-
         assertThatCode(() -> categoriser.categorise(buildCaseData(null, APPLICANT)))
             .doesNotThrowAnyException();
     }
@@ -154,10 +159,6 @@ class CUIDocumentsCategoriserTest {
     @Test
     void shouldIgnoreInvalidDocument() {
         CitizenUploadDocument doc = new CitizenUploadDocument();
-
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, APPLICANT);
-
         categoriser.categorise(buildCaseData(List.of(wrap(doc)), APPLICANT));
 
         assertThat(doc.getDocumentLink()).isNull();
@@ -165,9 +166,6 @@ class CUIDocumentsCategoriserTest {
 
     @Test
     void shouldIgnoreNullDocumentValue() {
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, APPLICANT);
-
         assertThatCode(() -> categoriser.categorise(buildCaseData(List.of(wrap(null)), APPLICANT)))
             .doesNotThrowAnyException();
     }
@@ -175,9 +173,6 @@ class CUIDocumentsCategoriserTest {
     @Test
     void shouldIgnoreDocumentWithoutType() {
         CitizenUploadDocument doc = buildDocument(null, NON_FDR);
-
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, APPLICANT);
 
         categoriser.categorise(buildCaseData(List.of(wrap(doc)), APPLICANT));
 
@@ -190,26 +185,19 @@ class CUIDocumentsCategoriserTest {
 
         CitizenUploadDocument doc = buildDocument(CASE_SUMMARY, NON_FDR);
 
-        new CUIDocumentsCategoriser(featureToggleService, APPLICANT)
-            .categorise(buildCaseData(List.of(wrap(doc)), APPLICANT));
+        categoriser.categorise(buildCaseData(List.of(wrap(doc)), APPLICANT));
 
         assertThat(doc.getDocumentLink().getCategoryId()).isNull();
     }
 
     @Test
     void shouldHandleEmptyDocumentListGracefully() {
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, APPLICANT);
-
         assertThatCode(() -> categoriser.categorise(buildCaseData(List.of(), APPLICANT)))
             .doesNotThrowAnyException();
     }
 
     @Test
     void shouldHandleNullWrapper() {
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, APPLICANT);
-
         FinremCaseData caseData = mock(FinremCaseData.class);
         when(caseData.getCitizenDocumentWrapper()).thenReturn(null);
 
@@ -228,9 +216,6 @@ class CUIDocumentsCategoriserTest {
         CitizenUploadDocument doc3 =
             buildDocument(PRE_HEARING_DRAFT_ORDER, NON_FDR);
 
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, RESPONDENT);
-
         categoriser.categorise(buildCaseData(
             List.of(wrap(doc1), wrap(doc2), wrap(doc3)), RESPONDENT));
 
@@ -244,13 +229,10 @@ class CUIDocumentsCategoriserTest {
     void shouldCategorise(
         CitizenUploadDocumentType type,
         boolean isFdr,
-        CUIDocumentsCategoriser.Party party,
+        CitizenPartyType party,
         DocumentCategory expected
     ) {
         CitizenUploadDocument doc = buildDocument(type, isFdr);
-
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, party);
 
         FinremCaseData caseData =
             buildCaseData(List.of(wrap(doc)), party);
@@ -586,7 +568,7 @@ class CUIDocumentsCategoriserTest {
 
     private static Arguments category(CitizenUploadDocumentType type,
                                       boolean isFdr,
-                                      CUIDocumentsCategoriser.Party party,
+                                      CitizenPartyType party,
                                       DocumentCategory expected) {
         return Arguments.of(type, isFdr, party, expected);
     }
