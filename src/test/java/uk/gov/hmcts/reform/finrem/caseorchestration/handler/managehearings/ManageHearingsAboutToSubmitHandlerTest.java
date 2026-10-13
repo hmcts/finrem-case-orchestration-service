@@ -312,11 +312,27 @@ class ManageHearingsAboutToSubmitHandlerTest {
     }
 
     @Test
+    void givenIntervenerPostalAddressMissing_whenHandled_thenPopulateErrors() {
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+
+        List<String> expectedErrors = List.of("some error messages");
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator
+                .validateRequiredIntervenersPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), anyBoolean(),
+                    anyBoolean(), anyBoolean(), anyBoolean()))
+            .thenReturn(expectedErrors);
+
+        var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).isEqualTo(expectedErrors);
+        verifyNoInteractions(notificationAuditService);
+    }
+
+    @Test
     void givenApplicantOrRespondentPostalAddressMissing_whenHandled_thenPopulateErrors() {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
 
-        List<String> expectedErrors = List.of("some error message");
+        List<String> expectedErrors = List.of("some error messages");
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator
             .validateRequiredPostalAddresses(eq(caseData), eq(EventType.MANAGE_HEARINGS), anyBoolean(), anyBoolean()))
             .thenReturn(expectedErrors);
@@ -373,7 +389,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
             var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
             assertThat(response.getErrors()).contains("ERROR");
-            // to guarantee the simulation should goes first before checking applicant or respondent address required
+            // to guarantee the simulation should go first before checking applicant or respondent address required
             assertThat(calls).containsExactly(
                 "createAuditsForCorrespondence",
                 "isApplicantAddressRequired",
