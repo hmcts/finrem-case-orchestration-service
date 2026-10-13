@@ -70,6 +70,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.MANAGE_HEARINGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.ADD_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
 
 @ExtendWith(MockitoExtension.class)
@@ -131,7 +132,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
+                .manageHearingsActionSelection(ADD_HEARING)
                 .workingHearing(hearingToAdd)
                 .build())
             .build();
@@ -139,7 +140,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
         FinremCallbackRequest request = buildRequest(caseData);
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
-            ManageHearingsAction.ADD_HEARING,
+            ADD_HEARING,
             request,
             AUTH_TOKEN
         )).thenReturn(List.of(event));
@@ -291,14 +292,14 @@ class ManageHearingsAboutToSubmitHandlerTest {
     void givenNoCorrespondenceEvent_whenHandle_thenDoesNotCreateNotificationAuditRows() {
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
+                .manageHearingsActionSelection(ADD_HEARING)
                 .build())
             .build();
 
         FinremCallbackRequest request = buildRequest(caseData);
 
         when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
-            ManageHearingsAction.ADD_HEARING,
+            ADD_HEARING,
             request,
             AUTH_TOKEN
         )).thenReturn(List.of());
@@ -308,7 +309,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
         verify(manageHearingActionService).performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(request.getCaseDetails().getData());
         verify(manageHearingsCorresponder).buildCorrespondenceEventIfNeeded(
-            ManageHearingsAction.ADD_HEARING,
+            ADD_HEARING,
             request,
             AUTH_TOKEN
         );
@@ -322,8 +323,8 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         List<String> expectedErrors = List.of("some error messages");
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-                .validateRequiredIntervenersPostalAddresses(eq(caseData), eq(MANAGE_HEARINGS), anyBoolean(),
-                    anyBoolean(), anyBoolean(), anyBoolean()))
+            .validateRequiredIntervenersPostalAddresses(eq(caseData), eq(MANAGE_HEARINGS), anyBoolean(),
+                anyBoolean(), anyBoolean(), anyBoolean()))
             .thenReturn(expectedErrors);
 
         var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -334,21 +335,20 @@ class ManageHearingsAboutToSubmitHandlerTest {
     void givenIntervenerPostalAddressMissingAndIntervenerOneIsActive_whenHandled_thenPopulateErrors() {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
-        when(manageHearingsWrapper.getManageHearingsActionSelection()).thenReturn(ManageHearingsAction.ADD_HEARING);
+        when(manageHearingsWrapper.getManageHearingsActionSelection()).thenReturn(ADD_HEARING);
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData)
             .toBuilder().eventType(MANAGE_HEARINGS).build();
 
         List<String> expectedErrors = List.of("expected error message");
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-                .validateRequiredIntervenersPostalAddresses(eq(caseData), eq(MANAGE_HEARINGS), eq(true),
-                    anyBoolean(), anyBoolean(), anyBoolean()))
+            .validateRequiredIntervenersPostalAddresses(caseData, MANAGE_HEARINGS, true, false, false, false))
             .thenReturn(expectedErrors);
         when(partyService.isIntervenerOneActive(caseData)).thenReturn(true);
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         List<SendCorrespondenceEvent> events = List.of(event);
-        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
-            eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
+        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(ADD_HEARING,
+            callbackRequest, AUTH_TOKEN)).thenReturn(events);
 
         try (MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class)) {
             // record the static call (adjust the return value to whatever the method returns)
@@ -386,7 +386,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
     ) {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
-        when(manageHearingsWrapper.getManageHearingsActionSelection()).thenReturn(ManageHearingsAction.ADD_HEARING);
+        when(manageHearingsWrapper.getManageHearingsActionSelection()).thenReturn(ADD_HEARING);
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData)
             .toBuilder().eventType(MANAGE_HEARINGS).build();
@@ -439,7 +439,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
     ) {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
-        when(manageHearingsWrapper.getManageHearingsActionSelection()).thenReturn(ManageHearingsAction.ADD_HEARING);
+        when(manageHearingsWrapper.getManageHearingsActionSelection()).thenReturn(ADD_HEARING);
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData)
             .toBuilder().eventType(MANAGE_HEARINGS).build();
