@@ -5,7 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -54,6 +56,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -331,34 +335,66 @@ class ManageHearingsAboutToSubmitHandlerTest {
         assertThat(response.getErrors()).isEqualTo(expectedErrors);
     }
 
-    @Test
-    void givenIntervenerPostalAddressMissingAndIntervenerOneIsActive_whenHandled_thenPopulateErrors() {
+    @ParameterizedTest(name = "intervener {0}, addressRequired={1}")
+    @MethodSource("intervenerAddressScenarios")
+    void givenIntervenerPostalAddressMissing_whenHandled_thenPopulateErrors(int intervenerNumber,
+                                                                            boolean isAddressRequired) {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
         when(manageHearingsWrapper.getManageHearingsActionSelection()).thenReturn(ADD_HEARING);
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData)
+        final FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData)
             .toBuilder().eventType(MANAGE_HEARINGS).build();
+
+        // Only the intervener under test is flagged as active
+        boolean[] active = new boolean[4];
+        active[intervenerNumber - 1] = true;
 
         List<String> expectedErrors = List.of("expected error message");
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-            .validateRequiredIntervenersPostalAddresses(caseData, MANAGE_HEARINGS, true, false, false, false))
+            .validateRequiredIntervenersPostalAddresses(
+                caseData, MANAGE_HEARINGS, active[0], active[1], active[2], active[3]))
             .thenReturn(expectedErrors);
-        when(partyService.isIntervenerOneActive(caseData)).thenReturn(true);
+
+        switch (intervenerNumber) {
+            case 1 -> when(partyService.isIntervenerOneActive(caseData)).thenReturn(true);
+            case 2 -> when(partyService.isIntervenerTwoActive(caseData)).thenReturn(true);
+            case 3 -> when(partyService.isIntervenerThreeActive(caseData)).thenReturn(true);
+            case 4 -> when(partyService.isIntervenerFourActive(caseData)).thenReturn(true);
+            default -> throw new IllegalArgumentException("Unexpected intervener: " + intervenerNumber);
+        }
+
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         List<SendCorrespondenceEvent> events = List.of(event);
         when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(ADD_HEARING,
             callbackRequest, AUTH_TOKEN)).thenReturn(events);
 
-        try (MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class)) {
-            // record the static call (adjust the return value to whatever the method returns)
-            mockedSendCorrespondenceEvent
-                .when(() -> SendCorrespondenceEvent.isIntervenerOneAddressRequired(events))
-                .thenAnswer(inv -> true);
+        MockedStatic.Verification addressRequiredCall = switch (intervenerNumber) {
+            case 1 -> () -> SendCorrespondenceEvent.isIntervenerOneAddressRequired(events);
+            case 2 -> () -> SendCorrespondenceEvent.isIntervenerTwoAddressRequired(events);
+            case 3 -> () -> SendCorrespondenceEvent.isIntervenerThreeAddressRequired(events);
+            case 4 -> () -> SendCorrespondenceEvent.isIntervenerFourAddressRequired(events);
+            default -> throw new IllegalArgumentException("Unexpected intervener: " + intervenerNumber);
+        };
+
+        try (MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent
+                 = Mockito.mockStatic(SendCorrespondenceEvent.class)) {
+            mockedSendCorrespondenceEvent.when(addressRequiredCall)
+                .thenAnswer(inv -> isAddressRequired);
 
             var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-            assertThat(response.getErrors()).isEqualTo(expectedErrors);
+
+            if (isAddressRequired) {
+                assertThat(response.getErrors()).isEqualTo(expectedErrors);
+            } else {
+                assertThat(response.getErrors()).isEmpty();
+            }
         }
+    }
+
+    static Stream<Arguments> intervenerAddressScenarios() {
+        return IntStream.rangeClosed(1, 4).boxed()
+            .flatMap(n -> Stream.of(true, false).map(required -> Arguments.of(n, required)));
     }
 
     @Test
