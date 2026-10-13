@@ -49,17 +49,17 @@ public class CitizenDocumentSorter {
             sortPartyDocuments(
                 citizenDocumentWrapper.getCitizenApplicantDocument(),
                 citizenDocumentWrapper.getApplicantDocCollection(),
-                citizenDocumentWrapper.getFdrDocCollection(),
-                citizenDocumentWrapper.getDivorceSolutionDocCollection(),
-                citizenDocumentWrapper.getHearingBundleDocCollection()
+                citizenDocumentWrapper.getFdrApplicantDocCollection(),
+                citizenDocumentWrapper.getDivorceApplicantDocCollection(),
+                citizenDocumentWrapper.getHearingApplicantDocCollection()
             );
         } else {
             sortPartyDocuments(
                 citizenDocumentWrapper.getCitizenRespondentDocument(),
                 citizenDocumentWrapper.getRespondentDocCollection(),
-                citizenDocumentWrapper.getFdrDocCollection(),
-                citizenDocumentWrapper.getDivorceSolutionDocCollection(),
-                citizenDocumentWrapper.getHearingBundleDocCollection()
+                citizenDocumentWrapper.getFdrRespondentDocCollection(),
+                citizenDocumentWrapper.getDivorceRespondentDocCollection(),
+                citizenDocumentWrapper.getHearingRespondentDocCollection()
             );
         }
     }
