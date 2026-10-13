@@ -312,7 +312,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenPostalAddressMissing_whenHandled_thenPopulateErrors() {
+    void givenApplicantOrRespondentPostalAddressMissing_whenHandled_thenPopulateErrors() {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
 
@@ -332,7 +332,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
         "true,false",
         "false,true"
     })
-    void givenPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenPopulateErrors(
+    void givenApplicantOrRespondentPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenPopulateErrors(
         boolean isApplicantAddressRequired, boolean isRespondentAddressRequired
     ) {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
@@ -385,7 +385,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
     @CsvSource({
         "false,false"
     })
-    void givenPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenDoNotPopulateErrors(
+    void givenApplicantOrRespondentPostalAddressMissingButNoPostalNotificationCreated_whenHandled_thenDoNotPopulateErrors(
         boolean isApplicantAddressRequired, boolean isRespondentAddressRequired
     ) {
         FinremCaseData caseData = spy(FinremCaseData.builder().build());
