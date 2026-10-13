@@ -17,12 +17,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1150,56 +1154,56 @@ class ContactDetailsValidatorTest {
             .build();
     }
 
-    private static Stream<Arguments> intervenerOnePostalAddressScenarios() {
-        return Stream.of(
-            Arguments.of(
-                "Intervener 1 not represented + Valid address",
-                YesOrNo.NO,
-                getValidAddress(),
-                TEST_EVENT,
-                List.of()
-            ),
-            Arguments.of(
-                "Intervener 1 not represented + Missing address",
-                YesOrNo.NO,
-                getInvalidAddress(),
-                TEST_EVENT,
-                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Intervener 1", TEST_EVENT.getDisplayName()))
-            ),
-            Arguments.of(
-                "Intervener 1 not represented + Null address",
-                YesOrNo.NO,
-                null,
-                TEST_EVENT,
-                List.of(ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Intervener 1", TEST_EVENT.getDisplayName()))
-            )
-        );
+    private static Stream<Arguments> intervenerPostalAddressScenarios() {
+        return IntStream.rangeClosed(1, 4).boxed().flatMap(n -> Stream.of(
+            Arguments.of(n, "not represented + valid address", YesOrNo.NO, getValidAddress(), false),
+            Arguments.of(n, "not represented + missing address", YesOrNo.NO, getInvalidAddress(), true),
+            Arguments.of(n, "not represented + null address", YesOrNo.NO, null, true)
+        ));
     }
 
-    @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("intervenerOnePostalAddressScenarios")
-    void shouldCheckForMissingIntervenerOnePostalAddress(String description, YesOrNo intervenerRepresented, Address address,
-                                                         EventType eventType, List<String> expectedResult) {
-        IntervenerOne intervenerOne = IntervenerOne.builder()
-            .intervenerRepresented(intervenerRepresented)
-            .intervenerAddress(address)
-            .build();
+    @ParameterizedTest(name = "{index}: intervener {0} {1}")
+    @MethodSource("intervenerPostalAddressScenarios")
+    void shouldCheckForMissingIntervenerPostalAddress(int intervenerNumber, String description,
+                                                      YesOrNo intervenerRepresented, Address address,
+                                                      boolean expectError) {
+        FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED);
 
-        FinremCaseData caseData = FinremCaseData.builder()
-            .intervenerOne(intervenerOne)
-            .ccdCaseType(CaseType.CONTESTED)
-            .build();
+        switch (intervenerNumber) {
+            case 1 -> builder.intervenerOne(IntervenerOne.builder()
+                .intervenerRepresented(intervenerRepresented).intervenerAddress(address).build());
+            case 2 -> builder.intervenerTwo(IntervenerTwo.builder()
+                .intervenerRepresented(intervenerRepresented).intervenerAddress(address).build());
+            case 3 -> builder.intervenerThree(IntervenerThree.builder()
+                .intervenerRepresented(intervenerRepresented).intervenerAddress(address).build());
+            case 4 -> builder.intervenerFour(IntervenerFour.builder()
+                .intervenerRepresented(intervenerRepresented).intervenerAddress(address).build());
+            default -> throw new IllegalArgumentException("Unexpected intervener: " + intervenerNumber);
+        }
+        FinremCaseData caseData = builder.build();
 
-        // Only intervener 1 selected: expect the scenario's result
+        String expectedMessage = ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE
+            .formatted("Intervener " + intervenerNumber, TEST_EVENT.getDisplayName());
+
+        // Only the intervener under test selected
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
-            caseData, eventType, true, false, false, false));
-        assertThat(errors).isEqualTo(expectedResult);
+            caseData, TEST_EVENT,
+            intervenerNumber == 1, intervenerNumber == 2,
+            intervenerNumber == 3, intervenerNumber == 4));
 
-        // Intervener 1 not selected (all others selected): never reports an error for intervener 1
+        if (expectError) {
+            assertThat(errors).containsExactly(expectedMessage);
+        } else {
+            assertThat(errors).isEmpty();
+        }
+
+        // Intervener under test not selected (all others selected): never reports an error for it
         errors = new ArrayList<>(ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
-            caseData, eventType, false, true, true, true));
-        assertThat(errors).doesNotContain(
-            ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE.formatted("Intervener 1", TEST_EVENT.getDisplayName())
-        );
+            caseData, TEST_EVENT,
+            intervenerNumber != 1, intervenerNumber != 2,
+            intervenerNumber != 3, intervenerNumber != 4));
+
+        assertThat(errors).doesNotContain(expectedMessage);
     }
 }
