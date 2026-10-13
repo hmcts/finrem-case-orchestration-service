@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
@@ -38,15 +39,18 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
     private final ManageHearingActionService manageHearingActionService;
     private final NotificationAuditService notificationAuditService;
     private final ManageHearingsCorresponder manageHearingsCorresponder;
+    private final PartyService partyService;
 
     public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               ManageHearingActionService manageHearingActionService,
                                               NotificationAuditService notificationAuditService,
-                                              ManageHearingsCorresponder manageHearingsCorresponder) {
+                                              ManageHearingsCorresponder manageHearingsCorresponder,
+                                              PartyService partyService) {
         super(finremCaseDetailsMapper);
         this.manageHearingActionService = manageHearingActionService;
         this.notificationAuditService = notificationAuditService;
         this.manageHearingsCorresponder = manageHearingsCorresponder;
+        this.partyService = partyService;
     }
 
     @Override
@@ -107,7 +111,11 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
             validateRequiredPostalAddresses(finremCaseData, eventType,
                 isApplicantAddressRequired(sendCorrespondenceEvents),
                 isRespondentAddressRequired(sendCorrespondenceEvents)));
-        errors.addAll(validateRequiredIntervenersPostalAddresses(finremCaseData, eventType, true, true, true, true));
+        errors.addAll(validateRequiredIntervenersPostalAddresses(finremCaseData, eventType,
+            partyService.isIntervenerOneActive(finremCaseData),
+            partyService.isIntervenerTwoActive(finremCaseData),
+            partyService.isIntervenerThreeActive(finremCaseData),
+            partyService.isIntervenerFourActive(finremCaseData)));
         return errors;
     }
 
