@@ -92,6 +92,26 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         assertFixtureMatchesLiveNotify("fixtures/functional/consented/fr-consent-order-not-approved-respondent-stub.json");
     }
 
+    @Test
+    public void shouldMatchFrConsentedNocCaseworkerStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/consented/fr-consented-noc-caseworker-stub.json");
+    }
+
+    @Test
+    public void shouldMatchFrConsentedRepresentativeStopRepresentingApplicantStub() throws Exception {
+        assertFixtureMatchesLiveNotify(
+            "fixtures/functional/consented/fr-consented-representative-stop-representing-applicant-stub.json"
+        );
+    }
+
+    @Test
+    public void shouldMatchFrConsentedRepresentativeStopRepresentingRespondentStub() throws Exception {
+        assertFixtureMatchesLiveNotify(
+            "fixtures/functional/consented/fr-consented-representative-stop-representing-respondent-stub.json"
+        );
+    }
+
+
     // -------------------------
     // CONTESTED SCENARIOS
     // -------------------------
@@ -182,11 +202,6 @@ public class EmailNotificationIntegrationTest extends BaseTest {
     }
 
     @Test
-    public void shouldMatchFrContestedNocCaseworkerStub() throws Exception {
-        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-noc-caseworker-stub.json");
-    }
-
-    @Test
     public void shouldMatchFrBarristerAccessRemovedStub() throws Exception {
         assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-barrister-access-removed-applicant-stub.json");
     }
@@ -222,25 +237,6 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         );
     }
 
-    @Test
-    public void shouldMatchFrConsentedNocCaseworkerStub() throws Exception {
-        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-consented-noc-caseworker-stub.json");
-    }
-
-    @Test
-    public void shouldMatchFrConsentedRepresentativeStopRepresentingApplicantStub() throws Exception {
-        assertFixtureMatchesLiveNotify(
-            "fixtures/functional/contested/fr-consented-representative-stop-representing-applicant-stub.json"
-        );
-    }
-
-    @Test
-    public void shouldMatchFrConsentedRepresentativeStopRepresentingRespondentStub() throws Exception {
-        assertFixtureMatchesLiveNotify(
-            "fixtures/functional/consented/fr-consented-representative-stop-representing-respondent-stub.json"
-        );
-    }
-
 
     // -------------------------
     // NOC SCENARIOS
@@ -252,11 +248,18 @@ public class EmailNotificationIntegrationTest extends BaseTest {
     }
 
     @Test
+    public void shouldMatchFrContestedNocCaseworkerStub() throws Exception {
+        assertFixtureMatchesLiveNotify("fixtures/functional/contested/fr-contested-noc-caseworker-stub.json");
+    }
+
+    @Test
     public void shouldMatchFrConsentedNoticeOfChangeStub() throws Exception {
         assertFixtureMatchesLiveNotify(
-            "fixtures/functional/contested/fr-consented-notice-of-change-stub.json"
+            "fixtures/functional/consented/fr-consented-notice-of-change-stub.json"
         );
     }
+
+
 
     // -------------------------
     // INTERVENERS SCENARIOS
