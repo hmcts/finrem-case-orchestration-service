@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -26,6 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredIntervenersPostalAddresses;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isApplicantAddressRequired;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isRespondentAddressRequired;
@@ -92,7 +93,7 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
             .toArray(new SendCorrespondenceEvent[0]));
         // Note: sendCorrespondenceEvents was simulated under notificationAuditService.createNotificationAuditRows
         // The following validation should be invoked after createNotificationAuditRows
-        List<String> errors = validateRequiredPostalAddresses(finremCaseData, sendCorrespondenceEvents);
+        List<String> errors = validateMissingPostalAddresses(finremCaseData, sendCorrespondenceEvents);
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(finremCaseData, errors);
         }
@@ -100,15 +101,17 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
         return response(finremCaseData);
     }
 
-    private List<String> validateRequiredPostalAddresses(FinremCaseData finremCaseData,
-                                                         List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
-        return new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(finremCaseData, EventType.MANAGE_HEARINGS,
-            isApplicantAddressRequired(sendCorrespondenceEvents),
-            isRespondentAddressRequired(sendCorrespondenceEvents)));
+    private List<String> validateMissingPostalAddresses(FinremCaseData finremCaseData, List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        EventType eventType = EventType.MANAGE_HEARINGS;
+        List<String> errors = new ArrayList<>(
+            validateRequiredPostalAddresses(finremCaseData, eventType,
+                isApplicantAddressRequired(sendCorrespondenceEvents),
+                isRespondentAddressRequired(sendCorrespondenceEvents)));
+        errors.addAll(validateRequiredIntervenersPostalAddresses(finremCaseData, eventType, true, true, true, true));
+        return errors;
     }
 
-    private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
-                                             SendCorrespondenceEvent... events) {
+    private void createNotificationAuditRows(FinremCallbackRequest callbackRequest, SendCorrespondenceEvent... events) {
         Arrays.stream(events)
             .filter(Objects::nonNull)
             .forEach(event -> notificationAuditService.createAuditsForCorrespondence(
