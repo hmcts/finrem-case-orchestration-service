@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -118,12 +117,12 @@ public class ContactDetailsValidator {
      */
     public static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         // DFR-4704 - to simplify the logic by FinremCaseData.getAppSolicitorAddress
-        if (isContested(caseData)) {
+        if (caseData.isContestedApplication()) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && postCodeIsInvalid(wrapper.getApplicantSolicitorAddress())) {
                 errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
             }
-        } else if (isConsented(caseData)
+        } else if (caseData.isConsentedApplication()
             && caseData.isApplicantRepresentedByASolicitor()
             && postCodeIsInvalid(wrapper.getSolicitorAddress())) {
             errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
@@ -319,13 +318,13 @@ public class ContactDetailsValidator {
      */
     public static boolean checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                                  List<String> errors) {
-        if (isContested(caseData)) {
+        if (caseData.isContestedApplication()) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && !isValidEmailAddress(wrapper.getApplicantSolicitorEmail())) {
                 errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getApplicantSolicitorEmail()));
                 return false;
             }
-        } else if (isConsented(caseData)
+        } else if (caseData.isConsentedApplication()
             && caseData.isApplicantRepresentedByASolicitor()
             && !isValidEmailAddress(wrapper.getSolicitorEmail())) {
             errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getSolicitorEmail()));
@@ -480,6 +479,43 @@ public class ContactDetailsValidator {
         return errors;
     }
 
+    /**
+     * Validates that the selected interveners on a case have a postal address, returning an error
+     * message for each intervener that is missing one.
+     *
+     * <p>Each {@code validateIntervenerN} flag controls whether the corresponding intervener
+     * (one to four) is checked. Interveners whose flag is {@code false} are skipped, so callers
+     * can restrict validation to only the interveners relevant to the current event.</p>
+     *
+     * @param caseData            the {@link FinremCaseData} containing the addresses to validate
+     * @param eventType           the event being processed, used when generating the error messages
+     * @param validateIntervener1 {@code true} to validate intervener one's postal address
+     * @param validateIntervener2 {@code true} to validate intervener two's postal address
+     * @param validateIntervener3 {@code true} to validate intervener three's postal address
+     * @param validateIntervener4 {@code true} to validate intervener four's postal address
+     * @return a list of validation error messages; empty if no selected intervener is missing a
+     *         postal address
+     */
+    public static List<String> validateRequiredIntervenersPostalAddresses(
+        FinremCaseData caseData, EventType eventType,
+        boolean validateIntervener1, boolean validateIntervener2, boolean validateIntervener3, boolean validateIntervener4) {
+        List<String> errors = new ArrayList<>();
+
+        if (validateIntervener1) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerOne(), eventType, errors);
+        }
+        if (validateIntervener2) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerTwo(), eventType, errors);
+        }
+        if (validateIntervener3) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerThree(), eventType, errors);
+        }
+        if (validateIntervener4) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerFour(), eventType, errors);
+        }
+        return errors;
+    }
+
     private static String getOrganisationId(OrganisationPolicy policy) {
         return Optional.ofNullable(policy)
             .map(OrganisationPolicy::getOrganisation)
@@ -563,14 +599,6 @@ public class ContactDetailsValidator {
         }
     }
 
-    private static boolean isContested(FinremCaseData caseData) {
-        return caseData.getCcdCaseType() == CaseType.CONTESTED;
-    }
-
-    private static boolean isConsented(FinremCaseData caseData) {
-        return caseData.getCcdCaseType() == CaseType.CONSENTED;
-    }
-
     private static void checkForMissingApplicantPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                               EventType eventType, List<String> errors) {
         if (caseData.isApplicantRepresentedByASolicitor()) {
@@ -596,6 +624,14 @@ public class ContactDetailsValidator {
 
         if (postalAddressIsMissing(wrapper.getRespondentAddress(), wrapper.getRespondentResideOutsideUK())) {
             errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent", eventType.getDisplayName()));
+        }
+    }
+
+    private static void checkForMissingIntervenerPostalAddress(IntervenerWrapper wrapper,
+                                                               EventType eventType, List<String> errors) {
+        if (postalAddressIsMissing(wrapper.getIntervenerAddress(), wrapper.getIntervenerResideOutsideUK())) {
+            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Intervener %s"
+                .formatted(wrapper.getIntervenerType().getIntervenerId()), eventType.getDisplayName()));
         }
     }
 
