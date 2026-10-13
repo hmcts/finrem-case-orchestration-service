@@ -36,7 +36,11 @@ public class CUIApplicantDocumentUploadAboutToSubmitHandler extends CUIDocumentU
                                                           CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
                                                           CUIDocumentsCategoriser documentsCategoriser,
                                                           CitizenDocumentSorter citizenDocumentSorter) {
-        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, documentsCategoriser, citizenDocumentsUploadedCorresponder, citizenDocumentSorter);
+        super(finremCaseDetailsMapper,
+            correspondenceEventAuditOrchestrationService,
+            documentsCategoriser,
+            citizenDocumentsUploadedCorresponder,
+            citizenDocumentSorter);
     }
 
     /**

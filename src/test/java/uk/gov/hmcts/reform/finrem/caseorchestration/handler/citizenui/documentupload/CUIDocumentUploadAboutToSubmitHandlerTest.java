@@ -112,19 +112,19 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
             : NotificationParty.CITIZEN_RESPONDENT;
         CUIDocumentUploadAboutToSubmitHandler handler = CitizenPartyType.APPLICANT.equals(party)
             ? new CUIApplicantDocumentUploadAboutToSubmitHandler(
-            mapper,
-            correspondenceEventAuditOrchestrationService,
-            citizenDocumentsUploadedCorresponder,
-            documentsCategoriser,
-            citizenDocumentSorter
-        )
-            : new CUIRespondentDocumentUploadAboutToSubmitHandler(
-            mapper,
-            correspondenceEventAuditOrchestrationService,
-            citizenDocumentsUploadedCorresponder,
-            documentsCategoriser,
-            citizenDocumentSorter
-        );
+                mapper,
+                correspondenceEventAuditOrchestrationService,
+                citizenDocumentsUploadedCorresponder,
+                documentsCategoriser,
+                citizenDocumentSorter
+            ) :
+            new CUIRespondentDocumentUploadAboutToSubmitHandler(
+                mapper,
+                correspondenceEventAuditOrchestrationService,
+                citizenDocumentsUploadedCorresponder,
+                documentsCategoriser,
+                citizenDocumentSorter
+            );
 
         return new HandlerCase(
             handler,

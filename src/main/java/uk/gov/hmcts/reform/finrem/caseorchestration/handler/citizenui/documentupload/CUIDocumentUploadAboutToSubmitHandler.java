@@ -26,7 +26,8 @@ public abstract class CUIDocumentUploadAboutToSubmitHandler extends FinremAboutT
     protected final CitizenDocumentSorter citizenDocumentSorter;
 
     protected CUIDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                    CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService, CUIDocumentsCategoriser documentsCategoriser,
+                                                    CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
+                                                    CUIDocumentsCategoriser documentsCategoriser,
                                                     CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
                                                     CitizenDocumentSorter citizenDocumentSorter) {
         super(finremCaseDetailsMapper);
