@@ -166,41 +166,41 @@ public class PartyService {
     /**
      * Determines whether intervener one is currently active on the case.
      *
-     * @param caseData the case details containing the intervener data
+     * @param caseData the case datails containing the intervener data
      * @return {@code true} if intervener one is active, {@code false} otherwise
      */
-    public boolean isIntervenerOneActive(FinremCaseDetails caseData) {
-        return isIntervenerActive(caseData.getData().getIntervenerOne());
+    public boolean isIntervenerOneActive(FinremCaseData caseData) {
+        return isIntervenerActive(caseData.getIntervenerOne());
     }
 
     /**
      * Determines whether intervener two is currently active on the case.
      *
-     * @param caseData the case details containing the intervener data
+     * @param caseData the case datails containing the intervener data
      * @return {@code true} if intervener two is active, {@code false} otherwise
      */
-    public boolean isIntervenerTwoActive(FinremCaseDetails caseData) {
-        return isIntervenerActive(caseData.getData().getIntervenerTwo());
+    public boolean isIntervenerTwoActive(FinremCaseData caseData) {
+        return isIntervenerActive(caseData.getIntervenerTwo());
     }
 
     /**
      * Determines whether intervener three is currently active on the case.
      *
-     * @param caseData the case details containing the intervener data
+     * @param caseData the case datails containing the intervener data
      * @return {@code true} if intervener three is active, {@code false} otherwise
      */
-    public boolean isIntervenerThreeActive(FinremCaseDetails caseData) {
-        return isIntervenerActive(caseData.getData().getIntervenerThree());
+    public boolean isIntervenerThreeActive(FinremCaseData caseData) {
+        return isIntervenerActive(caseData.getIntervenerThree());
     }
 
     /**
      * Determines whether intervener four is currently active on the case.
      *
-     * @param caseData the case details containing the intervener data
+     * @param caseData the case datails containing the intervener data
      * @return {@code true} if intervener four is active, {@code false} otherwise
      */
-    public boolean isIntervenerFourActive(FinremCaseDetails caseData) {
-        return isIntervenerActive(caseData.getData().getIntervenerFour());
+    public boolean isIntervenerFourActive(FinremCaseData caseData) {
+        return isIntervenerActive(caseData.getIntervenerFour());
     }
 
     private List<DynamicMultiSelectListElement> getActiveSolicitors(FinremCaseData caseData) {

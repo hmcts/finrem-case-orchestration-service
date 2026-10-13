@@ -448,7 +448,7 @@ class PartyServiceTest {
         accessor.stubWithOrganisation()
             .accept(finremCaseData, organisationPolicy(TEST_ORG_ID, INTERVENER_ORG_POLICY_ASSIGNED_ROLE));
 
-        assertThat(accessor.isActive().test(partyService, finremCaseDetails)).isTrue();
+        assertThat(accessor.isActive().test(partyService, finremCaseData)).isTrue();
     }
 
     @ParameterizedTest(name = "{0}")
@@ -456,7 +456,7 @@ class PartyServiceTest {
     void givenIntervenerWithoutOrganisation_isIntervenerActive_returnsFalse(IntervenerAccessor accessor) {
         accessor.stubWithOrganisation().accept(finremCaseData, null);
 
-        assertThat(accessor.isActive().test(partyService, finremCaseDetails)).isFalse();
+        assertThat(accessor.isActive().test(partyService, finremCaseData)).isFalse();
     }
 
     @ParameterizedTest(name = "{0}")
@@ -464,7 +464,7 @@ class PartyServiceTest {
     void givenNullIntervener_isIntervenerActive_returnsFalse(IntervenerAccessor accessor) {
         accessor.stubNullWrapper().accept(finremCaseData);
 
-        assertThat(accessor.isActive().test(partyService, finremCaseDetails)).isFalse();
+        assertThat(accessor.isActive().test(partyService, finremCaseData)).isFalse();
     }
 
     @Test
@@ -476,10 +476,10 @@ class PartyServiceTest {
         when(finremCaseData.getIntervenerThree()).thenReturn(IntervenerThree.builder().build());
         when(finremCaseData.getIntervenerFour()).thenReturn(null);
 
-        assertThat(partyService.isIntervenerOneActive(finremCaseDetails)).isTrue();
-        assertThat(partyService.isIntervenerTwoActive(finremCaseDetails)).isFalse();
-        assertThat(partyService.isIntervenerThreeActive(finremCaseDetails)).isFalse();
-        assertThat(partyService.isIntervenerFourActive(finremCaseDetails)).isFalse();
+        assertThat(partyService.isIntervenerOneActive(finremCaseData)).isTrue();
+        assertThat(partyService.isIntervenerTwoActive(finremCaseData)).isFalse();
+        assertThat(partyService.isIntervenerThreeActive(finremCaseData)).isFalse();
+        assertThat(partyService.isIntervenerFourActive(finremCaseData)).isFalse();
     }
 
     private static Stream<Arguments> intervenerActiveAccessors() {
@@ -511,6 +511,6 @@ class PartyServiceTest {
         String label,
         BiConsumer<FinremCaseData, OrganisationPolicy> stubWithOrganisation,
         Consumer<FinremCaseData> stubNullWrapper,
-        BiPredicate<PartyService, FinremCaseDetails> isActive) {
+        BiPredicate<PartyService, FinremCaseData> isActive) {
     }
 }
