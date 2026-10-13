@@ -30,6 +30,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetails
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isApplicantAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerFourAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerOneAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerThreeAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerTwoAddressRequired;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isRespondentAddressRequired;
 
 @Slf4j
@@ -112,10 +116,10 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
                 isApplicantAddressRequired(sendCorrespondenceEvents),
                 isRespondentAddressRequired(sendCorrespondenceEvents)));
         errors.addAll(validateRequiredIntervenersPostalAddresses(finremCaseData, eventType,
-            partyService.isIntervenerOneActive(finremCaseData),
-            partyService.isIntervenerTwoActive(finremCaseData),
-            partyService.isIntervenerThreeActive(finremCaseData),
-            partyService.isIntervenerFourActive(finremCaseData)));
+            partyService.isIntervenerOneActive(finremCaseData) && isIntervenerOneAddressRequired(sendCorrespondenceEvents),
+            partyService.isIntervenerTwoActive(finremCaseData) && isIntervenerTwoAddressRequired(sendCorrespondenceEvents),
+            partyService.isIntervenerThreeActive(finremCaseData) && isIntervenerThreeAddressRequired(sendCorrespondenceEvents),
+            partyService.isIntervenerFourActive(finremCaseData) && isIntervenerFourAddressRequired(sendCorrespondenceEvents)));
         return errors;
     }
 
