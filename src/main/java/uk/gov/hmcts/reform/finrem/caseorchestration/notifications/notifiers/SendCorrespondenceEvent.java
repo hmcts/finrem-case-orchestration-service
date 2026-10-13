@@ -224,6 +224,50 @@ public class SendCorrespondenceEvent {
         return isPartyAddressRequired(sendCorrespondenceEvents, NotificationParty.RESPONDENT);
     }
 
+    /**
+     * Determines whether the intervener1's address is required for the given correspondence events.
+     *
+     * @param sendCorrespondenceEvents the correspondence events to evaluate
+     * @return {@code true} if any of the events involves sending correspondence to the intervener1
+     *         that requires an address, otherwise {@code false}
+     */
+    public static boolean isIntervenerOneAddressRequired(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return isPartyAddressRequired(sendCorrespondenceEvents, NotificationParty.INTERVENER_ONE);
+    }
+
+    /**
+     * Determines whether the intervener2's address is required for the given correspondence events.
+     *
+     * @param sendCorrespondenceEvents the correspondence events to evaluate
+     * @return {@code true} if any of the events involves sending correspondence to the intervener2
+     *         that requires an address, otherwise {@code false}
+     */
+    public static boolean isIntervenerTwoAddressRequired(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return isPartyAddressRequired(sendCorrespondenceEvents, NotificationParty.INTERVENER_TWO);
+    }
+
+    /**
+     * Determines whether the intervener3's address is required for the given correspondence events.
+     *
+     * @param sendCorrespondenceEvents the correspondence events to evaluate
+     * @return {@code true} if any of the events involves sending correspondence to the intervener3
+     *         that requires an address, otherwise {@code false}
+     */
+    public static boolean isIntervenerThreeAddressRequired(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return isPartyAddressRequired(sendCorrespondenceEvents, NotificationParty.INTERVENER_THREE);
+    }
+
+    /**
+     * Determines whether the intervener4's address is required for the given correspondence events.
+     *
+     * @param sendCorrespondenceEvents the correspondence events to evaluate
+     * @return {@code true} if any of the events involves sending correspondence to the intervener4
+     *         that requires an address, otherwise {@code false}
+     */
+    public static boolean isIntervenerFourAddressRequired(List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return isPartyAddressRequired(sendCorrespondenceEvents, NotificationParty.INTERVENER_FOUR);
+    }
+
     private static boolean isPartyAddressRequired(List<SendCorrespondenceEvent> events, NotificationParty party) {
         return events.stream()
             .filter(event -> event.getNotificationParties().contains(party))
