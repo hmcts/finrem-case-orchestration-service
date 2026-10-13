@@ -5,6 +5,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -104,6 +106,8 @@ class CUILinkToCaseSubmittedHandlerTest {
 
     private static final class TestHandler extends CUILinkToCaseSubmittedHandler {
 
+        private static final Logger LOGGER = LoggerFactory.getLogger(TestHandler.class);
+
         private final NotificationParty notificationParty;
 
         private TestHandler(
@@ -147,6 +151,11 @@ class CUILinkToCaseSubmittedHandlerTest {
         @Override
         protected NotificationParty notificationParty() {
             return notificationParty;
+        }
+
+        @Override
+        protected Logger getLogger() {
+            return LOGGER;
         }
     }
 }

@@ -1,12 +1,13 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.corresponder.CorrespondenceSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -43,6 +44,9 @@ class CorrespondenceSubmittedHandlerTest {
     @Mock
     private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
+    @Mock
+    private Logger logger;
+
     private TestHandler handler;
 
     @BeforeEach
@@ -51,7 +55,8 @@ class CorrespondenceSubmittedHandlerTest {
             finremCaseDetailsMapper,
             evidenceManagementDeleteService,
             retryExecutor,
-            correspondenceEventAuditOrchestrationService
+            correspondenceEventAuditOrchestrationService,
+            logger
         );
     }
 
@@ -90,6 +95,17 @@ class CorrespondenceSubmittedHandlerTest {
                 correspondenceEvent,
                 "markPendingNotificationsAsSent"
             );
+
+        verify(logger).info(
+            CallbackHandlerLogger.submitted(callbackRequest)
+        );
+
+        verify(logger, never()).warn(
+            anyString(),
+            any(),
+            any(),
+            any()
+        );
 
         assertThat(correspondenceEvent.getEventId())
             .isEqualTo(
@@ -135,6 +151,17 @@ class CorrespondenceSubmittedHandlerTest {
                 any(),
                 anyString()
             );
+
+        verify(logger).info(
+            CallbackHandlerLogger.submitted(callbackRequest)
+        );
+
+        verify(logger).warn(
+            "{} - Failed to publish correspondence event. eventId: {}, description: {}",
+            caseDetails.getCaseIdAsString(),
+            EventType.CUI_APPLICANT_DOCUMENT_UPLOAD.getCcdType(),
+            TASK_DESCRIPTION
+        );
     }
 
     private static FinremCaseDetails caseDetailsWithNotificationEventId() {
@@ -165,13 +192,16 @@ class CorrespondenceSubmittedHandlerTest {
 
     private static final class TestHandler extends CorrespondenceSubmittedHandler {
 
+        private final Logger logger;
+
         private SendCorrespondenceEvent correspondenceEvent;
 
         private TestHandler(
             FinremCaseDetailsMapper finremCaseDetailsMapper,
             EvidenceManagementDeleteService evidenceManagementDeleteService,
             RetryExecutor retryExecutor,
-            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService
+            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
+            Logger logger
         ) {
             super(
                 finremCaseDetailsMapper,
@@ -179,6 +209,7 @@ class CorrespondenceSubmittedHandlerTest {
                 retryExecutor,
                 correspondenceEventAuditOrchestrationService
             );
+            this.logger = logger;
         }
 
         void setCorrespondenceEvent(
@@ -207,6 +238,11 @@ class CorrespondenceSubmittedHandlerTest {
             EventType eventType
         ) {
             return true;
+        }
+
+        @Override
+        protected Logger getLogger() {
+            return logger;
         }
     }
 }

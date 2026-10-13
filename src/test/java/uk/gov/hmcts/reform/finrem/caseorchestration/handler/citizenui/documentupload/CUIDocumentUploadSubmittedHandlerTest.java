@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -96,8 +98,9 @@ class CUIDocumentUploadSubmittedHandlerTest {
             .isEqualTo("Send citizen documents uploaded email: [APPLICANT]");
     }
 
-    private static final class TestHandler
-        extends CUIDocumentUploadSubmittedHandler {
+    private static final class TestHandler extends CUIDocumentUploadSubmittedHandler {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger(CUIDocumentUploadSubmittedHandlerTest.TestHandler.class);
 
         private TestHandler(
             FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -135,6 +138,11 @@ class CUIDocumentUploadSubmittedHandlerTest {
         @Override
         public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
             return true;
+        }
+
+        @Override
+        protected Logger getLogger() {
+            return LOGGER;
         }
     }
 }
