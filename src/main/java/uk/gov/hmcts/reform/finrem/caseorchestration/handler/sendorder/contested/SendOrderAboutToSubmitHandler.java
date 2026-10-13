@@ -115,13 +115,8 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
         FinremCaseData caseData = caseDetails.getData();
 
         List<String> selectedParties = partyService.getCheckedActiveParties(caseDetails);
-        List<String> errors = validateRequiredPostalAddresses(caseData, callbackRequest.getEventType(),
-            partyService.isApplicantPartySelected(caseDetails), partyService.isRespondentPartySelected(caseDetails));
-        errors.addAll(validateRequiredIntervenersPostalAddresses(caseData, callbackRequest.getEventType(),
-            selectedParties.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
-            selectedParties.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
-            selectedParties.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
-            selectedParties.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode())));
+        List<String> errors = validateMissingPostalAddresses(caseDetails, callbackRequest.getEventType(),
+            selectedParties);
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(caseData, errors);
         }
@@ -161,6 +156,19 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
         draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
 
         return response(caseDetails.getData());
+    }
+
+    private List<String> validateMissingPostalAddresses(FinremCaseDetails caseDetails, EventType eventType,
+                                                        List<String> selectedParties) {
+        FinremCaseData caseData = caseDetails.getData();
+        List<String> errors = validateRequiredPostalAddresses(caseData, eventType,
+            partyService.isApplicantPartySelected(caseDetails), partyService.isRespondentPartySelected(caseDetails));
+        errors.addAll(validateRequiredIntervenersPostalAddresses(caseData, eventType,
+            selectedParties.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
+            selectedParties.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
+            selectedParties.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
+            selectedParties.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode())));
+        return errors;
     }
 
     private void handleAdditionalDocumentsUploadedAndPrint(FinremCaseData caseData,
