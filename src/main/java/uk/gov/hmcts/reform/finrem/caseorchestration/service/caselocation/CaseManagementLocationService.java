@@ -5,8 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CourtRefData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -20,55 +21,39 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CaseManagementLocationService {
 
-    private static final String COURT_LIST_SUFFIX = "CourtList";
-
     private final Map<String, CourtRefData> courtReferenceDataByName;
 
     /**
      * Resolves the CCD case location from the selected court.
      *
-     * @param caseData CCD case data
+     * @param finremCaseData CCD case data
      * @return CaseLocation containing base location and region,
      *         or null if no matching court is found
      */
-    public CaseLocation getCaseLocation(Map<String, Object> caseData) {
-        List<Map.Entry<String, Object>> courtEntries = caseData.entrySet()
-            .stream()
-            .filter(entry -> entry.getKey().endsWith(COURT_LIST_SUFFIX))
-            .toList();
+    public CaseLocation getCaseLocation(FinremCaseData finremCaseData) {
 
-        if (courtEntries.isEmpty()) {
-            log.warn("No court list field found in case data");
-            return null;
-        }
+        Optional<String> selectedAllocatedCourtOptional = Optional.ofNullable(finremCaseData)
+            .map(FinremCaseData::getSelectedAllocatedCourt)
+            .map(String::trim)
+            .filter(value -> !value.isEmpty());
 
-        if (courtEntries.size() > 1) {
-            log.warn(
-                "Multiple court list fields found in case data: {}. Using last match: {}",
-                courtEntries.stream().map(Map.Entry::getKey).toList(),
-                courtEntries.getLast().getKey()
-            );
-        }
+        if (selectedAllocatedCourtOptional.isPresent()) {
+            String selectedAllocatedCourt = selectedAllocatedCourtOptional.get();
+            String courtKey = selectedAllocatedCourt.toLowerCase(Locale.ROOT);
+            CourtRefData courtRefData = courtReferenceDataByName.get(courtKey);
 
-        Map.Entry<String, Object> courtEntry = courtEntries.getLast();
+            if (courtRefData == null) {
+                log.warn("No court reference data found for case id: {}, court name: {}",
+                    finremCaseData.getCcdCaseId(), selectedAllocatedCourt);
+                return null;
+            }
 
-        if (courtEntry == null || courtEntry.getValue() == null || courtEntry.getValue().toString().isBlank()) {
-            return null;
-        }
-
-        CourtRefData courtRefData = courtReferenceDataByName.get(
-            Optional.ofNullable(courtEntry.getValue())
-                .map(Object::toString)
-                .map(String::toLowerCase)
-                .orElse(null)
-        );
-
-        if (courtRefData == null) {
-            log.warn("No court reference data found for court name: {}", courtEntry.getValue());
-            return null;
-        } else {
-            log.info("Found court reference data for court name: {}: {}", courtEntry.getValue(), courtRefData);
+            log.info("Found court reference data for case id: {}, court name: {}: {}",
+                finremCaseData.getCcdCaseId(), selectedAllocatedCourt, courtRefData);
             return CaseLocation.builder().baseLocation(courtRefData.getEpimmsId()).region(courtRefData.getRegionId()).build();
+        } else {
+            log.warn("No court set case id: {}", finremCaseData != null ? finremCaseData.getCcdCaseId() : null);
+            return null;
         }
     }
 }

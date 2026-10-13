@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -93,12 +92,14 @@ public class EvidenceManagementAuditService {
     }
 
     private FileUploadResponse createUploadResponse(JsonNode document) {
+        String selfHref = document.path("_links").path("self").path("href").textValue();
+        if (selfHref == null) {
+            throw new IllegalStateException("self rel link not found");
+        }
+
         return FileUploadResponse.builder()
             .status(HttpStatus.OK)
-            .fileUrl(new HalLinkDiscoverer()
-                .findLinkWithRel("self", document.toString())
-                .orElseThrow(() -> new IllegalStateException("self rel link not found"))
-                .getHref())
+            .fileUrl(selfHref)
             .fileName(document.get("originalDocumentName").asText())
             .createdBy(document.get("createdBy") != null ? document.get("createdBy").asText() : "")
             .createdOn(document.get("createdOn").asText())
