@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.documentupload;
 
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.CorrespondenceSubmittedHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.corresponder.CorrespondenceSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;

@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.linktocase;
 
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.CorrespondenceSubmittedHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.corresponder.CorrespondenceSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
@@ -10,8 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citiz
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
-public abstract class CUILinkToCaseSubmittedHandler
-    extends CorrespondenceSubmittedHandler {
+public abstract class CUILinkToCaseSubmittedHandler extends CorrespondenceSubmittedHandler {
 
     private final SignInConfirmationCorresponder signInConfirmationCorresponder;
 
