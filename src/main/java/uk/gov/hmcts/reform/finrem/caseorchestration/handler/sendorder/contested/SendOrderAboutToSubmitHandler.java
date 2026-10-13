@@ -56,6 +56,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Stream.concat;
@@ -161,13 +162,18 @@ public class SendOrderAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
     private List<String> validateMissingPostalAddresses(FinremCaseDetails caseDetails, EventType eventType,
                                                         List<String> selectedParties) {
         FinremCaseData caseData = caseDetails.getData();
-        List<String> errors = validateRequiredPostalAddresses(caseData, eventType,
-            partyService.isApplicantPartySelected(caseDetails), partyService.isRespondentPartySelected(caseDetails));
+        Predicate<CaseRole> isPartySelected = role -> selectedParties.contains(role.getCcdCode());
+
+        List<String> errors = new ArrayList<>(validateRequiredPostalAddresses(caseData, eventType,
+            isPartySelected.test(CaseRole.APP_SOLICITOR),
+            isPartySelected.test(CaseRole.RESP_SOLICITOR)));
+
         errors.addAll(validateRequiredIntervenersPostalAddresses(caseData, eventType,
-            selectedParties.contains(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
-            selectedParties.contains(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
-            selectedParties.contains(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
-            selectedParties.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode())));
+            isPartySelected.test(CaseRole.INTVR_SOLICITOR_1),
+            isPartySelected.test(CaseRole.INTVR_SOLICITOR_2),
+            isPartySelected.test(CaseRole.INTVR_SOLICITOR_3),
+            isPartySelected.test(CaseRole.INTVR_SOLICITOR_4)));
+
         return errors;
     }
 

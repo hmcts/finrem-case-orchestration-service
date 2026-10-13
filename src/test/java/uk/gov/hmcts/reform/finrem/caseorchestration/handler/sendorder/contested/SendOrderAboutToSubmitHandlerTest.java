@@ -797,75 +797,120 @@ class SendOrderAboutToSubmitHandlerTest {
                 coversheet));
     }
 
-    @Test
-    void givenMissingApplicantOrRespondentAddresses_whenHandled_thenPopulateErrors() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenCheckedPartyHasNoPostalAddress_whenHandled_thenReturnAddressErrors(boolean applicantSelected) {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
         callbackRequest.setEventType(SEND_ORDER);
 
-        List<String> expectedErrors = new ArrayList<>(List.of("some error message"));
+        String caseRole = applicantSelected ? CaseRole.APP_SOLICITOR.getCcdCode() : CaseRole.RESP_SOLICITOR.getCcdCode();
+        when(partyService.getCheckedActiveParties(callbackRequest.getCaseDetails()))
+            .thenReturn(List.of(caseRole));
+
+        List<String> expectedErrors = new ArrayList<>(List.of("missing address error"));
+
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
-                eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean()))
-            .thenReturn(expectedErrors);
+                eq(caseData), eq(SEND_ORDER), eq(applicantSelected), eq(!applicantSelected)))
+            .thenReturn(new ArrayList<>(expectedErrors));
+
+        // Default: no errors for any combination
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
+            .thenReturn(List.of());
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
         assertAll(
             () -> assertThat(response.getErrors()).isEqualTo(expectedErrors),
-            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService),
-            () -> verify(partyService).isApplicantPartySelected(callbackRequest.getCaseDetails()),
-            () -> verify(partyService).isRespondentPartySelected(callbackRequest.getCaseDetails())
+            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService)
         );
     }
 
-    @Test
-    void givenMissingIntervenersAddresses_whenHandled_thenPopulateErrors() {
+    @ParameterizedTest(name = "intervener {0}")
+    @ValueSource(ints = {1, 2, 3, 4})
+    void givenCheckedIntervenerHasNoPostalAddress_whenHandled_thenReturnAddressErrors(int intervenerNumber) {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
         callbackRequest.setEventType(SEND_ORDER);
 
-        List<String> expectedErrors = new ArrayList<>(List.of("some error message"));
+        String intervenerRole = switch (intervenerNumber) {
+            case 1 -> CaseRole.INTVR_SOLICITOR_1.getCcdCode();
+            case 2 -> CaseRole.INTVR_SOLICITOR_2.getCcdCode();
+            case 3 -> CaseRole.INTVR_SOLICITOR_3.getCcdCode();
+            case 4 -> CaseRole.INTVR_SOLICITOR_4.getCcdCode();
+            default -> throw new IllegalArgumentException("Unexpected intervener: " + intervenerNumber);
+        };
+        when(partyService.getCheckedActiveParties(callbackRequest.getCaseDetails()))
+            .thenReturn(List.of(intervenerRole));
+
+        List<String> expectedErrors = new ArrayList<>(List.of("missing address error"));
+
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
                 eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean()))
             .thenReturn(new ArrayList<>());
+
+        // Default: no errors for any combination
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
                 eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
+            .thenReturn(List.of());
+
+        // Errors only when the intervener under test is the flagged one
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+                eq(caseData), eq(SEND_ORDER),
+                eq(intervenerNumber == 1), eq(intervenerNumber == 2),
+                eq(intervenerNumber == 3), eq(intervenerNumber == 4)))
             .thenReturn(expectedErrors);
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
         assertAll(
             () -> assertThat(response.getErrors()).isEqualTo(expectedErrors),
-            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService),
-            () -> verify(partyService).isApplicantPartySelected(callbackRequest.getCaseDetails()),
-            () -> verify(partyService).isRespondentPartySelected(callbackRequest.getCaseDetails())
+            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService)
         );
     }
 
     @Test
-    void givenIntervenerOneSelectedAndMissingItsAddress_whenHandled_thenPopulateErrors() {
+    void givenMultiplePartiesCheckedWithMissingPostalAddresses_whenHandled_thenReturnCombinedAddressErrors() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
         callbackRequest.setEventType(SEND_ORDER);
 
         when(partyService.getCheckedActiveParties(callbackRequest.getCaseDetails())).thenReturn(List.of(
-            CaseRole.INTVR_SOLICITOR_1.getCcdCode()
+            CaseRole.APP_SOLICITOR.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode()
         ));
-        List<String> expectedErrors = new ArrayList<>(List.of("some error message"));
+
+        List<String> partyErrors = new ArrayList<>(List.of("applicant address missing"));
+        List<String> intervenerErrors = new ArrayList<>(List.of(
+            "intervener 1 address missing",
+            "intervener 3 address missing"));
+
+        // Default: no errors for any combination
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
                 eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean()))
             .thenReturn(new ArrayList<>());
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
                 eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
-            .thenReturn(List.of());
+            .thenReturn(new ArrayList<>());
+
+        // Errors only for the exact combination of parties checked
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), eq(true), eq(false)))
+            .thenReturn(partyErrors);
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
-                eq(caseData), eq(SEND_ORDER), eq(true), anyBoolean(), anyBoolean(), anyBoolean()))
-            .thenReturn(expectedErrors);
+                eq(caseData), eq(SEND_ORDER), eq(true), eq(false), eq(true), eq(false)))
+            .thenReturn(intervenerErrors);
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
         assertAll(
-            () -> assertThat(response.getErrors()).isEqualTo(expectedErrors),
-            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService),
-            () -> verify(partyService).isApplicantPartySelected(callbackRequest.getCaseDetails()),
-            () -> verify(partyService).isRespondentPartySelected(callbackRequest.getCaseDetails())
+            () -> assertThat(response.getErrors()).containsExactlyInAnyOrder(
+                "applicant address missing",
+                "intervener 1 address missing",
+                "intervener 3 address missing"),
+            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService)
         );
     }
 
