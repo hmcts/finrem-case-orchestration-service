@@ -126,6 +126,46 @@ public class PartyService {
     }
 
     /**
+     * Determines whether intervener one is currently active on the case.
+     *
+     * @param caseData the case details containing the intervener data
+     * @return {@code true} if intervener one is active, {@code false} otherwise
+     */
+    public boolean isIntervenerOneActive(FinremCaseDetails caseData) {
+        return isIntervenerActive(caseData.getData().getIntervenerOne());
+    }
+
+    /**
+     * Determines whether intervener two is currently active on the case.
+     *
+     * @param caseData the case details containing the intervener data
+     * @return {@code true} if intervener two is active, {@code false} otherwise
+     */
+    public boolean isIntervenerTwoActive(FinremCaseDetails caseData) {
+        return isIntervenerActive(caseData.getData().getIntervenerTwo());
+    }
+
+    /**
+     * Determines whether intervener three is currently active on the case.
+     *
+     * @param caseData the case details containing the intervener data
+     * @return {@code true} if intervener three is active, {@code false} otherwise
+     */
+    public boolean isIntervenerThreeActive(FinremCaseDetails caseData) {
+        return isIntervenerActive(caseData.getData().getIntervenerThree());
+    }
+
+    /**
+     * Determines whether intervener four is currently active on the case.
+     *
+     * @param caseData the case details containing the intervener data
+     * @return {@code true} if intervener four is active, {@code false} otherwise
+     */
+    public boolean isIntervenerFourActive(FinremCaseDetails caseData) {
+        return isIntervenerActive(caseData.getData().getIntervenerFour());
+    }
+
+    /**
      * Builds the list of all active parties on the case, used to populate
      * party-selection checkboxes such as "Who should receive this order?".
      *
@@ -225,7 +265,7 @@ public class PartyService {
     private void setIntervener(List<DynamicMultiSelectListElement> activeCaseParties,
                                IntervenerWrapper wrapper,
                                String intervener) {
-        if (wrapper != null && ObjectUtils.isNotEmpty(wrapper.getIntervenerOrganisation())) {
+        if (isIntervenerActive(wrapper)) {
             String assignedRole = wrapper.getIntervenerOrganisation().getOrgPolicyCaseAssignedRole();
             activeCaseParties.add(getDynamicMultiSelectListElement(assignedRole,
                 DISPLAY_LABEL.formatted(capitalize(intervener), wrapper.getIntervenerName())));
@@ -274,5 +314,9 @@ public class PartyService {
         return emptyIfNull(parties.getValue()).stream()
             .map(DynamicMultiSelectListElement::getCode)
             .toList();
+    }
+
+    private boolean isIntervenerActive(IntervenerWrapper wrapper) {
+        return wrapper != null && ObjectUtils.isNotEmpty(wrapper.getIntervenerOrganisation());
     }
 }
