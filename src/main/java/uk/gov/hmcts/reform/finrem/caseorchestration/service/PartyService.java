@@ -126,6 +126,44 @@ public class PartyService {
     }
 
     /**
+     * Builds the list of all active parties on the case, used to populate
+     * party-selection checkboxes such as "Who should receive this order?".
+     *
+     * <p>The returned list items contain, in order:
+     * <ol>
+     *   <li>active solicitors (applicant and respondent),</li>
+     *   <li>unrepresented parties, and</li>
+     *   <li>active interveners.</li>
+     * </ol>
+     *
+     * <p>Only the solicitors and unrepresented parties are pre-selected in the
+     * returned {@link DynamicMultiSelectList#getValue() value}. Interveners are
+     * available to select but are not selected by default.
+     *
+     * @param caseData the case data used to determine which parties are active
+     * @return a {@link DynamicMultiSelectList} whose list items are all active parties
+     *         and whose value is the pre-selected subset (solicitors and unrepresented parties)
+     */
+    public DynamicMultiSelectList getAllActivePartyList(FinremCaseData caseData) {
+        List<DynamicMultiSelectListElement> activeSolicitors = getActiveSolicitors(caseData);
+        List<DynamicMultiSelectListElement> unrepresentedParties = getUnrepresentedParties(caseData);
+
+        List<DynamicMultiSelectListElement> selectedActiveCaseParties = new ArrayList<>();
+        selectedActiveCaseParties.addAll(activeSolicitors);
+        selectedActiveCaseParties.addAll(unrepresentedParties);
+
+        List<DynamicMultiSelectListElement> activeCaseParties = new ArrayList<>();
+        activeCaseParties.addAll(activeSolicitors);
+        activeCaseParties.addAll(unrepresentedParties);
+        activeCaseParties.addAll(getActiveInterveners(caseData));
+
+        return DynamicMultiSelectList.builder()
+            .value(selectedActiveCaseParties)
+            .listItems(activeCaseParties)
+            .build();
+    }
+
+    /**
      * Determines whether intervener one is currently active on the case.
      *
      * @param caseData the case details containing the intervener data
@@ -163,44 +201,6 @@ public class PartyService {
      */
     public boolean isIntervenerFourActive(FinremCaseDetails caseData) {
         return isIntervenerActive(caseData.getData().getIntervenerFour());
-    }
-
-    /**
-     * Builds the list of all active parties on the case, used to populate
-     * party-selection checkboxes such as "Who should receive this order?".
-     *
-     * <p>The returned list items contain, in order:
-     * <ol>
-     *   <li>active solicitors (applicant and respondent),</li>
-     *   <li>unrepresented parties, and</li>
-     *   <li>active interveners.</li>
-     * </ol>
-     *
-     * <p>Only the solicitors and unrepresented parties are pre-selected in the
-     * returned {@link DynamicMultiSelectList#getValue() value}. Interveners are
-     * available to select but are not selected by default.
-     *
-     * @param caseData the case data used to determine which parties are active
-     * @return a {@link DynamicMultiSelectList} whose list items are all active parties
-     *         and whose value is the pre-selected subset (solicitors and unrepresented parties)
-     */
-    public DynamicMultiSelectList getAllActivePartyList(FinremCaseData caseData) {
-        List<DynamicMultiSelectListElement> activeSolicitors = getActiveSolicitors(caseData);
-        List<DynamicMultiSelectListElement> unrepresentedParties = getUnrepresentedParties(caseData);
-
-        List<DynamicMultiSelectListElement> selectedActiveCaseParties = new ArrayList<>();
-        selectedActiveCaseParties.addAll(activeSolicitors);
-        selectedActiveCaseParties.addAll(unrepresentedParties);
-
-        List<DynamicMultiSelectListElement> activeCaseParties = new ArrayList<>();
-        activeCaseParties.addAll(activeSolicitors);
-        activeCaseParties.addAll(unrepresentedParties);
-        activeCaseParties.addAll(getActiveInterveners(caseData));
-
-        return DynamicMultiSelectList.builder()
-            .value(selectedActiveCaseParties)
-            .listItems(activeCaseParties)
-            .build();
     }
 
     private List<DynamicMultiSelectListElement> getActiveSolicitors(FinremCaseData caseData) {
