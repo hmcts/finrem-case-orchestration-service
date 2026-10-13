@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
@@ -85,6 +86,9 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @Mock
+    private PartyService partyService;
 
     private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
 
@@ -342,7 +346,6 @@ class ManageHearingsAboutToSubmitHandlerTest {
         List<SendCorrespondenceEvent> events = List.of(event);
         when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
             eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
-
 
         try (MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class)) {
             List<String> calls = new ArrayList<>();
