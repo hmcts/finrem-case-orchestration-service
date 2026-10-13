@@ -441,7 +441,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
             var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
             assertThat(response.getErrors()).isEmpty();
-            // to guarantee the simulation should goes first before checking applicant or respondent address required
+            // to guarantee the simulation should go first before checking applicant or respondent address required
             assertThat(calls).containsExactly(
                 "createAuditsForCorrespondence",
                 "isApplicantAddressRequired",
