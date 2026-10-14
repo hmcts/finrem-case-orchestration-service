@@ -116,7 +116,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         if (existingList.isEmpty()
             && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             migrateExistingApplication(caseDetails, documents, userAuthorisation, isHearingRequired);
-
         } else {
             updateApplications(caseDetails, documents, userAuthorisation, isHearingRequired);
         }
@@ -333,10 +332,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         // Check whether the applicant's and respondent's addresses are missing to ensure the subsequent print action can proceed.
         List<String> errors = validateRequiredPostalAddresses(finremCaseData, getEventType());
-        if (!errors.isEmpty()) {
-            return errors;
-        }
-
         if (isHearingRequired) {
             List<SendCorrespondenceEvent> simulatedEvents = manageHearingsCorresponder
                 .buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
@@ -345,9 +340,9 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
                 applicationEventPublisher.publishEvent(event);
             });
 
-            return validateMissingPostalAddresses(callbackRequest.getFinremCaseData(), simulatedEvents);
+            errors.addAll(validateMissingPostalAddresses(callbackRequest.getFinremCaseData(), simulatedEvents));
         }
-        return List.of();
+        return errors;
     }
 
     private List<String> validateMissingPostalAddresses(FinremCaseData finremCaseData, List<SendCorrespondenceEvent> sendCorrespondenceEvents) {

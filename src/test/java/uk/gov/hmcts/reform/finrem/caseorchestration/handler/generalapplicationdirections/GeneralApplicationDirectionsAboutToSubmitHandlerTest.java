@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -39,9 +41,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationAudit;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
@@ -60,11 +64,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -81,6 +89,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredIntervenersPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
@@ -91,6 +100,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.NotificationType.POSTAL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -536,10 +550,13 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenIsHearingRequired_whenHandled_shouldValidateApplicantOrRespondentAddress(boolean isHearingRequired) {
-        List<String> expectedErrors = List.of("missing applicant or respondent address");
         contactDetailsValidatorMockedStatic
             .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH)))
-            .thenReturn(expectedErrors);
+            .thenReturn(new ArrayList<String>(List.of("missing applicant or respondent address")));
+        contactDetailsValidatorMockedStatic
+            .when(() -> validateRequiredIntervenersPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH),
+                anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
+            .thenReturn(List.of());
 
         List<GeneralApplicationsCollection> generalApplications = mock(List.class);
         GeneralApplicationWrapper generalApplicationWrapper = mock(GeneralApplicationWrapper.class);
@@ -556,9 +573,67 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         assertThat(response.getErrors()).containsOnly("missing applicant or respondent address");
         verify(generalApplicationHelper).populateGeneralApplicationSender(finremCaseData, generalApplications);
         verify(generalApplicationDirectionsService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
-        verify(manageHearingsCorresponder, never()).buildHearingCorrespondenceEventsIfNeeded(any(), any());
-        verify(applicationEventPublisher, never()).publishEvent((SendCorrespondenceEvent) any());
-        verifyNoInteractions(partyService);
+    }
+
+    static Stream<Arguments> hearingRequiredAndIntervenerIndex() {
+        return Stream.of(true, false).flatMap(isHearingRequired ->
+            IntStream.rangeClosed(1, 4).mapToObj(index -> Arguments.of(isHearingRequired, index)));
+    }
+
+    @ParameterizedTest(name = "isHearingRequired={0}, intervener={1}")
+    @MethodSource("hearingRequiredAndIntervenerIndex")
+    void givenIsHearingRequiredWithAnActiveIntervener_whenHandled_shouldValidateIntervenerAddress(
+        boolean isHearingRequired, int intervenerIndex) {
+
+        String expectedError = "missing intervener " + intervenerIndex + " address";
+
+        contactDetailsValidatorMockedStatic
+            .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH)))
+            .thenReturn(new ArrayList<>());
+        contactDetailsValidatorMockedStatic
+            .when(() -> validateRequiredIntervenersPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH),
+                eq(intervenerIndex == 1), eq(intervenerIndex == 2), eq(intervenerIndex == 3), eq(intervenerIndex == 4)))
+            .thenReturn(List.of(expectedError));
+
+        List<GeneralApplicationsCollection> generalApplications = mock(List.class);
+        GeneralApplicationWrapper generalApplicationWrapper = mock(GeneralApplicationWrapper.class);
+        when(generalApplicationWrapper.getGeneralApplications()).thenReturn(generalApplications);
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder()
+            .generalApplicationWrapper(generalApplicationWrapper)
+            .build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+
+        when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(isHearingRequired);
+        SendCorrespondenceEvent event1 = spy(SendCorrespondenceEvent.builder()
+            .notificationParties(List.of(intervenerParty(intervenerIndex)))
+            .audits(List.of(NotificationAudit.builder().type(POSTAL).build()))
+            .build());
+        SendCorrespondenceEvent event2 = mock(SendCorrespondenceEvent.class);
+        if (isHearingRequired) {
+            List<SendCorrespondenceEvent> events = List.of(event1, event2);
+            when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN))
+                .thenReturn(events);
+            stubIntervenerActive(finremCaseData, intervenerIndex);
+        }
+
+        var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        if (isHearingRequired) {
+            assertThat(response.getErrors()).containsOnly(expectedError);
+            verify(event1).setSimulatingCorrespondence(true);
+            verify(event2).setSimulatingCorrespondence(true);
+            verify(applicationEventPublisher).publishEvent(event1);
+            verify(applicationEventPublisher).publishEvent(event2);
+            verify(generalApplicationDirectionsService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        } else {
+            assertThat(response.getErrors()).isEmpty();
+            verify(event1, never()).setSimulatingCorrespondence(anyBoolean());
+            verify(event2, never()).setSimulatingCorrespondence(anyBoolean());
+            verifyNoInteractions(applicationEventPublisher);
+            verify(generalApplicationDirectionsService).submitCollectionGeneralApplicationDirections(
+                eq(callbackRequest.getCaseDetails()), anyList(), anyString());
+        }
+        verify(generalApplicationHelper).populateGeneralApplicationSender(finremCaseData, generalApplications);
     }
 
     @Test
@@ -686,5 +761,25 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
                         .build())
             ))
             .build();
+    }
+
+    private static NotificationParty intervenerParty(int index) {
+        return switch (index) {
+            case 1 -> INTERVENER_ONE;
+            case 2 -> INTERVENER_TWO;
+            case 3 -> INTERVENER_THREE;
+            case 4 -> INTERVENER_FOUR;
+            default -> throw new IllegalArgumentException("Unsupported intervener index: " + index);
+        };
+    }
+
+    private void stubIntervenerActive(FinremCaseData caseData, int index) {
+        switch (index) {
+            case 1 -> when(partyService.isIntervenerOneActive(caseData)).thenReturn(true);
+            case 2 -> when(partyService.isIntervenerTwoActive(caseData)).thenReturn(true);
+            case 3 -> when(partyService.isIntervenerThreeActive(caseData)).thenReturn(true);
+            case 4 -> when(partyService.isIntervenerFourActive(caseData)).thenReturn(true);
+            default -> throw new IllegalArgumentException("Unsupported intervener index: " + index);
+        }
     }
 }
