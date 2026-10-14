@@ -518,6 +518,9 @@ class CUIDocumentsCategoriserTest {
             applicant(CitizenUploadDocumentType.PERSONAL_SELLING_SIGHT_STATEMENT, NON_FDR,
                 DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
 
+            applicant(CitizenUploadDocumentType.SCHOOL_FEES, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
             applicant(CitizenUploadDocumentType.SELF_ASSESSMENT_TAX_FORMS, NON_FDR,
                 DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
 
@@ -552,9 +555,7 @@ class CUIDocumentsCategoriserTest {
                 DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
 
             applicant(CitizenUploadDocumentType.MANAGEMENT_ACCOUNTS, NON_FDR,
-                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
-
-            applicant(CitizenUploadDocumentType.SCHOOL_FEES, NON_FDR, null)
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE)
         );
     }
 
