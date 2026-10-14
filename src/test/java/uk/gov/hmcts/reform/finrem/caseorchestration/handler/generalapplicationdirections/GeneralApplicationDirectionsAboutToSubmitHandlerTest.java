@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -41,6 +42,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -73,6 +75,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
@@ -98,11 +101,11 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     @InjectMocks
     private GeneralApplicationDirectionsAboutToSubmitHandler aboutToSubmitHandler;
     @Mock
-    private GeneralApplicationHelper helper;
+    private GeneralApplicationHelper generalApplicationHelper;
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
     @Mock
-    private GeneralApplicationDirectionsService gaDirectionService;
+    private GeneralApplicationDirectionsService generalApplicationDirectionsService;
     @Mock
     private GeneralApplicationService gaService;
     @Mock
@@ -140,6 +143,10 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         contactDetailsValidatorMockedStatic
             .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH)))
             .thenReturn(List.of());
+
+        lenient().when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(
+            DynamicList.builder().value(DynamicListElement.builder().code("123#456").build()).build()
+        );
     }
 
     @AfterEach
@@ -185,7 +192,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").build();
 
-        when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(generalApplicationItems);
+        when(generalApplicationHelper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(generalApplicationItems);
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -199,13 +206,13 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         String collectionId = UUID.randomUUID().toString();
 
-        when(helper.getGeneralApplicationList(any(), any())).thenReturn(
+        when(generalApplicationHelper.getGeneralApplicationList(any(), any())).thenReturn(
             List.of(GeneralApplicationCollectionData.builder()
                 .id(collectionId)
                 .generalApplicationItems(generalApplicationItems)
                 .build()));
-        when(helper.objectToDynamicList(any())).thenReturn(dynamicList);
-        when(gaDirectionService.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(false); //No hearing required
+        when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(dynamicList);
+        when(generalApplicationDirectionsService.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(false); //No hearing required
 
         doAnswer(invocation -> {
             FinremCaseDetails caseDetails = invocation.getArgument(1);
@@ -256,16 +263,16 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
                 .generalApplicationDraftOrder(generalApplicationDraftOrder)
                 .build();
 
-        when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(generalApplicationItems);
-        when(gaDirectionService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true); //Hearing is required
-        when(helper.getPdfDocument(any(CaseDocument.class), any(String.class), any(CaseType.class)))
+        when(generalApplicationHelper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(generalApplicationItems);
+        when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true); //Hearing is required
+        when(generalApplicationHelper.getPdfDocument(any(CaseDocument.class), any(String.class), any(CaseType.class)))
             .thenReturn(generalApplicationDocument, generalApplicationDraftOrder);
 
         //Hearing required document
         Optional<CaseDocument> generatedDocument = Optional.of(CaseDocument.builder().documentFilename("HearingNotice.pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build());
-        when(gaDirectionService.generateGeneralApplicationDirectionsDocumentIfNeeded(eq(AUTH_TOKEN), any(FinremCaseDetails.class)))
+        when(generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocumentIfNeeded(eq(AUTH_TOKEN), any(FinremCaseDetails.class)))
             .thenReturn(generatedDocument);
 
         var startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -278,7 +285,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         String collectionId = UUID.randomUUID().toString();
 
-        when(helper.mapExistingGeneralApplicationToData(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
+        when(generalApplicationHelper.mapExistingGeneralApplicationToData(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
             GeneralApplicationCollectionData.builder()
                 .id(collectionId)
                 .generalApplicationItems(generalApplicationItems)
@@ -291,8 +298,8 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
         assertThat(applications).hasSize(1);
-        verify(gaDirectionService, times(2)).isHearingRequired(callbackRequest.getCaseDetails());
-        verify(helper, times(2)).getPdfDocument(any(CaseDocument.class), any(String.class), any(CaseType.class));
+        verify(generalApplicationDirectionsService).isHearingRequired(callbackRequest.getCaseDetails());
+        verify(generalApplicationHelper, times(2)).getPdfDocument(any(CaseDocument.class), any(String.class), any(CaseType.class));
         verify(manageHearingActionService).performAddHearing(any(FinremCaseDetails.class), any(String.class));
         verify(manageHearingActionService).updateTabData(any(FinremCaseData.class));
     }
@@ -320,7 +327,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
+        when(generalApplicationHelper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
@@ -341,7 +348,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
 
-        verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(generalApplicationDirectionsService).submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
     @Test
@@ -369,7 +376,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(helper.getApplicationItems(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
+        when(generalApplicationHelper.getApplicationItems(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
             finremCallbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
@@ -416,7 +423,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
+        when(generalApplicationHelper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
@@ -443,7 +450,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     @Test
     void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompletedAndReturnToPostState() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        when(gaDirectionService.getEventPostState(any(), any())).thenReturn(PREPARE_FOR_HEARING_STATE);
+        when(generalApplicationDirectionsService.getEventPostState(any(), any())).thenReturn(PREPARE_FOR_HEARING_STATE);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(
             ga -> ga.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
@@ -463,7 +470,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
+        when(generalApplicationHelper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
@@ -485,7 +492,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertThat(submitHandle.getState()).isEqualTo(PREPARE_FOR_HEARING_STATE);
-        verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(generalApplicationDirectionsService).submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
     /*
@@ -526,9 +533,37 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenIsHearingRequired_whenHandled_shouldValidateApplicantOrRespondentAddress(boolean isHearingRequired) {
+        List<String> expectedErrors = List.of("missing applicant or respondent address");
+        contactDetailsValidatorMockedStatic
+            .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH)))
+            .thenReturn(expectedErrors);
+
+        List<GeneralApplicationsCollection> generalApplications = mock(List.class);
+        GeneralApplicationWrapper generalApplicationWrapper = mock(GeneralApplicationWrapper.class);
+        when(generalApplicationWrapper.getGeneralApplications()).thenReturn(generalApplications);
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder()
+            .generalApplicationWrapper(generalApplicationWrapper)
+            .build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+
+        when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(isHearingRequired);
+
+        var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).containsOnly("missing applicant or respondent address");
+        verify(generalApplicationHelper).populateGeneralApplicationSender(finremCaseData, generalApplications);
+        verify(generalApplicationDirectionsService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(manageHearingsCorresponder, never()).buildHearingCorrespondenceEventsIfNeeded(any(), any());
+        verify(applicationEventPublisher, never()).publishEvent((SendCorrespondenceEvent) any());
+        verifyNoInteractions(partyService);
+    }
+
     @Test
     void shouldRemoveGadPreviewWhenHandled() {
-        when(helper.objectToDynamicList(any())).thenReturn(DynamicList.builder()
+        when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(DynamicList.builder()
                 .value(DynamicListElement.builder().code("a#b").build())
             .build());
 

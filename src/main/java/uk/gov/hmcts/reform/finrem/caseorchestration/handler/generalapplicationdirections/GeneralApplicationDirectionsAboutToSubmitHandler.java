@@ -115,10 +115,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             GENERAL_APPLICATION_COLLECTION);
         if (existingList.isEmpty()
             && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
-            migrateExistingApplication(caseDetails, documents, userAuthorisation);
+            migrateExistingApplication(caseDetails, documents, userAuthorisation, isHearingRequired);
 
         } else {
-            updateApplications(caseDetails, documents, userAuthorisation);
+            updateApplications(caseDetails, documents, userAuthorisation, isHearingRequired);
         }
 
         // Validate missing applicant and respondent addresses regardless of whether a hearing is required.
@@ -145,7 +145,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
 
     private void migrateExistingApplication(FinremCaseDetails caseDetails,
                                             List<BulkPrintDocument> bulkPrintDocuments,
-                                            String userAuthorisation) {
+                                            String userAuthorisation, boolean isHearingRequired) {
         FinremCaseData caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             generalApplicationHelper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
@@ -159,7 +159,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             log.info("In map outcome decision {} for general application for Case ID: {} Event type {}",
                 status, caseId, GENERAL_APPLICATION_DIRECTIONS_MH);
             setStatusForNonCollAndBulkPrintDocuments(caseDetails,
-                data, bulkPrintDocuments, status, userAuthorisation);
+                data, bulkPrintDocuments, status, userAuthorisation, isHearingRequired);
             existingGeneralApplication.add(data);
             generalApplicationService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseDetails);
         }
@@ -169,7 +169,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
 
     private void updateApplications(FinremCaseDetails caseDetails,
                                     List<BulkPrintDocument> bulkPrintDocuments,
-                                    String userAuthorisation) {
+                                    String userAuthorisation, boolean isHearingRequired) {
         FinremCaseData caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingList =
             generalApplicationHelper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
@@ -182,7 +182,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
 
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
             = existingList.stream().map(ga -> setStatusAndBulkPrintDocuments(caseDetails,
-                ga, valueCode, status, bulkPrintDocuments, userAuthorisation))
+                ga, valueCode, status, bulkPrintDocuments, userAuthorisation, isHearingRequired))
             .sorted(generalApplicationHelper::getCompareTo).toList();
 
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
@@ -196,16 +196,18 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
                                                                             GeneralApplicationCollectionData data,
                                                                             String code, String status,
                                                                             List<BulkPrintDocument> bulkPrintDocuments,
-                                                                            String userAuthorisation) {
+                                                                            String userAuthorisation,
+                                                                            boolean isHearingRequired) {
         if (code.equals(data.getId())) {
-            return setStatusForNonCollAndBulkPrintDocuments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
+            return setStatusForNonCollAndBulkPrintDocuments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation,
+                isHearingRequired);
         }
         return data;
     }
 
     private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDocuments(
         FinremCaseDetails finremCaseDetails, GeneralApplicationCollectionData data,
-        List<BulkPrintDocument> bulkPrintDocuments, String status, String userAuthorisation) {
+        List<BulkPrintDocument> bulkPrintDocuments, String status, String userAuthorisation, boolean isHearingRequired) {
 
         GeneralApplicationItems items = data.getGeneralApplicationItems();
 
@@ -218,7 +220,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             generalApplicationDirectionsDocument,
             status,
             bulkPrintDocuments,
-            userAuthorisation
+            userAuthorisation,
+            isHearingRequired
         );
 
         if (isIntervener(items)) {
@@ -228,12 +231,12 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         return data;
     }
 
-    public void setGeneralApplicationInformation(GeneralApplicationItems items, FinremCaseDetails caseDetails,
+    private void setGeneralApplicationInformation(GeneralApplicationItems items, FinremCaseDetails caseDetails,
                                                  Optional<CaseDocument> directionsDocument, String status, List<BulkPrintDocument> bulkPrintDocuments,
-                                                 String userAuthorisation) {
+                                                 String userAuthorisation, boolean isHearingRequired) {
         String caseId = String.valueOf(caseDetails.getId());
 
-        if (generalApplicationDirectionsService.isHearingRequired(caseDetails)) {
+        if (isHearingRequired) {
             setHearingDetails(items, caseDetails);
         }
 
