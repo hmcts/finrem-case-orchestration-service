@@ -25,6 +25,9 @@ public class CitizenDocumentWrapper {
     private List<CitizenDocumentCollectionItem> uploadedCuiApplicantDocuments;
     private List<CitizenDocumentCollectionItem> uploadedCuiRespondentDocuments;
 
+    /*
+     * Party-tab-specific document collections
+     */
     private List<CitizenDocumentCollectionItem> applicantDocCollection;
     private List<CitizenDocumentCollectionItem> respondentDocCollection;
 
