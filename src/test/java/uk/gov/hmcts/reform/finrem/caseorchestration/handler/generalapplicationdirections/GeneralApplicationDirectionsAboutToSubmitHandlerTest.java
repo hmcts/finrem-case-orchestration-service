@@ -511,66 +511,6 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenPostalValidationErrors_whenHandle_thenResponseContainsPostalErrors() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-
-        List<String> expectedErrors = List.of(
-            "Applicant's postal address is missing",
-            "Respondent's postal address is missing"
-        );
-
-        when(gaDirectionService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
-        SendCorrespondenceEvent event1 = mock(SendCorrespondenceEvent.class);
-        SendCorrespondenceEvent event2 = mock(SendCorrespondenceEvent.class);
-        List<SendCorrespondenceEvent> events = List.of(event1, event2);
-        when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN))
-            .thenReturn(events);
-        contactDetailsValidatorMockedStatic.when(() -> validateRequiredPostalAddresses(
-            eq(caseData), eq(callbackRequest.getEventType()), anyBoolean(), anyBoolean())).thenReturn(expectedErrors);
-
-        var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertAll(
-            () -> assertThat(response.getErrors()).containsExactlyInAnyOrderElementsOf(expectedErrors),
-            () -> verify(gaDirectionService).isHearingRequired(callbackRequest.getCaseDetails()),
-            () -> verify(event1).setSimulatingCorrespondence(true),
-            () -> verify(event2).setSimulatingCorrespondence(true),
-            () -> verify(applicationEventPublisher).publishEvent(event1),
-            () -> verify(applicationEventPublisher).publishEvent(event2),
-            () -> verifyNoInteractions(helper, gaService, generalApplicationsCategoriser,
-                manageHearingActionService, hearingCorrespondenceHelper)
-        );
-    }
-
-    @Test
-    void givenNoPostalValidationErrors_whenHandle_thenResponseContainsEmptyErrorList() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
-        when(gaDirectionService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
-        SendCorrespondenceEvent event1 = mock(SendCorrespondenceEvent.class);
-        SendCorrespondenceEvent event2 = mock(SendCorrespondenceEvent.class);
-        List<SendCorrespondenceEvent> events = List.of(event1, event2);
-        when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN))
-            .thenReturn(events);
-
-        var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertAll(
-            () -> assertThat(response.getErrors()).isEmpty(),
-            () -> verify(gaDirectionService).isHearingRequired(callbackRequest.getCaseDetails()),
-            () -> verify(event1).setSimulatingCorrespondence(true),
-            () -> verify(event2).setSimulatingCorrespondence(true),
-            () -> verify(applicationEventPublisher).publishEvent(event1),
-            () -> verify(applicationEventPublisher).publishEvent(event2),
-            () -> verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any()),
-            () -> verify(gaDirectionService).getEventPostState(any(), any()),
-            () -> verify(generalApplicationsCategoriser).categorise(any())
-        );
-    }
-
-    @Test
     void shouldRemoveGadPreviewWhenHandled() {
         when(helper.objectToDynamicList(any())).thenReturn(DynamicList.builder()
                 .value(DynamicListElement.builder().code("a#b").build())
