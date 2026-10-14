@@ -22,8 +22,8 @@ public class CitizenDocumentWrapper {
     /*
      * Temp dto's for citizen uploaded docs to be sorted into respective collections
      */
-    private List<CitizenDocumentCollectionItem> uploadedCuiApplicantDocuments; // citizenApplicantDocument
-    private List<CitizenDocumentCollectionItem> uploadedCuiRespondentDocuments; //citizenRespondentDocument
+    private List<CitizenDocumentCollectionItem> uploadedCuiApplicantDocuments;
+    private List<CitizenDocumentCollectionItem> uploadedCuiRespondentDocuments;
 
     private List<CitizenDocumentCollectionItem> applicantDocCollection;
     private List<CitizenDocumentCollectionItem> respondentDocCollection;
