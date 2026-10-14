@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
@@ -156,7 +155,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         contactDetailsValidatorMockedStatic = mockStatic(ContactDetailsValidator.class);
         contactDetailsValidatorMockedStatic
             .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH)))
-            .thenReturn(List.of());
+            .thenReturn(new ArrayList<>());
 
         lenient().when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(
             DynamicList.builder().value(DynamicListElement.builder().code("123#456").build()).build()
@@ -209,7 +208,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         when(generalApplicationHelper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(generalApplicationItems);
 
         // Act
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        var startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
         FinremCaseData finremCaseData = startHandle.getData();
 
@@ -238,7 +237,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             return null;
         }).when(gaService).updateGeneralApplicationCollectionData(any(), any());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        var submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         // Assert
@@ -345,13 +344,13 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        var startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertThat(dynamicList.getListItems()).hasSize(1);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        var submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
@@ -394,14 +393,14 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             finremCallbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var startHandle = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertThat(dynamicList.getListItems())
             .hasSize(1);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        var submitHandle = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
@@ -441,7 +440,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        var startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
@@ -449,7 +448,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         assertThat(dynamicList.getListItems())
             .hasSize(1);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        var submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
@@ -488,14 +487,14 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        var startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertThat(dynamicList.getListItems())
             .hasSize(1);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        var submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
