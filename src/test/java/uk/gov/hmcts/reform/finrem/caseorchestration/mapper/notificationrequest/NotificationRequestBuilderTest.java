@@ -191,6 +191,7 @@ class NotificationRequestBuilderTest {
             .vacatedHearingDateTime("2025-06-02")
             .vacatedHearingType("FDA")
             .dateOfIssue("2025-06-02")
+            .timeOfSubmission("3:45pm")
             .build();
 
         // Assert all fields are non-null

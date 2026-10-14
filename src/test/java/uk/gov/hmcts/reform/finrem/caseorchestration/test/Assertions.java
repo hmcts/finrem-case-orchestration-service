@@ -8,8 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 
 import java.util.Arrays;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Assertions {
 
@@ -27,8 +26,11 @@ public class Assertions {
                             && caseType == c.get()[1]
                             && eventType == c.get()[2] // This condition will always be true
                     );
-                    assertThat("Failed for eventType: %s | %s | %s".formatted(callbackType, caseType, eventType),
-                        handler.canHandle(callbackType, caseType, eventType), equalTo(expectedOutcome));
+                    assertThat(
+                        handler.canHandle(callbackType, caseType, eventType))
+                        .withFailMessage("Failed for eventType: %s | %s | %s",
+                            callbackType, caseType, eventType)
+                        .isEqualTo(expectedOutcome);
                 }
             }
         }
@@ -40,7 +42,11 @@ public class Assertions {
             for (CaseType caseType : CaseType.values()) {
                 for (EventType eventType : EventType.values()) {
                     boolean expectedOutcome = callbackType == expectedCallbackType && eventType == expectedEventType;
-                    assertThat("Failed for eventType: " + eventType, handler.canHandle(callbackType, caseType, eventType), equalTo(expectedOutcome));
+                    assertThat(// + eventType,
+                        handler.canHandle(callbackType, caseType, eventType))
+                        .withFailMessage("Failed for eventType: %s",
+                            eventType)
+                        .isEqualTo(expectedOutcome);
                 }
             }
         }
