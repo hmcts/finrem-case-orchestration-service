@@ -6,6 +6,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -38,6 +40,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -57,12 +60,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -484,24 +492,38 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
      * Opted for reflection to test performAddHearingIfNecessary.  Avoids complex setup to test this private method.
      * Test written to ensure that ManageHearingsAction.ADD_HEARING is set by performAddHearingIfNecessary.
      */
-    @Test
-    void givenCase_whenPerformAddHearingIfNecessary_thenCaseWithHearingHasAddHearingAction()
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenCase_whenPerformAddHearingIfNecessary_thenCaseWithHearingHasAddHearingAction(boolean isHearingRequired)
         throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         // Arrange
-        FinremCaseDetails caseDetails = buildFinremCallbackRequest().getCaseDetails();
+        ManageHearingsWrapper hearingsWrapper = mock(ManageHearingsWrapper.class);
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder().manageHearingsWrapper(hearingsWrapper).build());
+
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        lenient().when(caseDetails.getData()).thenReturn(finremCaseData);
 
         // Act, call performAddHearingIfNecessary using reflection
         Method method = GeneralApplicationDirectionsAboutToSubmitHandler.class.getDeclaredMethod(
             "performAddHearingIfNecessary", FinremCaseDetails.class, boolean.class, String.class);
         method.setAccessible(true);
-        method.invoke(aboutToSubmitHandler, caseDetails, true, AUTH_TOKEN);
+        method.invoke(aboutToSubmitHandler, caseDetails, isHearingRequired, AUTH_TOKEN);
 
         // Assert
-        assertThat(caseDetails.getData().getManageHearingsWrapper().getManageHearingsActionSelection())
-            .isEqualTo(ManageHearingsAction.ADD_HEARING);
-        verify(manageHearingActionService).performAddHearing(caseDetails, AUTH_TOKEN);
-        verify(manageHearingActionService).updateTabData(caseDetails.getData());
+        if (isHearingRequired) {
+            assertAll(
+                () -> verify(hearingsWrapper).setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING),
+                () -> verify(manageHearingActionService).performAddHearing(caseDetails, AUTH_TOKEN),
+                () -> verify(manageHearingActionService).updateTabData(caseDetails.getData())
+            );
+        } else {
+            assertAll(
+                () -> verify(hearingsWrapper, never()).setManageHearingsActionSelection(any(ManageHearingsAction.class)),
+                () -> verify(manageHearingActionService, never()).performAddHearing(any(FinremCaseDetails.class), anyString()),
+                () -> verify(manageHearingActionService, never()).updateTabData(any(FinremCaseData.class))
+            );
+        }
     }
 
     @Test
