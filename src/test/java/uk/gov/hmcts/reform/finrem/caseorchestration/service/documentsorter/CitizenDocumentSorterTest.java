@@ -37,7 +37,7 @@ class CitizenDocumentSorterTest {
         CitizenDocumentCollectionItem otherDocument = document(BANK_STATEMENTS);
 
         CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
-        wrapper.setCitizenApplicantDocument(new ArrayList<>(List.of(
+        wrapper.setUploadedCuiApplicantDocuments(new ArrayList<>(List.of(
             withoutPrejudice,
             divorceDocument,
             hearingBundle,
@@ -47,7 +47,7 @@ class CitizenDocumentSorterTest {
 
         sorter.sortDocuments(wrapper, APPLICANT);
 
-        assertThat(wrapper.getCitizenApplicantDocument()).isEmpty();
+        assertThat(wrapper.getUploadedCuiApplicantDocuments()).isEmpty();
         assertThat(wrapper.getFdrApplicantDocCollection()).containsExactly(withoutPrejudice);
         assertThat(wrapper.getDivorceApplicantDocCollection()).containsExactly(divorceDocument);
         assertThat(wrapper.getHearingApplicantDocCollection()).containsExactly(hearingBundle, fdrBundle);
@@ -63,7 +63,7 @@ class CitizenDocumentSorterTest {
         CitizenDocumentCollectionItem otherDocument = document(BANK_STATEMENTS);
 
         CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
-        wrapper.setCitizenRespondentDocument(new ArrayList<>(List.of(
+        wrapper.setUploadedCuiRespondentDocuments(new ArrayList<>(List.of(
             withoutPrejudice,
             divorceDocument,
             hearingBundle,
@@ -73,7 +73,7 @@ class CitizenDocumentSorterTest {
 
         sorter.sortDocuments(wrapper, RESPONDENT);
 
-        assertThat(wrapper.getCitizenRespondentDocument()).isEmpty();
+        assertThat(wrapper.getUploadedCuiRespondentDocuments()).isEmpty();
         assertThat(wrapper.getFdrRespondentDocCollection()).containsExactly(withoutPrejudice);
         assertThat(wrapper.getDivorceRespondentDocCollection()).containsExactly(divorceDocument);
         assertThat(wrapper.getHearingRespondentDocCollection()).containsExactly(hearingBundle, fdrBundle);

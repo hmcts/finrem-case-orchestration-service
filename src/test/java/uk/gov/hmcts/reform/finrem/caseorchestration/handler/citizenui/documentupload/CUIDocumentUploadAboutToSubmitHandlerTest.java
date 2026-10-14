@@ -143,9 +143,9 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
         FinremCaseData caseData = new FinremCaseData();
 
         if (CitizenPartyType.APPLICANT.equals(party)) {
-            caseData.getCitizenDocumentWrapper().setCitizenApplicantDocument(documents);
+            caseData.getCitizenDocumentWrapper().setUploadedCuiApplicantDocuments(documents);
         } else {
-            caseData.getCitizenDocumentWrapper().setCitizenRespondentDocument(documents);
+            caseData.getCitizenDocumentWrapper().setUploadedCuiRespondentDocuments(documents);
         }
 
         return caseData;
@@ -153,8 +153,8 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
 
     private List<CitizenDocumentCollectionItem> documentsFor(FinremCaseData caseData, CitizenPartyType party) {
         return CitizenPartyType.APPLICANT.equals(party)
-            ? caseData.getCitizenDocumentWrapper().getCitizenApplicantDocument()
-            : caseData.getCitizenDocumentWrapper().getCitizenRespondentDocument();
+            ? caseData.getCitizenDocumentWrapper().getUploadedCuiApplicantDocuments()
+            : caseData.getCitizenDocumentWrapper().getUploadedCuiRespondentDocuments();
     }
 
     private FinremCallbackRequest buildRequest(

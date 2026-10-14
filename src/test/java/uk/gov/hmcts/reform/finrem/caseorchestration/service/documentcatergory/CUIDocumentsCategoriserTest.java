@@ -135,9 +135,9 @@ class CUIDocumentsCategoriserTest {
         CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
 
         if (APPLICANT.equals(party)) {
-            wrapper.setCitizenApplicantDocument(docs);
+            wrapper.setUploadedCuiApplicantDocuments(docs);
         } else {
-            wrapper.setCitizenRespondentDocument(docs);
+            wrapper.setUploadedCuiRespondentDocuments(docs);
         }
 
         caseData.setCitizenDocumentWrapper(wrapper);

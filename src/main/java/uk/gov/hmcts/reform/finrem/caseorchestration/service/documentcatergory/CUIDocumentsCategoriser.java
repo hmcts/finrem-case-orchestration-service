@@ -34,8 +34,8 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
 
         List<CitizenDocumentCollectionItem> documents =
             CitizenPartyType.APPLICANT.equals(party)
-                ? citizenWrapper.getCitizenApplicantDocument()
-                : citizenWrapper.getCitizenRespondentDocument();
+                ? citizenWrapper.getUploadedCuiApplicantDocuments()
+                : citizenWrapper.getUploadedCuiRespondentDocuments();
 
         if (CollectionUtils.isEmpty(documents)) {
             return;

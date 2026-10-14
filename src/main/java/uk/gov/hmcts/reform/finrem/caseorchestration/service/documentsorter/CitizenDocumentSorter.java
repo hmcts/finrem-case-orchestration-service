@@ -47,7 +47,7 @@ public class CitizenDocumentSorter {
     public void sortDocuments(CitizenDocumentWrapper citizenDocumentWrapper, CitizenPartyType party) {
         if (CitizenPartyType.APPLICANT.equals(party)) {
             sortPartyDocuments(
-                citizenDocumentWrapper.getCitizenApplicantDocument(),
+                citizenDocumentWrapper.getUploadedCuiApplicantDocuments(),
                 citizenDocumentWrapper.ensureApplicantDocCollection(),
                 citizenDocumentWrapper.ensureFdrApplicantDocCollection(),
                 citizenDocumentWrapper.ensureDivorceApplicantDocCollection(),
@@ -55,7 +55,7 @@ public class CitizenDocumentSorter {
             );
         } else {
             sortPartyDocuments(
-                citizenDocumentWrapper.getCitizenRespondentDocument(),
+                citizenDocumentWrapper.getUploadedCuiRespondentDocuments(),
                 citizenDocumentWrapper.ensureRespondentDocCollection(),
                 citizenDocumentWrapper.ensureFdrRespondentDocCollection(),
                 citizenDocumentWrapper.ensureDivorceRespondentDocCollection(),

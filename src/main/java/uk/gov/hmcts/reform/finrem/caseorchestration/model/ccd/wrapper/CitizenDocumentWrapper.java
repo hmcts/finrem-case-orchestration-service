@@ -19,8 +19,11 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CitizenDocumentWrapper {
 
-    private List<CitizenDocumentCollectionItem> citizenApplicantDocument;
-    private List<CitizenDocumentCollectionItem> citizenRespondentDocument;
+    /*
+     * Temp dto's for citizen uploaded docs to be sorted into respective collections
+     */
+    private List<CitizenDocumentCollectionItem> uploadedCuiApplicantDocuments; // citizenApplicantDocument
+    private List<CitizenDocumentCollectionItem> uploadedCuiRespondentDocuments; //citizenRespondentDocument
 
     private List<CitizenDocumentCollectionItem> applicantDocCollection;
     private List<CitizenDocumentCollectionItem> respondentDocCollection;
