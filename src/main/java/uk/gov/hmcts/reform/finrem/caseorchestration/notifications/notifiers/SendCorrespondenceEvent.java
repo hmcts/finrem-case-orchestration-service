@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ibm.icu.text.ListFormatter;
 import io.micrometer.common.util.StringUtils;
 import lombok.Builder;
@@ -36,6 +37,28 @@ public class SendCorrespondenceEvent {
     String authToken;
     Barrister barrister;
     boolean letterNotificationOnly;
+    @Setter
+    boolean checkNotificationPartySelection;
+
+    /**
+     * Indicates whether the current event should validate the answer to
+     * "Who should receive this order?" when determining whether notifications
+     * are generated and sent.
+     *
+     * <p>When {@code true}, the selected notification parties are checked before any
+     * notification is generated or sent. When {@code false}, that selection is not
+     * consulted.
+     *
+     * <p>Annotated with {@link JsonIgnore} so it is excluded from JSON serialization
+     * and deserialization.
+     *
+     * @return {@code true} if the notification party selection should be checked,
+     *         {@code false} otherwise
+     */
+    @JsonIgnore
+    boolean shouldCheckNotificationPartySelection() {
+        return checkNotificationPartySelection;
+    }
 
     @Builder.Default
     List<NotificationAudit> audits = new ArrayList<>();

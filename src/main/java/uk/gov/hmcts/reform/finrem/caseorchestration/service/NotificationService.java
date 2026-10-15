@@ -300,12 +300,14 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_APPLICATION_ISSUED);
     }
 
+    @Deprecated(forRemoval = true)
     public void sendContestOrderApprovedEmailApplicant(FinremCaseDetails caseDetails) {
         log.info("Sending notification email to Applicant for 'Contest Order Approved'. Case ID : {}", caseDetails.getId());
         emailService.sendConfirmationEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails),
             FR_CONTEST_ORDER_APPROVED_APPLICANT);
     }
 
+    @Deprecated(forRemoval = true)
     public void sendContestOrderApprovedEmailRespondent(FinremCaseDetails caseDetails) {
         log.info("Sending notification email to Respondent for 'Contest Order Approved'. Case ID : {}",
             caseDetails.getId());
@@ -314,6 +316,7 @@ public class NotificationService {
             FR_CONTEST_ORDER_APPROVED_RESPONDENT);
     }
 
+    @Deprecated(forRemoval = true)
     public void sendContestOrderApprovedEmailIntervener(FinremCaseDetails caseDetails,
                                                         SolicitorCaseDataKeysWrapper caseDataKeysWrapper,
                                                         IntervenerType intervener) {

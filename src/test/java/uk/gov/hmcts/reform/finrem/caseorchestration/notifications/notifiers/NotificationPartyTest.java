@@ -82,4 +82,24 @@ class NotificationPartyTest {
         }
     }
 
+    @ParameterizedTest
+    @EnumSource(IntervenerType.class)
+    void shouldReturnCorrectNotificationParty(IntervenerType intervenerType) {
+        // Act
+        NotificationParty result = NotificationParty.getIntervener(intervenerType);
+
+        // Assert
+        switch (intervenerType) {
+            case INTERVENER_ONE -> assertThat(result)
+                .isEqualTo(NotificationParty.INTERVENER_ONE);
+            case INTERVENER_TWO -> assertThat(result)
+                .isEqualTo(NotificationParty.INTERVENER_TWO);
+            case INTERVENER_THREE -> assertThat(result)
+                .isEqualTo(NotificationParty.INTERVENER_THREE);
+            case INTERVENER_FOUR -> assertThat(result)
+                .isEqualTo(NotificationParty.INTERVENER_FOUR);
+            default ->
+                throw new IllegalStateException("Unexpected intervener type: " + intervenerType);
+        }
+    }
 }

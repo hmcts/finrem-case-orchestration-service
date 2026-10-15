@@ -27,6 +27,11 @@ public class FormerApplicantBarristerListener extends EmailNotificationOnlyListe
     }
 
     @Override
+    protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
+        return event.getCaseData().isApplicantCorrespondenceEnabled();
+    }
+
+    @Override
     protected String getNotificationParty() {
         return "former applicant barrister";
     }
