@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationdirections;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -8,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -23,11 +23,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
@@ -37,45 +39,61 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredIntervenersPostalAddresses;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.validateRequiredPostalAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.ADD_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerFourAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerOneAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerThreeAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerTwoAddressRequired;
 
 @Slf4j
 @Service
 public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
-    private final GeneralApplicationHelper helper;
-    private final GeneralApplicationDirectionsService gaDirectionService;
-    private final GeneralApplicationService gaService;
+    private final GeneralApplicationHelper generalApplicationHelper;
+    private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
+    private final GeneralApplicationService generalApplicationService;
     private final ManageHearingActionService manageHearingActionService;
     private final GeneralApplicationsCategoriser generalApplicationsCategoriser;
     private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
+    private final ManageHearingsCorresponder manageHearingsCorresponder;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final PartyService partyService;
 
     public GeneralApplicationDirectionsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                            GeneralApplicationHelper helper,
-                                                            GeneralApplicationDirectionsService gaDirectionService,
-                                                            GeneralApplicationService gaService,
+                                                            GeneralApplicationHelper generalApplicationHelper,
+                                                            GeneralApplicationDirectionsService generalApplicationDirectionsService,
+                                                            GeneralApplicationService generalApplicationService,
                                                             ManageHearingActionService manageHearingActionService,
                                                             GeneralApplicationsCategoriser generalApplicationsCategoriser,
-                                                            HearingCorrespondenceHelper hearingCorrespondenceHelper) {
+                                                            HearingCorrespondenceHelper hearingCorrespondenceHelper,
+                                                            ManageHearingsCorresponder manageHearingsCorresponder,
+                                                            ApplicationEventPublisher applicationEventPublisher,
+                                                            PartyService partyService) {
         super(finremCaseDetailsMapper);
-        this.helper = helper;
-        this.gaDirectionService = gaDirectionService;
-        this.gaService = gaService;
+        this.generalApplicationHelper = generalApplicationHelper;
+        this.generalApplicationDirectionsService = generalApplicationDirectionsService;
+        this.generalApplicationService = generalApplicationService;
         this.manageHearingActionService = manageHearingActionService;
         this.generalApplicationsCategoriser = generalApplicationsCategoriser;
         this.hearingCorrespondenceHelper = hearingCorrespondenceHelper;
+        this.manageHearingsCorresponder = manageHearingsCorresponder;
+        this.applicationEventPublisher = applicationEventPublisher;
+        this.partyService = partyService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && GENERAL_APPLICATION_DIRECTIONS_MH.equals(eventType);
+            && getEventType().equals(eventType);
     }
 
     @Override
@@ -85,35 +103,38 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        helper.populateGeneralApplicationSender(caseData,
+        generalApplicationHelper.populateGeneralApplicationSender(caseData,
             caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
-        performAddHearingIfNecessary(caseDetails, userAuthorisation);
+        boolean isHearingRequired = isHearingRequired(caseDetails);
+        performAddHearingIfNecessary(caseDetails, isHearingRequired, userAuthorisation);
+        // hearing id would be added in the above method  if hearing required
 
         List<BulkPrintDocument> documents = new ArrayList<>();
-        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData,
+        List<GeneralApplicationCollectionData> existingList = generalApplicationHelper.getGeneralApplicationList(caseData,
             GENERAL_APPLICATION_COLLECTION);
         if (existingList.isEmpty()
             && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
-            migrateExistingApplication(caseDetails, documents, userAuthorisation);
-
+            migrateExistingApplication(caseDetails, documents, userAuthorisation, isHearingRequired);
         } else {
-            updateApplications(caseDetails, documents, userAuthorisation);
+            updateApplications(caseDetails, documents, userAuthorisation, isHearingRequired);
         }
 
-        final List<String> errors = validatePostalAddressErrors(caseData, callbackRequest.getEventType());
-
+        // Validate missing applicant and respondent addresses regardless of whether a hearing is required.
+        List<String> errors = validateMissingPostalAddresses(callbackRequest, userAuthorisation, isHearingRequired);
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(caseData, errors);
         }
-
         try {
-            gaDirectionService.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);
+            // It's going to print the document that it requires applicant and respondent addresses
+            // Therefore, validation on applicant and respondent addresses is required
+            // regardless of whether a hearing is required.
+            generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);
         } catch (InvalidCaseDataException invalidCaseDataException) {
             errors.add(invalidCaseDataException.getMessage());
         }
 
-        String postState = gaDirectionService.getEventPostState(caseDetails, userAuthorisation);
+        String postState = generalApplicationDirectionsService.getEventPostState(caseDetails, userAuthorisation);
         generalApplicationsCategoriser.categorise(caseData);
         if (postState != null) {
             return responseWithoutWarnings(caseData, errors, postState);
@@ -121,19 +142,15 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         return responseWithoutWarnings(caseData, errors);
     }
 
-    private List<String> validatePostalAddressErrors(FinremCaseData caseData, EventType eventType) {
-        return new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
-    }
-
     private void migrateExistingApplication(FinremCaseDetails caseDetails,
                                             List<BulkPrintDocument> bulkPrintDocuments,
-                                            String userAuthorisation) {
+                                            String userAuthorisation, boolean isHearingRequired) {
         FinremCaseData caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication =
-            helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
+            generalApplicationHelper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         String caseId = caseDetails.getCaseIdAsString();
         log.info("Map existing general application to collection for Case ID: {}", caseId);
-        GeneralApplicationCollectionData data = helper.mapExistingGeneralApplicationToData(
+        GeneralApplicationCollectionData data = generalApplicationHelper.mapExistingGeneralApplicationToData(
             caseDetails, userAuthorisation);
         if (data != null) {
             String status = Objects.toString(caseData.getGeneralApplicationWrapper()
@@ -141,21 +158,21 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             log.info("In map outcome decision {} for general application for Case ID: {} Event type {}",
                 status, caseId, GENERAL_APPLICATION_DIRECTIONS_MH);
             setStatusForNonCollAndBulkPrintDocuments(caseDetails,
-                data, bulkPrintDocuments, status, userAuthorisation);
+                data, bulkPrintDocuments, status, userAuthorisation, isHearingRequired);
             existingGeneralApplication.add(data);
-            gaService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseDetails);
+            generalApplicationService.updateGeneralApplicationCollectionData(existingGeneralApplication, caseDetails);
         }
-        helper.deleteNonCollectionGeneralApplication(caseData);
+        generalApplicationHelper.deleteNonCollectionGeneralApplication(caseData);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
     }
 
     private void updateApplications(FinremCaseDetails caseDetails,
                                     List<BulkPrintDocument> bulkPrintDocuments,
-                                    String userAuthorisation) {
+                                    String userAuthorisation, boolean isHearingRequired) {
         FinremCaseData caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingList =
-            helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper()
+            generalApplicationHelper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
+        DynamicList dynamicList = generalApplicationHelper.objectToDynamicList(caseData.getGeneralApplicationWrapper()
             .getGeneralApplicationDirectionsList());
 
         String[] choice = dynamicList.getValueCode().split("#");
@@ -164,11 +181,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
 
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
             = existingList.stream().map(ga -> setStatusAndBulkPrintDocuments(caseDetails,
-                ga, valueCode, status, bulkPrintDocuments, userAuthorisation))
-            .sorted(helper::getCompareTo).toList();
+                ga, valueCode, status, bulkPrintDocuments, userAuthorisation, isHearingRequired))
+            .sorted(generalApplicationHelper::getCompareTo).toList();
 
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
-        gaService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseDetails);
+        generalApplicationService.updateGeneralApplicationCollectionData(applicationCollectionDataList, caseDetails);
         emptyIfNull(caseData.getGeneralApplicationWrapper().getGeneralApplications()).forEach(
             ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
@@ -178,21 +195,23 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
                                                                             GeneralApplicationCollectionData data,
                                                                             String code, String status,
                                                                             List<BulkPrintDocument> bulkPrintDocuments,
-                                                                            String userAuthorisation) {
+                                                                            String userAuthorisation,
+                                                                            boolean isHearingRequired) {
         if (code.equals(data.getId())) {
-            return setStatusForNonCollAndBulkPrintDocuments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
+            return setStatusForNonCollAndBulkPrintDocuments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation,
+                isHearingRequired);
         }
         return data;
     }
 
     private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDocuments(
         FinremCaseDetails finremCaseDetails, GeneralApplicationCollectionData data,
-        List<BulkPrintDocument> bulkPrintDocuments, String status, String userAuthorisation) {
+        List<BulkPrintDocument> bulkPrintDocuments, String status, String userAuthorisation, boolean isHearingRequired) {
 
         GeneralApplicationItems items = data.getGeneralApplicationItems();
 
         Optional<CaseDocument> generalApplicationDirectionsDocument =
-            gaDirectionService.generateGeneralApplicationDirectionsDocumentIfNeeded(userAuthorisation, finremCaseDetails);
+            generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocumentIfNeeded(userAuthorisation, finremCaseDetails);
 
         setGeneralApplicationInformation(
             items,
@@ -200,22 +219,23 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             generalApplicationDirectionsDocument,
             status,
             bulkPrintDocuments,
-            userAuthorisation
+            userAuthorisation,
+            isHearingRequired
         );
 
         if (isIntervener(items)) {
-            gaService.updateIntervenerDirectionsOrders(items, finremCaseDetails);
+            generalApplicationService.updateIntervenerDirectionsOrders(items, finremCaseDetails);
         }
 
         return data;
     }
 
-    public void setGeneralApplicationInformation(GeneralApplicationItems items, FinremCaseDetails caseDetails,
+    private void setGeneralApplicationInformation(GeneralApplicationItems items, FinremCaseDetails caseDetails,
                                                  Optional<CaseDocument> directionsDocument, String status, List<BulkPrintDocument> bulkPrintDocuments,
-                                                 String userAuthorisation) {
+                                                 String userAuthorisation, boolean isHearingRequired) {
         String caseId = String.valueOf(caseDetails.getId());
 
-        if (gaDirectionService.isHearingRequired(caseDetails)) {
+        if (isHearingRequired) {
             setHearingDetails(items, caseDetails);
         }
 
@@ -253,7 +273,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         log.info("items getGeneralApplicationDocument {}, for case ID: {}", items.getGeneralApplicationDocument(), caseDetails.getCaseIdAsString());
 
         Optional.ofNullable(items.getGeneralApplicationDocument())
-            .map(doc -> helper.getPdfDocument(doc, userAuthorisation, caseDetails.getCaseType()))
+            .map(doc -> generalApplicationHelper.getPdfDocument(doc, userAuthorisation, caseDetails.getCaseType()))
             .ifPresent(pdfDoc -> {
                 items.setGeneralApplicationDocument(pdfDoc);
                 addBulkPrintDocument(pdfDoc, bulkPrintDocuments);
@@ -262,7 +282,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             });
 
         Optional.ofNullable(items.getGeneralApplicationDraftOrder())
-            .map(doc -> helper.getPdfDocument(doc, userAuthorisation, caseDetails.getCaseType()))
+            .map(doc -> generalApplicationHelper.getPdfDocument(doc, userAuthorisation, caseDetails.getCaseType()))
             .ifPresent(pdfDoc -> {
                 items.setGeneralApplicationDraftOrder(pdfDoc);
                 addBulkPrintDocument(pdfDoc, bulkPrintDocuments);
@@ -294,11 +314,50 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
     /*
      * ManageHearingAction, ADD_HEARING, influences how notifications sent when submitted handler called.
      */
-    private void performAddHearingIfNecessary(FinremCaseDetails caseDetails, String userAuthorisation) {
-        if (gaDirectionService.isHearingRequired(caseDetails)) {
-            caseDetails.getData().getManageHearingsWrapper().setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
+    private void performAddHearingIfNecessary(FinremCaseDetails caseDetails, boolean isHearingRequired, String userAuthorisation) {
+        if (isHearingRequired) {
+            FinremCaseData finremCaseData = caseDetails.getData();
+
+            // Setting ADD HEARING as an instruction
+            finremCaseData.getManageHearingsWrapper().setManageHearingsActionSelection(ADD_HEARING);
+
             manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
-            manageHearingActionService.updateTabData(caseDetails.getData());
+            manageHearingActionService.updateTabData(finremCaseData);
         }
+    }
+
+    private List<String> validateMissingPostalAddresses(FinremCallbackRequest callbackRequest,
+                                                        String userAuthorisation,
+                                                        boolean isHearingRequired) {
+        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
+        // Check whether the applicant's and respondent's addresses are missing to ensure the subsequent print action can proceed.
+        List<String> errors = validateRequiredPostalAddresses(finremCaseData, getEventType());
+        if (isHearingRequired) {
+            List<SendCorrespondenceEvent> simulatedEvents = manageHearingsCorresponder
+                .buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
+            simulatedEvents.forEach(event -> {
+                event.setSimulatingCorrespondence(true);
+                applicationEventPublisher.publishEvent(event);
+            });
+
+            errors.addAll(validateMissingPostalAddresses(callbackRequest.getFinremCaseData(), simulatedEvents));
+        }
+        return errors;
+    }
+
+    private List<String> validateMissingPostalAddresses(FinremCaseData finremCaseData, List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
+        return validateRequiredIntervenersPostalAddresses(finremCaseData, getEventType(),
+            partyService.isIntervenerOneActive(finremCaseData) && isIntervenerOneAddressRequired(sendCorrespondenceEvents),
+            partyService.isIntervenerTwoActive(finremCaseData) && isIntervenerTwoAddressRequired(sendCorrespondenceEvents),
+            partyService.isIntervenerThreeActive(finremCaseData) && isIntervenerThreeAddressRequired(sendCorrespondenceEvents),
+            partyService.isIntervenerFourActive(finremCaseData) && isIntervenerFourAddressRequired(sendCorrespondenceEvents));
+    }
+
+    private boolean isHearingRequired(FinremCaseDetails finremCaseDetails) {
+        return generalApplicationDirectionsService.isHearingRequired(finremCaseDetails);
+    }
+
+    private EventType getEventType() {
+        return GENERAL_APPLICATION_DIRECTIONS_MH;
     }
 }
