@@ -33,8 +33,8 @@ public class SendOrderConsentForApprovedOrderAboutToSubmitHandler extends Finrem
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Received request for {} about to submit callback for Case ID: {}",
-            EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, callbackRequest.getCaseDetails().getId());
+
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 

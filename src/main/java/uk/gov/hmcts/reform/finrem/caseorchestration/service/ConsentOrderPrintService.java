@@ -58,6 +58,16 @@ public class ConsentOrderPrintService {
         }
     }
 
+    /**
+     * Generates and stores bulk print cover sheets for the applicant and respondent
+     * when they are not represented by a digital solicitor with an email address.
+     * The cover sheet is stored in the confidential field if the party's address is hidden.
+     * This is intended to be called from an about-to-submit callback so the cover sheets are persisted,
+     * and later retrieved by {@link #sendConsentOrderToBulkPrintWithStoredCoverSheets}
+     * in the submitted callback.
+     * @param caseDetails        the case details to generate and store cover sheets for
+     * @param authorisationToken the user authorisation token
+     */
     public void generateAndStoreCoverSheets(FinremCaseDetails caseDetails,
                                             String authorisationToken) {
 
