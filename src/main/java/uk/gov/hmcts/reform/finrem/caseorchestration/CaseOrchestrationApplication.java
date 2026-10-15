@@ -12,15 +12,32 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.task.ScheduledTaskRunner;
+import uk.gov.hmcts.reform.idam.client.IdamApi;
+import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 
-@SpringBootApplication(scanBasePackages = {
-    "uk.gov.hmcts.reform.finrem", "uk.gov.hmcts.reform.bsp.common", "uk.gov.hmcts.reform.ccd.document.am.feign"
-})
-@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client", "uk.gov.hmcts.reform.finrem",
-    "uk.gov.hmcts.reform.ccd.client"},
-    basePackageClasses = {CaseDocumentClientApi.class, ServiceAuthorisationApi.class})
+@SpringBootApplication(
+    scanBasePackages = {
+        "uk.gov.hmcts.reform.finrem",
+        "uk.gov.hmcts.reform.bsp.common",
+        "uk.gov.hmcts.reform.ccd.document.am.feign"
+    },
+    exclude = {
+        uk.gov.hmcts.reform.sendletter.SendLetterAutoConfiguration.class
+    })
+
+@EnableFeignClients(
+    basePackages = {"uk.gov.hmcts.reform.finrem"},
+    basePackageClasses = {
+        ServiceAuthorisationApi.class,    // uk.gov.hmcts.reform.authorisation
+        IdamApi.class,                    // uk.gov.hmcts.reform.idam.client
+        CoreCaseDataApi.class,            // uk.gov.hmcts.reform.ccd.client
+        SendLetterApi.class,            // uk.gov.hmcts.reform.sendletter
+        CaseDocumentClientApi.class,      // uk.gov.hmcts.reform.ccd.document.am.feign
+    }
+)
 @EnableCaching
 @EnableRetry
 @EnableScheduling

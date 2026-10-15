@@ -104,13 +104,13 @@ class EvidenceManagementUploadServiceTest {
     @Test
     void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveSecurityAuthHeader() {
         emUploadService.upload(getMultipartFiles(), CONTESTED, AUTH_TOKEN);
-        assertTrue(getEmRequestHeaders().containsKey("ServiceAuthorization"));
+        assertTrue(getEmRequestHeaders().containsHeader("ServiceAuthorization"));
     }
 
     @Test
     void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveUserIdHeader() {
         emUploadService.upload(getMultipartFiles(), CONTESTED, AUTH_TOKEN);
-        assertTrue(getEmRequestHeaders().containsKey("user-id"));
+        assertTrue(getEmRequestHeaders().containsHeader("user-id"));
     }
 
     @Test
