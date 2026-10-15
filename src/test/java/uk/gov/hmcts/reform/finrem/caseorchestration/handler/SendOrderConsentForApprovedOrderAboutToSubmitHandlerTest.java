@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,7 +56,8 @@ class SendOrderConsentForApprovedOrderAboutToSubmitHandlerTest {
     void handle() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         handler.handle(callbackRequest, AUTH_TOKEN).hasErrors();
-        verify(service).sendConsentOrderToBulkPrint(any(FinremCaseDetails.class),
+        verify(service).generateAndStoreCoverSheets(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(service, never()).sendConsentOrderToBulkPrint(any(FinremCaseDetails.class),
             any(FinremCaseDetails.class),
             any(EventType.class),
             anyString());

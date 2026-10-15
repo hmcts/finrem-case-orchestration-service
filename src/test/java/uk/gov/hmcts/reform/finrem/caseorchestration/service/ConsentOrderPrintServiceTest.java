@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -33,12 +34,15 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
@@ -307,6 +311,50 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             "consentOrderNotApprovedCoverLetter.pdf", "respondentCoverSheet.pdf"));
     }
 
+    @Test
+    public void givenNonDigitalParties_whenGenerateAndStoreCoverSheets_thenBothCoverSheetsStored() {
+        FinremCaseDetails caseDetails = consentedCaseDetailsWithGeneralOrder();
+
+        consentOrderPrintService.generateAndStoreCoverSheets(caseDetails, AUTH_TOKEN);
+
+        verify(coverSheetService).generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(coverSheetService).generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenDigitalParties_whenGenerateAndStoreCoverSheets_thenNoCoverSheetsStored() {
+        FinremCaseDetails caseDetails = caseWithDigitalParties();
+
+        consentOrderPrintService.generateAndStoreCoverSheets(caseDetails, AUTH_TOKEN);
+
+        verifyNoInteractions(coverSheetService);
+    }
+
+    @Test
+    public void givenStoredCoverSheets_whenSendWithStoredCoverSheets_thenPrintsStoredCoverSheets() {
+        FinremCaseDetails caseDetails = caseWithLetterPacks();
+        BulkPrintCoversheetWrapper coverSheets = caseDetails.getData().getBulkPrintCoversheetWrapper();
+        coverSheets.setBulkPrintCoverSheetApp(coverSheet("applicantCoverSheet.pdf"));
+        coverSheets.setBulkPrintCoverSheetResConfidential(coverSheet("respondentConfidential.pdf"));
+
+        sendWithStoredCoverSheets(caseDetails);
+
+        verifyNoInteractions(coverSheetService);
+        List<BulkPrintRequest> requests = captureBulkPrintRequests();
+        assertThat(fileNames(requests.get(0)), containsInAnyOrder(
+            "applicantCoverSheet.pdf", "generalOrder.pdf", "consentOrderNotApprovedCoverLetter.pdf"));
+        assertThat(fileNames(requests.get(1)), hasItem("respondentConfidential.pdf"));
+    }
+
+    @Test
+    public void givenNoStoredCoverSheet_whenSendWithStoredCoverSheets_thenThrowsAndNothingPrinted() {
+        FinremCaseDetails caseDetails = caseWithLetterPacks();
+
+        assertThrows(IllegalStateException.class, () -> sendWithStoredCoverSheets(caseDetails));
+
+        verify(genericDocumentService, never()).bulkPrint(any());
+    }
+
     private FinremCaseDetails defaultContestedFinremCaseDetails() {
         List<ConsentOrderCollection> approvedOrderCollection = new ArrayList<>();
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
@@ -344,5 +392,41 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             .state(State.APPLICATION_SUBMITTED)
             .data(caseData)
             .build();
+    }
+
+    private FinremCaseDetails caseWithLetterPacks() {
+        FinremCaseDetails caseDetails = consentedCaseDetailsWithGeneralOrder();
+        BulkPrintDocument generalOrder = BulkPrintDocument.builder().fileName("generalOrder.pdf").binaryFileUrl(BINARY_URL).build();
+        BulkPrintDocument notApprovedCoverLetter = BulkPrintDocument.builder().fileName("consentOrderNotApprovedCoverLetter.pdf").build();
+
+        when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
+            .thenReturn(List.of(generalOrder, notApprovedCoverLetter));
+        when(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(caseDetails, AUTH_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(notApprovedCoverLetter);
+        return caseDetails;
+    }
+
+    private FinremCaseDetails caseWithDigitalParties() {
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
+        return consentedCaseDetailsWithGeneralOrder();
+    }
+
+    private CaseDocument coverSheet(String fileName) {
+        return caseDocument(DOC_URL, fileName, BINARY_URL);
+    }
+
+    private void sendWithStoredCoverSheets(FinremCaseDetails caseDetails) {
+        consentOrderPrintService.sendConsentOrderToBulkPrintWithStoredCoverSheets(caseDetails,
+            consentedCaseDetailsWithGeneralOrder(), CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
+    }
+
+    private List<BulkPrintRequest> captureBulkPrintRequests() {
+        verify(genericDocumentService, times(2)).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
+        return bulkPrintRequestArgumentCaptor.getAllValues();
+    }
+
+    private List<String> fileNames(BulkPrintRequest request) {
+        return request.getBulkPrintDocuments().stream().map(BulkPrintDocument::getFileName).toList();
     }
 }

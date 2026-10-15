@@ -47,6 +47,12 @@ public class NotificationsController extends BaseController {
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final ConsentOrderNotApprovedSentCorresponder consentOrderNotApprovedSentCorresponder;
 
+    /**
+     * Sends the consent order available email.
+     *
+     * @deprecated FR_sendOrderForApproved now uses SendOrderConsentForApprovedOrderSubmittedHandler.
+     */
+    @Deprecated
     @PostMapping(value = "/consent-order-available", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for Consent order available.")
     @ApiResponses(value = {
