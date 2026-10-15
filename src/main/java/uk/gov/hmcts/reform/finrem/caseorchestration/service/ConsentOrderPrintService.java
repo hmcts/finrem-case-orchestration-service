@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
@@ -54,6 +56,82 @@ public class ConsentOrderPrintService {
             log.info("Sending approved order for respondent to bulk print for Case ID: {}", finremCaseDetails.getId());
             generateCoversheetForRespondentAndSendOrders(finremCaseDetails, finremCaseDetailsBefore, eventType, authorisationToken);
         }
+    }
+
+    public void generateAndStoreCoverSheets(FinremCaseDetails caseDetails,
+                                            String authorisationToken) {
+
+        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            log.info("Generating and storing cover sheet for applicant for Case ID: {}", caseDetails.getId());
+            coverSheetService.generateAndSetApplicantCoverSheet(caseDetails, authorisationToken);
+        }
+
+        if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            log.info("Generating and storing cover sheet for respondent for Case ID: {}", caseDetails.getId());
+            coverSheetService.generateAndSetRespondentCoverSheet(caseDetails, authorisationToken);
+        }
+    }
+
+    /**
+     * Sends the consent order to bulk print using cover sheets that were already
+     * generated and stored on the case. This is used in the submitted callback
+     */
+    public void sendConsentOrderToBulkPrintWithStoredCoverSheets(FinremCaseDetails caseDetails,
+                                                                 FinremCaseDetails caseDetailsBefore,
+                                                                 EventType eventType,
+                                                                 String authorisationToken) {
+        FinremCaseData caseData = caseDetails.getData();
+
+        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            log.info("Sending order to applicant for bulk print using stored cover sheet for Case ID: {}", caseDetails.getId());
+            List<BulkPrintDocument> applicantDocuments =
+                getApplicantOrderDocuments(caseDetails, caseDetailsBefore, eventType, authorisationToken);
+
+            if (!applicantDocuments.isEmpty()) {
+                CaseDocument coverSheet = getStoredCoverSheet(
+                    caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp(),
+                    caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential(),
+                    "applicant", caseDetails.getId());
+
+                List<BulkPrintDocument> documentsToPrint = new ArrayList<>();
+                documentsToPrint.add(documentHelper.mapToBulkPrintDocument(coverSheet));
+                documentsToPrint.addAll(applicantDocuments);
+
+                bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails, CCDConfigConstant.APPLICANT,
+                    documentsToPrint, postalService.isApplicantResideOutsideOfUK(caseData), authorisationToken);
+            }
+        }
+
+        if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            log.info("Sending order to respondent for bulk print using stored cover sheet for Case ID: {}", caseDetails.getId());
+            CaseDocument coverSheet = getStoredCoverSheet(
+                caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes(),
+                caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential(),
+                "respondent", caseDetails.getId());
+
+            sendConsentOrderForBulkPrintRespondent(coverSheet, caseDetails, caseDetailsBefore, eventType, authorisationToken);
+        }
+    }
+
+    private List<BulkPrintDocument> getApplicantOrderDocuments(FinremCaseDetails caseDetails,
+                                                               FinremCaseDetails caseDetailsBefore,
+                                                               EventType eventType,
+                                                               String authorisationToken) {
+        if (shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)) {
+            List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.addApprovedConsentOrderCoverLetter(
+                caseDetails, authorisationToken, APPLICANT);
+            getOrderDocuments(caseDetails, caseDetailsBefore, eventType, authorisationToken, documents);
+            return documents;
+        }
+        return consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, authorisationToken);
+    }
+
+    private CaseDocument getStoredCoverSheet(CaseDocument coverSheet, CaseDocument confidentialCoverSheet,
+                                             String party, Long caseId) {
+        return Optional.ofNullable(coverSheet)
+            .or(() -> Optional.ofNullable(confidentialCoverSheet))
+            .orElseThrow(() -> new IllegalStateException(
+                "No stored %s cover sheet found for Case ID: %s".formatted(party, caseId)));
     }
 
     private void generateCoversheetForRespondentAndSendOrders(FinremCaseDetails finremCaseDetails,
