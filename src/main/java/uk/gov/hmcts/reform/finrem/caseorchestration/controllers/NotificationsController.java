@@ -47,6 +47,10 @@ public class NotificationsController extends BaseController {
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final ConsentOrderNotApprovedSentCorresponder consentOrderNotApprovedSentCorresponder;
 
+    /**
+     * @deprecated FR_sendOrderForApproved now uses SendOrderConsentForApprovedOrderSubmittedHandler.
+     */
+    @Deprecated
     @PostMapping(value = "/consent-order-available", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for Consent order available.")
     @ApiResponses(value = {
@@ -83,6 +87,7 @@ public class NotificationsController extends BaseController {
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
+
 
     @PostMapping(value = "/consent-order-not-approved-sent", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send consent order not approved sent email")
