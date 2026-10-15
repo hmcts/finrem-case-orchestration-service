@@ -32,7 +32,7 @@ def versions = [
         springDoc            : '2.8.17',
         wiremock             : '3.0.1',
         apacheLogging        : '2.25.4',
-        idamClient           : '3.0.5',
+        idamClient           : '3.1.0',
         tika                 : '3.3.3',
         amClient             : '1.59.2',
         sendLetterClient     : '5.1.1',
