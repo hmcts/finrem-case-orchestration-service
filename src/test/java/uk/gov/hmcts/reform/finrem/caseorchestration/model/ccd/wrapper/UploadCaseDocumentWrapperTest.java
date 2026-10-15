@@ -57,7 +57,10 @@ class UploadCaseDocumentWrapperTest {
         "intv4Summaries", "intv4Chronologies", "intv4CorrespDocs", "intv4ExpertEvidence",
         "intv4FormEsExhibits", "intv4FormHs", "intv4HearingBundles", "intv4Other", "intv4Qa",
         "intv4StmtsExhibits", "intv1FdrCaseDocuments", "intv2FdrCaseDocuments",
-        "intv3FdrCaseDocuments", "intv4FdrCaseDocuments", "confidentialDocumentCollection"
+        "intv3FdrCaseDocuments", "intv4FdrCaseDocuments", "confidentialDocumentCollection",
+        "appUpdatingDisclosureCollection", "respUpdatingDisclosureCollection",
+        "intv1UpdatingDisclosureCollection", "intv2UpdatingDisclosureCollection",
+        "intv3UpdatingDisclosureCollection", "intv4UpdatingDisclosureCollection"
     );
 
     @Test
