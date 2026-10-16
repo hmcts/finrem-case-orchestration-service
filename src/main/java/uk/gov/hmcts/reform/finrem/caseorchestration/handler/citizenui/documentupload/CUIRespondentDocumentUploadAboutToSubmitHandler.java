@@ -6,15 +6,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogge
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CitizenDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.citizen.CitizenDocumentsUploadedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CUIDocumentsCategoriser;
-
-import java.util.List;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenPartyType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentsorter.CitizenDocumentSorter;
 
 /**
  * Handler for Respondent CUI document upload events.
@@ -22,9 +20,8 @@ import java.util.List;
  * <p>This handler processes {@link EventType#CUI_RESPONDENT_DOCUMENT_UPLOAD} events and is responsible for:
  * <ul>
  *     <li>Retrieving the respondent document collection</li>
- *     <li>Merging newly uploaded documents with existing ones</li>
- *     <li>Sorting documents by upload datetime (delegated to the abstract class)</li>
- *     <li>Updating the respondent document collection on the case data</li>
+ *     <li>Assigns each document it's CFV category</li>
+ *     <li>Sorts the documents into their tab-specific collections</li>
  * </ul>
  *
  * <p>All core merge and sort logic is implemented in
@@ -34,14 +31,16 @@ import java.util.List;
 @Service
 public class CUIRespondentDocumentUploadAboutToSubmitHandler extends CUIDocumentUploadAboutToSubmitHandler {
 
-    private final FeatureToggleService featureToggleService;
-
     public CUIRespondentDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                            FeatureToggleService featureToggleService,
-                                                            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
-                                                            CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder) {
-        super(finremCaseDetailsMapper, correspondenceEventAuditOrchestrationService, citizenDocumentsUploadedCorresponder);
-        this.featureToggleService = featureToggleService;
+                                                           CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
+                                                           CitizenDocumentsUploadedCorresponder citizenDocumentsUploadedCorresponder,
+                                                           CUIDocumentsCategoriser documentsCategoriser,
+                                                           CitizenDocumentSorter citizenDocumentSorter) {
+        super(finremCaseDetailsMapper,
+            correspondenceEventAuditOrchestrationService,
+            documentsCategoriser,
+            citizenDocumentsUploadedCorresponder,
+            citizenDocumentSorter);
     }
 
     /**
@@ -54,37 +53,9 @@ public class CUIRespondentDocumentUploadAboutToSubmitHandler extends CUIDocument
         return EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD;
     }
 
-    /**
-     * Retrieves the respondent document collection from case data.
-     *
-     * @param caseData case data
-     * @return list of respondent documents (may be null)
-     */
-    @Override
-    protected List<CitizenDocumentCollection> getDocuments(FinremCaseData caseData) {
-        return caseData.getCitizenDocumentWrapper().getCitizenRespondentDocument();
-    }
-
-    /**
-     * Sets the updated respondent document collection onto case data.
-     *
-     * @param caseData  case data
-     * @param documents merged and sorted respondent documents
-     */
-    @Override
-    protected void setDocuments(FinremCaseData caseData, List<CitizenDocumentCollection> documents) {
-        caseData.getCitizenDocumentWrapper().setCitizenRespondentDocument(documents);
-    }
-
     @Override
     protected void handleLog(FinremCallbackRequest callbackRequest) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
-    }
-
-    @Override
-    protected void categoriseDocuments(FinremCaseData caseData) {
-        new CUIDocumentsCategoriser(featureToggleService, CUIDocumentsCategoriser.Party.RESPONDENT)
-            .categorise(caseData);
     }
 
     @Override
@@ -92,4 +63,8 @@ public class CUIRespondentDocumentUploadAboutToSubmitHandler extends CUIDocument
         return NotificationParty.CITIZEN_RESPONDENT;
     }
 
+    @Override
+    protected void sortDocs(CitizenDocumentWrapper citizenDocumentWrapper) {
+        citizenDocumentSorter.sortDocuments(citizenDocumentWrapper, CitizenPartyType.RESPONDENT);
+    }
 }
