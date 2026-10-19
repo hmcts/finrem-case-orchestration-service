@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CaseFlagsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -31,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 public class CcdServiceTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
+    public static final String SERVICE_AUTH = "serviceAuth:)";
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
@@ -38,6 +41,8 @@ public class CcdServiceTest {
     private CaseEventsApi caseEventsApi;
     @Mock
     private IdamAuthService idamAuthService;
+    @Mock
+    private CaseFlagsConfiguration caseFlagsConfiguration;
     @InjectMocks
     private CcdService ccdService;
 
@@ -89,6 +94,19 @@ public class CcdServiceTest {
         ccdService.getCaseByCaseId("123", CaseType.CONTESTED, AUTH_TOKEN);
 
         verify(coreCaseDataApi).searchCases(any(), any(), any(), any());
+    }
+
+    @Test
+    public void shouldAddAddSupplementaryDataForCaseId() {
+        String hmctsId = "ABA5";
+
+        when(caseFlagsConfiguration.getHmctsId()).thenReturn(hmctsId);
+        when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
+        when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder()
+            .serviceAuthorization(SERVICE_AUTH).idamOauth2Token(AUTH_TOKEN)
+            .build());
+        ccdService.submitSupplementaryDataToCcd(AUTH_TOKEN, "123");
+        verify(coreCaseDataApi).submitSupplementaryData(anyString(), anyString(), anyString(),any());
     }
 
     private CaseDetails buildCaseDetails() {
