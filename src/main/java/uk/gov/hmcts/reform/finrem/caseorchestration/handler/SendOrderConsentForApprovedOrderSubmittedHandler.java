@@ -9,8 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -31,10 +31,10 @@ public class SendOrderConsentForApprovedOrderSubmittedHandler extends FinremSubm
                                                             EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                             RetryExecutor retryExecutor,
                                                             ConsentOrderApprovedCorresponder consentOrderApprovedCorresponder,
-                                                            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
+                                                            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrcService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
         this.consentOrderApprovedCorresponder = consentOrderApprovedCorresponder;
-        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
+        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrcService;
     }
 
     @Override
