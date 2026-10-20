@@ -21,10 +21,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.RESPONDENT;
 
-/**
- * Builds the correspondence events for the consented approved Send Order event.
- * Letter packs are read from the case; they are prepared in about-to-submit.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
