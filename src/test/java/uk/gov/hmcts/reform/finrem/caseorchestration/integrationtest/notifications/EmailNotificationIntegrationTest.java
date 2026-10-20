@@ -4,23 +4,22 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserTokenProvider;
-import uk.gov.service.notify.TemplatePreview;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -33,17 +32,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Live integration parity tests between fixture-rendered Notify previews and real Notify previews.
  */
-//@ContextConfiguration(classes = CaseOrchestrationApplication.class)
-//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-//@EnableScheduling
-//@Category(IntegrationTest.class)
-
-@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@PropertySource(value = "classpath:application.properties")
-//@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@EnableScheduling
 @Category(IntegrationTest.class)
+@ActiveProfiles("local")
+@PropertySource(value = "classpath:application.properties")
+@Slf4j
 public class EmailNotificationIntegrationTest extends BaseTest {
 
     @MockitoBean
@@ -54,8 +49,8 @@ public class EmailNotificationIntegrationTest extends BaseTest {
 
     private static final String TEMPLATE_ID_TOKEN = "{{request.pathSegments.[2]}}";
 
-    @Value("${uk.gov.notify.api.key}")
-    public String apiKey;
+    @Autowired
+    private EmailClient emailClient;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -311,8 +306,7 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         assertThat(fixture.response).as("response missing: " + fixtureClasspath).isNotNull();
         assertThat(fixture.response.bodyAsJson).as("response.bodyAsJson missing: " + fixtureClasspath).isNotNull();
 
-        EmailClient emailClient = new EmailClient(apiKey);
-        TemplatePreview livePreview =
+        uk.gov.service.notify.TemplatePreview livePreview =
             emailClient.generateTemplatePreview(fixture.templateId, fixture.notificationRequest.personalisation);
 
         JsonNode expected = renderExpectedFromFixtureTemplate(fixture);
