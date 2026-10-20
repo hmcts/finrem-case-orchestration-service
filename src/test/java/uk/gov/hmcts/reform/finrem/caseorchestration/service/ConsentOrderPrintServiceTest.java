@@ -307,6 +307,99 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             "consentOrderNotApprovedCoverLetter.pdf", "respondentCoverSheet.pdf"));
     }
 
+    @Test
+    public void givenApprovedOrder_whenGetApplicantLetterPack_thenCoverLetterThenOrders() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseDetails caseDetailsBefore = defaultContestedFinremCaseDetails();
+        CaseDocument coverLetter = caseDocument(DOC_URL, "appCoverLetter.pdf", BINARY_URL);
+        CaseDocument order = caseDocument(DOC_URL, "order.pdf", BINARY_URL);
+
+        when(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(List.of(coverLetter));
+        when(consentOrderApprovedDocumentService.approvedOrderDocuments(caseDetails, AUTH_TOKEN)).thenReturn(List.of(order));
+
+        List<CaseDocument> pack = consentOrderPrintService.getApplicantLetterPack(caseDetails, caseDetailsBefore,
+            CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
+
+        assertEquals(List.of("appCoverLetter.pdf", "order.pdf"), filenames(pack));
+        verify(genericDocumentService, times(0)).bulkPrint(any());
+    }
+
+    @Test
+    public void givenApprovedOrder_whenGetRespondentLetterPack_thenOrdersThenCoverLetter() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseDetails caseDetailsBefore = defaultContestedFinremCaseDetails();
+        CaseDocument coverLetter = caseDocument(DOC_URL, "resCoverLetter.pdf", BINARY_URL);
+        CaseDocument order = caseDocument(DOC_URL, "order.pdf", BINARY_URL);
+
+        when(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(List.of(coverLetter));
+        when(consentOrderApprovedDocumentService.approvedOrderDocuments(caseDetails, AUTH_TOKEN)).thenReturn(List.of(order));
+
+        List<CaseDocument> pack = consentOrderPrintService.getRespondentLetterPack(caseDetails, caseDetailsBefore,
+            CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
+
+        assertEquals(List.of("order.pdf", "resCoverLetter.pdf"), filenames(pack));
+        verify(genericDocumentService, times(0)).bulkPrint(any());
+    }
+
+    @Test
+    public void givenNoApprovedOrder_whenGetApplicantLetterPack_thenNotApprovedPack() {
+        FinremCaseDetails caseDetails = consentedCaseDetailsWithGeneralOrder();
+        FinremCaseDetails caseDetailsBefore = consentedCaseDetailsWithGeneralOrder();
+        List<CaseDocument> notApprovedPack = List.of(caseDocument(DOC_URL, "notApprovedCoverLetter.pdf", BINARY_URL),
+            caseDocument(DOC_URL, "generalOrder.pdf", BINARY_URL));
+
+        when(consentOrderNotApprovedDocumentService.getApplicantLetterPackDocuments(caseDetails, AUTH_TOKEN))
+            .thenReturn(notApprovedPack);
+
+        List<CaseDocument> pack = consentOrderPrintService.getApplicantLetterPack(caseDetails, caseDetailsBefore,
+            CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
+
+        assertEquals(notApprovedPack, pack);
+    }
+
+    @Test
+    public void givenNoApprovedOrder_whenGetRespondentLetterPack_thenGeneralOrderThenNotApprovedCoverLetter() {
+        FinremCaseDetails caseDetails = consentedCaseDetailsWithGeneralOrder();
+        FinremCaseDetails caseDetailsBefore = consentedCaseDetailsWithGeneralOrder();
+        CaseDocument coverLetter = caseDocument(DOC_URL, "notApprovedCoverLetter.pdf", BINARY_URL);
+
+        when(consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(caseDetails, AUTH_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(coverLetter);
+
+        List<CaseDocument> pack = consentOrderPrintService.getRespondentLetterPack(caseDetails, caseDetailsBefore,
+            CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
+
+        assertEquals(List.of("generalOrder.pdf", "notApprovedCoverLetter.pdf"), filenames(pack));
+    }
+
+    @Test
+    public void givenGeneralOrderAddedInThisEvent_whenGetConsentOrderDocuments_thenOnlyGeneralOrder() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseDetails caseDetailsBefore = defaultContestedFinremCaseDetails();
+        caseDetails.getData().getGeneralOrderWrapper()
+            .setGeneralOrderLatestDocument(caseDocument(DOC_URL, "GeneralOrder.pdf", BINARY_URL));
+
+        List<CaseDocument> documents = consentOrderPrintService.getConsentOrderDocuments(caseDetails, caseDetailsBefore,
+            CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
+
+        assertEquals(List.of("GeneralOrder.pdf"), filenames(documents));
+    }
+
+    @Test
+    public void givenNoGeneralOrder_whenGetConsentOrderDocuments_thenApprovedOrders() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseDetails caseDetailsBefore = defaultContestedFinremCaseDetails();
+        when(consentOrderApprovedDocumentService.approvedOrderDocuments(caseDetails, AUTH_TOKEN))
+            .thenReturn(List.of(caseDocument(DOC_URL, "order.pdf", BINARY_URL)));
+
+        List<CaseDocument> documents = consentOrderPrintService.getConsentOrderDocuments(caseDetails, caseDetailsBefore,
+            CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
+
+        assertEquals(List.of("order.pdf"), filenames(documents));
+    }
+
     private FinremCaseDetails defaultContestedFinremCaseDetails() {
         List<ConsentOrderCollection> approvedOrderCollection = new ArrayList<>();
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
@@ -344,5 +437,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             .state(State.APPLICATION_SUBMITTED)
             .data(caseData)
             .build();
+    }
+
+    private List<String> filenames(List<CaseDocument> documents) {
+        return documents.stream().map(CaseDocument::getDocumentFilename).toList();
     }
 }
