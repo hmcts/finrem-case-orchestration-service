@@ -6,7 +6,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractIs
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -17,10 +18,11 @@ public class FeeAccountDebitedAndIssueSubmittedHandler extends AbstractIssueAppl
     public FeeAccountDebitedAndIssueSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                      RetryExecutor retryExecutor,
-                                                     IssueApplicationConsentCorresponder issueApplicationConsentCorresponder,
-                                                     AssignPartiesAccessService assignPartiesAccessService) {
-        super(finremCaseDetailsMapper, evidenceManagementDeleteService,
-            retryExecutor, issueApplicationConsentCorresponder, assignPartiesAccessService);
+                                                     AssignToJudgeCorresponder assignToJudgeCorresponder,
+                                                     AssignPartiesAccessService assignPartiesAccessService,
+                                                     CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
+        super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor, assignToJudgeCorresponder,
+            assignPartiesAccessService, correspondenceEventAuditOrchestrationService);
     }
 
     @Override
