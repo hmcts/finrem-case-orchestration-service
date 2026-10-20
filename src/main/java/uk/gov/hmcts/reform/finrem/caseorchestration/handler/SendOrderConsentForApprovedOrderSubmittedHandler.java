@@ -17,9 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Sends the letters and emails once the event has been saved.
- */
 @Slf4j
 @Service
 public class SendOrderConsentForApprovedOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
