@@ -6,17 +6,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserTokenProvider;
+import uk.gov.service.notify.TemplatePreview;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -34,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 //@EnableScheduling
 //@Category(IntegrationTest.class)
 
-//@RunWith(SpringRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @PropertySource(value = "classpath:application.properties")
@@ -50,8 +54,8 @@ public class EmailNotificationIntegrationTest extends BaseTest {
 
     private static final String TEMPLATE_ID_TOKEN = "{{request.pathSegments.[2]}}";
 
-    @Autowired
-    private EmailClient emailClient;
+    @Value("${uk.gov.notify.api.key}")
+    public String apiKey;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -307,7 +311,8 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         assertThat(fixture.response).as("response missing: " + fixtureClasspath).isNotNull();
         assertThat(fixture.response.bodyAsJson).as("response.bodyAsJson missing: " + fixtureClasspath).isNotNull();
 
-        uk.gov.service.notify.TemplatePreview livePreview =
+        EmailClient emailClient = new EmailClient(apiKey);
+        TemplatePreview livePreview =
             emailClient.generateTemplatePreview(fixture.templateId, fixture.notificationRequest.personalisation);
 
         JsonNode expected = renderExpectedFromFixtureTemplate(fixture);
