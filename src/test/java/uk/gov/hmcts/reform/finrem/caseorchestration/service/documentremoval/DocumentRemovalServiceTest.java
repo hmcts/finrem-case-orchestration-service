@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -207,6 +209,23 @@ class DocumentRemovalServiceTest {
         assertEquals("https://example3.com/binary", result.get(2).getValue().getCaseDocument().getDocumentBinaryUrl());
         assertEquals("789", result.get(2).getValue().getDocumentId());
 
+    }
+
+    @Test
+    void testGetUploadTimestampFromDocumentNode_InvalidUploadTimestamp() throws Exception {
+        ObjectMapper objectMapper = createObjectMapper();
+        JsonNode documentNode = objectMapper.createObjectNode()
+            .put("document_url", "https://example.com/123")
+            .put("upload_timestamp", "not-a-timestamp");
+
+        var method = DocumentRemovalService.class.getDeclaredMethod("getUploadTimestampFromDocumentNode", JsonNode.class);
+        method.setAccessible(true);
+
+        LocalDateTime result = (LocalDateTime) method.invoke(documentRemovalService, documentNode);
+
+        assertNull(result);
+        assertThat(logs.getErrors())
+            .contains("Error getting upload timestamp for document url: https://example.com/123.");
     }
 
     /**
@@ -599,5 +618,110 @@ class DocumentRemovalServiceTest {
             .getFirst().getValue().getApproveOrders().getFirst()
             .getValue().getCaseDocument().getDocumentFilename());
         assertNull(result.getDocumentToKeepCollection());
+    }
+
+    @Test
+    void testShouldRemoveNestedDocumentsWithoutRemovingGeneralApplication() throws Exception {
+        String documentToDeleteUrl = "https://example1.com/123";
+        String documentToKeepUrl = "https://example2.com/456";
+        String draftOrderToDeleteUrl = "https://example3.com/789";
+        String directionsToDeleteUrl = "https://example4.com/101112";
+
+        ObjectMapper objectMapper = createObjectMapper();
+
+        FinremCaseData caseData = objectMapper.readValue(
+            """
+            {
+              "generalApplications": [
+                {
+                  "value": {
+                    "generalApplicationDocument": {
+                      "document_url": "https://example1.com/123",
+                      "document_filename": "Document-to-delete.pdf",
+                      "document_binary_url": "https://example1.com/binary"
+                    }
+                  }
+                },
+                {
+                  "value": {
+                    "generalApplicationDocument": {
+                      "document_url": "https://example2.com/456",
+                      "document_filename": "Document-to-keep.pdf",
+                      "document_binary_url": "https://example2.com/binary"
+                    },
+                    "generalApplicationDraftOrder": {
+                      "document_url": "https://example3.com/789",
+                      "document_filename": "Draft-order-to-delete.pdf",
+                      "document_binary_url": "https://example3.com/binary"
+                    },
+                    "generalApplicationDirectionsDocument": {
+                      "document_url": "https://example4.com/101112",
+                      "document_filename": "Directions-to-delete.pdf",
+                      "document_binary_url": "https://example4.com/binary"
+                    }
+                  }
+                }
+              ],
+              "documentToKeepCollection": [
+                {
+                  "value": {
+                    "documentId": "456",
+                    "caseDocument": {
+                      "document_url": "https://example2.com/456",
+                      "document_filename": "Document-to-keep.pdf",
+                      "document_binary_url": "https://example2.com/binary"
+                    }
+                  }
+                }
+              ]
+            }
+            """,
+            FinremCaseData.class
+        );
+
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(false);
+
+        FinremCaseData result =
+            documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
+
+        List<GeneralApplicationsCollection> generalApplications =
+            result.getGeneralApplicationWrapper().getGeneralApplications();
+
+        assertThat(generalApplications).hasSize(2);
+
+        List<String> remainingDocumentUrls = documentRemovalService.getCaseDocumentsList(result)
+            .stream()
+            .map(doc -> doc.getValue().getCaseDocument().getDocumentUrl())
+            .toList();
+
+        assertThat(remainingDocumentUrls)
+            .contains(documentToKeepUrl)
+            .doesNotContain(documentToDeleteUrl)
+            .doesNotContain(draftOrderToDeleteUrl)
+            .doesNotContain(directionsToDeleteUrl);
+
+        assertNull(result.getDocumentToKeepCollection());
+        verifyNoInteractions(genericDocumentService);
+    }
+
+    @Test
+    void testIsDocumentEntry_WithDocumentLinkObject() throws Exception {
+        ObjectMapper objectMapper = createObjectMapper();
+        JsonNode node = objectMapper.readTree("""
+            {
+              "value": {
+                "documentLink": {
+                  "document_url": "https://example.com/123"
+                }
+              }
+            }
+            """);
+
+        var method = DocumentRemovalService.class.getDeclaredMethod("isDocumentEntry", JsonNode.class, String.class);
+        method.setAccessible(true);
+
+        boolean result = (boolean) method.invoke(documentRemovalService, node, "https://example.com/123");
+
+        assertThat(result).isTrue();
     }
 }

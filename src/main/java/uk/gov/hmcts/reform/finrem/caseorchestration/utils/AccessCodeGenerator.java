@@ -23,16 +23,24 @@ public final class AccessCodeGenerator {
         return RandomStringUtils.random(8, 0, ALLOWED_CHARS.length(), false, false, ALLOWED_CHARS.toCharArray(), new SecureRandom());
     }
 
-    public static void setAccessCode(FinremCaseData caseData) {
-        ensureAccessCodePresent(
-            caseData::getApplicantAccessCodes,
-            caseData::setApplicantAccessCodes
-        );
+    public static void setAccessCode(FinremCaseData caseData, boolean alwaysGenerateCUIAccessCodes) {
 
-        ensureAccessCodePresent(
-            caseData::getRespondentAccessCodes,
-            caseData::setRespondentAccessCodes
-        );
+        boolean shouldGenerateApplicantCode = !caseData.isApplicantRepresentedByASolicitor() || alwaysGenerateCUIAccessCodes;
+        if (shouldGenerateApplicantCode) {
+            ensureAccessCodePresent(
+                caseData::getApplicantAccessCodes,
+
+                caseData::setApplicantAccessCodes
+            );
+        }
+
+        boolean shouldGenerateRespondentCode = !caseData.isRespondentRepresentedByASolicitor() || alwaysGenerateCUIAccessCodes;
+        if (shouldGenerateRespondentCode) {
+            ensureAccessCodePresent(
+                caseData::getRespondentAccessCodes,
+                caseData::setRespondentAccessCodes
+            );
+        }
     }
 
     private static void ensureAccessCodePresent(

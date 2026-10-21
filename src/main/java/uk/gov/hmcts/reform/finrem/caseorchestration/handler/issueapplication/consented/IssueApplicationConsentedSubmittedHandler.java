@@ -1,0 +1,32 @@
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.issueapplication.consented;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractIssueApplicationSubmittedHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
+
+@Slf4j
+@Service
+public class IssueApplicationConsentedSubmittedHandler extends AbstractIssueApplicationSubmittedHandler {
+
+    public IssueApplicationConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                     EvidenceManagementDeleteService evidenceManagementDeleteService,
+                                                     RetryExecutor retryExecutor,
+                                                     AssignToJudgeCorresponder assignToJudgeCorresponder,
+                                                     AssignPartiesAccessService assignPartiesAccessService,
+                                                     CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
+        super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor, assignToJudgeCorresponder,
+            assignPartiesAccessService, correspondenceEventAuditOrchestrationService);
+    }
+
+    @Override
+    protected EventType supportedEventType() {
+        return EventType.ISSUE_APPLICATION;
+    }
+}

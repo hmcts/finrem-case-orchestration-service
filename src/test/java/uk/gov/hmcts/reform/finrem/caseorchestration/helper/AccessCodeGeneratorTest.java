@@ -5,12 +5,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollecti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AccessCodeGeneratorTest {
@@ -28,7 +30,8 @@ class AccessCodeGeneratorTest {
     void setAccessCode_shouldCreateApplicantAndRespondentAccessCodesWhenEmpty() {
         FinremCaseData data = new FinremCaseData();
 
-        AccessCodeGenerator.setAccessCode(data);
+        boolean alwaysGenerateCUIAccessCodes = false;
+        AccessCodeGenerator.setAccessCode(data, alwaysGenerateCUIAccessCodes);
 
         assertNotNull(data.getApplicantAccessCodes());
         assertNotNull(data.getRespondentAccessCodes());
@@ -56,12 +59,77 @@ class AccessCodeGeneratorTest {
         data.setApplicantAccessCodes(List.of(existingCollection));
         data.setRespondentAccessCodes(List.of(existingCollection));
 
-        AccessCodeGenerator.setAccessCode(data);
+        boolean alwaysGenerateCUIAccessCodes = false;
+        AccessCodeGenerator.setAccessCode(data, alwaysGenerateCUIAccessCodes);
 
         // Ensure no new entries added
         assertEquals(1, data.getApplicantAccessCodes().size());
         assertEquals(1, data.getRespondentAccessCodes().size());
         assertEquals("ABCDEFGH", data.getApplicantAccessCodes().getFirst().getValue().getAccessCode());
+    }
+
+    @Test
+    void setAccessCode_shouldNotCreateCodesForRepresentedParties() {
+        FinremCaseData data = new FinremCaseData();
+        data.setContactDetailsWrapper(ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.YES)
+            .contestedRespondentRepresented(YesOrNo.YES)
+            .build());
+
+        boolean alwaysGenerateCUIAccessCodes = false;
+        AccessCodeGenerator.setAccessCode(data, alwaysGenerateCUIAccessCodes);
+
+        assertNull(data.getApplicantAccessCodes());
+        assertNull(data.getRespondentAccessCodes());
+    }
+
+    @Test
+    void setAccessCode_shouldCreateCodeForUnrepresentedPartyInMixedScenario() {
+        FinremCaseData data = new FinremCaseData();
+        data.setContactDetailsWrapper(ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.YES)
+            .contestedRespondentRepresented(YesOrNo.NO)
+            .build());
+
+        boolean alwaysGenerateCUIAccessCodes = false;
+        AccessCodeGenerator.setAccessCode(data, alwaysGenerateCUIAccessCodes);
+
+        assertNull(data.getApplicantAccessCodes());
+        assertNotNull(data.getRespondentAccessCodes());
+        assertEquals(1, data.getRespondentAccessCodes().size());
+        assertValidEntry(data.getRespondentAccessCodes().getFirst().getValue());
+    }
+
+    @Test
+    void setAccessCode_shouldAlwaysCreateCodes_when_alwaysGenerateCUIAccessCodesTrue() {
+        FinremCaseData representedCase = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantRepresented(YesOrNo.YES)
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .build())
+            .build();
+
+        FinremCaseData notRepresentedCase = new FinremCaseData();
+
+        boolean alwaysGenerateCUIAccessCodes = true;
+        AccessCodeGenerator.setAccessCode(representedCase, alwaysGenerateCUIAccessCodes);
+        AccessCodeGenerator.setAccessCode(notRepresentedCase, alwaysGenerateCUIAccessCodes);
+
+        assertNotNull(representedCase.getApplicantAccessCodes());
+        assertNotNull(representedCase.getRespondentAccessCodes());
+        assertEquals(1, representedCase.getApplicantAccessCodes().size());
+        assertEquals(1, representedCase.getRespondentAccessCodes().size());
+
+        assertValidEntry(representedCase.getApplicantAccessCodes().getFirst().getValue());
+        assertValidEntry(representedCase.getRespondentAccessCodes().getFirst().getValue());
+
+        assertNotNull(notRepresentedCase.getApplicantAccessCodes());
+        assertNotNull(notRepresentedCase.getRespondentAccessCodes());
+        assertEquals(1, notRepresentedCase.getApplicantAccessCodes().size());
+        assertEquals(1, notRepresentedCase.getRespondentAccessCodes().size());
+
+        assertValidEntry(notRepresentedCase.getApplicantAccessCodes().getFirst().getValue());
+        assertValidEntry(notRepresentedCase.getRespondentAccessCodes().getFirst().getValue());
     }
 
     private void assertValidEntry(AccessCodeEntry entry) {

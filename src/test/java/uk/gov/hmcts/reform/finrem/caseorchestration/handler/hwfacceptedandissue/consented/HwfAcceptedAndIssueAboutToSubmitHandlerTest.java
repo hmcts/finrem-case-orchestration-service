@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.IssueAppli
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -24,6 +25,8 @@ class HwfAcceptedAndIssueAboutToSubmitHandlerTest extends IssueApplicationAboutT
     private OnlineFormDocumentService onlineFormDocumentService;
     @Mock
     private IssueApplicationService issueApplicationService;
+    @Mock
+    private AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     @Test
     void testCanHandle() {
@@ -43,5 +46,10 @@ class HwfAcceptedAndIssueAboutToSubmitHandlerTest extends IssueApplicationAboutT
     @Override
     protected IssueApplicationService issueApplicationService() {
         return issueApplicationService;
+    }
+
+    @Override
+    protected AssignToJudgeCorresponder assignToJudgeCorresponder() {
+        return assignToJudgeCorresponder;
     }
 }

@@ -6,7 +6,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -107,12 +106,14 @@ public class EvidenceManagementUploadService {
     }
 
     private FileUploadResponse createUploadResponse(JsonNode document) {
+        String selfHref = document.path("_links").path("self").path("href").textValue();
+        if (selfHref == null) {
+            throw new IllegalStateException("self rel link not found");
+        }
+
         return FileUploadResponse.builder()
             .status(HttpStatus.OK)
-            .fileUrl(new HalLinkDiscoverer()
-                .findLinkWithRel("self", document.toString())
-                .orElseThrow(() -> new IllegalStateException("self rel link not found"))
-                .getHref())
+            .fileUrl(selfHref)
             .fileName(document.get("originalDocumentName").asText())
             .createdBy(getTextFromJsonNode(document, "createdBy"))
             .createdOn(document.get("createdOn").asText())
@@ -150,8 +151,8 @@ public class EvidenceManagementUploadService {
     }
 
     private String getTextFromJsonNode(JsonNode document, String attribute) {
-        return Optional.ofNullable(document)
-            .flatMap(file -> Optional.ofNullable(attribute).map(file::asText))
+        return Optional.ofNullable(document.get(attribute))
+            .map(JsonNode::asText)
             .orElse(null);
     }
 

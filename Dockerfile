@@ -1,5 +1,6 @@
 ARG APP_INSIGHTS_AGENT_VERSION=3.7.0
-FROM hmctsprod.azurecr.io/base/java:21-distroless
+ARG PLATFORM=""
+FROM hmctsprod.azurecr.io/base/java${PLATFORM}:21-distroless
 
 COPY build/libs/finrem-case-orchestration.jar /opt/app/
 COPY lib/applicationinsights.json /opt/app/

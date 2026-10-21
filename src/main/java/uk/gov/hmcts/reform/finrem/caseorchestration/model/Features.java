@@ -23,7 +23,9 @@ public enum Features {
     FINREM_CITIZEN_UI_ENABLED("finrem_citizen_ui_enabled"),
     FINREM_WORK_ALLOCATION_ENABLED("finrem_work_allocation_enabled"),
     ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED("estimated_assets_checklist_V3_enabled"),
-    PAPER_ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED("paper_estimated_assets_checklist_V3_enabled");
+    GLOBAL_SEARCH_ENABLED("global_search_enabled"),
+    PAPER_ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED("paper_estimated_assets_checklist_V3_enabled"),
+    ALWAYS_GENERATE_CUI_ACCESS_CODES_ENABLED("always_generate_cui_access_codes_enabled");
 
     private final String name;
 }
