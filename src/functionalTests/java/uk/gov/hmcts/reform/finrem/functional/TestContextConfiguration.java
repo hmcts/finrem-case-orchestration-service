@@ -1,13 +1,9 @@
 package uk.gov.hmcts.reform.finrem.functional;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.google.common.collect.ImmutableList;
 import feign.Feign;
 import feign.Request;
 import feign.RequestInterceptor;
@@ -16,20 +12,14 @@ import feign.codec.Decoder;
 import feign.jackson.JacksonEncoder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
-import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -69,25 +59,17 @@ public class TestContextConfiguration {
 
     @Bean
     public Decoder feignDecoder() {
-        MappingJackson2HttpMessageConverter jacksonConverter =
-            new MappingJackson2HttpMessageConverter(objectMapper());
-        jacksonConverter.setSupportedMediaTypes(ImmutableList.of(MediaType.APPLICATION_JSON));
-
-        ObjectFactory<HttpMessageConverters> objectFactory = () -> new HttpMessageConverters(jacksonConverter);
-        return new ResponseEntityDecoder(new SpringDecoder(objectFactory));
+        return new feign.jackson.JacksonDecoder(objectMapper());
     }
 
     @Bean
     public ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = JsonMapper
+        return new com.fasterxml.jackson.databind.json.JsonMapper()
             .builder()
             .addModule(new JavaTimeModule())
-            .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .build();
-
-        return objectMapper;
     }
 
     @Bean
