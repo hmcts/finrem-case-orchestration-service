@@ -76,7 +76,6 @@ withPipeline(type, product, component) {
     }
 
     afterSuccess('functionalTest:aat') {
-        env.UK_GOV_NOTIFY_API_KEY = uk.gov.notify.api.key
         steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
         publishHTML target: [
                 reportDir            : "target/site/serenity/",
