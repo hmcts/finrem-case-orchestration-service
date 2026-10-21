@@ -8,16 +8,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.functional.model.RegisterUser;
 import uk.gov.hmcts.reform.finrem.functional.model.RegisterUserRequest;
 import uk.gov.hmcts.reform.finrem.functional.model.UserDetails;
-import uk.gov.hmcts.reform.finrem.functional.model.UserGroup;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
@@ -32,9 +30,7 @@ public class IdamUtils {
     private final Map<String, String> userTokenCache = new ConcurrentHashMap<>();
     private final Map<String, String> serviceTokenCache = new ConcurrentHashMap<>();
     private final Map<String, String> userIdCache = new ConcurrentHashMap<>();
-
-    @Value("${idam.api.url}")
-    private String idamApiBaseUrl;
+    private final Map<String, String> testingTokenCache = new ConcurrentHashMap<>();
 
     @Value("${idam.oidc.url}")
     private String idamOidcBaseUrl;
@@ -45,7 +41,8 @@ public class IdamUtils {
     @Value("${idam.api.secret}")
     private String idamSecret;
 
-    List<UserDetails> createdUsers = new ArrayList<>();
+    @Value("${idam.testing-support.url}")
+    private String idamTestingSupportUrl;
 
     public String generateUserTokenWithNoRoles(String username, String password) {
         String cacheKey = username + ":" + password;
@@ -56,8 +53,33 @@ public class IdamUtils {
         return serviceTokenCache.computeIfAbsent(microserviceName, this::fetchServiceToken);
     }
 
+    public String generateTestingSupportToken() {
+        String cacheKey = "finrem";
+        return testingTokenCache.computeIfAbsent(cacheKey, key -> fetchTestingSupportToken());
+    }
+
     public String getUserId(String jwt) {
         return userIdCache.computeIfAbsent(jwt, this::fetchUserId);
+    }
+
+    private String fetchTestingSupportToken() {
+        Response response = RestAssured.given()
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .formParam("grant_type", "client_credentials")
+            .formParam("client_id", "finrem")
+            .formParam("client_secret", idamSecret)
+            .formParam("scope", "profile roles")
+            .relaxedHTTPSValidation()
+            .post(idamTokenUrl());
+
+        assert response.getStatusCode() == HttpStatus.OK.value()
+            : String.format(
+            "Testing support token generation failed with code: %d, body: %s",
+            response.getStatusCode(),
+            response.getBody().prettyPrint()
+        );
+
+        return response.getBody().path("access_token");
     }
 
     private String fetchUserToken(String username, String password) {
@@ -133,41 +155,36 @@ public class IdamUtils {
             "caseworker-divorce-bulkscan"
         };
 
-        createUser(username, password, "caseworker", roles);
+        createUser(username, password, roles);
 
         String authToken = generateUserTokenWithNoRoles(username, password);
         String userId = getUserId(authToken);
 
-        UserDetails userDetails = UserDetails.builder()
+        return UserDetails.builder()
             .username(username)
             .emailAddress(username)
             .password(password)
             .authToken(authToken)
             .id(userId)
             .build();
-
-        createdUsers.add(userDetails);
-
-        return userDetails;
     }
 
-    public void createUser(String username, String password, String userGroup, String... roles) {
-        List<UserGroup> rolesList = new ArrayList<>();
-        Stream.of(roles).forEach(role -> rolesList.add(UserGroup.builder().code(role).build()));
-        UserGroup[] rolesArray = new UserGroup[roles.length];
-
-        RegisterUserRequest registerUserRequest =
-            RegisterUserRequest.builder()
+    public void createUser(String username, String password, String... roles) {
+        RegisterUserRequest registerUserRequest = RegisterUserRequest.builder()
+            .password(password)
+            .user(RegisterUser.builder()
                 .email(username)
                 .forename("Esme")
                 .surname("Weatherwax")
-                .password(password)
-                .roles(rolesList.toArray(rolesArray))
-                .userGroup(UserGroup.builder().code(userGroup).build())
-                .build();
+                .roleNames(List.of(roles))
+                .build())
+            .build();
+
+        String testingSupportToken = generateTestingSupportToken();
 
         Response response = SerenityRest.given()
-            .header("Content-Type", "application/json")
+            .header(AUTHORIZATION_HEADER, BEARER_PREFIX + testingSupportToken)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
             .relaxedHTTPSValidation()
             .body(registerUserRequest)
             .post(idamCreateUrl());
@@ -179,39 +196,11 @@ public class IdamUtils {
         log.info("Test user created: {}", username);
     }
 
-    public void deleteTestUsers() {
-        createdUsers.stream()
-            .map(UserDetails::getUsername)
-            .forEach(this::deleteTestUser);
-    }
-
-    public void clearCaches() {
-        userTokenCache.clear();
-        serviceTokenCache.clear();
-        userIdCache.clear();
-    }
-
-    private void deleteTestUser(String username) {
-        Response response = SerenityRest.given()
-            .relaxedHTTPSValidation()
-            .delete(idamDeleteUserUrl(username));
-
-        if (response.getStatusCode() < 300) {
-            log.info("Deleted test user {}", username);
-        } else {
-            log.error("Failed to delete test user {}", username);
-        }
-    }
-
-    private String idamDeleteUserUrl(String username) {
-        return idamApiBaseUrl + "/testing-support/accounts/" + username;
-    }
-
     private String idamTokenUrl() {
         return idamOidcBaseUrl + "/o/token";
     }
 
     private String idamCreateUrl() {
-        return idamApiBaseUrl + "/testing-support/accounts";
+        return idamTestingSupportUrl + "/test/idam/users";
     }
 }
