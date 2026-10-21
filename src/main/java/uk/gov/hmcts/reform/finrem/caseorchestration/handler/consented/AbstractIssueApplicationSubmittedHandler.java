@@ -15,8 +15,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -28,18 +30,22 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected final IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
+    protected final AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     protected final AssignPartiesAccessService assignPartiesAccessService;
+
+    protected final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     protected AbstractIssueApplicationSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                        EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                        RetryExecutor retryExecutor,
-                                                       IssueApplicationConsentCorresponder issueApplicationConsentCorresponder,
-                                                       AssignPartiesAccessService assignPartiesAccessService) {
+                                                       AssignToJudgeCorresponder assignToJudgeCorresponder,
+                                                       AssignPartiesAccessService assignPartiesAccessService,
+                                                       CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
-        this.issueApplicationConsentCorresponder = issueApplicationConsentCorresponder;
+        this.assignToJudgeCorresponder = assignToJudgeCorresponder;
         this.assignPartiesAccessService = assignPartiesAccessService;
+        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
     }
 
     protected abstract EventType supportedEventType();
@@ -84,7 +90,7 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
 
         List<String> errors = new ArrayList<>();
         errors.add(grantRespondentSolicitor(caseData));
-        errors.add(sendIssueApplicationCorrespondence(caseDetails, userAuthorisation));
+        errors.addAll(sendIssueApplicationCorrespondences(callbackRequest.getEventType(), caseDetails, userAuthorisation));
         additionalTasks().forEach(task -> errors.add(task.execute(caseDetails, userAuthorisation)));
 
         boolean isHavingErrors = !StringUtils.isAllBlank(errors.toArray(new String[0]));
@@ -98,15 +104,30 @@ public abstract class AbstractIssueApplicationSubmittedHandler extends FinremSub
         }
     }
 
-    private String sendIssueApplicationCorrespondence(FinremCaseDetails caseDetails, String userAuthorisation) {
-        AtomicReference<String> error = new AtomicReference<>();
-        retryExecutor.runWithRetryWithHandler(() -> issueApplicationConsentCorresponder
-                .sendCorrespondence(caseDetails, userAuthorisation),
-            "sending issue application correspondence",
-            caseDetails.getCaseIdAsString(),
-            (exception, actionName, caseId1) ->
-                error.set("There was a problem sending issue application correspondence. Please send it manually."));
-        return error.get();
+    private List<String> sendIssueApplicationCorrespondences(EventType eventType,
+                                                             FinremCaseDetails caseDetails, String userAuthorisation) {
+        List<SendCorrespondenceEvent> events = assignToJudgeCorresponder
+            .buildSendCorrespondenceEvents(eventType, caseDetails, userAuthorisation);
+
+        List<String> errors = new ArrayList<>();
+        for (SendCorrespondenceEvent event : events) {
+            String trackerId = caseDetails.getData().getNotificationAuditWrapper().getNotificationEventId();
+            event.setNotificationTrackerId(trackerId);
+
+            correspondenceEventAuditOrchestrationService.publishEvent(
+                event,
+                "sending issue application correspondence %s (%s)".formatted(
+                    event.getNotificationTrackerId(),
+                    event.describeNotificationParties()
+                ),
+                () -> errors.add("There was a problem sending issue application correspondence (%s). Please send it manually."
+                    .formatted(event.describeNotificationParties()))
+            );
+        }
+
+        correspondenceEventAuditOrchestrationService.reconcileAndPersistAudits(caseDetails,
+            "markPendingNotificationsAsSent", events.toArray(new SendCorrespondenceEvent[0]));
+        return errors;
     }
 
     private String grantRespondentSolicitor(FinremCaseData caseData) {
