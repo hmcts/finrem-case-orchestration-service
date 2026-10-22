@@ -56,6 +56,40 @@ public class ConsentOrderNotApprovedDocumentService {
             : documents;
     }
 
+    /**
+     * Prepares the applicant's not approved documents: the cover letter followed by the not approved order
+     * or the latest general order, whichever is newer. Returns an empty list if only the cover letter would be sent.
+     *
+     * @param caseDetails        the case details
+     * @param authorisationToken the authorisation token
+     * @return the applicant's documents in posting order, or an empty list if there is nothing to send
+     */
+    public List<CaseDocument> getApplicantLetterPackDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
+        log.info("Preparing consent order not approved documents for applicant, Case ID: {}", caseDetails.getId());
+
+        List<CaseDocument> documents = new ArrayList<>();
+
+        documents.add(getNotApprovedCoverLetter(caseDetails, authorisationToken, APPLICANT));
+        documents.addAll(getNotApprovedOrderOrGeneralOrder(caseDetails, authorisationToken));
+
+        return documents.size() == 1
+            ? new ArrayList<>() // if only cover letter then send nothing
+            : documents;
+    }
+
+    private List<CaseDocument> getNotApprovedOrderOrGeneralOrder(FinremCaseDetails caseDetails, String authorisationToken) {
+        List<CaseDocument> notApprovedOrderDocuments = notApprovedConsentOrder(caseDetails);
+        Optional<CaseDocument> generalOrder = Optional.ofNullable(documentHelper.getLatestGeneralOrder(caseDetails.getData()));
+
+        boolean useNotApprovedOrder = !notApprovedOrderDocuments.isEmpty() && (generalOrder.isEmpty()
+            || documentOrderingService.isDocumentModifiedLater(notApprovedOrderDocuments.getFirst(), generalOrder.get(), authorisationToken));
+
+        if (useNotApprovedOrder) {
+            return notApprovedOrderDocuments;
+        }
+        return generalOrder.map(List::of).orElseGet(List::of);
+    }
+
     private void addEitherNotApprovedOrderOrGeneralOrderIfApplicable(FinremCaseDetails finremCaseDetails, List<BulkPrintDocument> existingList,
                                                                      String authorisationToken) {
         List<CaseDocument> notApprovedOrderDocuments = notApprovedConsentOrder(finremCaseDetails);
@@ -72,8 +106,16 @@ public class ConsentOrderNotApprovedDocumentService {
         }
     }
 
-    public BulkPrintDocument notApprovedCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
-                                                    DocumentHelper.PaperNotificationRecipient recipient) {
+    /**
+     * Generates the consent order not approved cover letter for the given recipient.
+     *
+     * @param caseDetails        the case details used to generate the letter
+     * @param authorisationToken the authorisation token
+     * @param recipient          the party the cover letter is addressed to
+     * @return the generated cover letter
+     */
+    public CaseDocument getNotApprovedCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
+                                                  DocumentHelper.PaperNotificationRecipient recipient) {
         CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
         String notApprovedOrderNotificationFileName;
         if (consentedApplicationHelper.isVariationOrder(caseDetails.getData())) {
@@ -83,12 +125,16 @@ public class ConsentOrderNotApprovedDocumentService {
             notApprovedOrderNotificationFileName = documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName();
             caseDetailsWithTemplateData.getData().put(ORDER_TYPE, CONSENT);
         }
-        CaseDocument coverLetter = genericDocumentService.generateDocument(
+        return genericDocumentService.generateDocument(
             authorisationToken,
             caseDetailsWithTemplateData,
             documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(),
             notApprovedOrderNotificationFileName);
-        return documentHelper.mapToBulkPrintDocument(coverLetter);
+    }
+
+    public BulkPrintDocument notApprovedCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
+                                                    DocumentHelper.PaperNotificationRecipient recipient) {
+        return documentHelper.mapToBulkPrintDocument(getNotApprovedCoverLetter(caseDetails, authorisationToken, recipient));
     }
 
     @SuppressWarnings("java:S3740")

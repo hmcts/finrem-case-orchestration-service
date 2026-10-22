@@ -168,4 +168,91 @@ public class ConsentOrderPrintService {
         return isOrderApprovedCollectionPresent && (!isOrderNotApprovedCollectionPresent
             || documentOrderingService.isOrderApprovedCollectionModifiedLaterThanNotApprovedCollection(caseDetails, authorisationToken));
     }
+
+    /**
+     * Builds the documents to post to the applicant, excluding the cover sheet.
+     * Approved: cover letter (paper applications only) then order documents. Not approved: the not approved pack.
+     *
+     * @param caseDetails        the current case details
+     * @param caseDetailsBefore  the case details before the event
+     * @param eventType          the event being processed
+     * @param authorisationToken the authorisation token
+     * @return the applicant's documents in posting order; may be empty if there is nothing to send
+     */
+    public List<CaseDocument> getApplicantLetterPack(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore,
+                                                     EventType eventType, String authorisationToken) {
+        if (shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)) {
+            List<CaseDocument> documents = new ArrayList<>(
+                consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(caseDetails, authorisationToken, APPLICANT));
+            documents.addAll(getConsentOrderDocuments(caseDetails, caseDetailsBefore, eventType, authorisationToken));
+            return documents;
+        }
+        return consentOrderNotApprovedDocumentService.getApplicantLetterPackDocuments(caseDetails, authorisationToken);
+    }
+
+    /**
+     * Builds the documents to post to the respondent, excluding the cover sheet.
+     * Order documents followed by the approved (paper applications only) or not approved cover letter.
+     *
+     * @param caseDetails        the current case details
+     * @param caseDetailsBefore  the case details before the event
+     * @param eventType          the event being processed
+     * @param authorisationToken the authorisation token
+     * @return the respondent's documents in posting order
+     */
+    public List<CaseDocument> getRespondentLetterPack(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore,
+                                                      EventType eventType, String authorisationToken) {
+        List<CaseDocument> documents = new ArrayList<>(
+            getConsentOrderDocuments(caseDetails, caseDetailsBefore, eventType, authorisationToken));
+        DocumentHelper.PaperNotificationRecipient respondent = DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+
+        if (!shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)) {
+            documents.add(consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(caseDetails, authorisationToken, respondent));
+        } else {
+            documents.addAll(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(caseDetails, authorisationToken, respondent));
+        }
+        return documents;
+    }
+
+    /**
+     * Returns the order documents to send. The latest general order is sent instead when it was added
+     * during this event, is newer than the order documents, or there are no order documents.
+     *
+     * @param finremCaseDetails       the current case details
+     * @param finremCaseDetailsBefore the case details before the event
+     * @param eventType               the event being processed
+     * @param authorisationToken      the authorisation token
+     * @return the order documents to send
+     */
+    public List<CaseDocument> getConsentOrderDocuments(FinremCaseDetails finremCaseDetails,
+                                                       FinremCaseDetails finremCaseDetailsBefore,
+                                                       EventType eventType,
+                                                       String authorisationToken) {
+        FinremCaseData caseData = finremCaseDetails.getData();
+        List<CaseDocument> orderDocuments = caseDataService.isOrderApprovedCollectionPresent(caseData)
+            ? consentOrderApprovedDocumentService.approvedOrderDocuments(finremCaseDetails, authorisationToken)
+            : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(finremCaseDetails);
+
+        CaseDocument generalOrderBefore = finremCaseDetailsBefore.getData().getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+        CaseDocument generalOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+
+        List<CaseDocument> documents = new ArrayList<>();
+        if (eventType.getCcdType().equals(EventType.APPROVE_ORDER.getCcdType())) {
+            documents.addAll(orderDocuments);
+        } else {
+            if (!isNull(generalOrder) && isNull(generalOrderBefore)) {
+                documents.add(generalOrder);
+            } else if (isNull(generalOrder) && isNull(generalOrderBefore)) {
+                documents.addAll(orderDocuments);
+            } else if (!isNull(generalOrder) && !orderDocuments.isEmpty()
+                && documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.getFirst(), authorisationToken)) {
+                documents.add(generalOrder);
+            } else if (!isNull(generalOrder) && orderDocuments.isEmpty()) {
+                documents.add(generalOrder);
+            } else {
+                documents.addAll(orderDocuments);
+            }
+        }
+        return documents;
+    }
 }
