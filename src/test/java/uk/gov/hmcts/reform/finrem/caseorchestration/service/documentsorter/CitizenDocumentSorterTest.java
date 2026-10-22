@@ -92,34 +92,34 @@ class CitizenDocumentSorterTest {
     }
 
     @Test
-    void shouldKeepApplicantDocumentsWithNoFdrCollectionChangeInPartyCollectionWhenMarkedFdr() {
-        List<CitizenDocumentCollectionItem> noFdrCollectionChangeDocuments = noFdrCollectionChangeDocuments();
+    void shouldKeepApplicantDocumentsWithNoFdrCollectionInPartyCollectionWhenMarkedFdr() {
+        List<CitizenDocumentCollectionItem> noFdrCollectionDocuments = noFdrCollectionDocuments();
 
         CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
-        wrapper.setUploadedCuiApplicantDocuments(new ArrayList<>(noFdrCollectionChangeDocuments));
+        wrapper.setUploadedCuiApplicantDocuments(new ArrayList<>(noFdrCollectionDocuments));
 
         sorter.sortDocuments(wrapper, APPLICANT);
 
         assertThat(wrapper.getUploadedCuiApplicantDocuments()).isEmpty();
-        assertThat(wrapper.getApplicantDocCollection()).containsExactlyElementsOf(noFdrCollectionChangeDocuments);
+        assertThat(wrapper.getApplicantDocCollection()).containsExactlyElementsOf(noFdrCollectionDocuments);
         assertThat(wrapper.getFdrApplicantDocCollection()).isEmpty();
     }
 
     @Test
     void shouldKeepRespondentDocumentsWithNoFdrCollectionChangeInPartyCollectionWhenMarkedFdr() {
-        List<CitizenDocumentCollectionItem> noFdrCollectionChangeDocuments = noFdrCollectionChangeDocuments();
+        List<CitizenDocumentCollectionItem> noFdrCollectionDocuments = noFdrCollectionDocuments();
 
         CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
-        wrapper.setUploadedCuiRespondentDocuments(new ArrayList<>(noFdrCollectionChangeDocuments));
+        wrapper.setUploadedCuiRespondentDocuments(new ArrayList<>(noFdrCollectionDocuments));
 
         sorter.sortDocuments(wrapper, RESPONDENT);
 
         assertThat(wrapper.getUploadedCuiRespondentDocuments()).isEmpty();
-        assertThat(wrapper.getRespondentDocCollection()).containsExactlyElementsOf(noFdrCollectionChangeDocuments);
+        assertThat(wrapper.getRespondentDocCollection()).containsExactlyElementsOf(noFdrCollectionDocuments);
         assertThat(wrapper.getFdrRespondentDocCollection()).isEmpty();
     }
 
-    private List<CitizenDocumentCollectionItem> noFdrCollectionChangeDocuments() {
+    private List<CitizenDocumentCollectionItem> noFdrCollectionDocuments() {
         return List.of(
             document(REPLY_TO_QUESTIONNAIRE, YesOrNo.YES),
             document(REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES, YesOrNo.YES),
