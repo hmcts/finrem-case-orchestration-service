@@ -130,6 +130,10 @@ public class FinremCallbackRequestFactory {
             .build();
     }
 
+    public static FinremCallbackRequest from(Long id, EventType eventType) {
+        return from(id, null, eventType);
+    }
+
     public static FinremCallbackRequest from(Long id,
                                              CaseType caseType,
                                              EventType eventType) {
@@ -180,6 +184,5 @@ public class FinremCallbackRequestFactory {
             caseData.setCcdCaseId(String.valueOf(id));
             caseData.setCcdCaseType(caseType);
         }
-
     }
 }

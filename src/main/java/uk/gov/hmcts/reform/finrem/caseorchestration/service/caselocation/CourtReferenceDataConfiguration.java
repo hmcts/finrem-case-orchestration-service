@@ -19,11 +19,12 @@ public class CourtReferenceDataConfiguration {
 
     @Bean
     public Map<String, CourtRefData> courtReferenceDataByName(ObjectMapper objectMapper) throws IOException {
+
         try (InputStream inputStream =
                  CourtReferenceDataConfiguration.class.getResourceAsStream(COURT_REF_DATA_FILE)) {
-
             if (inputStream == null) {
-                throw new IllegalStateException("Classpath resource not found: " + COURT_REF_DATA_FILE);
+                throw new IOException(
+                    "Unable to load court reference data from " + COURT_REF_DATA_FILE);
             }
 
             return objectMapper.readValue(
