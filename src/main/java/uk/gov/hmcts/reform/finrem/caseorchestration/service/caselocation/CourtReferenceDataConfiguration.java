@@ -18,18 +18,18 @@ public class CourtReferenceDataConfiguration {
     private static final String COURT_REF_DATA_FILE = "/json/fr-court-to-refdata-location-mappings.json";
 
     @Bean
-    public Map<String, CourtRefData> courtReferenceDataByName(ObjectMapper objectMapper) throws IOException {
-
+    public Map<String, CourtRefData> courtReferenceDataByName(ObjectMapper objectMapper) {
         try (InputStream inputStream =
                  CourtReferenceDataConfiguration.class.getResourceAsStream(COURT_REF_DATA_FILE)) {
             if (inputStream == null) {
                 throw new IllegalStateException("Classpath resource not found: " + COURT_REF_DATA_FILE);
             }
 
-            return objectMapper.readValue(
-                    inputStream,
-                    new TypeReference<Map<String, CourtRefData>>() {})
-                .entrySet()
+            Map<String, CourtRefData> result = objectMapper.readValue(
+                inputStream,
+                new TypeReference<Map<String, CourtRefData>>() {});
+
+            return result.entrySet()
                 .stream()
                 .collect(Collectors.toUnmodifiableMap(
                     entry -> entry.getKey().toLowerCase(),
