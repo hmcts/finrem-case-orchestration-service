@@ -69,4 +69,5 @@ public class NotificationRequest {
     private String dateOfIssue;
     private String timeOfSubmission;
     private List<byte[]> documentContentsList;
+    private Boolean hasDivorceAccount;
 }
