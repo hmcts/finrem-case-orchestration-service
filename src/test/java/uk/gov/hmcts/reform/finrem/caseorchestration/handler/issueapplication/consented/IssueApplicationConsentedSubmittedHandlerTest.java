@@ -1,13 +1,15 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.issueapplication.consented;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.IssueApplicationConsentedSubmittedHandlerContractTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
@@ -25,10 +27,13 @@ class IssueApplicationConsentedSubmittedHandlerTest extends IssueApplicationCons
     private RetryExecutor retryExecutor;
 
     @Mock
-    private IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
+    private AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     @Mock
     private AssignPartiesAccessService assignPartiesAccessService;
+
+    @Mock
+    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     @Test
     void testCanHandle() {
@@ -46,12 +51,17 @@ class IssueApplicationConsentedSubmittedHandlerTest extends IssueApplicationCons
     }
 
     @Override
-    protected IssueApplicationConsentCorresponder issueApplicationConsentCorresponder() {
-        return issueApplicationConsentCorresponder;
+    protected AssignToJudgeCorresponder assignToJudgeCorresponder() {
+        return assignToJudgeCorresponder;
     }
 
     @Override
     protected AssignPartiesAccessService assignPartiesAccessService() {
         return assignPartiesAccessService;
+    }
+
+    @Override
+    protected CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService() {
+        return correspondenceEventAuditOrchestrationService;
     }
 }
