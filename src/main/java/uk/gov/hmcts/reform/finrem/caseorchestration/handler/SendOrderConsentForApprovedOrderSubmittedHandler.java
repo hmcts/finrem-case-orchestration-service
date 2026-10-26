@@ -8,8 +8,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentSendOrderCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -21,17 +22,17 @@ import java.util.List;
 @Service
 public class SendOrderConsentForApprovedOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
 
-    private final ConsentOrderApprovedCorresponder consentOrderApprovedCorresponder;
-    private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
+    private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrcService;
+    private final ConsentSendOrderCorresponder consentSendOrderCorresponder;
 
     public SendOrderConsentForApprovedOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                             EvidenceManagementDeleteService evidenceManagementDeleteService,
                                                             RetryExecutor retryExecutor,
-                                                            ConsentOrderApprovedCorresponder consentOrderApprovedCorresponder,
-                                                            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrcService) {
+                                                            CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrcService,
+                                                            ConsentSendOrderCorresponder consentSendOrderCorresponder) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
-        this.consentOrderApprovedCorresponder = consentOrderApprovedCorresponder;
-        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrcService;
+        this.correspondenceEventAuditOrcService = correspondenceEventAuditOrcService;
+        this.consentSendOrderCorresponder = consentSendOrderCorresponder;
     }
 
     @Override
@@ -43,32 +44,29 @@ public class SendOrderConsentForApprovedOrderSubmittedHandler extends FinremSubm
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        log.info(CallbackHandlerLogger.submitted(callbackRequest));
+                                                                               String userAuthorisation) {
 
-        List<String> errors = sendCorrespondence(callbackRequest, userAuthorisation);
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
-        if (errors.isEmpty()) {
-            return submittedResponse();
-        }
-        return submittedResponse(
-            toConfirmationHeader("Send order event submitted with errors"),
-            toConfirmationBody(errors.toArray(new String[0])));
-    }
-
-    private List<String> sendCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        List<SendCorrespondenceEvent> events = consentOrderApprovedCorresponder
-            .buildCorrespondenceEvents(callbackRequest.getCaseDetails(), userAuthorisation);
-
+        List<SendCorrespondenceEvent> events = consentSendOrderCorresponder
+            .buildApprovedOrderEvents(caseDetails, caseDetailsBefore, userAuthorisation);
         List<String> errors = new ArrayList<>();
         for (SendCorrespondenceEvent event : events) {
-            String party = event.describeNotificationParties();
-            String actionName = "Send consent order correspondence to party: %s for the send order event".formatted(party);
-            boolean sent = correspondenceEventAuditOrchestrationService.publishEvent(event, actionName);
+            String actionName = "Send consent order correspondence to " + event.describeNotificationParties();
+            boolean sent = correspondenceEventAuditOrcService.publishEvent(event, actionName);
             if (!sent) {
-                errors.add("Unable to deliver send order correspondence to %s. Please send it manually.".formatted(party));
+                errors.add("Failed to send correspondence to " + event.describeNotificationParties());
             }
         }
-        return errors;
+
+        if (!errors.isEmpty()) {
+            return submittedResponse(
+                toConfirmationHeader("Send order event submitted with errors"),
+                toConfirmationBody(errors.toArray(new String[0]))
+            );
+        } else {
+            return submittedResponse();
+        }
     }
 }

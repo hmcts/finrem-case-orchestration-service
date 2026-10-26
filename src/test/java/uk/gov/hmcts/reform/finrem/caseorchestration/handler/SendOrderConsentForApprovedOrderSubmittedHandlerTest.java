@@ -7,11 +7,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentSendOrderCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.List;
 
@@ -19,7 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -27,12 +32,21 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class SendOrderConsentForApprovedOrderSubmittedHandlerTest {
 
+    private static final String APPLICANT = "applicant";
+    private static final String RESPONDENT = "respondent";
+
     @InjectMocks
     private SendOrderConsentForApprovedOrderSubmittedHandler underTest;
     @Mock
-    private ConsentOrderApprovedCorresponder consentOrderApprovedCorresponder;
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
-    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
+    private EvidenceManagementDeleteService evidenceManagementDeleteService;
+    @Mock
+    private RetryExecutor retryExecutor;
+    @Mock
+    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrcService;
+    @Mock
+    private ConsentSendOrderCorresponder consentSendOrderCorresponder;
 
     @Test
     void testCanHandle() {
@@ -42,15 +56,17 @@ class SendOrderConsentForApprovedOrderSubmittedHandlerTest {
     @Test
     void givenAllEventsPublished_whenHandled_thenNoErrors() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
-        SendCorrespondenceEvent applicantEvent = event("applicant");
-        SendCorrespondenceEvent respondentEvent = event("respondent");
-        when(consentOrderApprovedCorresponder.buildCorrespondenceEvents(callbackRequest.getCaseDetails(), AUTH_TOKEN))
-            .thenReturn(List.of(applicantEvent, respondentEvent));
-        when(correspondenceEventAuditOrchestrationService.publishEvent(applicantEvent, actionName("applicant"))).thenReturn(true);
-        when(correspondenceEventAuditOrchestrationService.publishEvent(respondentEvent, actionName("respondent"))).thenReturn(true);
+        SendCorrespondenceEvent applicantEvent = event(APPLICANT);
+        SendCorrespondenceEvent respondentEvent = event(RESPONDENT);
+        stubEvents(callbackRequest, List.of(applicantEvent, respondentEvent));
+        when(correspondenceEventAuditOrcService.publishEvent(applicantEvent, actionName(APPLICANT))).thenReturn(true);
+        when(correspondenceEventAuditOrcService.publishEvent(respondentEvent, actionName(RESPONDENT))).thenReturn(true);
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
+        verify(correspondenceEventAuditOrcService).publishEvent(applicantEvent, actionName(APPLICANT));
+        verify(correspondenceEventAuditOrcService).publishEvent(respondentEvent, actionName(RESPONDENT));
+        verifyNoMoreInteractions(correspondenceEventAuditOrcService);
         assertAll(
             () -> assertNull(response.getConfirmationHeader()),
             () -> assertNull(response.getConfirmationBody())
@@ -58,35 +74,61 @@ class SendOrderConsentForApprovedOrderSubmittedHandlerTest {
     }
 
     @Test
-    void givenOneEventFailsToPublish_whenHandled_thenErrorShownForThatParty() {
+    void givenRespondentEventFailsToPublish_whenHandled_thenErrorShownForRespondentOnly() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
-        SendCorrespondenceEvent applicantEvent = event("applicant");
-        SendCorrespondenceEvent respondentEvent = event("respondent");
-        when(consentOrderApprovedCorresponder.buildCorrespondenceEvents(callbackRequest.getCaseDetails(), AUTH_TOKEN))
-            .thenReturn(List.of(applicantEvent, respondentEvent));
-        when(correspondenceEventAuditOrchestrationService.publishEvent(applicantEvent, actionName("applicant"))).thenReturn(true);
-        when(correspondenceEventAuditOrchestrationService.publishEvent(respondentEvent, actionName("respondent"))).thenReturn(false);
+        SendCorrespondenceEvent applicantEvent = event(APPLICANT);
+        SendCorrespondenceEvent respondentEvent = event(RESPONDENT);
+        stubEvents(callbackRequest, List.of(applicantEvent, respondentEvent));
+        when(correspondenceEventAuditOrcService.publishEvent(applicantEvent, actionName(APPLICANT))).thenReturn(true);
+        when(correspondenceEventAuditOrcService.publishEvent(respondentEvent, actionName(RESPONDENT))).thenReturn(false);
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         assertAll(
             () -> assertThat(response.getConfirmationHeader()).contains("Send order event submitted with errors"),
             () -> assertThat(response.getConfirmationBody())
-                .contains("Unable to deliver send order correspondence to respondent. Please send it manually.")
-                .doesNotContain("correspondence to applicant")
+                .contains(errorMessage(RESPONDENT))
+                .doesNotContain(errorMessage(APPLICANT))
+        );
+    }
+
+    @Test
+    void givenBothEventsFailToPublish_whenHandled_thenErrorShownForBothParties() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+        SendCorrespondenceEvent applicantEvent = event(APPLICANT);
+        SendCorrespondenceEvent respondentEvent = event(RESPONDENT);
+        stubEvents(callbackRequest, List.of(applicantEvent, respondentEvent));
+        when(correspondenceEventAuditOrcService.publishEvent(applicantEvent, actionName(APPLICANT))).thenReturn(false);
+        when(correspondenceEventAuditOrcService.publishEvent(respondentEvent, actionName(RESPONDENT))).thenReturn(false);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        assertAll(
+            () -> assertThat(response.getConfirmationHeader()).contains("Send order event submitted with errors"),
+            () -> assertThat(response.getConfirmationBody())
+                .contains(errorMessage(APPLICANT))
+                .contains(errorMessage(RESPONDENT))
         );
     }
 
     @Test
     void givenNoEvents_whenHandled_thenNothingPublished() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
-        when(consentOrderApprovedCorresponder.buildCorrespondenceEvents(callbackRequest.getCaseDetails(), AUTH_TOKEN))
-            .thenReturn(List.of());
+        stubEvents(callbackRequest, List.of());
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        verifyNoInteractions(correspondenceEventAuditOrchestrationService);
-        assertNull(response.getConfirmationHeader());
+        verifyNoInteractions(correspondenceEventAuditOrcService);
+        assertAll(
+            () -> assertNull(response.getConfirmationHeader()),
+            () -> assertNull(response.getConfirmationBody())
+        );
+    }
+
+    private void stubEvents(FinremCallbackRequest callbackRequest, List<SendCorrespondenceEvent> events) {
+        when(consentSendOrderCorresponder.buildApprovedOrderEvents(
+            callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN))
+            .thenReturn(events);
     }
 
     private SendCorrespondenceEvent event(String party) {
@@ -96,6 +138,10 @@ class SendOrderConsentForApprovedOrderSubmittedHandlerTest {
     }
 
     private String actionName(String party) {
-        return "Send consent order correspondence to party: %s for the send order event".formatted(party);
+        return "Send consent order correspondence to " + party;
+    }
+
+    private String errorMessage(String party) {
+        return "Failed to send correspondence to " + party;
     }
 }

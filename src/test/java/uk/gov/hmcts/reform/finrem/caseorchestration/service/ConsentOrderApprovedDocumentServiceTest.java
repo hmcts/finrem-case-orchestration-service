@@ -845,6 +845,53 @@ class ConsentOrderApprovedDocumentServiceTest {
         assertThat(documents).containsOnly(coverLetter);
     }
 
+    @Nested
+    class GetApprovedConsentOrderCoverLetterTests {
+
+        private final DocumentHelper.PaperNotificationRecipient recipient = DocumentHelper.PaperNotificationRecipient.APPLICANT;
+
+        @Test
+        void givenNotPaperApplication_whenGetApprovedConsentOrderCoverLetter_thenReturnsNull() {
+            finremCaseDetails = FinremCaseDetails.builder()
+                .data(FinremCaseData.builder().build())
+                .build();
+            when(caseDataService.isPaperApplication(finremCaseDetails.getData())).thenReturn(false);
+
+            CaseDocument result = consentOrderApprovedDocumentService
+                .getApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, recipient);
+
+            assertAll(
+                () -> assertThat(result).isNull(),
+                () -> verifyNoInteractions(documentHelper, consentedApplicationHelper, documentConfiguration, genericDocumentService)
+            );
+        }
+
+        @Test
+        void givenPaperApplication_whenGetApprovedConsentOrderCoverLetter_thenReturnsCoverLetter() {
+            FinremCaseData caseData = FinremCaseData.builder().build();
+            finremCaseDetails = FinremCaseDetails.builder().data(caseData).build();
+            Map<String, Object> letterData = new HashMap<>();
+            CaseDetails caseDetailsForBulkPrint = CaseDetails.builder().data(letterData).build();
+            CaseDocument coverLetter = caseDocument("coverLetter");
+
+            when(caseDataService.isPaperApplication(caseData)).thenReturn(true);
+            when(documentHelper.prepareLetterTemplateData(finremCaseDetails, recipient)).thenReturn(caseDetailsForBulkPrint);
+            when(consentedApplicationHelper.isVariationOrder(caseData)).thenReturn(false);
+            when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn("fileName");
+            when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn("template");
+            when(genericDocumentService.generateDocument(AUTH_TOKEN, caseDetailsForBulkPrint, "template", "fileName"))
+                .thenReturn(coverLetter);
+
+            CaseDocument result = consentOrderApprovedDocumentService
+                .getApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, recipient);
+
+            assertAll(
+                () -> assertThat(result).isEqualTo(coverLetter),
+                () -> assertThat(letterData).containsEntry("orderType", "consent")
+            );
+        }
+    }
+
     private void stubStampType(FinremCaseData finremCaseData) {
         when(documentHelper.getStampType(finremCaseData)).thenReturn(stampType);
     }

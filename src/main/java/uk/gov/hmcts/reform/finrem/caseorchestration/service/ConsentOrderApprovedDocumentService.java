@@ -170,32 +170,35 @@ public class ConsentOrderApprovedDocumentService {
         return stampedPensionData;
     }
 
+    public List<BulkPrintDocument> addApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
+                                                                      DocumentHelper.PaperNotificationRecipient recipient) {
+        FinremCaseData caseData = caseDetails.getData();
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        if (caseDataService.isPaperApplication(caseData)) {
+            log.info("Adding Approved Consent Order Cover Letter for {} / solicitor for Bulk Print, Case ID: {}", recipient, caseDetails.getId());
+            CaseDocument coverLetter = generateApprovedConsentOrderCoverLetter(caseDetails, authorisationToken, recipient);
+            bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverLetter));
+        }
+        return bulkPrintDocuments;
+    }
+
     /**
      * Generates the approved consent order cover letter for the given recipient, for paper applications only.
      *
      * @param caseDetails        the case details used to generate the letter
      * @param authorisationToken the authorisation token
      * @param recipient          the party the cover letter is addressed to
-     * @return a list containing the cover letter, or an empty list if not a paper application
+     * @return the generated cover letter, or {@code null} if the case is not a paper application
      */
-    public List<CaseDocument> getApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
-                                                                 DocumentHelper.PaperNotificationRecipient recipient) {
+    public CaseDocument getApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
+                                                           DocumentHelper.PaperNotificationRecipient recipient) {
         FinremCaseData caseData = caseDetails.getData();
-        List<CaseDocument> documents = new ArrayList<>();
-        if (caseDataService.isPaperApplication(caseData)) {
-            log.info("Adding Approved Consent Order Cover Letter for {} / solicitor for Bulk Print, Case ID: {}", recipient, caseDetails.getId());
-            documents.add(generateApprovedConsentOrderCoverLetter(caseDetails, authorisationToken, recipient));
-        }
-        return documents;
-    }
 
-    public List<BulkPrintDocument> addApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
-                                                                      DocumentHelper.PaperNotificationRecipient recipient) {
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        for (CaseDocument coverLetter : getApprovedConsentOrderCoverLetter(caseDetails, authorisationToken, recipient)) {
-            bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverLetter));
+        if (caseDataService.isPaperApplication(caseData)) {
+            log.info("Generating Approved Consent Order Cover Letter for {} / solicitor, Case ID: {}", recipient, caseDetails.getId());
+            return generateApprovedConsentOrderCoverLetter(caseDetails, authorisationToken, recipient);
         }
-        return bulkPrintDocuments;
+        return null;
     }
 
     public void stampAndPopulateContestedConsentApprovedOrderCollection(FinremCaseDetails caseDetails, String authToken) {
