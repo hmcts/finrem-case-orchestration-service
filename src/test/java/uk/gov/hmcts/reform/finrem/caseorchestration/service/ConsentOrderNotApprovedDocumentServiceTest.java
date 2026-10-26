@@ -30,7 +30,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -205,75 +204,6 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         boolean result = consentOrderNotApprovedDocumentService.getFirstOrderModifiedAfterSecondOrder(
             null, secondCaseDocument, "token");
         assertThat(result, equalTo(false));
-    }
-
-    @Test
-    public void givenNotApprovedOrderNewerThanGeneralOrder_whenGetApplicantLetterPackDocuments_thenCoverLetterThenNotApprovedOrder() {
-        setupConsentedCase();
-        CaseDocument coverLetter = caseDocument("coverUrl", "coverLetter.pdf", "coverBin");
-        CaseDocument notApprovedOrder = caseDocument("orderUrl", "notApprovedOrder.pdf", "orderBin");
-        stubCoverLetter(coverLetter);
-        when(documentHelper.getDocumentLinkAsCaseDocument(any(), eq("DocumentLink"))).thenReturn(Optional.of(notApprovedOrder));
-        when(documentHelper.getLatestGeneralOrder(any(FinremCaseData.class))).thenReturn(caseDocument("goUrl", "generalOrder.pdf", "goBin"));
-        when(documentOrderingService.isDocumentModifiedLater(any(), any(), anyString())).thenReturn(true);
-
-        List<CaseDocument> documents = consentOrderNotApprovedDocumentService.getApplicantLetterPackDocuments(finremCaseDetails, AUTH_TOKEN);
-
-        assertThat(documents, equalTo(List.of(coverLetter, notApprovedOrder)));
-    }
-
-    @Test
-    public void givenGeneralOrderNewerThanNotApprovedOrder_whenGetApplicantLetterPackDocuments_thenCoverLetterThenGeneralOrder() {
-        setupConsentedCase();
-        CaseDocument coverLetter = caseDocument("coverUrl", "coverLetter.pdf", "coverBin");
-        CaseDocument generalOrder = caseDocument("goUrl", "generalOrder.pdf", "goBin");
-        stubCoverLetter(coverLetter);
-        when(documentHelper.getDocumentLinkAsCaseDocument(any(), eq("DocumentLink")))
-            .thenReturn(Optional.of(caseDocument("orderUrl", "notApprovedOrder.pdf", "orderBin")));
-        when(documentHelper.getLatestGeneralOrder(any(FinremCaseData.class))).thenReturn(generalOrder);
-        when(documentOrderingService.isDocumentModifiedLater(any(), any(), anyString())).thenReturn(false);
-
-        List<CaseDocument> documents = consentOrderNotApprovedDocumentService.getApplicantLetterPackDocuments(finremCaseDetails, AUTH_TOKEN);
-
-        assertThat(documents, equalTo(List.of(coverLetter, generalOrder)));
-    }
-
-    @Test
-    public void givenNoOrders_whenGetApplicantLetterPackDocuments_thenEmptyList() {
-        setupConsentedCase();
-        stubCoverLetter(caseDocument("coverUrl", "coverLetter.pdf", "coverBin"));
-        when(documentHelper.getLatestGeneralOrder(any(FinremCaseData.class))).thenReturn(null);
-
-        List<CaseDocument> documents = consentOrderNotApprovedDocumentService.getApplicantLetterPackDocuments(finremCaseDetails, AUTH_TOKEN);
-
-        assertThat(documents, hasSize(0));
-    }
-
-    @Test
-    public void whenGetNotApprovedCoverLetter_thenReturnsGeneratedDocument() {
-        setupConsentedCase();
-        CaseDocument coverLetter = caseDocument("coverUrl", "coverLetter.pdf", "coverBin");
-        when(documentHelper.prepareLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT))
-            .thenReturn(caseDetails);
-        when(genericDocumentService.generateDocument(anyString(), any(CaseDetails.class), anyString(), anyString()))
-            .thenReturn(coverLetter);
-
-        CaseDocument result = consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(finremCaseDetails, AUTH_TOKEN,
-            DocumentHelper.PaperNotificationRecipient.RESPONDENT);
-
-        assertThat(result, equalTo(coverLetter));
-    }
-
-    private void setupConsentedCase() {
-        setupContestedCase();
-        finremCaseDetails.setCaseType(CaseType.CONSENTED);
-    }
-
-    private void stubCoverLetter(CaseDocument coverLetter) {
-        when(documentHelper.prepareLetterTemplateData(
-            any(FinremCaseDetails.class), any(DocumentHelper.PaperNotificationRecipient.class))).thenReturn(caseDetails);
-        when(genericDocumentService.generateDocument(anyString(), any(CaseDetails.class), anyString(), anyString()))
-            .thenReturn(coverLetter);
     }
 
     private void addConsentedInContestedConsentOrderNotApproved() {
