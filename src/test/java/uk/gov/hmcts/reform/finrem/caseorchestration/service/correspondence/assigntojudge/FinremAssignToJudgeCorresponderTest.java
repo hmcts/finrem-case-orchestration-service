@@ -49,6 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.Inte
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_TWO;
 
+@Deprecated(forRemoval = true)
 @ExtendWith(MockitoExtension.class)
 class FinremAssignToJudgeCorresponderTest {
 
