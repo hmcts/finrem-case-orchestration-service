@@ -64,12 +64,12 @@ class SendOrderConsentForApprovedOrderSubmittedHandlerTest {
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(correspondenceEventAuditOrcService).publishEvent(applicantEvent, actionName(APPLICANT));
-        verify(correspondenceEventAuditOrcService).publishEvent(respondentEvent, actionName(RESPONDENT));
-        verifyNoMoreInteractions(correspondenceEventAuditOrcService);
         assertAll(
             () -> assertNull(response.getConfirmationHeader()),
-            () -> assertNull(response.getConfirmationBody())
+            () -> assertNull(response.getConfirmationBody()),
+            () -> verify(correspondenceEventAuditOrcService).publishEvent(applicantEvent, actionName(APPLICANT)),
+            () -> verify(correspondenceEventAuditOrcService).publishEvent(respondentEvent, actionName(RESPONDENT)),
+            () -> verifyNoMoreInteractions(correspondenceEventAuditOrcService)
         );
     }
 
