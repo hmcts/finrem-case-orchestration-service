@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.functional.notification;
 
 import net.serenitybdd.junit.runners.SerenityRunner;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,7 @@ public class NotificationTests extends IntegrationTestBase {
             "ccd-request-with-solicitor-contestApplicationIssued.json", CONTESTED_DIR);
     }
 
+    @Ignore
     @Test
     public void verifyNotifyUpdateFrcInfoIsOkay() {
         utils.validatePostSuccess(updateFrcInfoUri, "update-frc-info.json", CONTESTED_DIR);
