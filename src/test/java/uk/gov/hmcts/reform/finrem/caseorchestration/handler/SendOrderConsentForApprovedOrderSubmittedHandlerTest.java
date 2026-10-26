@@ -62,10 +62,10 @@ class SendOrderConsentForApprovedOrderSubmittedHandlerTest {
         when(correspondenceEventAuditOrcService.publishEvent(applicantEvent, actionName(APPLICANT))).thenReturn(true);
         when(correspondenceEventAuditOrcService.publishEvent(respondentEvent, actionName(RESPONDENT))).thenReturn(true);
 
-        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
-
         verify(correspondenceEventAuditOrcService).publishEvent(applicantEvent, actionName(APPLICANT));
         verify(correspondenceEventAuditOrcService).publishEvent(respondentEvent, actionName(RESPONDENT));
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
         verifyNoMoreInteractions(correspondenceEventAuditOrcService);
         assertAll(
             () -> assertNull(response.getConfirmationHeader()),

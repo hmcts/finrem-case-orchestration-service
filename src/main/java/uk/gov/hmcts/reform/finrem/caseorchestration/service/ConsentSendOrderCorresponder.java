@@ -36,7 +36,7 @@ public class ConsentSendOrderCorresponder {
     public List<SendCorrespondenceEvent> buildApprovedOrderEvents(FinremCaseDetails caseDetails,
                                                                   FinremCaseDetails caseDetailsBefore,
                                                                   String authorisationToken) {
-        List<SendCorrespondenceEvent> events = new ArrayList<>();
+
         List<CaseDocument> orders = consentOrderPrintService.getApprovedOrderDocumentsToSend(caseDetails, caseDetailsBefore, authorisationToken);
         FinremCaseData caseData = caseDetails.getData();
         List<CaseDocument> applicantDocuments = new ArrayList<>();
@@ -53,6 +53,8 @@ public class ConsentSendOrderCorresponder {
             respondentDocuments.add(respondentCoverLetter);
         }
         respondentDocuments.addAll(orders);
+
+        List<SendCorrespondenceEvent> events = new ArrayList<>();
 
         SendCorrespondenceEvent applicantEvent = SendCorrespondenceEvent.builder()
             .notificationParties(List.of(APPLICANT))
