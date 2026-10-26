@@ -72,9 +72,9 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response,
         FinremCaseData finremCaseData, String userAuthorisation) {
 
-        if (nonNull(globalSearchService)) {
-            log.info("DFR-5819 Debug - Response data: {}", response.getData());
+        log.info("DFR-5819 Debug - Response data: {}", response.getData());
 
+        if (nonNull(globalSearchService)) {
             globalSearchService.setGlobalSearchData(response.getData());
         }
 
