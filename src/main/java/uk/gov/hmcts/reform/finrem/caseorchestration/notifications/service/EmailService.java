@@ -21,7 +21,7 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
-@Profile("!local")
+//@Profile("!local")
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -205,6 +205,13 @@ public class EmailService {
             templateVars.putIfAbsent("courtName", "");
             String courtName = (String) templateVars.get("courtName");
             templateVars.put("hasCourtName", StringUtils.isNotBlank(courtName));
+        }
+
+        if (EmailTemplateNames.FR_CUI_SIGN_IN_CONFIRMATION.name().equals(templateName)) {
+            templateVars.put(
+                "hasDivorceAccount",
+                Boolean.TRUE.equals(notificationRequest.getHasDivorceAccount())
+            );
         }
     }
 
