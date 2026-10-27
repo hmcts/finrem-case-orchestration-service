@@ -10,6 +10,7 @@ import org.junit.experimental.categories.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@PropertySource(value = "classpath:application.properties")
 @AutoConfigureMockMvc
 @Slf4j
 @Category(IntegrationTest.class)
