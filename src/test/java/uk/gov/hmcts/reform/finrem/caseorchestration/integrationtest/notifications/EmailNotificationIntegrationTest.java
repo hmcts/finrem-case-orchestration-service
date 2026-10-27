@@ -4,14 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -33,11 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Live integration parity tests between fixture-rendered Notify previews and real Notify previews.
  */
-@Ignore
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@PropertySource(value = "classpath:application.properties")
 @AutoConfigureMockMvc
+@Slf4j
 @Category(IntegrationTest.class)
 public class EmailNotificationIntegrationTest extends BaseTest {
 
@@ -49,8 +46,8 @@ public class EmailNotificationIntegrationTest extends BaseTest {
 
     private static final String TEMPLATE_ID_TOKEN = "{{request.pathSegments.[2]}}";
 
-    @Value("${uk.gov.notify.api.key}")
-    private String apiKey;
+    @Autowired
+    private EmailClient emailClient;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -262,7 +259,6 @@ public class EmailNotificationIntegrationTest extends BaseTest {
     }
 
 
-
     // -------------------------
     // INTERVENERS SCENARIOS
     // -------------------------
@@ -306,8 +302,6 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         assertThat(fixture.response).as("response missing: " + fixtureClasspath).isNotNull();
         assertThat(fixture.response.bodyAsJson).as("response.bodyAsJson missing: " + fixtureClasspath).isNotNull();
 
-        //    @Autowired
-        EmailClient emailClient = new EmailClient(apiKey);
         TemplatePreview livePreview =
             emailClient.generateTemplatePreview(fixture.templateId, fixture.notificationRequest.personalisation);
 
