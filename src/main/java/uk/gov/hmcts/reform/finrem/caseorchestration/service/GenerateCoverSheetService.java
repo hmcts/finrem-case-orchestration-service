@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 
 import java.util.Map;
 import java.util.Optional;
@@ -34,7 +33,6 @@ public class GenerateCoverSheetService {
     private final DocumentConfiguration documentConfiguration;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
     private final FeatureToggleService featureToggleService;
-    private final CitizenPinInPostService citizenPinInPostService;
 
     private record IntervenerCoverSheetMapping(
         DocumentHelper.PaperNotificationRecipient recipient,
@@ -235,13 +233,6 @@ public class GenerateCoverSheetService {
     private CaseDocument generateCoverSheet(FinremCaseDetails caseDetails,
                                             String authorisationToken,
                                             DocumentHelper.PaperNotificationRecipient recipient) {
-
-        if (featureToggleService.isFinremCitizenUiEnabled()) {
-            citizenPinInPostService.ensurePinForRecipient(
-                caseDetails,
-                recipient
-            );
-        }
 
         Map<String, Object> placeholdersMap = bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(
             caseDetails,
