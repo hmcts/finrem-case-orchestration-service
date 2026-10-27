@@ -36,8 +36,6 @@ public class DocumentConfiguration {
     private String formGTemplate;
     private String formGHighCourtTemplate;
     private String formGFileName;
-    private String outOfFamilyCourtResolutionTemplate;
-    private String outOfFamilyCourtResolutionName;
     @Getter(AccessLevel.NONE)
     private String contestedMiniFormTemplate;
     private String contestedMiniFormHighCourtTemplate;
