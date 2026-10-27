@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentSendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -58,8 +59,8 @@ class SendOrderConsentForApprovedOrderAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertEquals(applicantCoverLetter, response.getData().getConsentOrderApprovedCoverLetterApp());
-        assertEquals(respondentCoverLetter, response.getData().getConsentOrderApprovedCoverLetterResp());
+        assertEquals(applicantCoverLetter, response.getData().getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterApp());
+        assertEquals(respondentCoverLetter, response.getData().getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterResp());
     }
 
     @Test
@@ -72,8 +73,8 @@ class SendOrderConsentForApprovedOrderAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertNull(response.getData().getConsentOrderApprovedCoverLetterApp());
-        assertNull(response.getData().getConsentOrderApprovedCoverLetterResp());
+        assertNull(response.getData().getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterApp());
+        assertNull(response.getData().getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterResp());
         verify(consentOrderApprovedDocumentService).getApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN, APPLICANT);
         verify(consentOrderApprovedDocumentService).getApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN, RESPONDENT);
     }
@@ -87,8 +88,8 @@ class SendOrderConsentForApprovedOrderAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertNull(response.getData().getConsentOrderApprovedCoverLetterApp());
-        assertNull(response.getData().getConsentOrderApprovedCoverLetterResp());
+        assertNull(response.getData().getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterApp());
+        assertNull(response.getData().getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterResp());
         verify(consentOrderApprovedDocumentService, never()).getApprovedConsentOrderCoverLetter(any(), any(), any());
     }
 
@@ -104,8 +105,8 @@ class SendOrderConsentForApprovedOrderAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertNull(response.getData().getConsentOrderApprovedCoverLetterApp());
-        assertEquals(respondentCoverLetter, response.getData().getConsentOrderApprovedCoverLetterResp());
+        assertNull(response.getData().getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterApp());
+        assertEquals(respondentCoverLetter, response.getData().getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterResp());
         verify(consentOrderApprovedDocumentService, never()).getApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN, APPLICANT);
     }
 
@@ -113,15 +114,17 @@ class SendOrderConsentForApprovedOrderAboutToSubmitHandlerTest {
     void givenCoverLettersFromPreviousRun_whenSolicitorsNowDigital_thenCoverLettersCleared() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().setConsentOrderApprovedCoverLetterApp(document("oldApp.pdf"));
-        caseDetails.getData().setConsentOrderApprovedCoverLetterResp(document("oldResp.pdf"));
+        caseDetails.getData().setConsentSendOrderWrapper(ConsentSendOrderWrapper.builder()
+            .consentOrderApprovedCoverLetterApp(document("oldApp.pdf"))
+            .consentOrderApprovedCoverLetterResp(document("oldResp.pdf"))
+            .build());
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertNull(response.getData().getConsentOrderApprovedCoverLetterApp());
-        assertNull(response.getData().getConsentOrderApprovedCoverLetterResp());
+        assertNull(response.getData().getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterApp());
+        assertNull(response.getData().getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterResp());
     }
 
     private FinremCallbackRequest callbackRequest() {

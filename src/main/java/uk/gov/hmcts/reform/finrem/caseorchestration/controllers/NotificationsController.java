@@ -84,6 +84,16 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
+    /**
+     * Sends the consent order not approved sent email to the solicitors.
+     *
+     * @param callbackRequest the callback request
+     * @return an empty submitted callback response
+     * @deprecated FR_sendOrder now uses the generic submitted callback
+     *     (SendOrderConsentForNotApprovedOrderSubmittedHandler).
+     *     Remove once the updated CCD definitions are live in all environments.
+     */
+    @Deprecated(since = "27-october-2026")
     @PostMapping(value = "/consent-order-not-approved-sent", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send consent order not approved sent email")
     @ApiResponses(value = {

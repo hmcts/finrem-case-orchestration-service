@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CfvMigrati
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CitizenDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderScannedDocWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentSendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
@@ -436,8 +437,10 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private boolean respondentCorrespondenceEnabled = true;
     private List<OrderSentToPartiesCollection> ordersSentToPartiesCollection;
-    private CaseDocument consentOrderApprovedCoverLetterApp;
-    private CaseDocument consentOrderApprovedCoverLetterResp;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private ConsentSendOrderWrapper consentSendOrderWrapper;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -1185,6 +1188,14 @@ public class FinremCaseData implements HasCaseDocument {
             this.sendOrderWrapper = new SendOrderWrapper();
         }
         return sendOrderWrapper;
+    }
+
+    @JsonIgnore
+    public ConsentSendOrderWrapper getConsentSendOrderWrapper() {
+        if (consentSendOrderWrapper == null) {
+            this.consentSendOrderWrapper = new ConsentSendOrderWrapper();
+        }
+        return consentSendOrderWrapper;
     }
 
     @JsonIgnore
