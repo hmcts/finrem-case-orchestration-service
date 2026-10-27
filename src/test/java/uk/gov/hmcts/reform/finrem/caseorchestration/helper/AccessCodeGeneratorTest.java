@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
@@ -17,6 +18,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
@@ -32,129 +38,247 @@ class AccessCodeGeneratorTest {
         assertTrue(code.matches("[A-Z2-9]+")); // allowed chars in class
     }
 
-    @Test
-    void ensureAccessCodeForRecipient_shouldGenerateApplicantCodeOnly() {
-        FinremCaseData data = new FinremCaseData();
+    @Nested
+    class TestEnsureAccessCodeForRecipient {
+        @Test
+        void ensureAccessCodeForRecipient_shouldGenerateApplicantCodeOnly() {
+            FinremCaseData data = new FinremCaseData();
 
-        boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
 
-        assertTrue(generated);
-        assertEquals(1, data.getApplicantAccessCodes().size());
-        assertValidEntry(data.getApplicantAccessCodes().getFirst().getValue());
-        assertNull(data.getRespondentAccessCodes());
+            assertTrue(generated);
+            assertEquals(1, data.getApplicantAccessCodes().size());
+            assertValidEntry(data.getApplicantAccessCodes().getFirst().getValue());
+            assertNull(data.getRespondentAccessCodes());
+        }
+
+        @Test
+        void ensureAccessCodeForRecipient_shouldGenerateRespondentCodeOnly() {
+            FinremCaseData data = new FinremCaseData();
+
+            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, RESPONDENT);
+
+            assertTrue(generated);
+            assertEquals(1, data.getRespondentAccessCodes().size());
+            assertValidEntry(data.getRespondentAccessCodes().getFirst().getValue());
+            assertNull(data.getApplicantAccessCodes());
+        }
+
+        @Test
+        void ensureAccessCodeForRecipient_shouldNotGenerateForRepresentedParties() {
+            FinremCaseData data = new FinremCaseData();
+            data.setContactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantRepresented(YesOrNo.YES)
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .build());
+
+            assertFalse(AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT));
+            assertFalse(AccessCodeGenerator.ensureAccessCodeForRecipient(data, RESPONDENT));
+
+            assertNull(data.getApplicantAccessCodes());
+            assertNull(data.getRespondentAccessCodes());
+        }
+
+        @Test
+        void ensureAccessCodeForRecipient_shouldNotReplaceActiveCode() {
+            FinremCaseData data = new FinremCaseData();
+            AccessCodeCollection existing = AccessCodeCollection.builder()
+                .value(AccessCodeEntry.builder()
+                    .accessCode("ABCDEFGH")
+                    .isValid(YesOrNo.YES)
+                    .build())
+                .build();
+
+            data.setApplicantAccessCodes(List.of(existing));
+
+            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+
+            assertFalse(generated);
+            assertEquals(1, data.getApplicantAccessCodes().size());
+            assertSame(existing, data.getApplicantAccessCodes().getFirst());
+        }
+
+        @Test
+        void ensureAccessCodeForRecipient_shouldNotGenerateWhenPreviouslyUsed() {
+            FinremCaseData data = new FinremCaseData();
+            AccessCodeCollection existing = AccessCodeCollection.builder()
+                .value(AccessCodeEntry.builder()
+                    .isValid(YesOrNo.NO)
+                    .usedAt(LocalDateTime.now())
+                    .build())
+                .build();
+
+            data.setApplicantAccessCodes(List.of(existing));
+
+            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+
+            assertFalse(generated);
+            assertEquals(1, data.getApplicantAccessCodes().size());
+        }
+
+        @Test
+        void ensureAccessCodeForRecipient_shouldNotGenerateWhenLinkedToIdamUser() {
+            FinremCaseData data = new FinremCaseData();
+            AccessCodeCollection existing = AccessCodeCollection.builder()
+                .value(AccessCodeEntry.builder()
+                    .isValid(YesOrNo.NO)
+                    .userIdamID("user-123")
+                    .build())
+                .build();
+
+            data.setApplicantAccessCodes(List.of(existing));
+
+            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+
+            assertFalse(generated);
+            assertEquals(1, data.getApplicantAccessCodes().size());
+        }
+
+        @Test
+        void ensureAccessCodeForRecipient_shouldPreserveHistoryWhenReplacingInvalidCode() {
+            FinremCaseData data = new FinremCaseData();
+            AccessCodeCollection existing = AccessCodeCollection.builder()
+                .value(AccessCodeEntry.builder()
+                    .accessCode("ABCDEFGH")
+                    .isValid(YesOrNo.NO)
+                    .build())
+                .build();
+
+            data.setApplicantAccessCodes(List.of(existing));
+
+            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+
+            assertTrue(generated);
+            assertEquals(2, data.getApplicantAccessCodes().size());
+            assertSame(existing, data.getApplicantAccessCodes().getFirst());
+            assertValidEntry(data.getApplicantAccessCodes().get(1).getValue());
+        }
+
+        @Test
+        void ensureAccessCodeForRecipient_shouldNotGenerateForIntervener() {
+            FinremCaseData data = new FinremCaseData();
+
+            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, INTERVENER_ONE);
+
+            assertFalse(generated);
+            assertNull(data.getApplicantAccessCodes());
+            assertNull(data.getRespondentAccessCodes());
+        }
     }
 
-    @Test
-    void ensureAccessCodeForRecipient_shouldGenerateRespondentCodeOnly() {
-        FinremCaseData data = new FinremCaseData();
+    @Nested
+    class TestNeedsAccessCodeForRecipient {
+        @Test
+        void shouldReturnTrueWhenApplicantHasNoAccessCodes() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
 
-        boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, RESPONDENT);
+            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+                caseData, APPLICANT
+            );
 
-        assertTrue(generated);
-        assertEquals(1, data.getRespondentAccessCodes().size());
-        assertValidEntry(data.getRespondentAccessCodes().getFirst().getValue());
-        assertNull(data.getApplicantAccessCodes());
-    }
+            assertTrue(result);
+            verify(caseData, never()).setApplicantAccessCodes(any());
+        }
 
-    @Test
-    void ensureAccessCodeForRecipient_shouldNotGenerateForRepresentedParties() {
-        FinremCaseData data = new FinremCaseData();
-        data.setContactDetailsWrapper(ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.YES)
-            .contestedRespondentRepresented(YesOrNo.YES)
-            .build());
+        @Test
+        void shouldReturnTrueWhenRespondentHasNoAccessCodes() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
 
-        assertFalse(AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT));
-        assertFalse(AccessCodeGenerator.ensureAccessCodeForRecipient(data, RESPONDENT));
+            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+                caseData, RESPONDENT
+            );
 
-        assertNull(data.getApplicantAccessCodes());
-        assertNull(data.getRespondentAccessCodes());
-    }
+            assertTrue(result);
+            verify(caseData, never()).setRespondentAccessCodes(any());
+        }
 
-    @Test
-    void ensureAccessCodeForRecipient_shouldNotReplaceActiveCode() {
-        FinremCaseData data = new FinremCaseData();
-        AccessCodeCollection existing = AccessCodeCollection.builder()
-            .value(AccessCodeEntry.builder()
-                .accessCode("ABCDEFGH")
+        @Test
+        void shouldReturnFalseWhenApplicantIsRepresented() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+
+            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+                caseData, APPLICANT
+            );
+
+            assertFalse(result);
+        }
+
+        @Test
+        void shouldReturnFalseWhenRespondentIsRepresented() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+
+            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+                caseData, RESPONDENT
+            );
+
+            assertFalse(result);
+        }
+
+        @Test
+        void shouldReturnFalseWhenApplicantHasActivePin() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+
+            AccessCodeEntry entry = AccessCodeEntry.builder()
                 .isValid(YesOrNo.YES)
-                .build())
-            .build();
+                .build();
 
-        data.setApplicantAccessCodes(List.of(existing));
+            when(caseData.getApplicantAccessCodes()).thenReturn(
+                List.of(AccessCodeCollection.builder().value(entry).build())
+            );
 
-        boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+                caseData, APPLICANT
+            );
 
-        assertFalse(generated);
-        assertEquals(1, data.getApplicantAccessCodes().size());
-        assertSame(existing, data.getApplicantAccessCodes().getFirst());
-    }
+            assertFalse(result);
+            verify(caseData, never()).setApplicantAccessCodes(any());
+        }
 
-    @Test
-    void ensureAccessCodeForRecipient_shouldNotGenerateWhenPreviouslyUsed() {
-        FinremCaseData data = new FinremCaseData();
-        AccessCodeCollection existing = AccessCodeCollection.builder()
-            .value(AccessCodeEntry.builder()
+        @Test
+        void shouldReturnFalseWhenRespondentPreviouslyActivatedPin() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+
+            AccessCodeEntry entry = AccessCodeEntry.builder()
+                .userIdamID("test-user-id")
                 .isValid(YesOrNo.NO)
-                .usedAt(LocalDateTime.now())
-                .build())
-            .build();
+                .build();
 
-        data.setApplicantAccessCodes(List.of(existing));
+            when(caseData.getRespondentAccessCodes()).thenReturn(
+                List.of(AccessCodeCollection.builder().value(entry).build())
+            );
 
-        boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+                caseData, RESPONDENT
+            );
 
-        assertFalse(generated);
-        assertEquals(1, data.getApplicantAccessCodes().size());
-    }
+            assertFalse(result);
+        }
 
-    @Test
-    void ensureAccessCodeForRecipient_shouldNotGenerateWhenLinkedToIdamUser() {
-        FinremCaseData data = new FinremCaseData();
-        AccessCodeCollection existing = AccessCodeCollection.builder()
-            .value(AccessCodeEntry.builder()
+        @Test
+        void shouldReturnTrueWhenApplicantHasInvalidUnusedPin() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+
+            AccessCodeEntry entry = AccessCodeEntry.builder()
                 .isValid(YesOrNo.NO)
-                .userIdamID("user-123")
-                .build())
-            .build();
+                .build();
 
-        data.setApplicantAccessCodes(List.of(existing));
+            List<AccessCodeCollection> existingCodes = List.of(
+                AccessCodeCollection.builder().value(entry).build()
+            );
 
-        boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+            when(caseData.getApplicantAccessCodes()).thenReturn(existingCodes);
 
-        assertFalse(generated);
-        assertEquals(1, data.getApplicantAccessCodes().size());
-    }
+            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+                caseData, APPLICANT
+            );
 
-    @Test
-    void ensureAccessCodeForRecipient_shouldPreserveHistoryWhenReplacingInvalidCode() {
-        FinremCaseData data = new FinremCaseData();
-        AccessCodeCollection existing = AccessCodeCollection.builder()
-            .value(AccessCodeEntry.builder()
-                .accessCode("ABCDEFGH")
-                .isValid(YesOrNo.NO)
-                .build())
-            .build();
+            assertTrue(result);
+            assertSame(existingCodes, caseData.getApplicantAccessCodes());
+            verify(caseData, never()).setApplicantAccessCodes(any());
+        }
 
-        data.setApplicantAccessCodes(List.of(existing));
-
-        boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
-
-        assertTrue(generated);
-        assertEquals(2, data.getApplicantAccessCodes().size());
-        assertSame(existing, data.getApplicantAccessCodes().getFirst());
-        assertValidEntry(data.getApplicantAccessCodes().get(1).getValue());
-    }
-
-    @Test
-    void ensureAccessCodeForRecipient_shouldNotGenerateForIntervener() {
-        FinremCaseData data = new FinremCaseData();
-
-        boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, INTERVENER_ONE);
-
-        assertFalse(generated);
-        assertNull(data.getApplicantAccessCodes());
-        assertNull(data.getRespondentAccessCodes());
     }
 
     private void assertValidEntry(AccessCodeEntry entry) {

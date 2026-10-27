@@ -10,9 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
@@ -104,6 +107,29 @@ class CitizenPinInPostPersistenceServiceTest {
             caseDetailsMapper,
             citizenPinInPostService
         );
+    }
+
+    @Test
+    void shouldNotCallCcdWhenRecipientAlreadyHasActivePin() {
+        when(caseDetails.getCaseType()).thenReturn(CaseType.CONTESTED);
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        AccessCodeEntry activePin = AccessCodeEntry.builder()
+            .isValid(YesOrNo.YES)
+            .build();
+
+        when(caseData.getApplicantAccessCodes()).thenReturn(
+            List.of(AccessCodeCollection.builder()
+                .value(activePin)
+                .build())
+        );
+
+        service.ensurePinPersisted(caseDetails, APPLICANT);
+
+        verifyNoInteractions(coreCaseDataService);
+        verifyNoInteractions(citizenPinInPostService);
+        verifyNoInteractions(caseDetailsMapper);
     }
 
     @Test
