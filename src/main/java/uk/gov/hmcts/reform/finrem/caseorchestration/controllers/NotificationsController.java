@@ -47,6 +47,16 @@ public class NotificationsController extends BaseController {
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final ConsentOrderNotApprovedSentCorresponder consentOrderNotApprovedSentCorresponder;
 
+    /**
+     * Sends the consent order available email to the solicitors.
+     *
+     * @param callbackRequest the callback request
+     * @return the callback response with the unchanged case data
+     * @deprecated FR_sendOrderForApproved now uses the generic submitted callback
+     *     ({@link uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderConsentForApprovedOrderSubmittedHandler}).
+     *     Remove once the updated CCD definitions are live in all environments.
+     */
+    @Deprecated(since = "27-october-2026")
     @PostMapping(value = "/consent-order-available", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for Consent order available.")
     @ApiResponses(value = {
