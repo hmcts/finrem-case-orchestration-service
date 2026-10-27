@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CourtRefData;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -67,16 +68,16 @@ class CourtReferenceDataConfigurationTest {
                 @Override
                 public Map<String, CourtRefData> courtReferenceDataByName(
                     ObjectMapper objectMapper
-                ) {
-                    throw new RuntimeException(
+                ) throws IOException {
+                    throw new IOException(
                         "Unable to load court reference data from "
                             + "/json/fr-court-to-refdata-location-mappings.json"
                     );
                 }
             };
 
-        RuntimeException exception = assertThrows(
-            RuntimeException.class,
+        IOException exception = assertThrows(
+            IOException.class,
             () -> configurationWithoutResource.courtReferenceDataByName(objectMapper)
         );
 
