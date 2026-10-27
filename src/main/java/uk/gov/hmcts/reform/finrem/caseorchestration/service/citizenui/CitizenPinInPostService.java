@@ -9,15 +9,29 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient;
 
+/**
+ * Handles Citizen UI PIN generation for eligible parties in contested Financial Remedy cases.
+ *
+ * <p>Delegates to {@link AccessCodeGenerator} to ensure a PIN is generated
+ * only for eligible, unrepresented applicants or respondents.
+ *
+ * <p>This service updates case data in memory. Persistence to CCD is handled
+ * by the calling handler or persistence service.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CitizenPinInPostService {
 
     /**
-     * Ensures a PIN is generated for an eligible Citizen UI party
-     * in a contested Financial Remedy case.
+     * Ensures an eligible applicant or respondent has a Citizen UI PIN.
      *
+     * <p>PIN generation is restricted to contested cases and is skipped if
+     * the party is represented, has previously activated a PIN, or already
+     * has an active PIN.
+     *
+     * @param caseDetails the case containing the party's access codes
+     * @param recipient the party requiring a PIN
      * @return true if a new PIN was generated, otherwise false
      */
     public boolean ensurePinForRecipient(FinremCaseDetails caseDetails,
