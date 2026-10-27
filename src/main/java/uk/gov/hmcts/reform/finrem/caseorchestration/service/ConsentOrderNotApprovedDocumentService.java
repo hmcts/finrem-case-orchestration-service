@@ -103,7 +103,7 @@ public class ConsentOrderNotApprovedDocumentService {
      * @param recipient          the party the letter is addressed to
      * @return the cover letter as a {@link BulkPrintDocument}
      * @deprecated use {@link #getNotApprovedCoverLetter(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}.
-     *     Remove once the remaining caller sends correspondence in the submitted callback (DFR-XXXX).
+     *     Remove once the remaining caller sends correspondence in the submitted callback (DFR-5872).
      */
     @Deprecated(since = "27-october-2026")
     @SuppressWarnings("java:S1133")
