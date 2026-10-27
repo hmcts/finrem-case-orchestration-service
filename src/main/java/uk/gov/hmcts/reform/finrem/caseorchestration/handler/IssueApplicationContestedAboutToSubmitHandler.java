@@ -66,7 +66,8 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremAboutTo
         }
 
         if (featureToggleService.isFinremCitizenUiEnabled()) {
-            AccessCodeGenerator.setAccessCode(caseDetails.getData());
+            boolean alwaysGenerateCUIAccessCodes = featureToggleService.alwaysGenerateCUIAccessCodesEnabled();
+            AccessCodeGenerator.setAccessCode(caseDetails.getData(), alwaysGenerateCUIAccessCodes);
         }
 
         generateCoverSheets(caseDetails, userAuthorisation);
