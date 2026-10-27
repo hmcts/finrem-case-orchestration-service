@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 import java.util.Collections;
 import java.util.Map;
@@ -50,6 +51,11 @@ public class CitizenPinInPostPersistenceService {
         if (caseDetails.getCaseType() != CaseType.CONTESTED
             || (recipient != APPLICANT && recipient != RESPONDENT)
             || !featureToggleService.isFinremCitizenUiEnabled()) {
+            return;
+        }
+
+        if (!AccessCodeGenerator.needsAccessCodeForRecipient(
+            caseDetails.getData(), recipient)) {
             return;
         }
 

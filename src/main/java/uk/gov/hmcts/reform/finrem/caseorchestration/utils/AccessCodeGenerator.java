@@ -76,11 +76,7 @@ public final class AccessCodeGenerator {
     }
 
     /**
-     * Generates and adds a new PIN to the party's access code collection if required.
-     *
-     * <p>PIN generation is skipped if any previous code has been activated
-     * or an active PIN already exists. Otherwise, a new PIN with a UTC
-     * creation timestamp is appended to the existing collection.
+     * Generates and adds a new PIN if the party has no active or previously activated PIN.
      *
      * @param getter retrieves the party's existing access codes
      * @param setter updates the party's access code collection
@@ -92,32 +88,13 @@ public final class AccessCodeGenerator {
 
         List<AccessCodeCollection> existing = getter.get();
 
+        if (!needsAccessCode(existing)) {
+            return false;
+        }
+
         List<AccessCodeCollection> accessCodes = existing == null
             ? new ArrayList<>()
             : new ArrayList<>(existing);
-
-        boolean previouslyActivated = accessCodes.stream()
-            .map(AccessCodeCollection::getValue)
-            .filter(Objects::nonNull)
-            .anyMatch(entry ->
-                entry.getUsedAt() != null
-                    || StringUtils.isNotBlank(entry.getUserIdamID())
-            );
-
-        if (previouslyActivated) {
-            return false;
-        }
-
-        boolean hasActivePin = accessCodes.stream()
-            .map(AccessCodeCollection::getValue)
-            .filter(Objects::nonNull)
-            .anyMatch(entry ->
-                YesOrNo.YES.equals(entry.getIsValid())
-            );
-
-        if (hasActivePin) {
-            return false;
-        }
 
         AccessCodeEntry entry = AccessCodeEntry.builder()
             .accessCode(generateAccessCode())
@@ -135,4 +112,53 @@ public final class AccessCodeGenerator {
         return true;
     }
 
+    /**
+     * Checks whether an applicant or respondent requires a new Citizen UI PIN.
+     *
+     * <p>A PIN is needed only if the party is unrepresented, has not previously
+     * activated a PIN, and has no active PIN. This method does not modify case data.
+     *
+     * @param caseData the case data containing the party's access codes
+     * @param recipient the party to check
+     * @return true if a new PIN is required, otherwise false
+     */
+    public static boolean needsAccessCodeForRecipient(
+        FinremCaseData caseData,
+        PaperNotificationRecipient recipient) {
+
+        return switch (recipient) {
+            case APPLICANT -> !caseData.isApplicantRepresentedByASolicitor()
+                && needsAccessCode(caseData.getApplicantAccessCodes());
+
+            case RESPONDENT -> !caseData.isRespondentRepresentedByASolicitor()
+                && needsAccessCode(caseData.getRespondentAccessCodes());
+
+            default -> false;
+        };
+    }
+
+    /**
+     * Checks whether an access code collection requires a new PIN.
+     *
+     * <p>A new PIN is not required if any existing code has been activated
+     * or is currently valid.
+     *
+     * @param accessCodes the party's existing access codes
+     * @return true if no active or previously activated PIN exists
+     */
+    private static boolean needsAccessCode(List<AccessCodeCollection> accessCodes) {
+
+        if (accessCodes == null) {
+            return true;
+        }
+
+        return accessCodes.stream()
+            .map(AccessCodeCollection::getValue)
+            .filter(Objects::nonNull)
+            .noneMatch(entry ->
+                entry.getUsedAt() != null
+                    || StringUtils.isNotBlank(entry.getUserIdamID())
+                    || YesOrNo.YES.equals(entry.getIsValid())
+            );
+    }
 }
