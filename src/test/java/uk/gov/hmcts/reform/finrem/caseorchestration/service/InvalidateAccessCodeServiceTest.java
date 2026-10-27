@@ -25,11 +25,13 @@ class InvalidateAccessCodeServiceTest {
     @Test
     void shouldMergeIsValidFromCurrentWhenIdsMatch() {
         UUID id = UUID.randomUUID();
+        LocalDateTime createdAt = LocalDateTime.now(ZoneOffset.UTC).minusDays(5);
 
-        AccessCodeCollection before = collection(
-            id,
-            entry("ABC123", YesOrNo.YES)
-        );
+        AccessCodeCollection before = collection(id, AccessCodeEntry.builder()
+            .accessCode("ABC123")
+            .isValid(YesOrNo.YES)
+            .createdAt(createdAt)
+            .build());
 
         AccessCodeCollection current = collection(
             id,
@@ -37,10 +39,8 @@ class InvalidateAccessCodeServiceTest {
         );
 
         LocalDateTime beforeCall = LocalDateTime.now(ZoneOffset.UTC);
-
         List<AccessCodeCollection> result =
             service.mergeForInvalidation(List.of(before), List.of(current));
-
         LocalDateTime afterCall = LocalDateTime.now(ZoneOffset.UTC);
 
         AccessCodeEntry merged = result.getFirst().getValue();
@@ -48,38 +48,53 @@ class InvalidateAccessCodeServiceTest {
         assertThat(merged.getAccessCode()).isEqualTo("ABC123");
         assertThat(merged.getIsValid()).isEqualTo(YesOrNo.NO);
         assertThat(merged.getUserIdamID()).isEqualTo("user-id");
-        assertThat(merged.getUsedAt()).isAfterOrEqualTo(beforeCall);
-        assertThat(merged.getUsedAt()).isBeforeOrEqualTo(afterCall);
+        assertThat(merged.getCreatedAt()).isEqualTo(createdAt);
+        assertThat(merged.getUsedAt()).isBetween(beforeCall, afterCall);
     }
 
     @Test
-    void shouldSetUsedAtDateTime() {
+    void shouldPreserveExistingUsedAt() {
         UUID id = UUID.randomUUID();
+        LocalDateTime usedAt = LocalDateTime.now(ZoneOffset.UTC).minusDays(1);
 
-        LocalDateTime usedAtBefore = LocalDateTime.now().minusDays(1);
         AccessCodeCollection before = collection(
             id,
-            entry("ABC123", YesOrNo.NO)
+            entry("ABC123", YesOrNo.NO, "original-user", usedAt)
         );
-
         AccessCodeCollection current = collection(
             id,
-            entry("DIFFERENT", YesOrNo.NO, "current-user-id", LocalDateTime.now())
+            entry("DIFFERENT", YesOrNo.NO)
         );
-
-        LocalDateTime beforeCall = LocalDateTime.now(ZoneOffset.UTC);
 
         List<AccessCodeCollection> result =
             service.mergeForInvalidation(List.of(before), List.of(current));
 
-        LocalDateTime afterCall = LocalDateTime.now(ZoneOffset.UTC);
+        AccessCodeEntry merged = result.getFirst().getValue();
+
+        assertThat(merged.getUsedAt()).isEqualTo(usedAt);
+        assertThat(merged.getUserIdamID()).isEqualTo("original-user");
+    }
+
+    @Test
+    void shouldNotSetUsedAtWhenNoIdamUserProvided() {
+        UUID id = UUID.randomUUID();
+
+        AccessCodeCollection before = collection(
+            id,
+            entry("ABC123", YesOrNo.YES)
+        );
+        AccessCodeCollection current = collection(
+            id,
+            entry("ABC123", YesOrNo.NO)
+        );
+
+        List<AccessCodeCollection> result =
+            service.mergeForInvalidation(List.of(before), List.of(current));
 
         AccessCodeEntry merged = result.getFirst().getValue();
 
         assertThat(merged.getIsValid()).isEqualTo(YesOrNo.NO);
-        assertThat(merged.getUsedAt()).isAfterOrEqualTo(beforeCall);
-        assertThat(merged.getUsedAt()).isBeforeOrEqualTo(afterCall);
-        assertThat(merged.getUsedAt()).isNotEqualTo(usedAtBefore);
+        assertThat(merged.getUsedAt()).isNull();
     }
 
     @Test
@@ -94,9 +109,7 @@ class InvalidateAccessCodeServiceTest {
         List<AccessCodeCollection> result =
             service.mergeForInvalidation(List.of(before), List.of());
 
-        assertThat(result)
-            .hasSize(1)
-            .containsExactly(before);
+        assertThat(result).containsExactly(before);
     }
 
     // -------- helpers --------
@@ -108,27 +121,16 @@ class InvalidateAccessCodeServiceTest {
             .build();
     }
 
-    private AccessCodeEntry entry(
-        String accessCode,
-        YesOrNo isValid) {
-
+    private AccessCodeEntry entry(String accessCode, YesOrNo isValid) {
         return entry(accessCode, isValid, null);
     }
 
-    private AccessCodeEntry entry(
-        String accessCode,
-        YesOrNo isValid,
-        String userIdamId) {
-
+    private AccessCodeEntry entry(String accessCode, YesOrNo isValid, String userIdamId) {
         return entry(accessCode, isValid, userIdamId, null);
     }
 
-    private AccessCodeEntry entry(
-        String accessCode,
-        YesOrNo isValid,
-        String userIdamId,
-        LocalDateTime usedAt) {
-
+    private AccessCodeEntry entry(String accessCode, YesOrNo isValid, String userIdamId,
+                                  LocalDateTime usedAt) {
         return AccessCodeEntry.builder()
             .accessCode(accessCode)
             .isValid(isValid)
