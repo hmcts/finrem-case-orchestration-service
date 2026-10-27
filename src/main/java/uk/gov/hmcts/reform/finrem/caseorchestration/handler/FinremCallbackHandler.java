@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ import static org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnot
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RequiredArgsConstructor
+@Slf4j
 public abstract class FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
 
     protected static final List<String> NO_WARNINGS = null;
@@ -69,6 +71,8 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> postHandle(
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response,
         FinremCaseData finremCaseData, String userAuthorisation) {
+
+        log.info("DFR-5819 Debug - Response data: {}", response.getData());
 
         if (nonNull(globalSearchService)) {
             globalSearchService.setGlobalSearchData(response.getData());
