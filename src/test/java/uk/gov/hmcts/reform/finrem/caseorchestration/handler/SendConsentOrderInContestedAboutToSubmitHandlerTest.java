@@ -1,13 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -52,8 +57,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -92,6 +100,7 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
     private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     @Mock
     private SendOrdersCategoriser sendOrdersCategoriser;
+    private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
 
     @BeforeEach
     public void setUpTest() {
@@ -109,6 +118,16 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
                 new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService, notificationService)),
             sendOrdersCategoriser
         );
+
+        mockedContactDetailsValidator = Mockito.mockStatic(ContactDetailsValidator.class);
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                any(FinremCaseData.class), any(EventType.class)))
+            .thenReturn(List.of());
+    }
+
+    @AfterEach
+    void tearDownStatics() {
+        mockedContactDetailsValidator.close();
     }
 
     @Test
@@ -234,6 +253,21 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
         FinremCaseData resultingData = response.getData();
         List<OrderSentToPartiesCollection> partyOrders = resultingData.getOrdersSentToPartiesCollection();
         assertThat(partyOrders.get(0).getValue().getCaseDocument(), equalTo(firstRefusedOrder.getConsentOrder()));
+    }
+
+    @Test
+    void givenInvalidCaseDataAddresses_whenHandled_thenPopulateErrors() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+
+        List<String> expectedErrors = List.of("some error message");
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                caseData, EventType.SEND_CONSENT_IN_CONTESTED_ORDER))
+            .thenReturn(expectedErrors);
+
+        var response = sendConsentOrderInContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors(), equalTo(expectedErrors));
+        verifyNoInteractions(generalOrderService, sendOrdersCategoriser, consentOrderApprovedDocumentService, consentOrderNotApprovedDocumentService);
     }
 
     private DynamicMultiSelectList getParties() {
