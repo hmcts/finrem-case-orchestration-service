@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.LocalE
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-@Ignore
 @ActiveProfiles("local")
 @SpringBootTest
 class LocalProfileTest {
@@ -17,6 +16,7 @@ class LocalProfileTest {
     @Autowired
     LocalEmailService localEmailService;
 
+    @Ignore("Disabled until we can get the local email service to work with the new Notify API")
     @Test
     void emailServiceShouldBeInstanceOfLocalEmailService() {
         // localEmailService inherits from EmailService, hence the class check.
