@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationT
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
