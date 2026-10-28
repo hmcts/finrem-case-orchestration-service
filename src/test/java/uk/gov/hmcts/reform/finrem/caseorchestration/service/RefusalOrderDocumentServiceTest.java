@@ -237,6 +237,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
                 .returns(LocalDate.now(), OrderRefusalHolder::getOrderRefusalDate);
         verify(idamService).getIdamSurname(AUTH_TOKEN);
     }
+
     @Test
     public void givenOnlyV2Reasons_whenProcessConsentOrderNotApproved_thenV2SavedToCollection() {
         FinremCaseDetails caseDetails = buildCallbackRequest(EventType.REJECT_ORDER, CaseType.CONSENTED).getCaseDetails();
@@ -248,7 +249,6 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
         assertEquals(reasons, caseData.getOrderRefusalCollection().get(0).getValue().getOrderRefusalV2());
     }
-
 
     private void assertCaseDataExtraFields() {
         verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
