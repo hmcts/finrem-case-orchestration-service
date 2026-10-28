@@ -64,8 +64,11 @@ properties([
     copyArtifactPermission('HMCTS_d_to_i/finrem-case-orchestration-service/*'),
 ]);
 
+def branchesToSync = ['demo', 'perftest']
+
 withPipeline(type, product, component) {
     loadVaultSecrets(secrets)
+    syncBranchesWithMaster(branchesToSync)
     afterSuccess('checkout') {
         step ([
                 $class: 'CopyArtifact',
