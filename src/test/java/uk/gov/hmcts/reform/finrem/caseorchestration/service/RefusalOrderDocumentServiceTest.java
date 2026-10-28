@@ -94,12 +94,12 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
         FinremCaseData caseData = refusalOrderDocumentService.processConsentOrderNotApproved(caseDetails, AUTH_TOKEN);
 
-        assertEquals(caseDocument(), caseData.getUploadOrder().get(0).getValue().getDocumentLink());
-        assertEquals("generalOrder", caseData.getUploadOrder().get(0).getValue().getDocumentType().getValue());
-        assertEquals("System Generated", caseData.getUploadOrder().get(0).getValue().getDocumentComment());
+        assertEquals(caseDocument(), caseData.getUploadOrder().getFirst().getValue().getDocumentLink());
+        assertEquals("generalOrder", caseData.getUploadOrder().getFirst().getValue().getDocumentType().getValue());
+        assertEquals("System Generated", caseData.getUploadOrder().getFirst().getValue().getDocumentComment());
         assertCaseDataExtraFields();
         assertConsentedCaseDataExtraFields();
-        assertCaseDocument(caseData.getUploadOrder().get(0).getValue().getDocumentLink());
+        assertCaseDocument(caseData.getUploadOrder().getFirst().getValue().getDocumentLink());
     }
 
     @Test
@@ -129,12 +129,12 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
         FinremCaseData caseData = refusalOrderDocumentService.processConsentOrderNotApproved(caseDetails, AUTH_TOKEN);
 
-        assertEquals(caseDocument(), caseData.getUploadOrder().get(0).getValue().getDocumentLink());
-        assertEquals("generalOrder", caseData.getUploadOrder().get(0).getValue().getDocumentType().getValue());
-        assertEquals("System Generated", caseData.getUploadOrder().get(0).getValue().getDocumentComment());
+        assertEquals(caseDocument(), caseData.getUploadOrder().getFirst().getValue().getDocumentLink());
+        assertEquals("generalOrder", caseData.getUploadOrder().getFirst().getValue().getDocumentType().getValue());
+        assertEquals("System Generated", caseData.getUploadOrder().getFirst().getValue().getDocumentComment());
         assertCaseDataExtraFields();
         assertConsentedCaseDataExtraFields();
-        assertCaseDocument(caseData.getUploadOrder().get(0).getValue().getDocumentLink());
+        assertCaseDocument(caseData.getUploadOrder().getFirst().getValue().getDocumentLink());
     }
 
     @Test
@@ -176,14 +176,14 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         caseDetails.getData().getConsentOrderWrapper().setConsentD81Question(YesOrNo.YES);
         FinremCaseData caseData = refusalOrderDocumentService.processConsentOrderNotApproved(caseDetails, AUTH_TOKEN);
 
-        assertEquals(caseDocument(), caseData.getUploadOrder().get(0).getValue().getDocumentLink());
-        assertEquals("generalOrder", caseData.getUploadOrder().get(0).getValue().getDocumentType().getValue());
-        assertEquals("System Generated", caseData.getUploadOrder().get(0).getValue().getDocumentComment());
+        assertEquals(caseDocument(), caseData.getUploadOrder().getFirst().getValue().getDocumentLink());
+        assertEquals("generalOrder", caseData.getUploadOrder().getFirst().getValue().getDocumentType().getValue());
+        assertEquals("System Generated", caseData.getUploadOrder().getFirst().getValue().getDocumentComment());
         assertCaseDataExtraFields();
         assertContestedCaseDataExtraFields();
-        assertCaseDocument(caseData.getUploadOrder().get(0).getValue().getDocumentLink());
+        assertCaseDocument(caseData.getUploadOrder().getFirst().getValue().getDocumentLink());
         List<ConsentOrderCollection> consentedNotApprovedOrders = caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders();
-        assertCaseDocument(consentedNotApprovedOrders.get(0).getApprovedOrder().getConsentOrder());
+        assertCaseDocument(consentedNotApprovedOrders.getFirst().getApprovedOrder().getConsentOrder());
     }
 
     @Test
@@ -247,7 +247,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
         FinremCaseData caseData = refusalOrderDocumentService.processConsentOrderNotApproved(caseDetails, AUTH_TOKEN);
 
-        assertEquals(reasons, caseData.getOrderRefusalCollection().get(0).getValue().getOrderRefusalV2());
+        assertEquals(reasons, caseData.getOrderRefusalCollection().getFirst().getValue().getOrderRefusalV2());
     }
 
     private void assertCaseDataExtraFields() {
