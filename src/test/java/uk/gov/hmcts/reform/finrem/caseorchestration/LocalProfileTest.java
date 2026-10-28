@@ -16,8 +16,8 @@ class LocalProfileTest {
     @Autowired
     LocalEmailService localEmailService;
 
-    @Ignore("Disabled until we can get the local email service to work with the new Notify API")
     @Test
+    @Ignore("Disabled until we can get the local email service to work with the new Notify API")
     void emailServiceShouldBeInstanceOfLocalEmailService() {
         // localEmailService inherits from EmailService, hence the class check.
         assertInstanceOf(LocalEmailService.class, localEmailService);
