@@ -2,11 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -16,12 +19,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCateg
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.BUSINESS_VALUATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.CERTIFICATE_OF_SERVICE_FORM_FP6;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.CHRONOLOGY;
@@ -37,6 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUplo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.MEDICAL_REPORT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.OPEN_OFFERS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.OTHER_PROPERTY_VALUATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.PENSION_REPORT_EXPERT_REPORT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.POINTS_OF_CLAIM_DEFENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.POSITION_STATEMENT;
@@ -94,15 +101,24 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_S25_STATEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenPartyType.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.CitizenPartyType.RESPONDENT;
 
+@ExtendWith(MockitoExtension.class)
 class CUIDocumentsCategoriserTest {
 
+    private static final boolean FDR = true;
+    private static final boolean NON_FDR = false;
+
+    @Mock
     private FeatureToggleService featureToggleService;
+
+    private CUIDocumentsCategoriser categoriser;
 
     @BeforeEach
     void setUp() {
-        featureToggleService = mock(FeatureToggleService.class);
-        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
+        lenient().when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
+        categoriser = new CUIDocumentsCategoriser(featureToggleService);
     }
 
     private CitizenUploadDocument buildDocument(CitizenUploadDocumentType type, boolean isFdr) {
@@ -114,53 +130,76 @@ class CUIDocumentsCategoriserTest {
         return doc;
     }
 
-    private FinremCaseData buildCaseData(List<CitizenDocumentCollection> docs, boolean applicant) {
+    private FinremCaseData buildCaseData(List<CitizenDocumentCollectionItem> docs, CitizenPartyType party) {
         FinremCaseData caseData = new FinremCaseData();
         CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
 
-        if (applicant) {
-            wrapper.setCitizenApplicantDocument(docs);
+        if (APPLICANT.equals(party)) {
+            wrapper.setUploadedCuiApplicantDocuments(docs);
         } else {
-            wrapper.setCitizenRespondentDocument(docs);
+            wrapper.setUploadedCuiRespondentDocuments(docs);
         }
 
         caseData.setCitizenDocumentWrapper(wrapper);
         return caseData;
     }
 
-    private CitizenDocumentCollection wrap(CitizenUploadDocument doc) {
-        CitizenDocumentCollection c = new CitizenDocumentCollection();
+    private CitizenDocumentCollectionItem wrap(CitizenUploadDocument doc) {
+        CitizenDocumentCollectionItem c = new CitizenDocumentCollectionItem();
         c.setValue(doc);
         return c;
     }
 
     @Test
     void shouldHandleEmptyDocumentsGracefully() {
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, CUIDocumentsCategoriser.Party.APPLICANT);
-
-        assertThatCode(() -> categoriser.categorise(buildCaseData(null, true)))
+        assertThatCode(() -> categoriser.categorise(buildCaseData(null, APPLICANT)))
             .doesNotThrowAnyException();
     }
 
     @Test
     void shouldIgnoreInvalidDocument() {
         CitizenUploadDocument doc = new CitizenUploadDocument();
-
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, CUIDocumentsCategoriser.Party.APPLICANT);
-
-        categoriser.categorise(buildCaseData(List.of(wrap(doc)), true));
+        categoriser.categorise(buildCaseData(List.of(wrap(doc)), APPLICANT));
 
         assertThat(doc.getDocumentLink()).isNull();
     }
 
     @Test
-    void shouldHandleNullWrapper() {
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, CUIDocumentsCategoriser.Party.APPLICANT);
+    void shouldIgnoreNullDocumentValue() {
+        assertThatCode(() -> categoriser.categorise(buildCaseData(List.of(wrap(null)), APPLICANT)))
+            .doesNotThrowAnyException();
+    }
 
-        FinremCaseData caseData = new FinremCaseData();
+    @Test
+    void shouldIgnoreDocumentWithoutType() {
+        CitizenUploadDocument doc = buildDocument(null, NON_FDR);
+
+        categoriser.categorise(buildCaseData(List.of(wrap(doc)), APPLICANT));
+
+        assertThat(doc.getDocumentLink().getCategoryId()).isNull();
+    }
+
+    @Test
+    void shouldNotCategoriseWhenCaseFileViewDisabled() {
+        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(false);
+
+        CitizenUploadDocument doc = buildDocument(CASE_SUMMARY, NON_FDR);
+
+        categoriser.categorise(buildCaseData(List.of(wrap(doc)), APPLICANT));
+
+        assertThat(doc.getDocumentLink().getCategoryId()).isNull();
+    }
+
+    @Test
+    void shouldHandleEmptyDocumentListGracefully() {
+        assertThatCode(() -> categoriser.categorise(buildCaseData(List.of(), APPLICANT)))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldHandleNullWrapper() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.getCitizenDocumentWrapper()).thenReturn(null);
 
         assertThatCode(() -> categoriser.categorise(caseData))
             .doesNotThrowAnyException();
@@ -169,20 +208,16 @@ class CUIDocumentsCategoriserTest {
     @Test
     void shouldProcessMultipleMixedDocuments() {
         CitizenUploadDocument doc1 =
-            buildDocument(CitizenUploadDocumentType.CASE_SUMMARY, false);
+            buildDocument(CitizenUploadDocumentType.CASE_SUMMARY, NON_FDR);
 
         CitizenUploadDocument doc2 =
-            buildDocument(CitizenUploadDocumentType.HOUSING_NEEDS_PROPERTY_PARTICULARS, true);
+            buildDocument(HOUSING_NEEDS_PROPERTY_PARTICULARS, FDR);
 
         CitizenUploadDocument doc3 =
-            buildDocument(CitizenUploadDocumentType.PRE_HEARING_DRAFT_ORDER, false);
-
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService,
-                CUIDocumentsCategoriser.Party.RESPONDENT);
+            buildDocument(PRE_HEARING_DRAFT_ORDER, NON_FDR);
 
         categoriser.categorise(buildCaseData(
-            List.of(wrap(doc1), wrap(doc2), wrap(doc3)), false));
+            List.of(wrap(doc1), wrap(doc2), wrap(doc3)), RESPONDENT));
 
         assertThat(doc1.getDocumentLink().getCategoryId()).isNotNull();
         assertThat(doc2.getDocumentLink().getCategoryId()).isNotNull();
@@ -194,17 +229,13 @@ class CUIDocumentsCategoriserTest {
     void shouldCategorise(
         CitizenUploadDocumentType type,
         boolean isFdr,
-        CUIDocumentsCategoriser.Party party,
-        boolean applicant,
+        CitizenPartyType party,
         DocumentCategory expected
     ) {
         CitizenUploadDocument doc = buildDocument(type, isFdr);
 
-        CUIDocumentsCategoriser categoriser =
-            new CUIDocumentsCategoriser(featureToggleService, party);
-
         FinremCaseData caseData =
-            buildCaseData(List.of(wrap(doc)), applicant);
+            buildCaseData(List.of(wrap(doc)), party);
 
         categoriser.categorise(caseData);
 
@@ -212,241 +243,335 @@ class CUIDocumentsCategoriserTest {
             assertThat(doc.getDocumentLink().getCategoryId()).isNull();
         } else {
             assertThat(doc.getDocumentLink().getCategoryId())
+                .as("Document type '%s' (FDR: %s) incorrectly categorised. Expected: %s, Actual: %s",
+                    type, isFdr, expected, doc.getDocumentLink().getCategoryId())
                 .isEqualTo(expected.getDocumentCategoryId());
         }
+    }
+
+    @Test
+    void shouldHaveTestCaseForEveryCitizenUploadDocumentType() {
+        Set<CitizenUploadDocumentType> testedTypes = documentCategoryProvider()
+            .map(arguments -> (CitizenUploadDocumentType) arguments.get()[0])
+            .collect(java.util.stream.Collectors.toSet());
+
+        assertThat(testedTypes)
+            .containsExactlyInAnyOrder(CitizenUploadDocumentType.values());
     }
 
     private static Stream<Arguments> documentCategoryProvider() {
         return Stream.of(
 
-            Arguments.of(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true, APPLICANT_DOCUMENTS_FORM_E),
+            applicant(CitizenUploadDocumentType.FAMILY_MEDIATION_INFORMATION_AND_ASSESSMENT_MEETING_MIAM_FORM_FM1,
+                NON_FDR, DocumentCategory.APPLICATIONS_MAIN_APPLICATION),
 
-            Arguments.of(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false, RESPONDENT_DOCUMENTS_FORM_E),
+            applicant(POINTS_OF_CLAIM_DEFENCE, NON_FDR, APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE),
 
-            Arguments.of(PENSION_REPORT_EXPERT_REPORT, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true, FDR_REPORTS),
+            respondent(POINTS_OF_CLAIM_DEFENCE, NON_FDR,
+                DocumentCategory.RESPONDENT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE),
 
-            Arguments.of(PENSION_REPORT_EXPERT_REPORT, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true, REPORTS),
+            applicant(POINTS_OF_CLAIM_DEFENCE, FDR, APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE),
 
-            Arguments.of(STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5,
-                false, CUIDocumentsCategoriser.Party.APPLICANT, true,
-                HEARING_DOCUMENTS_APPLICANT_FM5),
+            applicant(STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5,
+                NON_FDR, HEARING_DOCUMENTS_APPLICANT_FM5),
 
-            Arguments.of(STATEMENT_OF_COSTS_FORM_H1, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260),
+            respondent(STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5,
+                FDR, DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_FM5),
 
-            Arguments.of(SCHEDULE_OF_DEFICIENCIES, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                HEARING_DOCUMENTS_APPLICANT_REPLIES_TO_QUESTIONNAIRE),
+            applicant(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, NON_FDR, APPLICANT_DOCUMENTS_FORM_E),
 
-            Arguments.of(SCHEDULE_OF_DEFICIENCIES, true,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+            respondent(FINANCIAL_STATEMENT_FORM_E_E1_OR_E2, NON_FDR, RESPONDENT_DOCUMENTS_FORM_E),
 
-            Arguments.of(CASE_SUMMARY, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                HEARING_DOCUMENTS_APPLICANT_CASE_SUMMARY),
+            applicant(CitizenUploadDocumentType.ATTACHMENTS_TO_FORM_E, NON_FDR, APPLICANT_DOCUMENTS_FORM_E),
 
-            Arguments.of(CASE_SUMMARY, true,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
-
-            Arguments.of(POSITION_STATEMENT, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS),
-
-            Arguments.of(POSITION_STATEMENT, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                HEARING_DOCUMENTS_RESPONDENT_POSITION_STATEMENT),
-
-            Arguments.of(CHRONOLOGY, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_JOINT_DOCUMENTS_CHRONOLOGY),
-
-            Arguments.of(CHRONOLOGY, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                HEARING_DOCUMENTS_RESPONDENT_CHRONOLOGY),
-
-            Arguments.of(STATEMENT_OF_ISSUES, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                HEARING_DOCUMENTS_APPLICANT_CONCISE_STATEMENT_OF_ISSUES),
-
-            Arguments.of(COMPOSITE_CASE_SUMMARY_FORM_ES1, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_JOINT_DOCUMENTS_ES1),
-
-            Arguments.of(COMPOSITE_SCHEDULE_OF_ASSETS_AND_INCOME_FORM_ES2, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                HEARING_DOCUMENTS_RESPONDENT_ES2),
-
-            Arguments.of(MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
-
-            Arguments.of(MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                RESPONDENT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL),
-
-            Arguments.of(HOUSING_NEEDS_PROPERTY_PARTICULARS, true,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
-
-            Arguments.of(HOUSING_NEEDS_PROPERTY_PARTICULARS, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS),
-
-            Arguments.of(QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
-
-            Arguments.of(QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                HEARING_DOCUMENTS_RESPONDENT_QUESTIONNAIRES),
-
-            Arguments.of(SECTION_25_STATEMENT, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                RESPONDENT_DOCUMENTS_S25_STATEMENT),
-
-            Arguments.of(WITNESS_STATEMENT, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
-
-            Arguments.of(WITNESS_STATEMENT, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS),
-
-            Arguments.of(WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS),
-
-            Arguments.of(WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                null),
-
-            Arguments.of(OPEN_OFFERS, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
-
-            Arguments.of(OPEN_OFFERS, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                RESPONDENT_DOCUMENTS_OPEN_OFFERS),
-
-            Arguments.of(HEARING_BUNDLE, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_BUNDLE),
-
-            Arguments.of(PRE_HEARING_DRAFT_ORDER, true,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_DRAFT_ORDER),
-
-            Arguments.of(PRE_HEARING_DRAFT_ORDER, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER),
-
-            Arguments.of(POINTS_OF_CLAIM_DEFENCE, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE),
-
-            Arguments.of(POINTS_OF_CLAIM_DEFENCE, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                null),
-
-            Arguments.of(ESTIMATE_OF_COSTS_INCURRED_FORM_H, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
+            applicant(ESTIMATE_OF_COSTS_INCURRED_FORM_H, NON_FDR,
                 HEARING_DOCUMENTS_APPLICANT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260),
 
-            Arguments.of(STATEMENT_OF_COSTS_SUMMARY_ASSESSMENT_FORM_N260, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
+            respondent(STATEMENT_OF_COSTS_FORM_H1, NON_FDR,
                 HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260),
 
-            Arguments.of(SUPPLEMENTAL_QUESTIONNAIRE, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                HEARING_DOCUMENTS_APPLICANT_QUESTIONNAIRES),
+            respondent(STATEMENT_OF_COSTS_SUMMARY_ASSESSMENT_FORM_N260, NON_FDR,
+                HEARING_DOCUMENTS_RESPONDENT_COSTS_FORM_H_OR_FORM_H1_OR_FORM_N260),
 
-            Arguments.of(REPLY_TO_QUESTIONNAIRE, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE),
+            applicant(CERTIFICATE_OF_SERVICE_FORM_FP6, NON_FDR, APPLICANT_DOCUMENTS_CERTIFICATES_OF_SERVICE),
 
-            Arguments.of(REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                RESPONDENT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE),
+            respondent(CERTIFICATE_OF_SERVICE_FORM_FP6, NON_FDR,
+                DocumentCategory.RESPONDENT_DOCUMENTS_CERTIFICATES_OF_SERVICE),
 
-            Arguments.of(DIVORCE_APPLICATION_PETITION, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                DIVORCE_DOCUMENTS_APPLICATION_OR_PETITION),
+            applicant(RESPONSE_TO_THE_NOTICE_OF_FIRST_APPOINTMENT_FORM_G, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_FORM_G),
 
-            Arguments.of(DIVORCE_CONDITIONAL_ORDER_DECREE_NISI, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
+            respondent(RESPONSE_TO_THE_NOTICE_OF_FIRST_APPOINTMENT_FORM_G, NON_FDR, RESPONDENT_DOCUMENTS_FORM_G),
+
+            applicant(SCHEDULE_OF_DEFICIENCIES, NON_FDR, HEARING_DOCUMENTS_APPLICANT_REPLIES_TO_QUESTIONNAIRE),
+
+            respondent(SCHEDULE_OF_DEFICIENCIES, NON_FDR,
+                DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_REPLIES_TO_QUESTIONNAIRE),
+
+            applicant(SCHEDULE_OF_DEFICIENCIES, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
+
+            respondent(SCHEDULE_OF_DEFICIENCIES, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+
+            applicant(CASE_SUMMARY, NON_FDR, HEARING_DOCUMENTS_APPLICANT_CASE_SUMMARY),
+
+            respondent(CASE_SUMMARY, NON_FDR, DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CASE_SUMMARY),
+
+            applicant(CASE_SUMMARY, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
+
+            respondent(CASE_SUMMARY, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+
+            applicant(POSITION_STATEMENT, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS),
+
+            applicant(POSITION_STATEMENT, NON_FDR, DocumentCategory.HEARING_DOCUMENTS_APPLICANT_POSITION_STATEMENT),
+
+            respondent(POSITION_STATEMENT, NON_FDR, HEARING_DOCUMENTS_RESPONDENT_POSITION_STATEMENT),
+
+            respondent(POSITION_STATEMENT, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_POSITION_STATEMENTS),
+
+            applicant(CHRONOLOGY, FDR, FDR_JOINT_DOCUMENTS_CHRONOLOGY),
+
+            applicant(CHRONOLOGY, NON_FDR, DocumentCategory.HEARING_DOCUMENTS_APPLICANT_CHRONOLOGY),
+
+            respondent(CHRONOLOGY, NON_FDR, HEARING_DOCUMENTS_RESPONDENT_CHRONOLOGY),
+
+            applicant(STATEMENT_OF_ISSUES, NON_FDR, HEARING_DOCUMENTS_APPLICANT_CONCISE_STATEMENT_OF_ISSUES),
+
+            respondent(STATEMENT_OF_ISSUES, NON_FDR,
+                DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_CONCISE_STATEMENT_OF_ISSUES),
+
+            applicant(STATEMENT_OF_ISSUES, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS),
+
+            respondent(STATEMENT_OF_ISSUES, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_POSITION_STATEMENTS),
+
+            applicant(DIVORCE_APPLICATION_PETITION, NON_FDR, DIVORCE_DOCUMENTS_APPLICATION_OR_PETITION),
+
+            applicant(DIVORCE_CONDITIONAL_ORDER_DECREE_NISI, NON_FDR,
                 DIVORCE_DOCUMENTS_CONDITIONAL_ORDER_OR_DECREE_NISI),
 
-            Arguments.of(DIVORCE_FINAL_ORDER_DECREE_ABSOLUTE, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                DIVORCE_DOCUMENTS_FINAL_ORDER_OR_DECREE_ABSOLUTE),
+            applicant(DIVORCE_FINAL_ORDER_DECREE_ABSOLUTE, NON_FDR, DIVORCE_DOCUMENTS_FINAL_ORDER_OR_DECREE_ABSOLUTE),
 
-            Arguments.of(CERTIFICATE_OF_SERVICE_FORM_FP6, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                APPLICANT_DOCUMENTS_CERTIFICATES_OF_SERVICE),
+            applicant(COMPOSITE_CASE_SUMMARY_FORM_ES1, FDR, FDR_JOINT_DOCUMENTS_ES1),
 
-            Arguments.of(RESPONSE_TO_THE_NOTICE_OF_FIRST_APPOINTMENT_FORM_G, false,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
-                RESPONDENT_DOCUMENTS_FORM_G),
+            applicant(COMPOSITE_CASE_SUMMARY_FORM_ES1, NON_FDR, DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES1),
 
-            Arguments.of(MEDICAL_REPORT, true,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                FDR_REPORTS),
+            respondent(COMPOSITE_CASE_SUMMARY_FORM_ES1, NON_FDR, DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_ES1),
 
-            Arguments.of(MEDICAL_REPORT, false,
-                CUIDocumentsCategoriser.Party.APPLICANT, true,
-                REPORTS),
+            applicant(COMPOSITE_SCHEDULE_OF_ASSETS_AND_INCOME_FORM_ES2, FDR, DocumentCategory.FDR_JOINT_DOCUMENTS_ES2),
 
-            Arguments.of(SUPPLEMENTAL_QUESTIONNAIRE, true,
-                CUIDocumentsCategoriser.Party.RESPONDENT, false,
+            applicant(COMPOSITE_SCHEDULE_OF_ASSETS_AND_INCOME_FORM_ES2, NON_FDR,
+                DocumentCategory.HEARING_DOCUMENTS_APPLICANT_ES2),
+
+            respondent(COMPOSITE_SCHEDULE_OF_ASSETS_AND_INCOME_FORM_ES2, NON_FDR, HEARING_DOCUMENTS_RESPONDENT_ES2),
+
+            applicant(MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
+
+            respondent(MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME, FDR,
                 FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
 
-            Arguments.of(
-                CitizenUploadDocumentType.STATEMENT_OF_ISSUES,
-                true,
-                CUIDocumentsCategoriser.Party.RESPONDENT,
-                false,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_POSITION_STATEMENTS
+            respondent(MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME, NON_FDR,
+                RESPONDENT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL),
+
+            applicant(MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME, NON_FDR,
+                APPLICANT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL),
+
+            respondent(HOUSING_NEEDS_PROPERTY_PARTICULARS, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+
+            applicant(HOUSING_NEEDS_PROPERTY_PARTICULARS, NON_FDR,
+                APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS),
+
+            respondent(HOUSING_NEEDS_PROPERTY_PARTICULARS, NON_FDR,
+                DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS),
+
+            applicant(HOUSING_NEEDS_PROPERTY_PARTICULARS, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
+
+            respondent(CitizenUploadDocumentType.POTENTIAL_BORROWING_CAPACITY_MORTGAGE_CAPACITIES, FDR,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+
+            respondent(CitizenUploadDocumentType.POTENTIAL_BORROWING_CAPACITY_MORTGAGE_CAPACITIES, NON_FDR,
+                DocumentCategory.RESPONDENT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS),
+
+            applicant(CitizenUploadDocumentType.POTENTIAL_BORROWING_CAPACITY_MORTGAGE_CAPACITIES, NON_FDR,
+                APPLICANT_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS),
+
+            applicant(OPEN_OFFERS, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
+
+            respondent(OPEN_OFFERS, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+
+            applicant(OPEN_OFFERS, NON_FDR, DocumentCategory.APPLICANT_DOCUMENTS_OPEN_OFFERS),
+
+            respondent(OPEN_OFFERS, NON_FDR, RESPONDENT_DOCUMENTS_OPEN_OFFERS),
+
+            applicant(QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
+
+            respondent(QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS, FDR,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+
+            applicant(QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS, NON_FDR,
+                HEARING_DOCUMENTS_APPLICANT_QUESTIONNAIRES),
+
+            respondent(QUESTIONNAIRE_REQUEST_FOR_FURTHER_DOCUMENTS, NON_FDR,
+                HEARING_DOCUMENTS_RESPONDENT_QUESTIONNAIRES),
+
+            applicant(SUPPLEMENTAL_QUESTIONNAIRE, NON_FDR, HEARING_DOCUMENTS_APPLICANT_QUESTIONNAIRES),
+
+            respondent(SUPPLEMENTAL_QUESTIONNAIRE, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+
+            applicant(SECTION_25_STATEMENT, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
+
+            respondent(SECTION_25_STATEMENT, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+
+            applicant(SECTION_25_STATEMENT, NON_FDR, DocumentCategory.APPLICANT_DOCUMENTS_S25_STATEMENT),
+
+            respondent(SECTION_25_STATEMENT, NON_FDR, RESPONDENT_DOCUMENTS_S25_STATEMENT),
+
+            applicant(WITNESS_STATEMENT, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER),
+
+            respondent(WITNESS_STATEMENT, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_OTHER),
+
+            applicant(WITNESS_STATEMENT, NON_FDR, DocumentCategory.APPLICANT_DOCUMENTS_WITNESS_STATEMENTS),
+
+            respondent(WITNESS_STATEMENT, NON_FDR, RESPONDENT_DOCUMENTS_WITNESS_STATEMENTS),
+
+            applicant(WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT, FDR,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS),
+
+            respondent(WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT, FDR,
+                DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS),
+
+            applicant(WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT, NON_FDR,
+                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS),
+
+            respondent(WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT, NON_FDR,
+                DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_WITHOUT_PREJUDICE_OFFERS),
+
+            applicant(PENSION_REPORT_EXPERT_REPORT, FDR, FDR_REPORTS),
+
+            applicant(PENSION_REPORT_EXPERT_REPORT, NON_FDR, REPORTS),
+
+            applicant(BUSINESS_VALUATION, NON_FDR, REPORTS),
+
+            applicant(OTHER_PROPERTY_VALUATION, NON_FDR, REPORTS),
+
+            applicant(MEDICAL_REPORT, FDR, FDR_REPORTS),
+
+            applicant(MEDICAL_REPORT, NON_FDR, REPORTS),
+
+            applicant(HEARING_BUNDLE, FDR, FDR_BUNDLE),
+
+            applicant(HEARING_BUNDLE, NON_FDR, DocumentCategory.HEARING_BUNDLE),
+
+            respondent(CitizenUploadDocumentType.FDR_BUNDLE, FDR, FDR_BUNDLE),
+
+            respondent(PRE_HEARING_DRAFT_ORDER, FDR, FDR_DOCUMENTS_AND_FDR_BUNDLE_RESPONDENT_DRAFT_ORDER),
+
+            applicant(PRE_HEARING_DRAFT_ORDER, FDR,
+                DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_DRAFT_ORDER),
+
+            applicant(PRE_HEARING_DRAFT_ORDER, NON_FDR, HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER),
+
+            respondent(PRE_HEARING_DRAFT_ORDER, NON_FDR, HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER),
+
+            applicant(REPLY_TO_QUESTIONNAIRE, NON_FDR, APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE),
+
+            respondent(REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES, NON_FDR,
+                RESPONDENT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE),
+
+            applicant(CitizenUploadDocumentType.REPLY_TO_QUESTIONNAIRE_SUPPORTING_DOCUMENTS, NON_FDR,
+                APPLICANT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE),
+
+            respondent(
+                CitizenUploadDocumentType.REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES_SUPPORTING_DOCUMENTS,
+                NON_FDR,
+                RESPONDENT_DOCUMENTS_REPLIES_TO_QUESTIONNAIRE
             ),
 
-            Arguments.of(
-                CitizenUploadDocumentType.MARKET_APPRAISAL_OR_VALUATION_OF_FAMILY_HOME,
-                false,
-                CUIDocumentsCategoriser.Party.APPLICANT,
-                true,
-                APPLICANT_MORTGAGE_CAPACITIES_OR_MARKET_APPRAISAL
-            ),
+            applicant(CitizenUploadDocumentType.UPDATING_DISCLOSURE, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
 
-            Arguments.of(
-                CitizenUploadDocumentType.HOUSING_NEEDS_PROPERTY_PARTICULARS,
-                true,
-                CUIDocumentsCategoriser.Party.APPLICANT,
-                true,
-                FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER
-            ),
+            respondent(CitizenUploadDocumentType.UPDATING_DISCLOSURE, NON_FDR,
+                DocumentCategory.RESPONDENT_DOCUMENTS_UPDATING_DISCLOSURE),
 
-            Arguments.of(
-                CitizenUploadDocumentType.PRE_HEARING_DRAFT_ORDER,
-                false,
-                CUIDocumentsCategoriser.Party.RESPONDENT,
-                false,
-                HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER
-            ),
+            applicant(CitizenUploadDocumentType.BANK_STATEMENTS, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
 
-            Arguments.of(
-                CitizenUploadDocumentType.FDR_BUNDLE,
-                true,
-                CUIDocumentsCategoriser.Party.RESPONDENT,
-                false,
-                FDR_BUNDLE
-            )
+            applicant(CitizenUploadDocumentType.PAYSLIPS, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.P60, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.P45, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.DEBT_STATEMENT, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.LIST_OF_ASSETS, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.LOAN_STATEMENT, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.CAR_INSURANCE_LOAN_STATEMENT, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.PERSONAL_SELLING_SIGHT_STATEMENT, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.SCHOOL_FEES, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.SELF_ASSESSMENT_TAX_FORMS, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.UNIVERSAL_CREDIT_STATEMENT, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.MORTGAGE_STATEMENTS_FOR_FAMILY_HOME, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.MORTGAGE_STATEMENTS_FOR_OTHER_PROPERTIES, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.INVESTMENT_STATEMENTS, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.BUSINESS_ACCOUNTS, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.P11D, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.TAX_ASSESSMENTS, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.INCOME_EVIDENCE, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.PENSION_STATEMENT, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.LIFE_INSURANCE_INCLUDING_ENDOWMENT_POLICIES, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
+
+            applicant(CitizenUploadDocumentType.MANAGEMENT_ACCOUNTS, NON_FDR,
+                DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE)
         );
+    }
+
+    private static Arguments applicant(CitizenUploadDocumentType type, boolean isFdr, DocumentCategory expected) {
+        return category(type, isFdr, APPLICANT, expected);
+    }
+
+    private static Arguments respondent(CitizenUploadDocumentType type, boolean isFdr, DocumentCategory expected) {
+        return category(type, isFdr, RESPONDENT, expected);
+    }
+
+    private static Arguments category(CitizenUploadDocumentType type,
+                                      boolean isFdr,
+                                      CitizenPartyType party,
+                                      DocumentCategory expected) {
+        return Arguments.of(type, isFdr, party, expected);
     }
 
 }
