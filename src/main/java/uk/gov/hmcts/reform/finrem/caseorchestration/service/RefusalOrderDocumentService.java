@@ -122,10 +122,12 @@ public class RefusalOrderDocumentService {
 
         OrderRefusalHolder orderRefusalOnScreen = convertToRefusalOrder(caseDetailsCopy.getData().get("orderRefusalOnScreen"));
         List<OrderRefusalOption> optionList = orderRefusalOnScreen.getOrderRefusal();
-        List<OrderRefusalOption> optionListTranslated = new ArrayList<>();
-        optionList.forEach(s -> optionListTranslated.add(OrderRefusalOption
-            .getOrderRefusalOption(REFUSAL_KEYS.getOrDefault(s.getId(), s.getId()))));
-        orderRefusalOnScreen.setOrderRefusal(optionListTranslated);
+        if (optionList != null) {
+            List<OrderRefusalOption> optionListTranslated = new ArrayList<>();
+            optionList.forEach(s -> optionListTranslated.add(OrderRefusalOption
+                .getOrderRefusalOption(REFUSAL_KEYS.getOrDefault(s.getId(), s.getId()))));
+            orderRefusalOnScreen.setOrderRefusal(optionListTranslated);
+        }
         caseDetailsCopy.getData().put("orderRefusalOnScreen", orderRefusalOnScreen);
 
         return genericDocumentService.generateDocument(authorisationToken,

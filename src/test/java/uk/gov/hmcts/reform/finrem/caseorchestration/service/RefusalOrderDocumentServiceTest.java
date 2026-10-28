@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalOptionV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
@@ -236,6 +237,18 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
                 .returns(LocalDate.now(), OrderRefusalHolder::getOrderRefusalDate);
         verify(idamService).getIdamSurname(AUTH_TOKEN);
     }
+    @Test
+    public void givenOnlyV2Reasons_whenProcessConsentOrderNotApproved_thenV2SavedToCollection() {
+        FinremCaseDetails caseDetails = buildCallbackRequest(EventType.REJECT_ORDER, CaseType.CONSENTED).getCaseDetails();
+        List<OrderRefusalOptionV2> reasons = List.of(OrderRefusalOptionV2.PENSION_ANNEX, OrderRefusalOptionV2.APPLICATION_NOW_CONTESTED);
+        caseDetails.getData().setOrderRefusalOnScreen(OrderRefusalHolder.builder().orderRefusalV2(reasons).build());
+        caseDetails.getData().getNatureApplicationWrapper().setNatureOfApplication2(List.of(NatureApplication.LUMP_SUM_ORDER));
+
+        FinremCaseData caseData = refusalOrderDocumentService.processConsentOrderNotApproved(caseDetails, AUTH_TOKEN);
+
+        assertEquals(reasons, caseData.getOrderRefusalCollection().get(0).getValue().getOrderRefusalV2());
+    }
+
 
     private void assertCaseDataExtraFields() {
         verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
