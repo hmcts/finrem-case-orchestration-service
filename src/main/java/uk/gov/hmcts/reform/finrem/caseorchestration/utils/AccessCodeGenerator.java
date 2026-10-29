@@ -14,18 +14,15 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
- * Utility for generating and managing Citizen UI access codes.
+ * Generates Citizen UI access codes and appends them to a recipient's history.
  *
- * <p>Generates access codes for unrepresented applicants and respondents
- * who have not previously activated a code and do not have an active PIN.
- * Existing access code history is preserved when a new PIN is generated.
+ * <p>New codes are added only for unrepresented applicants or respondents
+ * without an active or previously activated code. Existing history is preserved.
  *
- * <p>This utility updates the case data in memory. Persisting the changes
- * to CCD is the responsibility of the calling service or handler.
+ * <p>Changes are made in memory. The caller is responsible for checking the
+ * case type and feature toggle, and persisting changes to CCD.
  */
 public final class AccessCodeGenerator {
 
@@ -44,53 +41,70 @@ public final class AccessCodeGenerator {
     }
 
     /**
-     * Ensures an eligible applicant or respondent has an active Citizen UI PIN.
+     * Checks whether the recipient requires a new access code without modifying case data.
      *
-     * <p>A new PIN is generated only if the party is unrepresented, has not
-     * previously activated a PIN, and has no existing active PIN.
-     * Other recipient types are ignored.
+     * <p>Returns true only for an unrepresented applicant or respondent whose
+     * history contains no active or previously activated code.
      *
-     * @param caseData the case data containing the party's access codes
-     * @param recipient the applicant or respondent requiring a PIN
-     * @return true if a new PIN was generated, or false if no PIN was needed
-     *         or the recipient was ineligible
+     * @param caseData the case data containing representation details and access-code history
+     * @param recipient the recipient to check
+     * @return true if a new code is required; false otherwise, including for unsupported recipients
      */
-    public static boolean ensureAccessCodeForRecipient(FinremCaseData caseData,
-        PaperNotificationRecipient recipient) {
+    public static boolean doesRecipientNeedNewAccessCode(FinremCaseData caseData,
+                                                         PaperNotificationRecipient recipient) {
 
         return switch (recipient) {
             case APPLICANT -> !caseData.isApplicantRepresentedByASolicitor()
-                && ensureAccessCodePresent(
-                caseData::getApplicantAccessCodes,
-                caseData::setApplicantAccessCodes
-            );
-
+                && !hasActiveOrActivatedCode(caseData.getApplicantAccessCodes());
             case RESPONDENT -> !caseData.isRespondentRepresentedByASolicitor()
-                && ensureAccessCodePresent(
-                caseData::getRespondentAccessCodes,
-                caseData::setRespondentAccessCodes
-            );
-
+                && !hasActiveOrActivatedCode(caseData.getRespondentAccessCodes());
             default -> false;
         };
     }
 
     /**
-     * Generates and adds a new PIN if the party has no active or previously activated PIN.
+     * Generates and appends an access code if the recipient requires one.
      *
-     * @param getter retrieves the party's existing access codes
-     * @param setter updates the party's access code collection
-     * @return true if a new PIN was added, otherwise false
+     * <p>Updates the recipient's access-code collection in memory, preserving
+     * existing history. The caller is responsible for persisting the change.
+     *
+     * @param caseData the case data to update
+     * @param recipient the recipient for whom to generate a code
+     * @return true if a new code was added; false if no change was required
      */
-    private static boolean ensureAccessCodePresent(
-        Supplier<List<AccessCodeCollection>> getter,
-        Consumer<List<AccessCodeCollection>> setter) {
+    public static boolean generateAccessCodeIfNeeded(
+        FinremCaseData caseData,
+        PaperNotificationRecipient recipient) {
 
-        List<AccessCodeCollection> existing = getter.get();
-
-        if (!needsAccessCode(existing)) {
+        if (!doesRecipientNeedNewAccessCode(caseData, recipient)) {
             return false;
         }
+
+        switch (recipient) {
+            case APPLICANT -> caseData.setApplicantAccessCodes(
+                appendNewAccessCode(caseData.getApplicantAccessCodes())
+            );
+            case RESPONDENT -> caseData.setRespondentAccessCodes(
+                appendNewAccessCode(caseData.getRespondentAccessCodes())
+            );
+            default -> {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Creates a collection containing the existing entries followed by a new valid code.
+     *
+     * <p>The new entry records its creation time in UTC. The supplied list is not modified.
+     *
+     * @param existing the existing access-code collection, or null if none exists
+     * @return a new list containing the existing entries and the generated code
+     */
+    private static List<AccessCodeCollection> appendNewAccessCode(
+        List<AccessCodeCollection> existing) {
 
         List<AccessCodeCollection> accessCodes = existing == null
             ? new ArrayList<>()
@@ -102,60 +116,38 @@ public final class AccessCodeGenerator {
             .createdAt(LocalDateTime.now(ZoneOffset.UTC))
             .build();
 
-        AccessCodeCollection collection = AccessCodeCollection.builder()
-            .value(entry)
-            .build();
+        accessCodes.add(
+            AccessCodeCollection.builder()
+                .value(entry)
+                .build()
+        );
 
-        accessCodes.add(collection);
-        setter.accept(accessCodes);
-
-        return true;
+        return accessCodes;
     }
 
     /**
-     * Checks whether an applicant or respondent requires a new Citizen UI PIN.
+     * Checks whether the history contains an active or previously activated code.
      *
-     * <p>A PIN is needed only if the party is unrepresented, has not previously
-     * activated a PIN, and has no active PIN. This method does not modify case data.
+     * <p>A code is active when its validity flag is YES. It is considered previously
+     * activated when its usage timestamp is populated or its user IDAM ID is nonblank.
+     * Null collection items and null entry values are ignored.
      *
-     * @param caseData the case data containing the party's access codes
-     * @param recipient the party to check
-     * @return true if a new PIN is required, otherwise false
+     * @param accessCodes the access-code history, or null if none exists
+     * @return true if a matching entry exists; false for null or empty collections
+     *         or when no entry matches
      */
-    public static boolean needsAccessCodeForRecipient(
-        FinremCaseData caseData,
-        PaperNotificationRecipient recipient) {
-
-        return switch (recipient) {
-            case APPLICANT -> !caseData.isApplicantRepresentedByASolicitor()
-                && needsAccessCode(caseData.getApplicantAccessCodes());
-
-            case RESPONDENT -> !caseData.isRespondentRepresentedByASolicitor()
-                && needsAccessCode(caseData.getRespondentAccessCodes());
-
-            default -> false;
-        };
-    }
-
-    /**
-     * Checks whether an access code collection requires a new PIN.
-     *
-     * <p>A new PIN is not required if any existing code has been activated
-     * or is currently valid.
-     *
-     * @param accessCodes the party's existing access codes
-     * @return true if no active or previously activated PIN exists
-     */
-    private static boolean needsAccessCode(List<AccessCodeCollection> accessCodes) {
+    private static boolean hasActiveOrActivatedCode(
+        List<AccessCodeCollection> accessCodes) {
 
         if (accessCodes == null) {
-            return true;
+            return false;
         }
 
         return accessCodes.stream()
+            .filter(Objects::nonNull)
             .map(AccessCodeCollection::getValue)
             .filter(Objects::nonNull)
-            .noneMatch(entry ->
+            .anyMatch(entry ->
                 entry.getUsedAt() != null
                     || StringUtils.isNotBlank(entry.getUserIdamID())
                     || YesOrNo.YES.equals(entry.getIsValid())
