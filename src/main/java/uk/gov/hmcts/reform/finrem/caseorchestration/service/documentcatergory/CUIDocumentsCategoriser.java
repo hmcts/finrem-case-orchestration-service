@@ -52,8 +52,6 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
         }
 
         String category = switch (doc.getDocumentType()) {
-            case FAMILY_MEDIATION_INFORMATION_AND_ASSESSMENT_MEETING_MIAM_FORM_FM1 ->
-                DocumentCategory.APPLICATIONS_MAIN_APPLICATION.getDocumentCategoryId();
             case POINTS_OF_CLAIM_DEFENCE -> getPointsOfClaimDefenceCategory(partyType);
             case STATEMENT_OF_POSITION_ON_NON_COURT_DISPUTE_RESOLUTION_NCDR_FORM_FM5 -> getFm5FolderCategory(partyType);
             case FINANCIAL_STATEMENT_FORM_E_E1_OR_E2,
