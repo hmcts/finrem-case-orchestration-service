@@ -3,13 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
@@ -18,11 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationT
 
 import static org.junit.Assert.assertEquals;
 
-@Disabled
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@PropertySource(value = "classpath:application.properties")
 @AutoConfigureMockMvc
 @Slf4j
 @Category(IntegrationTest.class)
@@ -36,6 +32,8 @@ public class EmailClientTest extends BaseTest {
 
     @Test
     public void shouldHaveTheCorrectApiKey() {
-        assertEquals(apiKey, emailClient.getApiKey());
+        // Notify API keys are 36 characters long, so we can check the last 36 characters of the key to ensure it is correct.
+        String extractedApiKey = apiKey.substring(Math.max(0, apiKey.length() - 36));
+        assertEquals(extractedApiKey, emailClient.getApiKey());
     }
 }
