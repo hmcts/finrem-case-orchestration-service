@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeEntry;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -68,11 +70,10 @@ public class InvalidateAccessCodeService {
     }
 
     /**
-     * Merges a single access code entry.
-     *
-     * <p>
-     * All access code details are preserved from the original entry.
-     * Only the {@code isValid} flag is applied from the updated entry.
+     * Merges an updated access code entry with its original details.
+     * Preserves the original access code and creation date,
+     * updates its validity and IDAM user, and records when
+     * the code is first activated.
      *
      * @param beforeItem the original access code entry
      * @param updated    the updated access code entry containing the new validity value
@@ -82,8 +83,22 @@ public class InvalidateAccessCodeService {
 
         AccessCodeEntry beforeValue = beforeItem.getValue();
         AccessCodeEntry updatedValue = updated.getValue();
-        LocalDateTime usedAt = LocalDateTime.now(ZoneOffset.UTC);
-        String userIdamId = updatedValue.getUserIdamID();
+
+        String userIdamId = StringUtils.defaultIfBlank(
+            updatedValue.getUserIdamID(),
+            beforeValue.getUserIdamID()
+        );
+
+        boolean newlyActivated =
+            YesOrNo.YES.equals(beforeValue.getIsValid())
+                && YesOrNo.NO.equals(updatedValue.getIsValid())
+                && StringUtils.isNotBlank(updatedValue.getUserIdamID());
+
+        LocalDateTime usedAt = beforeValue.getUsedAt();
+
+        if (usedAt == null && newlyActivated) {
+            usedAt = LocalDateTime.now(ZoneOffset.UTC);
+        }
 
         return AccessCodeCollection.builder()
             .id(beforeItem.getId())
@@ -92,6 +107,7 @@ public class InvalidateAccessCodeService {
                 .isValid(updatedValue.getIsValid())
                 .userIdamID(userIdamId)
                 .usedAt(usedAt)
+                .createdAt(beforeValue.getCreatedAt())
                 .build())
             .build();
     }

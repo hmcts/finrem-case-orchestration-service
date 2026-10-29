@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
@@ -43,6 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DOCUMENT_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 
 @ExtendWith(MockitoExtension.class)
 class GenerateCoverSheetServiceTest {
@@ -66,6 +68,8 @@ class GenerateCoverSheetServiceTest {
     private GenerateCoverSheetService generateCoverSheetService;
     @Mock
     private CaseType caseType;
+    @Mock
+    private CitizenPinInPostService citizenPinInPostService;
 
     @Test
     void shouldGenerateApplicantCoverSheet() {
@@ -87,28 +91,11 @@ class GenerateCoverSheetServiceTest {
     }
 
     @Test
-    void shouldGenerateAndSetApplicantCoverSheet_whenAddressNotHidden() {
-        setUpDocGenerationMocks();
-        when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
-        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
-        caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(
-            caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME)
-        );
-
-        generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
-
-        assertEquals(TEST_DOCUMENT_FILENAME,
-            caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
-        assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential());
-        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted())
-            .extracting(item -> item.getValue().getBinFileUrl())
-            .containsExactly(OLD_COVERSHEET_URL);
-    }
-
-    @Test
     void shouldNotDeleteDocument_whenOldCoverSheetIsNull() {
         setUpDocGenerationMocks();
         when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
 
@@ -116,6 +103,7 @@ class GenerateCoverSheetServiceTest {
 
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
+        verify(citizenPinInPostService).generatePinIfNeeded(caseDetails, APPLICANT);
         verify(genericDocumentService, never()).deleteDocument(any(), eq(AUTH_TOKEN));
     }
 
@@ -156,6 +144,7 @@ class GenerateCoverSheetServiceTest {
     void shouldGenerateAndSetRespondentCoverSheet_whenAddressNotHidden() {
         setUpDocGenerationMocks();
         when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(
             caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME)
@@ -169,6 +158,7 @@ class GenerateCoverSheetServiceTest {
         assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted())
             .extracting(item -> item.getValue().getBinFileUrl())
             .containsExactly(OLD_COVERSHEET_URL);
+        verify(citizenPinInPostService).generatePinIfNeeded(caseDetails, RESPONDENT);
     }
 
     @Test

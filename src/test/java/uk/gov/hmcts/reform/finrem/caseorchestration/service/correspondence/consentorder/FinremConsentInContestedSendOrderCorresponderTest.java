@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderNotApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,8 @@ class FinremConsentInContestedSendOrderCorresponderTest {
     private DocumentHelper documentHelper;
     @Mock
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @Mock
+    private CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
 
     @Mock
     private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
@@ -68,6 +71,7 @@ class FinremConsentInContestedSendOrderCorresponderTest {
             caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
         assertEquals(1, documentsToPrint.size());
         verify(consentOrderNotApprovedDocumentService).addNotApprovedConsentCoverLetter(any(FinremCaseDetails.class), anyList(), any(), any());
+        verify(citizenPinInPostPersistenceService).ensurePinPersisted(any(FinremCaseDetails.class), any());
     }
 
     @Test
