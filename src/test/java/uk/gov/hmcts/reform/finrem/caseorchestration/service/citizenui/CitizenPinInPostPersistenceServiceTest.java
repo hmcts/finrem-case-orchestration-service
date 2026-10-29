@@ -219,7 +219,7 @@ class CitizenPinInPostPersistenceServiceTest {
         when(caseDetailsMapper.mapToFinremCaseDetails(latestCcdCase))
             .thenReturn(latestFinremDetails);
 
-        when(citizenPinInPostService.ensurePinForRecipient(
+        when(citizenPinInPostService.generatePinIfNeeded(
             latestFinremDetails, recipient
         )).thenReturn(pinGenerated);
 

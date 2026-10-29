@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +34,7 @@ public class GenerateCoverSheetService {
     private final DocumentConfiguration documentConfiguration;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
     private final FeatureToggleService featureToggleService;
+    private final CitizenPinInPostService citizenPinInPostService;
 
     private record IntervenerCoverSheetMapping(
         DocumentHelper.PaperNotificationRecipient recipient,
@@ -55,6 +57,11 @@ public class GenerateCoverSheetService {
      * @param authorisationToken the authorization token used to access and store the generated document
      */
     public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+
+        if (featureToggleService.isFinremCitizenUiEnabled()) {
+            citizenPinInPostService.generatePinIfNeeded(caseDetails, APPLICANT);
+        }
+
         FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(APPLICANT, caseDetails.getCaseIdAsString());
 
@@ -83,6 +90,11 @@ public class GenerateCoverSheetService {
      * @param authorisationToken the authorization token used to access and store the generated document
      */
     public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+
+        if (featureToggleService.isFinremCitizenUiEnabled()) {
+            citizenPinInPostService.generatePinIfNeeded(caseDetails, RESPONDENT);
+        }
+
         FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(RESPONDENT, caseDetails.getCaseIdAsString());
 
