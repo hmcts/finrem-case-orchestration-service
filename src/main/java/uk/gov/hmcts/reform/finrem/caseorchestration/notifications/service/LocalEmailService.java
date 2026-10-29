@@ -25,7 +25,6 @@ import java.util.Map;
  *      HMCTS Confluence – Local Email Service guidance
  *      </a>
  */
-@Profile("local")
 @Service
 @Slf4j
 @SuppressWarnings("java:S6857")
