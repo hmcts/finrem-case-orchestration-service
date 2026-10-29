@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
+import org.junit.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
@@ -10,10 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.LocalE
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-@DisabledIfEnvironmentVariable(
-    named = "SPRING_PROFILES_ACTIVE",
-    matches = "local",
-    disabledReason = "This test is only relevant when the 'local' profile is active.")
+@Disabled
 @ActiveProfiles("local")
 @SpringBootTest
 class LocalProfileTest {
@@ -22,7 +20,7 @@ class LocalProfileTest {
     LocalEmailService localEmailService;
 
     @Test
-    @Disabled
+    @Ignore
     void emailServiceShouldBeInstanceOfLocalEmailService() {
         // localEmailService inherits from EmailService, hence the class check.
         assertInstanceOf(LocalEmailService.class, localEmailService);
