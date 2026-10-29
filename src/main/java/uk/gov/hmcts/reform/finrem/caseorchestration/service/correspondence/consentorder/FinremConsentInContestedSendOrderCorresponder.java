@@ -31,7 +31,8 @@ public class FinremConsentInContestedSendOrderCorresponder extends FinremMultiLe
     public FinremConsentInContestedSendOrderCorresponder(NotificationService notificationService,
                                                          BulkPrintService bulkPrintService,
                                                          ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
-                                                         ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService, CitizenPinInPostPersistenceService citizenPinInPostPersistenceService) {
+                                                         ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
+                                                         CitizenPinInPostPersistenceService citizenPinInPostPersistenceService) {
         super(bulkPrintService, notificationService);
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;

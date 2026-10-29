@@ -202,7 +202,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(
             any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
-        verify(citizenPinInPostService, times(2)).generatePinIfNeeded(any(FinremCaseDetails.class), any(DocumentHelper.PaperNotificationRecipient.class));
+        verify(citizenPinInPostService, times(2))
+            .generatePinIfNeeded(any(FinremCaseDetails.class), any(DocumentHelper.PaperNotificationRecipient.class));
     }
 
     @Test
