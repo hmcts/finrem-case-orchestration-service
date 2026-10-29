@@ -170,6 +170,17 @@ public class ConsentOrderApprovedDocumentService {
         return stampedPensionData;
     }
 
+    /**
+     * Generates the approved consent order cover letter for the given recipient as bulk print documents.
+     * Returns an empty list when the case is not a paper application.
+     *
+     * @param caseDetails        the case details
+     * @param authorisationToken the authorisation token
+     * @param recipient          the party the letter is addressed to
+     * @return a list containing the cover letter, or an empty list if the case is not a paper application
+     * @deprecated use {@link #getApprovedConsentOrderCoverLetter(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}.
+     */
+    @Deprecated(since = "27-october-2026")
     public List<BulkPrintDocument> addApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
                                                                       DocumentHelper.PaperNotificationRecipient recipient) {
         FinremCaseData caseData = caseDetails.getData();
