@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -118,12 +117,12 @@ public class ContactDetailsValidator {
      */
     public static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         // DFR-4704 - to simplify the logic by FinremCaseData.getAppSolicitorAddress
-        if (isContested(caseData)) {
+        if (caseData.isContestedApplication()) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && postCodeIsInvalid(wrapper.getApplicantSolicitorAddress())) {
                 errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
             }
-        } else if (isConsented(caseData)
+        } else if (caseData.isConsentedApplication()
             && caseData.isApplicantRepresentedByASolicitor()
             && postCodeIsInvalid(wrapper.getSolicitorAddress())) {
             errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
@@ -319,13 +318,13 @@ public class ContactDetailsValidator {
      */
     public static boolean checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                                  List<String> errors) {
-        if (isContested(caseData)) {
+        if (caseData.isContestedApplication()) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && !isValidEmailAddress(wrapper.getApplicantSolicitorEmail())) {
                 errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getApplicantSolicitorEmail()));
                 return false;
             }
-        } else if (isConsented(caseData)
+        } else if (caseData.isConsentedApplication()
             && caseData.isApplicantRepresentedByASolicitor()
             && !isValidEmailAddress(wrapper.getSolicitorEmail())) {
             errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getSolicitorEmail()));
@@ -398,6 +397,12 @@ public class ContactDetailsValidator {
      * Validates that the applicant and respondent have the required postal addresses.
      *
      * <p>
+     * This is a convenience overload that validates both parties. It is equivalent to calling
+     * {@link #validateRequiredPostalAddresses(FinremCaseData, EventType, boolean, boolean)}
+     * with both {@code validateApplicant} and {@code validateRespondent} set to {@code true}.
+     * </p>
+     *
+     * <p>
      * This method checks the appropriate postal address for each party based on whether
      * they are represented by a solicitor. For represented parties, the solicitor's
      * address is validated; otherwise, the party's own address is validated.
@@ -423,12 +428,91 @@ public class ContactDetailsValidator {
      * @return a list of validation error messages for any missing postal addresses
      */
     public static List<String> validateRequiredPostalAddresses(FinremCaseData caseData, EventType eventType) {
+        return validateRequiredPostalAddresses(caseData, eventType, true, true);
+    }
+
+    /**
+     * Validates that the selected parties have the required postal addresses.
+     *
+     * <p>
+     * This method checks the appropriate postal address for each party being validated, based on
+     * whether they are represented by a solicitor. For represented parties, the solicitor's
+     * address is validated; otherwise, the party's own address is validated. Each party is only
+     * checked if the corresponding flag is {@code true}, which allows callers to validate only
+     * the parties who will receive postal notifications, for example those selected in
+     * "Who should receive this order?".
+     * </p>
+     *
+     * <p>
+     * A validation error is generated when the relevant address:
+     * </p>
+     * <ul>
+     *   <li>Is null or empty.</li>
+     *   <li>Does not contain {@code addressLine1}.</li>
+     *   <li>Does not contain {@code postcode}.</li>
+     * </ul>
+     *
+     * <p>
+     * This validation is intended to be used during about-to-submit callbacks to ensure that
+     * postal notifications can be issued successfully. It assumes that a UK postcode is provided
+     * for the addresses being validated, and does not account for non-UK addresses.
+     * </p>
+     *
+     * @param caseData the {@link FinremCaseData} containing the addresses to validate
+     * @param eventType the event context to include in validation error messages
+     * @param validateApplicant {@code true} to validate the applicant's postal address
+     * @param validateRespondent {@code true} to validate the respondent's postal address
+     * @return a list of validation error messages for any missing postal addresses; empty if
+     *         neither party is validated or all validated addresses are complete
+     */
+    public static List<String> validateRequiredPostalAddresses(FinremCaseData caseData, EventType eventType,
+                                                               boolean validateApplicant, boolean validateRespondent) {
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
-        checkForMissingApplicantPostalAddress(caseData, wrapper, eventType, errors);
-        checkForMissingRespondentPostalAddress(caseData, wrapper, eventType, errors);
+        if (validateApplicant) {
+            checkForMissingApplicantPostalAddress(caseData, wrapper, eventType, errors);
+        }
+        if (validateRespondent) {
+            checkForMissingRespondentPostalAddress(caseData, wrapper, eventType, errors);
+        }
+        return errors;
+    }
 
+    /**
+     * Validates that the selected interveners on a case have a postal address, returning an error
+     * message for each intervener that is missing one.
+     *
+     * <p>Each {@code validateIntervenerN} flag controls whether the corresponding intervener
+     * (one to four) is checked. Interveners whose flag is {@code false} are skipped, so callers
+     * can restrict validation to only the interveners relevant to the current event.</p>
+     *
+     * @param caseData            the {@link FinremCaseData} containing the addresses to validate
+     * @param eventType           the event being processed, used when generating the error messages
+     * @param validateIntervener1 {@code true} to validate intervener one's postal address
+     * @param validateIntervener2 {@code true} to validate intervener two's postal address
+     * @param validateIntervener3 {@code true} to validate intervener three's postal address
+     * @param validateIntervener4 {@code true} to validate intervener four's postal address
+     * @return a list of validation error messages; empty if no selected intervener is missing a
+     *         postal address
+     */
+    public static List<String> validateRequiredIntervenersPostalAddresses(
+        FinremCaseData caseData, EventType eventType,
+        boolean validateIntervener1, boolean validateIntervener2, boolean validateIntervener3, boolean validateIntervener4) {
+        List<String> errors = new ArrayList<>();
+
+        if (validateIntervener1) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerOne(), eventType, errors);
+        }
+        if (validateIntervener2) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerTwo(), eventType, errors);
+        }
+        if (validateIntervener3) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerThree(), eventType, errors);
+        }
+        if (validateIntervener4) {
+            checkForMissingIntervenerPostalAddress(caseData.getIntervenerFour(), eventType, errors);
+        }
         return errors;
     }
 
@@ -515,14 +599,6 @@ public class ContactDetailsValidator {
         }
     }
 
-    private static boolean isContested(FinremCaseData caseData) {
-        return caseData.getCcdCaseType() == CaseType.CONTESTED;
-    }
-
-    private static boolean isConsented(FinremCaseData caseData) {
-        return caseData.getCcdCaseType() == CaseType.CONSENTED;
-    }
-
     private static void checkForMissingApplicantPostalAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                               EventType eventType, List<String> errors) {
         if (caseData.isApplicantRepresentedByASolicitor()) {
@@ -548,6 +624,14 @@ public class ContactDetailsValidator {
 
         if (postalAddressIsMissing(wrapper.getRespondentAddress(), wrapper.getRespondentResideOutsideUK())) {
             errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Respondent", eventType.getDisplayName()));
+        }
+    }
+
+    private static void checkForMissingIntervenerPostalAddress(IntervenerWrapper wrapper,
+                                                               EventType eventType, List<String> errors) {
+        if (postalAddressIsMissing(wrapper.getIntervenerAddress(), wrapper.getIntervenerResideOutsideUK())) {
+            errors.add(String.format(MISSING_ADDRESS_ERROR_MESSAGE, "Intervener %s"
+                .formatted(wrapper.getIntervenerType().getIntervenerId()), eventType.getDisplayName()));
         }
     }
 
