@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderNotApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremMultiLetterOnlyAllPartiesCorresponder;
 
 import java.util.ArrayList;
@@ -24,21 +25,26 @@ public class FinremConsentInContestedSendOrderCorresponder extends FinremMultiLe
 
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    private final CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
 
     @Autowired
     public FinremConsentInContestedSendOrderCorresponder(NotificationService notificationService,
                                                          BulkPrintService bulkPrintService,
                                                          ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
-                                                         ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService) {
+                                                         ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService, CitizenPinInPostPersistenceService citizenPinInPostPersistenceService) {
         super(bulkPrintService, notificationService);
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;
+        this.citizenPinInPostPersistenceService = citizenPinInPostPersistenceService;
     }
 
     @Override
     public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails,
                                                        String authToken,
                                                        DocumentHelper.PaperNotificationRecipient recipient) {
+
+        citizenPinInPostPersistenceService.ensurePinPersisted(caseDetails, recipient);
+
         List<OrderSentToPartiesCollection> sentToPartiesCollection = caseDetails.getData().getOrdersSentToPartiesCollection();
         List<CaseDocument> consentOrderDocuments = new ArrayList<>();
         sentToPartiesCollection.forEach(doc -> consentOrderDocuments.add(doc.getValue().getCaseDocument()));
