@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 // Profile not specified, so not 'local'
-@Ignore("Disabled until we can get the local email service to work with the new Notify API")
 @SpringBootTest
 class NonLocalProfileTest {
 
@@ -19,7 +18,7 @@ class NonLocalProfileTest {
     EmailService emailService;
 
     @Test
-    @Ignore("Disabled until we can get the local email service to work with the new Notify API")
+    @Disabled
     void emailServiceShouldBeInstanceOfEmailService() {
         // Check that an EmailService is loaded into context. LocalEmailService should
         // only be used when the 'local' profile is active.

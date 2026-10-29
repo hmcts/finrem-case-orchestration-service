@@ -1,10 +1,25 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.LocalEmailService;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+
+@ActiveProfiles("local")
 @SpringBootTest
-@Ignore("Disabled until we can get the local email service to work with the new Notify API")
 class LocalProfileTest {
 
+    @Autowired
+    LocalEmailService localEmailService;
+
+    @Test
+    @Disabled
+    void emailServiceShouldBeInstanceOfLocalEmailService() {
+        // localEmailService inherits from EmailService, hence the class check.
+        assertInstanceOf(LocalEmailService.class, localEmailService);
+    }
 }
