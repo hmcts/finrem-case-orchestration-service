@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
+import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.LocalE
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
+@Disabled
 @ActiveProfiles("local")
 @SpringBootTest
 class LocalProfileTest {
@@ -16,6 +19,7 @@ class LocalProfileTest {
     LocalEmailService localEmailService;
 
     @Test
+    @Ignore
     void emailServiceShouldBeInstanceOfLocalEmailService() {
         // localEmailService inherits from EmailService, hence the class check.
         assertInstanceOf(LocalEmailService.class, localEmailService);

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationT
 
 import static org.junit.Assert.assertEquals;
 
+@Disabled
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

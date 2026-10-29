@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
@@ -25,7 +24,6 @@ import java.util.Map;
  *      HMCTS Confluence – Local Email Service guidance
  *      </a>
  */
-@Profile("local")
 @Service
 @Slf4j
 @SuppressWarnings("java:S6857")
