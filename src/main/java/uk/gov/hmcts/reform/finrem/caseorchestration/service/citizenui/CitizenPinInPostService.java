@@ -42,7 +42,7 @@ public class CitizenPinInPostService {
         }
 
         boolean generated = AccessCodeGenerator
-            .ensureAccessCodeForRecipient(caseDetails.getData(),
+            .generateAccessCodeIfNeeded(caseDetails.getData(),
                 recipient
             );
 

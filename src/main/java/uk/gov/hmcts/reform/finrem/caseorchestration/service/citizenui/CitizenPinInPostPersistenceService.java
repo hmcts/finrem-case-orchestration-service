@@ -54,7 +54,7 @@ public class CitizenPinInPostPersistenceService {
             return;
         }
 
-        if (!AccessCodeGenerator.needsAccessCodeForRecipient(
+        if (!AccessCodeGenerator.doesRecipientNeedNewAccessCode(
             caseDetails.getData(), recipient)) {
             return;
         }
