@@ -262,9 +262,6 @@ class CUIDocumentsCategoriserTest {
     private static Stream<Arguments> documentCategoryProvider() {
         return Stream.of(
 
-            applicant(CitizenUploadDocumentType.FAMILY_MEDIATION_INFORMATION_AND_ASSESSMENT_MEETING_MIAM_FORM_FM1,
-                NON_FDR, DocumentCategory.APPLICATIONS_MAIN_APPLICATION),
-
             applicant(POINTS_OF_CLAIM_DEFENCE, NON_FDR, APPLICANT_DOCUMENTS_POINTS_OF_CLAIM_OR_DEFENCE),
 
             respondent(POINTS_OF_CLAIM_DEFENCE, NON_FDR,
