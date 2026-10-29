@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
@@ -140,6 +141,8 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     ManageHearingsCorresponder manageHearingsCorresponder;
     @MockitoBean
     ExpressCaseService expressCaseService;
+    @MockitoBean
+    private CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
     private final ObjectMapper objectMapper = createObjectMapper();
 
     private ArgumentCaptor<Map> placeholdersMapArgumentCaptor = ArgumentCaptor.forClass(Map.class);
