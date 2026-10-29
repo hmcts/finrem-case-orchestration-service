@@ -39,12 +39,12 @@ class AccessCodeGeneratorTest {
     }
 
     @Nested
-    class TestEnsureAccessCodeForRecipient {
+    class TestGenerateAccessCodeIfNeeded {
         @Test
         void ensureAccessCodeForRecipient_shouldGenerateApplicantCodeOnly() {
             FinremCaseData data = new FinremCaseData();
 
-            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+            boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(data, APPLICANT);
 
             assertTrue(generated);
             assertEquals(1, data.getApplicantAccessCodes().size());
@@ -56,7 +56,7 @@ class AccessCodeGeneratorTest {
         void ensureAccessCodeForRecipient_shouldGenerateRespondentCodeOnly() {
             FinremCaseData data = new FinremCaseData();
 
-            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, RESPONDENT);
+            boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(data, RESPONDENT);
 
             assertTrue(generated);
             assertEquals(1, data.getRespondentAccessCodes().size());
@@ -72,8 +72,8 @@ class AccessCodeGeneratorTest {
                 .contestedRespondentRepresented(YesOrNo.YES)
                 .build());
 
-            assertFalse(AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT));
-            assertFalse(AccessCodeGenerator.ensureAccessCodeForRecipient(data, RESPONDENT));
+            assertFalse(AccessCodeGenerator.generateAccessCodeIfNeeded(data, APPLICANT));
+            assertFalse(AccessCodeGenerator.generateAccessCodeIfNeeded(data, RESPONDENT));
 
             assertNull(data.getApplicantAccessCodes());
             assertNull(data.getRespondentAccessCodes());
@@ -91,7 +91,7 @@ class AccessCodeGeneratorTest {
 
             data.setApplicantAccessCodes(List.of(existing));
 
-            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+            boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(data, APPLICANT);
 
             assertFalse(generated);
             assertEquals(1, data.getApplicantAccessCodes().size());
@@ -110,7 +110,7 @@ class AccessCodeGeneratorTest {
 
             data.setApplicantAccessCodes(List.of(existing));
 
-            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+            boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(data, APPLICANT);
 
             assertFalse(generated);
             assertEquals(1, data.getApplicantAccessCodes().size());
@@ -128,7 +128,7 @@ class AccessCodeGeneratorTest {
 
             data.setApplicantAccessCodes(List.of(existing));
 
-            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+            boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(data, APPLICANT);
 
             assertFalse(generated);
             assertEquals(1, data.getApplicantAccessCodes().size());
@@ -146,7 +146,7 @@ class AccessCodeGeneratorTest {
 
             data.setApplicantAccessCodes(List.of(existing));
 
-            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, APPLICANT);
+            boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(data, APPLICANT);
 
             assertTrue(generated);
             assertEquals(2, data.getApplicantAccessCodes().size());
@@ -158,7 +158,7 @@ class AccessCodeGeneratorTest {
         void ensureAccessCodeForRecipient_shouldNotGenerateForIntervener() {
             FinremCaseData data = new FinremCaseData();
 
-            boolean generated = AccessCodeGenerator.ensureAccessCodeForRecipient(data, INTERVENER_ONE);
+            boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(data, INTERVENER_ONE);
 
             assertFalse(generated);
             assertNull(data.getApplicantAccessCodes());
@@ -167,12 +167,12 @@ class AccessCodeGeneratorTest {
     }
 
     @Nested
-    class TestNeedsAccessCodeForRecipient {
+    class TestDoesRecipientNeedNewAccessCode {
         @Test
         void shouldReturnTrueWhenApplicantHasNoAccessCodes() {
             FinremCaseData caseData = mock(FinremCaseData.class);
 
-            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+            boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
                 caseData, APPLICANT
             );
 
@@ -184,7 +184,7 @@ class AccessCodeGeneratorTest {
         void shouldReturnTrueWhenRespondentHasNoAccessCodes() {
             FinremCaseData caseData = mock(FinremCaseData.class);
 
-            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+            boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
                 caseData, RESPONDENT
             );
 
@@ -197,7 +197,7 @@ class AccessCodeGeneratorTest {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
 
-            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+            boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
                 caseData, APPLICANT
             );
 
@@ -209,7 +209,7 @@ class AccessCodeGeneratorTest {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
 
-            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+            boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
                 caseData, RESPONDENT
             );
 
@@ -228,7 +228,7 @@ class AccessCodeGeneratorTest {
                 List.of(AccessCodeCollection.builder().value(entry).build())
             );
 
-            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+            boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
                 caseData, APPLICANT
             );
 
@@ -249,7 +249,7 @@ class AccessCodeGeneratorTest {
                 List.of(AccessCodeCollection.builder().value(entry).build())
             );
 
-            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+            boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
                 caseData, RESPONDENT
             );
 
@@ -270,7 +270,7 @@ class AccessCodeGeneratorTest {
 
             when(caseData.getApplicantAccessCodes()).thenReturn(existingCodes);
 
-            boolean result = AccessCodeGenerator.needsAccessCodeForRecipient(
+            boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
                 caseData, APPLICANT
             );
 
