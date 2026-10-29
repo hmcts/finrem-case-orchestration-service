@@ -103,7 +103,7 @@ class GenerateCoverSheetServiceTest {
 
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
-        verify(citizenPinInPostService).ensurePinForRecipient(caseDetails, APPLICANT);
+        verify(citizenPinInPostService).generatePinIfNeeded(caseDetails, APPLICANT);
         verify(genericDocumentService, never()).deleteDocument(any(), eq(AUTH_TOKEN));
     }
 
@@ -158,7 +158,7 @@ class GenerateCoverSheetServiceTest {
         assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted())
             .extracting(item -> item.getValue().getBinFileUrl())
             .containsExactly(OLD_COVERSHEET_URL);
-        verify(citizenPinInPostService).ensurePinForRecipient(caseDetails, RESPONDENT);
+        verify(citizenPinInPostService).generatePinIfNeeded(caseDetails, RESPONDENT);
     }
 
     @Test

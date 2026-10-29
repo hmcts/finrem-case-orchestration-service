@@ -34,8 +34,8 @@ public class CitizenPinInPostService {
      * @param recipient the party requiring a PIN
      * @return true if a new PIN was generated, otherwise false
      */
-    public boolean ensurePinForRecipient(FinremCaseDetails caseDetails,
-                                         PaperNotificationRecipient recipient) {
+    public boolean generatePinIfNeeded(FinremCaseDetails caseDetails,
+                                       PaperNotificationRecipient recipient) {
 
         if (caseDetails.getCaseType() != CaseType.CONTESTED) {
             return false;

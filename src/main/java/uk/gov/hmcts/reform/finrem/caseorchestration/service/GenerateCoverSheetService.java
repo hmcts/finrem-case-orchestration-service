@@ -59,7 +59,7 @@ public class GenerateCoverSheetService {
     public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
 
         if (featureToggleService.isFinremCitizenUiEnabled()) {
-            citizenPinInPostService.ensurePinForRecipient(caseDetails, APPLICANT);
+            citizenPinInPostService.generatePinIfNeeded(caseDetails, APPLICANT);
         }
 
         FinremCaseData caseData = caseDetails.getData();
@@ -92,7 +92,7 @@ public class GenerateCoverSheetService {
     public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
 
         if (featureToggleService.isFinremCitizenUiEnabled()) {
-            citizenPinInPostService.ensurePinForRecipient(caseDetails, RESPONDENT);
+            citizenPinInPostService.generatePinIfNeeded(caseDetails, RESPONDENT);
         }
 
         FinremCaseData caseData = caseDetails.getData();

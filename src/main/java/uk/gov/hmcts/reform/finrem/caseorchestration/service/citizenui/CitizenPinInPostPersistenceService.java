@@ -76,7 +76,7 @@ public class CitizenPinInPostPersistenceService {
         FinremCaseDetails latestDetails =
             caseDetailsMapper.mapToFinremCaseDetails(latestCase);
 
-        if (!citizenPinInPostService.ensurePinForRecipient(
+        if (!citizenPinInPostService.generatePinIfNeeded(
             latestDetails, recipient)) {
             return Collections.emptyMap();
         }

@@ -41,7 +41,7 @@ class CitizenPinInPostServiceTest {
         when(caseDetails.getCaseType()).thenReturn(CaseType.CONTESTED);
         when(caseDetails.getData()).thenReturn(data);
 
-        boolean generated = service.ensurePinForRecipient(caseDetails, APPLICANT);
+        boolean generated = service.generatePinIfNeeded(caseDetails, APPLICANT);
 
         assertTrue(generated);
         assertEquals(1, data.getApplicantAccessCodes().size());
@@ -55,7 +55,7 @@ class CitizenPinInPostServiceTest {
         when(caseDetails.getCaseType()).thenReturn(CaseType.CONTESTED);
         when(caseDetails.getData()).thenReturn(data);
 
-        boolean generated = service.ensurePinForRecipient(caseDetails, RESPONDENT);
+        boolean generated = service.generatePinIfNeeded(caseDetails, RESPONDENT);
 
         assertTrue(generated);
         assertEquals(1, data.getRespondentAccessCodes().size());
@@ -66,7 +66,7 @@ class CitizenPinInPostServiceTest {
     void shouldNotGeneratePinForConsentedCase() {
         when(caseDetails.getCaseType()).thenReturn(CaseType.CONSENTED);
 
-        boolean generated = service.ensurePinForRecipient(caseDetails, APPLICANT);
+        boolean generated = service.generatePinIfNeeded(caseDetails, APPLICANT);
 
         assertFalse(generated);
         verify(caseDetails, never()).getData();
@@ -82,7 +82,7 @@ class CitizenPinInPostServiceTest {
         when(caseDetails.getCaseType()).thenReturn(CaseType.CONTESTED);
         when(caseDetails.getData()).thenReturn(data);
 
-        boolean generated = service.ensurePinForRecipient(caseDetails, APPLICANT);
+        boolean generated = service.generatePinIfNeeded(caseDetails, APPLICANT);
 
         assertFalse(generated);
         assertNull(data.getApplicantAccessCodes());
