@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerTwoLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.RespondentLetterAddresseeGenerator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
@@ -37,7 +36,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderNotApprovedCorresponder;
@@ -81,7 +79,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
     ConsentOrderNotApprovedCorresponder.class,
     ContestedConsentOrderApprovedCorresponder.class,
     ContestedConsentOrderNotApprovedCorresponder.class,
-    ConsentOrderAvailableCorresponder.class,
     ContestedIntermHearingCorresponder.class,
     FinremCaseDetailsMapper.class,
     DocumentHelper.class,
@@ -135,28 +132,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendConsentOrderAvailableEmail() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
-
-        verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendConsentOrderAvailableEmail() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
-
-        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
     public void sendContestedGeneralApplicationOutcomeEmail() throws IOException {
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
@@ -164,15 +139,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendGeneralApplicationOutcomeEmail(buildCallbackRequest());
 
         verify(notificationService).sendContestedGeneralApplicationOutcomeEmail(any(CaseDetails.class));
-    }
-
-    @Test
-    public void givenConsentedCase_whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CaseType.CONSENTED.getCcdType());
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-        notificationsController.sendConsentOrderAvailableEmail(callbackRequest);
-        verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
