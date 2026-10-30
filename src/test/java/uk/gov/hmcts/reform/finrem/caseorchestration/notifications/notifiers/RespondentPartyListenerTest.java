@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CoverSheetPersistenceService;
 
 import java.util.List;
 import java.util.UUID;
@@ -49,6 +50,8 @@ class RespondentPartyListenerTest {
     private InternationalPostalService internationalPostalService;
     @Mock
     private CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
+    @Mock
+    private CoverSheetPersistenceService coverSheetPersistenceService;
 
     private RespondentPartyListener respondentPartyListener;
 
@@ -90,7 +93,8 @@ class RespondentPartyListenerTest {
             .build();
 
         respondentPartyListener = new RespondentPartyListener(
-            bulkPrintService, emailService, notificationService, internationalPostalService, citizenPinInPostPersistenceService
+            bulkPrintService, emailService, notificationService, internationalPostalService,
+            citizenPinInPostPersistenceService, coverSheetPersistenceService
         );
 
         lenient().when(caseDetails.isRespondentSolicitorDigital()).thenReturn(false);

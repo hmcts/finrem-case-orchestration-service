@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -260,6 +261,48 @@ class GenerateCoverSheetServiceTest {
         assertThrows(IllegalArgumentException.class, () -> {
             generateCoverSheetService.removeIntervenerCoverSheet(caseDetails, changeDetails, AUTH_TOKEN);
         });
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "APPLICANT,     CONTESTED, true,  false, true",
+        "RESPONDENT,    CONTESTED, true,  false, true",
+        "APPLICANT,     CONTESTED, true,  true,  false",
+        "RESPONDENT,    CONTESTED, true,  true,  false",
+        "APPLICANT,     CONSENTED, true,  false, false",
+        "APPLICANT,     CONTESTED, false, false, false",
+        "INTERVENER_ONE, CONTESTED, true, false, false"
+    })
+    void shouldSelectAppropriateCoverSheetTemplate(DocumentHelper.PaperNotificationRecipient recipient,
+                                                   CaseType caseType,
+                                                   boolean cuiEnabled,
+                                                   boolean represented,
+                                                   boolean useCuiTemplate) {
+        FinremCaseData data = new FinremCaseData();
+        data.getContactDetailsWrapper().setApplicantRepresented(represented ? YesOrNo.YES : YesOrNo.NO);
+        data.getContactDetailsWrapper().setContestedRespondentRepresented(represented ? YesOrNo.YES : YesOrNo.NO);
+
+        FinremCaseDetails details = FinremCaseDetails.builder()
+            .id(1234567890123456L).caseType(caseType).data(data).build();
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(cuiEnabled);
+        String expectedTemplate = useCuiTemplate ? "cui-template.docx" : "existing-template.docx";
+
+        if (useCuiTemplate) {
+            when(documentConfiguration.getBulkPrintCitizenUiTemplate()).thenReturn(expectedTemplate);
+        } else {
+            when(documentConfiguration.getBulkPrintTemplate()).thenReturn(expectedTemplate);
+        }
+
+        switch (recipient) {
+            case APPLICANT -> generateCoverSheetService.generateApplicantCoverSheet(details, AUTH_TOKEN);
+            case RESPONDENT -> generateCoverSheetService.generateRespondentCoverSheet(details, AUTH_TOKEN);
+            default -> generateCoverSheetService.generateIntervenerCoverSheet(details, AUTH_TOKEN, recipient);
+        }
+
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            eq(AUTH_TOKEN), any(), eq(expectedTemplate), any(), eq(caseType)
+        );
     }
 
     private void setIntervenerCoverSheet(FinremCaseDetails caseDetails, IntervenerType intervenerType, CaseDocument document) {

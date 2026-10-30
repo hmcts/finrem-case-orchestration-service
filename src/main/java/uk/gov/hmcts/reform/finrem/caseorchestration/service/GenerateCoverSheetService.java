@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -45,6 +46,7 @@ public class GenerateCoverSheetService {
 
     public CaseDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         logCoverSheetGeneration(APPLICANT, caseDetails.getCaseIdAsString());
+
         return generateCoverSheet(caseDetails, authorisationToken, APPLICANT);
     }
 
@@ -246,6 +248,10 @@ public class GenerateCoverSheetService {
                                             String authorisationToken,
                                             DocumentHelper.PaperNotificationRecipient recipient) {
 
+        String template = shouldUseCitizenUiCoverSheet(caseDetails, recipient)
+            ? documentConfiguration.getBulkPrintCitizenUiTemplate()
+            : documentConfiguration.getBulkPrintTemplate();
+
         Map<String, Object> placeholdersMap = bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(
             caseDetails,
             recipient,
@@ -255,10 +261,28 @@ public class GenerateCoverSheetService {
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
             authorisationToken,
             placeholdersMap,
-            documentConfiguration.getBulkPrintTemplate(),
+            template,
             documentConfiguration.getBulkPrintFileName(),
             caseDetails.getCaseType()
         );
+    }
+
+    private boolean shouldUseCitizenUiCoverSheet(
+        FinremCaseDetails caseDetails,
+        DocumentHelper.PaperNotificationRecipient recipient) {
+
+        if (!featureToggleService.isFinremCitizenUiEnabled()
+            || caseDetails.getCaseType() != CaseType.CONTESTED) {
+            return false;
+        }
+
+        FinremCaseData caseData = caseDetails.getData();
+
+        return switch (recipient) {
+            case APPLICANT -> !caseData.isApplicantRepresentedByASolicitor();
+            case RESPONDENT -> !caseData.isRespondentRepresentedByASolicitor();
+            default -> false;
+        };
     }
 
     private void logCoverSheetGeneration(DocumentHelper.PaperNotificationRecipient recipient, String caseId) {
