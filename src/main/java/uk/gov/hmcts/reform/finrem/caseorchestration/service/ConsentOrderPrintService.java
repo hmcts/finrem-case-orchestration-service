@@ -161,6 +161,41 @@ public class ConsentOrderPrintService {
         }
     }
 
+    /**
+     * Returns the approved consent order documents to send to the parties.
+     * The latest general order is sent instead when it is newer than the approved orders,
+     * or when there are no approved orders.
+     *
+     * @param finremCaseDetails       the current case details
+     * @param finremCaseDetailsBefore the case details before the event
+     * @param authorisationToken      the authorisation token
+     * @return the order documents to send
+     */
+    public List<CaseDocument> getApprovedOrderDocumentsToSend(FinremCaseDetails finremCaseDetails,
+                                                              FinremCaseDetails finremCaseDetailsBefore,
+                                                              String authorisationToken) {
+
+        FinremCaseData caseData = finremCaseDetails.getData();
+        List<CaseDocument> orderDocuments = consentOrderApprovedDocumentService.approvedOrderDocuments(finremCaseDetails, authorisationToken);
+        CaseDocument generalOrderBefore = finremCaseDetailsBefore.getData().getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+        CaseDocument generalOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+        List<CaseDocument> documentsToSend = new ArrayList<>();
+
+        if (!isNull(generalOrder) && isNull(generalOrderBefore)) {
+            documentsToSend.add(generalOrder);
+        } else if (isNull(generalOrder) && isNull(generalOrderBefore)) {
+            documentsToSend.addAll(orderDocuments);
+        } else if (!isNull(generalOrder) && !orderDocuments.isEmpty()
+            && documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.getFirst(), authorisationToken)) {
+            documentsToSend.add(generalOrder);
+        } else if (!isNull(generalOrder) && orderDocuments.isEmpty()) {
+            documentsToSend.add(generalOrder);
+        } else {
+            documentsToSend.addAll(orderDocuments);
+        }
+        return documentsToSend;
+    }
+
     public boolean shouldPrintOrderApprovedDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
         boolean isOrderApprovedCollectionPresent = caseDataService.isOrderApprovedCollectionPresent(caseDetails.getData());
         boolean isOrderNotApprovedCollectionPresent = caseDataService.isContestedOrderNotApprovedCollectionPresent(caseDetails.getData());

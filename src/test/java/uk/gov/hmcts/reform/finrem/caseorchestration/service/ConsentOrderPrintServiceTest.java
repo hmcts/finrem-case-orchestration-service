@@ -307,6 +307,52 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             "consentOrderNotApprovedCoverLetter.pdf", "respondentCoverSheet.pdf"));
     }
 
+    @Test
+    public void givenGeneralOrderAddedInThisEvent_whenGetApprovedOrderDocumentsToSend_thenOnlyGeneralOrder() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseDetails caseDetailsBefore = defaultContestedFinremCaseDetails();
+        caseDetails.getData().getGeneralOrderWrapper()
+            .setGeneralOrderLatestDocument(caseDocument(DOC_URL, "GeneralOrder.pdf", BINARY_URL));
+        when(consentOrderApprovedDocumentService.approvedOrderDocuments(caseDetails, AUTH_TOKEN))
+            .thenReturn(List.of(caseDocument(DOC_URL, "order.pdf", BINARY_URL)));
+
+        List<CaseDocument> documents = consentOrderPrintService.getApprovedOrderDocumentsToSend(caseDetails,
+            caseDetailsBefore, AUTH_TOKEN);
+
+        assertEquals(List.of("GeneralOrder.pdf"), filenames(documents));
+    }
+
+    @Test
+    public void givenNoGeneralOrder_whenGetApprovedOrderDocumentsToSend_thenApprovedOrders() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseDetails caseDetailsBefore = defaultContestedFinremCaseDetails();
+        when(consentOrderApprovedDocumentService.approvedOrderDocuments(caseDetails, AUTH_TOKEN))
+            .thenReturn(List.of(caseDocument(DOC_URL, "order.pdf", BINARY_URL),
+                caseDocument(DOC_URL, "orderLetter.pdf", BINARY_URL)));
+
+        List<CaseDocument> documents = consentOrderPrintService.getApprovedOrderDocumentsToSend(caseDetails,
+            caseDetailsBefore, AUTH_TOKEN);
+
+        assertEquals(List.of("order.pdf", "orderLetter.pdf"), filenames(documents));
+    }
+
+    @Test
+    public void givenExistingGeneralOrderNewerThanApprovedOrders_whenGetApprovedOrderDocumentsToSend_thenOnlyGeneralOrder() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseDetails caseDetailsBefore = defaultContestedFinremCaseDetails();
+        CaseDocument generalOrder = caseDocument(DOC_URL, "GeneralOrder.pdf", BINARY_URL);
+        caseDetails.getData().getGeneralOrderWrapper().setGeneralOrderLatestDocument(generalOrder);
+        caseDetailsBefore.getData().getGeneralOrderWrapper().setGeneralOrderLatestDocument(generalOrder);
+        when(consentOrderApprovedDocumentService.approvedOrderDocuments(caseDetails, AUTH_TOKEN))
+            .thenReturn(List.of(caseDocument(DOC_URL, "order.pdf", BINARY_URL)));
+        when(documentOrderingService.isDocumentModifiedLater(eq(generalOrder), any(), eq(AUTH_TOKEN))).thenReturn(true);
+
+        List<CaseDocument> documents = consentOrderPrintService.getApprovedOrderDocumentsToSend(caseDetails,
+            caseDetailsBefore, AUTH_TOKEN);
+
+        assertEquals(List.of("GeneralOrder.pdf"), filenames(documents));
+    }
+
     private FinremCaseDetails defaultContestedFinremCaseDetails() {
         List<ConsentOrderCollection> approvedOrderCollection = new ArrayList<>();
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
@@ -344,5 +390,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             .state(State.APPLICATION_SUBMITTED)
             .data(caseData)
             .build();
+    }
+
+    private List<String> filenames(List<CaseDocument> documents) {
+        return documents.stream().map(CaseDocument::getDocumentFilename).toList();
     }
 }

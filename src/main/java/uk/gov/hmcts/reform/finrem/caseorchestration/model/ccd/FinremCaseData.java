@@ -436,6 +436,8 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private boolean respondentCorrespondenceEnabled = true;
     private List<OrderSentToPartiesCollection> ordersSentToPartiesCollection;
+    private CaseDocument consentOrderApprovedCoverLetterApp;
+    private CaseDocument consentOrderApprovedCoverLetterResp;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
