@@ -107,7 +107,8 @@ public class RespondentPartyListener extends AbstractPartyListener {
             coversheet
         );
 
-        return coversheet;    }
+        return coversheet;
+    }
 
     @Override
     protected boolean isPartyOutsideUK(SendCorrespondenceEvent event) {
