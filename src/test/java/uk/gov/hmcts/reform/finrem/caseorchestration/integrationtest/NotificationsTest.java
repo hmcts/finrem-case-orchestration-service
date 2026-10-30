@@ -47,7 +47,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -69,7 +68,6 @@ public class NotificationsTest extends BaseTest {
     @MockitoBean
     EmailService emailService;
 
-    private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
     private static final String NOTICE_OF_CHANGE_URL = "/case-orchestration/notify/notice-of-change";
 
     @Autowired
@@ -88,22 +86,6 @@ public class NotificationsTest extends BaseTest {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/consented-ccd-request-with-solicitor-agreed-to-emails.json")) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
-    }
-
-    @Test
-    public void notifyConsentOrderAvailable() throws Exception {
-        when(assignCaseAccessService.searchUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
-            .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
-            .build());
-        webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_AVAILABLE_URL)
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(content().json(expectedCaseData()));
-        Mockito.verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_AVAILABLE));
-
     }
 
     @Test
