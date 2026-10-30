@@ -66,6 +66,22 @@ properties([
 
 withPipeline(type, product, component) {
     loadVaultSecrets(secrets)
+
+    // Pre-test assertion: fail fast if Notify API key was not loaded from Key Vault.
+    afterSuccess('local') {
+        sh '''#!/usr/bin/env bash
+            set -eu
+
+            if [ -z "${UK_GOV_NOTIFY_API_KEY:-}" ]; then
+              echo "ERROR: UK_GOV_NOTIFY_API_KEY is not available in test stage environment."
+              exit 1
+            fi
+
+            echo "UK_GOV_NOTIFY_API_KEY is available (length=${#UK_GOV_NOTIFY_API_KEY})."
+        '''
+    }
+
+
     afterSuccess('checkout') {
         step ([
                 $class: 'CopyArtifact',
