@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
@@ -42,37 +41,7 @@ public class NotificationsController extends BaseController {
     private final TransferCourtService transferCourtService;
     private final NocLetterNotificationService nocLetterNotificationService;
     private final UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
-    private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
-
-    /**
-     * Sends the consent order available email to the solicitors.
-     *
-     * @param callbackRequest the callback request
-     * @return the callback response with the unchanged case data
-     * @deprecated FR_sendOrderForApproved now uses the generic submitted callback
-     *     ({@link uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderConsentForApprovedOrderSubmittedHandler}).
-     *     Remove once the updated CCD definitions are live in all environments.
-     */
-    @Deprecated(since = "27-october-2026")
-    @PostMapping(value = "/consent-order-available", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for Consent order available.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Consent order available e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderAvailableEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request to process notifications for 'Consent Order Available' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        consentOrderAvailableCorresponder.sendCorrespondence(callbackRequest.getCaseDetails());
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
+  
     @PostMapping(value = "/general-application-outcome", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send general application outcome email")
     @ApiResponses(value = {

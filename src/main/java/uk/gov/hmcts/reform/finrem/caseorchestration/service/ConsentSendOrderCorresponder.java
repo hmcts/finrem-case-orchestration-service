@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT;
@@ -46,14 +47,10 @@ public class ConsentSendOrderCorresponder {
         CaseDocument applicantCoverLetter = caseData.getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterApp();
         CaseDocument respondentCoverLetter = caseData.getConsentSendOrderWrapper().getConsentOrderApprovedCoverLetterResp();
 
-        if (applicantCoverLetter != null) {
-            applicantDocuments.add(applicantCoverLetter);
-        }
+        Optional.ofNullable(applicantCoverLetter).ifPresent(applicantDocuments::add);
         applicantDocuments.addAll(orders);
 
-        if (respondentCoverLetter != null) {
-            respondentDocuments.add(respondentCoverLetter);
-        }
+        Optional.ofNullable(respondentCoverLetter).ifPresent(respondentDocuments::add);
         respondentDocuments.addAll(orders);
 
         List<SendCorrespondenceEvent> events = new ArrayList<>();
