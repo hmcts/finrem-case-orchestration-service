@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CoverSheetPersistenceService;
 
 import static com.google.common.base.Strings.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
@@ -34,14 +35,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class RespondentPartyListener extends AbstractPartyListener {
 
     private final CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
+    private final CoverSheetPersistenceService coverSheetPersistenceService;
 
     public RespondentPartyListener(BulkPrintService bulkPrintService,
                                    EmailService emailService,
                                    NotificationService notificationService,
                                    InternationalPostalService internationalPostalService,
-                                   CitizenPinInPostPersistenceService citizenPinInPostPersistenceService) {
+                                   CitizenPinInPostPersistenceService citizenPinInPostPersistenceService,
+                                   CoverSheetPersistenceService coverSheetPersistenceService) {
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
         this.citizenPinInPostPersistenceService = citizenPinInPostPersistenceService;
+        this.coverSheetPersistenceService = coverSheetPersistenceService;
     }
 
     @Override
@@ -91,8 +95,19 @@ public class RespondentPartyListener extends AbstractPartyListener {
             event.getCaseDetails(),
             DocumentHelper.PaperNotificationRecipient.RESPONDENT
         );
-        return bulkPrintService.getRespondentCoverSheet(event.getCaseDetails(), event.authToken);
-    }
+
+        CaseDocument coversheet = bulkPrintService.getRespondentCoverSheet(
+            event.getCaseDetails(),
+            event.authToken
+        );
+
+        coverSheetPersistenceService.saveCoverSheet(
+            event.getCaseDetails(),
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT,
+            coversheet
+        );
+
+        return coversheet;    }
 
     @Override
     protected boolean isPartyOutsideUK(SendCorrespondenceEvent event) {
