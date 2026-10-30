@@ -17,12 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
@@ -45,7 +43,6 @@ public class NotificationsController extends BaseController {
     private final NocLetterNotificationService nocLetterNotificationService;
     private final UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
-    private final ConsentOrderNotApprovedSentCorresponder consentOrderNotApprovedSentCorresponder;
 
     /**
      * Sends the consent order available email to the solicitors.
@@ -92,32 +89,6 @@ public class NotificationsController extends BaseController {
         notificationService.sendContestedGeneralApplicationOutcomeEmail(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
-    }
-
-    /**
-     * Sends the consent order not approved sent email to the solicitors.
-     *
-     * @param callbackRequest the callback request
-     * @return an empty submitted callback response
-     * @deprecated FR_sendOrder now uses the generic submitted callback
-     *     (SendOrderConsentForNotApprovedOrderSubmittedHandler).
-     *     Remove once the updated CCD definitions are live in all environments.
-     */
-    @Deprecated(since = "27-october-2026")
-    @PostMapping(value = "/consent-order-not-approved-sent", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send consent order not approved sent email")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Consent order not approved sent email sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<SubmittedCallbackResponse> sendConsentOrderNotApprovedSentEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to process notifications for consent order not approved sent email for Case ID: {}", caseDetails.getId());
-        consentOrderNotApprovedSentCorresponder.sendCorrespondence(caseDetails);
-
-        return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
     }
 
     @PostMapping(value = "/transfer-to-local-court", consumes = APPLICATION_JSON_VALUE)

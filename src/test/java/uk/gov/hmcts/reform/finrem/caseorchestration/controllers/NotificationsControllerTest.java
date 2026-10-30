@@ -39,7 +39,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderNotApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedIntermHearingCorresponder;
@@ -83,7 +82,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
     ContestedConsentOrderApprovedCorresponder.class,
     ContestedConsentOrderNotApprovedCorresponder.class,
     ConsentOrderAvailableCorresponder.class,
-    ConsentOrderNotApprovedSentCorresponder.class,
     ContestedIntermHearingCorresponder.class,
     FinremCaseDetailsMapper.class,
     DocumentHelper.class,
@@ -175,28 +173,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         notificationsController.sendConsentOrderAvailableEmail(callbackRequest);
         verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void whenConsentOrderNotApprovedSentEmail_thenNotificationEmailsSentToSolicitors() {
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
-
-        verify(notificationService).sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService).sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void whenConsentOrderApprovedAndSolicitorEmailsNotEnabled_thenDoNotEmailSolicitors() {
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
-
-        notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, never()).sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(any(CaseDetails.class));
     }
 
     @Test
