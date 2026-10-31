@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.AbstractIs
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 @Slf4j
@@ -14,8 +15,9 @@ public class FeeAccountDebitedAndIssueAboutToSubmitHandler extends AbstractIssue
 
     public FeeAccountDebitedAndIssueAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                          OnlineFormDocumentService onlineFormDocumentService,
-                                                         IssueApplicationService issueApplicationService) {
-        super(finremCaseDetailsMapper, onlineFormDocumentService, issueApplicationService);
+                                                         IssueApplicationService issueApplicationService,
+                                                         AssignToJudgeCorresponder assignToJudgeCorresponder) {
+        super(finremCaseDetailsMapper, onlineFormDocumentService, issueApplicationService, assignToJudgeCorresponder);
     }
 
     @Override
