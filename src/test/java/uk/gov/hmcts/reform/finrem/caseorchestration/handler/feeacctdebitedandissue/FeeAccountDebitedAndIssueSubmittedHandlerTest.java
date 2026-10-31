@@ -9,7 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.consented.IssueApplicationConsentedSubmittedHandlerContractTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.feeacctdebitedandissue.consented.FeeAccountDebitedAndIssueSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
@@ -31,19 +32,17 @@ class FeeAccountDebitedAndIssueSubmittedHandlerTest extends IssueApplicationCons
     private RetryExecutor retryExecutor;
 
     @Mock
-    private IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
+    private AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     @Mock
     private AssignPartiesAccessService assignPartiesAccessService;
 
+    @Mock
+    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
+
     @Test
     void testCanHandle() {
         assertCanHandle(handler, SUBMITTED, CONSENTED, FEE_ACCOUNT_DEBITED_AND_ISSUE);
-    }
-
-    @Override
-    protected FinremCallbackHandler handler() {
-        return handler;
     }
 
     @Override
@@ -52,8 +51,13 @@ class FeeAccountDebitedAndIssueSubmittedHandlerTest extends IssueApplicationCons
     }
 
     @Override
-    protected IssueApplicationConsentCorresponder issueApplicationConsentCorresponder() {
-        return issueApplicationConsentCorresponder;
+    protected FinremCallbackHandler handler() {
+        return handler;
+    }
+
+    @Override
+    protected AssignToJudgeCorresponder assignToJudgeCorresponder() {
+        return assignToJudgeCorresponder;
     }
 
     @Override
@@ -61,4 +65,8 @@ class FeeAccountDebitedAndIssueSubmittedHandlerTest extends IssueApplicationCons
         return assignPartiesAccessService;
     }
 
+    @Override
+    protected CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService() {
+        return correspondenceEventAuditOrchestrationService;
+    }
 }

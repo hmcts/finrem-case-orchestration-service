@@ -48,9 +48,26 @@ public class RespondentPartyListener extends AbstractPartyListener {
         return RESPONDENT;
     }
 
+    /**
+     * Determines whether an email / paper notification should be sent to the respondent solicitor
+     * for the given correspondence event.
+     *
+     * <p><strong>Important:</strong> this method must <em>not</em> depend on an API call
+     * (e.g. the Case Assignment API) to determine the respondent's representation state.
+     * The {@code about-to-submit} callback closes the transaction and persists the case data,
+     * and the {@code submitted} callback then acts on that persisted data and calls other
+     * third-party services. The event itself may grant the respondent solicitor access to the
+     * case, which changes the respondent's digital state, so an API lookup would not reliably
+     * reflect the persisted case data. The represented flag, organisation ID, and solicitor
+     * email held in the case data are the source of truth for this decision.
+     *
+     * @param event the send correspondence event containing the case details to evaluate
+     * @return {@code true} if the respondent solicitor is digital; {@code false} otherwise
+     */
     @Override
     protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
-        return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(event.getCaseDetails());
+        FinremCaseDetails caseDetails = event.getCaseDetails();
+        return caseDetails.isRespondentSolicitorDigital();
     }
 
     @Override
