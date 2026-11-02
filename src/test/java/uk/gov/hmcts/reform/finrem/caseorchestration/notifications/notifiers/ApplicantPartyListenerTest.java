@@ -173,7 +173,7 @@ class ApplicantPartyListenerTest extends BasePartyListenerTest {
 
     @Test
     void shouldSendDigitalNotificationWhenPartyIsDigitalViaHandleNotification() {
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(caseDetails.isApplicantSolicitorDigital()).thenReturn(true);
 
         // Set up event with applicant as notification party
         applicantPartyListener.handleNotification(event);
@@ -183,7 +183,6 @@ class ApplicantPartyListenerTest extends BasePartyListenerTest {
         assertThat(event.getEmailNotificationRequest().getNotificationEmail()).isEqualTo(APPLICANT_EMAIL);
         assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(APPLICANT_REF);
 
-        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR));
     }
 
@@ -199,12 +198,11 @@ class ApplicantPartyListenerTest extends BasePartyListenerTest {
             .authToken(AUTH_TOKEN)
             .build();
 
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(caseDetails.isApplicantSolicitorDigital()).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> applicantPartyListener.handleNotification(newEvent));
 
-        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verifyNoInteractions(emailService);
 
         assertThat(exception.getMessage()).isEqualTo("Notification Request is required for digital notifications, case ID: " + CASE_ID);
@@ -247,7 +245,7 @@ class ApplicantPartyListenerTest extends BasePartyListenerTest {
             .build();
 
         // Cover sheet should be at the beginning of the documents sent for bulk print
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(caseDetails.isApplicantSolicitorDigital()).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))
