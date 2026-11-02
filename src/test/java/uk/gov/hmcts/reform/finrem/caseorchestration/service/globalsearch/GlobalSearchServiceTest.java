@@ -39,7 +39,7 @@ class GlobalSearchServiceTest {
         globalSearchService.setGlobalSearchData(caseData);
 
         assertEquals("Jane vs Doe", caseData.getCaseNameHmctsInternal());
-        assertEquals("Financial Remedy", caseData.getCaseManagementCategory().getValue().getCode());
+        assertEquals("FR Consented", caseData.getCaseManagementCategory().getValue().getCode());
         assertEquals(expectedLocation, caseData.getCaseManagementLocation());
         verify(caseManagementLocationService).getCaseLocation(caseData);
     }
@@ -82,7 +82,7 @@ class GlobalSearchServiceTest {
         globalSearchService.setGlobalSearchData(caseData);
 
         assertEquals("Financial Remedy", caseData.getCaseNameHmctsInternal());
-        assertEquals("Financial Remedy", caseData.getCaseManagementCategory().getValue().getCode());
+        assertEquals("FR Consented", caseData.getCaseManagementCategory().getValue().getCode());
         assertNull(caseData.getCaseManagementLocation());
     }
 

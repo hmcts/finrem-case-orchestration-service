@@ -18,7 +18,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Form",
+      "type": "form",
       "subtype": "FormA",
       "url": {
         "document_url": "This will be set in test",
@@ -31,7 +31,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "D81",
       "url": {
         "document_url": "This will be set in test",
@@ -44,7 +44,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "P1",
       "url": {
         "document_url": "This will be set in test",
@@ -57,7 +57,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "PPF1",
       "url": {
         "document_url": "This will be set in test",
@@ -70,7 +70,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "P2",
       "url": {
         "document_url": "This will be set in test",
@@ -83,7 +83,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "PPF2",
       "url": {
         "document_url": "This will be set in test",
@@ -96,7 +96,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "PPF",
       "url": {
         "document_url": "This will be set in test",
@@ -109,7 +109,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "FormE",
       "url": {
         "document_url": "This will be set in test",
@@ -122,7 +122,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "CoverLetter",
       "url": {
         "document_url": "This will be set in test",
@@ -135,7 +135,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "DraftConsentOrder",
       "url": {
         "document_url": "This will be set in test",
@@ -148,7 +148,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "DecreeNisi",
       "url": {
         "document_url": "This will be set in test",
@@ -161,7 +161,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "DecreeAbsolute",
       "url": {
         "document_url": "This will be set in test",
@@ -174,7 +174,7 @@
       "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
-      "type": "Other",
+      "type": "other",
       "subtype": "OtherSupportDocuments",
       "url": {
         "document_url": "This will be set in test",

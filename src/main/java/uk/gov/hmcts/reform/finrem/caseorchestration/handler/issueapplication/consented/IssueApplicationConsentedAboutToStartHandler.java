@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.issueapplication.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

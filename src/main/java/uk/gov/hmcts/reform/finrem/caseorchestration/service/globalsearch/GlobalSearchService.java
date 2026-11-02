@@ -22,9 +22,10 @@ import java.util.List;
 public class GlobalSearchService {
 
     private static final String FINANCIAL_REMEDY = "Financial Remedy";
+    private static final String FR_CONSENTED = "FR Consented";
     private final FeatureToggleService featureToggleService;
     private final CaseManagementLocationService caseManagementLocationService;
-    private final DynamicListElement element = DynamicListElement.builder().code(FINANCIAL_REMEDY).label(FINANCIAL_REMEDY).build();
+    private final DynamicListElement element = DynamicListElement.builder().code(FR_CONSENTED).label(FR_CONSENTED).build();
 
     /**
      * Sets the fields required for global search on the provided case data map.

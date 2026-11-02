@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,6 +25,8 @@ public abstract class IssueApplicationAboutToSubmitHandlerContractTest {
     protected abstract OnlineFormDocumentService onlineFormDocumentService();
 
     protected abstract IssueApplicationService issueApplicationService();
+
+    protected abstract AssignToJudgeCorresponder assignToJudgeCorresponder();
 
     protected static final String MISSING_COURT_SELECTION_ERROR = "Case cannot be issued as court selection is missing.";
 

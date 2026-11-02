@@ -18,22 +18,24 @@ public class CourtReferenceDataConfiguration {
 
     @Bean
     public Map<String, CourtRefData> courtReferenceDataByName(ObjectMapper objectMapper) throws IOException {
-
+        Map<String, CourtRefData> rawData;
         try (InputStream inputStream =
                  CourtReferenceDataConfiguration.class.getResourceAsStream(COURT_REF_DATA_FILE)) {
             if (inputStream == null) {
                 throw new IOException(
                     "Unable to load court reference data from " + COURT_REF_DATA_FILE);
             }
-            return objectMapper.readValue(
-                    inputStream,
-                    new TypeReference<Map<String, CourtRefData>>() {})
-                .entrySet()
-                .stream()
-                .collect(Collectors.toUnmodifiableMap(
-                    entry -> entry.getKey().toLowerCase(),
-                    Map.Entry::getValue
-                ));
+            rawData = objectMapper.readValue(
+                inputStream,
+                new TypeReference<>() {
+                });
         }
+
+        return rawData.entrySet()
+            .stream()
+            .collect(Collectors.toUnmodifiableMap(
+                entry -> entry.getKey().toLowerCase(),
+                Map.Entry::getValue
+            ));
     }
 }

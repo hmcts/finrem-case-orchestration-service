@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
  */
 @Slf4j
 @Component
+@Deprecated(forRemoval = true)
 public class FinremAssignToJudgeCorresponder extends AbstractAssignToJudgeCorresponder {
 
     @Autowired

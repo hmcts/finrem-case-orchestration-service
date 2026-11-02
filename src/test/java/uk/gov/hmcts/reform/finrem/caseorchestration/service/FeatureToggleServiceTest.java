@@ -88,7 +88,7 @@ public class FeatureToggleServiceTest {
         }
 
         @Test
-        void isEstimatedAssetsChecklistV3EnabledReturnsTrue() {
+        void isEstimatedAssetsChecklistV3EnabledReturnsFalse() {
             // default value is defined in src/test/resources/application.properties
             assertThat(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).isFalse();
         }
@@ -98,11 +98,17 @@ public class FeatureToggleServiceTest {
             // default value is defined in src/test/resources/application.properties
             assertThat(featureToggleService.isGlobalSearchEnabled()).isFalse();
         }
-      
+
         @Test
-        void isPaperEstimatedAssetsChecklistV3EnabledReturnsTrue() {
+        void isPaperEstimatedAssetsChecklistV3EnabledReturnsFalse() {
             // default value is defined in src/test/resources/application.properties
             assertThat(featureToggleService.isPaperEstimatedAssetsChecklistV3Enabled()).isFalse();
+        }
+
+        @Test
+        void isAlwaysGenerateCUIAccessCodesEnabledReturnsFalse() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.alwaysGenerateCUIAccessCodesEnabled()).isFalse();
         }
     }
 
@@ -144,7 +150,7 @@ public class FeatureToggleServiceTest {
         void isGlobalSearchEnabledReturnsTrue() {
             assertThat(featureToggleService.isGlobalSearchEnabled()).isTrue();
         }
-      
+
         @Test
         void isPaperEstimatedAssetsChecklistV3EnabledReturnsTrue() {
             assertThat(featureToggleService.isPaperEstimatedAssetsChecklistV3Enabled()).isTrue();
@@ -240,6 +246,21 @@ public class FeatureToggleServiceTest {
         @Test
         public void isFinremCitizenUiEnabled() {
             assertThat(featureToggleService.isFinremCitizenUiEnabled()).isFalse();
+        }
+    }
+
+    @Nested
+    @TestPropertySource(properties = {
+        "feature.toggle.always_generate_cui_access_codes_enabled=true"
+    })
+    class AlwaysGenerateCUIAccessCodesEnabledSwitchedOn {
+
+        @Autowired
+        private FeatureToggleService featureToggleService;
+
+        @Test
+        void alwaysGenerateCUIAccessCodesEnabledReturnsTrue() {
+            assertThat(featureToggleService.alwaysGenerateCUIAccessCodesEnabled()).isTrue();
         }
     }
 }

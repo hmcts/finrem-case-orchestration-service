@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ALWAYS_GENERATE_CUI_ACCESS_CODES_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASE_FILE_VIEW_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.DELETE_OLD_BP_COVERSHEET_ENABLED;
@@ -152,6 +153,9 @@ public class FeatureToggleService {
         return isFeatureEnabled(PAPER_ESTIMATED_ASSETS_CHECKLIST_V3_ENABLED);
     }
 
+    public boolean alwaysGenerateCUIAccessCodesEnabled() {
+        return isFeatureEnabled(ALWAYS_GENERATE_CUI_ACCESS_CODES_ENABLED);
+    }
 
     /**
      * Given runtime feature toggle status, returns fields that should be ignored during serialisation (i.e. not

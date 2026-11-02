@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 import uk.gov.hmcts.reform.finrem.functional.util.FunctionalTestUtils;
 import uk.gov.hmcts.reform.finrem.functional.util.ServiceUtils;
@@ -45,7 +46,10 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
 
         Map<String, String> uploadedDoc;
         try {
-            uploadedDoc = serviceUtils.uploadFileToEmStore("fileTypes/sample.pdf", "application/pdf");
+            uploadedDoc = serviceUtils.uploadFileToEmStore(
+                "fileTypes/sample.pdf",
+                "application/pdf",
+                CaseType.CONSENTED.getCcdType());
         } catch (JSONException e) {
             throw new RuntimeException("Exception uploading file to evidence store ", e);
         }
@@ -70,7 +74,10 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
 
         Map<String, String> uploadedDoc;
         try {
-            uploadedDoc = serviceUtils.uploadFileToEmStore("fileTypes/sample.pdf", "application/pdf");
+            uploadedDoc = serviceUtils.uploadFileToEmStore(
+                "fileTypes/sample.pdf",
+                "application/pdf",
+                CaseType.CONSENTED.getCcdType());
         } catch (JSONException e) {
             throw new RuntimeException("Exception uploading file to evidence store ", e);
         }

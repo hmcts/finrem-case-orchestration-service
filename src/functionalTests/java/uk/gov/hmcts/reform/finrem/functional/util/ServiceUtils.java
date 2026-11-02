@@ -29,7 +29,8 @@ public class ServiceUtils {
     @Autowired
     private FunctionalTestUtils functionalTestUtils;
 
-    public Map<String, String> uploadFileToEmStore(String fileToUpload, String fileContentType) throws JSONException {
+    public Map<String, String> uploadFileToEmStore(String fileToUpload, String fileContentType,
+                                                   String caseTypeId) throws JSONException {
         File file = null;
 
         try {
@@ -44,11 +45,16 @@ public class ServiceUtils {
 
         Response response = SerenityRest.given()
             .headers(functionalTestUtils.getHeader())
+            .header("caseTypeId", caseTypeId)
             .multiPart("file", file, fileContentType)
             .post(evidenceManagementClientBaseUrl.concat("/upload"))
             .andReturn();
-        assertEquals(HttpStatus.OK.value(), response.statusCode());
 
+        assertEquals(
+            "EM Store upload failed. Response: " + response.body().asString(),
+            HttpStatus.OK.value(),
+            response.statusCode()
+        );
         JSONArray responseJson = new JSONArray(response.body().asString());
 
         JSONObject fileUploadResponse = (JSONObject) responseJson.get(0);

@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.finrem.functional.bulkscan;
 
+import feign.FeignException;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +63,6 @@ public class CcdBulkScanIntegrationTest {
     private String bulkScanTransformationAndUpdateMicroservice;
 
     @Test
-    @Ignore
     public void givenOcrPayload_whenTransformedPayloadUploadedToCcd_thenCaseIsCreated() throws Exception {
         var formA = ResourceLoader.loadJsonToObject(FORM_A_JSON, Map.class);
         setScannedDocumentsUrls(formA);
@@ -93,11 +91,6 @@ public class CcdBulkScanIntegrationTest {
         assertThat(persistedCaseData, hasKey("divorceUploadEvidence2"));//DecreeAbsolute
     }
 
-    @After
-    public void cleanUp() {
-        idamUtils.deleteTestUsers();
-    }
-
     private String transformOcrData(String body) {
         String token = idamUtils.generateServiceTokenWithValidMicroservice(bulkScanTransformationAndUpdateMicroservice);
         Response response = SerenityRest.given()
@@ -113,7 +106,11 @@ public class CcdBulkScanIntegrationTest {
     }
 
     private void setScannedDocumentsUrls(Map<String, Object> formA) throws Exception {
-        var uploadedDoc = serviceUtils.uploadFileToEmStore("fileTypes/sample.pdf", "application/pdf");
+        var uploadedDoc = serviceUtils.uploadFileToEmStore(
+            "fileTypes/sample.pdf",
+            "application/pdf",
+            CaseType.CONSENTED.getCcdType()
+        );
         var scannedDocuments = (List)formA.get("scanned_documents");
         for (var document : scannedDocuments) {
             var url = (Map)((Map)document).get("url");
@@ -145,17 +142,25 @@ public class CcdBulkScanIntegrationTest {
             .eventToken(startEventResponse.getToken())
             .build();
 
-        CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
-            bearer.apply(userDetails.getAuthToken()),
-            serviceToken,
-            userDetails.getId(),
-            DIVORCE_JURISDICTION_ID,
-            CaseType.CONSENTED.getCcdType(),
-            true,
-            caseDataContent);
+        try {
+            CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
+                bearer.apply(userDetails.getAuthToken()),
+                serviceToken,
+                userDetails.getId(),
+                DIVORCE_JURISDICTION_ID,
+                CaseType.CONSENTED.getCcdType(),
+                true,
+                caseDataContent
+            );
 
-        log.info("Created case ID {}", caseDetails.getId());
-        return caseDetails;
+            log.info("Created case ID {}", caseDetails.getId());
+            return caseDetails;
+        } catch (FeignException e) {
+            throw new AssertionError(
+                "CCD case submission failed. Response: " + e.contentUTF8(),
+                e
+            );
+        }
     }
 
     private Function<String, String> bearer = token -> String.format("Bearer %s", token);
