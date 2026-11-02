@@ -69,7 +69,7 @@ class ApplicantPartyListenerTest extends BasePartyListenerTest {
             .documentFilename(TEST_DOC_NAME)
             .build();
 
-        caseDetails = FinremCaseDetails.builder()
+        caseDetails = spy(FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(caseData = spy(FinremCaseData.builder()
                 .ccdCaseId(CASE_ID)
@@ -80,7 +80,7 @@ class ApplicantPartyListenerTest extends BasePartyListenerTest {
                         .applicantSolicitorEmail(APPLICANT_EMAIL)
                         .solicitorReference(APPLICANT_REF)
                         .build()
-                ).build())).build();
+                ).build())).build());
 
         event = spy(SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
@@ -221,13 +221,11 @@ class ApplicantPartyListenerTest extends BasePartyListenerTest {
             .documentsToPost(List.of())
             .authToken(AUTH_TOKEN)
             .build();
-
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(caseDetails.isApplicantSolicitorDigital()).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> applicantPartyListener.handleNotification(newEvent));
 
-        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verifyNoInteractions(emailService);
 
         assertThat(exception.getMessage()).isEqualTo("Email template is required for digital notifications, case ID: " + CASE_ID);

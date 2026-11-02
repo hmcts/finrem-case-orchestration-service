@@ -64,7 +64,7 @@ class RespondentPartyListenerTest extends BasePartyListenerTest {
             .documentFilename(TEST_DOC_NAME)
             .build();
 
-        caseDetails = FinremCaseDetails.builder()
+        caseDetails = spy(FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder()
                 .contactDetailsWrapper(
@@ -74,7 +74,7 @@ class RespondentPartyListenerTest extends BasePartyListenerTest {
                         .respondentSolicitorEmail(RESPONDENT_EMAIL)
                         .respondentSolicitorReference(RESPONDENT_REF)
                         .build()
-                ).build()).build();
+                ).build()).build());
 
         event = spy(SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
@@ -146,7 +146,7 @@ class RespondentPartyListenerTest extends BasePartyListenerTest {
 
     @Test
     void shouldSendDigitalNotificationWhenPartyIsDigitalViaHandleNotification() {
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(caseDetails.isRespondentSolicitorDigital()).thenReturn(true);
 
         // Set up event with respondent as notification party
         respondentPartyListener.handleNotification(event);
@@ -156,7 +156,6 @@ class RespondentPartyListenerTest extends BasePartyListenerTest {
         assertThat(event.getEmailNotificationRequest().getNotificationEmail()).isEqualTo(RESPONDENT_EMAIL);
         assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(RESPONDENT_REF);
 
-        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR));
     }
 
@@ -176,7 +175,7 @@ class RespondentPartyListenerTest extends BasePartyListenerTest {
             .build();
 
         // Cover sheet should be at the beginning of the documents sent for bulk print
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(caseDetails.isRespondentSolicitorDigital()).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))
