@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -98,22 +98,35 @@ public class GeneralApplicationDirectionsService {
     }
 
     /**
+     * Determines whether the supplied documents should be sent via bulk print.
+     *
+     * <p>Documents are only printed when the general application "refer detail" on the case
+     * is present, i.e. not null and not empty.</p>
+     *
+     * @param caseDetails the case details containing the general application wrapper
+     * @return {@code true} if the general application refer detail is non-empty, otherwise {@code false}
+     */
+    public boolean shouldPrintSuppliedDocuments(FinremCaseDetails caseDetails) {
+        String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
+        return StringUtils.isNotEmpty(referDetail);
+    }
+
+    /**
      * Sends the supplied general application direction documents via bulk print to the relevant parties.
      *
-     * <p>Printing only happens when the general application "refer detail" is present (non-empty).
-     * When it is, the documents are always sent to the applicant and the respondent, and are additionally
-     * sent to an intervener if the refer detail identifies one (see {@link #sendIntervenerDocuments}).
+     * <p>Printing only happens when {@link #shouldPrintSuppliedDocuments(FinremCaseDetails)} returns
+     * {@code true}, i.e. the general application "refer detail" is non-empty. In that case the documents are
+     * always sent to the respondent and the applicant, and are additionally sent to an intervener when the
+     * refer detail identifies one (see {@link #sendIntervenerDocuments}).
      * When the refer detail is null or empty, no documents are sent.</p>
      *
-     * @param caseDetails         the case details containing the general application wrapper and party data
-     * @param documents           the documents to be sent via bulk print
-     * @param authorisationToken  the user's authorisation token used for the bulk print requests
+     * @param caseDetails        the case details containing the general application wrapper and party data
+     * @param documents          the documents to be sent via bulk print
+     * @param authorisationToken the user's authorisation token used for the bulk print requests
      */
     public void submitCollectionGeneralApplicationDirections(FinremCaseDetails caseDetails, List<BulkPrintDocument> documents,
                                                              String authorisationToken) {
-        String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
-        log.info("The relevant party {} for Case ID: {}", ObjectUtils.nullSafeConciseToString(referDetail), caseDetails.getId());
-        if (StringUtils.isNotEmpty(referDetail)) {
+        if (shouldPrintSuppliedDocuments(caseDetails)) {
             log.info("Sending {} document(s) to applicant via bulk print for Case ID: {}, document(s) are {}",
                 documents.size(), caseDetails.getId(),
                 documents);
@@ -124,7 +137,8 @@ public class GeneralApplicationDirectionsService {
                 documents);
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
 
-            sendIntervenerDocuments(caseDetails, authorisationToken, documents, referDetail);
+            sendIntervenerDocuments(caseDetails, authorisationToken, documents,
+                caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail());
         }
     }
 
@@ -158,18 +172,44 @@ public class GeneralApplicationDirectionsService {
         return YesOrNo.isYes(hearingRequired);
     }
 
+    /**
+     * Determines whether a notification should be sent to the given intervener, based on
+     * whether the refer detail text mentions that intervener.
+     *
+     * <p>The intervener is identified by the constant mapped to its {@link IntervenerType}
+     * (e.g. {@code INTERVENER_ONE} maps to {@code INTERVENER1}). The refer detail is searched
+     * for that identifier as-is and in lower case. Note this is a substring match, not a
+     * word-boundary match.</p>
+     *
+     * @param intervenerType the intervener to check for; must not be {@code null}
+     * @param referDetail    the free-text refer detail to search; must not be {@code null}
+     * @return {@code true} if the refer detail contains the intervener's identifier
+     *         (original or lower case), otherwise {@code false}
+     * @throws NullPointerException if {@code intervenerType} or {@code referDetail} is {@code null}
+     */
+    public boolean shouldSendToIntervener(IntervenerType intervenerType, String referDetail) {
+        String identifier = switch (intervenerType) {
+            case INTERVENER_ONE -> INTERVENER1;
+            case INTERVENER_TWO -> INTERVENER2;
+            case INTERVENER_THREE -> INTERVENER3;
+            case INTERVENER_FOUR -> INTERVENER4;
+        };
+
+        return referDetail.contains(identifier.toLowerCase()) || referDetail.contains(identifier);
+    }
+
     private void sendIntervenerDocuments(FinremCaseDetails caseDetails, String authorisationToken,
                                          List<BulkPrintDocument> documents, String referDetail) {
-        if (referDetail.contains(INTERVENER1.toLowerCase()) || referDetail.contains(INTERVENER1)) {
+        if (shouldSendToIntervener(IntervenerType.INTERVENER_ONE, referDetail)) {
             IntervenerOne intervenerWrapper = caseDetails.getData().getIntervenerOne();
             sendToBulkPrintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
-        } else if (referDetail.contains(INTERVENER2.toLowerCase()) || referDetail.contains(INTERVENER2)) {
+        } else if (shouldSendToIntervener(IntervenerType.INTERVENER_TWO, referDetail)) {
             IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerTwo();
             sendToBulkPrintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
-        } else if (referDetail.contains(INTERVENER3.toLowerCase()) || referDetail.contains(INTERVENER3)) {
+        } else if (shouldSendToIntervener(IntervenerType.INTERVENER_THREE, referDetail)) {
             IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerThree();
             sendToBulkPrintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
-        } else if (referDetail.contains(INTERVENER4.toLowerCase()) || referDetail.contains(INTERVENER4)) {
+        } else if (shouldSendToIntervener(IntervenerType.INTERVENER_FOUR, referDetail)) {
             IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerFour();
             sendToBulkPrintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
         }

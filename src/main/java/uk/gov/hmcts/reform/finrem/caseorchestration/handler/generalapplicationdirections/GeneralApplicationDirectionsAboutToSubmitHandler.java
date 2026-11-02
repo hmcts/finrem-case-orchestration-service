@@ -48,10 +48,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.ADD_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_TWO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isApplicantAddressRequired;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerFourAddressRequired;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerOneAddressRequired;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerThreeAddressRequired;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerTwoAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isRespondentAddressRequired;
 
 @Slf4j
 @Service
@@ -108,7 +114,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
 
         boolean isHearingRequired = isHearingRequired(caseDetails);
         performAddHearingIfNecessary(caseDetails, isHearingRequired, userAuthorisation);
-        // hearing id would be added in the above method  if hearing required
+        // hearing id would be added in the above method if hearing required
 
         List<BulkPrintDocument> documents = new ArrayList<>();
         List<GeneralApplicationCollectionData> existingList = generalApplicationHelper.getGeneralApplicationList(caseData,
@@ -120,15 +126,16 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             updateApplications(caseDetails, documents, userAuthorisation, isHearingRequired);
         }
 
-        // Validate missing applicant and respondent addresses regardless of whether a hearing is required.
         List<String> errors = validateMissingPostalAddresses(callbackRequest, userAuthorisation, isHearingRequired);
         if (!errors.isEmpty()) {
             return responseWithoutWarnings(caseData, errors);
         }
         try {
-            // It's going to print the document that it requires applicant and respondent addresses
-            // Therefore, validation on applicant and respondent addresses is required
-            // regardless of whether a hearing is required.
+            // It's going to print the document that it requires
+            // - applicant (or its solicitor) address
+            // - respondent (or its solicitor) address
+            // - intervener (1-4) address
+            // however, it depends on the generalApplicationDirectionsService.shouldPrintSuppliedDocuments
             generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);
         } catch (InvalidCaseDataException invalidCaseDataException) {
             errors.add(invalidCaseDataException.getMessage());
@@ -327,12 +334,26 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
     }
 
     private List<String> validateMissingPostalAddresses(FinremCallbackRequest callbackRequest,
-                                                        String userAuthorisation,
-                                                        boolean isHearingRequired) {
+                                                        String userAuthorisation, boolean isHearingRequired) {
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
-        // Check whether the applicant's and respondent's addresses are missing to ensure the subsequent print action can proceed.
-        List<String> errors = validateRequiredPostalAddresses(finremCaseData, getEventType());
-        if (isHearingRequired) {
+
+        List<String> errors = new ArrayList<>();
+
+        if (generalApplicationDirectionsService.shouldPrintSuppliedDocuments(finremCaseDetails)) {
+            errors.addAll(validateRequiredPostalAddresses(finremCaseData, getEventType(), true, true));
+
+            String referDetail = finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
+            errors.addAll(validateRequiredIntervenersPostalAddresses(finremCaseData, getEventType(),
+                partyService.isIntervenerOneActive(finremCaseData)
+                    && generalApplicationDirectionsService.shouldSendToIntervener(INTERVENER_ONE, referDetail),
+                partyService.isIntervenerTwoActive(finremCaseData)
+                    && generalApplicationDirectionsService.shouldSendToIntervener(INTERVENER_TWO, referDetail),
+                partyService.isIntervenerThreeActive(finremCaseData)
+                    && generalApplicationDirectionsService.shouldSendToIntervener(INTERVENER_THREE, referDetail),
+                partyService.isIntervenerFourActive(finremCaseData)
+                    && generalApplicationDirectionsService.shouldSendToIntervener(INTERVENER_FOUR, referDetail)));
+        } else if (isHearingRequired) {
             List<SendCorrespondenceEvent> simulatedEvents = manageHearingsCorresponder
                 .buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
             simulatedEvents.forEach(event -> {
@@ -346,11 +367,15 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
     }
 
     private List<String> validateMissingPostalAddresses(FinremCaseData finremCaseData, List<SendCorrespondenceEvent> sendCorrespondenceEvents) {
-        return validateRequiredIntervenersPostalAddresses(finremCaseData, getEventType(),
+        List<String> errors = validateRequiredPostalAddresses(finremCaseData, getEventType(),
+            isApplicantAddressRequired(sendCorrespondenceEvents),
+            isRespondentAddressRequired(sendCorrespondenceEvents));
+        errors.addAll(validateRequiredIntervenersPostalAddresses(finremCaseData, getEventType(),
             partyService.isIntervenerOneActive(finremCaseData) && isIntervenerOneAddressRequired(sendCorrespondenceEvents),
             partyService.isIntervenerTwoActive(finremCaseData) && isIntervenerTwoAddressRequired(sendCorrespondenceEvents),
             partyService.isIntervenerThreeActive(finremCaseData) && isIntervenerThreeAddressRequired(sendCorrespondenceEvents),
-            partyService.isIntervenerFourActive(finremCaseData) && isIntervenerFourAddressRequired(sendCorrespondenceEvents));
+            partyService.isIntervenerFourActive(finremCaseData) && isIntervenerFourAddressRequired(sendCorrespondenceEvents)));
+        return errors;
     }
 
     private boolean isHearingRequired(FinremCaseDetails finremCaseDetails) {
