@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -153,6 +154,8 @@ class ApplicantPartyListenerTest {
         CaseDocument result = applicantPartyListener.getPartyCoversheet(event);
         assertThat(result).isEqualTo(coverSheet);
         verify(bulkPrintService).getApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(coverSheetPersistenceService).saveCoverSheet(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT, coverSheet);
     }
 
     /**
@@ -271,6 +274,8 @@ class ApplicantPartyListenerTest {
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
             caseDetails, APPLICANT, List.of(bulkPrintCoverSheet, bulkPrintDocument1), false, AUTH_TOKEN
         );
+        verify(coverSheetPersistenceService).saveCoverSheet(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT, coverSheet);
     }
 
     /**
