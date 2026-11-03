@@ -142,6 +142,8 @@ class ManageHearingFormCLetterDetailsMapperTest {
         // Assert
         FormCLetterDetails formCLetterDetails = (FormCLetterDetails) result;
         assertThat(formCLetterDetails.getCaseNumber()).isEqualTo(CASE_ID);
+        assertThat(formCLetterDetails.getHyphenatedCaseNumber()).isEqualTo(CASE_ID);
+        assertThat(formCLetterDetails.getCitizenLoginUrl()).isEqualTo("https://www.manage-financial-remedy.service.gov.uk");
         assertThat(formCLetterDetails.getApplicantFmName()).isEqualTo("John");
         assertThat(formCLetterDetails.getApplicantLName()).isEqualTo("Doe");
         assertThat(formCLetterDetails.getRespondentFmName()).isEqualTo("Jane");

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +48,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -61,7 +63,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -89,8 +93,19 @@ class ManageHearingsCorresponderTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private CitizenPinInPostService citizenPinInPostService;
+
     @InjectMocks
     private ManageHearingsCorresponder corresponder;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(citizenPinInPostService.findAccessCodeForRecipient(
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any()
+        )).thenReturn(Optional.empty());
+    }
 
     @Test
     void givenHearingSelectedNoNotification_whenSendHearingCorrespondence_thenNoNotificationSent() {
@@ -120,6 +135,9 @@ class ManageHearingsCorresponderTest {
         Hearing hearing = Hearing.builder()
             .hearingNoticePrompt(YesOrNo.YES)
             .hearingType(null)
+            .partiesOnCase(List.of(PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder().role(CaseRole.APP_SOLICITOR.getCcdCode()).build())
+                .build()))
             .build();
 
         ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
@@ -143,6 +161,9 @@ class ManageHearingsCorresponderTest {
             .hearingNoticePrompt(YesOrNo.YES)
             .hearingType(FDA)
             .hearingDate(null)
+            .partiesOnCase(List.of(PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder().role(CaseRole.APP_SOLICITOR.getCcdCode()).build())
+                .build()))
             .build();
 
         ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
@@ -168,6 +189,9 @@ class ManageHearingsCorresponderTest {
             .wasVacOrAdjNoticeSent(YesOrNo.YES)
             .hearingDate(LocalDate.now())
             .hearingTime(null)
+            .partiesOnCase(List.of(PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder().role(CaseRole.APP_SOLICITOR.getCcdCode()).build())
+                .build()))
             .build();
 
         ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
@@ -184,7 +208,7 @@ class ManageHearingsCorresponderTest {
 
         //Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-            corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN));
+            corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN));
 
         assertTrue(exception.getMessage().contains("Hearing time must not be null"));
     }
@@ -236,6 +260,11 @@ class ManageHearingsCorresponderTest {
                 .builder()
                 .applicantLname("Frodo")
                 .respondentLname("Gollum")
+                .applicantRepresented(YesOrNo.YES)
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .build())
+            .listForHearingWrapper(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper.builder()
+                .formC(caseDocument("Form-C.pdf"))
                 .build())
             .manageHearingsWrapper(ManageHearingsWrapper
                 .builder()
@@ -267,30 +296,34 @@ class ManageHearingsCorresponderTest {
 
         // Assert
         ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-        verify(eventPublisher).publishEvent(captor.capture());
+        verify(eventPublisher, times(6)).publishEvent(captor.capture());
 
-        SendCorrespondenceEvent actualEvent = captor.getValue();
         SendCorrespondenceEvent expectedEvent = getExpectedHearingEvent(callbackRequest.getCaseDetails());
 
-        assertThat(actualEvent.getEmailNotificationRequest())
-            .usingRecursiveComparison()
-            .isEqualTo(expectedEvent.getEmailNotificationRequest());
+        assertThat(captor.getAllValues()).allSatisfy(actualEvent -> {
+            assertThat(actualEvent.getEmailNotificationRequest())
+                .usingRecursiveComparison()
+                .isEqualTo(expectedEvent.getEmailNotificationRequest());
 
-        assertThat(actualEvent.getEmailTemplate())
-            .isEqualTo(expectedEvent.getEmailTemplate());
+            assertThat(actualEvent.getEmailTemplate())
+                .isEqualTo(expectedEvent.getEmailTemplate());
 
-        assertThat(actualEvent.getNotificationParties())
+            assertThat(actualEvent.getDocumentsToPost())
+                .containsExactlyInAnyOrderElementsOf(expectedEvent.getDocumentsToPost());
+
+            assertThat(actualEvent.getCaseDetails())
+                .usingRecursiveComparison()
+                .isEqualTo(expectedEvent.getCaseDetails());
+
+            assertThat(actualEvent.getAuthToken())
+                .isEqualTo(expectedEvent.getAuthToken());
+
+            assertThat(actualEvent.getNotificationParties()).hasSize(1);
+        });
+
+        assertThat(captor.getAllValues())
+            .flatExtracting(SendCorrespondenceEvent::getNotificationParties)
             .containsExactlyInAnyOrderElementsOf(expectedEvent.getNotificationParties());
-
-        assertThat(actualEvent.getDocumentsToPost())
-            .containsExactlyInAnyOrderElementsOf(expectedEvent.getDocumentsToPost());
-
-        assertThat(actualEvent.getCaseDetails())
-            .usingRecursiveComparison()
-            .isEqualTo(expectedEvent.getCaseDetails());
-
-        assertThat(actualEvent.getAuthToken())
-            .isEqualTo(expectedEvent.getAuthToken());
     }
 
     @Test
@@ -311,8 +344,8 @@ class ManageHearingsCorresponderTest {
             .thenReturn(vacatedOrAdjournedHearing);
 
         //Act
-        assertThat(corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN))
-            .isNull();
+        assertThat(corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN))
+            .isEmpty();
     }
 
     @Test
@@ -336,30 +369,36 @@ class ManageHearingsCorresponderTest {
         );
 
         //Act
-        SendCorrespondenceEvent actualEvent = corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
+        List<SendCorrespondenceEvent> actualEvents =
+            corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN);
 
         // Assert
         SendCorrespondenceEvent expectedEvent = getExpectedVacatedOrAdjournedHearingEvent(callbackRequest.getCaseDetails());
 
-        assertThat(actualEvent.getEmailNotificationRequest())
-            .usingRecursiveComparison()
-            .isEqualTo(expectedEvent.getEmailNotificationRequest());
+        assertThat(actualEvents).hasSize(6);
+        assertThat(actualEvents).allSatisfy(actualEvent -> {
+            assertThat(actualEvent.getEmailNotificationRequest())
+                .usingRecursiveComparison()
+                .isEqualTo(expectedEvent.getEmailNotificationRequest());
 
-        assertThat(actualEvent.getEmailTemplate())
-            .isEqualTo(expectedEvent.getEmailTemplate());
+            assertThat(actualEvent.getEmailTemplate())
+                .isEqualTo(expectedEvent.getEmailTemplate());
 
-        assertThat(actualEvent.getNotificationParties())
+            assertThat(actualEvent.getDocumentsToPost())
+                .containsExactlyInAnyOrderElementsOf(expectedEvent.getDocumentsToPost());
+
+            assertThat(actualEvent.getCaseDetails())
+                .usingRecursiveComparison()
+                .isEqualTo(expectedEvent.getCaseDetails());
+
+            assertThat(actualEvent.getAuthToken())
+                .isEqualTo(expectedEvent.getAuthToken());
+
+            assertThat(actualEvent.getNotificationParties()).hasSize(1);
+        });
+        assertThat(actualEvents)
+            .flatExtracting(SendCorrespondenceEvent::getNotificationParties)
             .containsExactlyInAnyOrderElementsOf(expectedEvent.getNotificationParties());
-
-        assertThat(actualEvent.getDocumentsToPost())
-            .containsExactlyInAnyOrderElementsOf(expectedEvent.getDocumentsToPost());
-
-        assertThat(actualEvent.getCaseDetails())
-            .usingRecursiveComparison()
-            .isEqualTo(expectedEvent.getCaseDetails());
-
-        assertThat(actualEvent.getAuthToken())
-            .isEqualTo(expectedEvent.getAuthToken());
     }
 
     @Test
@@ -377,10 +416,12 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.getVacateHearingNotice(callbackRequest.getCaseDetails().getData())).thenReturn(
             CaseDocument.builder().documentFilename("VacateHearingNotice.pdf").build());
 
-        SendCorrespondenceEvent actualEvent = corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
+        List<SendCorrespondenceEvent> actualEvents =
+            corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN);
 
-        assertThat(actualEvent.getEmailTemplate())
-            .isEqualTo(EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR);
+        assertThat(actualEvents)
+            .extracting(SendCorrespondenceEvent::getEmailTemplate)
+            .containsOnly(EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR);
     }
 
     @Nested
@@ -517,7 +558,7 @@ class ManageHearingsCorresponderTest {
             }
         }
 
-        static Stream<Arguments> shouldReturnMultipleEventWithNotificationParties_whenMultiplePartiesOnCaseSelected() {
+        static Stream<Arguments> shouldReturnHearingCorrespondenceEventsList_whenMultiplePartiesOnCaseSelected() {
             return Stream.of(
                 Arguments.of(
                     List.of(
@@ -540,7 +581,7 @@ class ManageHearingsCorresponderTest {
 
         @ParameterizedTest
         @MethodSource
-        void shouldReturnMultipleEventWithNotificationParties_whenMultiplePartiesOnCaseSelected(
+        void shouldReturnHearingCorrespondenceEventsList_whenMultiplePartiesOnCaseSelected(
             List<PartyOnCaseCollectionItem> partiesOnCases, List<NotificationParty> expectedNotificationParties
         ) {
             FinremCallbackRequest callback = FinremCallbackRequestFactory.from(

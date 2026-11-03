@@ -13,9 +13,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.FormCLetterDetails;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @Component
 public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
+
+    private static final String CITIZEN_LOGIN_URL = "https://www.manage-financial-remedy.service.gov.uk";
 
     public ManageHearingFormCLetterDetailsMapper(CourtDetailsConfiguration courtDetailsConfiguration,
                                                  ObjectMapper objectMapper) {
@@ -24,6 +27,10 @@ public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearing
 
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails) {
+        return buildDocumentTemplateDetails(caseDetails, null);
+    }
+
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, String accessCode) {
         FinremCaseData caseData = caseDetails.getData();
         Hearing hearing = getWorkingHearing(caseData);
         ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
@@ -36,6 +43,8 @@ public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearing
 
         return FormCLetterDetails.builder()
             .caseNumber(caseDetails.getCaseIdAsString())
+            .hyphenatedCaseNumber(toHyphenatedCaseNumber(caseDetails.getCaseIdAsString()))
+            .citizenLoginUrl(CITIZEN_LOGIN_URL)
             .courtDetails(courtTemplateFields)
             .applicantFmName(contactDetails.getApplicantFmName())
             .applicantLName(contactDetails.getApplicantLname())
@@ -58,6 +67,24 @@ public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearing
             .eventDatePlus21Days(String.valueOf(formCCreatedDate.plusDays(21)))
             .typeOfApplication(getSchedule1OrMatrimonial(caseData))
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
+            .accessCode(accessCode)
             .build();
+    }
+
+    public Map<String, Object> getDocumentTemplateDetailsAsMap(FinremCaseDetails caseDetails, String accessCode) {
+        return buildCaseDetailsMap(caseDetails, buildDocumentTemplateDetails(caseDetails, accessCode));
+    }
+
+    private String toHyphenatedCaseNumber(String caseIdAsString) {
+        if (caseIdAsString == null || caseIdAsString.length() != 16) {
+            return caseIdAsString;
+        }
+
+        return "%s-%s-%s-%s".formatted(
+            caseIdAsString.substring(0, 4),
+            caseIdAsString.substring(4, 8),
+            caseIdAsString.substring(8, 12),
+            caseIdAsString.substring(12, 16)
+        );
     }
 }

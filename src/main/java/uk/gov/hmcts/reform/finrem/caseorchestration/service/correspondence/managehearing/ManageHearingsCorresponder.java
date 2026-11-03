@@ -24,13 +24,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
@@ -43,6 +47,7 @@ public class ManageHearingsCorresponder {
 
     private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final CitizenPinInPostService citizenPinInPostService;
 
     /**
      * Collect associated new hearing information and send hearing notification to the solicitor through
@@ -52,10 +57,20 @@ public class ManageHearingsCorresponder {
      * @param userAuthorisation the authorization token of the user initiating this action
      */
     public void sendHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        SendCorrespondenceEvent event = buildHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation);
-        if (event != null) {
-            applicationEventPublisher.publishEvent(event);
-        }
+        List<SendCorrespondenceEvent> events = buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
+        events.forEach(applicationEventPublisher::publishEvent);
+    }
+
+    public List<SendCorrespondenceEvent> buildCorrespondenceEventsIfNeeded(ManageHearingsAction actionSelection,
+                                                                            FinremCallbackRequest callbackRequest,
+                                                                            String userAuthorisation) {
+        return switch (actionSelection) {
+            case ADD_HEARING -> buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
+            case ADJOURN_OR_VACATE_HEARING -> buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(
+                callbackRequest,
+                userAuthorisation
+            );
+        };
     }
 
     /**
@@ -109,7 +124,7 @@ public class ManageHearingsCorresponder {
      *         or an empty list if no notification is required
      */
     public List<SendCorrespondenceEvent> buildHearingCorrespondenceEventsIfNeeded(FinremCallbackRequest callbackRequest,
-                                                                                  String userAuthorisation) {
+                                                                                    String userAuthorisation) {
         HearingCorrespondenceContext context = prepareHearingCorrespondenceContext(callbackRequest);
         if (isNull(context)) {
             return List.of();
@@ -191,17 +206,18 @@ public class ManageHearingsCorresponder {
      * @return a {@link SendCorrespondenceEvent} containing the hearing notification details,
      *         or {@code null} if notification should not be sent
      */
-    public SendCorrespondenceEvent buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(FinremCallbackRequest callbackRequest,
-                                                                                             String userAuthorisation) {
+    public List<SendCorrespondenceEvent> buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(FinremCallbackRequest callbackRequest,
+                                                                                                       String userAuthorisation) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         ManageHearingsWrapper wrapper = finremCaseData.getManageHearingsWrapper();
 
         boolean isVacatedAndRelistedHearing = hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseData);
+        List<SendCorrespondenceEvent> correspondenceEvents = new ArrayList<>();
 
         if (isVacatedAndRelistedHearing) {
-            sendHearingCorrespondence(callbackRequest, userAuthorisation);
+            correspondenceEvents.addAll(buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation));
         }
 
         VacateOrAdjournedHearing vacateOrAdjournedHearing = hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(
@@ -209,7 +225,7 @@ public class ManageHearingsCorresponder {
 
         // Always send vacate hearing notice when relisted, as user cannot select to send or not in this scenario
         if (shouldNotSendVacateOrAdjournNotification(isVacatedAndRelistedHearing, vacateOrAdjournedHearing)) {
-            return null;
+            return correspondenceEvents;
         }
 
         VacateOrAdjournAction action = vacateOrAdjournedHearing.getHearingStatus();
@@ -220,14 +236,16 @@ public class ManageHearingsCorresponder {
             ? FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR
             : FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
 
-        return buildSendCorrespondenceEvent(
+        correspondenceEvents.addAll(buildSendCorrespondenceEvents(
             finremCaseDetails,
             vacateOrAdjournedHearing,
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
             userAuthorisation,
             documentsToPost,
             templateName
-        );
+        ));
+
+        return correspondenceEvents;
     }
 
     /**
@@ -322,18 +340,6 @@ public class ManageHearingsCorresponder {
             .build();
     }
 
-    /**
-     * Builds one {@link SendCorrespondenceEvent} per party on the case, so each party's
-     * correspondence can be sent/tracked independently rather than combined into one event.
-     *
-     * @param caseDetails       the case the correspondence relates to
-     * @param hearing           the hearing whose parties should be notified
-     * @param action            the hearing management action that triggered this correspondence
-     * @param userAuthorisation the calling user's auth token
-     * @param documentsToPost   documents to be sent by post
-     * @param templateName      the email template to use
-     * @return one event per party on the case
-     */
     private List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(FinremCaseDetails caseDetails,
                                                                         HearingLike hearing,
                                                                         ManageHearingsAction action,
@@ -341,10 +347,60 @@ public class ManageHearingsCorresponder {
                                                                         List<CaseDocument> documentsToPost,
                                                                         EmailTemplateNames templateName) {
         return partiesOnCase(hearing).stream()
-            .map(party -> baseEventBuilder(caseDetails, hearing, action, userAuthorisation, documentsToPost, templateName)
-                .notificationParties(List.of(getNotificationPartyFromRole(party.getValue().getRole())))
+            .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
+            .filter(Objects::nonNull)
+            .map(notificationParty -> baseEventBuilder(
+                caseDetails,
+                hearing,
+                action,
+                userAuthorisation,
+                getDocumentsToPostForNotificationParty(caseDetails, documentsToPost, notificationParty),
+                templateName)
+                .notificationParties(List.of(notificationParty))
                 .build())
             .toList();
+    }
+
+    private List<CaseDocument> getDocumentsToPostForNotificationParty(FinremCaseDetails caseDetails,
+                                                                      List<CaseDocument> documentsToPost,
+                                                                      NotificationParty party) {
+        FinremCaseData caseData = caseDetails.getData();
+        CaseDocument defaultFormC = caseData.getListForHearingWrapper().getFormC();
+
+        boolean isApplicantOrRespondent =
+            NotificationParty.APPLICANT.equals(party) || NotificationParty.RESPONDENT.equals(party);
+        if (!isApplicantOrRespondent) {
+            return documentsToPost;
+        }
+
+        return documentsToPost.stream()
+            .map(doc -> Objects.equals(doc, defaultFormC) ? getFormCForRecipient(caseData, party) : doc)
+            .toList();
+    }
+
+    private CaseDocument getFormCForRecipient(FinremCaseData caseData, NotificationParty recipient) {
+        if (NotificationParty.APPLICANT.equals(recipient)
+            && !caseData.isApplicantRepresentedByASolicitor()
+            && hasAccessCodeForRecipient(caseData, APPLICANT)) {
+            return Optional.ofNullable(caseData.getListForHearingWrapper().getFormCApplicantCitizen())
+                .orElse(caseData.getListForHearingWrapper().getFormC());
+        }
+
+        if (NotificationParty.RESPONDENT.equals(recipient)
+            && !caseData.isRespondentRepresentedByASolicitor()
+            && hasAccessCodeForRecipient(caseData, RESPONDENT)) {
+            return Optional.ofNullable(caseData.getListForHearingWrapper().getFormCRespondentCitizen())
+                .orElse(caseData.getListForHearingWrapper().getFormC());
+        }
+
+        return caseData.getListForHearingWrapper().getFormC();
+    }
+
+    private boolean hasAccessCodeForRecipient(
+        FinremCaseData caseData,
+        uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient recipient
+    ) {
+        return citizenPinInPostService.findAccessCodeForRecipient(caseData, recipient).isPresent();
     }
 
     /**
@@ -383,33 +439,6 @@ public class ManageHearingsCorresponder {
      */
     private List<PartyOnCaseCollectionItem> partiesOnCase(HearingLike hearing) {
         return Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
-    }
-
-    /**
-     * Builds a correspondence event for the selected manage hearings action, if correspondence is required.
-     *
-     * <p>This method routes the selected action to the appropriate correspondence builder.
-     * Add hearing actions use the hearing correspondence builder, while adjourn or vacate
-     * actions use the adjourned or vacated hearing correspondence builder.</p>
-     *
-     * @param actionSelection   the manage hearings action selected by the user
-     * @param callbackRequest   the callback request containing the case details and hearing data
-     * @param userAuthorisation the authorisation token used when building correspondence
-     * @return a {@link SendCorrespondenceEvent}, or {@code null} if no correspondence is required
-     */
-    public SendCorrespondenceEvent buildCorrespondenceEventIfNeeded(ManageHearingsAction actionSelection,
-                                                                    FinremCallbackRequest callbackRequest,
-                                                                    String userAuthorisation) {
-        return switch (actionSelection) {
-            case ADD_HEARING -> buildHearingCorrespondenceEventIfNeeded(
-                callbackRequest,
-                userAuthorisation
-            );
-            case ADJOURN_OR_VACATE_HEARING -> buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(
-                callbackRequest,
-                userAuthorisation
-            );
-        };
     }
 
     private boolean shouldNotSendVacateOrAdjournNotification(boolean isVacatedAndRelistedHearing,

@@ -24,7 +24,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.ArrayList;
@@ -63,6 +65,7 @@ public class ManageHearingActionService {
     private final ManageHearingsDocumentService manageHearingsDocumentService;
     private final ExpressCaseService expressCaseService;
     private final HearingTabDataMapper hearingTabDataMapper;
+    private final FeatureToggleService featureToggleService;
 
     private record DocumentRecord(CaseDocument caseDocument, CaseDocumentType caseDocumentType) {
     }
@@ -415,12 +418,30 @@ public class ManageHearingActionService {
     }
 
     private void generateFormC(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
-        CaseDocumentType formCType = manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails).getLeft();
+        ManageHearingsDocumentService.FormCTemplateSelection formCTemplates =
+            manageHearingsDocumentService.determineFormCTemplates(finremCaseDetails);
+        ListForHearingWrapper listForHearingWrapper = finremCaseDetails.getData().getListForHearingWrapper();
+
+        CaseDocument standardFormC = manageHearingsDocumentService.generateFormC(finremCaseDetails, authToken);
+        listForHearingWrapper.setFormC(standardFormC);
+
+        if (featureToggleService.isFinremCitizenUiEnabled()) {
+            listForHearingWrapper.setFormCApplicantCitizen(
+                manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails, authToken)
+            );
+            listForHearingWrapper.setFormCRespondentCitizen(
+                manageHearingsDocumentService.generateRespondentCitizenFormC(finremCaseDetails, authToken)
+            );
+        } else {
+            listForHearingWrapper.setFormCApplicantCitizen(null);
+            listForHearingWrapper.setFormCRespondentCitizen(null);
+        }
+
         documentMap.put(
             FORM_C,
             new DocumentRecord(
-                manageHearingsDocumentService.generateFormC(finremCaseDetails, authToken),
-                formCType
+                standardFormC,
+                formCTemplates.standardType()
             )
         );
     }

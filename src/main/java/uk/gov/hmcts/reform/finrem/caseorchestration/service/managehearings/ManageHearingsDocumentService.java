@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
@@ -19,11 +19,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Vac
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
@@ -35,6 +37,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 // Service for managing hearing-related document generation.
 public class ManageHearingsDocumentService {
 
+    public record FormCTemplateSelection(CaseDocumentType standardType,
+                                         String defaultTemplate,
+                                         String citizenTemplate) {
+    }
+
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final HearingNoticeLetterDetailsMapper hearingNoticeLetterDetailsMapper;
@@ -42,6 +49,7 @@ public class ManageHearingsDocumentService {
     private final ManageHearingFormCLetterDetailsMapper manageHearingFormCLetterDetailsMapper;
     private final ManageHearingFormGLetterDetailsMapper formGLetterDetailsMapper;
     private final ExpressCaseService expressCaseService;
+    private final CitizenPinInPostService citizenPinInPostService;
     private final StaticHearingDocumentService staticHearingDocumentService;
 
     /**
@@ -105,18 +113,51 @@ public class ManageHearingsDocumentService {
      * @param authorisationToken the token for document generation
      * @return the generated Form C document as a {@link CaseDocument}
      */
-    public CaseDocument generateFormC(FinremCaseDetails finremCaseDetails,
-                                      String authorisationToken) {
+    public CaseDocument generateFormC(FinremCaseDetails finremCaseDetails, String authorisationToken) {
+        String defaultFormCTemplate = determineFormCTemplates(finremCaseDetails).defaultTemplate();
 
-        Map<String, Object> documentDataMap = manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
+        return generateFormC(finremCaseDetails, authorisationToken, defaultFormCTemplate, null);
+    }
+
+    private CaseDocument generateFormC(FinremCaseDetails finremCaseDetails,
+                                       String authorisationToken,
+                                       String template,
+                                       String accessCode) {
+
+        Map<String, Object> documentDataMap = manageHearingFormCLetterDetailsMapper
+            .getDocumentTemplateDetailsAsMap(finremCaseDetails, accessCode);
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
             authorisationToken,
             documentDataMap,
-            determineFormCTemplate(finremCaseDetails).getRight(),
+            template,
             documentConfiguration.getFormCFileName(),
             finremCaseDetails.getCaseType()
         );
+    }
+
+    public CaseDocument generateApplicantCitizenFormC(FinremCaseDetails finremCaseDetails, String authorisationToken) {
+        return generateCitizenFormC(PaperNotificationRecipient.APPLICANT, finremCaseDetails, authorisationToken);
+    }
+
+    public CaseDocument generateRespondentCitizenFormC(FinremCaseDetails finremCaseDetails, String authorisationToken) {
+        return generateCitizenFormC(PaperNotificationRecipient.RESPONDENT, finremCaseDetails, authorisationToken);
+    }
+
+    private CaseDocument generateCitizenFormC(PaperNotificationRecipient recipient, FinremCaseDetails finremCaseDetails, String authorisationToken) {
+        citizenPinInPostService.generatePinIfNeeded(finremCaseDetails, recipient);
+
+        Optional<String> accessCode = citizenPinInPostService.findAccessCodeForRecipient(
+            finremCaseDetails.getData(),
+            recipient
+        );
+
+        return accessCode.map(code -> generateFormC(
+            finremCaseDetails,
+            authorisationToken,
+            determineFormCTemplates(finremCaseDetails).citizenTemplate(),
+            code
+        )).orElse(null);
     }
 
     /**
@@ -207,29 +248,32 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Determines the appropriate Form C template to use for a given case and
-     * returns it along with the corresponding {@link CaseDocumentType}.
+     * Determines the appropriate Form C templates to use for a given case and
+     * returns them along with the corresponding {@link CaseDocumentType}.
      *
      * @param caseDetails the details of the case
-     * @return a pair containing the {@link CaseDocumentType} and the string for the template
+     * @return a {@link FormCTemplateSelection} containing the {@link CaseDocumentType} and the strings for the templates
      */
-    public Pair<CaseDocumentType, String> determineFormCTemplate(FinremCaseDetails caseDetails) {
+    public FormCTemplateSelection determineFormCTemplates(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
 
         if (expressCaseService.isExpressCase(caseData)) {
-            return Pair.of(
+            return new FormCTemplateSelection(
                 CaseDocumentType.FORM_C_EXPRESS,
-                documentConfiguration.getManageHearingExpressFormCTemplate()
+                documentConfiguration.getManageHearingExpressFormCTemplate(),
+                documentConfiguration.getManageHearingExpressFormCCitizenTemplate()
             );
         } else if (caseData.isFastTrackApplication()) {
-            return Pair.of(
+            return new FormCTemplateSelection(
                 CaseDocumentType.FORM_C_FAST_TRACK,
-                documentConfiguration.getFormCFastTrackTemplate(caseDetails)
+                documentConfiguration.getFormCFastTrackTemplate(caseDetails),
+                documentConfiguration.getFormCFastTrackCitizenTemplate(caseDetails)
             );
         } else {
-            return Pair.of(
+            return new FormCTemplateSelection(
                 CaseDocumentType.FORM_C,
-                documentConfiguration.getFormCStandardTemplate(caseDetails)
+                documentConfiguration.getFormCStandardTemplate(caseDetails),
+                documentConfiguration.getFormCStandardCitizenTemplate(caseDetails)
             );
         }
     }
