@@ -571,7 +571,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         when(generalApplicationDirectionsService.shouldPrintSuppliedDocuments(callbackRequest.getCaseDetails())).thenReturn(true);
 
         stubIntervenerActive(finremCaseData, intervenerIndex);
-        when(generalApplicationDirectionsService.shouldSendToIntervener(eq(intervenerType), eq("ref detail"))).thenReturn(true);
+        when(generalApplicationDirectionsService.shouldSendToIntervener(intervenerType, "ref detail")).thenReturn(true);
 
         var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
