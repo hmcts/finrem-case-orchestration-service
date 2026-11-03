@@ -67,10 +67,14 @@ public class GenerateCoverSheetService {
         FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(APPLICANT, caseDetails.getCaseIdAsString());
 
+        YesOrNo confidentialFlag = shouldUseCitizenUiCoverSheet(caseDetails, APPLICANT)
+            ? YesOrNo.YES
+            : caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent();
+
         replaceAndStoreCoverSheet(
             caseData,
             generateApplicantCoverSheet(caseDetails, authorisationToken),
-            caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent(),
+            confidentialFlag,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetApp,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetAppConfidential,
             caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetApp,
@@ -100,10 +104,14 @@ public class GenerateCoverSheetService {
         FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(RESPONDENT, caseDetails.getCaseIdAsString());
 
+        YesOrNo confidentialFlag = shouldUseCitizenUiCoverSheet(caseDetails, RESPONDENT)
+            ? YesOrNo.YES
+            : caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant();
+
         replaceAndStoreCoverSheet(
             caseData,
             generateRespondentCoverSheet(caseDetails, authorisationToken),
-            caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant(),
+            confidentialFlag,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetRes,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetResConfidential,
             caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetRes,
@@ -267,7 +275,7 @@ public class GenerateCoverSheetService {
         );
     }
 
-    private boolean shouldUseCitizenUiCoverSheet(
+    public boolean shouldUseCitizenUiCoverSheet(
         FinremCaseDetails caseDetails,
         DocumentHelper.PaperNotificationRecipient recipient) {
 
