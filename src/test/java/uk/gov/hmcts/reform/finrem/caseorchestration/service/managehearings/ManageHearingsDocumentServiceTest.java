@@ -10,11 +10,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.VacateOrAdjournNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -42,6 +44,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ACCESS_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -284,64 +287,31 @@ class ManageHearingsDocumentServiceTest {
 
     @Test
     void shouldGenerateApplicantCitizenFormC() {
-        Map<String, Object> documentDataMap = Map.of(
-            "caseDetails", Map.of(
-                "case_data", new java.util.HashMap<>(Map.of("key", "value")),
-                "id", finremCaseDetails.getId()
-            )
-        );
-        FinremCaseData caseData = FinremCaseData.builder()
-            .fastTrackDecision(YesOrNo.NO)
-            .build();
-        finremCaseDetails.setData(caseData);
-
-        when(manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails, "APPL1234"))
-            .thenReturn(documentDataMap);
-        when(expressCaseService.isExpressCase(caseData)).thenReturn(false);
-        when(documentConfiguration.getFormCStandardCitizenTemplate(finremCaseDetails))
-            .thenReturn(CITIZEN_STANDARD_FORM_C);
-        when(citizenPinInPostService.findAccessCodeForRecipient(caseData, APPLICANT))
-            .thenReturn(java.util.Optional.of("APPL1234"));
-        when(documentConfiguration.getFormCFileName()).thenReturn(FORM_C_FILE_NAME);
-
-        CaseDocument expectedDocument = CaseDocument.builder().documentFilename(FORM_C_FILE_NAME).build();
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(
-            AUTH_TOKEN,
-            documentDataMap,
-            CITIZEN_STANDARD_FORM_C,
-            FORM_C_FILE_NAME,
-            CONTESTED
-        )).thenReturn(expectedDocument);
-
-        CaseDocument actualDocument = manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails, AUTH_TOKEN);
-
-        assertEquals(expectedDocument, actualDocument);
-        verify(citizenPinInPostService).findAccessCodeForRecipient(caseData, APPLICANT);
+        assertCitizenFormCGeneration(APPLICANT, TEST_ACCESS_CODE);
     }
 
     @Test
     void shouldGenerateRespondentCitizenFormC() {
-        Map<String, Object> documentDataMap = Map.of(
-            "caseDetails", Map.of(
-                "case_data", new java.util.HashMap<>(Map.of("key", "value")),
-                "id", finremCaseDetails.getId()
-            )
-        );
+        assertCitizenFormCGeneration(RESPONDENT, TEST_ACCESS_CODE);
+    }
+
+    private void assertCitizenFormCGeneration(PaperNotificationRecipient recipient, String accessCode) {
         FinremCaseData caseData = FinremCaseData.builder()
             .fastTrackDecision(YesOrNo.NO)
             .build();
         finremCaseDetails.setData(caseData);
 
-        when(manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails, "RESP1234"))
+        Map<String, Object> documentDataMap = Map.of("k", "v");
+        CaseDocument expectedDocument = CaseDocument.builder().documentFilename(FORM_C_FILE_NAME).build();
+
+        when(manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails, accessCode))
             .thenReturn(documentDataMap);
         when(expressCaseService.isExpressCase(caseData)).thenReturn(false);
         when(documentConfiguration.getFormCStandardCitizenTemplate(finremCaseDetails))
             .thenReturn(CITIZEN_STANDARD_FORM_C);
-        when(citizenPinInPostService.findAccessCodeForRecipient(caseData, RESPONDENT))
-            .thenReturn(java.util.Optional.of("RESP1234"));
+        when(citizenPinInPostService.findAccessCodeForRecipient(caseData, recipient))
+            .thenReturn(java.util.Optional.of(accessCode));
         when(documentConfiguration.getFormCFileName()).thenReturn(FORM_C_FILE_NAME);
-
-        CaseDocument expectedDocument = CaseDocument.builder().documentFilename(FORM_C_FILE_NAME).build();
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(
             AUTH_TOKEN,
             documentDataMap,
@@ -350,10 +320,12 @@ class ManageHearingsDocumentServiceTest {
             CONTESTED
         )).thenReturn(expectedDocument);
 
-        CaseDocument actualDocument = manageHearingsDocumentService.generateRespondentCitizenFormC(finremCaseDetails, AUTH_TOKEN);
+        CaseDocument actualDocument = APPLICANT.equals(recipient)
+            ? manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails, AUTH_TOKEN)
+            : manageHearingsDocumentService.generateRespondentCitizenFormC(finremCaseDetails, AUTH_TOKEN);
 
         assertEquals(expectedDocument, actualDocument);
-        verify(citizenPinInPostService).findAccessCodeForRecipient(caseData, RESPONDENT);
+        verify(citizenPinInPostService).findAccessCodeForRecipient(caseData, recipient);
     }
 
     @Test
@@ -386,6 +358,60 @@ class ManageHearingsDocumentServiceTest {
         verify(documentConfiguration).getFormGFileName();
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
             AUTH_TOKEN, documentDataMap, FORM_G_TEMPLATE, FORM_G_FILE_NAME, CONTESTED);
+    }
+
+    @Test
+    void selectFormCTemplatesShouldReturnExpressFormC() {
+        FinremCaseData someCaseData = FinremCaseData.builder()
+            .fastTrackDecision(YesOrNo.YES)
+            .build();
+        finremCaseDetails.setData(someCaseData);
+        when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
+        when(documentConfiguration.getManageHearingExpressFormCTemplate()).thenReturn(EXPRESS_FORM_C);
+        when(documentConfiguration.getManageHearingExpressFormCCitizenTemplate()).thenReturn(CITIZEN_EXPRESS_FORM_C);
+
+        ManageHearingsDocumentService.FormCTemplateSelection result =
+            manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails);
+
+        assertEquals(CaseDocumentType.FORM_C_EXPRESS, result.standardType());
+        assertEquals(EXPRESS_FORM_C, result.defaultTemplate());
+        assertEquals(CITIZEN_EXPRESS_FORM_C, result.citizenTemplate());
+    }
+
+    @Test
+    void selectFormCTemplatesShouldReturnFastTrackFormC() {
+        FinremCaseData someCaseData = FinremCaseData.builder()
+            .fastTrackDecision(YesOrNo.YES)
+            .build();
+        finremCaseDetails.setData(someCaseData);
+        when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
+        when(documentConfiguration.getFormCFastTrackTemplate(finremCaseDetails)).thenReturn(FAST_TRACK_FORM_C);
+        when(documentConfiguration.getFormCFastTrackCitizenTemplate(finremCaseDetails)).thenReturn(CITIZEN_FAST_TRACK_FORM_C);
+
+        ManageHearingsDocumentService.FormCTemplateSelection result =
+            manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails);
+
+        assertEquals(CaseDocumentType.FORM_C_FAST_TRACK, result.standardType());
+        assertEquals(FAST_TRACK_FORM_C, result.defaultTemplate());
+        assertEquals(CITIZEN_FAST_TRACK_FORM_C, result.citizenTemplate());
+    }
+
+    @Test
+    void selectFormCTemplatesShouldReturnStandardFormC() {
+        FinremCaseData someCaseData = FinremCaseData.builder()
+            .fastTrackDecision(YesOrNo.NO)
+            .build();
+        finremCaseDetails.setData(someCaseData);
+        when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
+        when(documentConfiguration.getFormCStandardTemplate(finremCaseDetails)).thenReturn(STANDARD_FORM_C);
+        when(documentConfiguration.getFormCStandardCitizenTemplate(finremCaseDetails)).thenReturn(CITIZEN_STANDARD_FORM_C);
+
+        ManageHearingsDocumentService.FormCTemplateSelection result =
+            manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails);
+
+        assertEquals(CaseDocumentType.FORM_C, result.standardType());
+        assertEquals(STANDARD_FORM_C, result.defaultTemplate());
+        assertEquals(CITIZEN_STANDARD_FORM_C, result.citizenTemplate());
     }
 
     @Test
