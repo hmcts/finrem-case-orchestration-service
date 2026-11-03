@@ -419,10 +419,10 @@ public class ManageHearingActionService {
 
     private void generateFormC(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         ManageHearingsDocumentService.FormCTemplateSelection formCTemplates =
-            manageHearingsDocumentService.determineFormCTemplates(finremCaseDetails);
+            manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails);
         ListForHearingWrapper listForHearingWrapper = finremCaseDetails.getData().getListForHearingWrapper();
 
-        CaseDocument standardFormC = manageHearingsDocumentService.generateFormC(finremCaseDetails, authToken);
+        CaseDocument standardFormC = manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails, authToken);
         listForHearingWrapper.setFormC(standardFormC);
 
         if (featureToggleService.isFinremCitizenUiEnabled()) {

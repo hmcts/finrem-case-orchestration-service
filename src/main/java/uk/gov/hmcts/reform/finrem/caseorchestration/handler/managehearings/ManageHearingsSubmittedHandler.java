@@ -49,7 +49,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                               String userAuthorisation) {
+                                                                              String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -75,8 +75,8 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             .buildCorrespondenceEventsIfNeeded(actionSelection, callbackRequest, userAuthorisation);
 
         for (SendCorrespondenceEvent event : correspondenceEvents) {
-            log.info("Sending hearing correspondence for {} action. Case reference: {}",
-                actionSelection.getDescription(), finremCaseData.getCcdCaseId());
+            log.info("Sending hearing correspondence for {} action. Party: {}. Case reference: {}",
+                actionSelection.getDescription(), event.describeNotificationParties(), finremCaseData.getCcdCaseId());
             event.setEventId(callbackRequest.getEventType().getCcdType());
             event.setNotificationTrackerId(finremCaseData.getNotificationAuditWrapper().getNotificationEventId());
 

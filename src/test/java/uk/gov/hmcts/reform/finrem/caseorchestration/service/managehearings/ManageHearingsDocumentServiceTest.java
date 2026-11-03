@@ -265,7 +265,7 @@ class ManageHearingsDocumentServiceTest {
             .thenReturn(expectedDocument);
 
         // Act
-        CaseDocument actualDocument = manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN);
+        CaseDocument actualDocument = manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
         assertEquals(expectedDocument, actualDocument);

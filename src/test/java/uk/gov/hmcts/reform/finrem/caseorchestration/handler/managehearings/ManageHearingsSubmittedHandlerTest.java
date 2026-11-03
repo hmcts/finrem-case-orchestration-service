@@ -208,7 +208,7 @@ class ManageHearingsSubmittedHandlerTest {
     }
 
     @Test
-    void givenPublishedEvents_whenHandleSuccessful_thenReconcilesAndPersistsAudits() {
+    void givenPublishedEvents_whenSuccessful_thenReconcilesAndPersistsAudits() {
         // Arrange
         FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADD_HEARING);
 

@@ -107,44 +107,43 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Generates appropriate Form C document based on the case type (standard/fast track/express).
+     * Generates default case Form C document without an access code based on the case type (standard/fast track/express).
      *
      * @param finremCaseDetails  the case details
      * @param authorisationToken the token for document generation
      * @return the generated Form C document as a {@link CaseDocument}
      */
-    public CaseDocument generateFormC(FinremCaseDetails finremCaseDetails, String authorisationToken) {
-        String defaultFormCTemplate = determineFormCTemplates(finremCaseDetails).defaultTemplate();
+    public CaseDocument generateDefaultFormC(FinremCaseDetails finremCaseDetails, String authorisationToken) {
+        String defaultFormCTemplate = selectFormCTemplates(finremCaseDetails).defaultTemplate();
 
-        return generateFormC(finremCaseDetails, authorisationToken, defaultFormCTemplate, null);
+        return renderFormCWithTemplate(finremCaseDetails, authorisationToken, defaultFormCTemplate, null);
     }
 
-    private CaseDocument generateFormC(FinremCaseDetails finremCaseDetails,
-                                       String authorisationToken,
-                                       String template,
-                                       String accessCode) {
-
-        Map<String, Object> documentDataMap = manageHearingFormCLetterDetailsMapper
-            .getDocumentTemplateDetailsAsMap(finremCaseDetails, accessCode);
-
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(
-            authorisationToken,
-            documentDataMap,
-            template,
-            documentConfiguration.getFormCFileName(),
-            finremCaseDetails.getCaseType()
-        );
-    }
-
+    /**
+     * Generates applicant citizen Form C document with an access code based on the case type (standard/fast track/express).
+     *
+     * @param finremCaseDetails  the case details
+     * @param authorisationToken the token for document generation
+     * @return the generated Form C document as a {@link CaseDocument}
+     */
     public CaseDocument generateApplicantCitizenFormC(FinremCaseDetails finremCaseDetails, String authorisationToken) {
-        return generateCitizenFormC(PaperNotificationRecipient.APPLICANT, finremCaseDetails, authorisationToken);
+        return generateFormCForCitizenParty(PaperNotificationRecipient.APPLICANT, finremCaseDetails, authorisationToken);
     }
 
+    /**
+     * Generates respondent citizen Form C document with an access code based on the case type (standard/fast track/express).
+     *
+     * @param finremCaseDetails  the case details
+     * @param authorisationToken the token for document generation
+     * @return the generated Form C document as a {@link CaseDocument}
+     */
     public CaseDocument generateRespondentCitizenFormC(FinremCaseDetails finremCaseDetails, String authorisationToken) {
-        return generateCitizenFormC(PaperNotificationRecipient.RESPONDENT, finremCaseDetails, authorisationToken);
+        return generateFormCForCitizenParty(PaperNotificationRecipient.RESPONDENT, finremCaseDetails, authorisationToken);
     }
 
-    private CaseDocument generateCitizenFormC(PaperNotificationRecipient recipient, FinremCaseDetails finremCaseDetails, String authorisationToken) {
+    private CaseDocument generateFormCForCitizenParty(PaperNotificationRecipient recipient,
+                                                      FinremCaseDetails finremCaseDetails,
+                                                      String authorisationToken) {
         citizenPinInPostService.generatePinIfNeeded(finremCaseDetails, recipient);
 
         Optional<String> accessCode = citizenPinInPostService.findAccessCodeForRecipient(
@@ -152,10 +151,10 @@ public class ManageHearingsDocumentService {
             recipient
         );
 
-        return accessCode.map(code -> generateFormC(
+        return accessCode.map(code -> renderFormCWithTemplate(
             finremCaseDetails,
             authorisationToken,
-            determineFormCTemplates(finremCaseDetails).citizenTemplate(),
+            selectFormCTemplates(finremCaseDetails).citizenTemplate(),
             code
         )).orElse(null);
     }
@@ -254,7 +253,7 @@ public class ManageHearingsDocumentService {
      * @param caseDetails the details of the case
      * @return a {@link FormCTemplateSelection} containing the {@link CaseDocumentType} and the strings for the templates
      */
-    public FormCTemplateSelection determineFormCTemplates(FinremCaseDetails caseDetails) {
+    public FormCTemplateSelection selectFormCTemplates(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
 
         if (expressCaseService.isExpressCase(caseData)) {
@@ -278,4 +277,20 @@ public class ManageHearingsDocumentService {
         }
     }
 
+    private CaseDocument renderFormCWithTemplate(FinremCaseDetails finremCaseDetails,
+                                                 String authorisationToken,
+                                                 String template,
+                                                 String accessCode) {
+
+        Map<String, Object> documentDataMap = manageHearingFormCLetterDetailsMapper
+            .getDocumentTemplateDetailsAsMap(finremCaseDetails, accessCode);
+
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(
+            authorisationToken,
+            documentDataMap,
+            template,
+            documentConfiguration.getFormCFileName(),
+            finremCaseDetails.getCaseType()
+        );
+    }
 }

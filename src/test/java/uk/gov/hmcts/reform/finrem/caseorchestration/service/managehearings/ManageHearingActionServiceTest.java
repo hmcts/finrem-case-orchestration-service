@@ -144,13 +144,13 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
-        when(manageHearingsDocumentService.determineFormCTemplates(finremCaseDetails)).thenReturn(
+        when(manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails)).thenReturn(
             new ManageHearingsDocumentService.FormCTemplateSelection(
                 CaseDocumentType.FORM_C,
                 "a template",
                 "a citizen template"
             ));
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+        when(manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
@@ -199,13 +199,13 @@ class ManageHearingActionServiceTest {
         CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
             "http://example.com/OutOfCourtResolution");
 
-        when(manageHearingsDocumentService.determineFormCTemplates(finremCaseDetails)).thenReturn(
+        when(manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails)).thenReturn(
             new ManageHearingsDocumentService.FormCTemplateSelection(
                 CaseDocumentType.FORM_C,
                 "a template",
                 "a citizen template"
             ));
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+        when(manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
@@ -255,13 +255,13 @@ class ManageHearingActionServiceTest {
                 "http://example.com/cover-letter"));
 
         when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(false);
-        when(manageHearingsDocumentService.determineFormCTemplates(finremCaseDetails)).thenReturn(
+        when(manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails)).thenReturn(
             new ManageHearingsDocumentService.FormCTemplateSelection(
                 CaseDocumentType.FORM_C,
                 "a template",
                 "a citizen template"
             ));
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+        when(manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formG);
@@ -297,13 +297,13 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
-        when(manageHearingsDocumentService.determineFormCTemplates(finremCaseDetails)).thenReturn(
+        when(manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails)).thenReturn(
             new ManageHearingsDocumentService.FormCTemplateSelection(
                 CaseDocumentType.FORM_C_EXPRESS,
                 "a template",
                 "a citizen template"
             ));
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+        when(manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
@@ -351,13 +351,13 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
-        when(manageHearingsDocumentService.determineFormCTemplates(finremCaseDetails)).thenReturn(
+        when(manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails)).thenReturn(
             new ManageHearingsDocumentService.FormCTemplateSelection(
                 CaseDocumentType.FORM_C,
                 "a template",
                 "a citizen template"
             ));
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+        when(manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
