@@ -43,6 +43,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
@@ -94,7 +95,7 @@ class GeneralApplicationDirectionsServiceTest {
     void givenContestedCase_whenDirectionEventExecutedReturnNoPreviousStateFound_thenHandlerReturnsPostStateNull() {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO).build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CONTESTED)
             .data(data).build();
         when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
         when(ccdService.getCcdEventDetailsOnCase(any(), any(), any())).thenReturn(new ArrayList<>());
@@ -143,7 +144,7 @@ class GeneralApplicationDirectionsServiceTest {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CONTESTED)
             .data(data).build();
         when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
         when(ccdService.getCcdEventDetailsOnCase(any(), any(), any())).thenReturn(new ArrayList<>());
@@ -170,7 +171,7 @@ class GeneralApplicationDirectionsServiceTest {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CONTESTED)
             .data(data).build();
         when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
         assertEquals(PREPARE_FOR_HEARING_STATE, generalApplicationDirectionsService.getEventPostState(finremCaseDetails, AUTH_TOKEN));
@@ -187,7 +188,7 @@ class GeneralApplicationDirectionsServiceTest {
         data.setIntervenerOne(IntervenerOne.builder()
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .intervenerName("intervener1").build());
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CONTESTED)
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
 
@@ -207,7 +208,7 @@ class GeneralApplicationDirectionsServiceTest {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("intervener2-referdetails").build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CONTESTED)
             .data(data).build();
         data.setIntervenerTwo(IntervenerTwo.builder()
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
@@ -233,7 +234,7 @@ class GeneralApplicationDirectionsServiceTest {
         data.setIntervenerThree(IntervenerThree.builder()
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .intervenerName("intervener1").build());
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CONTESTED)
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
 
@@ -256,7 +257,7 @@ class GeneralApplicationDirectionsServiceTest {
         data.setIntervenerFour(IntervenerFour.builder()
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .intervenerName("intervener1").build());
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CONTESTED)
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
 
@@ -276,7 +277,7 @@ class GeneralApplicationDirectionsServiceTest {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("applicant-referdetails").build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CONTESTED)
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
         verify(bulkPrintService).printApplicantDocuments(
@@ -295,7 +296,7 @@ class GeneralApplicationDirectionsServiceTest {
         GeneralApplicationWrapper wrapper = GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingRequired(YesOrNo.NO)
             .generalApplicationPreState("applicationIssued").generalApplicationReferDetail("respondent-referdetails").build();
         FinremCaseData data = FinremCaseData.builder().generalApplicationWrapper(wrapper).build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CONTESTED)
             .data(data).build();
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
         verify(bulkPrintService).printApplicantDocuments(
