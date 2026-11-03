@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,11 +27,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,6 +58,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finrem
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -364,6 +373,52 @@ class GeneralApplicationDirectionsServiceTest {
 
         // Assert
         assertEquals(expectedDocument, result);
+    }
+
+    @ParameterizedTest(name = "{0} with \"{1}\" -> {2}")
+    @MethodSource("shouldSendToIntervenerCases")
+    void shouldSendToIntervener(IntervenerType type, String referDetail, boolean expected) {
+        assertEquals(expected, generalApplicationDirectionsService.shouldSendToIntervener(type, referDetail));
+    }
+
+    static Stream<Arguments> shouldSendToIntervenerCases() {
+        return Stream.of(
+            // exact-case match
+            Arguments.of(IntervenerType.INTERVENER_ONE, "Refer to " + INTERVENER1, true),
+            Arguments.of(IntervenerType.INTERVENER_TWO, "Refer to " + INTERVENER2, true),
+            Arguments.of(IntervenerType.INTERVENER_THREE, "Refer to " + INTERVENER3, true),
+            Arguments.of(IntervenerType.INTERVENER_FOUR, "Refer to " + INTERVENER4, true),
+            // lower-case match
+            Arguments.of(IntervenerType.INTERVENER_ONE, INTERVENER1.toLowerCase(), true),
+            // no match
+            Arguments.of(IntervenerType.INTERVENER_ONE, "Some unrelated text", false),
+            Arguments.of(IntervenerType.INTERVENER_ONE, "", false),
+            // a different intervener's identifier only
+            Arguments.of(IntervenerType.INTERVENER_ONE, INTERVENER2, false)
+        );
+    }
+
+    @ParameterizedTest(name = "referDetail \"{0}\" -> {1}")
+    @MethodSource("shouldPrintSuppliedDocumentsCases")
+    void shouldPrintSuppliedDocuments(String referDetail, boolean expected) {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                    .generalApplicationReferDetail(referDetail)
+                    .build())
+                .build())
+            .build();
+
+        assertEquals(expected, generalApplicationDirectionsService.shouldPrintSuppliedDocuments(caseDetails));
+    }
+
+    static Stream<Arguments> shouldPrintSuppliedDocumentsCases() {
+        return Stream.of(
+            Arguments.of("Some refer detail", true),
+            Arguments.of(" ", true),   // StringUtils.isNotEmpty does not treat whitespace as empty
+            Arguments.of("", false),
+            Arguments.of(null, false)
+        );
     }
 
     private CaseDocument convertToCaseDocument(Object object) {
