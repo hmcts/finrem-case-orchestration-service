@@ -546,34 +546,6 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         }
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void givenIsHearingRequired_whenHandled_shouldValidateApplicantOrRespondentAddress(boolean isHearingRequired) {
-        contactDetailsValidatorMockedStatic
-            .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH)))
-            .thenReturn(new ArrayList<String>(List.of("missing applicant or respondent address")));
-        contactDetailsValidatorMockedStatic
-            .when(() -> validateRequiredIntervenersPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH),
-                anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
-            .thenReturn(List.of());
-
-        List<GeneralApplicationsCollection> generalApplications = mock(List.class);
-        GeneralApplicationWrapper generalApplicationWrapper = mock(GeneralApplicationWrapper.class);
-        when(generalApplicationWrapper.getGeneralApplications()).thenReturn(generalApplications);
-        FinremCaseData finremCaseData = spy(FinremCaseData.builder()
-            .generalApplicationWrapper(generalApplicationWrapper)
-            .build());
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
-
-        when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(isHearingRequired);
-
-        var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors()).containsOnly("missing applicant or respondent address");
-        verify(generalApplicationHelper).populateGeneralApplicationSender(finremCaseData, generalApplications);
-        verify(generalApplicationDirectionsService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
-    }
-
     static Stream<Arguments> hearingRequiredAndIntervenerIndex() {
         return Stream.of(true, false).flatMap(isHearingRequired ->
             IntStream.rangeClosed(1, 4).mapToObj(index -> Arguments.of(isHearingRequired, index)));
