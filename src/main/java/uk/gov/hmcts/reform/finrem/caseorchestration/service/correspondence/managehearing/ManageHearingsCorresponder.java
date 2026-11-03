@@ -186,7 +186,7 @@ public class ManageHearingsCorresponder {
      *         returns an empty list when notification is not required
      */
     public List<SendCorrespondenceEvent> buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(FinremCallbackRequest callbackRequest,
-                                                                                                       String userAuthorisation) {
+                                                                                                    String userAuthorisation) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
