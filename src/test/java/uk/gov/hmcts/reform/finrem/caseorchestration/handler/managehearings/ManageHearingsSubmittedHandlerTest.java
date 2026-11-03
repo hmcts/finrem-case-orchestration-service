@@ -159,7 +159,7 @@ class ManageHearingsSubmittedHandlerTest {
         // Assert
         assertThat(response.getErrors()).isNullOrEmpty();
         assertThat(logs.getInfos()).contains(
-            format("Sending hearing correspondence for Hearing Added action. Case reference: %s", CASE_ID)
+            format("Sending hearing correspondence for Hearing Added action. Party: WHATEVER. Case reference: %s", CASE_ID)
         );
         verify(manageHearingsCorresponder).buildCorrespondenceEventsIfNeeded(
             ManageHearingsAction.ADD_HEARING,
@@ -193,7 +193,7 @@ class ManageHearingsSubmittedHandlerTest {
         // Assert
         assertThat(response.getErrors()).isNullOrEmpty();
         assertThat(logs.getInfos()).contains(
-            format("Sending hearing correspondence for Hearing Adjourned Or Vacated action. Case reference: %s", CASE_ID)
+            format("Sending hearing correspondence for Hearing Adjourned Or Vacated action. Party: WHATEVER. Case reference: %s", CASE_ID)
         );
         verify(manageHearingsCorresponder).buildCorrespondenceEventsIfNeeded(
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,

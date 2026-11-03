@@ -422,16 +422,19 @@ public class ManageHearingActionService {
             manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails);
         ListForHearingWrapper listForHearingWrapper = finremCaseDetails.getData().getListForHearingWrapper();
 
-        CaseDocument standardFormC = manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails, authToken);
-        listForHearingWrapper.setFormC(standardFormC);
+        CaseDocument defaultCaseFormC = manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails, authToken);
+        listForHearingWrapper.setFormC(defaultCaseFormC);
 
         if (featureToggleService.isFinremCitizenUiEnabled()) {
-            listForHearingWrapper.setFormCApplicantCitizen(
-                manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails, authToken)
+            CaseDocument applicantCitizenFormC = manageHearingsDocumentService.generateApplicantCitizenFormC(
+                finremCaseDetails, authToken
             );
-            listForHearingWrapper.setFormCRespondentCitizen(
-                manageHearingsDocumentService.generateRespondentCitizenFormC(finremCaseDetails, authToken)
+            CaseDocument respondentCitizenFormC = manageHearingsDocumentService.generateRespondentCitizenFormC(
+                finremCaseDetails, authToken
             );
+
+            listForHearingWrapper.setFormCApplicantCitizen(applicantCitizenFormC);
+            listForHearingWrapper.setFormCRespondentCitizen(respondentCitizenFormC);
         } else {
             listForHearingWrapper.setFormCApplicantCitizen(null);
             listForHearingWrapper.setFormCRespondentCitizen(null);
@@ -440,7 +443,7 @@ public class ManageHearingActionService {
         documentMap.put(
             FORM_C,
             new DocumentRecord(
-                standardFormC,
+                defaultCaseFormC,
                 formCTemplates.standardType()
             )
         );

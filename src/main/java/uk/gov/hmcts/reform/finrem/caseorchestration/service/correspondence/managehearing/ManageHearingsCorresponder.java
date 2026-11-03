@@ -61,6 +61,18 @@ public class ManageHearingsCorresponder {
         events.forEach(applicationEventPublisher::publishEvent);
     }
 
+    /**
+     * Builds correspondence events for the selected manage hearings action, if correspondence is required.
+     *
+     * <p>This routes to the action-specific builder:
+     * add hearing uses {@code buildHearingCorrespondenceEventsIfNeeded},
+     * and adjourn/vacate uses {@code buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded}.</p>
+     *
+     * @param actionSelection the selected manage hearings action
+     * @param callbackRequest the callback request containing case details and hearing data
+     * @param userAuthorisation the authorization token used to build correspondence payloads
+     * @return a list of correspondence events for the selected action, or an empty list if none are required
+     */
     public List<SendCorrespondenceEvent> buildCorrespondenceEventsIfNeeded(ManageHearingsAction actionSelection,
                                                                             FinremCallbackRequest callbackRequest,
                                                                             String userAuthorisation) {
@@ -71,39 +83,6 @@ public class ManageHearingsCorresponder {
                 userAuthorisation
             );
         };
-    }
-
-    /**
-     * Builds a {@link SendCorrespondenceEvent} for a hearing notification to be sent to the solicitor,
-     * if notification is required.
-     *
-     * <p>
-     * This method retrieves the active hearing in context and checks whether notifications
-     * should be sent. If notifications are enabled, it gathers all relevant documents including
-     * additional hearing documents, any required mini Form A, and associated working hearing
-     * documents. It then constructs a single correspondence event covering all parties.
-     * </p>
-     *
-     * @param callbackRequest   the callback request containing case details and data
-     * @param userAuthorisation the authorization token of the user initiating this action
-     * @return a {@link SendCorrespondenceEvent} containing the hearing notification details,
-     *         or {@code null} if no notification is required
-     */
-    public SendCorrespondenceEvent buildHearingCorrespondenceEventIfNeeded(FinremCallbackRequest callbackRequest,
-                                                                           String userAuthorisation) {
-        HearingCorrespondenceContext context = prepareHearingCorrespondenceContext(callbackRequest);
-        if (isNull(context)) {
-            return null;
-        }
-
-        return buildSendCorrespondenceEvent(
-            context.caseDetails(),
-            context.hearing(),
-            ManageHearingsAction.ADD_HEARING,
-            userAuthorisation,
-            context.documentsToPost(),
-            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
-        );
     }
 
     /**
@@ -124,7 +103,7 @@ public class ManageHearingsCorresponder {
      *         or an empty list if no notification is required
      */
     public List<SendCorrespondenceEvent> buildHearingCorrespondenceEventsIfNeeded(FinremCallbackRequest callbackRequest,
-                                                                                    String userAuthorisation) {
+                                                                                  String userAuthorisation) {
         HearingCorrespondenceContext context = prepareHearingCorrespondenceContext(callbackRequest);
         if (isNull(context)) {
             return List.of();
@@ -203,8 +182,8 @@ public class ManageHearingsCorresponder {
      *
      * @param callbackRequest the callback request containing case details and data
      * @param userAuthorisation the authorization token of the user initiating this action
-     * @return a {@link SendCorrespondenceEvent} containing the hearing notification details,
-     *         or {@code null} if notification should not be sent
+     * @return a list of {@link SendCorrespondenceEvent}s for relisted hearing and/or vacate/adjourn notice;
+     *         returns an empty list when notification is not required
      */
     public List<SendCorrespondenceEvent> buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(FinremCallbackRequest callbackRequest,
                                                                                                        String userAuthorisation) {
@@ -314,38 +293,25 @@ public class ManageHearingsCorresponder {
     }
 
     /**
-     * Builds a single {@link SendCorrespondenceEvent} that targets every party on the case,
-     * bundling all parties into one combined notification list.
+     * Builds one {@link SendCorrespondenceEvent} per notification party on the hearing.
      *
-     * @param caseDetails       the case the correspondence relates to
-     * @param hearing           the hearing whose parties should be notified
-     * @param action            the hearing management action that triggered this correspondence
+     * <p>For applicant/respondent parties, this also resolves party-specific Form C documents
+     * (citizen variants where applicable) before building each event.</p>
+     *
+     * @param caseDetails the case the correspondence relates to
+     * @param hearing the hearing whose parties should be notified
+     * @param action the action that triggered correspondence
      * @param userAuthorisation the calling user's auth token
-     * @param documentsToPost   documents to be sent by post
-     * @param templateName      the email template to use
-     * @return a single event containing all parties on the case
+     * @param documentsToPost base documents to post
+     * @param templateName email template for notifications
+     * @return one correspondence event per resolved notification party
      */
-    private SendCorrespondenceEvent buildSendCorrespondenceEvent(FinremCaseDetails caseDetails,
-                                                                 HearingLike hearing,
-                                                                 ManageHearingsAction action,
-                                                                 String userAuthorisation,
-                                                                 List<CaseDocument> documentsToPost,
-                                                                 EmailTemplateNames templateName) {
-        List<NotificationParty> notificationParties = partiesOnCase(hearing).stream()
-            .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
-            .toList();
-
-        return baseEventBuilder(caseDetails, hearing, action, userAuthorisation, documentsToPost, templateName)
-            .notificationParties(notificationParties)
-            .build();
-    }
-
     private List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(FinremCaseDetails caseDetails,
-                                                                        HearingLike hearing,
-                                                                        ManageHearingsAction action,
-                                                                        String userAuthorisation,
-                                                                        List<CaseDocument> documentsToPost,
-                                                                        EmailTemplateNames templateName) {
+                                                                         HearingLike hearing,
+                                                                         ManageHearingsAction action,
+                                                                         String userAuthorisation,
+                                                                         List<CaseDocument> documentsToPost,
+                                                                         EmailTemplateNames templateName) {
         return partiesOnCase(hearing).stream()
             .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
             .filter(Objects::nonNull)
@@ -361,9 +327,18 @@ public class ManageHearingsCorresponder {
             .toList();
     }
 
+    /**
+     * Returns the posting document list for a specific party, substituting Form C with the
+     * recipient-specific version where applicable.
+     *
+     * @param caseDetails case details containing Form C variants
+     * @param documentsToPost base posting documents
+     * @param party target notification party
+     * @return posting documents for the specified party
+     */
     private List<CaseDocument> getDocumentsToPostForNotificationParty(FinremCaseDetails caseDetails,
-                                                                      List<CaseDocument> documentsToPost,
-                                                                      NotificationParty party) {
+                                                                       List<CaseDocument> documentsToPost,
+                                                                       NotificationParty party) {
         FinremCaseData caseData = caseDetails.getData();
         CaseDocument defaultFormC = caseData.getListForHearingWrapper().getFormC();
 
@@ -378,6 +353,16 @@ public class ManageHearingsCorresponder {
             .toList();
     }
 
+    /**
+     * Resolves the most appropriate Form C for a recipient.
+     *
+     * <p>For unrepresented applicant/respondent with access code, citizen Form C is preferred;
+     * otherwise the default Form C is returned.</p>
+     *
+     * @param caseData case data containing Form C documents and representation status
+     * @param recipient notification party recipient
+     * @return recipient-specific Form C where applicable, otherwise default Form C
+     */
     private CaseDocument getFormCForRecipient(FinremCaseData caseData, NotificationParty recipient) {
         if (NotificationParty.APPLICANT.equals(recipient)
             && !caseData.isApplicantRepresentedByASolicitor()
@@ -396,6 +381,13 @@ public class ManageHearingsCorresponder {
         return caseData.getListForHearingWrapper().getFormC();
     }
 
+    /**
+     * Checks whether an access code exists for the given paper-notification recipient.
+     *
+     * @param caseData case data used to look up recipient access code
+     * @param recipient recipient type (applicant/respondent)
+     * @return {@code true} if an access code is present, otherwise {@code false}
+     */
     private boolean hasAccessCodeForRecipient(
         FinremCaseData caseData,
         uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient recipient

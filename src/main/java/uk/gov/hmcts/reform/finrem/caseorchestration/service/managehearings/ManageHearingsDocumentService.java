@@ -277,11 +277,19 @@ public class ManageHearingsDocumentService {
         }
     }
 
+    /**
+     * Renders a Form C document using the provided template and optional citizen access code.
+     *
+     * @param finremCaseDetails the case details used to populate template placeholders
+     * @param authorisationToken the authorization token used for document generation
+     * @param template the document template to render
+     * @param accessCode optional citizen access code to embed in the generated document context
+     * @return the generated Form C document
+     */
     private CaseDocument renderFormCWithTemplate(FinremCaseDetails finremCaseDetails,
                                                  String authorisationToken,
                                                  String template,
                                                  String accessCode) {
-
         Map<String, Object> documentDataMap = manageHearingFormCLetterDetailsMapper
             .getDocumentTemplateDetailsAsMap(finremCaseDetails, accessCode);
 
