@@ -7,8 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -44,6 +43,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.notifications.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -63,15 +63,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -546,17 +542,50 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         }
     }
 
-    static Stream<Arguments> hearingRequiredAndIntervenerIndex() {
-        return Stream.of(true, false).flatMap(isHearingRequired ->
-            IntStream.rangeClosed(1, 4).mapToObj(index -> Arguments.of(isHearingRequired, index)));
+    @EnumSource(IntervenerType.class)
+    @ParameterizedTest
+    void givenPrintSuppliedDocumentNeededWithAnActiveIntervener_whenHandled_shouldValidateAllMissingAddresses(IntervenerType intervenerType) {
+        int intervenerIndex = intervenerType.getIntervenerId();
+
+        final String expectedApplicantAddressError = "missing applicant address";
+        final String expectedRespondentAddressError = "missing respondent address";
+        final String expectedIntervenerAddressError = "missing intervener %s address".formatted(intervenerIndex);
+
+        contactDetailsValidatorMockedStatic
+            .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH)))
+            .thenReturn(new ArrayList<>(List.of(expectedApplicantAddressError, expectedRespondentAddressError)));
+        contactDetailsValidatorMockedStatic
+            .when(() -> validateRequiredIntervenersPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH),
+                eq(intervenerIndex == 1), eq(intervenerIndex == 2), eq(intervenerIndex == 3), eq(intervenerIndex == 4)))
+            .thenReturn(new ArrayList<>(List.of(expectedIntervenerAddressError)));
+
+        List<GeneralApplicationsCollection> generalApplications = mock(List.class);
+        GeneralApplicationWrapper generalApplicationWrapper = mock(GeneralApplicationWrapper.class);
+        when(generalApplicationWrapper.getGeneralApplicationReferDetail()).thenReturn("ref detail");
+        when(generalApplicationWrapper.getGeneralApplications()).thenReturn(generalApplications);
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder()
+            .generalApplicationWrapper(generalApplicationWrapper)
+            .build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+
+        when(generalApplicationDirectionsService.shouldPrintSuppliedDocuments(callbackRequest.getCaseDetails())).thenReturn(true);
+
+        stubIntervenerActive(finremCaseData, intervenerIndex);
+        when(generalApplicationDirectionsService.shouldSendToIntervener(eq(intervenerType), eq("ref detail"))).thenReturn(true);
+
+        var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).contains(expectedIntervenerAddressError,
+            expectedApplicantAddressError, expectedRespondentAddressError);
+        verify(generalApplicationDirectionsService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verifyNoInteractions(applicationEventPublisher);
     }
 
-    @ParameterizedTest(name = "isHearingRequired={0}, intervener={1}")
-    @MethodSource("hearingRequiredAndIntervenerIndex")
-    void givenIsHearingRequiredWithAnActiveIntervener_whenHandled_shouldValidateIntervenerAddress(
-        boolean isHearingRequired, int intervenerIndex) {
-
-        String expectedError = "missing intervener " + intervenerIndex + " address";
+    @EnumSource(IntervenerType.class)
+    @ParameterizedTest
+    void givenHearingRequiredWithAnActiveIntervener_whenHandled_shouldValidateIntervenerAddress(IntervenerType intervenerType) {
+        int intervenerIndex = intervenerType.getIntervenerId();
+        String expectedError = "missing intervener %s address".formatted(intervenerIndex);
 
         contactDetailsValidatorMockedStatic
             .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH)))
@@ -574,36 +603,27 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             .build());
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
 
-        when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(isHearingRequired);
+        when(generalApplicationDirectionsService.shouldPrintSuppliedDocuments(callbackRequest.getCaseDetails())).thenReturn(false);
+        when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
         SendCorrespondenceEvent event1 = spy(SendCorrespondenceEvent.builder()
             .notificationParties(List.of(intervenerParty(intervenerIndex)))
             .audits(List.of(NotificationAudit.builder().type(POSTAL).build()))
             .build());
         SendCorrespondenceEvent event2 = mock(SendCorrespondenceEvent.class);
-        if (isHearingRequired) {
-            List<SendCorrespondenceEvent> events = List.of(event1, event2);
-            when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN))
-                .thenReturn(events);
-            stubIntervenerActive(finremCaseData, intervenerIndex);
-        }
+
+        List<SendCorrespondenceEvent> events = List.of(event1, event2);
+        when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN))
+            .thenReturn(events);
+        stubIntervenerActive(finremCaseData, intervenerIndex);
 
         var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        if (isHearingRequired) {
-            assertThat(response.getErrors()).containsOnly(expectedError);
-            verify(event1).setSimulatingCorrespondence(true);
-            verify(event2).setSimulatingCorrespondence(true);
-            verify(applicationEventPublisher).publishEvent(event1);
-            verify(applicationEventPublisher).publishEvent(event2);
-            verify(generalApplicationDirectionsService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
-        } else {
-            assertThat(response.getErrors()).isEmpty();
-            verify(event1, never()).setSimulatingCorrespondence(anyBoolean());
-            verify(event2, never()).setSimulatingCorrespondence(anyBoolean());
-            verifyNoInteractions(applicationEventPublisher);
-            verify(generalApplicationDirectionsService).submitCollectionGeneralApplicationDirections(
-                eq(callbackRequest.getCaseDetails()), anyList(), anyString());
-        }
+        assertThat(response.getErrors()).containsOnly(expectedError);
+        verify(event1).setSimulatingCorrespondence(true);
+        verify(event2).setSimulatingCorrespondence(true);
+        verify(applicationEventPublisher).publishEvent(event1);
+        verify(applicationEventPublisher).publishEvent(event2);
+        verify(generalApplicationDirectionsService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
         verify(generalApplicationHelper).populateGeneralApplicationSender(finremCaseData, generalApplications);
     }
 

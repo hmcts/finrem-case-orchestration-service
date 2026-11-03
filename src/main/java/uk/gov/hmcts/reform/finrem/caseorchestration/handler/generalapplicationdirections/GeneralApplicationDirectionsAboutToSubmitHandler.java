@@ -112,7 +112,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         generalApplicationHelper.populateGeneralApplicationSender(caseData,
             caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
-        boolean isHearingRequired = isHearingRequired(caseDetails);
+        boolean isHearingRequired = generalApplicationDirectionsService.isHearingRequired(caseDetails);
         performAddHearingIfNecessary(caseDetails, isHearingRequired, userAuthorisation);
         // hearing id would be added in the above method if hearing required
 
@@ -341,7 +341,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
         List<String> errors = new ArrayList<>();
 
         if (generalApplicationDirectionsService.shouldPrintSuppliedDocuments(finremCaseDetails)) {
-            errors.addAll(validateRequiredPostalAddresses(finremCaseData, getEventType(), true, true));
+            errors.addAll(validateRequiredPostalAddresses(finremCaseData, getEventType()));
 
             String referDetail = finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
             errors.addAll(validateRequiredIntervenersPostalAddresses(finremCaseData, getEventType(),
@@ -376,10 +376,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
             partyService.isIntervenerThreeActive(finremCaseData) && isIntervenerThreeAddressRequired(sendCorrespondenceEvents),
             partyService.isIntervenerFourActive(finremCaseData) && isIntervenerFourAddressRequired(sendCorrespondenceEvents)));
         return errors;
-    }
-
-    private boolean isHearingRequired(FinremCaseDetails finremCaseDetails) {
-        return generalApplicationDirectionsService.isHearingRequired(finremCaseDetails);
     }
 
     private EventType getEventType() {
