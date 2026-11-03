@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
 import java.util.HashMap;
@@ -47,6 +48,8 @@ class CoverSheetPersistenceServiceTest {
     private CoreCaseDataService coreCaseDataService;
     @Mock
     private FeatureToggleService featureToggleService;
+    @Mock
+    private GenerateCoverSheetService generateCoverSheetService;
 
     private final FinremCaseDetailsMapper caseDetailsMapper =
         new FinremCaseDetailsMapper(createObjectMapper());
@@ -58,7 +61,8 @@ class CoverSheetPersistenceServiceTest {
     @BeforeEach
     void setUp() {
         coverSheetPersistenceService = new CoverSheetPersistenceService(
-            coreCaseDataService, caseDetailsMapper, featureToggleService
+                generateCoverSheetService, coreCaseDataService,
+                caseDetailsMapper, featureToggleService
         );
         currentCaseDetails = FinremCaseDetails.builder()
             .id(CASE_ID)
@@ -74,7 +78,7 @@ class CoverSheetPersistenceServiceTest {
         "RESPONDENT, false",
         "RESPONDENT, true"
     })
-    void shouldSaveCoverSheetUsingLatestAddressConfidentiality(
+    void shouldSaveLegacyCoverSheetUsingLatestAddressConfidentiality(
         PaperNotificationRecipient recipient, boolean addressConfidential) {
 
         FinremCaseData latestCaseData = new FinremCaseData();
@@ -293,6 +297,34 @@ class CoverSheetPersistenceServiceTest {
         assertSame(ccdFailure, thrown);
         assertThat(getPublicCoverSheet(currentCaseDetails.getData(), APPLICANT)).isSameAs(existingCoverSheet);
         assertThat(getConfidentialCoverSheet(currentCaseDetails.getData(), APPLICANT)).isNull();
+    }
+
+    @ParameterizedTest(name = "{0}: CUI coversheet is confidential despite public address")
+    @EnumSource(value = PaperNotificationRecipient.class, names = {"APPLICANT", "RESPONDENT"})
+    void shouldSaveCitizenUiCoverSheetConfidentiallyWhenAddressIsNotConfidential(
+            PaperNotificationRecipient recipient) {
+
+        FinremCaseData latestCaseData = new FinremCaseData();
+        setAddressConfidentiality(latestCaseData, recipient, false);
+        setExistingCoverSheets(latestCaseData, recipient, caseDocument("old-public"), null);
+
+        when(generateCoverSheetService.shouldUseCitizenUiCoverSheet(
+                any(FinremCaseDetails.class), eq(recipient)
+        )).thenReturn(true);
+        stubSuccessfulCcdUpdate(latestCaseData);
+
+        CaseDocument newCoverSheet = caseDocument("new");
+        coverSheetPersistenceService.saveCoverSheet(currentCaseDetails, recipient, newCoverSheet);
+
+        assertThat(submittedUpdates).containsOnlyKeys(
+                getPublicCoverSheetFieldName(recipient),
+                getConfidentialCoverSheetFieldName(recipient)
+        );
+        assertThat(submittedUpdates).containsEntry(getPublicCoverSheetFieldName(recipient), null);
+        assertThat(submittedUpdates.get(getConfidentialCoverSheetFieldName(recipient))).isNotNull();
+
+        assertThat(getPublicCoverSheet(currentCaseDetails.getData(), recipient)).isNull();
+        assertThat(getConfidentialCoverSheet(currentCaseDetails.getData(), recipient)).isEqualTo(newCoverSheet);
     }
 
     private void stubSuccessfulCcdUpdate(FinremCaseData latestCaseData) {
