@@ -81,6 +81,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CUI_DOCUMENTS_UPLOADED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CUI_SIGN_IN_CONFIRMATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL;
@@ -993,6 +994,17 @@ class EmailServiceTest {
 
         assertThrows(SendEmailException.class,
             () -> emailService.sendConfirmationEmail(notificationRequest, FR_HWF_SUCCESSFUL));
+    }
+
+    @Test
+    void givenSignInConfirmationTemplate_whenBuildingTemplateVars_thenAddsHasDivorceAccount() {
+        notificationRequest.setHasDivorceAccount(true);
+
+        Map<String, Object> returnedTemplateVars =
+            emailService.buildTemplateVars(notificationRequest, FR_CUI_SIGN_IN_CONFIRMATION.name());
+
+        assertThat(returnedTemplateVars)
+            .containsEntry("hasDivorceAccount", true);
     }
 
     @Test
