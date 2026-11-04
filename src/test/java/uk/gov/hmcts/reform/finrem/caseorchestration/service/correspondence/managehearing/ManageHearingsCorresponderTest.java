@@ -423,6 +423,89 @@ class ManageHearingsCorresponderTest {
             .containsOnly(EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR);
     }
 
+    @Test
+    void shouldUseCitizenFormCForUnrepresentedApplicantAndRespondentWhenAccessCodesExist() {
+        CaseDocument defaultFormC = caseDocument("Form-C-default.pdf");
+        CaseDocument applicantCitizenFormC = caseDocument("Form-C-applicant-citizen.pdf");
+        CaseDocument respondentCitizenFormC = caseDocument("Form-C-respondent-citizen.pdf");
+
+        FinremCallbackRequest callback = buildCallbackForFormCSelection(
+            defaultFormC,
+            applicantCitizenFormC,
+            respondentCitizenFormC,
+            false,
+            false
+        );
+        UUID workingHearingId = callback.getFinremCaseData().getManageHearingsWrapper().getWorkingHearingId();
+        Hearing hearing = buildHearingForFormCSelection(defaultFormC);
+
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(
+            callback.getFinremCaseData().getManageHearingsWrapper(),
+            workingHearingId
+        )).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getMiniFormAIfRequired(callback.getFinremCaseData(), hearing))
+            .thenReturn(Optional.empty());
+        when(citizenPinInPostService.findAccessCodeForRecipient(
+            callback.getFinremCaseData(),
+            uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT
+        )).thenReturn(Optional.of("APPL1234"));
+        when(citizenPinInPostService.findAccessCodeForRecipient(
+            callback.getFinremCaseData(),
+            uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT
+        )).thenReturn(Optional.of("RESP1234"));
+
+        List<SendCorrespondenceEvent> events = corresponder.buildHearingCorrespondenceEventsIfNeeded(callback, AUTH_TOKEN);
+
+        SendCorrespondenceEvent applicantEvent = getEventForParty(events, NotificationParty.APPLICANT);
+        SendCorrespondenceEvent respondentEvent = getEventForParty(events, NotificationParty.RESPONDENT);
+
+        assertThat(applicantEvent.getDocumentsToPost()).contains(applicantCitizenFormC).doesNotContain(defaultFormC);
+        assertThat(respondentEvent.getDocumentsToPost()).contains(respondentCitizenFormC).doesNotContain(defaultFormC);
+    }
+
+    @Test
+    void shouldFallBackToDefaultFormCWhenCitizenFormCIsMissing() {
+        CaseDocument defaultFormC = caseDocument("Form-C-default.pdf");
+
+        FinremCallbackRequest callback = buildCallbackForFormCSelection(defaultFormC, null, null, false, false);
+        UUID workingHearingId = callback.getFinremCaseData().getManageHearingsWrapper().getWorkingHearingId();
+        Hearing hearing = buildHearingForFormCSelection(defaultFormC);
+
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(
+            callback.getFinremCaseData().getManageHearingsWrapper(),
+            workingHearingId
+        )).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getMiniFormAIfRequired(callback.getFinremCaseData(), hearing))
+            .thenReturn(Optional.empty());
+
+        List<SendCorrespondenceEvent> events = corresponder.buildHearingCorrespondenceEventsIfNeeded(callback, AUTH_TOKEN);
+        SendCorrespondenceEvent applicantEvent = getEventForParty(events, NotificationParty.APPLICANT);
+
+        assertThat(applicantEvent.getDocumentsToPost()).contains(defaultFormC);
+    }
+
+    @Test
+    void shouldUseDefaultFormCWhenApplicantIsRepresentedEvenIfAccessCodeExists() {
+        CaseDocument defaultFormC = caseDocument("Form-C-default.pdf");
+        CaseDocument applicantCitizenFormC = caseDocument("Form-C-applicant-citizen.pdf");
+
+        FinremCallbackRequest callback = buildCallbackForFormCSelection(defaultFormC, applicantCitizenFormC, null, true, false);
+        UUID workingHearingId = callback.getFinremCaseData().getManageHearingsWrapper().getWorkingHearingId();
+        Hearing hearing = buildHearingForFormCSelection(defaultFormC);
+
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(
+            callback.getFinremCaseData().getManageHearingsWrapper(),
+            workingHearingId
+        )).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getMiniFormAIfRequired(callback.getFinremCaseData(), hearing))
+            .thenReturn(Optional.empty());
+
+        List<SendCorrespondenceEvent> events = corresponder.buildHearingCorrespondenceEventsIfNeeded(callback, AUTH_TOKEN);
+        SendCorrespondenceEvent applicantEvent = getEventForParty(events, NotificationParty.APPLICANT);
+
+        assertThat(applicantEvent.getDocumentsToPost()).contains(defaultFormC).doesNotContain(applicantCitizenFormC);
+    }
+
     @Nested
     class BuildHearingCorrespondenceEventIfNeededTests {
 
@@ -736,6 +819,57 @@ class ManageHearingsCorresponderTest {
             .applicantLname("Frodo")
             .respondentLname("Gollum")
             .build();
+    }
+
+    private FinremCallbackRequest buildCallbackForFormCSelection(CaseDocument defaultFormC,
+                                                                  CaseDocument applicantCitizenFormC,
+                                                                  CaseDocument respondentCitizenFormC,
+                                                                  boolean applicantRepresented,
+                                                                  boolean respondentRepresented) {
+        UUID workingHearingId = UUID.randomUUID();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(CASE_ID)
+            .ccdCaseType(CaseType.CONTESTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantLname("Frodo")
+                .respondentLname("Gollum")
+                .applicantRepresented(applicantRepresented ? YesOrNo.YES : YesOrNo.NO)
+                .contestedRespondentRepresented(respondentRepresented ? YesOrNo.YES : YesOrNo.NO)
+                .build())
+            .listForHearingWrapper(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper.builder()
+                .formC(defaultFormC)
+                .formCApplicantCitizen(applicantCitizenFormC)
+                .formCRespondentCitizen(respondentCitizenFormC)
+                .build())
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .workingHearingId(workingHearingId)
+                .build())
+            .build();
+
+        return FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, caseData);
+    }
+
+    private Hearing buildHearingForFormCSelection(CaseDocument defaultFormC) {
+        return Hearing.builder()
+            .hearingDate(LocalDate.of(2026, 1, 1))
+            .hearingTime("10:00")
+            .hearingTimeEstimate("30 mins")
+            .hearingType(FDA)
+            .hearingNoticePrompt(YesOrNo.YES)
+            .hearingCourtSelection(buildCourt())
+            .partiesOnCase(List.of(
+                PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(CaseRole.APP_SOLICITOR.getCcdCode()).build()).build(),
+                PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(CaseRole.RESP_SOLICITOR.getCcdCode()).build()).build()
+            ))
+            .additionalHearingDocs(List.of(DocumentCollectionItem.builder().value(defaultFormC).build()))
+            .build();
+    }
+
+    private SendCorrespondenceEvent getEventForParty(List<SendCorrespondenceEvent> events, NotificationParty party) {
+        return events.stream()
+            .filter(e -> e.getNotificationParties().contains(party))
+            .findFirst()
+            .orElseThrow();
     }
 
     private SendCorrespondenceEvent getExpectedHearingEvent(FinremCaseDetails caseDetails) {

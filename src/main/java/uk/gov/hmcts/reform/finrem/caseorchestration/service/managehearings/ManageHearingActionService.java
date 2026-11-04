@@ -417,6 +417,12 @@ public class ManageHearingActionService {
         );
     }
 
+    /**
+     * Generates and stores Form C documents for hearing correspondence.
+     *
+     * <p>Saves a default case Form C suitable for all recipients (without access code) on the list-for-hearing wrapper.
+     * It optionally generates citizen-specific Form C variants containing access codes when citizen UI is enabled.</p>
+     */
     private void generateFormC(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         ManageHearingsDocumentService.FormCTemplateSelection formCTemplates =
             manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails);
@@ -425,6 +431,20 @@ public class ManageHearingActionService {
         CaseDocument defaultCaseFormC = manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails, authToken);
         listForHearingWrapper.setFormC(defaultCaseFormC);
 
+        setCitizenFormCIfRequired(finremCaseDetails, authToken, listForHearingWrapper);
+
+        documentMap.put(
+            FORM_C,
+            new DocumentRecord(
+                defaultCaseFormC,
+                formCTemplates.standardType()
+            )
+        );
+    }
+
+    private void setCitizenFormCIfRequired(
+        FinremCaseDetails finremCaseDetails, String authToken, ListForHearingWrapper listForHearingWrapper
+    ) {
         if (featureToggleService.isFinremCitizenUiEnabled()) {
             CaseDocument applicantCitizenFormC = manageHearingsDocumentService.generateApplicantCitizenFormC(
                 finremCaseDetails, authToken
@@ -439,14 +459,6 @@ public class ManageHearingActionService {
             listForHearingWrapper.setFormCApplicantCitizen(null);
             listForHearingWrapper.setFormCRespondentCitizen(null);
         }
-
-        documentMap.put(
-            FORM_C,
-            new DocumentRecord(
-                defaultCaseFormC,
-                formCTemplates.standardType()
-            )
-        );
     }
 
     private void generateFormG(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {

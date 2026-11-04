@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -164,25 +165,18 @@ public class ManageHearingsCorresponder {
     }
 
     /**
-     * Builds a {@link SendCorrespondenceEvent} to notify the solicitor when a hearing
-     * is adjourned or vacated, if notification is required.
+     * Builds correspondence events for an adjourned or vacated hearing when notifications are required.
      *
-     * <p>
-     * This method determines whether the hearing has been vacated and relisted. In such cases,
-     * a hearing correspondence is always sent via {@code sendHearingCorrespondence}, as the user
-     * cannot opt out of notifications. It then retrieves the vacated or adjourned hearing in context
-     * and evaluates whether a notification should be sent.
-     * </p>
+     * <p>If the hearing was vacated and relisted, this method also includes add-hearing
+     * correspondence events by calling {@code buildHearingCorrespondenceEventsIfNeeded(...)}.
+     * Publishing is handled by the caller.</p>
      *
-     * <p>
-     * If notification is required, it prepares the relevant hearing notice document and selects
-     * the appropriate email template based on whether the hearing was adjourned or vacated,
-     * before constructing the correspondence event.
-     * </p>
+     * <p>When a vacate/adjourn notice should be sent, this method selects the appropriate
+     * template (adjourn or vacate) and builds one event per notification party.</p>
      *
-     * @param callbackRequest the callback request containing case details and data
-     * @param userAuthorisation the authorization token of the user initiating this action
-     * @return a list of {@link SendCorrespondenceEvent}s for relisted hearing and/or vacate/adjourn notice;
+     * @param callbackRequest the callback request containing case details and hearing data
+     * @param userAuthorisation the authorization token used to build correspondence payloads
+     * @return a list of correspondence events for relist and/or vacate/adjourn notice;
      *         returns an empty list when notification is not required
      */
     public List<SendCorrespondenceEvent> buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(FinremCallbackRequest callbackRequest,
@@ -295,8 +289,8 @@ public class ManageHearingsCorresponder {
     /**
      * Builds one {@link SendCorrespondenceEvent} per notification party on the hearing.
      *
-     * <p>For applicant/respondent parties, this also resolves party-specific Form C documents
-     * (citizen variants where applicable) before building each event.</p>
+     * <p>For applicant and respondent parties, party-specific Form C documents are also resolved
+     * before building each event.</p>
      *
      * @param caseDetails the case the correspondence relates to
      * @param hearing the hearing whose parties should be notified
@@ -328,7 +322,7 @@ public class ManageHearingsCorresponder {
     }
 
     /**
-     * Returns the posting document list for a specific party, substituting Form C with the
+     * Returns the documents to post for a specific party, substituting Form C with the
      * recipient-specific version where applicable.
      *
      * @param caseDetails case details containing Form C variants
@@ -357,32 +351,34 @@ public class ManageHearingsCorresponder {
      * Resolves the most appropriate Form C for a recipient.
      *
      * <p>For unrepresented applicant/respondent with access code, citizen Form C is preferred;
-     * otherwise the default Form C is returned.</p>
+     * otherwise the default case Form C without an access code is returned.</p>
      *
      * @param caseData case data containing Form C documents and representation status
      * @param recipient notification party recipient
      * @return recipient-specific Form C where applicable, otherwise default Form C
      */
     private CaseDocument getFormCForRecipient(FinremCaseData caseData, NotificationParty recipient) {
+        ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
+
         if (NotificationParty.APPLICANT.equals(recipient)
             && !caseData.isApplicantRepresentedByASolicitor()
             && hasAccessCodeForRecipient(caseData, APPLICANT)) {
-            return Optional.ofNullable(caseData.getListForHearingWrapper().getFormCApplicantCitizen())
-                .orElse(caseData.getListForHearingWrapper().getFormC());
+            return Optional.ofNullable(listForHearingWrapper.getFormCApplicantCitizen())
+                .orElse(listForHearingWrapper.getFormC());
         }
 
         if (NotificationParty.RESPONDENT.equals(recipient)
             && !caseData.isRespondentRepresentedByASolicitor()
             && hasAccessCodeForRecipient(caseData, RESPONDENT)) {
-            return Optional.ofNullable(caseData.getListForHearingWrapper().getFormCRespondentCitizen())
-                .orElse(caseData.getListForHearingWrapper().getFormC());
+            return Optional.ofNullable(listForHearingWrapper.getFormCRespondentCitizen())
+                .orElse(listForHearingWrapper.getFormC());
         }
 
         return caseData.getListForHearingWrapper().getFormC();
     }
 
     /**
-     * Checks whether an access code exists for the given paper-notification recipient.
+     * Checks whether an access code exists for the given recipient.
      *
      * @param caseData case data used to look up recipient access code
      * @param recipient recipient type (applicant/respondent)
