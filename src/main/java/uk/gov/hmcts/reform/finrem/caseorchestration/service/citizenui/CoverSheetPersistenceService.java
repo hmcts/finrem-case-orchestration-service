@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
 import java.util.Arrays;
@@ -42,6 +43,7 @@ public class CoverSheetPersistenceService {
     private static final String RESPONDENT_CONFIDENTIAL_COVERSHEET = "bulkPrintCoverSheetResConfidential";
     private static final String BIN_FIELD = "bin_fileUrlsCollection";
 
+    private final GenerateCoverSheetService generateCoverSheetService;
     private final CoreCaseDataService coreCaseDataService;
     private final FinremCaseDetailsMapper caseDetailsMapper;
     private final FeatureToggleService featureToggleService;
@@ -94,7 +96,8 @@ public class CoverSheetPersistenceService {
     private Map<String, Object> buildCoverSheetUpdate(CaseDetails latestCase, PaperNotificationRecipient recipient,
                                                       CaseDocument coversheet) {
 
-        FinremCaseData caseData = caseDetailsMapper.mapToFinremCaseDetails(latestCase).getData();
+        FinremCaseDetails latestDetails = caseDetailsMapper.mapToFinremCaseDetails(latestCase);
+        FinremCaseData caseData = latestDetails.getData();
         BulkPrintCoversheetWrapper wrapper = caseData.getBulkPrintCoversheetWrapper();
         boolean applicant = recipient == APPLICANT;
 
@@ -104,9 +107,9 @@ public class CoverSheetPersistenceService {
                 : Arrays.asList(wrapper.getBulkPrintCoverSheetRes(), wrapper.getBulkPrintCoverSheetResConfidential());
 
         if (applicant) {
-            setApplicantCoverSheet(caseData, coversheet);
+            setApplicantCoverSheet(latestDetails, coversheet);
         } else {
-            setRespondentCoverSheet(caseData, coversheet);
+            setRespondentCoverSheet(latestDetails, coversheet);
         }
 
         boolean binUpdated = binOldCoverSheets(caseData, oldCoverSheets, coversheet);
@@ -163,16 +166,15 @@ public class CoverSheetPersistenceService {
      *
      * <p>Updates the case data in memory and clears the opposite coversheet field.
      *
-     * @param caseData the case data to update
+     * @param caseDetails the case details to update
      * @param coversheet the new applicant coversheet
      */
-    private void setApplicantCoverSheet(FinremCaseData caseData, CaseDocument coversheet) {
-
+    private void setApplicantCoverSheet(FinremCaseDetails caseDetails, CaseDocument coversheet) {
+        FinremCaseData caseData = caseDetails.getData();
         BulkPrintCoversheetWrapper wrapper = caseData.getBulkPrintCoversheetWrapper();
 
-        boolean confidential = YesOrNo.isYes(
-                caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent()
-        );
+        boolean confidential = generateCoverSheetService.shouldUseCitizenUiCoverSheet(caseDetails, APPLICANT)
+                || YesOrNo.isYes(caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent());
 
         wrapper.setBulkPrintCoverSheetApp(confidential ? null : coversheet);
         wrapper.setBulkPrintCoverSheetAppConfidential(confidential ? coversheet : null);
@@ -183,15 +185,15 @@ public class CoverSheetPersistenceService {
      *
      * <p>Updates the case data in memory and clears the opposite coversheet field.
      *
-     * @param caseData the case data to update
+     * @param caseDetails the case details to update
      * @param coversheet the new respondent coversheet
      */
-    private void setRespondentCoverSheet(FinremCaseData caseData, CaseDocument coversheet) {
-
+    private void setRespondentCoverSheet(FinremCaseDetails caseDetails, CaseDocument coversheet) {
+        FinremCaseData caseData = caseDetails.getData();
         BulkPrintCoversheetWrapper wrapper = caseData.getBulkPrintCoversheetWrapper();
-        boolean confidential = YesOrNo.isYes(
-                caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant()
-        );
+
+        boolean confidential = generateCoverSheetService.shouldUseCitizenUiCoverSheet(caseDetails, RESPONDENT)
+                || YesOrNo.isYes(caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant());
 
         wrapper.setBulkPrintCoverSheetRes(confidential ? null : coversheet);
         wrapper.setBulkPrintCoverSheetResConfidential(confidential ? coversheet : null);

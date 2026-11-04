@@ -305,6 +305,53 @@ class GenerateCoverSheetServiceTest {
         );
     }
 
+    @Test
+    void shouldStoreApplicantCitizenUiCoverSheetConfidentiallyWhenAddressIsPublic() {
+        FinremCaseDetails caseDetails = setUpCitizenUiCoverSheet(APPLICANT);
+        BulkPrintCoversheetWrapper wrapper = caseDetails.getData().getBulkPrintCoversheetWrapper();
+        wrapper.setBulkPrintCoverSheetApp(caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME));
+
+        generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+
+        assertNull(wrapper.getBulkPrintCoverSheetApp());
+        assertEquals(caseDocument(TEST_DOCUMENT_URL, TEST_DOCUMENT_FILENAME),
+            wrapper.getBulkPrintCoverSheetAppConfidential());
+    }
+
+    @Test
+    void shouldStoreRespondentCitizenUiCoverSheetConfidentiallyWhenAddressIsPublic() {
+        FinremCaseDetails caseDetails = setUpCitizenUiCoverSheet(RESPONDENT);
+        BulkPrintCoversheetWrapper wrapper = caseDetails.getData().getBulkPrintCoversheetWrapper();
+        wrapper.setBulkPrintCoverSheetRes(caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME));
+
+        generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+
+        assertNull(wrapper.getBulkPrintCoverSheetRes());
+        assertEquals(caseDocument(TEST_DOCUMENT_URL, TEST_DOCUMENT_FILENAME),
+            wrapper.getBulkPrintCoverSheetResConfidential());
+    }
+
+    private FinremCaseDetails setUpCitizenUiCoverSheet(DocumentHelper.PaperNotificationRecipient recipient) {
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
+        caseDetails.setCaseType(CaseType.CONTESTED);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+
+        String template = "FL-FRM-LET-ENG-00523.docx";
+        Map<String, Object> placeholders = Map.of();
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+        when(documentConfiguration.getBulkPrintCitizenUiTemplate()).thenReturn(template);
+        when(documentConfiguration.getBulkPrintFileName()).thenReturn(BULK_PRINT_FILE_NAME);
+        when(bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(eq(caseDetails), eq(recipient), any()))
+            .thenReturn(placeholders);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(
+            AUTH_TOKEN, placeholders, template, BULK_PRINT_FILE_NAME, CaseType.CONTESTED
+        )).thenReturn(caseDocument(TEST_DOCUMENT_URL, TEST_DOCUMENT_FILENAME));
+
+        return caseDetails;
+    }
+
     private void setIntervenerCoverSheet(FinremCaseDetails caseDetails, IntervenerType intervenerType, CaseDocument document) {
         BulkPrintCoversheetWrapper wrapper = caseDetails.getData().getBulkPrintCoversheetWrapper();
         switch (intervenerType) {
