@@ -33,7 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -61,7 +62,7 @@ class HearingsAboutToSubmitHandlerTest {
     private ManageHearingActionService manageHearingActionService;
 
     @Mock
-    private NotificationAuditService notificationAuditService;
+    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     @Mock
     private ManageHearingsCorresponder manageHearingsCorresponder;
@@ -209,7 +210,8 @@ class HearingsAboutToSubmitHandlerTest {
             request,
             AUTH_TOKEN
         );
-        verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
+        verify(correspondenceEventAuditOrchestrationService)
+            .createPendingAudits(List.of(event), EventType.MANAGE_HEARINGS);
     }
 
     @Test
@@ -240,7 +242,8 @@ class HearingsAboutToSubmitHandlerTest {
             request,
             AUTH_TOKEN
         );
-        verify(notificationAuditService).createAuditsForCorrespondence(event, EventType.MANAGE_HEARINGS);
+        verify(correspondenceEventAuditOrchestrationService)
+            .createPendingAudits(List.of(event), EventType.MANAGE_HEARINGS);
 
     }
 
@@ -269,7 +272,7 @@ class HearingsAboutToSubmitHandlerTest {
             request,
             AUTH_TOKEN
         );
-        verify(notificationAuditService, never()).createAuditsForCorrespondence(any(), any());
+        verify(correspondenceEventAuditOrchestrationService, never()).createPendingAudits(anyList(), any());
     }
 
     private FinremCallbackRequest buildRequest(FinremCaseData caseData) {

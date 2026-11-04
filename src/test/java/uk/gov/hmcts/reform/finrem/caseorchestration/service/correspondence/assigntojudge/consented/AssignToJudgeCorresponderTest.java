@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.Notificat
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 
 import java.util.List;
 
@@ -24,10 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -45,13 +43,13 @@ class AssignToJudgeCorresponderTest {
     private FinremNotificationRequestMapper finremNotificationRequestMapper;
 
     @Mock
-    private NotificationAuditService notificationAuditService;
+    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     @InjectMocks
     private AssignToJudgeCorresponder assignToJudgeCorresponder;
 
     @Captor
-    ArgumentCaptor<SendCorrespondenceEvent> sendCorrespondenceEventArgumentCaptor;
+    ArgumentCaptor<List<SendCorrespondenceEvent>> sendCorrespondenceEventListArgumentCaptor;
 
     @Test
     void shouldCreateAuditsForCorrespondence() {
@@ -72,10 +70,6 @@ class AssignToJudgeCorresponderTest {
             .getNotificationRequestForRespondentSolicitor(finremCaseDetails, false)
         ).thenReturn(respondentNotificationRequest);
 
-        when(notificationAuditService
-            .createAuditsForCorrespondence(any(SendCorrespondenceEvent.class), eq(eventType)))
-            .thenReturn("tracker-valid-id");
-
         // Act
         assignToJudgeCorresponder.createAuditsForCorrespondence(eventType, finremCaseDetails, AUTH_TOKEN);
 
@@ -83,11 +77,11 @@ class AssignToJudgeCorresponderTest {
         assertAll(
             () -> verify(finremCaseDetails).isApplicantSolicitorDigital(),
             () -> verify(finremCaseDetails).isRespondentSolicitorDigital(),
-            () -> verify(notificationAuditService, times(2))
-                .createAuditsForCorrespondence(sendCorrespondenceEventArgumentCaptor.capture(), eq(eventType)),
+            () -> verify(correspondenceEventAuditOrchestrationService)
+                .createPendingAudits(sendCorrespondenceEventListArgumentCaptor.capture(), eq(eventType)),
             () -> verifyNoInteractions(assignedToJudgeDocumentService),
             () -> {
-                List<SendCorrespondenceEvent> events = sendCorrespondenceEventArgumentCaptor.getAllValues();
+                List<SendCorrespondenceEvent> events = sendCorrespondenceEventListArgumentCaptor.getValue();
 
                 assertAll(
                     // Applicant event
@@ -118,8 +112,7 @@ class AssignToJudgeCorresponderTest {
                         events.get(1).getEmailNotificationRequest()
                     ),
                     () -> assertEquals(AUTH_TOKEN, events.get(1).getAuthToken()),
-                    () -> assertEquals("tracker-valid-id", // respondent event should be the first tracker id
-                        events.get(1).getNotificationTrackerId()),
+                    () -> assertNull(events.get(1).getNotificationTrackerId()),
                     () -> assertThat(events.get(1).getDocumentsToPost()).isEmpty()
                 );
             }
@@ -159,7 +152,7 @@ class AssignToJudgeCorresponderTest {
         assertAll(
             () -> verify(finremCaseDetails).isApplicantSolicitorDigital(),
             () -> verify(finremCaseDetails).isRespondentSolicitorDigital(),
-            () -> verifyNoInteractions(notificationAuditService),
+            () -> verifyNoInteractions(correspondenceEventAuditOrchestrationService),
             // Applicant event
             () -> assertEquals(eventType.name(), events.getFirst().getEventId()),
             () -> assertEquals(finremCaseDetails, events.getFirst().getCaseDetails()),
