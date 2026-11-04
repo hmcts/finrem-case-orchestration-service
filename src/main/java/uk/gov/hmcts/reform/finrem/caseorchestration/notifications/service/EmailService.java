@@ -206,6 +206,12 @@ public class EmailService {
             String courtName = (String) templateVars.get("courtName");
             templateVars.put("hasCourtName", StringUtils.isNotBlank(courtName));
         }
+        if (EmailTemplateNames.FR_CUI_SIGN_IN_CONFIRMATION.name().equals(templateName)) {
+            templateVars.put(
+                "hasDivorceAccount",
+                Boolean.TRUE.equals(notificationRequest.getHasDivorceAccount())
+            );
+        }
     }
 
     protected void populateTemplateVarsFromApplicationProperties(Map<String, Object> templateVars, String templateName) {
