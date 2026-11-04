@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizenui.documentupload;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -35,5 +36,10 @@ public class CUIApplicantDocumentUploadSubmittedHandler extends CUIDocumentUploa
     @Override
     protected NotificationParty notificationParty() {
         return NotificationParty.CITIZEN_APPLICANT;
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return log;
     }
 }
