@@ -9,6 +9,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
 import java.util.ArrayList;
@@ -73,6 +75,10 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private CcdService ccdService;
     @MockitoBean
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @MockitoBean
+    private FeatureToggleService featureToggleService;
+    @MockitoBean
+    private CitizenPinInPostService citizenPinInPostService;
 
     private CaseDetails caseDetails;
 
@@ -185,6 +191,9 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             .intervenerName("intervener1").build());
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
             .data(data).build();
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
 
         verify(bulkPrintService, times(1)).printIntervenerDocuments(
@@ -193,6 +202,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(
             any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(citizenPinInPostService, times(2))
+            .generatePinIfNeeded(any(FinremCaseDetails.class), any(DocumentHelper.PaperNotificationRecipient.class));
     }
 
     @Test

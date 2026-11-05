@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.cons
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +30,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +52,8 @@ class FinremContestedSendOrderCorresponderTest {
     private BulkPrintService bulkPrintService;
     @Mock
     private DocumentHelper documentHelper;
+    @Mock
+    private CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
 
     private FinremCaseDetails caseDetails;
 
@@ -153,6 +162,40 @@ class FinremContestedSendOrderCorresponderTest {
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOne, caseDetails);
         verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOne.class), any(FinremCaseDetails.class),
             anyString(), anyList());
+    }
+
+    @Test
+    void shouldPersistApplicantPinBeforePrinting() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .ordersSentToPartiesCollection(List.of())
+                .build())
+            .build();
+
+        corresponder.printApplicantDocuments(AUTH_TOKEN, caseDetails);
+
+        InOrder inOrder = inOrder(citizenPinInPostPersistenceService, bulkPrintService);
+        inOrder.verify(citizenPinInPostPersistenceService)
+            .ensurePinPersisted(caseDetails, APPLICANT);
+        inOrder.verify(bulkPrintService)
+            .printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), anyList());
+    }
+
+    @Test
+    void shouldPersistRespondentPinBeforePrinting() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .ordersSentToPartiesCollection(List.of())
+                .build())
+            .build();
+
+        corresponder.printRespondentDocuments(AUTH_TOKEN, caseDetails);
+
+        InOrder inOrder = inOrder(citizenPinInPostPersistenceService, bulkPrintService);
+        inOrder.verify(citizenPinInPostPersistenceService)
+            .ensurePinPersisted(caseDetails, RESPONDENT);
+        inOrder.verify(bulkPrintService)
+            .printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), anyList());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
