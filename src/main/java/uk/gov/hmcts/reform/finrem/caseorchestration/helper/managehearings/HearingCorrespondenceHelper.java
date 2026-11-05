@@ -17,15 +17,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.isCitizenFormCDocumentType;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.isDefaultFormCDocumentType;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.FDA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.FDR;
 
@@ -36,6 +44,8 @@ public class HearingCorrespondenceHelper {
 
     private final PaperNotificationService paperNotificationService;
     private final ExpressCaseService expressCaseService;
+    private final CitizenPinInPostService citizenPinInPostService;
+    private final FeatureToggleService featureToggleService;
 
     /**
      * Retrieves the {@link Hearing} from the wrapper param using the UUID param.
@@ -182,6 +192,24 @@ public class HearingCorrespondenceHelper {
         }
     }
 
+    public List<CaseDocument> getHearingCorrespondenceDocumentsForParty(FinremCaseData caseData,
+                                                          UUID hearingId,
+                                                          NotificationParty party) {
+        ManageHearingsWrapper wrapper = caseData.getManageHearingsWrapper();
+
+        List<CaseDocument> documentsToPost = new ArrayList<>(getHearingDocumentEntries(wrapper, hearingId).stream()
+            .filter(Objects::nonNull)
+            .filter(doc -> !isFormCDocumentType(doc.getHearingCaseDocumentType()))
+            .map(ManageHearingDocument::getHearingDocument)
+            .filter(Objects::nonNull)
+            .toList());
+
+        Optional.ofNullable(getFormCForParty(caseData, wrapper, hearingId, party))
+            .ifPresent(documentsToPost::add);
+
+        return documentsToPost;
+    }
+
     /**
      * Determines if the action selection is to vacate a hearing.
      *
@@ -215,15 +243,77 @@ public class HearingCorrespondenceHelper {
      * @return a {@link CaseDocument}
      */
     public CaseDocument getCaseDocumentByTypeAndHearingUuid(CaseDocumentType documentType, ManageHearingsWrapper wrapper, UUID hearingId) {
-        return wrapper.getHearingDocumentsCollection().stream()
-            .map(ManageHearingDocumentsCollectionItem::getValue)
+        return getHearingDocumentEntries(wrapper, hearingId).stream()
             .filter(Objects::nonNull)
-            .filter(doc -> Objects.equals(hearingId, doc.getHearingId()))
             .filter(doc -> Objects.equals(documentType, doc.getHearingCaseDocumentType()))
             .map(ManageHearingDocument::getHearingDocument)
             .filter(Objects::nonNull)
             .max(Comparator.comparing(CaseDocument::getUploadTimestamp,
                 Comparator.nullsLast(Comparator.naturalOrder())))
             .orElse(null);
+    }
+
+    private List<ManageHearingDocument> getHearingDocumentEntries(ManageHearingsWrapper wrapper, UUID hearingId) {
+        if (hearingId == null || wrapper.getHearingDocumentsCollection() == null) {
+            return List.of();
+        }
+
+        return wrapper.getHearingDocumentsCollection().stream()
+            .map(ManageHearingDocumentsCollectionItem::getValue)
+            .filter(Objects::nonNull)
+            .filter(doc -> Objects.equals(hearingId, doc.getHearingId()))
+            .toList();
+    }
+
+    private CaseDocument getFormCForParty(FinremCaseData caseData,
+                                          ManageHearingsWrapper wrapper,
+                                          UUID hearingId,
+                                          NotificationParty party) {
+        CaseDocument defaultHearingFormC = getFormCByType(wrapper, hearingId, CaseDocumentType.DEFAULT_FORM_C_TYPES);
+
+        if (!featureToggleService.isFinremCitizenUiEnabled()) {
+            return defaultHearingFormC;
+        }
+
+        if (NotificationParty.APPLICANT.equals(party)) {
+            CaseDocument applicantCitizenFormC = getFormCByType(wrapper, hearingId, CaseDocumentType.APPLICANT_CITIZEN_FORM_C_TYPES);
+            boolean shouldSendApplicantCitizenFormC = !caseData.isApplicantRepresentedByASolicitor() && hasAccessCodeForApplicant(caseData);
+            return shouldSendApplicantCitizenFormC && applicantCitizenFormC != null
+                ? applicantCitizenFormC
+                : defaultHearingFormC;
+        }
+
+        if (NotificationParty.RESPONDENT.equals(party)) {
+            CaseDocument respondentCitizenFormC = getFormCByType(wrapper, hearingId, CaseDocumentType.RESPONDENT_CITIZEN_FORM_C_TYPES);
+            boolean shouldSendRespondentCitizenFormC = !caseData.isRespondentRepresentedByASolicitor() && hasAccessCodeForRespondent(caseData);
+            return shouldSendRespondentCitizenFormC && respondentCitizenFormC != null
+                ? respondentCitizenFormC
+                : defaultHearingFormC;
+        }
+
+        return defaultHearingFormC;
+    }
+
+    private boolean isFormCDocumentType(CaseDocumentType documentType) {
+        return isDefaultFormCDocumentType(documentType) || isCitizenFormCDocumentType(documentType);
+    }
+
+    private boolean hasAccessCodeForApplicant(FinremCaseData caseData) {
+        return citizenPinInPostService.findAccessCodeForRecipient(caseData, APPLICANT).isPresent();
+    }
+
+    private boolean hasAccessCodeForRespondent(FinremCaseData caseData) {
+        return citizenPinInPostService.findAccessCodeForRecipient(caseData, RESPONDENT).isPresent();
+    }
+
+    private CaseDocument getFormCByType(ManageHearingsWrapper wrapper, UUID hearingId, List<CaseDocumentType> formCTypes) {
+        for (CaseDocumentType documentType : formCTypes) {
+            CaseDocument formCDocument = getCaseDocumentByTypeAndHearingUuid(documentType, wrapper, hearingId);
+            if (formCDocument != null) {
+                return formCDocument;
+            }
+        }
+
+        return null;
     }
 }

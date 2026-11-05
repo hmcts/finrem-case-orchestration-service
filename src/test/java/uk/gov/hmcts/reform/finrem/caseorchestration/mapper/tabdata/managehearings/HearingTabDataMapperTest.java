@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
@@ -107,6 +108,7 @@ class HearingTabDataMapperTest {
             ManageHearingDocumentsCollectionItem.builder()
                 .value(ManageHearingDocument.builder()
                     .hearingId(hearingId)
+                    .hearingCaseDocumentType(CaseDocumentType.FORM_C)
                     .hearingDocument(CaseDocument.builder()
                         .documentFilename(DOCUMENT_2_FILENAME)
                         .build())
@@ -131,6 +133,56 @@ class HearingTabDataMapperTest {
             .anyMatch(doc -> doc.getValue().getDocumentFilename().equals(DOCUMENT_1_FILENAME)));
         assertTrue(result.getTabHearingDocuments().stream()
             .anyMatch(doc -> doc.getValue().getDocumentFilename().equals(DOCUMENT_2_FILENAME)));
+    }
+
+    @Test
+    void mapHearingToTabData_shouldExcludeCitizenFormCDocumentsFromTab() {
+        UUID hearingId = UUID.randomUUID();
+        when(courtDetailsMapper.convertToFrcCourtDetails(any())).thenReturn(CourtDetails.builder().courtName(COURT_NAME).build());
+
+        Hearing hearing = Hearing.builder()
+            .hearingType(HearingType.FDR)
+            .hearingDate(LocalDate.of(2025, 8, 1))
+            .hearingTime("10:00 AM")
+            .hearingTimeEstimate(HEARING_TIME_ESTIMATE)
+            .hearingMode(HearingMode.HYBRID)
+            .partiesOnCase(List.of())
+            .build();
+
+        ManageHearingsCollectionItem hearingCollectionItem = ManageHearingsCollectionItem.builder()
+            .id(hearingId)
+            .value(hearing)
+            .build();
+
+        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection = List.of(
+            ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument.builder()
+                    .hearingId(hearingId)
+                    .hearingCaseDocumentType(CaseDocumentType.FORM_C)
+                    .hearingDocument(CaseDocument.builder().documentFilename("FormC.pdf").build())
+                    .build())
+                .build(),
+            ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument.builder()
+                    .hearingId(hearingId)
+                    .hearingCaseDocumentType(CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN)
+                    .hearingDocument(CaseDocument.builder().documentFilename("FormCApplicantCitizen.pdf").build())
+                    .build())
+                .build(),
+            ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument.builder()
+                    .hearingId(hearingId)
+                    .hearingCaseDocumentType(CaseDocumentType.FORM_C_EXPRESS_RESPONDENT_CITIZEN)
+                    .hearingDocument(CaseDocument.builder().documentFilename("FormCRespondentCitizen.pdf").build())
+                    .build())
+                .build()
+        );
+
+        HearingTabItem result = hearingTabDataMapper.mapHearingToTabData(hearingCollectionItem, hearingDocumentsCollection);
+
+        assertThat(result.getTabHearingDocuments())
+            .extracting(doc -> doc.getValue().getDocumentFilename())
+            .containsExactly("FormC.pdf");
     }
 
     private static Stream<Arguments> mapVacatedOrAdjournedHearingToTabData() {
@@ -188,6 +240,7 @@ class HearingTabDataMapperTest {
             ManageHearingDocumentsCollectionItem.builder()
                 .value(ManageHearingDocument.builder()
                     .hearingId(hearingId)
+                    .hearingCaseDocumentType(CaseDocumentType.FORM_C)
                     .hearingDocument(CaseDocument.builder()
                         .documentFilename(DOCUMENT_2_FILENAME)
                         .build())

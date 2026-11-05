@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -25,7 +26,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
@@ -51,6 +55,10 @@ class HearingCorrespondenceHelperTest {
     PaperNotificationService paperNotificationService;
     @Mock
     ExpressCaseService expressCaseService;
+    @Mock
+    CitizenPinInPostService citizenPinInPostService;
+    @Mock
+    FeatureToggleService featureToggleService;
 
     @InjectMocks
     private HearingCorrespondenceHelper helper;
@@ -386,5 +394,131 @@ class HearingCorrespondenceHelperTest {
         CaseDocument result = helper.getVacateHearingNotice(finremCaseDetails.getData());
 
         assertNull(result);
+    }
+
+    @Test
+    void shouldReturnCitizenFormCForApplicantWhenEligible() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument citizenFormC = CaseDocument.builder().documentFilename("Form-C-applicant-citizen.pdf").build();
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
+
+        FinremCaseData caseData = caseDataWithHearingDocuments(
+            hearingId,
+            hearingDocument(hearingId, CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN, citizenFormC),
+            hearingDocument(hearingId, CaseDocumentType.FORM_C, standardFormC)
+        );
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+        stubAccessCode(caseData, PaperNotificationRecipient.APPLICANT, Optional.of("APPL1234"));
+
+        List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.APPLICANT);
+
+        assertEquals(List.of(citizenFormC), result);
+    }
+
+    @Test
+    void shouldReturnStandardFormCForRespondentWhenNoAccessCode() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument citizenFormC = CaseDocument.builder().documentFilename("Form-C-respondent-citizen.pdf").build();
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
+
+        FinremCaseData caseData = caseDataWithHearingDocuments(
+            hearingId,
+            hearingDocument(hearingId, CaseDocumentType.FORM_C_EXPRESS_RESPONDENT_CITIZEN, citizenFormC),
+            hearingDocument(hearingId, CaseDocumentType.FORM_C, standardFormC)
+        );
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+        stubAccessCode(caseData, PaperNotificationRecipient.RESPONDENT, Optional.empty());
+
+        List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.RESPONDENT);
+
+        assertEquals(List.of(standardFormC), result);
+    }
+
+    @Test
+    void shouldReturnStandardFormCWhenCitizenUiFeatureDisabled() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument citizenFormC = CaseDocument.builder().documentFilename("Form-C-applicant-citizen.pdf").build();
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
+
+        FinremCaseData caseData = caseDataWithHearingDocuments(
+            hearingId,
+            hearingDocument(hearingId, CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN, citizenFormC),
+            hearingDocument(hearingId, CaseDocumentType.FORM_C, standardFormC)
+        );
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(false);
+
+        List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.APPLICANT);
+
+        assertEquals(List.of(standardFormC), result);
+    }
+
+    @Test
+    void shouldNotReturnRespondentCitizenFormCForApplicantParty() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument respondentCitizenFormC = CaseDocument.builder().documentFilename("Form-C-respondent-citizen.pdf").build();
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
+
+        FinremCaseData caseData = caseDataWithHearingDocuments(
+            hearingId,
+            hearingDocument(hearingId, CaseDocumentType.FORM_C_EXPRESS_RESPONDENT_CITIZEN, respondentCitizenFormC),
+            hearingDocument(hearingId, CaseDocumentType.FORM_C, standardFormC)
+        );
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+        stubAccessCode(caseData, PaperNotificationRecipient.APPLICANT, Optional.of("RESP1234"));
+
+        List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.APPLICANT);
+
+        assertEquals(List.of(standardFormC), result);
+    }
+
+    @Test
+    void shouldNotReturnApplicantCitizenFormCForRespondentParty() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument applicantCitizenFormC = CaseDocument.builder().documentFilename("Form-C-applicant-citizen.pdf").build();
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
+
+        FinremCaseData caseData = caseDataWithHearingDocuments(
+            hearingId,
+            hearingDocument(hearingId, CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN, applicantCitizenFormC),
+            hearingDocument(hearingId, CaseDocumentType.FORM_C, standardFormC)
+        );
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+        stubAccessCode(caseData, PaperNotificationRecipient.RESPONDENT, Optional.of("APP1234"));
+
+        List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.RESPONDENT);
+
+        assertEquals(List.of(standardFormC), result);
+    }
+
+    private FinremCaseData caseDataWithHearingDocuments(UUID hearingId,
+                                                        ManageHearingDocumentsCollectionItem... documentItems) {
+        return FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .hearingDocumentsCollection(List.of(documentItems))
+                .build())
+            .build();
+    }
+
+    private ManageHearingDocumentsCollectionItem hearingDocument(UUID hearingId,
+                                                                 CaseDocumentType documentType,
+                                                                 CaseDocument document) {
+        return ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder()
+                .hearingId(hearingId)
+                .hearingCaseDocumentType(documentType)
+                .hearingDocument(document)
+                .build())
+            .build();
+    }
+
+    private void stubAccessCode(FinremCaseData caseData,
+                                PaperNotificationRecipient recipient,
+                                Optional<String> accessCode) {
+        when(citizenPinInPostService.findAccessCodeForRecipient(caseData, recipient)).thenReturn(accessCode);
     }
 }

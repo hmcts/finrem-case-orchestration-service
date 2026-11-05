@@ -50,8 +50,13 @@ public abstract class AbstractManageHearingsLetterMapper {
      * @return a {@link Map} with the document template details organized under the "caseDetails" key
      */
     public Map<String, Object> getDocumentTemplateDetailsAsMap(FinremCaseDetails caseDetails) {
+        return buildCaseDetailsMap(caseDetails, buildDocumentTemplateDetails(caseDetails));
+    }
+
+    protected Map<String, Object> buildCaseDetailsMap(FinremCaseDetails caseDetails,
+                                                       DocumentTemplateDetails templateDetails) {
         Map<String, Object> documentTemplateDetails =
-            objectMapper.convertValue(buildDocumentTemplateDetails(caseDetails),
+            objectMapper.convertValue(templateDetails,
                 TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
 
         Map<String, Object> caseDetailsMap = Map.of(
