@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CoverSheetPersistenceService;
 
 import static com.google.common.base.Strings.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -17,15 +18,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ApplicantPartyListener extends AbstractPartyListener {
 
     private final CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
+    private final CoverSheetPersistenceService coverSheetPersistenceService;
 
     public ApplicantPartyListener(BulkPrintService bulkPrintService,
                                   EmailService emailService,
                                   NotificationService notificationService,
                                   InternationalPostalService internationalPostalService,
-                                  CitizenPinInPostPersistenceService citizenPinInPostPersistenceService) {
+                                  CitizenPinInPostPersistenceService citizenPinInPostPersistenceService,
+                                  CoverSheetPersistenceService coverSheetPersistenceService) {
 
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
         this.citizenPinInPostPersistenceService = citizenPinInPostPersistenceService;
+        this.coverSheetPersistenceService = coverSheetPersistenceService;
     }
 
     @Override
@@ -75,7 +79,19 @@ public class ApplicantPartyListener extends AbstractPartyListener {
             event.getCaseDetails(),
             PaperNotificationRecipient.APPLICANT
         );
-        return bulkPrintService.getApplicantCoverSheet(event.getCaseDetails(), event.authToken);
+
+        CaseDocument coversheet = bulkPrintService.getApplicantCoverSheet(
+            event.getCaseDetails(),
+            event.authToken
+        );
+
+        coverSheetPersistenceService.saveCoverSheet(
+            event.getCaseDetails(),
+            PaperNotificationRecipient.APPLICANT,
+            coversheet
+        );
+
+        return coversheet;
     }
 
     @Override

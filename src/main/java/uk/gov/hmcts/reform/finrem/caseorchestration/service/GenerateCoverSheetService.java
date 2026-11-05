@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -45,6 +46,7 @@ public class GenerateCoverSheetService {
 
     public CaseDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         logCoverSheetGeneration(APPLICANT, caseDetails.getCaseIdAsString());
+
         return generateCoverSheet(caseDetails, authorisationToken, APPLICANT);
     }
 
@@ -65,10 +67,14 @@ public class GenerateCoverSheetService {
         FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(APPLICANT, caseDetails.getCaseIdAsString());
 
+        YesOrNo confidentialFlag = shouldUseCitizenUiCoverSheet(caseDetails, APPLICANT)
+            ? YesOrNo.YES
+            : caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent();
+
         replaceAndStoreCoverSheet(
             caseData,
             generateApplicantCoverSheet(caseDetails, authorisationToken),
-            caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent(),
+            confidentialFlag,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetApp,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetAppConfidential,
             caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetApp,
@@ -98,10 +104,14 @@ public class GenerateCoverSheetService {
         FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(RESPONDENT, caseDetails.getCaseIdAsString());
 
+        YesOrNo confidentialFlag = shouldUseCitizenUiCoverSheet(caseDetails, RESPONDENT)
+            ? YesOrNo.YES
+            : caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant();
+
         replaceAndStoreCoverSheet(
             caseData,
             generateRespondentCoverSheet(caseDetails, authorisationToken),
-            caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant(),
+            confidentialFlag,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetRes,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetResConfidential,
             caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetRes,
@@ -246,6 +256,10 @@ public class GenerateCoverSheetService {
                                             String authorisationToken,
                                             DocumentHelper.PaperNotificationRecipient recipient) {
 
+        String template = shouldUseCitizenUiCoverSheet(caseDetails, recipient)
+            ? documentConfiguration.getBulkPrintCitizenUiTemplate()
+            : documentConfiguration.getBulkPrintTemplate();
+
         Map<String, Object> placeholdersMap = bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(
             caseDetails,
             recipient,
@@ -255,10 +269,28 @@ public class GenerateCoverSheetService {
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
             authorisationToken,
             placeholdersMap,
-            documentConfiguration.getBulkPrintTemplate(),
+            template,
             documentConfiguration.getBulkPrintFileName(),
             caseDetails.getCaseType()
         );
+    }
+
+    public boolean shouldUseCitizenUiCoverSheet(
+        FinremCaseDetails caseDetails,
+        DocumentHelper.PaperNotificationRecipient recipient) {
+
+        if (!featureToggleService.isFinremCitizenUiEnabled()
+            || caseDetails.getCaseType() != CaseType.CONTESTED) {
+            return false;
+        }
+
+        FinremCaseData caseData = caseDetails.getData();
+
+        return switch (recipient) {
+            case APPLICANT -> !caseData.isApplicantRepresentedByASolicitor();
+            case RESPONDENT -> !caseData.isRespondentRepresentedByASolicitor();
+            default -> false;
+        };
     }
 
     private void logCoverSheetGeneration(DocumentHelper.PaperNotificationRecipient recipient, String caseId) {
