@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -55,6 +56,8 @@ class HearingCorrespondenceHelperTest {
     ExpressCaseService expressCaseService;
     @Mock
     CitizenPinInPostService citizenPinInPostService;
+    @Mock
+    FeatureToggleService featureToggleService;
 
     @InjectMocks
     private HearingCorrespondenceHelper helper;
@@ -418,6 +421,7 @@ class HearingCorrespondenceHelperTest {
                 .build())
             .build();
 
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
         when(citizenPinInPostService.findAccessCodeForRecipient(
             caseData,
             uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT
@@ -454,10 +458,114 @@ class HearingCorrespondenceHelperTest {
                 .build())
             .build();
 
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+        when(citizenPinInPostService.findAccessCodeForRecipient(
+            caseData,
+            uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT
+        )).thenReturn(Optional.empty());
+
+        List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.RESPONDENT);
+
+        assertEquals(List.of(standardFormC), result);
+    }
+
+    @Test
+    void shouldReturnStandardFormCWhenCitizenUiFeatureDisabled() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument citizenFormC = CaseDocument.builder().documentFilename("Form-C-applicant-citizen.pdf").build();
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .hearingDocumentsCollection(List.of(
+                    ManageHearingDocumentsCollectionItem.builder()
+                        .value(ManageHearingDocument.builder()
+                            .hearingId(hearingId)
+                            .hearingCaseDocumentType(CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN)
+                            .hearingDocument(citizenFormC)
+                            .build())
+                        .build(),
+                    ManageHearingDocumentsCollectionItem.builder()
+                        .value(ManageHearingDocument.builder()
+                            .hearingId(hearingId)
+                            .hearingCaseDocumentType(CaseDocumentType.FORM_C)
+                            .hearingDocument(standardFormC)
+                            .build())
+                        .build()))
+                .build())
+            .build();
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(false);
+
+        List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.APPLICANT);
+
+        assertEquals(List.of(standardFormC), result);
+    }
+
+    @Test
+    void shouldNotReturnRespondentCitizenFormCForApplicantParty() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument respondentCitizenFormC = CaseDocument.builder().documentFilename("Form-C-respondent-citizen.pdf").build();
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .hearingDocumentsCollection(List.of(
+                    ManageHearingDocumentsCollectionItem.builder()
+                        .value(ManageHearingDocument.builder()
+                            .hearingId(hearingId)
+                            .hearingCaseDocumentType(CaseDocumentType.FORM_C_EXPRESS_RESPONDENT_CITIZEN)
+                            .hearingDocument(respondentCitizenFormC)
+                            .build())
+                        .build(),
+                    ManageHearingDocumentsCollectionItem.builder()
+                        .value(ManageHearingDocument.builder()
+                            .hearingId(hearingId)
+                            .hearingCaseDocumentType(CaseDocumentType.FORM_C)
+                            .hearingDocument(standardFormC)
+                            .build())
+                        .build()))
+                .build())
+            .build();
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
         when(citizenPinInPostService.findAccessCodeForRecipient(
             caseData,
             uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT
         )).thenReturn(Optional.empty());
+
+        List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.APPLICANT);
+
+        assertEquals(List.of(standardFormC), result);
+    }
+
+    @Test
+    void shouldNotReturnApplicantCitizenFormCForRespondentParty() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument applicantCitizenFormC = CaseDocument.builder().documentFilename("Form-C-applicant-citizen.pdf").build();
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .hearingDocumentsCollection(List.of(
+                    ManageHearingDocumentsCollectionItem.builder()
+                        .value(ManageHearingDocument.builder()
+                            .hearingId(hearingId)
+                            .hearingCaseDocumentType(CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN)
+                            .hearingDocument(applicantCitizenFormC)
+                            .build())
+                        .build(),
+                    ManageHearingDocumentsCollectionItem.builder()
+                        .value(ManageHearingDocument.builder()
+                            .hearingId(hearingId)
+                            .hearingCaseDocumentType(CaseDocumentType.FORM_C)
+                            .hearingDocument(standardFormC)
+                            .build())
+                        .build()))
+                .build())
+            .build();
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
         when(citizenPinInPostService.findAccessCodeForRecipient(
             caseData,
             uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT

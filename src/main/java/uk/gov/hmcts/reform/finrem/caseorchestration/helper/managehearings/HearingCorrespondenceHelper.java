@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -44,6 +45,7 @@ public class HearingCorrespondenceHelper {
     private final PaperNotificationService paperNotificationService;
     private final ExpressCaseService expressCaseService;
     private final CitizenPinInPostService citizenPinInPostService;
+    private final FeatureToggleService featureToggleService;
 
     /**
      * Retrieves the {@link Hearing} from the wrapper param using the UUID param.
@@ -269,21 +271,24 @@ public class HearingCorrespondenceHelper {
                                           NotificationParty party) {
         CaseDocument defaultHearingFormC = getFormCByType(wrapper, hearingId, CaseDocumentType.DEFAULT_FORM_C_TYPES);
 
-        boolean isApplicantOrRespondent = NotificationParty.APPLICANT.equals(party) || NotificationParty.RESPONDENT.equals(party);
-        if (!isApplicantOrRespondent) {
+        if (!featureToggleService.isFinremCitizenUiEnabled()) {
             return defaultHearingFormC;
         }
 
-        CaseDocument applicantCitizenFormC = getFormCByType(wrapper, hearingId, CaseDocumentType.APPLICANT_CITIZEN_FORM_C_TYPES);
-        boolean shouldSendApplicantCitizenFormC = !caseData.isApplicantRepresentedByASolicitor() && hasAccessCodeForApplicant(caseData);
-        if (shouldSendApplicantCitizenFormC && applicantCitizenFormC != null) {
-            return applicantCitizenFormC;
+        if (NotificationParty.APPLICANT.equals(party)) {
+            CaseDocument applicantCitizenFormC = getFormCByType(wrapper, hearingId, CaseDocumentType.APPLICANT_CITIZEN_FORM_C_TYPES);
+            boolean shouldSendApplicantCitizenFormC = !caseData.isApplicantRepresentedByASolicitor() && hasAccessCodeForApplicant(caseData);
+            return shouldSendApplicantCitizenFormC && applicantCitizenFormC != null
+                ? applicantCitizenFormC
+                : defaultHearingFormC;
         }
 
-        CaseDocument respondentCitizenFormC = getFormCByType(wrapper, hearingId, CaseDocumentType.RESPONDENT_CITIZEN_FORM_C_TYPES);
-        boolean shouldSendRespondentCitizenFormC = !caseData.isRespondentRepresentedByASolicitor() && hasAccessCodeForRespondent(caseData);
-        if (shouldSendRespondentCitizenFormC && respondentCitizenFormC != null) {
-            return respondentCitizenFormC;
+        if (NotificationParty.RESPONDENT.equals(party)) {
+            CaseDocument respondentCitizenFormC = getFormCByType(wrapper, hearingId, CaseDocumentType.RESPONDENT_CITIZEN_FORM_C_TYPES);
+            boolean shouldSendRespondentCitizenFormC = !caseData.isRespondentRepresentedByASolicitor() && hasAccessCodeForRespondent(caseData);
+            return shouldSendRespondentCitizenFormC && respondentCitizenFormC != null
+                ? respondentCitizenFormC
+                : defaultHearingFormC;
         }
 
         return defaultHearingFormC;
