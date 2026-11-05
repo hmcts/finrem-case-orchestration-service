@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -18,11 +19,13 @@ import java.util.Map;
 @Component
 public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
 
-    private static final String CITIZEN_LOGIN_URL = "https://www.manage-financial-remedy.service.gov.uk";
+    private final String citizenLoginUrl;
 
     public ManageHearingFormCLetterDetailsMapper(CourtDetailsConfiguration courtDetailsConfiguration,
+                                                 @Value("${finrem.citizen.login-url}") String citizenLoginUrl,
                                                  ObjectMapper objectMapper) {
         super(objectMapper, courtDetailsConfiguration);
+        this.citizenLoginUrl = citizenLoginUrl;
     }
 
     @Override
@@ -44,7 +47,7 @@ public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearing
         return FormCLetterDetails.builder()
             .caseNumber(caseDetails.getCaseIdAsString())
             .hyphenatedCaseNumber(toHyphenatedCaseNumber(caseDetails.getCaseIdAsString()))
-            .citizenLoginUrl(CITIZEN_LOGIN_URL)
+            .citizenLoginUrl(citizenLoginUrl)
             .courtDetails(courtTemplateFields)
             .applicantFmName(contactDetails.getApplicantFmName())
             .applicantLName(contactDetails.getApplicantLname())

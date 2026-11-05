@@ -51,6 +51,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_AC
 class ManageHearingFormCLetterDetailsMapperTest {
 
     private static final String CASE_ID_16_DIGITS = "1234567890123456";
+    private static final String TEST_CITIZEN_LOGIN_URL = "https://citizen-login.test";
 
     @Mock
     private CourtDetailsConfiguration courtDetailsConfiguration;
@@ -59,7 +60,11 @@ class ManageHearingFormCLetterDetailsMapperTest {
 
     @BeforeEach
     void setUp() {
-        manageHearingFormCLetterDetailsMapper = new ManageHearingFormCLetterDetailsMapper(courtDetailsConfiguration, new ObjectMapper());
+        manageHearingFormCLetterDetailsMapper = new ManageHearingFormCLetterDetailsMapper(
+            courtDetailsConfiguration,
+            TEST_CITIZEN_LOGIN_URL,
+            new ObjectMapper()
+        );
     }
 
     @ParameterizedTest
@@ -101,7 +106,7 @@ class ManageHearingFormCLetterDetailsMapperTest {
         assertThat(formCLetterDetails.getCaseNumber()).isEqualTo(CASE_ID);
         assertThat(formCLetterDetails.getHyphenatedCaseNumber()).isEqualTo(CASE_ID);
         assertThat(formCLetterDetails.getAccessCode()).isEqualTo(TEST_ACCESS_CODE);
-        assertThat(formCLetterDetails.getCitizenLoginUrl()).isEqualTo("https://www.manage-financial-remedy.service.gov.uk");
+        assertThat(formCLetterDetails.getCitizenLoginUrl()).isEqualTo(TEST_CITIZEN_LOGIN_URL);
         assertThat(formCLetterDetails.getApplicantFmName()).isEqualTo("John");
         assertThat(formCLetterDetails.getApplicantLName()).isEqualTo("Doe");
         assertThat(formCLetterDetails.getRespondentFmName()).isEqualTo("Jane");
