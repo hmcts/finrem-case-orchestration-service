@@ -49,14 +49,14 @@ public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends Fin
             log.info("Generating not approved cover letter for Case ID: {}", caseDetails.getId());
             caseData.getConsentSendOrderWrapper().setConsentOrderNotApprovedCoverLetterApp(consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(
                 caseDetails, userAuthorisation, DocumentHelper.PaperNotificationRecipient.APPLICANT));
-        }else {
+        } else {
             caseData.getConsentSendOrderWrapper().setConsentOrderNotApprovedCoverLetterApp(null);
         }
         if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
             log.info("Generating not approved cover letter for Case ID: {}", caseDetails.getId());
             caseData.getConsentSendOrderWrapper().setConsentOrderNotApprovedCoverLetterResp(consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(
                 caseDetails, userAuthorisation, DocumentHelper.PaperNotificationRecipient.RESPONDENT));
-        }else {
+        } else {
             caseData.getConsentSendOrderWrapper().setConsentOrderNotApprovedCoverLetterResp(null);
         }
         return response(caseData);
