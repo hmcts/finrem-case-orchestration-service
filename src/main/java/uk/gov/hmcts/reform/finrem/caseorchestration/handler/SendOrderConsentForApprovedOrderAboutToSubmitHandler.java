@@ -45,17 +45,17 @@ public class SendOrderConsentForApprovedOrderAboutToSubmitHandler extends Finrem
         FinremCaseData caseData = caseDetails.getData();
 
         if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
-            caseData.setConsentOrderApprovedCoverLetterApp(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(
+            caseData.getConsentSendOrderWrapper().setConsentOrderApprovedCoverLetterApp(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(
                 caseDetails, userAuthorisation, DocumentHelper.PaperNotificationRecipient.APPLICANT));
         } else {
-            caseData.setConsentOrderApprovedCoverLetterApp(null);
+            caseData.getConsentSendOrderWrapper().setConsentOrderApprovedCoverLetterApp(null);
         }
 
         if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
-            caseData.setConsentOrderApprovedCoverLetterResp(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(
+            caseData.getConsentSendOrderWrapper().setConsentOrderApprovedCoverLetterResp(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(
                 caseDetails, userAuthorisation, DocumentHelper.PaperNotificationRecipient.RESPONDENT));
         } else {
-            caseData.setConsentOrderApprovedCoverLetterResp(null);
+            caseData.getConsentSendOrderWrapper().setConsentOrderApprovedCoverLetterResp(null);
         }
         return response(caseData);
     }

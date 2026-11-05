@@ -7,20 +7,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderNotApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +29,10 @@ class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
     private SendOrderConsentForNotApprovedOrderAboutToSubmitHandler handler;
 
     @Mock
-    private ConsentOrderPrintService service;
+    private NotificationService notificationService;
+
+    @Mock
+    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
 
     @Test
     void testCanHandle() {
@@ -38,47 +40,36 @@ class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void handle() {
-        FinremCallbackRequest callbackRequest = callbackRequest();
-        handler.handle(callbackRequest, AUTH_TOKEN).hasErrors();
-        verify(service).sendConsentOrderToBulkPrint(any(FinremCaseDetails.class),
-            any(FinremCaseDetails.class),
-            any(EventType.class),
-            anyString());
+    void givenPaperApplicantAndDigitalRespondent_whenHandle_thenOnlyApplicantCoverLetterStored() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(new FinremCaseData()).build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(caseDetails).build();
+        CaseDocument coverLetter = CaseDocument.builder().documentFilename("coverLetter.pdf").build();
+
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(caseDetails, AUTH_TOKEN, APPLICANT))
+            .thenReturn(coverLetter);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getData().getConsentSendOrderWrapper().getConsentOrderNotApprovedCoverLetterApp()).isEqualTo(coverLetter);
+        assertThat(response.getData().getConsentSendOrderWrapper().getConsentOrderNotApprovedCoverLetterResp()).isNull();
     }
 
     @Test
-    void givenCase_whenMissingCourtExceptionThrown_thenReturnError() {
-        // Arrange
-        FinremCallbackRequest callbackRequest = callbackRequest();
+    void givenDigitalApplicantAndPaperRespondent_whenHandle_thenOnlyRespondentCoverLetterStored() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(new FinremCaseData()).build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(caseDetails).build();
+        CaseDocument coverLetter = CaseDocument.builder().documentFilename("coverLetter.pdf").build();
 
-        // Mock the behavior of the service to throw the specific exception
-        doThrow(new MissingCourtException("whatever"))
-            .when(service).sendConsentOrderToBulkPrint(any(FinremCaseDetails.class),
-                any(FinremCaseDetails.class),
-                any(EventType.class),
-                anyString());
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(caseDetails, AUTH_TOKEN, RESPONDENT))
+            .thenReturn(coverLetter);
 
-        // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        // Assert
-        assertThat(response.getErrors()).isNotEmpty();
-        assertTrue(response.getErrors().contains("No FR court information is present on the case. "
-            + "Please add this information using Update FR Court Info."));
-        verify(service).sendConsentOrderToBulkPrint(any(FinremCaseDetails.class),
-            any(FinremCaseDetails.class),
-            any(EventType.class),
-            anyString());
-    }
-
-    private FinremCallbackRequest callbackRequest() {
-        return FinremCallbackRequest
-            .builder()
-            .caseDetails(FinremCaseDetails.builder().id(123L)
-                .data(new FinremCaseData()).build())
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L)
-                .data(new FinremCaseData()).build())
-            .build();
+        assertThat(response.getData().getConsentSendOrderWrapper().getConsentOrderNotApprovedCoverLetterApp()).isNull();
+        assertThat(response.getData().getConsentSendOrderWrapper().getConsentOrderNotApprovedCoverLetterResp()).isEqualTo(coverLetter);
     }
 }
