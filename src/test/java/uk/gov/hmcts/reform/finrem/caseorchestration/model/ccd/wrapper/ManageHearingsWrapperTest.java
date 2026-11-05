@@ -311,7 +311,7 @@ class ManageHearingsWrapperTest {
     }
 
     @Test
-    void whenGetAssociatedHearingDocuments_thenExcludesCitizenFormCDocuments() {
+    void getAssociatedHearingDocuments_excludesCitizenFormCDocuments() {
         UUID target = UUID.randomUUID();
 
         CaseDocument standardFormC = CaseDocument.builder().documentFilename("FormC.pdf").build();
