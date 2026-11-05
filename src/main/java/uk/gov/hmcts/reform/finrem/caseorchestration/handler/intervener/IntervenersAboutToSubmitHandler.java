@@ -76,7 +76,7 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         }
 
         if (ADD_OPERATION_CODES.contains(selectedOperationCode)) {
-            if (YesOrNo.NO.equals(intervener.getIntervenerRepresented())){
+            if (YesOrNo.NO.equals(intervener.getIntervenerRepresented())) {
                 intervener.clearIntervenerSolicitorFields();
             }
             intervenerService.validateIntervenerInformation(intervener, errors);
