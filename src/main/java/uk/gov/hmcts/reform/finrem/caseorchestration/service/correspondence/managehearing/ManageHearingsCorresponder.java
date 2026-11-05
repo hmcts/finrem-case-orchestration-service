@@ -291,7 +291,7 @@ public class ManageHearingsCorresponder {
      * @param hearing the hearing whose parties should be notified
      * @param action the action that triggered correspondence
      * @param userAuthorisation the calling user's auth token
-     * @param documentsToPost base documents to post
+     * @param baseDocumentsToPost base documents to post (not party specific)
      * @param templateName email template for notifications
      * @return one correspondence event per resolved notification party
      */
@@ -299,7 +299,7 @@ public class ManageHearingsCorresponder {
                                                                         HearingLike hearing,
                                                                         ManageHearingsAction action,
                                                                         String userAuthorisation,
-                                                                        List<CaseDocument> documentsToPost,
+                                                                        List<CaseDocument> baseDocumentsToPost,
                                                                         EmailTemplateNames templateName) {
         UUID hearingId = caseDetails.getData().getManageHearingsWrapper().getWorkingHearingId();
 
@@ -311,7 +311,7 @@ public class ManageHearingsCorresponder {
                 hearing,
                 action,
                 userAuthorisation,
-                getDocumentsToPostForNotificationParty(caseDetails, hearingId, documentsToPost, notificationParty),
+                buildDocumentsToPostForParty(caseDetails, hearingId, baseDocumentsToPost, notificationParty),
                 templateName)
                 .notificationParties(List.of(notificationParty))
                 .build())
@@ -323,21 +323,21 @@ public class ManageHearingsCorresponder {
      * recipient-specific version where applicable.
      *
      * @param caseDetails case details containing Form C variants
-     * @param documentsToPost base posting documents
+     * @param baseDocumentsToPost base documents to post (not party specific)
      * @param party target notification party
      * @return posting documents for the specified party
      */
-    private List<CaseDocument> getDocumentsToPostForNotificationParty(FinremCaseDetails caseDetails,
-                                                                       UUID hearingId,
-                                                                       List<CaseDocument> documentsToPost,
-                                                                       NotificationParty party) {
+    private List<CaseDocument> buildDocumentsToPostForParty(FinremCaseDetails caseDetails,
+                                                             UUID hearingId,
+                                                             List<CaseDocument> baseDocumentsToPost,
+                                                             NotificationParty party) {
         FinremCaseData caseData = caseDetails.getData();
-        List<CaseDocument> partySpecificHearingDocuments = hearingCorrespondenceHelper
-            .getHearingDocumentsForParty(caseData, hearingId, party);
+        List<CaseDocument> partyHearingDocuments = hearingCorrespondenceHelper
+            .getHearingCorrespondenceDocumentsForParty(caseData, hearingId, party);
 
-        List<CaseDocument> allDocumentsToPost = new ArrayList<>(documentsToPost);
-        allDocumentsToPost.addAll(partySpecificHearingDocuments);
-        return allDocumentsToPost;
+        List<CaseDocument> documentsToPostForParty = new ArrayList<>(baseDocumentsToPost);
+        documentsToPostForParty.addAll(partyHearingDocuments);
+        return documentsToPostForParty;
     }
 
     /**

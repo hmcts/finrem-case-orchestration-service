@@ -190,7 +190,7 @@ public class HearingCorrespondenceHelper {
         }
     }
 
-    public List<CaseDocument> getHearingDocumentsForParty(FinremCaseData caseData,
+    public List<CaseDocument> getHearingCorrespondenceDocumentsForParty(FinremCaseData caseData,
                                                           UUID hearingId,
                                                           NotificationParty party) {
         ManageHearingsWrapper wrapper = caseData.getManageHearingsWrapper();

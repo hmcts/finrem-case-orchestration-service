@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public enum CaseDocumentType {
@@ -77,15 +78,6 @@ public enum CaseDocumentType {
         FORM_C_EXPRESS
     );
 
-    public static final List<CaseDocumentType> CITIZEN_FORM_C_TYPES = List.of(
-        FORM_C_APPLICANT_CITIZEN,
-        FORM_C_FAST_TRACK_APPLICANT_CITIZEN,
-        FORM_C_EXPRESS_APPLICANT_CITIZEN,
-        FORM_C_RESPONDENT_CITIZEN,
-        FORM_C_FAST_TRACK_RESPONDENT_CITIZEN,
-        FORM_C_EXPRESS_RESPONDENT_CITIZEN
-    );
-
     public static final List<CaseDocumentType> APPLICANT_CITIZEN_FORM_C_TYPES = List.of(
         FORM_C_APPLICANT_CITIZEN,
         FORM_C_FAST_TRACK_APPLICANT_CITIZEN,
@@ -97,6 +89,10 @@ public enum CaseDocumentType {
         FORM_C_FAST_TRACK_RESPONDENT_CITIZEN,
         FORM_C_EXPRESS_RESPONDENT_CITIZEN
     );
+
+    public static final List<CaseDocumentType> CITIZEN_FORM_C_TYPES =
+        Stream.concat(APPLICANT_CITIZEN_FORM_C_TYPES.stream(), RESPONDENT_CITIZEN_FORM_C_TYPES.stream())
+            .toList();
 
     @JsonValue
     public String getId() {
