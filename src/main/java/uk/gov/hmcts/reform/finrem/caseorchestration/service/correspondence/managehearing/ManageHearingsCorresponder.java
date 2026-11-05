@@ -301,8 +301,6 @@ public class ManageHearingsCorresponder {
                                                                         String userAuthorisation,
                                                                         List<CaseDocument> baseDocumentsToPost,
                                                                         EmailTemplateNames templateName) {
-        UUID hearingId = caseDetails.getData().getManageHearingsWrapper().getWorkingHearingId();
-
         return partiesOnCase(hearing).stream()
             .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
             .filter(Objects::nonNull)
@@ -311,7 +309,7 @@ public class ManageHearingsCorresponder {
                 hearing,
                 action,
                 userAuthorisation,
-                buildDocumentsToPostForParty(caseDetails, hearingId, baseDocumentsToPost, notificationParty),
+                buildDocumentsToPostForParty(caseDetails, baseDocumentsToPost, notificationParty, action),
                 templateName)
                 .notificationParties(List.of(notificationParty))
                 .build())
@@ -325,13 +323,19 @@ public class ManageHearingsCorresponder {
      * @param caseDetails case details containing Form C variants
      * @param baseDocumentsToPost base documents to post (not party specific)
      * @param party target notification party
+     * @param action correspondence action to determine whether party-specific hearing docs are needed
      * @return posting documents for the specified party
      */
     private List<CaseDocument> buildDocumentsToPostForParty(FinremCaseDetails caseDetails,
-                                                             UUID hearingId,
                                                              List<CaseDocument> baseDocumentsToPost,
-                                                             NotificationParty party) {
+                                                             NotificationParty party,
+                                                             ManageHearingsAction action) {
+        if (!ManageHearingsAction.ADD_HEARING.equals(action)) {
+            return baseDocumentsToPost;
+        }
+
         FinremCaseData caseData = caseDetails.getData();
+        UUID hearingId = caseData.getManageHearingsWrapper().getWorkingHearingId();
         List<CaseDocument> partyHearingDocuments = hearingCorrespondenceHelper
             .getHearingCorrespondenceDocumentsForParty(caseData, hearingId, party);
 

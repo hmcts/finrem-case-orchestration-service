@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -226,6 +227,45 @@ class ManageHearingsWrapperTest {
     }
 
     @Test
+    void getAssociatedWorkingHearingDocuments_shouldExcludeCitizenFormCDocuments() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("FormC.pdf").build();
+        CaseDocument applicantCitizenFormC = CaseDocument.builder().documentFilename("FormCApplicantCitizen.pdf").build();
+        CaseDocument respondentCitizenFormC = CaseDocument.builder().documentFilename("FormCRespondentCitizen.pdf").build();
+
+        ManageHearingDocumentsCollectionItem standardItem = ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder()
+                .hearingId(hearingId)
+                .hearingCaseDocumentType(CaseDocumentType.FORM_C)
+                .hearingDocument(standardFormC)
+                .build())
+            .build();
+
+        ManageHearingDocumentsCollectionItem applicantCitizenItem = ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder()
+                .hearingId(hearingId)
+                .hearingCaseDocumentType(CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN)
+                .hearingDocument(applicantCitizenFormC)
+                .build())
+            .build();
+
+        ManageHearingDocumentsCollectionItem respondentCitizenItem = ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder()
+                .hearingId(hearingId)
+                .hearingCaseDocumentType(CaseDocumentType.FORM_C_EXPRESS_RESPONDENT_CITIZEN)
+                .hearingDocument(respondentCitizenFormC)
+                .build())
+            .build();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .workingHearingId(hearingId)
+            .hearingDocumentsCollection(List.of(standardItem, applicantCitizenItem, respondentCitizenItem))
+            .build();
+
+        assertThat(wrapper.getAssociatedWorkingHearingDocuments()).containsExactly(standardFormC);
+    }
+
+    @Test
     void whenGetAssociatedHearingDocuments_givenNullHearingId_thenReturnsEmpty() {
         var wrapper = ManageHearingsWrapper.builder()
             .hearingDocumentsCollection(List.of())
@@ -268,6 +308,36 @@ class ManageHearingsWrapperTest {
             .build();
 
         assertThat(wrapper.getAssociatedHearingDocuments(target)).containsExactly(docB, docA);
+    }
+
+    @Test
+    void whenGetAssociatedHearingDocuments_thenExcludesCitizenFormCDocuments() {
+        UUID target = UUID.randomUUID();
+
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("FormC.pdf").build();
+        CaseDocument applicantCitizenFormC = CaseDocument.builder().documentFilename("FormCApplicantCitizen.pdf").build();
+
+        var standardItem = ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder()
+                .hearingId(target)
+                .hearingCaseDocumentType(CaseDocumentType.FORM_C)
+                .hearingDocument(standardFormC)
+                .build())
+            .build();
+
+        var applicantCitizenItem = ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder()
+                .hearingId(target)
+                .hearingCaseDocumentType(CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN)
+                .hearingDocument(applicantCitizenFormC)
+                .build())
+            .build();
+
+        var wrapper = ManageHearingsWrapper.builder()
+            .hearingDocumentsCollection(List.of(standardItem, applicantCitizenItem))
+            .build();
+
+        assertThat(wrapper.getAssociatedHearingDocuments(target)).containsExactly(standardFormC);
     }
 
     @Test

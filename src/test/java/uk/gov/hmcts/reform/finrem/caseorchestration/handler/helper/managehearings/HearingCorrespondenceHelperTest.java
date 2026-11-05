@@ -25,7 +25,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
@@ -51,6 +53,8 @@ class HearingCorrespondenceHelperTest {
     PaperNotificationService paperNotificationService;
     @Mock
     ExpressCaseService expressCaseService;
+    @Mock
+    CitizenPinInPostService citizenPinInPostService;
 
     @InjectMocks
     private HearingCorrespondenceHelper helper;
@@ -386,5 +390,81 @@ class HearingCorrespondenceHelperTest {
         CaseDocument result = helper.getVacateHearingNotice(finremCaseDetails.getData());
 
         assertNull(result);
+    }
+
+    @Test
+    void shouldReturnCitizenFormCForApplicantWhenEligible() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument citizenFormC = CaseDocument.builder().documentFilename("Form-C-applicant-citizen.pdf").build();
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .hearingDocumentsCollection(List.of(
+                    ManageHearingDocumentsCollectionItem.builder()
+                        .value(ManageHearingDocument.builder()
+                            .hearingId(hearingId)
+                            .hearingCaseDocumentType(CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN)
+                            .hearingDocument(citizenFormC)
+                            .build())
+                        .build(),
+                    ManageHearingDocumentsCollectionItem.builder()
+                        .value(ManageHearingDocument.builder()
+                            .hearingId(hearingId)
+                            .hearingCaseDocumentType(CaseDocumentType.FORM_C)
+                            .hearingDocument(standardFormC)
+                            .build())
+                        .build()))
+                .build())
+            .build();
+
+        when(citizenPinInPostService.findAccessCodeForRecipient(
+            caseData,
+            uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT
+        )).thenReturn(Optional.of("APPL1234"));
+
+        List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.APPLICANT);
+
+        assertEquals(List.of(citizenFormC), result);
+    }
+
+    @Test
+    void shouldReturnStandardFormCForRespondentWhenNoAccessCode() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument citizenFormC = CaseDocument.builder().documentFilename("Form-C-respondent-citizen.pdf").build();
+        CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .hearingDocumentsCollection(List.of(
+                    ManageHearingDocumentsCollectionItem.builder()
+                        .value(ManageHearingDocument.builder()
+                            .hearingId(hearingId)
+                            .hearingCaseDocumentType(CaseDocumentType.FORM_C_EXPRESS_RESPONDENT_CITIZEN)
+                            .hearingDocument(citizenFormC)
+                            .build())
+                        .build(),
+                    ManageHearingDocumentsCollectionItem.builder()
+                        .value(ManageHearingDocument.builder()
+                            .hearingId(hearingId)
+                            .hearingCaseDocumentType(CaseDocumentType.FORM_C)
+                            .hearingDocument(standardFormC)
+                            .build())
+                        .build()))
+                .build())
+            .build();
+
+        when(citizenPinInPostService.findAccessCodeForRecipient(
+            caseData,
+            uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT
+        )).thenReturn(Optional.empty());
+        when(citizenPinInPostService.findAccessCodeForRecipient(
+            caseData,
+            uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT
+        )).thenReturn(Optional.empty());
+
+        List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.RESPONDENT);
+
+        assertEquals(List.of(standardFormC), result);
     }
 }

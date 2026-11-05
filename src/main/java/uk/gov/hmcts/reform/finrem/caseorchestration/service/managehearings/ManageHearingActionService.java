@@ -426,11 +426,9 @@ public class ManageHearingActionService {
     private void generateFormC(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         ManageHearingsDocumentService.FormCTemplateSelection formCTemplates =
             manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails);
-        ListForHearingWrapper listForHearingWrapper = finremCaseDetails.getData().getListForHearingWrapper();
         ManageHearingsWrapper manageHearingsWrapper = finremCaseDetails.getData().getManageHearingsWrapper();
 
         CaseDocument defaultCaseFormC = manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails, authToken);
-        listForHearingWrapper.setFormC(defaultCaseFormC);
 
         setCitizenFormCIfRequired(finremCaseDetails, authToken, manageHearingsWrapper, documentMap, formCTemplates.standardType());
 

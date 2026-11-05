@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
@@ -48,7 +49,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -64,6 +64,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -92,18 +93,16 @@ class ManageHearingsCorresponderTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
-    @Mock
-    private CitizenPinInPostService citizenPinInPostService;
-
     @InjectMocks
     private ManageHearingsCorresponder corresponder;
 
     @BeforeEach
     void setUp() {
-        lenient().when(citizenPinInPostService.findAccessCodeForRecipient(
+        lenient().when(hearingCorrespondenceHelper.getHearingCorrespondenceDocumentsForParty(
+            org.mockito.ArgumentMatchers.any(),
             org.mockito.ArgumentMatchers.any(),
             org.mockito.ArgumentMatchers.any()
-        )).thenReturn(Optional.empty());
+        )).thenReturn(List.of());
     }
 
     @Test
@@ -289,6 +288,13 @@ class ManageHearingsCorresponderTest {
         ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
 
         when(hearingCorrespondenceHelper.getActiveHearingInContext(manageHearingsWrapper, hearingId)).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getHearingCorrespondenceDocumentsForParty(
+            org.mockito.ArgumentMatchers.eq(callbackRequest.getFinremCaseData()),
+            org.mockito.ArgumentMatchers.eq(hearingId),
+            org.mockito.ArgumentMatchers.any()
+        )).thenReturn(List.of(CaseDocument.builder()
+            .documentFilename("HearingNotice.pdf")
+            .build()));
 
         //Act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
@@ -424,6 +430,30 @@ class ManageHearingsCorresponderTest {
     }
 
     @Test
+    void givenVacatedHearing_whenBuildingCorrespondence_thenDoesNotAppendPartyHearingDocuments() {
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(ALL_SOLICITOR_ROLES);
+        VacateOrAdjournedHearing hearing = buildVacateOrAdjournedHearing(VacateOrAdjournAction.VACATE_HEARING, partyList);
+        FinremCaseData caseData = buildVacatedHearingCaseData(hearing);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
+            CASE_ID_IN_LONG, CaseType.CONTESTED, caseData);
+
+        ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
+
+        CaseDocument vacateNotice = CaseDocument.builder().documentFilename("VacateHearingNotice.pdf").build();
+        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(manageHearingsWrapper, hearingId)).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getVacateHearingNotice(callbackRequest.getCaseDetails().getData())).thenReturn(vacateNotice);
+        List<SendCorrespondenceEvent> actualEvents =
+            corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN);
+
+        assertThat(actualEvents).allSatisfy(event -> {
+            assertThat(event.getDocumentsToPost()).contains(vacateNotice);
+        });
+
+        verify(hearingCorrespondenceHelper, never()).getHearingCorrespondenceDocumentsForParty(
+            org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
     void shouldUseCitizenFormCForUnrepresentedApplicantAndRespondentWhenAccessCodesExist() {
         CaseDocument defaultFormC = caseDocument("Form-C-default.pdf");
         CaseDocument applicantCitizenFormC = caseDocument("Form-C-applicant-citizen.pdf");
@@ -445,14 +475,16 @@ class ManageHearingsCorresponderTest {
         )).thenReturn(hearing);
         when(hearingCorrespondenceHelper.getMiniFormAIfRequired(callback.getFinremCaseData(), hearing))
             .thenReturn(Optional.empty());
-        when(citizenPinInPostService.findAccessCodeForRecipient(
-            callback.getFinremCaseData(),
-            uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT
-        )).thenReturn(Optional.of("APPL1234"));
-        when(citizenPinInPostService.findAccessCodeForRecipient(
-            callback.getFinremCaseData(),
-            uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT
-        )).thenReturn(Optional.of("RESP1234"));
+        when(hearingCorrespondenceHelper.getHearingCorrespondenceDocumentsForParty(
+            org.mockito.ArgumentMatchers.eq(callback.getFinremCaseData()),
+            org.mockito.ArgumentMatchers.eq(workingHearingId),
+            org.mockito.ArgumentMatchers.eq(NotificationParty.APPLICANT)
+        )).thenReturn(List.of(applicantCitizenFormC));
+        when(hearingCorrespondenceHelper.getHearingCorrespondenceDocumentsForParty(
+            org.mockito.ArgumentMatchers.eq(callback.getFinremCaseData()),
+            org.mockito.ArgumentMatchers.eq(workingHearingId),
+            org.mockito.ArgumentMatchers.eq(NotificationParty.RESPONDENT)
+        )).thenReturn(List.of(respondentCitizenFormC));
 
         List<SendCorrespondenceEvent> events = corresponder.buildHearingCorrespondenceEventsIfNeeded(callback, AUTH_TOKEN);
 
@@ -477,6 +509,11 @@ class ManageHearingsCorresponderTest {
         )).thenReturn(hearing);
         when(hearingCorrespondenceHelper.getMiniFormAIfRequired(callback.getFinremCaseData(), hearing))
             .thenReturn(Optional.empty());
+        when(hearingCorrespondenceHelper.getHearingCorrespondenceDocumentsForParty(
+            org.mockito.ArgumentMatchers.eq(callback.getFinremCaseData()),
+            org.mockito.ArgumentMatchers.eq(workingHearingId),
+            org.mockito.ArgumentMatchers.eq(NotificationParty.APPLICANT)
+        )).thenReturn(List.of(defaultFormC));
 
         List<SendCorrespondenceEvent> events = corresponder.buildHearingCorrespondenceEventsIfNeeded(callback, AUTH_TOKEN);
         SendCorrespondenceEvent applicantEvent = getEventForParty(events, NotificationParty.APPLICANT);
@@ -499,6 +536,11 @@ class ManageHearingsCorresponderTest {
         )).thenReturn(hearing);
         when(hearingCorrespondenceHelper.getMiniFormAIfRequired(callback.getFinremCaseData(), hearing))
             .thenReturn(Optional.empty());
+        when(hearingCorrespondenceHelper.getHearingCorrespondenceDocumentsForParty(
+            org.mockito.ArgumentMatchers.eq(callback.getFinremCaseData()),
+            org.mockito.ArgumentMatchers.eq(workingHearingId),
+            org.mockito.ArgumentMatchers.eq(NotificationParty.APPLICANT)
+        )).thenReturn(List.of(defaultFormC));
 
         List<SendCorrespondenceEvent> events = corresponder.buildHearingCorrespondenceEventsIfNeeded(callback, AUTH_TOKEN);
         SendCorrespondenceEvent applicantEvent = getEventForParty(events, NotificationParty.APPLICANT);
@@ -827,6 +869,35 @@ class ManageHearingsCorresponderTest {
                                                                   boolean applicantRepresented,
                                                                   boolean respondentRepresented) {
         UUID workingHearingId = UUID.randomUUID();
+        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection = new ArrayList<>();
+        hearingDocumentsCollection.add(ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder()
+                .hearingId(workingHearingId)
+                .hearingCaseDocumentType(CaseDocumentType.FORM_C)
+                .hearingDocument(defaultFormC)
+                .build())
+            .build());
+
+        if (applicantCitizenFormC != null) {
+            hearingDocumentsCollection.add(ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument.builder()
+                    .hearingId(workingHearingId)
+                    .hearingCaseDocumentType(CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN)
+                    .hearingDocument(applicantCitizenFormC)
+                    .build())
+                .build());
+        }
+
+        if (respondentCitizenFormC != null) {
+            hearingDocumentsCollection.add(ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument.builder()
+                    .hearingId(workingHearingId)
+                    .hearingCaseDocumentType(CaseDocumentType.FORM_C_EXPRESS_RESPONDENT_CITIZEN)
+                    .hearingDocument(respondentCitizenFormC)
+                    .build())
+                .build());
+        }
+
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseId(CASE_ID)
             .ccdCaseType(CaseType.CONTESTED)
@@ -838,11 +909,10 @@ class ManageHearingsCorresponderTest {
                 .build())
             .listForHearingWrapper(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper.builder()
                 .formC(defaultFormC)
-                .formCApplicantCitizen(applicantCitizenFormC)
-                .formCRespondentCitizen(respondentCitizenFormC)
                 .build())
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .workingHearingId(workingHearingId)
+                .hearingDocumentsCollection(hearingDocumentsCollection)
                 .build())
             .build();
 
@@ -861,7 +931,7 @@ class ManageHearingsCorresponderTest {
                 PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(CaseRole.APP_SOLICITOR.getCcdCode()).build()).build(),
                 PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(CaseRole.RESP_SOLICITOR.getCcdCode()).build()).build()
             ))
-            .additionalHearingDocs(List.of(DocumentCollectionItem.builder().value(defaultFormC).build()))
+            .additionalHearingDocs(List.of())
             .build();
     }
 

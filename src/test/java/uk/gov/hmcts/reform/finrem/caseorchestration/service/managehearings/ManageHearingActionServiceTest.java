@@ -167,7 +167,7 @@ class ManageHearingActionServiceTest {
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(6);
+        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(8);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
             .extracting(item -> item.getValue().getHearingDocument())
             .contains(formC, formG,
@@ -223,7 +223,7 @@ class ManageHearingActionServiceTest {
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(5);
+        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(7);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
             .extracting(item -> item.getValue().getHearingDocument())
             .contains(pfdComplianceLetter);
@@ -322,7 +322,7 @@ class ManageHearingActionServiceTest {
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(6);
+        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(8);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
             .extracting(item -> item.getValue().getHearingDocument())
             .contains(formC, formG,
@@ -373,7 +373,7 @@ class ManageHearingActionServiceTest {
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(5);
+        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(7);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
             .extracting(item -> item.getValue().getHearingDocument())
             .contains(formC,
