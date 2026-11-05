@@ -427,11 +427,12 @@ public class ManageHearingActionService {
         ManageHearingsDocumentService.FormCTemplateSelection formCTemplates =
             manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails);
         ListForHearingWrapper listForHearingWrapper = finremCaseDetails.getData().getListForHearingWrapper();
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseDetails.getData().getManageHearingsWrapper();
 
         CaseDocument defaultCaseFormC = manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails, authToken);
         listForHearingWrapper.setFormC(defaultCaseFormC);
 
-        setCitizenFormCIfRequired(finremCaseDetails, authToken, listForHearingWrapper);
+        setCitizenFormCIfRequired(finremCaseDetails, authToken, manageHearingsWrapper, documentMap, formCTemplates.standardType());
 
         documentMap.put(
             FORM_C,
@@ -443,21 +444,42 @@ public class ManageHearingActionService {
     }
 
     private void setCitizenFormCIfRequired(
-        FinremCaseDetails finremCaseDetails, String authToken, ListForHearingWrapper listForHearingWrapper
+        FinremCaseDetails finremCaseDetails,
+        String authToken,
+        ManageHearingsWrapper manageHearingsWrapper,
+        Map<String, DocumentRecord> documentMap,
+        CaseDocumentType standardFormCType
     ) {
-        if (featureToggleService.isFinremCitizenUiEnabled()) {
-            CaseDocument applicantCitizenFormC = manageHearingsDocumentService.generateApplicantCitizenFormC(
-                finremCaseDetails, authToken
-            );
-            CaseDocument respondentCitizenFormC = manageHearingsDocumentService.generateRespondentCitizenFormC(
-                finremCaseDetails, authToken
-            );
+        if (!featureToggleService.isFinremCitizenUiEnabled()) {
+            manageHearingsWrapper.setFormCApplicantCitizen(null);
+            manageHearingsWrapper.setFormCRespondentCitizen(null);
+            return;
+        }
 
-            listForHearingWrapper.setFormCApplicantCitizen(applicantCitizenFormC);
-            listForHearingWrapper.setFormCRespondentCitizen(respondentCitizenFormC);
-        } else {
-            listForHearingWrapper.setFormCApplicantCitizen(null);
-            listForHearingWrapper.setFormCRespondentCitizen(null);
+        CaseDocument applicantCitizenFormC = manageHearingsDocumentService.generateApplicantCitizenFormC(
+            finremCaseDetails, authToken
+        );
+        CaseDocument respondentCitizenFormC = manageHearingsDocumentService.generateRespondentCitizenFormC(
+            finremCaseDetails, authToken
+        );
+
+        manageHearingsWrapper.setFormCApplicantCitizen(applicantCitizenFormC);
+        manageHearingsWrapper.setFormCRespondentCitizen(respondentCitizenFormC);
+
+        if (applicantCitizenFormC != null) {
+            CaseDocumentType applicantCitizenFormCType = CaseDocumentType.getApplicantCitizenFormCType(standardFormCType);
+            documentMap.put(
+                applicantCitizenFormCType.name(),
+                new DocumentRecord(applicantCitizenFormC, applicantCitizenFormCType)
+            );
+        }
+
+        if (respondentCitizenFormC != null) {
+            CaseDocumentType respondentCitizenFormCType = CaseDocumentType.getRespondentCitizenFormCType(standardFormCType);
+            documentMap.put(
+                respondentCitizenFormCType.name(),
+                new DocumentRecord(respondentCitizenFormC, respondentCitizenFormCType)
+            );
         }
     }
 

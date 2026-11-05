@@ -18,24 +18,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Objects.isNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
@@ -48,7 +45,6 @@ public class ManageHearingsCorresponder {
 
     private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final CitizenPinInPostService citizenPinInPostService;
 
     /**
      * Collect associated new hearing information and send hearing notification to the solicitor through
@@ -147,7 +143,6 @@ public class ManageHearingsCorresponder {
         List<CaseDocument> documentsToPost = getAdditionalHearingDocs(hearing);
         hearingCorrespondenceHelper.getMiniFormAIfRequired(finremCaseData, hearing)
             .ifPresent(documentsToPost::add);
-        documentsToPost.addAll(wrapper.getAssociatedWorkingHearingDocuments());
 
         return new HearingCorrespondenceContext(finremCaseDetails, hearing, documentsToPost);
     }
@@ -301,11 +296,13 @@ public class ManageHearingsCorresponder {
      * @return one correspondence event per resolved notification party
      */
     private List<SendCorrespondenceEvent> buildSendCorrespondenceEvents(FinremCaseDetails caseDetails,
-                                                                         HearingLike hearing,
-                                                                         ManageHearingsAction action,
-                                                                         String userAuthorisation,
-                                                                         List<CaseDocument> documentsToPost,
-                                                                         EmailTemplateNames templateName) {
+                                                                        HearingLike hearing,
+                                                                        ManageHearingsAction action,
+                                                                        String userAuthorisation,
+                                                                        List<CaseDocument> documentsToPost,
+                                                                        EmailTemplateNames templateName) {
+        UUID hearingId = caseDetails.getData().getManageHearingsWrapper().getWorkingHearingId();
+
         return partiesOnCase(hearing).stream()
             .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
             .filter(Objects::nonNull)
@@ -314,7 +311,7 @@ public class ManageHearingsCorresponder {
                 hearing,
                 action,
                 userAuthorisation,
-                getDocumentsToPostForNotificationParty(caseDetails, documentsToPost, notificationParty),
+                getDocumentsToPostForNotificationParty(caseDetails, hearingId, documentsToPost, notificationParty),
                 templateName)
                 .notificationParties(List.of(notificationParty))
                 .build())
@@ -331,64 +328,16 @@ public class ManageHearingsCorresponder {
      * @return posting documents for the specified party
      */
     private List<CaseDocument> getDocumentsToPostForNotificationParty(FinremCaseDetails caseDetails,
+                                                                       UUID hearingId,
                                                                        List<CaseDocument> documentsToPost,
                                                                        NotificationParty party) {
         FinremCaseData caseData = caseDetails.getData();
-        CaseDocument defaultFormC = caseData.getListForHearingWrapper().getFormC();
+        List<CaseDocument> partySpecificHearingDocuments = hearingCorrespondenceHelper
+            .getHearingDocumentsForParty(caseData, hearingId, party);
 
-        boolean isApplicantOrRespondent =
-            NotificationParty.APPLICANT.equals(party) || NotificationParty.RESPONDENT.equals(party);
-        if (!isApplicantOrRespondent) {
-            return documentsToPost;
-        }
-
-        return documentsToPost.stream()
-            .map(doc -> Objects.equals(doc, defaultFormC) ? getFormCForRecipient(caseData, party) : doc)
-            .toList();
-    }
-
-    /**
-     * Resolves the most appropriate Form C for a recipient.
-     *
-     * <p>For unrepresented applicant/respondent with access code, citizen Form C is preferred;
-     * otherwise the default case Form C without an access code is returned.</p>
-     *
-     * @param caseData case data containing Form C documents and representation status
-     * @param recipient notification party recipient
-     * @return recipient-specific Form C where applicable, otherwise default Form C
-     */
-    private CaseDocument getFormCForRecipient(FinremCaseData caseData, NotificationParty recipient) {
-        ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
-
-        if (NotificationParty.APPLICANT.equals(recipient)
-            && !caseData.isApplicantRepresentedByASolicitor()
-            && hasAccessCodeForRecipient(caseData, APPLICANT)) {
-            return Optional.ofNullable(listForHearingWrapper.getFormCApplicantCitizen())
-                .orElse(listForHearingWrapper.getFormC());
-        }
-
-        if (NotificationParty.RESPONDENT.equals(recipient)
-            && !caseData.isRespondentRepresentedByASolicitor()
-            && hasAccessCodeForRecipient(caseData, RESPONDENT)) {
-            return Optional.ofNullable(listForHearingWrapper.getFormCRespondentCitizen())
-                .orElse(listForHearingWrapper.getFormC());
-        }
-
-        return caseData.getListForHearingWrapper().getFormC();
-    }
-
-    /**
-     * Checks whether an access code exists for the given recipient.
-     *
-     * @param caseData case data used to look up recipient access code
-     * @param recipient recipient type (applicant/respondent)
-     * @return {@code true} if an access code is present, otherwise {@code false}
-     */
-    private boolean hasAccessCodeForRecipient(
-        FinremCaseData caseData,
-        uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient recipient
-    ) {
-        return citizenPinInPostService.findAccessCodeForRecipient(caseData, recipient).isPresent();
+        List<CaseDocument> allDocumentsToPost = new ArrayList<>(documentsToPost);
+        allDocumentsToPost.addAll(partySpecificHearingDocuments);
+        return allDocumentsToPost;
     }
 
     /**
