@@ -468,7 +468,7 @@ class HearingCorrespondenceHelperTest {
         );
 
         when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
-        stubAccessCode(caseData, PaperNotificationRecipient.APPLICANT, Optional.empty());
+        stubAccessCode(caseData, PaperNotificationRecipient.APPLICANT, Optional.of("RESP1234"));
 
         List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.APPLICANT);
 
@@ -488,7 +488,7 @@ class HearingCorrespondenceHelperTest {
         );
 
         when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
-        stubAccessCode(caseData, PaperNotificationRecipient.RESPONDENT, Optional.empty());
+        stubAccessCode(caseData, PaperNotificationRecipient.RESPONDENT, Optional.of("APP1234"));
 
         List<CaseDocument> result = helper.getHearingCorrespondenceDocumentsForParty(caseData, hearingId, NotificationParty.RESPONDENT);
 

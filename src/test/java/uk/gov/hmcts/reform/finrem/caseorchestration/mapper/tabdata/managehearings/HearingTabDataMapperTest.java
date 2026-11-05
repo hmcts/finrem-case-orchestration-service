@@ -136,7 +136,7 @@ class HearingTabDataMapperTest {
     }
 
     @Test
-    void mapHearingToTabData_shouldExcludeCitizenFormCDocumentsFromTabDocuments() {
+    void mapHearingToTabData_shouldExcludeCitizenFormCDocumentsFromTab() {
         UUID hearingId = UUID.randomUUID();
         when(courtDetailsMapper.convertToFrcCourtDetails(any())).thenReturn(CourtDetails.builder().courtName(COURT_NAME).build());
 

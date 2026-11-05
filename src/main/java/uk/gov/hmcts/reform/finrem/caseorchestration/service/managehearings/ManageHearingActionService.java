@@ -419,8 +419,8 @@ public class ManageHearingActionService {
     /**
      * Generates and stores Form C documents for hearing correspondence.
      *
-     * <p>Saves a default case Form C suitable for all recipients (without access code) on the manage hearings wrapper.
-     * It optionally generates citizen-specific Form C variants containing access codes when citizen UI is enabled.</p>
+     * <p>Saves a default hearing Form C suitable for all parties on the hearing (no access codes present).
+     * Optionally generates citizen-specific Form C variants containing access codes when citizen UI is enabled.</p>
      */
     private void generateFormC(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         ManageHearingsDocumentService.FormCTemplateSelection formCTemplates =
