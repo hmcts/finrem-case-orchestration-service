@@ -362,6 +362,18 @@ public class GeneralOrderService {
         return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
     }
 
+    /**
+     * Returns the role codes of the parties selected in a party-selection
+     * question such as "Who should receive this order?".
+     *
+     * <p>The codes are taken from the selected values of the {@code partiesOnCase}
+     * multi-select list, for example {@code [APP_SOLICITOR]}.
+     *
+     * @param caseDetails the case details containing the party selection
+     * @return the role codes of the selected parties
+     * @deprecated use {@link PartyService#getCheckedActiveParties(FinremCaseDetails)} instead
+     */
+    @Deprecated
     public List<String> getParties(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         DynamicMultiSelectList parties = data.getPartiesOnCase();
@@ -460,6 +472,17 @@ public class GeneralOrderService {
         return false;
     }
 
+    /**
+     * Sets the correspondence-enabled flags for the applicant, respondent and interveners
+     * based on the parties selected in a party-selection question such as
+     * "Who should receive this order?".
+     *
+     * @param caseDetails the case details containing the party selection
+     * @param parties the role codes of the selected parties
+     * @deprecated use {@link PartyService#updateCorrespondenceEnabledFromSelectedParties(FinremCaseDetails)}
+     *             instead, which reads the selected parties from the case details
+     */
+    @Deprecated
     public void setPartiesToReceiveCommunication(FinremCaseDetails caseDetails, List<String> parties) {
         FinremCaseData data = caseDetails.getData();
         parties.forEach(role -> {

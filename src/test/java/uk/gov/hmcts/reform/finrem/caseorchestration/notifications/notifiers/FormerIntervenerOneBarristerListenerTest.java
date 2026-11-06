@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectio
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
@@ -142,5 +143,17 @@ class FormerIntervenerOneBarristerListenerTest extends BasePartyListenerTest {
 
         verifyNoInteractions(emailService);
         verifyNoLetterSent();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void isNotificationPartySelected_shouldMatchIntervenerOneCorrespondenceEnabled(
+        boolean intervenerCorrespondenceEnabled) {
+        when(event.getCaseData()).thenReturn(finremCaseData);
+        IntervenerOne intervenerOne = mock(IntervenerOne.class);
+        when(intervenerOne.getIntervenerCorrespondenceEnabled()).thenReturn(intervenerCorrespondenceEnabled);
+        when(finremCaseData.getIntervenerOne()).thenReturn(intervenerOne);
+
+        assertThat(underTest.isNotificationPartySelected(event)).isEqualTo(intervenerCorrespondenceEnabled);
     }
 }
