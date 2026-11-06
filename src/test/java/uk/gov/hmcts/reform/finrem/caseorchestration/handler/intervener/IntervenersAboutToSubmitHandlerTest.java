@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -184,6 +185,18 @@ class IntervenersAboutToSubmitHandlerTest {
 
         verify(intervenerService, never()).validateIntervenerInformation(any(), any());
         verify(intervenerService, never()).updateIntervenerDetails(any(), any(), any());
+    }
+
+    @Test
+    void givenIntervenerIsNotRepresented_clearIntervenerSolicitorFields() {
+        FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(ADD_INTERVENER_ONE_CODE);
+        IntervenerOne intervener = mock(IntervenerOne.class);
+        when(callbackRequest.getCaseDetails().getData().getIntervenerOne()).thenReturn(intervener);
+        when(intervener.getIntervenerRepresented()).thenReturn(YesOrNo.NO);
+
+        aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(intervener).clearIntervenerSolicitorFields();
     }
 
     private static Stream<Arguments> deleteIntervenerOperationCodes() {
