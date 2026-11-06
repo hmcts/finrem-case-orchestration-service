@@ -23,6 +23,7 @@ import java.util.List;
 public class OrderRefusalHolder implements HasCaseDocument {
     private String orderRefusalAfterText;
     private List<OrderRefusalOption> orderRefusal;
+    private List<OrderRefusalOptionV2> orderRefusalV2;
     private String orderRefusalOther;
     private CaseDocument orderRefusalDocs;
     @JsonProperty("orderRefusalJudge")
