@@ -17,11 +17,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -952,6 +957,9 @@ class ContactDetailsValidatorTest {
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
         assertThat(errors).isEqualTo(expectedResult);
+        errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType,
+            false, true));
+        assertThat(errors).isEmpty();
     }
 
     @ParameterizedTest(name = "{index}: {0}")
@@ -972,6 +980,9 @@ class ContactDetailsValidatorTest {
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
         assertThat(errors).isEqualTo(expectedResult);
+        errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType,
+            false, true));
+        assertThat(errors).isEmpty();
     }
 
     @ParameterizedTest(name = "{index}: {0}")
@@ -992,6 +1003,9 @@ class ContactDetailsValidatorTest {
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
         assertThat(errors).isEqualTo(expectedResult);
+        errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType,
+            true, false));
+        assertThat(errors).isEmpty();
     }
 
     @ParameterizedTest(name = "{index}: {0}")
@@ -1012,6 +1026,9 @@ class ContactDetailsValidatorTest {
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType));
         assertThat(errors).isEqualTo(expectedResult);
+        errors = new ArrayList<>(ContactDetailsValidator.validateRequiredPostalAddresses(caseData, eventType,
+            true, false));
+        assertThat(errors).isEmpty();
     }
 
     private static Stream<Arguments> applicantPostalAddressScenarios() {
@@ -1135,5 +1152,58 @@ class ContactDetailsValidatorTest {
             .addressLine1("")
             .postCode("")
             .build();
+    }
+
+    private static Stream<Arguments> intervenerPostalAddressScenarios() {
+        return IntStream.rangeClosed(1, 4).boxed().flatMap(n -> Stream.of(
+            Arguments.of(n, "not represented + valid address", YesOrNo.NO, getValidAddress(), false),
+            Arguments.of(n, "not represented + missing address", YesOrNo.NO, getInvalidAddress(), true),
+            Arguments.of(n, "not represented + null address", YesOrNo.NO, null, true)
+        ));
+    }
+
+    @ParameterizedTest(name = "{index}: intervener {0} {1}")
+    @MethodSource("intervenerPostalAddressScenarios")
+    void shouldCheckForMissingIntervenerPostalAddress(int intervenerNumber, String description,
+                                                      YesOrNo intervenerRepresented, Address address,
+                                                      boolean expectError) {
+        FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED);
+
+        switch (intervenerNumber) {
+            case 1 -> builder.intervenerOne(IntervenerOne.builder()
+                .intervenerRepresented(intervenerRepresented).intervenerAddress(address).build());
+            case 2 -> builder.intervenerTwo(IntervenerTwo.builder()
+                .intervenerRepresented(intervenerRepresented).intervenerAddress(address).build());
+            case 3 -> builder.intervenerThree(IntervenerThree.builder()
+                .intervenerRepresented(intervenerRepresented).intervenerAddress(address).build());
+            case 4 -> builder.intervenerFour(IntervenerFour.builder()
+                .intervenerRepresented(intervenerRepresented).intervenerAddress(address).build());
+            default -> throw new IllegalArgumentException("Unexpected intervener: " + intervenerNumber);
+        }
+        FinremCaseData caseData = builder.build();
+
+        String expectedMessage = ContactDetailsValidator.MISSING_ADDRESS_ERROR_MESSAGE
+            .formatted("Intervener " + intervenerNumber, TEST_EVENT.getDisplayName());
+
+        // Only the intervener under test selected
+        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+            caseData, TEST_EVENT,
+            intervenerNumber == 1, intervenerNumber == 2,
+            intervenerNumber == 3, intervenerNumber == 4));
+
+        if (expectError) {
+            assertThat(errors).containsExactly(expectedMessage);
+        } else {
+            assertThat(errors).isEmpty();
+        }
+
+        // Intervener under test not selected (all others selected): never reports an error for it
+        errors = new ArrayList<>(ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+            caseData, TEST_EVENT,
+            intervenerNumber != 1, intervenerNumber != 2,
+            intervenerNumber != 3, intervenerNumber != 4));
+
+        assertThat(errors).doesNotContain(expectedMessage);
     }
 }
