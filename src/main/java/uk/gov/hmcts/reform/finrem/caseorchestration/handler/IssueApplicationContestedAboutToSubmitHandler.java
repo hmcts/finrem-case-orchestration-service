@@ -68,7 +68,7 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremAboutTo
                 .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
         }
 
-        // REMOVE WHEN BEFORE FCUI RELEASE
+        // REMOVE BEFORE FCUI RELEASE
         if (featureToggleService.isFinremCitizenUiEnabled()) {
             citizenPinInPostService.generatePinIfNeeded(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT);
             citizenPinInPostService.generatePinIfNeeded(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
