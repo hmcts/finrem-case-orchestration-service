@@ -5,6 +5,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -13,7 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 @Slf4j
@@ -22,13 +25,18 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremAboutTo
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final IssueApplicationService issueApplicationService;
+    private final CitizenPinInPostService citizenPinInPostService;
+    private final FeatureToggleService featureToggleService;
 
     public IssueApplicationContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                          OnlineFormDocumentService onlineFormDocumentService,
-                                                         IssueApplicationService issueApplicationService) {
+                                                         IssueApplicationService issueApplicationService,
+                                                         CitizenPinInPostService citizenPinInPostService, FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.issueApplicationService = issueApplicationService;
+        this.citizenPinInPostService = citizenPinInPostService;
+        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -58,6 +66,12 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremAboutTo
         if (ObjectUtils.isEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())) {
             caseData.setScheduleOneWrapper(ScheduleOneWrapper.builder()
                 .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
+        }
+
+        // REMOVE BEFORE FCUI RELEASE
+        if (featureToggleService.isFinremCitizenUiEnabled()) {
+            citizenPinInPostService.generatePinIfNeeded(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+            citizenPinInPostService.generatePinIfNeeded(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
         }
 
         generateCoverSheets(caseDetails, userAuthorisation);
