@@ -51,12 +51,13 @@ public final class AccessCodeGenerator {
      * @return true if a new code is required; false otherwise, including for unsupported recipients
      */
     public static boolean doesRecipientNeedNewAccessCode(FinremCaseData caseData,
-                                                         PaperNotificationRecipient recipient) {
+                                                         PaperNotificationRecipient recipient,
+                                                         boolean alwaysGenerateAccessCode) {
 
         return switch (recipient) {
-            case APPLICANT -> !caseData.isApplicantRepresentedByASolicitor()
+            case APPLICANT -> (!caseData.isApplicantRepresentedByASolicitor() || alwaysGenerateAccessCode)
                 && !hasActiveOrActivatedCode(caseData.getApplicantAccessCodes());
-            case RESPONDENT -> !caseData.isRespondentRepresentedByASolicitor()
+            case RESPONDENT -> (!caseData.isRespondentRepresentedByASolicitor() || alwaysGenerateAccessCode)
                 && !hasActiveOrActivatedCode(caseData.getRespondentAccessCodes());
             default -> false;
         };
@@ -74,9 +75,10 @@ public final class AccessCodeGenerator {
      */
     public static boolean generateAccessCodeIfNeeded(
         FinremCaseData caseData,
-        PaperNotificationRecipient recipient) {
+        PaperNotificationRecipient recipient,
+        boolean alwaysGenerateAccessCode) {
 
-        if (!doesRecipientNeedNewAccessCode(caseData, recipient)) {
+        if (!doesRecipientNeedNewAccessCode(caseData, recipient, alwaysGenerateAccessCode)) {
             return false;
         }
 
