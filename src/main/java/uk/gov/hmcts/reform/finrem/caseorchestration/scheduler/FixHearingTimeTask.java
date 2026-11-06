@@ -7,10 +7,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
@@ -75,11 +75,7 @@ public class FixHearingTimeTask extends EncryptedCsvFileProcessingTask {
 
         Stream.of(wrapper.getHearingTabItems(),
                 wrapper.getApplicantHearingTabItems(),
-                wrapper.getRespondentHearingTabItems(),
-                wrapper.getInt1HearingTabItems(),
-                wrapper.getInt2HearingTabItems(),
-                wrapper.getInt3HearingTabItems(),
-                wrapper.getInt4HearingTabItems())
+                wrapper.getRespondentHearingTabItems())
             .filter(Objects::nonNull)
             .flatMap(List::stream)
             .filter(tab -> hearingId.equals(tab.getId()))
