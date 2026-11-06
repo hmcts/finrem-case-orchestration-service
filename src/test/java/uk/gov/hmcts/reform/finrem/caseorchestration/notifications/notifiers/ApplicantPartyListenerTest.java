@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
 
 import java.util.List;
 import java.util.UUID;
@@ -49,6 +50,8 @@ class ApplicantPartyListenerTest extends BasePartyListenerTest {
     private NotificationService notificationService;
     @Mock
     private InternationalPostalService internationalPostalService;
+    @Mock
+    private CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
 
     private ApplicantPartyListener applicantPartyListener;
 
@@ -92,7 +95,7 @@ class ApplicantPartyListenerTest extends BasePartyListenerTest {
             .build());
 
         applicantPartyListener = new ApplicantPartyListener(
-            bulkPrintService, emailService, notificationService, internationalPostalService
+            bulkPrintService, emailService, notificationService, internationalPostalService, citizenPinInPostPersistenceService
         );
     }
 
