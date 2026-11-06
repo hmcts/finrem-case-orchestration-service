@@ -208,7 +208,7 @@ class EvidenceManagementDownloadServiceTest {
     void shouldReturnEmptyByteArrayWhenResourceIsNull() {
         // Given
         CaseDocument caseDocument = CaseDocument.builder().documentBinaryUrl(TEST_DOCUMENT_BINARY_URL).build();
-        ResponseEntity<Resource> responseEntity = new ResponseEntity<>(null, HttpStatus.OK);
+        ResponseEntity<Resource> responseEntity = new ResponseEntity<>((Resource) null, HttpStatus.OK);
 
         doReturn(responseEntity) // Use doReturn() for spies
             .when(downloadService)
