@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class FixHearingTimeTask extends EncryptedCsvFileProcessingTask {
     private static final String TASK_NAME = "FixHearingTimeTask";
-    private static final String SUMMARY = "DFR-XXXX Fix hearingTime containing additional information";
+    private static final String SUMMARY = "DFR-5936 Fix hearingTime containing additional information";
 
     private static final String CORRECT_TIME = "10:00 AM";
     private static final int MAX_TIME_LENGTH = 100;
