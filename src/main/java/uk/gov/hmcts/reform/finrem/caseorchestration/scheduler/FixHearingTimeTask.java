@@ -19,7 +19,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -51,14 +50,9 @@ public class FixHearingTimeTask extends EncryptedCsvFileProcessingTask {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper wrapper = caseData.getManageHearingsWrapper();
 
-        ManageHearingsCollectionItem hearingItem = Optional.ofNullable(wrapper.getHearings())
-            .orElseGet(List::of)
-            .stream()
+        ManageHearingsCollectionItem hearingItem = wrapper.getHearings().stream()
             .filter(this::hasInvalidTime)
-            .reduce((first, second) -> {
-                throw new IllegalStateException(String.format(
-                    "Case ID: %s - More than one hearing with invalid time found", finremCaseDetails.getId()));
-            })
+            .findFirst()
             .orElse(null);
 
         if (hearingItem == null) {

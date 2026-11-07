@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FixHearingTimeTaskTest {
 
@@ -45,16 +44,6 @@ class FixHearingTimeTaskTest {
         ManageHearingsWrapper wrapper = details.getData().getManageHearingsWrapper();
         assertThat(wrapper.getHearings().getFirst().getValue().getHearingTime()).isEqualTo("2:30 PM");
         assertThat(wrapper.getHearingTabItems().getFirst().getValue().getTabDateTime()).isEqualTo("02 Feb 2025 2:30 PM");
-    }
-
-    @Test
-    void shouldThrowWhenMoreThanOneInvalidHearing() {
-        FinremCaseDetails details = caseDetails(
-            List.of(hearing(UUID.randomUUID(), LONG_TEXT), hearing(UUID.randomUUID(), LONG_TEXT)), List.of());
-
-        assertThatThrownBy(() -> task.executeTask(details))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("More than one hearing with invalid time found");
     }
 
     private FinremCaseDetails caseDetails(List<ManageHearingsCollectionItem> hearings, List<HearingTabCollectionItem> tabs) {
