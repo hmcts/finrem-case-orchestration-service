@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,16 @@ public class EmailNotificationIntegrationTest extends BaseTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @BeforeClass
+    public static void requireNotifyKey() {
+        String key = System.getenv("UK_GOV_NOTIFY_API_KEY");
+        boolean hasKey = key != null && !key.isBlank();
+        if (System.getenv("JENKINS_URL") != null && !hasKey) {
+            throw new IllegalStateException("UK_GOV_NOTIFY_API_KEY must be set in CI");
+        }
+        Assume.assumeTrue("UK_GOV_NOTIFY_API_KEY not set; skipping", hasKey);
+    }
 
     // -------------------------
     // CONSENTED SCENARIOS
@@ -107,7 +119,6 @@ public class EmailNotificationIntegrationTest extends BaseTest {
             "fixtures/functional/consented/fr-consented-representative-stop-representing-respondent-stub.json"
         );
     }
-
 
     // -------------------------
     // CONTESTED SCENARIOS
@@ -234,7 +245,6 @@ public class EmailNotificationIntegrationTest extends BaseTest {
         );
     }
 
-
     // -------------------------
     // NOC SCENARIOS
     // -------------------------
@@ -255,7 +265,6 @@ public class EmailNotificationIntegrationTest extends BaseTest {
             "fixtures/functional/consented/fr-consented-notice-of-change-stub.json"
         );
     }
-
 
     // -------------------------
     // INTERVENERS SCENARIOS
