@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -30,6 +31,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
@@ -55,6 +58,8 @@ public class GeneralApplicationDirectionsService {
     private final ObjectMapper objectMapper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final CcdService ccdService;
+    private final CitizenPinInPostService citizenPinInPostService;
+    private final FeatureToggleService featureToggleService;
 
     private static final String COURT_DETAIL = "courtDetails";
     private static final String APPLICANT_NAME = "applicantName";
@@ -153,6 +158,12 @@ public class GeneralApplicationDirectionsService {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
         log.info("The relevant party {} for Case ID: {}", ObjectUtils.nullSafeConciseToString(referDetail), caseDetails.getId());
         if (StringUtils.isNotEmpty(referDetail)) {
+
+            if (featureToggleService.isFinremCitizenUiEnabled()) {
+                citizenPinInPostService.generatePinIfNeeded(caseDetails, APPLICANT);
+                citizenPinInPostService.generatePinIfNeeded(caseDetails, RESPONDENT);
+            }
+
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
             log.info("Sending {} document(s) to applicant via bulk print for Case ID: {}, document(s) are {}",
                 documents.size(), caseDetails.getId(),
