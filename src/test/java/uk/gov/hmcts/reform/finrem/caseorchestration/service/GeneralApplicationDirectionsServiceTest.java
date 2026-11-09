@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
 import java.util.ArrayList;
@@ -91,6 +92,11 @@ class GeneralApplicationDirectionsServiceTest {
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
     private DocumentConfiguration documentConfiguration;
+    @Mock
+    private FeatureToggleService featureToggleService;
+    @Mock
+    private CitizenPinInPostService citizenPinInPostService;
+
     private CaseDetails caseDetails;
 
     @BeforeEach
@@ -199,6 +205,9 @@ class GeneralApplicationDirectionsServiceTest {
             .intervenerName("intervener1").build());
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CONTESTED)
             .data(data).build();
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(finremCaseDetails, documents, AUTH_TOKEN);
 
         verify(bulkPrintService).printIntervenerDocuments(
@@ -207,6 +216,8 @@ class GeneralApplicationDirectionsServiceTest {
             any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
         verify(bulkPrintService).printRespondentDocuments(
             any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(citizenPinInPostService, times(2))
+            .generatePinIfNeeded(any(FinremCaseDetails.class), any(DocumentHelper.PaperNotificationRecipient.class));
     }
 
     @Test
