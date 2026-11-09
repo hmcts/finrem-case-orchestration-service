@@ -134,6 +134,11 @@ public class GeneralApplicationDirectionsService {
                 documents.size(), caseDetails.getId(),
                 documents);
 
+            if (featureToggleService.isFinremCitizenUiEnabled()) {
+                citizenPinInPostService.generatePinIfNeeded(caseDetails, APPLICANT);
+                citizenPinInPostService.generatePinIfNeeded(caseDetails, RESPONDENT);
+            }
+
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
             log.info("Sending {} document(s) to respondent via bulk print for Case ID: {}, document(s) are {}",
                 documents.size(), caseDetails.getId(),
@@ -199,29 +204,6 @@ public class GeneralApplicationDirectionsService {
         };
 
         return referDetail.contains(identifier.toLowerCase()) || referDetail.contains(identifier);
-    }
-  
-    private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails caseDetails, String authorisationToken,
-                                                           List<BulkPrintDocument> documents) {
-        String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
-        log.info("The relevant party {} for Case ID: {}", ObjectUtils.nullSafeConciseToString(referDetail), caseDetails.getId());
-        if (StringUtils.isNotEmpty(referDetail)) {
-
-            if (featureToggleService.isFinremCitizenUiEnabled()) {
-                citizenPinInPostService.generatePinIfNeeded(caseDetails, APPLICANT);
-                citizenPinInPostService.generatePinIfNeeded(caseDetails, RESPONDENT);
-            }
-
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to applicant via bulk print for Case ID: {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to respondent via bulk print for Case ID: {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
-            sendIntervenerDocuments(caseDetails, authorisationToken, documents, referDetail);
-        }
     }
 
     private void sendIntervenerDocuments(FinremCaseDetails caseDetails, String authorisationToken,
