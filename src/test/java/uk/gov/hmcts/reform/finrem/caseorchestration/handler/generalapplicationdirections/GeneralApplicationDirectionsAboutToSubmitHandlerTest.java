@@ -544,6 +544,54 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
     @EnumSource(IntervenerType.class)
     @ParameterizedTest
+    void givenPrintSuppliedDocumentNeededWithAnActiveIntervener_whenHandled_shouldValidateAllMissingAddressesAfterSimulatingEvents(
+        IntervenerType intervenerType) {
+        int intervenerIndex = intervenerType.getIntervenerId();
+
+        final String expectedIntervenerAddressError = "missing intervener %s address".formatted(intervenerIndex);
+
+        contactDetailsValidatorMockedStatic
+            .when(() -> validateRequiredPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH)))
+            .thenReturn(new ArrayList<>());
+        contactDetailsValidatorMockedStatic
+            .when(() -> validateRequiredIntervenersPostalAddresses(any(FinremCaseData.class), eq(GENERAL_APPLICATION_DIRECTIONS_MH),
+                eq(intervenerIndex == 1), eq(intervenerIndex == 2), eq(intervenerIndex == 3), eq(intervenerIndex == 4)))
+            .thenReturn(new ArrayList<>(List.of(expectedIntervenerAddressError)));
+
+        List<GeneralApplicationsCollection> generalApplications = mock(List.class);
+        GeneralApplicationWrapper generalApplicationWrapper = mock(GeneralApplicationWrapper.class);
+        when(generalApplicationWrapper.getGeneralApplicationReferDetail()).thenReturn("ref detail");
+        when(generalApplicationWrapper.getGeneralApplications()).thenReturn(generalApplications);
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder()
+            .generalApplicationWrapper(generalApplicationWrapper)
+            .build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+
+        when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
+        when(generalApplicationDirectionsService.shouldPrintSuppliedDocuments(callbackRequest.getCaseDetails())).thenReturn(true);
+
+        stubIntervenerActive(finremCaseData, intervenerIndex);
+        when(generalApplicationDirectionsService.shouldSendToIntervener(intervenerType, "ref detail")).thenReturn(false);
+
+        SendCorrespondenceEvent event1 = mock(SendCorrespondenceEvent.class);
+        when(event1.getNotificationParties()).thenReturn(List.of(INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR));
+        when(event1.getAudits()).thenReturn(List.of(NotificationAudit.builder().type(POSTAL).build()));
+        SendCorrespondenceEvent event2 = mock(SendCorrespondenceEvent.class);
+        List<SendCorrespondenceEvent> events = List.of(event1, event2);
+        when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(eq(callbackRequest), eq(AUTH_TOKEN)))
+            .thenReturn(events);
+
+        var response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).contains(expectedIntervenerAddressError);
+        verify(generalApplicationDirectionsService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(manageHearingsCorresponder).buildHearingCorrespondenceEventsIfNeeded(any(), eq(AUTH_TOKEN));
+        verify(applicationEventPublisher).publishEvent(event1);
+        verify(applicationEventPublisher).publishEvent(event2);
+    }
+
+    @EnumSource(IntervenerType.class)
+    @ParameterizedTest
     void givenPrintSuppliedDocumentNeededWithAnActiveIntervener_whenHandled_shouldValidateAllMissingAddresses(IntervenerType intervenerType) {
         int intervenerIndex = intervenerType.getIntervenerId();
 
@@ -568,6 +616,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             .build());
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
 
+        when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
         when(generalApplicationDirectionsService.shouldPrintSuppliedDocuments(callbackRequest.getCaseDetails())).thenReturn(true);
 
         stubIntervenerActive(finremCaseData, intervenerIndex);
@@ -578,6 +627,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         assertThat(response.getErrors()).contains(expectedIntervenerAddressError,
             expectedApplicantAddressError, expectedRespondentAddressError);
         verify(generalApplicationDirectionsService, never()).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(manageHearingsCorresponder, never()).buildHearingCorrespondenceEventsIfNeeded(any(), eq(AUTH_TOKEN));
         verifyNoInteractions(applicationEventPublisher);
     }
 

@@ -353,7 +353,9 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremAbou
                     && generalApplicationDirectionsService.shouldSendToIntervener(INTERVENER_THREE, referDetail),
                 partyService.isIntervenerFourActive(finremCaseData)
                     && generalApplicationDirectionsService.shouldSendToIntervener(INTERVENER_FOUR, referDetail)));
-        } else if (isHearingRequired) {
+        }
+
+        if (errors.isEmpty() && isHearingRequired) {
             List<SendCorrespondenceEvent> simulatedEvents = manageHearingsCorresponder
                 .buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
             simulatedEvents.forEach(event -> {
