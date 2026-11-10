@@ -13,8 +13,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -24,6 +26,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -262,8 +265,70 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument2, AUTH_TOKEN, CaseType.CONSENTED);
     }
 
-    private CaseDetails caseDetails() {
-        return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
+    @Test
+    public void shouldStoreApplicantCitizenUiCoverSheetConfidentiallyWhenAddressIsPublic() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(1234567890123456L)
+            .caseType(CaseType.CONTESTED)
+            .data(new FinremCaseData())
+            .build();
+        caseDetails.getData().getContactDetailsWrapper().setApplicantAddressHiddenFromRespondent(YesOrNo.NO);
+
+        CaseDocument coversheet = CaseDocument.builder()
+            .documentUrl("http://test.com/coversheet")
+            .documentBinaryUrl("http://test.com/coversheet/binary")
+            .documentFilename("BulkPrintCoverSheet.pdf")
+            .build();
+        BulkPrintDocument printDocument = BulkPrintDocument.builder()
+            .binaryFileUrl(coversheet.getDocumentBinaryUrl())
+            .fileName(coversheet.getDocumentFilename())
+            .build();
+
+        BulkPrintCoversheetWrapper wrapper = caseDetails.getData().getBulkPrintCoversheetWrapper();
+        wrapper.setBulkPrintCoverSheetApp(CaseDocument.builder().documentUrl("http://test.com/old").build());
+
+        when(coverSheetService.shouldUseCitizenUiCoverSheet(
+            caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT
+        )).thenReturn(true);
+        when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coversheet);
+
+        bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, List.of());
+
+        assertNull(wrapper.getBulkPrintCoverSheetApp());
+        assertEquals(coversheet, wrapper.getBulkPrintCoverSheetAppConfidential());
+    }
+
+    @Test
+    public void shouldStoreRespondentCitizenUiCoverSheetConfidentiallyWhenAddressIsPublic() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(1234567890123456L)
+            .caseType(CaseType.CONTESTED)
+            .data(new FinremCaseData())
+            .build();
+        caseDetails.getData().getContactDetailsWrapper().setRespondentAddressHiddenFromApplicant(YesOrNo.NO);
+
+        CaseDocument coversheet = CaseDocument.builder()
+            .documentUrl("http://test.com/coversheet")
+            .documentBinaryUrl("http://test.com/coversheet/binary")
+            .documentFilename("BulkPrintCoverSheet.pdf")
+            .build();
+        BulkPrintDocument printDocument = BulkPrintDocument.builder()
+            .binaryFileUrl(coversheet.getDocumentBinaryUrl())
+            .fileName(coversheet.getDocumentFilename())
+            .build();
+
+        BulkPrintCoversheetWrapper wrapper = caseDetails.getData().getBulkPrintCoversheetWrapper();
+        wrapper.setBulkPrintCoverSheetRes(CaseDocument.builder().documentUrl("http://test.com/old").build());
+
+        when(coverSheetService.shouldUseCitizenUiCoverSheet(
+            caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT
+        )).thenReturn(true);
+        when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coversheet);
+
+        bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, List.of());
+
+        assertNull(wrapper.getBulkPrintCoverSheetRes());
+        assertEquals(coversheet, wrapper.getBulkPrintCoverSheetResConfidential());
     }
 
     private FinremCaseDetails finremCaseDetails() {
