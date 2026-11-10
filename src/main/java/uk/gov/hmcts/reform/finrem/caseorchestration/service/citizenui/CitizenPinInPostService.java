@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient;
@@ -22,6 +23,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 @RequiredArgsConstructor
 @Slf4j
 public class CitizenPinInPostService {
+
+    private final FeatureToggleService featureToggleService;
 
     /**
      * Ensures an eligible applicant or respondent has a Citizen UI PIN.
@@ -43,7 +46,8 @@ public class CitizenPinInPostService {
 
         boolean generated = AccessCodeGenerator
             .generateAccessCodeIfNeeded(caseDetails.getData(),
-                recipient
+                recipient,
+                featureToggleService.alwaysGenerateCUIAccessCodesEnabled()
             );
 
         if (generated) {
