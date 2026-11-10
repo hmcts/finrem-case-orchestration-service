@@ -18,11 +18,12 @@ import java.util.Objects;
 /**
  * Generates Citizen UI access codes and appends them to a recipient's history.
  *
- * <p>New codes are added only for unrepresented applicants or respondents
- * without an active or previously activated code. Existing history is preserved.
+ * <p>Applicants and respondents are eligible if they are unrepresented or the caller
+ * enables generation for represented parties. An active or previously activated code
+ * prevents generation in either case. Existing history is preserved.
  *
  * <p>Changes are made in memory. The caller is responsible for checking the
- * case type and feature toggle, and persisting changes to CCD.
+ * case type and feature toggles and persisting changes to CCD.
  */
 public final class AccessCodeGenerator {
 
@@ -43,20 +44,19 @@ public final class AccessCodeGenerator {
     /**
      * Checks whether the recipient requires a new access code without modifying case data.
      *
-     * <p>Returns true only for an unrepresented applicant or respondent whose
-     * history contains no active or previously activated code.
-     *
      * @param caseData the case data containing representation details and access-code history
      * @param recipient the recipient to check
-     * @return true if a new code is required; false otherwise, including for unsupported recipients
+     * @param alwaysGenerateAccessCode whether represented applicants and respondents are also eligible
+     * @return true if the recipient is eligible and has no active or previously activated code
      */
     public static boolean doesRecipientNeedNewAccessCode(FinremCaseData caseData,
-                                                         PaperNotificationRecipient recipient) {
+                                                         PaperNotificationRecipient recipient,
+                                                         boolean alwaysGenerateAccessCode) {
 
         return switch (recipient) {
-            case APPLICANT -> !caseData.isApplicantRepresentedByASolicitor()
+            case APPLICANT -> (!caseData.isApplicantRepresentedByASolicitor() || alwaysGenerateAccessCode)
                 && !hasActiveOrActivatedCode(caseData.getApplicantAccessCodes());
-            case RESPONDENT -> !caseData.isRespondentRepresentedByASolicitor()
+            case RESPONDENT -> (!caseData.isRespondentRepresentedByASolicitor() || alwaysGenerateAccessCode)
                 && !hasActiveOrActivatedCode(caseData.getRespondentAccessCodes());
             default -> false;
         };
@@ -70,13 +70,15 @@ public final class AccessCodeGenerator {
      *
      * @param caseData the case data to update
      * @param recipient the recipient for whom to generate a code
-     * @return true if a new code was added; false if no change was required
+     * @param alwaysGenerateAccessCode whether represented applicants and respondents are also eligible
+     * @return true if a new code was added
      */
     public static boolean generateAccessCodeIfNeeded(
         FinremCaseData caseData,
-        PaperNotificationRecipient recipient) {
+        PaperNotificationRecipient recipient,
+        boolean alwaysGenerateAccessCode) {
 
-        if (!doesRecipientNeedNewAccessCode(caseData, recipient)) {
+        if (!doesRecipientNeedNewAccessCode(caseData, recipient, alwaysGenerateAccessCode)) {
             return false;
         }
 
@@ -133,8 +135,7 @@ public final class AccessCodeGenerator {
      * Null collection items and null entry values are ignored.
      *
      * @param accessCodes the access-code history, or null if none exists
-     * @return true if a matching entry exists; false for null or empty collections
-     *         or when no entry matches
+     * @return true if a matching entry exists
      */
     private static boolean hasActiveOrActivatedCode(
         List<AccessCodeCollection> accessCodes) {
