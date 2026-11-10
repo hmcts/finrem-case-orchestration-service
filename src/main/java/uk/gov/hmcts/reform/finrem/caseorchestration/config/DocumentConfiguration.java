@@ -18,6 +18,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Component
 @ConfigurationProperties(prefix = "document")
 public class DocumentConfiguration {
+    private String bulkPrintCitizenUiTemplate;
     private String bulkPrintTemplate;
     private String bulkPrintFileName;
     @Getter(AccessLevel.NONE)
