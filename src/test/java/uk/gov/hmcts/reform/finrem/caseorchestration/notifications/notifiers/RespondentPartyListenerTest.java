@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CoverSheetPersistenceService;
 
 import java.util.List;
 import java.util.UUID;
@@ -48,6 +50,8 @@ class RespondentPartyListenerTest extends BasePartyListenerTest {
     private InternationalPostalService internationalPostalService;
     @Mock
     private CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
+    @Mock
+    private CoverSheetPersistenceService coverSheetPersistenceService;
 
     private RespondentPartyListener respondentPartyListener;
 
@@ -89,7 +93,8 @@ class RespondentPartyListenerTest extends BasePartyListenerTest {
             .build());
 
         respondentPartyListener = new RespondentPartyListener(
-            bulkPrintService, emailService, notificationService, internationalPostalService, citizenPinInPostPersistenceService
+            bulkPrintService, emailService, notificationService, internationalPostalService,
+            citizenPinInPostPersistenceService, coverSheetPersistenceService
         );
     }
 
@@ -124,6 +129,8 @@ class RespondentPartyListenerTest extends BasePartyListenerTest {
         CaseDocument result = respondentPartyListener.getPartyCoversheet(event);
         assertThat(result).isEqualTo(coverSheet);
         verify(bulkPrintService).getRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(coverSheetPersistenceService).saveCoverSheet(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT, coverSheet);
     }
 
     /**
@@ -200,6 +207,8 @@ class RespondentPartyListenerTest extends BasePartyListenerTest {
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
             caseDetails, RESPONDENT, List.of(bulkPrintCoverSheet, bulkPrintDocument1), false, AUTH_TOKEN
         );
+        verify(coverSheetPersistenceService).saveCoverSheet(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT, coverSheet);
     }
 
     /**
