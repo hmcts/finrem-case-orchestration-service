@@ -333,7 +333,6 @@ class AccessCodeGeneratorTest {
             assertSame(existingCodes, caseData.getApplicantAccessCodes());
             verify(caseData, never()).setApplicantAccessCodes(any());
         }
-
     }
 
     private void assertValidEntry(AccessCodeEntry entry) {
