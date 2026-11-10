@@ -403,7 +403,6 @@ class HearingCorrespondenceHelperTest {
         CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
 
         FinremCaseData caseData = caseDataWithHearingDocuments(
-            hearingId,
             hearingDocument(hearingId, CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN, citizenFormC),
             hearingDocument(hearingId, CaseDocumentType.FORM_C, standardFormC)
         );
@@ -423,7 +422,6 @@ class HearingCorrespondenceHelperTest {
         CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
 
         FinremCaseData caseData = caseDataWithHearingDocuments(
-            hearingId,
             hearingDocument(hearingId, CaseDocumentType.FORM_C_EXPRESS_RESPONDENT_CITIZEN, citizenFormC),
             hearingDocument(hearingId, CaseDocumentType.FORM_C, standardFormC)
         );
@@ -443,7 +441,6 @@ class HearingCorrespondenceHelperTest {
         CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
 
         FinremCaseData caseData = caseDataWithHearingDocuments(
-            hearingId,
             hearingDocument(hearingId, CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN, citizenFormC),
             hearingDocument(hearingId, CaseDocumentType.FORM_C, standardFormC)
         );
@@ -462,7 +459,6 @@ class HearingCorrespondenceHelperTest {
         CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
 
         FinremCaseData caseData = caseDataWithHearingDocuments(
-            hearingId,
             hearingDocument(hearingId, CaseDocumentType.FORM_C_EXPRESS_RESPONDENT_CITIZEN, respondentCitizenFormC),
             hearingDocument(hearingId, CaseDocumentType.FORM_C, standardFormC)
         );
@@ -482,7 +478,6 @@ class HearingCorrespondenceHelperTest {
         CaseDocument standardFormC = CaseDocument.builder().documentFilename("Form-C-default.pdf").build();
 
         FinremCaseData caseData = caseDataWithHearingDocuments(
-            hearingId,
             hearingDocument(hearingId, CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN, applicantCitizenFormC),
             hearingDocument(hearingId, CaseDocumentType.FORM_C, standardFormC)
         );
@@ -495,8 +490,7 @@ class HearingCorrespondenceHelperTest {
         assertEquals(List.of(standardFormC), result);
     }
 
-    private FinremCaseData caseDataWithHearingDocuments(UUID hearingId,
-                                                        ManageHearingDocumentsCollectionItem... documentItems) {
+    private FinremCaseData caseDataWithHearingDocuments(ManageHearingDocumentsCollectionItem... documentItems) {
         return FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .hearingDocumentsCollection(List.of(documentItems))

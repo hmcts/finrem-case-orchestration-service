@@ -445,6 +445,7 @@ class ManageHearingsCorresponderTest {
         List<SendCorrespondenceEvent> actualEvents =
             corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(callbackRequest, AUTH_TOKEN);
 
+        assertThat(actualEvents).isNotEmpty();
         assertThat(actualEvents).allSatisfy(event -> {
             assertThat(event.getDocumentsToPost()).contains(vacateNotice);
         });
@@ -502,96 +503,6 @@ class ManageHearingsCorresponderTest {
                     List.of(NotificationParty.APPLICANT)
                 )
             );
-        }
-
-        @ParameterizedTest
-        @MethodSource
-        void shouldReturnHearingCorrespondenceEvents_whenMultiplePartiesOnCaseSelected(
-            List<PartyOnCaseCollectionItem> partiesOnCases, List<NotificationParty> expectedNotificationParties
-        ) {
-            FinremCallbackRequest callback = FinremCallbackRequestFactory.from(
-                FinremCaseData.builder()
-                    .ccdCaseId(CASE_ID)
-                    .ccdCaseType(CaseType.CONTESTED)
-                    .contactDetailsWrapper(buildContactDetails())
-                    .build()
-            );
-
-            UUID workingHearingId = UUID.randomUUID();
-            LocalDate hearingDate = LocalDate.of(2026, Month.JULY, 21);
-            callback.getFinremCaseData().getManageHearingsWrapper()
-                .setWorkingHearingId(workingHearingId);
-
-            Hearing hearing = mock(Hearing.class);
-            when(hearing.getHearingType()).thenReturn(FH);
-            when(hearing.getHearingDate()).thenReturn(hearingDate);
-            when(hearing.shouldSendNotifications()).thenReturn(true);
-
-            // Setting up parties on case
-            when(hearing.getPartiesOnCase()).thenReturn(partiesOnCases);
-
-            List<DocumentCollectionItem> hearingAdditionalDocs = new ArrayList<>();
-            hearingAdditionalDocs.add(DocumentCollectionItem.builder().value(additionalDoc).build());
-            when(hearingCorrespondenceHelper.getMiniFormAIfRequired(callback.getFinremCaseData(), hearing))
-                .thenReturn(Optional.of(miniFormA));
-            when(hearing.getAdditionalHearingDocs()).thenReturn(hearingAdditionalDocs);
-
-            when(hearingCorrespondenceHelper.getActiveHearingInContext(
-                callback.getFinremCaseData().getManageHearingsWrapper(),
-                workingHearingId
-            )).thenReturn(hearing);
-
-            try (
-                MockedStatic<CourtHelper> mockedCourtHelperStatic = Mockito.mockStatic(CourtHelper.class);
-                MockedStatic<NotificationParty> mockedNotificationPartyStatic = Mockito.mockStatic(NotificationParty.class)
-                ) {
-                mockedCourtHelperStatic.when(() -> CourtHelper.getFRCForHearing(hearing)).thenReturn("selectedFRC");
-
-                mockedNotificationPartyStatic.when(() -> NotificationParty.getNotificationPartyFromRole(
-                    CaseRole.APP_SOLICITOR.getCcdCode()
-                )).thenReturn(NotificationParty.APPLICANT);
-                mockedNotificationPartyStatic.when(() -> NotificationParty.getNotificationPartyFromRole(
-                    CaseRole.RESP_SOLICITOR.getCcdCode()
-                )).thenReturn(NotificationParty.RESPONDENT);
-
-                var events = corresponder.buildHearingCorrespondenceEventsIfNeeded(callback, AUTH_TOKEN);
-
-                verify(hearingCorrespondenceHelper).getActiveHearingInContext(
-                    callback.getFinremCaseData().getManageHearingsWrapper(), workingHearingId);
-                assertThat(events).hasSize(expectedNotificationParties.size());
-
-                assertThat(events).allSatisfy(event -> {
-                    assertThat(event)
-                        .extracting(
-                            SendCorrespondenceEvent::getCaseDetails,
-                            SendCorrespondenceEvent::getEmailTemplate,
-                            SendCorrespondenceEvent::getEmailNotificationRequest,
-                            SendCorrespondenceEvent::getDocumentsToPost,
-                            SendCorrespondenceEvent::getAuthToken)
-                        .containsExactly(
-                            callback.getCaseDetails(),
-                            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR,
-                            NotificationRequest.builder()
-                                .caseReferenceNumber(CASE_ID)
-                                .hearingType(FH.getId())
-                                .hearingDate("21 July 2026")
-                                .applicantName("Frodo")
-                                .respondentName("Gollum")
-                                .caseType("contested")
-                                .selectedCourt("selectedFRC")
-                                .vacatedHearingDateTime("")
-                                .vacatedHearingType("")
-                                .build(),
-                            List.of(additionalDoc, miniFormA),
-                            AUTH_TOKEN
-                        );
-                    assertThat(event.getNotificationParties()).hasSize(1);
-                });
-
-                assertThat(events)
-                    .flatExtracting(SendCorrespondenceEvent::getNotificationParties)
-                    .containsExactlyInAnyOrderElementsOf(expectedNotificationParties);
-            }
         }
 
         static Stream<Arguments> shouldReturnHearingCorrespondenceEventsList_whenMultiplePartiesOnCaseSelected() {
@@ -766,85 +677,6 @@ class ManageHearingsCorresponderTest {
             .applicantLname("Frodo")
             .respondentLname("Gollum")
             .build();
-    }
-
-    private FinremCallbackRequest buildCallbackForFormCSelection(CaseDocument defaultFormC,
-                                                                  CaseDocument applicantCitizenFormC,
-                                                                  CaseDocument respondentCitizenFormC,
-                                                                  boolean applicantRepresented,
-                                                                  boolean respondentRepresented) {
-        UUID workingHearingId = UUID.randomUUID();
-        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection = new ArrayList<>();
-        hearingDocumentsCollection.add(ManageHearingDocumentsCollectionItem.builder()
-            .value(ManageHearingDocument.builder()
-                .hearingId(workingHearingId)
-                .hearingCaseDocumentType(CaseDocumentType.FORM_C)
-                .hearingDocument(defaultFormC)
-                .build())
-            .build());
-
-        if (applicantCitizenFormC != null) {
-            hearingDocumentsCollection.add(ManageHearingDocumentsCollectionItem.builder()
-                .value(ManageHearingDocument.builder()
-                    .hearingId(workingHearingId)
-                    .hearingCaseDocumentType(CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN)
-                    .hearingDocument(applicantCitizenFormC)
-                    .build())
-                .build());
-        }
-
-        if (respondentCitizenFormC != null) {
-            hearingDocumentsCollection.add(ManageHearingDocumentsCollectionItem.builder()
-                .value(ManageHearingDocument.builder()
-                    .hearingId(workingHearingId)
-                    .hearingCaseDocumentType(CaseDocumentType.FORM_C_EXPRESS_RESPONDENT_CITIZEN)
-                    .hearingDocument(respondentCitizenFormC)
-                    .build())
-                .build());
-        }
-
-        FinremCaseData caseData = FinremCaseData.builder()
-            .ccdCaseId(CASE_ID)
-            .ccdCaseType(CaseType.CONTESTED)
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .applicantLname("Frodo")
-                .respondentLname("Gollum")
-                .applicantRepresented(applicantRepresented ? YesOrNo.YES : YesOrNo.NO)
-                .contestedRespondentRepresented(respondentRepresented ? YesOrNo.YES : YesOrNo.NO)
-                .build())
-            .listForHearingWrapper(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper.builder()
-                .formC(defaultFormC)
-                .build())
-            .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .workingHearingId(workingHearingId)
-                .hearingDocumentsCollection(hearingDocumentsCollection)
-                .build())
-            .build();
-
-        return FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, caseData);
-    }
-
-    private Hearing buildHearingForFormCSelection(CaseDocument defaultFormC) {
-        return Hearing.builder()
-            .hearingDate(LocalDate.of(2026, 1, 1))
-            .hearingTime("10:00")
-            .hearingTimeEstimate("30 mins")
-            .hearingType(FDA)
-            .hearingNoticePrompt(YesOrNo.YES)
-            .hearingCourtSelection(buildCourt())
-            .partiesOnCase(List.of(
-                PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(CaseRole.APP_SOLICITOR.getCcdCode()).build()).build(),
-                PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(CaseRole.RESP_SOLICITOR.getCcdCode()).build()).build()
-            ))
-            .additionalHearingDocs(List.of())
-            .build();
-    }
-
-    private SendCorrespondenceEvent getEventForParty(List<SendCorrespondenceEvent> events, NotificationParty party) {
-        return events.stream()
-            .filter(e -> e.getNotificationParties().contains(party))
-            .findFirst()
-            .orElseThrow();
     }
 
     private SendCorrespondenceEvent getExpectedHearingEvent(FinremCaseDetails caseDetails) {
