@@ -26,7 +26,6 @@ public class ApplicantPartyListener extends AbstractPartyListener {
                                   InternationalPostalService internationalPostalService,
                                   CitizenPinInPostPersistenceService citizenPinInPostPersistenceService,
                                   CoverSheetPersistenceService coverSheetPersistenceService) {
-
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
         this.citizenPinInPostPersistenceService = citizenPinInPostPersistenceService;
         this.coverSheetPersistenceService = coverSheetPersistenceService;
