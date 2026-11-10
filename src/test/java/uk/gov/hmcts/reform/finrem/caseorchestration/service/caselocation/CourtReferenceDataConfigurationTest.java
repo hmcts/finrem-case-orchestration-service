@@ -64,7 +64,7 @@ class CourtReferenceDataConfigurationTest extends BaseTest {
 
         assertThat(result)
             .containsKey("fr_londonlist_4")
-            .doesNotContainKey("FR_s_CFCList_11");
+            .doesNotContainKey("fr_s_cfclist_11");
 
         assertThat(result.get("fr_londonlist_4"))
             .isEqualTo(courtRefData);
