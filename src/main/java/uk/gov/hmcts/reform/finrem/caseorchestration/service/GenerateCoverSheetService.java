@@ -255,7 +255,6 @@ public class GenerateCoverSheetService {
     private CaseDocument generateCoverSheet(FinremCaseDetails caseDetails,
                                             String authorisationToken,
                                             DocumentHelper.PaperNotificationRecipient recipient) {
-
         String template = shouldUseCitizenUiCoverSheet(caseDetails, recipient)
             ? documentConfiguration.getBulkPrintCitizenUiTemplate()
             : documentConfiguration.getBulkPrintTemplate();
