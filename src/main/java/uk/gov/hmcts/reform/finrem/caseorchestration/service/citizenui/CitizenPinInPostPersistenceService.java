@@ -55,7 +55,7 @@ public class CitizenPinInPostPersistenceService {
         }
 
         if (!AccessCodeGenerator.doesRecipientNeedNewAccessCode(
-            caseDetails.getData(), recipient)) {
+            caseDetails.getData(), recipient, featureToggleService.alwaysGenerateCUIAccessCodesEnabled())) {
             return;
         }
 
