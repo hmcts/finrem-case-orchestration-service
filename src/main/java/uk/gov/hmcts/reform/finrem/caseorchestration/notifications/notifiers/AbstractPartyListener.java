@@ -205,5 +205,7 @@ public abstract class AbstractPartyListener {
     /**
      * Persists the coversheet once Bulk Print accepts the letter pack.
      */
-    protected void persistPartyCoversheet(SendCorrespondenceEvent event, CaseDocument coversheet) {}
+    protected void persistPartyCoversheet(SendCorrespondenceEvent event, CaseDocument coversheet) {
+
+    }
 }
