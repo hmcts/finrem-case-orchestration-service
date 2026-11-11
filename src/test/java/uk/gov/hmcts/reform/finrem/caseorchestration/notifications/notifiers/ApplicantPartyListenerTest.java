@@ -154,8 +154,7 @@ class ApplicantPartyListenerTest {
         CaseDocument result = applicantPartyListener.getPartyCoversheet(event);
         assertThat(result).isEqualTo(coverSheet);
         verify(bulkPrintService).getApplicantCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(coverSheetPersistenceService).saveCoverSheet(caseDetails,
-            DocumentHelper.PaperNotificationRecipient.APPLICANT, coverSheet);
+        verifyNoInteractions(coverSheetPersistenceService);
     }
 
     /**
