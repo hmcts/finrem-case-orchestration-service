@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
@@ -298,5 +299,37 @@ class ApplicantPartyListenerTest {
         assertThat(exception.getMessage()).isEqualTo("No documents to post provided for paper notification, case ID: " + CASE_ID);
 
         verifyNoInteractions(bulkPrintService);
+    }
+
+    @Test
+    void shouldRecordSentLetterWhenCoversheetSaveFails() {
+        CaseDocument coversheet = CaseDocument.builder()
+            .documentFilename(COVER_SHEET_FILE)
+            .build();
+        List<BulkPrintDocument> printDocuments = List.of(
+            BulkPrintDocument.builder().fileName(COVER_SHEET_FILE).build(),
+            BulkPrintDocument.builder().fileName(TEST_DOC_NAME).build()
+        );
+        UUID letterId = UUID.randomUUID();
+
+        when(bulkPrintService.getApplicantCoverSheet(caseDetails, AUTH_TOKEN))
+            .thenReturn(coversheet);
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(
+            List.of(coversheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()
+        )).thenReturn(printDocuments);
+        when(bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+            caseDetails, APPLICANT, printDocuments, false, AUTH_TOKEN
+        )).thenReturn(letterId);
+        doThrow(new IllegalStateException("CCD update failed"))
+            .when(coverSheetPersistenceService)
+            .saveCoverSheet(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT, coversheet);
+
+        applicantPartyListener.handleNotification(event);
+
+        verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
+            caseDetails, APPLICANT, printDocuments, false, AUTH_TOKEN
+        );
+        assertThat(event.getAudits()).singleElement()
+            .satisfies(audit -> assertThat(audit.getLetterId()).isEqualTo(letterId.toString()));
     }
 }
