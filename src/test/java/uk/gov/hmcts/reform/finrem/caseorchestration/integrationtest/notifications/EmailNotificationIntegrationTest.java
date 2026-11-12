@@ -55,11 +55,9 @@ public class EmailNotificationIntegrationTest extends BaseTest {
     @BeforeClass
     public static void requireNotifyKey() {
         String key = System.getenv("UK_GOV_NOTIFY_API_KEY");
-        boolean hasKey = key != null && !key.isBlank();
-        if (System.getenv("JENKINS_URL") != null && !hasKey) {
-            throw new IllegalStateException("UK_GOV_NOTIFY_API_KEY must be set in CI");
+        if (key == null || key.isBlank()) {
+            throw new IllegalStateException("UK_GOV_NOTIFY_API_KEY must be set");
         }
-        Assume.assumeTrue("UK_GOV_NOTIFY_API_KEY not set; skipping", hasKey);
     }
 
     // -------------------------
