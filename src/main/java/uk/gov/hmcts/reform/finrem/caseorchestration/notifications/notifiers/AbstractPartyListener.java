@@ -193,6 +193,13 @@ public abstract class AbstractPartyListener {
             event.caseDetails, getBulkPrintRecipient(), bpDocs, isOutsideUK, event.authToken
         );
 
+        try {
+            persistPartyCoversheet(event, partyCoversheet);
+        } catch (RuntimeException ex) {
+            log.error("Failed to save coversheet for party {} on case {} after Bulk Print accepted letter {}",
+                getNotificationParty(), event.getCaseId(), letterId, ex);
+        }
+
         log.info("Completed paper notification for party {} on case {} with letter ID: {}",
             getNotificationParty(), event.getCaseId(), letterId);
         return letterId;
@@ -200,5 +207,12 @@ public abstract class AbstractPartyListener {
 
     protected String getBulkPrintRecipient() {
         return getNotificationParty();
+    }
+
+    /**
+     * Persists the coversheet once Bulk Print accepts the letter pack.
+     */
+    protected void persistPartyCoversheet(SendCorrespondenceEvent event, CaseDocument coversheet) {
+
     }
 }

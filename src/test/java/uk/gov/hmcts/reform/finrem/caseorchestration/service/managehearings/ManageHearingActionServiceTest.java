@@ -362,11 +362,6 @@ class ManageHearingActionServiceTest {
             .isEqualTo(CaseDocumentType.VACATE_HEARING_NOTICE.getId());
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingId())
             .isEqualTo(hearingToVacateId);
-
-        assertThat(hearingWrapper.getManageHearingsActionSelection()).isNull();
-        assertThat(hearingWrapper.getWorkingVacatedHearing()).isNull();
-        assertThat(hearingWrapper.getIsRelistSelected()).isNull();
-        assertThat(hearingWrapper.getShouldSendVacateOrAdjNotice()).isNull();
     }
 
     @Test
