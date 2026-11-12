@@ -2,26 +2,21 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationd
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
 import java.util.List;
 
@@ -29,17 +24,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCondition;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mockRunWithRetryWithHandlerInvokesFirstErrorHandler;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,7 +50,7 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
     private RetryExecutor retryExecutor;
 
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
+    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     @Test
     void testCanHandle() {
@@ -94,9 +86,7 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
             .thenReturn(true);
 
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
-        when(event.getNotificationParties()).thenReturn(List.of(
-            NotificationParty.APPLICANT
-        ));
+        when(event.describeNotificationParties()).thenReturn("APPLICANT");
 
         List<SendCorrespondenceEvent> events = List.of(event);
         when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest,
@@ -106,21 +96,12 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
         var response = generalApplicationDirectionsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
-        ArgumentCaptor<ThrowingRunnable> sendHearingRunnableCaptor = getThrowingRunnableCaptor();
         assertAll(
             () -> assertThat(response.getConfirmationHeader()).isNullOrEmpty(),
             () -> assertThat(response.getConfirmationBody()).isNullOrEmpty(),
-            () -> verify(retryExecutor)
-                .runWithRetryWithHandler(
-                    sendHearingRunnableCaptor.capture(),
-                    eq("Send hearing corresponder to party: APPLICANT on general application direction event"),
-                    eq(CASE_ID),
-                    any(RetryErrorHandler.class)
-                ),
-            () -> {
-                sendHearingRunnableCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
-                verify(applicationEventPublisher).publishEvent(event);
-            }
+            () -> verify(correspondenceEventAuditOrchestrationService).publishEvent(eq(event),
+                eq("Send hearing corresponder to party: APPLICANT on general application direction event"),
+                any(Runnable.class))
         );
     }
 
@@ -134,13 +115,9 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
             .thenReturn(true);
 
         SendCorrespondenceEvent applicantEvent = mock(SendCorrespondenceEvent.class);
-        when(applicantEvent.getNotificationParties()).thenReturn(List.of(
-            NotificationParty.APPLICANT
-        ));
+        when(applicantEvent.describeNotificationParties()).thenReturn("APPLICANT");
         SendCorrespondenceEvent respondentEvent = mock(SendCorrespondenceEvent.class);
-        when(respondentEvent.getNotificationParties()).thenReturn(List.of(
-            NotificationParty.RESPONDENT
-        ));
+        when(respondentEvent.describeNotificationParties()).thenReturn("RESPONDENT");
 
         List<SendCorrespondenceEvent> events = List.of(applicantEvent, respondentEvent);
         when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest,
@@ -150,30 +127,15 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
         var response = generalApplicationDirectionsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
-        ArgumentCaptor<ThrowingRunnable> sendHearingRunnableCaptor = getThrowingRunnableCaptor();
         assertAll(
             () -> assertThat(response.getConfirmationHeader()).isNullOrEmpty(),
             () -> assertThat(response.getConfirmationBody()).isNullOrEmpty(),
-            () -> verify(retryExecutor)
-                .runWithRetryWithHandler(
-                    sendHearingRunnableCaptor.capture(),
-                    eq("Send hearing corresponder to party: APPLICANT on general application direction event"),
-                    eq(CASE_ID),
-                    any(RetryErrorHandler.class)
-                ),
-            () -> verify(retryExecutor)
-                .runWithRetryWithHandler(
-                    sendHearingRunnableCaptor.capture(),
-                    eq("Send hearing corresponder to party: RESPONDENT on general application direction event"),
-                    eq(CASE_ID),
-                    any(RetryErrorHandler.class)
-                ),
-            () -> {
-                sendHearingRunnableCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
-                verify(applicationEventPublisher).publishEvent(applicantEvent);
-                verify(applicationEventPublisher).publishEvent(respondentEvent);
-                verifyNoMoreInteractions(applicationEventPublisher);
-            }
+            () -> verify(correspondenceEventAuditOrchestrationService).publishEvent(eq(applicantEvent),
+                eq("Send hearing corresponder to party: APPLICANT on general application direction event"),
+                any(Runnable.class)),
+            () -> verify(correspondenceEventAuditOrchestrationService).publishEvent(eq(respondentEvent),
+                eq("Send hearing corresponder to party: RESPONDENT on general application direction event"),
+                any(Runnable.class))
         );
     }
 
@@ -187,44 +149,26 @@ class GeneralApplicationDirectionsSubmittedHandlerTest {
             .thenReturn(true);
 
         SendCorrespondenceEvent applicantEvent = mock(SendCorrespondenceEvent.class);
-        when(applicantEvent.getNotificationParties()).thenReturn(List.of(
-            NotificationParty.APPLICANT
-        ));
+        when(applicantEvent.describeNotificationParties()).thenReturn("APPLICANT");
         SendCorrespondenceEvent respondentEvent = mock(SendCorrespondenceEvent.class);
-        when(respondentEvent.getNotificationParties()).thenReturn(List.of(
-            NotificationParty.RESPONDENT
-        ));
+        when(respondentEvent.describeNotificationParties()).thenReturn("RESPONDENT");
 
         List<SendCorrespondenceEvent> events = List.of(applicantEvent, respondentEvent);
         when(manageHearingsCorresponder.buildHearingCorrespondenceEventsIfNeeded(callbackRequest,
             AUTH_TOKEN)).thenReturn(events);
 
-        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
-            retryExecutor,
-            "Send hearing corresponder to party: APPLICANT on general application direction event"
-        );
-        doNothing().when(retryExecutor).runWithRetryWithHandler(
-            any(),
-            eq("Send hearing corresponder to party: RESPONDENT on general application direction event"),
-            any(),
-            any(RetryErrorHandler.class)
+        doAnswer(invocation -> {
+            invocation.getArgument(2, Runnable.class).run();
+            return null;
+        }).when(correspondenceEventAuditOrchestrationService).publishEvent(
+            eq(applicantEvent),
+            eq("Send hearing corresponder to party: APPLICANT on general application direction event"),
+            any(Runnable.class)
         );
 
         // Act
         var response = generalApplicationDirectionsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
         assertAll(
-            () -> verify(retryExecutor).runWithRetryWithHandler(
-                any(ThrowingRunnable.class),
-                eq("Send hearing corresponder to party: APPLICANT on general application direction event"),
-                eq(CASE_ID),
-                any(RetryErrorHandler.class)
-            ),
-            () -> verify(retryExecutor).runWithRetryWithHandler(
-                any(ThrowingRunnable.class),
-                eq("Send hearing corresponder to party: RESPONDENT on general application direction event"),
-                eq(CASE_ID),
-                any(RetryErrorHandler.class)
-            ),
             () -> assertThat(response.getConfirmationHeader()).contains("General Application Direction completed with error"),
             () -> assertCondition(response.getConfirmationBody(),
                 "Notification to APPLICANT has failed. Please send notification manually.",

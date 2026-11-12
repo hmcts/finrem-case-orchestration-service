@@ -1,11 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -20,11 +18,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 
-import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -40,11 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_INTERIM_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourtGA;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +48,6 @@ public class GeneralApplicationDirectionsService {
     private final DocumentConfiguration documentConfiguration;
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final CcdService ccdService;
     private final CitizenPinInPostService citizenPinInPostService;
@@ -108,13 +100,54 @@ public class GeneralApplicationDirectionsService {
         caseData.getRegionWrapper().getGeneralApplicationRegionWrapper().clearRegions();
     }
 
-    public void submitCollectionGeneralApplicationDirections(FinremCaseDetails caseDetails, List<BulkPrintDocument> dirDocuments,
-                                                             String authorisationToken) {
-        printDocumentPackAndSendToRelevantParties(caseDetails, authorisationToken, dirDocuments);
+    /**
+     * Determines whether the supplied documents should be sent via bulk print.
+     *
+     * <p>Documents are only printed when the general application "refer detail" on the case
+     * is present, i.e. not null and not empty.</p>
+     *
+     * @param caseDetails the case details containing the general application wrapper
+     * @return {@code true} if the general application refer detail is non-empty, otherwise {@code false}
+     */
+    public boolean shouldPrintSuppliedDocuments(FinremCaseDetails caseDetails) {
+        String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
+        return StringUtils.isNotEmpty(referDetail);
     }
 
-    public boolean isNotEmpty(String field, Map<String, Object> caseData) {
-        return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
+    /**
+     * Sends the supplied general application direction documents via bulk print to the relevant parties.
+     *
+     * <p>Printing only happens when {@link #shouldPrintSuppliedDocuments(FinremCaseDetails)} returns
+     * {@code true}, i.e. the general application "refer detail" is non-empty. In that case the documents are
+     * always sent to the respondent and the applicant, and are additionally sent to an intervener when the
+     * refer detail identifies one (see {@link #sendIntervenerDocuments}).
+     * When the refer detail is null or empty, no documents are sent.</p>
+     *
+     * @param caseDetails        the case details containing the general application wrapper and party data
+     * @param documents          the documents to be sent via bulk print
+     * @param authorisationToken the user's authorisation token used for the bulk print requests
+     */
+    public void submitCollectionGeneralApplicationDirections(FinremCaseDetails caseDetails, List<BulkPrintDocument> documents,
+                                                             String authorisationToken) {
+        if (shouldPrintSuppliedDocuments(caseDetails)) {
+            log.info("Sending {} document(s) to applicant via bulk print for Case ID: {}, document(s) are {}",
+                documents.size(), caseDetails.getId(),
+                documents);
+
+            if (featureToggleService.isFinremCitizenUiEnabled()) {
+                citizenPinInPostService.generatePinIfNeeded(caseDetails, APPLICANT);
+                citizenPinInPostService.generatePinIfNeeded(caseDetails, RESPONDENT);
+            }
+
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
+            log.info("Sending {} document(s) to respondent via bulk print for Case ID: {}, document(s) are {}",
+                documents.size(), caseDetails.getId(),
+                documents);
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
+
+            sendIntervenerDocuments(caseDetails, authorisationToken, documents,
+                caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail());
+        }
     }
 
     /**
@@ -147,53 +180,50 @@ public class GeneralApplicationDirectionsService {
         return YesOrNo.isYes(hearingRequired);
     }
 
-    /*
-    If any referdetail is present, applicant and respondent are send correspondence via Bulk Print.
-    If referdetail indicates that the GA came from an intervener, that intervener will receive correspondence too.
-    referDetail comes from a label created when the General Application is created, can look like this:
-    "Received from - Intervener1 - Created Date - 2025-09-04 - Hearing Required - Yes" (reads applicant or respondent for these parties)
+    /**
+     * Determines whether a notification should be sent to the given intervener, based on
+     * whether the refer detail text mentions that intervener.
+     *
+     * <p>The intervener is identified by the constant mapped to its {@link IntervenerType}
+     * (e.g. {@code INTERVENER_ONE} maps to {@code INTERVENER1}). The refer detail is searched
+     * for that identifier as-is and in lower case. Note this is a substring match, not a
+     * word-boundary match.</p>
+     *
+     * @param intervenerType the intervener to check for; must not be {@code null}
+     * @param referDetail    the free-text refer detail to search; must not be {@code null}
+     * @return {@code true} if the refer detail contains the intervener's identifier
+     *         (original or lower case), otherwise {@code false}
+     * @throws NullPointerException if {@code intervenerType} or {@code referDetail} is {@code null}
      */
-    private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails caseDetails, String authorisationToken,
-                                                           List<BulkPrintDocument> documents) {
-        String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
-        log.info("The relevant party {} for Case ID: {}", ObjectUtils.nullSafeConciseToString(referDetail), caseDetails.getId());
-        if (StringUtils.isNotEmpty(referDetail)) {
+    public boolean shouldSendToIntervener(IntervenerType intervenerType, String referDetail) {
+        String identifier = switch (intervenerType) {
+            case INTERVENER_ONE -> INTERVENER1;
+            case INTERVENER_TWO -> INTERVENER2;
+            case INTERVENER_THREE -> INTERVENER3;
+            case INTERVENER_FOUR -> INTERVENER4;
+        };
 
-            if (featureToggleService.isFinremCitizenUiEnabled()) {
-                citizenPinInPostService.generatePinIfNeeded(caseDetails, APPLICANT);
-                citizenPinInPostService.generatePinIfNeeded(caseDetails, RESPONDENT);
-            }
-
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to applicant via bulk print for Case ID: {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
-            log.info("Sending {} document(s) to respondent via bulk print for Case ID: {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
-            sendIntervenerDocuments(caseDetails, authorisationToken, documents, referDetail);
-        }
+        return referDetail.contains(identifier.toLowerCase()) || referDetail.contains(identifier);
     }
 
     private void sendIntervenerDocuments(FinremCaseDetails caseDetails, String authorisationToken,
                                          List<BulkPrintDocument> documents, String referDetail) {
-        if (referDetail.contains(INTERVENER1.toLowerCase()) || referDetail.contains(INTERVENER1)) {
+        if (shouldSendToIntervener(IntervenerType.INTERVENER_ONE, referDetail)) {
             IntervenerOne intervenerWrapper = caseDetails.getData().getIntervenerOne();
-            sendToBulkprintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
-        } else if (referDetail.contains(INTERVENER2.toLowerCase()) || referDetail.contains(INTERVENER2)) {
+            sendToBulkPrintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
+        } else if (shouldSendToIntervener(IntervenerType.INTERVENER_TWO, referDetail)) {
             IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerTwo();
-            sendToBulkprintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
-        } else if (referDetail.contains(INTERVENER3.toLowerCase()) || referDetail.contains(INTERVENER3)) {
+            sendToBulkPrintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
+        } else if (shouldSendToIntervener(IntervenerType.INTERVENER_THREE, referDetail)) {
             IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerThree();
-            sendToBulkprintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
-        } else if (referDetail.contains(INTERVENER4.toLowerCase()) || referDetail.contains(INTERVENER4)) {
+            sendToBulkPrintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
+        } else if (shouldSendToIntervener(IntervenerType.INTERVENER_FOUR, referDetail)) {
             IntervenerWrapper intervenerWrapper = caseDetails.getData().getIntervenerFour();
-            sendToBulkprintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
+            sendToBulkPrintForIntervener(caseDetails, authorisationToken, documents, intervenerWrapper);
         }
     }
 
-    private void sendToBulkprintForIntervener(FinremCaseDetails caseDetails, String authorisationToken,
+    private void sendToBulkPrintForIntervener(FinremCaseDetails caseDetails, String authorisationToken,
                                               List<BulkPrintDocument> documents,
                                               IntervenerWrapper intervenerWrapper) {
         bulkPrintService.printIntervenerDocuments(intervenerWrapper, caseDetails, authorisationToken, documents);
@@ -215,16 +245,5 @@ public class GeneralApplicationDirectionsService {
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralApplicationOrderTemplate(caseDetails),
             documentConfiguration.getGeneralApplicationOrderFileName());
-    }
-
-    private void addHearingVenueDetails(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        try {
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseData.get(getSelectedCourtGA(caseData)));
-            caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
-        } catch (IOException exception) {
-            throw new IllegalStateException(exception);
-        }
     }
 }
