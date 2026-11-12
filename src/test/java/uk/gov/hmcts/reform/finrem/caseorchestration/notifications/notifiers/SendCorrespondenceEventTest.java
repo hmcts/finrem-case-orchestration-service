@@ -20,15 +20,24 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_FOUR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isApplicantAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerFourAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerOneAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerThreeAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isIntervenerTwoAddressRequired;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent.isRespondentAddressRequired;
 
 class SendCorrespondenceEventTest {
 
@@ -155,6 +164,173 @@ class SendCorrespondenceEventTest {
                 .build();
 
             assertNull(event.getCaseData());
+        }
+    }
+
+    @Nested
+    class IsPartyAddressRequiredTests {
+        // ---------- applicant ----------
+
+        @Test
+        void shouldReturnTrueWhenApplicantHasPostalAudit() {
+            var events = List.of(event(List.of(NotificationParty.APPLICANT), audit(NotificationType.POSTAL)));
+
+            assertThat(isApplicantAddressRequired(events)).isTrue();
+        }
+
+        @Test
+        void shouldReturnFalseForApplicantWhenOnlyRespondentHasPostalAudit() {
+            var events = List.of(event(List.of(NotificationParty.RESPONDENT), audit(NotificationType.POSTAL)));
+
+            assertThat(isApplicantAddressRequired(events)).isFalse();
+        }
+
+        @Test
+        void shouldReturnFalseForApplicantWhenOnlyIntervenerOneHasPostalAudit() {
+            var events = List.of(event(List.of(INTERVENER_ONE), audit(NotificationType.POSTAL)));
+
+            assertThat(isApplicantAddressRequired(events)).isFalse();
+        }
+
+        // ---------- respondent ----------
+
+        @Test
+        void shouldReturnTrueWhenRespondentHasPostalAudit() {
+            var events = List.of(event(List.of(NotificationParty.RESPONDENT), audit(NotificationType.POSTAL)));
+
+            assertThat(isRespondentAddressRequired(events)).isTrue();
+        }
+
+        @Test
+        void shouldReturnFalseForRespondentWhenOnlyApplicantHasPostalAudit() {
+            var events = List.of(event(List.of(NotificationParty.APPLICANT), audit(NotificationType.POSTAL)));
+
+            assertThat(isRespondentAddressRequired(events)).isFalse();
+        }
+
+        @Test
+        void shouldReturnFalseForRespondentWhenOnlyIntervenerHasPostalAudit() {
+            var events = List.of(event(List.of(INTERVENER_ONE), audit(NotificationType.POSTAL)));
+
+            assertThat(isRespondentAddressRequired(events)).isFalse();
+        }
+
+        // ---------- shared behaviour (both parties) ----------
+
+        @Test
+        void shouldReturnFalseWhenEventListIsEmpty() {
+            assertThat(isApplicantAddressRequired(List.of())).isFalse();
+            assertThat(isRespondentAddressRequired(List.of())).isFalse();
+            assertThat(isIntervenerOneAddressRequired(List.of())).isFalse();
+            assertThat(isIntervenerTwoAddressRequired(List.of())).isFalse();
+            assertThat(isIntervenerThreeAddressRequired(List.of())).isFalse();
+            assertThat(isIntervenerFourAddressRequired(List.of())).isFalse();
+        }
+
+        @Test
+        void shouldThrowNullPointerExceptionWhenEventListIsNull() {
+            // Documents current behaviour; remove or change if you add null handling
+            assertThatThrownBy(() -> isApplicantAddressRequired(null))
+                .isInstanceOf(NullPointerException.class);
+            assertThatThrownBy(() -> isRespondentAddressRequired(null))
+                .isInstanceOf(NullPointerException.class);
+            assertThatThrownBy(() -> isIntervenerOneAddressRequired(null))
+                .isInstanceOf(NullPointerException.class);
+            assertThatThrownBy(() -> isIntervenerTwoAddressRequired(null))
+                .isInstanceOf(NullPointerException.class);
+            assertThatThrownBy(() -> isIntervenerThreeAddressRequired(null))
+                .isInstanceOf(NullPointerException.class);
+            assertThatThrownBy(() -> isIntervenerFourAddressRequired(null))
+                .isInstanceOf(NullPointerException.class);
+        }
+
+        @Test
+        void shouldReturnTrueWhenEventNotifiesBothPartiesWithPostalAudit() {
+            var events = List.of(event(
+                List.of(NotificationParty.APPLICANT, NotificationParty.RESPONDENT, INTERVENER_ONE,
+                    INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR),
+                audit(NotificationType.POSTAL)));
+
+            assertThat(isApplicantAddressRequired(events)).isTrue();
+            assertThat(isRespondentAddressRequired(events)).isTrue();
+            assertThat(isIntervenerOneAddressRequired(events)).isTrue();
+            assertThat(isIntervenerTwoAddressRequired(events)).isTrue();
+            assertThat(isIntervenerThreeAddressRequired(events)).isTrue();
+            assertThat(isIntervenerFourAddressRequired(events)).isTrue();
+        }
+
+        @Test
+        void shouldReturnTrueWhenAnyOneOfSeveralEventsMatches() {
+            var events = List.of(
+                event(List.of(NotificationParty.APPLICANT), audit(NotificationType.EMAIL)),
+                event(List.of(NotificationParty.RESPONDENT), audit(NotificationType.POSTAL)),
+                event(List.of(INTERVENER_TWO), audit(NotificationType.EMAIL)),
+                event(List.of(INTERVENER_ONE)));
+
+            assertThat(isRespondentAddressRequired(events)).isTrue();
+            assertThat(isApplicantAddressRequired(events)).isFalse();
+            assertThat(isIntervenerOneAddressRequired(events)).isFalse();
+            assertThat(isIntervenerTwoAddressRequired(events)).isFalse();
+            assertThat(isIntervenerThreeAddressRequired(events)).isFalse();
+            assertThat(isIntervenerFourAddressRequired(events)).isFalse();
+        }
+
+        @Test
+        void shouldReturnTrueWhenPostalAuditIsAmongMixedAudits() {
+            var events = List.of(event(
+                List.of(NotificationParty.APPLICANT),
+                audit(NotificationType.EMAIL),
+                audit(NotificationType.POSTAL)));
+
+            assertThat(isApplicantAddressRequired(events)).isTrue();
+        }
+
+        @Test
+        void shouldReturnFalseWhenPartyMatchesButEventHasNoAudits() {
+            var events = List.of(event(List.of(NotificationParty.APPLICANT)));
+
+            assertThat(isApplicantAddressRequired(events)).isFalse();
+        }
+
+        @Test
+        void shouldReturnFalseWhenEventHasNoNotificationParties() {
+            var events = List.of(event(List.of(), audit(NotificationType.POSTAL)));
+
+            assertThat(isApplicantAddressRequired(events)).isFalse();
+            assertThat(isRespondentAddressRequired(events)).isFalse();
+            assertThat(isIntervenerOneAddressRequired(events)).isFalse();
+            assertThat(isIntervenerTwoAddressRequired(events)).isFalse();
+            assertThat(isIntervenerThreeAddressRequired(events)).isFalse();
+            assertThat(isIntervenerFourAddressRequired(events)).isFalse();
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = NotificationType.class, names = "POSTAL", mode = EnumSource.Mode.EXCLUDE)
+        void shouldReturnFalseWhenAuditsAreNotPostal(NotificationType type) {
+            var events = List.of(event(
+                List.of(NotificationParty.APPLICANT, NotificationParty.RESPONDENT, INTERVENER_ONE,
+                    INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR),
+                audit(type)));
+
+            assertThat(isApplicantAddressRequired(events)).isFalse();
+            assertThat(isRespondentAddressRequired(events)).isFalse();
+            assertThat(isIntervenerOneAddressRequired(events)).isFalse();
+            assertThat(isIntervenerTwoAddressRequired(events)).isFalse();
+            assertThat(isIntervenerThreeAddressRequired(events)).isFalse();
+            assertThat(isIntervenerFourAddressRequired(events)).isFalse();
+        }
+
+        // ---------- helpers (adapt to your model) ----------
+
+        private static SendCorrespondenceEvent event(List<NotificationParty> parties, NotificationAudit... audits) {
+            return SendCorrespondenceEvent.builder()
+                .notificationParties(parties)
+                .audits(List.of(audits))
+                .build();
+        }
+
+        private static NotificationAudit audit(NotificationType type) {
+            return NotificationAudit.builder().type(type).build();
         }
     }
 
