@@ -35,6 +35,11 @@ public class ApplicantSolicitorListener extends EmailNotificationOnlyListener {
     }
 
     @Override
+    protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
+        return event.getCaseData().isApplicantCorrespondenceEnabled();
+    }
+
+    @Override
     protected String getNotificationParty() {
         return "applicant solicitor";
     }

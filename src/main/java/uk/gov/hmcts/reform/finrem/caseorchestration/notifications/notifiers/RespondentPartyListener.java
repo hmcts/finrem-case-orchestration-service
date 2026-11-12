@@ -75,6 +75,11 @@ public class RespondentPartyListener extends AbstractPartyListener {
      * @return {@code true} if the respondent solicitor is digital; {@code false} otherwise
      */
     @Override
+    protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
+        return event.getCaseData().isRespondentCorrespondenceEnabled();
+    }
+
+    @Override
     protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
         FinremCaseDetails caseDetails = event.getCaseDetails();
         return caseDetails.isRespondentSolicitorDigital();

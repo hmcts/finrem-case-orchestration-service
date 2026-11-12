@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
@@ -85,5 +86,15 @@ class FormerApplicantBarristerListenerTest extends BasePartyListenerTest {
 
         verifyNoInteractions(emailService);
         verifyNoLetterSent();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void isNotificationPartySelected_shouldMatchApplicantCorrespondenceEnabled(
+        boolean isApplicantCorrespondenceEnabled) {
+        when(event.getCaseData()).thenReturn(finremCaseData);
+        when(finremCaseData.isApplicantCorrespondenceEnabled()).thenReturn(isApplicantCorrespondenceEnabled);
+
+        assertThat(underTest.isNotificationPartySelected(event)).isEqualTo(isApplicantCorrespondenceEnabled);
     }
 }
