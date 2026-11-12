@@ -79,18 +79,16 @@ public class ApplicantPartyListener extends AbstractPartyListener {
             PaperNotificationRecipient.APPLICANT
         );
 
-        CaseDocument coversheet = bulkPrintService.getApplicantCoverSheet(
-            event.getCaseDetails(),
-            event.authToken
-        );
+        return bulkPrintService.getApplicantCoverSheet(event.getCaseDetails(), event.authToken);
+    }
 
+    @Override
+    protected void persistPartyCoversheet(SendCorrespondenceEvent event, CaseDocument coversheet) {
         coverSheetPersistenceService.saveCoverSheet(
             event.getCaseDetails(),
             PaperNotificationRecipient.APPLICANT,
             coversheet
         );
-
-        return coversheet;
     }
 
     @Override
