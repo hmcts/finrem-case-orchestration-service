@@ -46,17 +46,15 @@ public final class AccessCodeGenerator {
      *
      * @param caseData the case data containing representation details and access-code history
      * @param recipient the recipient to check
-     * @param alwaysGenerateAccessCode whether represented applicants and respondents are also eligible
      * @return true if the recipient is eligible and has no active or previously activated code
      */
     public static boolean doesRecipientNeedNewAccessCode(FinremCaseData caseData,
-                                                         PaperNotificationRecipient recipient,
-                                                         boolean alwaysGenerateAccessCode) {
+                                                         PaperNotificationRecipient recipient) {
 
         return switch (recipient) {
-            case APPLICANT -> (!caseData.isApplicantRepresentedByASolicitor() || alwaysGenerateAccessCode)
+            case APPLICANT -> !caseData.isApplicantRepresentedByASolicitor()
                 && !hasActiveOrActivatedCode(caseData.getApplicantAccessCodes());
-            case RESPONDENT -> (!caseData.isRespondentRepresentedByASolicitor() || alwaysGenerateAccessCode)
+            case RESPONDENT -> !caseData.isRespondentRepresentedByASolicitor()
                 && !hasActiveOrActivatedCode(caseData.getRespondentAccessCodes());
             default -> false;
         };
@@ -70,15 +68,13 @@ public final class AccessCodeGenerator {
      *
      * @param caseData the case data to update
      * @param recipient the recipient for whom to generate a code
-     * @param alwaysGenerateAccessCode whether represented applicants and respondents are also eligible
      * @return true if a new code was added
      */
     public static boolean generateAccessCodeIfNeeded(
         FinremCaseData caseData,
-        PaperNotificationRecipient recipient,
-        boolean alwaysGenerateAccessCode) {
+        PaperNotificationRecipient recipient) {
 
-        if (!doesRecipientNeedNewAccessCode(caseData, recipient, alwaysGenerateAccessCode)) {
+        if (!doesRecipientNeedNewAccessCode(caseData, recipient)) {
             return false;
         }
 

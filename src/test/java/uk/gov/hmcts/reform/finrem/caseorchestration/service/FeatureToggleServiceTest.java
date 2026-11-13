@@ -105,11 +105,6 @@ public class FeatureToggleServiceTest {
             assertThat(featureToggleService.isPaperEstimatedAssetsChecklistV3Enabled()).isFalse();
         }
 
-        @Test
-        void isAlwaysGenerateCUIAccessCodesEnabledReturnsFalse() {
-            // default value is defined in src/test/resources/application.properties
-            assertThat(featureToggleService.alwaysGenerateCUIAccessCodesEnabled()).isFalse();
-        }
     }
 
     @Nested
@@ -249,18 +244,4 @@ public class FeatureToggleServiceTest {
         }
     }
 
-    @Nested
-    @TestPropertySource(properties = {
-        "feature.toggle.always_generate_cui_access_codes_enabled=true"
-    })
-    class AlwaysGenerateCUIAccessCodesEnabledSwitchedOn {
-
-        @Autowired
-        private FeatureToggleService featureToggleService;
-
-        @Test
-        void alwaysGenerateCUIAccessCodesEnabledReturnsTrue() {
-            assertThat(featureToggleService.alwaysGenerateCUIAccessCodesEnabled()).isTrue();
-        }
-    }
 }
