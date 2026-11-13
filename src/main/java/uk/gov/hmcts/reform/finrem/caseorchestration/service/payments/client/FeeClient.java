@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.config.FeeS
 
 import java.net.URI;
 
-import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +30,7 @@ public class FeeClient {
     }
 
     private URI buildUri(ApplicationType application) {
-        return fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi())
+        return fromUriString(serviceConfig.getUrl() + serviceConfig.getApi())
             .queryParam("service", serviceConfig.getService())
             .queryParam("jurisdiction1", serviceConfig.getJurisdiction1())
             .queryParam("jurisdiction2", serviceConfig.getJurisdiction2())
@@ -44,7 +44,7 @@ public class FeeClient {
     }
 
     private URI buildSchedule1Uri(ApplicationType application) {
-        return fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi())
+        return fromUriString(serviceConfig.getUrl() + serviceConfig.getApi())
             .queryParam("service", serviceConfig.getSchedule1Service())
             .queryParam("jurisdiction1", serviceConfig.getJurisdiction1())
             .queryParam("jurisdiction2", serviceConfig.getJurisdiction2())
