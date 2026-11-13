@@ -98,6 +98,14 @@ withPipeline(type, product, component) {
         ]
     }
 
+    afterAlways('functionalTest:preview') {
+        steps.junit allowEmptyResults: true, testResults: 'build/test-results/notifyIntegrationTest/*.xml'
+    }
+
+    afterAlways('functionalTest:aat') {
+        steps.junit allowEmptyResults: true, testResults: 'build/test-results/notifyIntegrationTest/*.xml'
+    }
+
     enableSlackNotifications('#finrem-dev')
     enableAksStagingDeployment()
     disableLegacyDeployment()

@@ -150,6 +150,9 @@ tasks.withType(Test).configureEach {
 test {
     maxHeapSize = "2g"
     failFast = true
+    filter {
+        excludeTestsMatching '*.EmailNotificationIntegrationTest'
+    }
 }
 
 // before committing a change, make sure task still works
@@ -322,6 +325,26 @@ tasks.register('functional', Test) {
     description = "Runs functional Tests"
     setTestClassesDirs(sourceSets.functional.output.classesDirs)
     setClasspath(sourceSets.functional.runtimeClasspath)
+    finalizedBy 'notifyIntegrationTest'
+}
+
+tasks.register('notifyIntegrationTest', Test) {
+    description = 'Runs EmailNotificationIntegrationTest against GOV.UK Notify (needs UK_GOV_NOTIFY_API_KEY)'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    maxHeapSize = '2g'
+    filter {
+        includeTestsMatching '*.EmailNotificationIntegrationTest'
+    }
+    doFirst {
+        def envFile = project.file('./.aat-env')
+        if (!System.getenv('UK_GOV_NOTIFY_API_KEY') && envFile.exists()) {
+            envFile.readLines()
+                .find { it.startsWith('UK_GOV_NOTIFY_API_KEY=') }
+                ?.with { environment('UK_GOV_NOTIFY_API_KEY', it.substring(it.indexOf('=') + 1)) }
+        }
+    }
 }
 
 tasks.register('contractTest', Test) {
