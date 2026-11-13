@@ -72,23 +72,70 @@ public class ConsentOrderNotApprovedDocumentService {
         }
     }
 
+    /**
+     * Returns the order to send to the parties for a consent order that was not approved.
+     * Sends the not approved order, or the latest general order instead when it is newer
+     * or when there is no not approved order. Documents are not converted to PDF.
+     *
+     * @param caseDetails        the case details
+     * @param authorisationToken the authorisation token
+     * @return the order to send, or an empty list if there is neither a not approved order nor a general order
+     */
+    public List<CaseDocument> getNotApprovedConsentOrders(FinremCaseDetails caseDetails, String authorisationToken) {
+        List<CaseDocument> notApprovedOrderDocuments = notApprovedConsentOrder(caseDetails);
+        Optional<CaseDocument> generalOrder = Optional.ofNullable(documentHelper.getLatestGeneralOrder(caseDetails.getData()));
+
+        boolean useNotApprovedOrder = !notApprovedOrderDocuments.isEmpty() && (generalOrder.isEmpty()
+            || documentOrderingService.isDocumentModifiedLater(notApprovedOrderDocuments.getFirst(), generalOrder.get(), authorisationToken));
+
+        if (useNotApprovedOrder) {
+            return notApprovedOrderDocuments;
+        } else {
+            return generalOrder.map(Collections::singletonList).orElse(Collections.emptyList());
+        }
+    }
+
+    /**
+     * Generates the not approved cover letter for the given recipient as a bulk print document.
+     *
+     * @param caseDetails        the case details
+     * @param authorisationToken the authorisation token
+     * @param recipient          the party the letter is addressed to
+     * @return the cover letter as a {@link BulkPrintDocument}
+     * @deprecated use {@link #getNotApprovedCoverLetter(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}.
+     *     Remove once the remaining caller sends correspondence in the submitted callback (DFR-5872).
+     */
+    @Deprecated(since = "27-october-2026")
+    @SuppressWarnings("java:S1133")
     public BulkPrintDocument notApprovedCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+        return documentHelper.mapToBulkPrintDocument(getNotApprovedCoverLetter(caseDetails, authorisationToken, recipient));
+    }
+
+    /**
+     * Generates the not approved cover letter for the given recipient.
+     * Variation orders use the variation order file name; all others use the consent order one.
+     *
+     * @param caseDetails        the case details
+     * @param authorisationToken the authorisation token
+     * @param recipient          the party the letter is addressed to
+     * @return the generated cover letter
+     */
+    public CaseDocument getNotApprovedCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
+                                                  DocumentHelper.PaperNotificationRecipient recipient) {
         CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
-        String notApprovedOrderNotificationFileName;
-        if (consentedApplicationHelper.isVariationOrder(caseDetails.getData())) {
-            notApprovedOrderNotificationFileName = documentConfiguration.getVariationOrderNotApprovedCoverLetterFileName();
-            caseDetailsWithTemplateData.getData().put(ORDER_TYPE, VARIATION);
-        } else {
-            notApprovedOrderNotificationFileName = documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName();
-            caseDetailsWithTemplateData.getData().put(ORDER_TYPE, CONSENT);
-        }
-        CaseDocument coverLetter = genericDocumentService.generateDocument(
+        boolean isVariationOrder = consentedApplicationHelper.isVariationOrder(caseDetails.getData());
+
+        String fileName = isVariationOrder
+            ? documentConfiguration.getVariationOrderNotApprovedCoverLetterFileName()
+            : documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName();
+        caseDetailsWithTemplateData.getData().put(ORDER_TYPE, isVariationOrder ? VARIATION : CONSENT);
+
+        return genericDocumentService.generateDocument(
             authorisationToken,
             caseDetailsWithTemplateData,
             documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(),
-            notApprovedOrderNotificationFileName);
-        return documentHelper.mapToBulkPrintDocument(coverLetter);
+            fileName);
     }
 
     @SuppressWarnings("java:S3740")
