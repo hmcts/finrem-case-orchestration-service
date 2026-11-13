@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.ArrayList;
@@ -63,6 +64,7 @@ public class ManageHearingActionService {
     private final ManageHearingsDocumentService manageHearingsDocumentService;
     private final ExpressCaseService expressCaseService;
     private final HearingTabDataMapper hearingTabDataMapper;
+    private final FeatureToggleService featureToggleService;
 
     private record DocumentRecord(CaseDocument caseDocument, CaseDocumentType caseDocumentType) {
     }
@@ -414,15 +416,67 @@ public class ManageHearingActionService {
         );
     }
 
+    /**
+     * Generates and stores Form C documents for hearing correspondence.
+     *
+     * <p>Saves a default hearing Form C suitable for all parties on the hearing (no access codes present).
+     * Optionally generates citizen-specific Form C variants containing access codes when citizen UI is enabled.</p>
+     */
     private void generateFormC(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
-        CaseDocumentType formCType = manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails).getLeft();
+        ManageHearingsDocumentService.FormCTemplateSelection formCTemplates =
+            manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails);
+
+        CaseDocument defaultCaseFormC = manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails, authToken);
+
+        setCitizenFormCIfRequired(finremCaseDetails, authToken, documentMap, formCTemplates.standardType());
+
         documentMap.put(
             FORM_C,
             new DocumentRecord(
-                manageHearingsDocumentService.generateFormC(finremCaseDetails, authToken),
-                formCType
+                defaultCaseFormC,
+                formCTemplates.standardType()
             )
         );
+    }
+
+    private void setCitizenFormCIfRequired(
+        FinremCaseDetails finremCaseDetails,
+        String authToken,
+        Map<String, DocumentRecord> documentMap,
+        CaseDocumentType standardFormCType
+    ) {
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseDetails.getData().getManageHearingsWrapper();
+        if (!featureToggleService.isFinremCitizenUiEnabled()) {
+            manageHearingsWrapper.setFormCApplicantCitizen(null);
+            manageHearingsWrapper.setFormCRespondentCitizen(null);
+            return;
+        }
+
+        CaseDocument applicantCitizenFormC = manageHearingsDocumentService.generateApplicantCitizenFormC(
+            finremCaseDetails, authToken
+        );
+        CaseDocument respondentCitizenFormC = manageHearingsDocumentService.generateRespondentCitizenFormC(
+            finremCaseDetails, authToken
+        );
+
+        manageHearingsWrapper.setFormCApplicantCitizen(applicantCitizenFormC);
+        manageHearingsWrapper.setFormCRespondentCitizen(respondentCitizenFormC);
+
+        if (applicantCitizenFormC != null) {
+            CaseDocumentType applicantCitizenFormCType = CaseDocumentType.getApplicantCitizenFormCType(standardFormCType);
+            documentMap.put(
+                applicantCitizenFormCType.name(),
+                new DocumentRecord(applicantCitizenFormC, applicantCitizenFormCType)
+            );
+        }
+
+        if (respondentCitizenFormC != null) {
+            CaseDocumentType respondentCitizenFormCType = CaseDocumentType.getRespondentCitizenFormCType(standardFormCType);
+            documentMap.put(
+                respondentCitizenFormCType.name(),
+                new DocumentRecord(respondentCitizenFormC, respondentCitizenFormCType)
+            );
+        }
     }
 
     private void generateFormG(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {

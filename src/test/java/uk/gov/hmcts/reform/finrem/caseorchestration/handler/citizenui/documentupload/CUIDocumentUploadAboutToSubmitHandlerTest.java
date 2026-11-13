@@ -78,7 +78,8 @@ class CUIDocumentUploadAboutToSubmitHandlerTest {
 
         handlerCase.handler.handle(request, AUTH_TOKEN);
 
-        verify(handlerCase.correspondenceEventAuditOrchestrationService).createPendingAudits(any(), eq(handlerCase.eventType));
+        verify(handlerCase.correspondenceEventAuditOrchestrationService)
+            .createPendingAudits(any(SendCorrespondenceEvent.class), eq(handlerCase.eventType));
         verify(handlerCase.citizenDocumentsUploadedCorresponder).buildCorrespondenceEvent(
             any(),
             anyString(),

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +40,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.time.LocalDate;
@@ -86,6 +86,8 @@ class ManageHearingActionServiceTest {
     private HearingTabDataMapper hearingTabDataMapper;
     @Mock
     private HearingCorrespondenceHelper hearingCorrespondenceHelper;
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     @InjectMocks
     private ManageHearingActionService manageHearingActionService;
@@ -103,6 +105,7 @@ class ManageHearingActionServiceTest {
                 .manageHearingsWrapper(hearingWrapper)
                 .build())
             .build();
+        lenient().when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
     }
 
     @Test
@@ -141,9 +144,17 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
-        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
-            Pair.of(CaseDocumentType.FORM_C, "a template"));
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+        when(manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails)).thenReturn(
+            new ManageHearingsDocumentService.FormCTemplateSelection(
+                CaseDocumentType.FORM_C,
+                "a template",
+                "a citizen template"
+            ));
+        when(manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateRespondentCitizenFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formG);
@@ -156,7 +167,7 @@ class ManageHearingActionServiceTest {
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(6);
+        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(8);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
             .extracting(item -> item.getValue().getHearingDocument())
             .contains(formC, formG,
@@ -188,9 +199,17 @@ class ManageHearingActionServiceTest {
         CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
             "http://example.com/OutOfCourtResolution");
 
-        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
-            Pair.of(CaseDocumentType.FORM_C, "a template"));
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+        when(manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails)).thenReturn(
+            new ManageHearingsDocumentService.FormCTemplateSelection(
+                CaseDocumentType.FORM_C,
+                "a template",
+                "a citizen template"
+            ));
+        when(manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateRespondentCitizenFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formG);
@@ -204,7 +223,7 @@ class ManageHearingActionServiceTest {
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(5);
+        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(7);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
             .extracting(item -> item.getValue().getHearingDocument())
             .contains(pfdComplianceLetter);
@@ -213,6 +232,50 @@ class ManageHearingActionServiceTest {
             .doesNotContain(CaseDocumentType.PFD_NCDR_COVER_LETTER);
         assertDocumentsAssignedToWorkingHearingId();
 
+    }
+
+    @Test
+    void performAddHearing_shouldNotGenerateCitizenFormC_whenCitizenUiFeatureDisabled() {
+        workingHearing.setHearingTypeDynamicList(DynamicList.builder()
+            .value(DynamicListElement.builder()
+                .code(HearingType.FDA.name())
+                .label(HearingType.FDA.getId())
+                .build())
+            .build());
+
+        CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
+        CaseDocument formG = createCaseDocument("FormG.pdf", "http://example.com/form-g");
+        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
+            "http://example.com/OutOfCourtResolution");
+
+        Map<String, CaseDocument> pfdNcdrDocuments = Map.of(
+            PFD_NCDR_COMPLIANCE_LETTER, createCaseDocument("ComplianceLetter.pdf",
+                "http://example.com/compliance-letter"),
+            PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
+                "http://example.com/cover-letter"));
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(false);
+        when(manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails)).thenReturn(
+            new ManageHearingsDocumentService.FormCTemplateSelection(
+                CaseDocumentType.FORM_C,
+                "a template",
+                "a citizen template"
+            ));
+        when(manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formG);
+        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(pfdNcdrDocuments);
+        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(outOfCourtResolution);
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, Region.LONDON,
+            AUTH_TOKEN)).thenReturn(createCaseDocument(HEARING_NOTICE_FILENAME, HEARING_NOTICE_URL));
+
+        manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
+
+        verify(manageHearingsDocumentService, never()).generateApplicantCitizenFormC(finremCaseDetails, AUTH_TOKEN);
+        verify(manageHearingsDocumentService, never()).generateRespondentCitizenFormC(finremCaseDetails, AUTH_TOKEN);
     }
 
     @Test
@@ -234,9 +297,17 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
-        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
-            Pair.of(CaseDocumentType.FORM_C_EXPRESS, "a template"));
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+        when(manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails)).thenReturn(
+            new ManageHearingsDocumentService.FormCTemplateSelection(
+                CaseDocumentType.FORM_C_EXPRESS,
+                "a template",
+                "a citizen template"
+            ));
+        when(manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateRespondentCitizenFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formG);
@@ -251,7 +322,7 @@ class ManageHearingActionServiceTest {
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(6);
+        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(8);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
             .extracting(item -> item.getValue().getHearingDocument())
             .contains(formC, formG,
@@ -280,9 +351,17 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
-        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
-            Pair.of(CaseDocumentType.FORM_C, "a template"));
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+        when(manageHearingsDocumentService.selectFormCTemplates(finremCaseDetails)).thenReturn(
+            new ManageHearingsDocumentService.FormCTemplateSelection(
+                CaseDocumentType.FORM_C,
+                "a template",
+                "a citizen template"
+            ));
+        when(manageHearingsDocumentService.generateDefaultFormC(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateApplicantCitizenFormC(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateRespondentCitizenFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(pfdNcdrDocuments);
@@ -294,7 +373,7 @@ class ManageHearingActionServiceTest {
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(5);
+        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(7);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
             .extracting(item -> item.getValue().getHearingDocument())
             .contains(formC,

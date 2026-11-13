@@ -9,9 +9,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 /**
@@ -41,6 +43,23 @@ public class CorrespondenceEventAuditOrchestrationService {
      */
     public void createPendingAudits(SendCorrespondenceEvent event, EventType eventType) {
         notificationAuditService.createAuditsForCorrespondence(event, eventType);
+    }
+
+    /**
+     * Creates pending notification audit rows for multiple correspondence events,
+     * linking them under one notification tracker ID.
+     *
+     * @param events correspondence events to audit
+     * @param eventType callback event type used for audit metadata
+     */
+    public void createPendingAudits(List<SendCorrespondenceEvent> events, EventType eventType) {
+        String trackerId = null;
+        for (SendCorrespondenceEvent event : events) {
+            if (nonNull(trackerId)) {
+                event.setNotificationTrackerId(trackerId);
+            }
+            trackerId = notificationAuditService.createAuditsForCorrespondence(event, eventType);
+        }
     }
 
     /**
