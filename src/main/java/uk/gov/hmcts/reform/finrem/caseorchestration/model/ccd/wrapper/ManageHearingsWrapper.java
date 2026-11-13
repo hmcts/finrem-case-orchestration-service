@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
@@ -40,13 +41,17 @@ public class ManageHearingsWrapper {
     // Working data representations
     private ManageHearingsAction manageHearingsActionSelection;
     private UUID workingHearingId;
+    @TemporaryField
     private WorkingHearing workingHearing;
+    @TemporaryField
     private WorkingVacatedHearing workingVacatedHearing;
     private UUID workingVacatedHearingId;
+    @TemporaryField
     private YesOrNo isRelistSelected;
     private YesOrNo wasRelistSelected;
     private YesOrNo isAddHearingChosen;
     private YesOrNo isFinalOrder;
+    @TemporaryField
     private YesOrNo shouldSendVacateOrAdjNotice;
 
     // Hearing data Repositories
