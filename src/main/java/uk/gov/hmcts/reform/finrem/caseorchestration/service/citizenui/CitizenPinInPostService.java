@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -10,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 import java.util.List;
@@ -27,11 +25,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
  * service saves the changes to CCD.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class CitizenPinInPostService {
-
-    private final FeatureToggleService featureToggleService;
 
     /**
      * Generates a Citizen UI PIN for an eligible applicant or respondent in a contested case.
@@ -52,8 +47,7 @@ public class CitizenPinInPostService {
 
         boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(
             caseDetails.getData(),
-            recipient,
-            featureToggleService.alwaysGenerateCUIAccessCodesEnabled()
+            recipient
         );
 
         if (generated) {
