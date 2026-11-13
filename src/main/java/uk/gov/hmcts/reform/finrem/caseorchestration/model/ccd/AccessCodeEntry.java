@@ -19,4 +19,5 @@ public class AccessCodeEntry {
     private YesOrNo isValid;
     private String userIdamID;
     private LocalDateTime usedAt;
+    private LocalDateTime createdAt;
 }

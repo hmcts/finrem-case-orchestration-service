@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
@@ -43,6 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DOCUMENT_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 
 @ExtendWith(MockitoExtension.class)
 class GenerateCoverSheetServiceTest {
@@ -66,6 +69,8 @@ class GenerateCoverSheetServiceTest {
     private GenerateCoverSheetService generateCoverSheetService;
     @Mock
     private CaseType caseType;
+    @Mock
+    private CitizenPinInPostService citizenPinInPostService;
 
     @Test
     void shouldGenerateApplicantCoverSheet() {
@@ -87,28 +92,11 @@ class GenerateCoverSheetServiceTest {
     }
 
     @Test
-    void shouldGenerateAndSetApplicantCoverSheet_whenAddressNotHidden() {
-        setUpDocGenerationMocks();
-        when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
-        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
-        caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(
-            caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME)
-        );
-
-        generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
-
-        assertEquals(TEST_DOCUMENT_FILENAME,
-            caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
-        assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential());
-        assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted())
-            .extracting(item -> item.getValue().getBinFileUrl())
-            .containsExactly(OLD_COVERSHEET_URL);
-    }
-
-    @Test
     void shouldNotDeleteDocument_whenOldCoverSheetIsNull() {
         setUpDocGenerationMocks();
         when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
 
@@ -116,6 +104,7 @@ class GenerateCoverSheetServiceTest {
 
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
+        verify(citizenPinInPostService).generatePinIfNeeded(caseDetails, APPLICANT);
         verify(genericDocumentService, never()).deleteDocument(any(), eq(AUTH_TOKEN));
     }
 
@@ -156,6 +145,7 @@ class GenerateCoverSheetServiceTest {
     void shouldGenerateAndSetRespondentCoverSheet_whenAddressNotHidden() {
         setUpDocGenerationMocks();
         when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(
             caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME)
@@ -169,6 +159,7 @@ class GenerateCoverSheetServiceTest {
         assertThat(caseDetails.getData().getBin().getFileUrlsToBeDeleted())
             .extracting(item -> item.getValue().getBinFileUrl())
             .containsExactly(OLD_COVERSHEET_URL);
+        verify(citizenPinInPostService).generatePinIfNeeded(caseDetails, RESPONDENT);
     }
 
     @Test
@@ -270,6 +261,95 @@ class GenerateCoverSheetServiceTest {
         assertThrows(IllegalArgumentException.class, () -> {
             generateCoverSheetService.removeIntervenerCoverSheet(caseDetails, changeDetails, AUTH_TOKEN);
         });
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "APPLICANT,     CONTESTED, true,  false, true",
+        "RESPONDENT,    CONTESTED, true,  false, true",
+        "APPLICANT,     CONTESTED, true,  true,  false",
+        "RESPONDENT,    CONTESTED, true,  true,  false",
+        "APPLICANT,     CONSENTED, true,  false, false",
+        "APPLICANT,     CONTESTED, false, false, false",
+        "INTERVENER_ONE, CONTESTED, true, false, false"
+    })
+    void shouldSelectAppropriateCoverSheetTemplate(DocumentHelper.PaperNotificationRecipient recipient,
+                                                   CaseType caseType,
+                                                   boolean cuiEnabled,
+                                                   boolean represented,
+                                                   boolean useCuiTemplate) {
+        FinremCaseData data = new FinremCaseData();
+        data.getContactDetailsWrapper().setApplicantRepresented(represented ? YesOrNo.YES : YesOrNo.NO);
+        data.getContactDetailsWrapper().setContestedRespondentRepresented(represented ? YesOrNo.YES : YesOrNo.NO);
+
+        FinremCaseDetails details = FinremCaseDetails.builder()
+            .id(1234567890123456L).caseType(caseType).data(data).build();
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(cuiEnabled);
+        String expectedTemplate = useCuiTemplate ? "cui-template.docx" : "existing-template.docx";
+
+        if (useCuiTemplate) {
+            when(documentConfiguration.getBulkPrintCitizenUiTemplate()).thenReturn(expectedTemplate);
+        } else {
+            when(documentConfiguration.getBulkPrintTemplate()).thenReturn(expectedTemplate);
+        }
+
+        switch (recipient) {
+            case APPLICANT -> generateCoverSheetService.generateApplicantCoverSheet(details, AUTH_TOKEN);
+            case RESPONDENT -> generateCoverSheetService.generateRespondentCoverSheet(details, AUTH_TOKEN);
+            default -> generateCoverSheetService.generateIntervenerCoverSheet(details, AUTH_TOKEN, recipient);
+        }
+
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            eq(AUTH_TOKEN), any(), eq(expectedTemplate), any(), eq(caseType)
+        );
+    }
+
+    @Test
+    void shouldStoreApplicantCitizenUiCoverSheetConfidentiallyWhenAddressIsPublic() {
+        FinremCaseDetails caseDetails = setUpCitizenUiCoverSheet(APPLICANT);
+        BulkPrintCoversheetWrapper wrapper = caseDetails.getData().getBulkPrintCoversheetWrapper();
+        wrapper.setBulkPrintCoverSheetApp(caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME));
+
+        generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+
+        assertNull(wrapper.getBulkPrintCoverSheetApp());
+        assertEquals(caseDocument(TEST_DOCUMENT_URL, TEST_DOCUMENT_FILENAME),
+            wrapper.getBulkPrintCoverSheetAppConfidential());
+    }
+
+    @Test
+    void shouldStoreRespondentCitizenUiCoverSheetConfidentiallyWhenAddressIsPublic() {
+        FinremCaseDetails caseDetails = setUpCitizenUiCoverSheet(RESPONDENT);
+        BulkPrintCoversheetWrapper wrapper = caseDetails.getData().getBulkPrintCoversheetWrapper();
+        wrapper.setBulkPrintCoverSheetRes(caseDocument(OLD_COVERSHEET_URL, BULK_PRINT_FILE_NAME));
+
+        generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+
+        assertNull(wrapper.getBulkPrintCoverSheetRes());
+        assertEquals(caseDocument(TEST_DOCUMENT_URL, TEST_DOCUMENT_FILENAME),
+            wrapper.getBulkPrintCoverSheetResConfidential());
+    }
+
+    private FinremCaseDetails setUpCitizenUiCoverSheet(DocumentHelper.PaperNotificationRecipient recipient) {
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
+        caseDetails.setCaseType(CaseType.CONTESTED);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+
+        String template = "FL-FRM-LET-ENG-00523.docx";
+        Map<String, Object> placeholders = Map.of();
+
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+        when(documentConfiguration.getBulkPrintCitizenUiTemplate()).thenReturn(template);
+        when(documentConfiguration.getBulkPrintFileName()).thenReturn(BULK_PRINT_FILE_NAME);
+        when(bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(eq(caseDetails), eq(recipient), any()))
+            .thenReturn(placeholders);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(
+            AUTH_TOKEN, placeholders, template, BULK_PRINT_FILE_NAME, CaseType.CONTESTED
+        )).thenReturn(caseDocument(TEST_DOCUMENT_URL, TEST_DOCUMENT_FILENAME));
+
+        return caseDetails;
     }
 
     private void setIntervenerCoverSheet(FinremCaseDetails caseDetails, IntervenerType intervenerType, CaseDocument document) {

@@ -1,12 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CoverSheetPersistenceService;
 
 import static com.google.common.base.Strings.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -14,11 +17,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Component
 public class ApplicantPartyListener extends AbstractPartyListener {
 
+    private final CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
+    private final CoverSheetPersistenceService coverSheetPersistenceService;
+
     public ApplicantPartyListener(BulkPrintService bulkPrintService,
                                   EmailService emailService,
                                   NotificationService notificationService,
-                                  InternationalPostalService internationalPostalService) {
+                                  InternationalPostalService internationalPostalService,
+                                  CitizenPinInPostPersistenceService citizenPinInPostPersistenceService,
+                                  CoverSheetPersistenceService coverSheetPersistenceService) {
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
+        this.citizenPinInPostPersistenceService = citizenPinInPostPersistenceService;
+        this.coverSheetPersistenceService = coverSheetPersistenceService;
     }
 
     @Override
@@ -64,7 +74,21 @@ public class ApplicantPartyListener extends AbstractPartyListener {
 
     @Override
     protected CaseDocument getPartyCoversheet(SendCorrespondenceEvent event) {
+        citizenPinInPostPersistenceService.ensurePinPersisted(
+            event.getCaseDetails(),
+            PaperNotificationRecipient.APPLICANT
+        );
+
         return bulkPrintService.getApplicantCoverSheet(event.getCaseDetails(), event.authToken);
+    }
+
+    @Override
+    protected void persistPartyCoversheet(SendCorrespondenceEvent event, CaseDocument coversheet) {
+        coverSheetPersistenceService.saveCoverSheet(
+            event.getCaseDetails(),
+            PaperNotificationRecipient.APPLICANT,
+            coversheet
+        );
     }
 
     @Override

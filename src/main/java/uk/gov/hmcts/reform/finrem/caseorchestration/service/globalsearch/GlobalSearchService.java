@@ -35,12 +35,12 @@ public class GlobalSearchService {
      */
     public void setGlobalSearchData(FinremCaseData finremCaseData) {
         if (featureToggleService.isGlobalSearchEnabled() && finremCaseData != null && finremCaseData.isConsentedApplication()) {
-            log.info("setGlobalSearchDataByMap::Received request to set global search fields "
+            log.info("setGlobalSearchData::Received request to set global search fields "
                 + "for {} case type with CCD ID: {}", finremCaseData.getCcdCaseType(), finremCaseData.getCcdCaseId());
             finremCaseData.setCaseManagementCategory(DynamicList.builder().value(element).listItems(List.of(element)).build());
             finremCaseData.setCaseNameHmctsInternal(getCaseNameHmctsInternal(finremCaseData));
             finremCaseData.setCaseManagementLocation(caseManagementLocationService.getCaseLocation(finremCaseData));
-            log.info("setGlobalSearchDataByMap::global search fields are set for {} case type with CCD ID: {}",
+            log.info("setGlobalSearchData::global search fields are set for {} case type with CCD ID: {}",
                 finremCaseData.getCcdCaseType(), finremCaseData.getCcdCaseId());
         }
     }

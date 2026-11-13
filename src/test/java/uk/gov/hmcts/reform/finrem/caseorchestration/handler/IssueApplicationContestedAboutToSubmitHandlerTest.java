@@ -16,15 +16,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.issueapplication.IssueApplicationService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +39,8 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
     private OnlineFormDocumentService service;
     @Mock
     private IssueApplicationService issueApplicationService;
+    @Mock
+    private CitizenPinInPostService citizenPinInPostService;
     @Mock
     private FeatureToggleService featureToggleService;
 
@@ -52,7 +57,6 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
             = FinremCallbackRequest.builder().eventType(EventType.ISSUE_APPLICATION).caseDetails(caseDetails).build();
 
         when(service.generateContestedMiniForm(AUTH_TOKEN, callbackRequest.getCaseDetails())).thenReturn(caseDocument());
-        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(false);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -65,19 +69,19 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
 
         verify(issueApplicationService).generateCoverSheets(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verifyNoMoreInteractions(issueApplicationService);
+        verifyNoInteractions(citizenPinInPostService);
     }
 
     @Test
     void givenCase_whenIssueApplication_thenGenerateAppropriateCaseDocumentDoNotSetIfAlreadySetValue() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .id(123L).data(FinremCaseData.builder().divorceCaseNumber("897901").scheduleOneWrapper(ScheduleOneWrapper.builder()
-                    .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989)
+                .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989)
                 .build()).build()).build();
         FinremCallbackRequest callbackRequest
             = FinremCallbackRequest.builder().eventType(EventType.ISSUE_APPLICATION).caseDetails(caseDetails).build();
 
         when(service.generateContestedMiniForm(AUTH_TOKEN, callbackRequest.getCaseDetails())).thenReturn(caseDocument());
-        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(false);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = response.getData();
@@ -86,25 +90,26 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
         assertEquals(TypeOfApplication.SCHEDULE_ONE.getTypeOfApplication(),
             data.getScheduleOneWrapper().getTypeOfApplication().getValue());
         assertEquals(caseDocument(), data.getMiniFormA());
+        verifyNoInteractions(citizenPinInPostService);
     }
 
     @Test
-    void givenCase_whenIssueApplication_thenGenerateAccessCode() {
+    void givenCase_whenCitizenUiEnabled_thenGenerateApplicantAndRespondentPins() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(123L).data(FinremCaseData.builder().scheduleOneWrapper(ScheduleOneWrapper.builder().build()).build()).build();
+            .id(123L)
+            .data(FinremCaseData.builder()
+                .scheduleOneWrapper(ScheduleOneWrapper.builder().build())
+                .build())
+            .build();
         FinremCallbackRequest callbackRequest
             = FinremCallbackRequest.builder().eventType(EventType.ISSUE_APPLICATION).caseDetails(caseDetails).build();
 
         when(service.generateContestedMiniForm(AUTH_TOKEN, callbackRequest.getCaseDetails())).thenReturn(caseDocument());
         when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        handler.handle(callbackRequest, AUTH_TOKEN);
 
-        FinremCaseData data = response.getData();
-
-        assertNotNull(data.getApplicantAccessCodes());
-        assertNotNull(data.getRespondentAccessCodes());
-        assertEquals(1, data.getApplicantAccessCodes().size());
-        assertEquals(1, data.getRespondentAccessCodes().size());
+        verify(citizenPinInPostService).generatePinIfNeeded(caseDetails, APPLICANT);
+        verify(citizenPinInPostService).generatePinIfNeeded(caseDetails, RESPONDENT);
     }
 }
