@@ -2,10 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -37,9 +35,6 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
 
     @MockitoBean
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-
-    @Autowired
-    protected MockMvc mvc;
 
     @Test
     public void givenInvalidApplicantSolicitorPostcode_whenAmendApplication_thenReturnValidationError() throws Exception {

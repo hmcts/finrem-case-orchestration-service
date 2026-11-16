@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.validation.PBAValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -24,6 +26,7 @@ import static org.springframework.http.HttpMethod.GET;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 public class PBAValidationClient {
 
     protected static final String USER_EMAIL = "UserEmail";

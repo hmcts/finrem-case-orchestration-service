@@ -21,7 +21,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 
 @RunWith(SerenityRunner.class)
@@ -30,7 +29,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     @Autowired
     private FunctionalTestUtils functionalTestUtils;
 
-    private ObjectMapper objectMapper = createObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
     private CallbackRequest callbackRequest = null;
 
     private static final String consentedDir = "/json/consented/";
