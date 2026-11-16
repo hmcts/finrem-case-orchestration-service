@@ -30,6 +30,7 @@ java:
     FEES_API_URL: "http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     CASE_DOCUMENT_AM_URL: "http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     MANAGE_CASE_UI_BASE_URL: "https://manage-case.platform.hmcts.net"
+    CITIZEN_LOGIN_URL: "https://www.manage-financial-remedy.service.gov.uk"
   keyVaults:
     finrem:
       secrets:
