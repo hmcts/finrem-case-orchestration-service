@@ -29,9 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 
 class AccessCodeGeneratorTest {
 
-    private static final boolean DO_NOT_ALWAYS_GENERATE_ACCESS_CODE = false;
-    private static final boolean ALWAYS_GENERATE_ACCESS_CODE = true;
-
     @Test
     void generateAccessCode_shouldReturn8CharString() {
         String code = AccessCodeGenerator.generateAccessCode();
@@ -48,7 +45,7 @@ class AccessCodeGeneratorTest {
             FinremCaseData data = new FinremCaseData();
 
             boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(
-                data, APPLICANT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE);
+                data, APPLICANT);
 
             assertTrue(generated);
             assertEquals(1, data.getApplicantAccessCodes().size());
@@ -61,7 +58,7 @@ class AccessCodeGeneratorTest {
             FinremCaseData data = new FinremCaseData();
 
             boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(
-                data, RESPONDENT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE);
+                data, RESPONDENT);
 
             assertTrue(generated);
             assertEquals(1, data.getRespondentAccessCodes().size());
@@ -78,31 +75,12 @@ class AccessCodeGeneratorTest {
                 .build());
 
             assertFalse(AccessCodeGenerator.generateAccessCodeIfNeeded(
-                data, APPLICANT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE));
+                data, APPLICANT));
             assertFalse(AccessCodeGenerator.generateAccessCodeIfNeeded(
-                data, RESPONDENT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE));
+                data, RESPONDENT));
 
             assertNull(data.getApplicantAccessCodes());
             assertNull(data.getRespondentAccessCodes());
-        }
-
-        @Test
-        void ensureAccessCodeForRecipient_shouldGenerateForRepresentedPartiesWhenAlwaysGenerateEnabled() {
-            FinremCaseData data = new FinremCaseData();
-            data.setContactDetailsWrapper(ContactDetailsWrapper.builder()
-                .applicantRepresented(YesOrNo.YES)
-                .contestedRespondentRepresented(YesOrNo.YES)
-                .build());
-
-            assertTrue(AccessCodeGenerator.generateAccessCodeIfNeeded(
-                data, APPLICANT, ALWAYS_GENERATE_ACCESS_CODE));
-            assertTrue(AccessCodeGenerator.generateAccessCodeIfNeeded(
-                data, RESPONDENT, ALWAYS_GENERATE_ACCESS_CODE));
-
-            assertEquals(1, data.getApplicantAccessCodes().size());
-            assertEquals(1, data.getRespondentAccessCodes().size());
-            assertValidEntry(data.getApplicantAccessCodes().getFirst().getValue());
-            assertValidEntry(data.getRespondentAccessCodes().getFirst().getValue());
         }
 
         @Test
@@ -118,7 +96,7 @@ class AccessCodeGeneratorTest {
             data.setApplicantAccessCodes(List.of(existing));
 
             boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(
-                data, APPLICANT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE);
+                data, APPLICANT);
 
             assertFalse(generated);
             assertEquals(1, data.getApplicantAccessCodes().size());
@@ -138,7 +116,7 @@ class AccessCodeGeneratorTest {
             data.setApplicantAccessCodes(List.of(existing));
 
             boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(
-                data, APPLICANT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE);
+                data, APPLICANT);
 
             assertFalse(generated);
             assertEquals(1, data.getApplicantAccessCodes().size());
@@ -157,7 +135,7 @@ class AccessCodeGeneratorTest {
             data.setApplicantAccessCodes(List.of(existing));
 
             boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(
-                data, APPLICANT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE);
+                data, APPLICANT);
 
             assertFalse(generated);
             assertEquals(1, data.getApplicantAccessCodes().size());
@@ -176,7 +154,7 @@ class AccessCodeGeneratorTest {
             data.setApplicantAccessCodes(List.of(existing));
 
             boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(
-                data, APPLICANT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE);
+                data, APPLICANT);
 
             assertTrue(generated);
             assertEquals(2, data.getApplicantAccessCodes().size());
@@ -189,7 +167,7 @@ class AccessCodeGeneratorTest {
             FinremCaseData data = new FinremCaseData();
 
             boolean generated = AccessCodeGenerator.generateAccessCodeIfNeeded(
-                data, INTERVENER_ONE, ALWAYS_GENERATE_ACCESS_CODE);
+                data, INTERVENER_ONE);
 
             assertFalse(generated);
             assertNull(data.getApplicantAccessCodes());
@@ -204,7 +182,7 @@ class AccessCodeGeneratorTest {
             FinremCaseData caseData = mock(FinremCaseData.class);
 
             boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
-                caseData, APPLICANT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE
+                caseData, APPLICANT
             );
 
             assertTrue(result);
@@ -216,7 +194,7 @@ class AccessCodeGeneratorTest {
             FinremCaseData caseData = mock(FinremCaseData.class);
 
             boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
-                caseData, RESPONDENT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE
+                caseData, RESPONDENT
             );
 
             assertTrue(result);
@@ -229,22 +207,10 @@ class AccessCodeGeneratorTest {
             when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
 
             boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
-                caseData, APPLICANT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE
+                caseData, APPLICANT
             );
 
             assertFalse(result);
-        }
-
-        @Test
-        void shouldReturnTrueWhenApplicantIsRepresentedAndAlwaysGenerateEnabled() {
-            FinremCaseData caseData = mock(FinremCaseData.class);
-            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
-
-            boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
-                caseData, APPLICANT, ALWAYS_GENERATE_ACCESS_CODE
-            );
-
-            assertTrue(result);
         }
 
         @Test
@@ -253,22 +219,10 @@ class AccessCodeGeneratorTest {
             when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
 
             boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
-                caseData, RESPONDENT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE
+                caseData, RESPONDENT
             );
 
             assertFalse(result);
-        }
-
-        @Test
-        void shouldReturnTrueWhenRespondentIsRepresentedAndAlwaysGenerateEnabled() {
-            FinremCaseData caseData = mock(FinremCaseData.class);
-            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
-
-            boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
-                caseData, RESPONDENT, ALWAYS_GENERATE_ACCESS_CODE
-            );
-
-            assertTrue(result);
         }
 
         @Test
@@ -284,7 +238,7 @@ class AccessCodeGeneratorTest {
             );
 
             boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
-                caseData, APPLICANT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE
+                caseData, APPLICANT
             );
 
             assertFalse(result);
@@ -305,7 +259,7 @@ class AccessCodeGeneratorTest {
             );
 
             boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
-                caseData, RESPONDENT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE
+                caseData, RESPONDENT
             );
 
             assertFalse(result);
@@ -326,7 +280,7 @@ class AccessCodeGeneratorTest {
             when(caseData.getApplicantAccessCodes()).thenReturn(existingCodes);
 
             boolean result = AccessCodeGenerator.doesRecipientNeedNewAccessCode(
-                caseData, APPLICANT, DO_NOT_ALWAYS_GENERATE_ACCESS_CODE
+                caseData, APPLICANT
             );
 
             assertTrue(result);
