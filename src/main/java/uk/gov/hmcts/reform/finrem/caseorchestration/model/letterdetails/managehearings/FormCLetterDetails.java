@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 @NoArgsConstructor
 public class FormCLetterDetails implements DocumentTemplateDetails {
     private String caseNumber;
+    private String hyphenatedCaseNumber;
+    private String citizenLoginUrl;
     private CourtDetailsTemplateFields courtDetails;
     @JsonProperty(value = "applicantFMName")
     private String applicantFmName;
@@ -38,4 +40,5 @@ public class FormCLetterDetails implements DocumentTemplateDetails {
     private String eventDatePlus21Days;
     private String typeOfApplication;
     private String civilPartnership;
+    private String accessCode;
 }

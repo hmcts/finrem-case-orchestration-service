@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -149,15 +150,11 @@ class ManageHearingsWrapperTest {
     @Test
     void getAssociatedWorkingHearingDocuments_shouldReturnAssociatedDocuments_WhenHearingIdMatches() {
         UUID hearingId = UUID.randomUUID();
-        CaseDocument doc1 = CaseDocument.builder().documentUrl("url1").documentFilename("file1").build();
-        CaseDocument doc2 = CaseDocument.builder().documentUrl("url2").documentFilename("file2").build();
+        CaseDocument doc1 = caseDocument("file1", "url1");
+        CaseDocument doc2 = caseDocument("file2", "url2");
 
-        ManageHearingDocumentsCollectionItem item1 = ManageHearingDocumentsCollectionItem.builder()
-                .value(ManageHearingDocument.builder().hearingId(hearingId).hearingDocument(doc1).build())
-                .build();
-        ManageHearingDocumentsCollectionItem item2 = ManageHearingDocumentsCollectionItem.builder()
-                .value(ManageHearingDocument.builder().hearingId(hearingId).hearingDocument(doc2).build())
-                .build();
+        ManageHearingDocumentsCollectionItem item1 = hearingDocumentItem(hearingId, doc1);
+        ManageHearingDocumentsCollectionItem item2 = hearingDocumentItem(hearingId, doc2);
 
         ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
                 .workingHearingId(hearingId)
@@ -174,11 +171,9 @@ class ManageHearingsWrapperTest {
     void getAssociatedWorkingHearingDocuments_shouldReturnEmptyList_WhenNoMatchFoundForAssociatedDocuments() {
         UUID hearingId = UUID.randomUUID();
         UUID nonMatchingId = UUID.randomUUID();
-        CaseDocument doc1 = CaseDocument.builder().documentUrl("url1").documentFilename("file1").build();
+        CaseDocument doc1 = caseDocument("file1", "url1");
 
-        ManageHearingDocumentsCollectionItem item1 = ManageHearingDocumentsCollectionItem.builder()
-                .value(ManageHearingDocument.builder().hearingId(nonMatchingId).hearingDocument(doc1).build())
-                .build();
+        ManageHearingDocumentsCollectionItem item1 = hearingDocumentItem(nonMatchingId, doc1);
 
         ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
                 .workingHearingId(hearingId)
@@ -208,11 +203,9 @@ class ManageHearingsWrapperTest {
 
     @Test
     void getAssociatedWorkingHearingDocuments_shouldReturnEmptyList_WhenWorkingHearingIdIsNull() {
-        CaseDocument doc1 = CaseDocument.builder().documentUrl("url1").documentFilename("file1").build();
+        CaseDocument doc1 = caseDocument("file1", "url1");
 
-        ManageHearingDocumentsCollectionItem item1 = ManageHearingDocumentsCollectionItem.builder()
-                .value(ManageHearingDocument.builder().hearingId(UUID.randomUUID()).hearingDocument(doc1).build())
-                .build();
+        ManageHearingDocumentsCollectionItem item1 = hearingDocumentItem(UUID.randomUUID(), doc1);
 
         ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
                 .workingHearingId(null)
@@ -223,6 +216,33 @@ class ManageHearingsWrapperTest {
 
         assertNotNull(result);
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getAssociatedWorkingHearingDocuments_shouldExcludeCitizenFormCDocuments() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument standardFormC = caseDocument("FormC.pdf");
+        CaseDocument applicantCitizenFormC = caseDocument("FormCApplicantCitizen.pdf");
+        CaseDocument respondentCitizenFormC = caseDocument("FormCRespondentCitizen.pdf");
+
+        ManageHearingDocumentsCollectionItem standardItem = hearingDocumentItem(hearingId, CaseDocumentType.FORM_C, standardFormC);
+        ManageHearingDocumentsCollectionItem applicantCitizenItem = hearingDocumentItem(
+            hearingId,
+            CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN,
+            applicantCitizenFormC
+        );
+        ManageHearingDocumentsCollectionItem respondentCitizenItem = hearingDocumentItem(
+            hearingId,
+            CaseDocumentType.FORM_C_EXPRESS_RESPONDENT_CITIZEN,
+            respondentCitizenFormC
+        );
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .workingHearingId(hearingId)
+            .hearingDocumentsCollection(List.of(standardItem, applicantCitizenItem, respondentCitizenItem))
+            .build();
+
+        assertThat(wrapper.getAssociatedWorkingHearingDocuments()).containsExactly(standardFormC);
     }
 
     @Test
@@ -248,26 +268,39 @@ class ManageHearingsWrapperTest {
         UUID target = UUID.randomUUID();
         UUID other = UUID.randomUUID();
 
-        CaseDocument docA = CaseDocument.builder().documentFilename("A").build();
-        CaseDocument docB = CaseDocument.builder().documentFilename("B").build();
+        CaseDocument docA = caseDocument("A");
+        CaseDocument docB = caseDocument("B");
 
-        var itemB = ManageHearingDocumentsCollectionItem.builder()
-            .value(ManageHearingDocument.builder().hearingId(target).hearingDocument(docB).build())
-            .build();
-
-        var itemA = ManageHearingDocumentsCollectionItem.builder()
-            .value(ManageHearingDocument.builder().hearingId(target).hearingDocument(docA).build())
-            .build();
-
-        var itemOther = ManageHearingDocumentsCollectionItem.builder()
-            .value(ManageHearingDocument.builder().hearingId(other).hearingDocument(docA).build())
-            .build();
+        var itemB = hearingDocumentItem(target, docB);
+        var itemA = hearingDocumentItem(target, docA);
+        var itemOther = hearingDocumentItem(other, docA);
 
         var wrapper = ManageHearingsWrapper.builder()
             .hearingDocumentsCollection(List.of(itemB, itemOther, itemA))
             .build();
 
         assertThat(wrapper.getAssociatedHearingDocuments(target)).containsExactly(docB, docA);
+    }
+
+    @Test
+    void getAssociatedHearingDocuments_excludesCitizenFormCDocuments() {
+        UUID target = UUID.randomUUID();
+
+        CaseDocument standardFormC = caseDocument("FormC.pdf");
+        CaseDocument applicantCitizenFormC = caseDocument("FormCApplicantCitizen.pdf");
+
+        var standardItem = hearingDocumentItem(target, CaseDocumentType.FORM_C, standardFormC);
+        var applicantCitizenItem = hearingDocumentItem(
+            target,
+            CaseDocumentType.FORM_C_FAST_TRACK_APPLICANT_CITIZEN,
+            applicantCitizenFormC
+        );
+
+        var wrapper = ManageHearingsWrapper.builder()
+            .hearingDocumentsCollection(List.of(standardItem, applicantCitizenItem))
+            .build();
+
+        assertThat(wrapper.getAssociatedHearingDocuments(target)).containsExactly(standardFormC);
     }
 
     @Test
@@ -295,5 +328,29 @@ class ManageHearingsWrapperTest {
             .build();
 
         assertFalse(caseData.getManageHearingsWrapper().hasNoHearings());
+    }
+
+    private CaseDocument caseDocument(String filename) {
+        return CaseDocument.builder().documentFilename(filename).build();
+    }
+
+    private CaseDocument caseDocument(String filename, String url) {
+        return CaseDocument.builder().documentFilename(filename).documentUrl(url).build();
+    }
+
+    private ManageHearingDocumentsCollectionItem hearingDocumentItem(UUID hearingId, CaseDocument caseDocument) {
+        return hearingDocumentItem(hearingId, null, caseDocument);
+    }
+
+    private ManageHearingDocumentsCollectionItem hearingDocumentItem(UUID hearingId,
+                                                                      CaseDocumentType documentType,
+                                                                      CaseDocument caseDocument) {
+        return ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder()
+                .hearingId(hearingId)
+                .hearingCaseDocumentType(documentType)
+                .hearingDocument(caseDocument)
+                .build())
+            .build();
     }
 }

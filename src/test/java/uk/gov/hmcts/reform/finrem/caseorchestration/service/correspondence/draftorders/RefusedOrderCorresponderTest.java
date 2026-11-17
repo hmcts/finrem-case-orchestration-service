@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -56,6 +57,8 @@ class RefusedOrderCorresponderTest {
     private DocumentHelper documentHelper;
     @Mock
     private BulkPrintService bulkPrintService;
+    @Mock
+    private CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
 
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> applicantBulkPrintDocumentsCaptor;
@@ -112,6 +115,9 @@ class RefusedOrderCorresponderTest {
             anyList());
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(FinremCaseDetails.class), anyString(),
             applicantBulkPrintDocumentsCaptor.capture());
+        verify(citizenPinInPostPersistenceService, times(1))
+            .ensurePinPersisted(any(FinremCaseDetails.class), any(DocumentHelper.PaperNotificationRecipient.class));
+
         List<BulkPrintDocument> bulkPrintDocuments = applicantBulkPrintDocumentsCaptor.getValue();
         assertThat(bulkPrintDocuments).hasSize(1);
     }
@@ -132,6 +138,8 @@ class RefusedOrderCorresponderTest {
             anyList());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(FinremCaseDetails.class), anyString(),
             respondentBulkPrintDocumentsCaptor.capture());
+        verify(citizenPinInPostPersistenceService, times(1))
+            .ensurePinPersisted(any(FinremCaseDetails.class), any(DocumentHelper.PaperNotificationRecipient.class));
 
         List<BulkPrintDocument> bulkPrintDocuments = respondentBulkPrintDocumentsCaptor.getValue();
         assertThat(bulkPrintDocuments).hasSize(1);

@@ -16,11 +16,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
-import static java.util.Objects.nonNull;
+import java.util.List;
+
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 
 @Slf4j
@@ -28,16 +29,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus
 public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final ManageHearingActionService manageHearingActionService;
-    private final NotificationAuditService notificationAuditService;
+    private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
     private final ManageHearingsCorresponder manageHearingsCorresponder;
 
     public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               ManageHearingActionService manageHearingActionService,
-                                              NotificationAuditService notificationAuditService,
+                                              CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
                                               ManageHearingsCorresponder manageHearingsCorresponder) {
         super(finremCaseDetailsMapper);
         this.manageHearingActionService = manageHearingActionService;
-        this.notificationAuditService = notificationAuditService;
+        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
         this.manageHearingsCorresponder = manageHearingsCorresponder;
     }
 
@@ -88,19 +89,12 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
     private void createNotificationAuditRows(FinremCallbackRequest callbackRequest,
                                              String userAuthorisation,
                                              ManageHearingsAction actionSelection) {
-
-        SendCorrespondenceEvent event = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+        List<SendCorrespondenceEvent> events = manageHearingsCorresponder.buildCorrespondenceEventsIfNeeded(
             actionSelection,
             callbackRequest,
             userAuthorisation
         );
 
-        if (nonNull(event)) {
-            notificationAuditService.createAuditsForCorrespondence(
-                event,
-                callbackRequest.getEventType()
-            );
-        }
-
+        correspondenceEventAuditOrchestrationService.createPendingAudits(events, callbackRequest.getEventType());
     }
 }

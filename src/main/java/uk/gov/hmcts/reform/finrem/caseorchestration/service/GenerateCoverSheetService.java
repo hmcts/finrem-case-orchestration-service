@@ -8,12 +8,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +35,7 @@ public class GenerateCoverSheetService {
     private final DocumentConfiguration documentConfiguration;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
     private final FeatureToggleService featureToggleService;
+    private final CitizenPinInPostService citizenPinInPostService;
 
     private record IntervenerCoverSheetMapping(
         DocumentHelper.PaperNotificationRecipient recipient,
@@ -43,6 +46,7 @@ public class GenerateCoverSheetService {
 
     public CaseDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         logCoverSheetGeneration(APPLICANT, caseDetails.getCaseIdAsString());
+
         return generateCoverSheet(caseDetails, authorisationToken, APPLICANT);
     }
 
@@ -55,13 +59,22 @@ public class GenerateCoverSheetService {
      * @param authorisationToken the authorization token used to access and store the generated document
      */
     public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+
+        if (featureToggleService.isFinremCitizenUiEnabled()) {
+            citizenPinInPostService.generatePinIfNeeded(caseDetails, APPLICANT);
+        }
+
         FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(APPLICANT, caseDetails.getCaseIdAsString());
+
+        YesOrNo confidentialFlag = shouldUseCitizenUiCoverSheet(caseDetails, APPLICANT)
+            ? YesOrNo.YES
+            : caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent();
 
         replaceAndStoreCoverSheet(
             caseData,
             generateApplicantCoverSheet(caseDetails, authorisationToken),
-            caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent(),
+            confidentialFlag,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetApp,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetAppConfidential,
             caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetApp,
@@ -83,13 +96,22 @@ public class GenerateCoverSheetService {
      * @param authorisationToken the authorization token used to access and store the generated document
      */
     public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+
+        if (featureToggleService.isFinremCitizenUiEnabled()) {
+            citizenPinInPostService.generatePinIfNeeded(caseDetails, RESPONDENT);
+        }
+
         FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(RESPONDENT, caseDetails.getCaseIdAsString());
+
+        YesOrNo confidentialFlag = shouldUseCitizenUiCoverSheet(caseDetails, RESPONDENT)
+            ? YesOrNo.YES
+            : caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant();
 
         replaceAndStoreCoverSheet(
             caseData,
             generateRespondentCoverSheet(caseDetails, authorisationToken),
-            caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant(),
+            confidentialFlag,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetRes,
             caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetResConfidential,
             caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetRes,
@@ -233,6 +255,10 @@ public class GenerateCoverSheetService {
     private CaseDocument generateCoverSheet(FinremCaseDetails caseDetails,
                                             String authorisationToken,
                                             DocumentHelper.PaperNotificationRecipient recipient) {
+        String template = shouldUseCitizenUiCoverSheet(caseDetails, recipient)
+            ? documentConfiguration.getBulkPrintCitizenUiTemplate()
+            : documentConfiguration.getBulkPrintTemplate();
+
         Map<String, Object> placeholdersMap = bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(
             caseDetails,
             recipient,
@@ -242,10 +268,28 @@ public class GenerateCoverSheetService {
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
             authorisationToken,
             placeholdersMap,
-            documentConfiguration.getBulkPrintTemplate(),
+            template,
             documentConfiguration.getBulkPrintFileName(),
             caseDetails.getCaseType()
         );
+    }
+
+    public boolean shouldUseCitizenUiCoverSheet(
+        FinremCaseDetails caseDetails,
+        DocumentHelper.PaperNotificationRecipient recipient) {
+
+        if (!featureToggleService.isFinremCitizenUiEnabled()
+            || caseDetails.getCaseType() != CaseType.CONTESTED) {
+            return false;
+        }
+
+        FinremCaseData caseData = caseDetails.getData();
+
+        return switch (recipient) {
+            case APPLICANT -> !caseData.isApplicantRepresentedByASolicitor();
+            case RESPONDENT -> !caseData.isRespondentRepresentedByASolicitor();
+            default -> false;
+        };
     }
 
     private void logCoverSheetGeneration(DocumentHelper.PaperNotificationRecipient recipient, String caseId) {

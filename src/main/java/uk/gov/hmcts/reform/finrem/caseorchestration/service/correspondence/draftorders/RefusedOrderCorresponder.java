@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremCorresponder;
 
 import java.util.List;
@@ -31,14 +32,17 @@ public class RefusedOrderCorresponder extends FinremCorresponder {
     private final DraftOrdersNotificationRequestMapper notificationRequestMapper;
     private final DocumentHelper documentHelper;
     private final BulkPrintService bulkPrintService;
+    private final CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
 
     public RefusedOrderCorresponder(NotificationService notificationService,
                                     DraftOrdersNotificationRequestMapper notificationRequestMapper,
-                                    DocumentHelper documentHelper, BulkPrintService bulkPrintService) {
+                                    DocumentHelper documentHelper, BulkPrintService bulkPrintService,
+                                    CitizenPinInPostPersistenceService citizenPinInPostPersistenceService) {
         super(notificationService);
         this.notificationRequestMapper = notificationRequestMapper;
         this.documentHelper = documentHelper;
         this.bulkPrintService = bulkPrintService;
+        this.citizenPinInPostPersistenceService = citizenPinInPostPersistenceService;
     }
 
     /**
@@ -138,11 +142,23 @@ public class RefusedOrderCorresponder extends FinremCorresponder {
     }
 
     private void printApplicantLetter(RefusedOrderCorrespondenceRequest request) {
+
+        citizenPinInPostPersistenceService.ensurePinPersisted(
+            request.caseDetails(),
+            DocumentHelper.PaperNotificationRecipient.APPLICANT
+        );
+
         List<BulkPrintDocument> documents = getDocumentsToPrint(request.refusedOrders(), APPLICANT);
         bulkPrintService.printApplicantDocuments(request.caseDetails(), request.authorisationToken(), documents);
     }
 
     private void printRespondentLetter(RefusedOrderCorrespondenceRequest request) {
+
+        citizenPinInPostPersistenceService.ensurePinPersisted(
+            request.caseDetails(),
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT
+        );
+
         List<BulkPrintDocument> documents = getDocumentsToPrint(request.refusedOrders(), RESPONDENT);
         bulkPrintService.printRespondentDocuments(request.caseDetails(), request.authorisationToken(), documents);
     }

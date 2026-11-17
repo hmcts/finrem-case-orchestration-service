@@ -191,12 +191,17 @@ public class BulkPrintService {
         CaseDocument applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
         log.info("Applicant coversheet generated {} for case Id {}", applicantCoverSheet, caseDetails.getId());
 
-        if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent())) {
-            log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
+        boolean confidential = coverSheetService.shouldUseCitizenUiCoverSheet(
+            caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)
+            || YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent());
+
+        if (confidential) {
+            log.info("Storing applicant coversheet in confidential field for caseId {}", caseDetails.getId());
             caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
             caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
         } else {
             caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(applicantCoverSheet);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(null);
         }
 
         return documentHelper.mapToBulkPrintDocument(applicantCoverSheet);
@@ -204,14 +209,19 @@ public class BulkPrintService {
 
     private BulkPrintDocument generateRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
-        log.info("Respondent cover sheet generated {}, for case Id {}", respondentCoverSheet, caseDetails.getId());
+        log.info("Respondent coversheet generated {} for case Id {}", respondentCoverSheet, caseDetails.getId());
 
-        if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant())) {
-            log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
+        boolean confidential = coverSheetService.shouldUseCitizenUiCoverSheet(
+            caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT)
+            || YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant());
+
+        if (confidential) {
+            log.info("Storing respondent coversheet in confidential field for caseId {}", caseDetails.getId());
             caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(null);
             caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
         } else {
             caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(null);
         }
 
         return documentHelper.mapToBulkPrintDocument(respondentCoverSheet);
