@@ -50,7 +50,7 @@ class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
         when(consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(caseDetails, AUTH_TOKEN, APPLICANT))
             .thenReturn(coverLetter);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData().getConsentSendOrderWrapper().getConsentOrderNotApprovedCoverLetterApp()).isEqualTo(coverLetter);
         assertThat(response.getData().getConsentSendOrderWrapper().getConsentOrderNotApprovedCoverLetterResp()).isNull();
@@ -67,7 +67,7 @@ class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
         when(consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(caseDetails, AUTH_TOKEN, RESPONDENT))
             .thenReturn(coverLetter);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData().getConsentSendOrderWrapper().getConsentOrderNotApprovedCoverLetterApp()).isNull();
         assertThat(response.getData().getConsentSendOrderWrapper().getConsentOrderNotApprovedCoverLetterResp()).isEqualTo(coverLetter);

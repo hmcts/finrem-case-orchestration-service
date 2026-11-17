@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+
 @Slf4j
 @Service
 public class SendOrderConsentForNotApprovedOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
@@ -45,27 +47,36 @@ public class SendOrderConsentForNotApprovedOrderSubmittedHandler extends FinremS
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        List<String> errors = sendNotifications(callbackRequest, userAuthorisation);
 
+        if (errors.isEmpty()) {
+            return submittedResponse();
+        }
+
+        return submittedResponse(
+            toConfirmationHeader("Send order event submitted with errors"),
+            toConfirmationBody(errors.toArray(new String[0]))
+        );
+    }
+
+    private List<String> sendNotifications(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         List<SendCorrespondenceEvent> events = consentSendOrderCorresponder
             .buildNotApprovedOrderEvents(caseDetails, userAuthorisation);
-        List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
         for (SendCorrespondenceEvent event : events) {
-            String actionName = "Send consent order not approved correspondence to " + event.describeNotificationParties();
-            boolean sent = correspondenceEventAuditOrcService.publishEvent(event, actionName);
-            if (!sent) {
-                errors.add("Failed to send correspondence to " + event.describeNotificationParties());
+            if (!emptyIfNull(event.getNotificationParties()).isEmpty()) {
+                String party = event.describeNotificationParties();
+                String actionName = "Send consent order not approved correspondence to party: %s for the send order event"
+                    .formatted(party);
+                correspondenceEventAuditOrcService.publishEvent(event, actionName,
+                    () -> errors.add(
+                        "Unable to deliver consent order not approved correspondence to %s. Please send it manually."
+                            .formatted(party))
+                );
             }
         }
-
-        if (!errors.isEmpty()) {
-            return submittedResponse(
-                toConfirmationHeader("Send order event submitted with errors"),
-                toConfirmationBody(errors.toArray(new String[0]))
-            );
-        } else {
-            return submittedResponse();
-        }
+        return errors;
     }
 }

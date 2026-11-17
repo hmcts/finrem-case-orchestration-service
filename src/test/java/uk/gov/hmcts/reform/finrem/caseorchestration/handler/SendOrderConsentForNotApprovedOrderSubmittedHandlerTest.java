@@ -18,8 +18,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventA
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -70,11 +72,15 @@ class SendOrderConsentForNotApprovedOrderSubmittedHandlerTest {
 
         when(consentSendOrderCorresponder.buildNotApprovedOrderEvents(caseDetails, AUTH_TOKEN))
             .thenReturn(List.of(applicantEvent));
-        when(correspondenceEventAuditOrcService.publishEvent(eq(applicantEvent), anyString())).thenReturn(false);
+        doAnswer(invocation -> {
+            invocation.getArgument(2, Runnable.class).run();
+            return null;
+        }).when(correspondenceEventAuditOrcService).publishEvent(eq(applicantEvent), anyString(), any());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getConfirmationHeader()).contains("Send order event submitted with errors");
-        assertThat(response.getConfirmationBody()).contains("Failed to send correspondence to");
+        assertThat(response.getConfirmationBody())
+            .contains("Unable to deliver consent order not approved correspondence to");
     }
 }
