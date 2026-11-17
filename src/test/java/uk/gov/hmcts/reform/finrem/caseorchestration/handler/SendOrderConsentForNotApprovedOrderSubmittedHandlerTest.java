@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -49,19 +48,17 @@ class SendOrderConsentForNotApprovedOrderSubmittedHandlerTest {
     @Test
     void givenEvents_whenHandle_thenEachEventIsPublished() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(new FinremCaseData()).build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(caseDetails).build();
         SendCorrespondenceEvent applicantEvent = SendCorrespondenceEvent.builder().notificationParties(List.of(APPLICANT)).build();
         SendCorrespondenceEvent respondentEvent = SendCorrespondenceEvent.builder().notificationParties(List.of(RESPONDENT)).build();
 
         when(consentSendOrderCorresponder.buildNotApprovedOrderEvents(caseDetails, AUTH_TOKEN))
             .thenReturn(List.of(applicantEvent, respondentEvent));
-        when(correspondenceEventAuditOrcService.publishEvent(eq(applicantEvent), anyString())).thenReturn(true);
-        when(correspondenceEventAuditOrcService.publishEvent(eq(respondentEvent), anyString())).thenReturn(true);
 
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(caseDetails).build();
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(correspondenceEventAuditOrcService).publishEvent(eq(applicantEvent), anyString());
-        verify(correspondenceEventAuditOrcService).publishEvent(eq(respondentEvent), anyString());
+        verify(correspondenceEventAuditOrcService).publishEvent(eq(applicantEvent), anyString(), any());
+        verify(correspondenceEventAuditOrcService).publishEvent(eq(respondentEvent), anyString(), any());
     }
 
     @Test
