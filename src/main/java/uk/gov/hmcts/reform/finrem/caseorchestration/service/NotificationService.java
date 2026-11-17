@@ -199,34 +199,8 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_MADE);
     }
 
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #sendConsentOrderNotApprovedEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendConsentOrderNotApprovedEmailToApplicantSolicitor(CaseDetails caseDetails) {
-        sendConsentOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
-    }
-
     public void sendConsentOrderNotApprovedEmailToApplicantSolicitor(FinremCaseDetails caseDetails) {
         sendConsentOrderNotApprovedEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
-    }
-
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #sendConsentOrderNotApprovedEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendConsentOrderNotApprovedEmailToRespondentSolicitor(CaseDetails caseDetails) {
-        sendConsentOrderNotApprovedEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
     public void sendConsentOrderNotApprovedEmailToRespondentSolicitor(FinremCaseDetails caseDetails) {

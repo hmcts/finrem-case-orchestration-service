@@ -29,7 +29,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -45,6 +47,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFacto
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
 
 @ActiveProfiles("test-mock-feign-clients")
 public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest {
@@ -204,6 +208,69 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         boolean result = consentOrderNotApprovedDocumentService.getFirstOrderModifiedAfterSecondOrder(
             null, secondCaseDocument, "token");
         assertThat(result, equalTo(false));
+    }
+
+    @Test
+    public void givenUploadedOrderNewerThanGeneralOrder_whenGettingNotApprovedConsentOrders_thenReturnsUploadedOrder() {
+        FinremCaseDetails details = consentedCaseDetails(true);
+        CaseDocument uploadedOrder = caseDocument("uploadUrl", "uploaded.pdf", "uploadBin");
+        CaseDocument generalOrder = caseDocument("generalUrl", "general.pdf", "generalBin");
+        when(documentHelper.getDocumentLinkAsCaseDocument(any(), eq("DocumentLink"))).thenReturn(Optional.of(uploadedOrder));
+        when(documentHelper.getLatestGeneralOrder(any(FinremCaseData.class))).thenReturn(generalOrder);
+        when(documentOrderingService.isDocumentModifiedLater(uploadedOrder, generalOrder, AUTH_TOKEN)).thenReturn(true);
+
+        List<CaseDocument> result = consentOrderNotApprovedDocumentService.getNotApprovedConsentOrders(details, AUTH_TOKEN);
+
+        assertThat(result, equalTo(List.of(uploadedOrder)));
+    }
+
+    @Test
+    public void givenGeneralOrderNewerThanUploadedOrder_whenGettingNotApprovedConsentOrders_thenReturnsGeneralOrder() {
+        FinremCaseDetails details = consentedCaseDetails(true);
+        CaseDocument uploadedOrder = caseDocument("uploadUrl", "uploaded.pdf", "uploadBin");
+        CaseDocument generalOrder = caseDocument("generalUrl", "general.pdf", "generalBin");
+        when(documentHelper.getDocumentLinkAsCaseDocument(any(), eq("DocumentLink"))).thenReturn(Optional.of(uploadedOrder));
+        when(documentHelper.getLatestGeneralOrder(any(FinremCaseData.class))).thenReturn(generalOrder);
+        when(documentOrderingService.isDocumentModifiedLater(uploadedOrder, generalOrder, AUTH_TOKEN)).thenReturn(false);
+
+        List<CaseDocument> result = consentOrderNotApprovedDocumentService.getNotApprovedConsentOrders(details, AUTH_TOKEN);
+
+        assertThat(result, equalTo(List.of(generalOrder)));
+    }
+
+    @Test
+    public void givenNoUploadedOrderAndNoGeneralOrder_whenGettingNotApprovedConsentOrders_thenReturnsEmptyList() {
+        FinremCaseDetails details = consentedCaseDetails(false);
+        when(documentHelper.getLatestGeneralOrder(any(FinremCaseData.class))).thenReturn(null);
+
+        List<CaseDocument> result = consentOrderNotApprovedDocumentService.getNotApprovedConsentOrders(details, AUTH_TOKEN);
+
+        assertThat(result, hasSize(0));
+    }
+
+    @Test
+    public void givenConsentOrder_whenGettingNotApprovedCoverLetter_thenGeneratesConsentCoverLetter() {
+        FinremCaseDetails details = consentedCaseDetails(false);
+        CaseDetails templateDetails = CaseDetails.builder().data(new HashMap<>()).build();
+        CaseDocument coverLetter = caseDocument("coverUrl", "cover.pdf", "coverBin");
+        when(documentHelper.prepareLetterTemplateData(details, DocumentHelper.PaperNotificationRecipient.APPLICANT))
+            .thenReturn(templateDetails);
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), eq(templateDetails), any(), any())).thenReturn(coverLetter);
+
+        CaseDocument result = consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(
+            details, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+
+        assertThat(result, equalTo(coverLetter));
+        assertThat(templateDetails.getData().get(ORDER_TYPE), equalTo(CONSENT));
+    }
+
+    private FinremCaseDetails consentedCaseDetails(boolean withUploadOrder) {
+        FinremCaseData data = FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).build();
+        if (withUploadOrder) {
+            UploadOrder uploadOrder = UploadOrder.builder().documentLink(caseDocument("uploadUrl", "uploaded.pdf", "uploadBin")).build();
+            data.setUploadOrder(List.of(UploadOrderCollection.builder().id(UUID.randomUUID().toString()).value(uploadOrder).build()));
+        }
+        return FinremCaseDetails.builder().id(123L).caseType(CaseType.CONSENTED).data(data).build();
     }
 
     private void addConsentedInContestedConsentOrderNotApproved() {
