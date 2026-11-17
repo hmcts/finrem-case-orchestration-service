@@ -46,7 +46,7 @@ public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends Fin
         FinremCaseData caseData = caseDetails.getData();
 
         if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
-            log.info("Generating not approved cover letter for Case ID: {}", caseDetails.getId());
+            log.info("Generating Applicant order not approved cover letter for Case ID: {}", caseDetails.getId());
             caseData.getConsentSendOrderWrapper().setConsentOrderNotApprovedCoverLetterApp(
                 consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(
                 caseDetails, userAuthorisation, DocumentHelper.PaperNotificationRecipient.APPLICANT));
@@ -54,13 +54,13 @@ public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends Fin
             caseData.getConsentSendOrderWrapper().setConsentOrderNotApprovedCoverLetterApp(null);
         }
         if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
-            log.info("Generating not approved cover letter for Case ID: {}", caseDetails.getId());
+            log.info("Generating Respondent order not approved cover letter for Case ID: {}", caseDetails.getId());
             caseData.getConsentSendOrderWrapper().setConsentOrderNotApprovedCoverLetterResp(
                 consentOrderNotApprovedDocumentService.getNotApprovedCoverLetter(
                 caseDetails, userAuthorisation, DocumentHelper.PaperNotificationRecipient.RESPONDENT));
         } else {
             caseData.getConsentSendOrderWrapper().setConsentOrderNotApprovedCoverLetterResp(null);
-        }
+}
         return response(caseData);
     }
 }
