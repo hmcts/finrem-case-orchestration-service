@@ -11,6 +11,7 @@ public class TestConstants {
     public static final String ABOUT_TO_SUBMIT_URL = "/case-orchestration/ccdAboutToSubmitEvent";
     public static final String SUBMITTED_URL = "/case-orchestration/ccdSubmittedEvent";
 
+    public static final String TEST_ACCESS_CODE = "G7AX2XZ8";
     public static final String TEST_CASE_ID = "test.case.id";
     public static final String TEST_USER_ID = "test.user.id";
     public static final String TEST_ORG_ID = "test.org.id";
