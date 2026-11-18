@@ -204,7 +204,7 @@ public class EmailService {
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED.name().equals(templateName)) {
             addRefusedDraftOrderOrPsaTemplateVars(notificationRequest, templateVars);
         }
-        if (isCitizenCuiTemplate(templateName)) {
+        if (isCitizenTemplate(templateName)) {
             templateVars.put(CITIZEN_LOGIN_URL, citizenLoginUrl);
         }
         if (EmailTemplateNames.FR_CUI_DOCUMENTS_UPLOADED.name().equals(templateName)) {
@@ -221,7 +221,7 @@ public class EmailService {
         }
     }
 
-    private boolean isCitizenCuiTemplate(String templateName) {
+    private boolean isCitizenTemplate(String templateName) {
         return EmailTemplateNames.FR_CUI_DOCUMENTS_UPLOADED.name().equals(templateName)
             || EmailTemplateNames.FR_CUI_SIGN_IN_CONFIRMATION.name().equals(templateName);
     }
