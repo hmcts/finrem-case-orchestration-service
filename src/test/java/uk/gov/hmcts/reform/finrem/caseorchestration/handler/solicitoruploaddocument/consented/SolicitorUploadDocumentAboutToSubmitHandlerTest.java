@@ -15,10 +15,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrls;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrlsCollection;
@@ -65,10 +67,18 @@ class SolicitorUploadDocumentAboutToSubmitHandlerTest {
     }
 
     @Test
+    void givenReadyToSubmitWithStateReadyForHearing_whenHandled_thenCaseStateNotChanged() {
+        FinremCaseData finremCaseData = finremCaseDataWithReadyToSubmitDocument();
+
+        var response = underTest.handle(FinremCallbackRequestFactory.from(FinremCaseDetails
+            .builder().data(finremCaseData).state(State.READY_FOR_HEARING)), AUTH_TOKEN);
+
+        assertThat(response.getState()).isNull();
+    }
+
+    @Test
     void givenReadyToSubmit_whenHandled_thenSetInfoReceivedCaseStateAndWarningPopulated() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .genericInputFields(GenericInputFields.builder().readyToSubmitDocument(YesOrNo.YES).build())
-            .build();
+        FinremCaseData finremCaseData = finremCaseDataWithReadyToSubmitDocument();
 
         var response = underTest.handle(FinremCallbackRequestFactory.from(finremCaseData), AUTH_TOKEN);
         assertAll(
@@ -169,4 +179,9 @@ class SolicitorUploadDocumentAboutToSubmitHandlerTest {
             .build();
     }
 
+    private static FinremCaseData finremCaseDataWithReadyToSubmitDocument() {
+        return FinremCaseData.builder()
+            .genericInputFields(GenericInputFields.builder().readyToSubmitDocument(YesOrNo.YES).build())
+            .build();
+    }
 }

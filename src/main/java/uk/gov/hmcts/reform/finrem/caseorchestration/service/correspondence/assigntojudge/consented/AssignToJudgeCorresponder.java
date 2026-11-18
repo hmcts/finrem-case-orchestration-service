@@ -13,13 +13,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 
 /**
@@ -64,7 +63,7 @@ public class AssignToJudgeCorresponder {
 
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
 
-    private final NotificationAuditService notificationAuditService;
+    private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     /**
      * Creates audit records for all correspondence associated with the given event, linking them
@@ -84,13 +83,7 @@ public class AssignToJudgeCorresponder {
     public void createAuditsForCorrespondence(EventType eventType, FinremCaseDetails finremCaseDetails, String userAuthorisation) {
         List<SendCorrespondenceEvent> events = buildSendCorrespondenceEventsForAuditCreation(eventType, finremCaseDetails,
             userAuthorisation);
-        String trackerId = null;
-        for (SendCorrespondenceEvent event : events) {
-            if (nonNull(trackerId)) {
-                event.setNotificationTrackerId(trackerId);
-            }
-            trackerId = notificationAuditService.createAuditsForCorrespondence(event, eventType);
-        }
+        correspondenceEventAuditOrchestrationService.createPendingAudits(events, eventType);
     }
 
     /**

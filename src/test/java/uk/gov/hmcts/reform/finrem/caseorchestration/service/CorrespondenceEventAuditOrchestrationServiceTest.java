@@ -61,6 +61,24 @@ class CorrespondenceEventAuditOrchestrationServiceTest {
     }
 
     @Test
+    void shouldCreatePendingAuditsForMultipleEventsUsingSharedTrackerId() {
+        SendCorrespondenceEvent firstEvent = event();
+        SendCorrespondenceEvent secondEvent = event();
+
+        when(notificationAuditService.createAuditsForCorrespondence(firstEvent, EventType.MANAGE_HEARINGS))
+            .thenReturn("tracker-id");
+
+        correspondenceEventAuditOrchestrationService.createPendingAudits(
+            java.util.List.of(firstEvent, secondEvent),
+            EventType.MANAGE_HEARINGS
+        );
+
+        verify(notificationAuditService).createAuditsForCorrespondence(firstEvent, EventType.MANAGE_HEARINGS);
+        assertThat(secondEvent.getNotificationTrackerId()).isEqualTo("tracker-id");
+        verify(notificationAuditService).createAuditsForCorrespondence(secondEvent, EventType.MANAGE_HEARINGS);
+    }
+
+    @Test
     void shouldReturnTrueWhenPublishEventSucceeds() {
         SendCorrespondenceEvent event = event();
 
