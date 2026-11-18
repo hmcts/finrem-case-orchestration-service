@@ -43,11 +43,15 @@ public class EmailService {
     @Value("${finrem.manageCase.baseurl}")
     private String manageCaseBaseUrl;
 
+    @Value("${finrem.citizen.login-url}")
+    private String citizenLoginUrl;
+
     public static final String CONTESTED = "contested";
     public static final String CONSENTED = "consented";
     private static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
     private static final String HEARING_DATE = "hearingDate";
     private static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
+    private static final String CITIZEN_LOGIN_URL = "citizenLoginUrl";
     private static final String DEFAULT_LINK_TO_SMART_SURVEY = "http://www.smartsurvey.co.uk/s/KCECE/";
     private static final int MAX_EMAIL_ATTACHMENTS = 10;
 
@@ -200,6 +204,9 @@ public class EmailService {
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED.name().equals(templateName)) {
             addRefusedDraftOrderOrPsaTemplateVars(notificationRequest, templateVars);
         }
+        if (isCitizenCuiTemplate(templateName)) {
+            templateVars.put(CITIZEN_LOGIN_URL, citizenLoginUrl);
+        }
         if (EmailTemplateNames.FR_CUI_DOCUMENTS_UPLOADED.name().equals(templateName)) {
             templateVars.put("timeOfSubmission", notificationRequest.getTimeOfSubmission());
             templateVars.putIfAbsent("courtName", "");
@@ -212,6 +219,11 @@ public class EmailService {
                 Boolean.TRUE.equals(notificationRequest.getHasDivorceAccount())
             );
         }
+    }
+
+    private boolean isCitizenCuiTemplate(String templateName) {
+        return EmailTemplateNames.FR_CUI_DOCUMENTS_UPLOADED.name().equals(templateName)
+            || EmailTemplateNames.FR_CUI_SIGN_IN_CONFIRMATION.name().equals(templateName);
     }
 
     protected void populateTemplateVarsFromApplicationProperties(Map<String, Object> templateVars, String templateName) {
