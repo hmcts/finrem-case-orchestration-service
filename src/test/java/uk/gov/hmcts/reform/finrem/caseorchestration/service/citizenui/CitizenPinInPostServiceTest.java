@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -39,14 +38,11 @@ class CitizenPinInPostServiceTest {
     @Mock
     private FinremCaseDetails caseDetails;
 
-    @Mock
-    private FeatureToggleService featureToggleService;
-
     private CitizenPinInPostService service;
 
     @BeforeEach
     void setUp() {
-        service = new CitizenPinInPostService(featureToggleService);
+        service = new CitizenPinInPostService();
     }
 
     @Test
@@ -101,23 +97,6 @@ class CitizenPinInPostServiceTest {
 
         assertFalse(generated);
         assertNull(data.getApplicantAccessCodes());
-    }
-
-    @Test
-    void shouldGeneratePinForRepresentedPartyWhenAlwaysGenerateEnabled() {
-        FinremCaseData data = new FinremCaseData();
-        data.setContactDetailsWrapper(ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.YES)
-            .build());
-
-        when(caseDetails.getCaseType()).thenReturn(CaseType.CONTESTED);
-        when(caseDetails.getData()).thenReturn(data);
-        when(featureToggleService.alwaysGenerateCUIAccessCodesEnabled()).thenReturn(true);
-
-        boolean generated = service.generatePinIfNeeded(caseDetails, APPLICANT);
-
-        assertTrue(generated);
-        assertEquals(1, data.getApplicantAccessCodes().size());
     }
 
     @Nested
