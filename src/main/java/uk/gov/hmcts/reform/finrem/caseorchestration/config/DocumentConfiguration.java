@@ -18,6 +18,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Component
 @ConfigurationProperties(prefix = "document")
 public class DocumentConfiguration {
+    private String bulkPrintCitizenUiTemplate;
     private String bulkPrintTemplate;
     private String bulkPrintFileName;
     @Getter(AccessLevel.NONE)
@@ -101,11 +102,20 @@ public class DocumentConfiguration {
     private String manageHearingFormCTemplate;
     @Getter(AccessLevel.NONE)
     private String manageHearingHighCourtFormCTemplate;
+    @Getter(AccessLevel.NONE)
+    private String manageHearingFormCCitizenTemplate;
+    @Getter(AccessLevel.NONE)
+    private String manageHearingHighCourtFormCCitizenTemplate;
     private String manageHearingExpressFormCTemplate;
+    private String manageHearingExpressFormCCitizenTemplate;
     @Getter(AccessLevel.NONE)
     private String manageHearingFastTrackFormCTemplate;
     @Getter(AccessLevel.NONE)
     private String manageHearingFastTrackHighCourtFormCTemplate;
+    @Getter(AccessLevel.NONE)
+    private String manageHearingFastTrackFormCCitizenTemplate;
+    @Getter(AccessLevel.NONE)
+    private String manageHearingFastTrackHighCourtFormCCitizenTemplate;
     @Getter(AccessLevel.NONE)
     private String generalApplicationOrderTemplate;
     private String generalApplicationOrderHighCourtTemplate;
@@ -173,6 +183,18 @@ public class DocumentConfiguration {
 
     public String getFormCFastTrackTemplate(FinremCaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? manageHearingFastTrackHighCourtFormCTemplate : manageHearingFastTrackFormCTemplate;
+    }
+
+    public String getFormCStandardCitizenTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails)
+            ? manageHearingHighCourtFormCCitizenTemplate
+            : manageHearingFormCCitizenTemplate;
+    }
+
+    public String getFormCFastTrackCitizenTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails)
+            ? manageHearingFastTrackHighCourtFormCCitizenTemplate
+            : manageHearingFastTrackFormCCitizenTemplate;
     }
 
     public String getFormGTemplate(FinremCaseDetails caseDetails) {

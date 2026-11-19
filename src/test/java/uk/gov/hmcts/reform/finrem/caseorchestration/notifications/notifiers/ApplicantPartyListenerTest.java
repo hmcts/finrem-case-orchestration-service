@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CoverSheetPersistenceService;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
@@ -50,6 +53,8 @@ class ApplicantPartyListenerTest {
     private InternationalPostalService internationalPostalService;
     @Mock
     private CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
+    @Mock
+    private CoverSheetPersistenceService coverSheetPersistenceService;
 
     private ApplicantPartyListener applicantPartyListener;
 
@@ -90,7 +95,8 @@ class ApplicantPartyListenerTest {
             .build();
 
         applicantPartyListener = new ApplicantPartyListener(
-            bulkPrintService, emailService, notificationService, internationalPostalService, citizenPinInPostPersistenceService
+            bulkPrintService, emailService, notificationService, internationalPostalService,
+            citizenPinInPostPersistenceService, coverSheetPersistenceService
         );
         lenient().when(caseDetails.isApplicantSolicitorDigital()).thenReturn(false);
         clearInvocations(caseDetails);
@@ -149,6 +155,7 @@ class ApplicantPartyListenerTest {
         CaseDocument result = applicantPartyListener.getPartyCoversheet(event);
         assertThat(result).isEqualTo(coverSheet);
         verify(bulkPrintService).getApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        verifyNoInteractions(coverSheetPersistenceService);
     }
 
     /**
@@ -267,6 +274,8 @@ class ApplicantPartyListenerTest {
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
             caseDetails, APPLICANT, List.of(bulkPrintCoverSheet, bulkPrintDocument1), false, AUTH_TOKEN
         );
+        verify(coverSheetPersistenceService).saveCoverSheet(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT, coverSheet);
     }
 
     /**
@@ -290,5 +299,37 @@ class ApplicantPartyListenerTest {
         assertThat(exception.getMessage()).isEqualTo("No documents to post provided for paper notification, case ID: " + CASE_ID);
 
         verifyNoInteractions(bulkPrintService);
+    }
+
+    @Test
+    void shouldRecordSentLetterWhenCoversheetSaveFails() {
+        CaseDocument coversheet = CaseDocument.builder()
+            .documentFilename(COVER_SHEET_FILE)
+            .build();
+        List<BulkPrintDocument> printDocuments = List.of(
+            BulkPrintDocument.builder().fileName(COVER_SHEET_FILE).build(),
+            BulkPrintDocument.builder().fileName(TEST_DOC_NAME).build()
+        );
+        UUID letterId = UUID.randomUUID();
+
+        when(bulkPrintService.getApplicantCoverSheet(caseDetails, AUTH_TOKEN))
+            .thenReturn(coversheet);
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(
+            List.of(coversheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()
+        )).thenReturn(printDocuments);
+        when(bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+            caseDetails, APPLICANT, printDocuments, false, AUTH_TOKEN
+        )).thenReturn(letterId);
+        doThrow(new IllegalStateException("CCD update failed"))
+            .when(coverSheetPersistenceService)
+            .saveCoverSheet(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT, coversheet);
+
+        applicantPartyListener.handleNotification(event);
+
+        verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
+            caseDetails, APPLICANT, printDocuments, false, AUTH_TOKEN
+        );
+        assertThat(event.getAudits()).singleElement()
+            .satisfies(audit -> assertThat(audit.getLetterId()).isEqualTo(letterId.toString()));
     }
 }

@@ -25,6 +25,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.isCitizenFormCDocumentType;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_NOTICES;
 
 @Slf4j
@@ -233,6 +234,7 @@ public class HearingTabDataMapper {
         List<DocumentCollectionItem> hearingDocuments = hearingDocumentsCollection != null
             ? hearingDocumentsCollection.stream()
             .filter(doc -> hearingId.equals(doc.getValue().getHearingId()))
+            .filter(doc -> !isCitizenFormCDocumentType(doc.getValue().getHearingCaseDocumentType()))
             .map(doc -> DocumentCollectionItem.builder()
                 .value(CaseDocument
                     .builder()
