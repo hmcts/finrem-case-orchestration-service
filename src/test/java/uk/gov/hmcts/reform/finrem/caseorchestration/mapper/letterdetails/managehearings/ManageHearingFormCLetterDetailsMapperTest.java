@@ -45,9 +45,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ACCESS_CODE;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingFormCLetterDetailsMapperTest {
+
+    private static final String CASE_ID_16_DIGITS = "1234567890123456";
+    private static final String TEST_CITIZEN_LOGIN_URL = "https://citizen-login.test";
 
     @Mock
     private CourtDetailsConfiguration courtDetailsConfiguration;
@@ -56,7 +60,11 @@ class ManageHearingFormCLetterDetailsMapperTest {
 
     @BeforeEach
     void setUp() {
-        manageHearingFormCLetterDetailsMapper = new ManageHearingFormCLetterDetailsMapper(courtDetailsConfiguration, new ObjectMapper());
+        manageHearingFormCLetterDetailsMapper = new ManageHearingFormCLetterDetailsMapper(
+            courtDetailsConfiguration,
+            TEST_CITIZEN_LOGIN_URL,
+            new ObjectMapper()
+        );
     }
 
     @ParameterizedTest
@@ -64,61 +72,13 @@ class ManageHearingFormCLetterDetailsMapperTest {
     void shouldBuildDocumentTemplateDetails(HearingMode hearingMode, String additionalHearingInfo,
                                             String expectedAttendance, String expectedAdditionalInfo,
                                             YesOrNo civilPartnership, String schedule1OrMatrimonial) {
-        // Arrange
-        FinremCaseData caseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONTESTED)
-            .civilPartnership(civilPartnership)
-            .contactDetailsWrapper(ContactDetailsWrapper
-                .builder()
-                .applicantFmName("John")
-                .applicantLname("Doe")
-                .respondentFmName("Jane")
-                .respondentLname("Smith")
-                .solicitorReference(TestConstants.TEST_SOLICITOR_REFERENCE)
-                .respondentSolicitorReference(TestConstants.TEST_RESP_SOLICITOR_REFERENCE)
-                .build())
-            .scheduleOneWrapper(ScheduleOneWrapper
-                .builder()
-                .typeOfApplication(Schedule1OrMatrimonialAndCpList.forValue(schedule1OrMatrimonial))
-                .build())
-            .manageHearingsWrapper(
-                ManageHearingsWrapper.builder()
-                    .workingHearing(WorkingHearing.builder()
-                        .hearingTypeDynamicList(DynamicList.builder()
-                            .value(DynamicListElement.builder()
-                                .code(HearingType.FDR.name())
-                                .label(HearingType.FDR.getId())
-                                .build())
-                            .build())
-                        .hearingDate(LocalDate.of(2025, 8, 1))
-                        .hearingTime("10:00 AM")
-                        .hearingTimeEstimate("2 hours")
-                        .hearingMode(hearingMode)
-                        .additionalHearingInformation(additionalHearingInfo)
-                        .hearingCourtSelection(
-                            Court.builder()
-                                .region(Region.LONDON)
-                                .londonList(RegionLondonFrc.LONDON)
-                                .courtListWrapper(DefaultCourtListWrapper.builder()
-                                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
-                                    .build())
-                                .build())
-                        .partiesOnCaseMultiSelectList(DynamicMultiSelectList.builder()
-                            .value(List.of(
-                                DynamicMultiSelectListElement.builder()
-                                    .code("[APPSOLICITOR]")
-                                    .label("Applicant Solicitor - Hamzah")
-                                    .build()
-                            ))
-                            .build())
-                        .build())
-                    .build())
-            .build();
-
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(Long.valueOf(CASE_ID))
-            .data(caseData)
-            .build();
+        FinremCaseDetails caseDetails = buildMinimalCaseDetails(
+            CASE_ID,
+            hearingMode,
+            additionalHearingInfo,
+            civilPartnership,
+            Schedule1OrMatrimonialAndCpList.forValue(schedule1OrMatrimonial)
+        );
 
         CourtDetailsTemplateFields courtTemplateFields = CourtDetailsTemplateFields.builder()
             .courtName("London Court")
@@ -137,11 +97,16 @@ class ManageHearingFormCLetterDetailsMapperTest {
         when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of("FR_s_CFCList_1", courtDetails));
 
         // Act
-        DocumentTemplateDetails result = manageHearingFormCLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails);
+        DocumentTemplateDetails result = manageHearingFormCLetterDetailsMapper.buildDocumentTemplateDetails(
+            caseDetails, TEST_ACCESS_CODE
+        );
 
         // Assert
         FormCLetterDetails formCLetterDetails = (FormCLetterDetails) result;
         assertThat(formCLetterDetails.getCaseNumber()).isEqualTo(CASE_ID);
+        assertThat(formCLetterDetails.getHyphenatedCaseNumber()).isEqualTo(CASE_ID);
+        assertThat(formCLetterDetails.getAccessCode()).isEqualTo(TEST_ACCESS_CODE);
+        assertThat(formCLetterDetails.getCitizenLoginUrl()).isEqualTo(TEST_CITIZEN_LOGIN_URL);
         assertThat(formCLetterDetails.getApplicantFmName()).isEqualTo("John");
         assertThat(formCLetterDetails.getApplicantLName()).isEqualTo("Doe");
         assertThat(formCLetterDetails.getRespondentFmName()).isEqualTo("Jane");
@@ -206,5 +171,110 @@ class ManageHearingFormCLetterDetailsMapperTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> manageHearingFormCLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
         assertThat(exception.getMessage()).isEqualTo("Working hearing is null");
+    }
+
+    @Test
+    void shouldBuildHyphenatedCaseNumberFor16DigitCaseId() {
+        FinremCaseDetails caseDetails = buildMinimalCaseDetails(CASE_ID_16_DIGITS);
+        mockCourtDetailsLookup();
+
+        FormCLetterDetails result = (FormCLetterDetails) manageHearingFormCLetterDetailsMapper
+            .buildDocumentTemplateDetails(caseDetails, TEST_ACCESS_CODE);
+
+        assertThat(result.getCaseNumber()).isEqualTo(CASE_ID_16_DIGITS);
+        assertThat(result.getHyphenatedCaseNumber()).isEqualTo("1234-5678-9012-3456");
+    }
+
+    @Test
+    void shouldSetNullAccessCodeWhenUsingDefaultOverload() {
+        FinremCaseDetails caseDetails = buildMinimalCaseDetails(CASE_ID);
+        mockCourtDetailsLookup();
+
+        FormCLetterDetails result = (FormCLetterDetails) manageHearingFormCLetterDetailsMapper
+            .buildDocumentTemplateDetails(caseDetails);
+
+        assertThat(result.getAccessCode()).isNull();
+    }
+
+    private FinremCaseDetails buildMinimalCaseDetails(String caseId) {
+        return buildMinimalCaseDetails(
+            caseId,
+            HearingMode.IN_PERSON,
+            "Additional info",
+            YesOrNo.NO,
+            Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS
+        );
+    }
+
+    private FinremCaseDetails buildMinimalCaseDetails(String caseId,
+                                                      HearingMode hearingMode,
+                                                      String additionalHearingInfo,
+                                                      YesOrNo civilPartnership,
+                                                      Schedule1OrMatrimonialAndCpList schedule1OrMatrimonial) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .civilPartnership(civilPartnership)
+            .contactDetailsWrapper(ContactDetailsWrapper
+                .builder()
+                .applicantFmName("John")
+                .applicantLname("Doe")
+                .respondentFmName("Jane")
+                .respondentLname("Smith")
+                .solicitorReference(TestConstants.TEST_SOLICITOR_REFERENCE)
+                .respondentSolicitorReference(TestConstants.TEST_RESP_SOLICITOR_REFERENCE)
+                .build())
+            .scheduleOneWrapper(ScheduleOneWrapper
+                .builder()
+                .typeOfApplication(schedule1OrMatrimonial)
+                .build())
+            .manageHearingsWrapper(
+                ManageHearingsWrapper.builder()
+                    .workingHearing(WorkingHearing.builder()
+                        .hearingTypeDynamicList(DynamicList.builder()
+                            .value(DynamicListElement.builder()
+                                .code(HearingType.FDR.name())
+                                .label(HearingType.FDR.getId())
+                                .build())
+                            .build())
+                        .hearingDate(LocalDate.of(2025, 8, 1))
+                        .hearingTime("10:00 AM")
+                        .hearingTimeEstimate("2 hours")
+                        .hearingMode(hearingMode)
+                        .additionalHearingInformation(additionalHearingInfo)
+                        .hearingCourtSelection(
+                            Court.builder()
+                                .region(Region.LONDON)
+                                .londonList(RegionLondonFrc.LONDON)
+                                .courtListWrapper(DefaultCourtListWrapper.builder()
+                                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                                    .build())
+                                .build())
+                        .partiesOnCaseMultiSelectList(DynamicMultiSelectList.builder()
+                            .value(List.of(
+                                DynamicMultiSelectListElement.builder()
+                                    .code("[APPSOLICITOR]")
+                                    .label("Applicant Solicitor - Hamzah")
+                                    .build()
+                            ))
+                            .build())
+                        .build())
+                    .build())
+            .build();
+
+        return FinremCaseDetails.builder()
+            .id(Long.valueOf(caseId))
+            .data(caseData)
+            .build();
+    }
+
+    private void mockCourtDetailsLookup() {
+        CourtDetails courtDetails = CourtDetails.builder()
+            .courtName("London Court")
+            .phoneNumber("010000 00000")
+            .email("email@test.com")
+            .courtAddress("123 Court Street, London")
+            .build();
+
+        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of("FR_s_CFCList_1", courtDetails));
     }
 }

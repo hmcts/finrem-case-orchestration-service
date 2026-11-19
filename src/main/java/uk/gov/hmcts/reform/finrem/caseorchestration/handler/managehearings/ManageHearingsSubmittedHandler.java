@@ -19,11 +19,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.manag
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.String.format;
-import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Slf4j
 @Service
@@ -56,57 +57,63 @@ public class ManageHearingsSubmittedHandler extends FinremSubmittedCallbackHandl
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
-        ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
+        List<String> errors = sendHearingCorrespondence(callbackRequest, userAuthorisation, caseDetails);
 
-        List<SendCorrespondenceEvent> correspondenceEvents = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
-            actionSelection,
-            callbackRequest,
-            userAuthorisation
-        );
-
-        String error = null;
-        for (SendCorrespondenceEvent correspondenceEvent : correspondenceEvents) {
-            correspondenceEvent.setEventId(callbackRequest.getEventType().getCcdType());
-
-            correspondenceEvent.setNotificationTrackerId(
-                finremCaseData.getNotificationAuditWrapper().getNotificationEventId()
-            );
-
-            error = publishEvent(getEventDescription(actionSelection), correspondenceEvent);
-            if (isNull(error)) {
-                markPendingNotificationsAsSent(caseDetails, correspondenceEvent);
-            }
-        }
-
-        if (isNull(error)) {
+        if (errors.isEmpty()) {
             return submittedResponse();
         }
         return submittedResponse(
             toConfirmationHeader("Manage Hearings completed with error"),
-            toConfirmationBody(error)
+            toConfirmationBody(errors.toArray(new String[0]))
         );
     }
 
-    private String getEventDescription(ManageHearingsAction actionSelection) {
-        return switch (actionSelection) {
-            case ADD_HEARING -> "Send hearing correspondence";
-            case ADJOURN_OR_VACATE_HEARING -> "Send adjourned or vacate hearing correspondence";
-        };
+    private List<String> sendHearingCorrespondence(FinremCallbackRequest callbackRequest,
+                                                   String userAuthorisation,
+                                                   FinremCaseDetails caseDetails) {
+        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
+        ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
+
+        List<String> errors = new ArrayList<>();
+        List<SendCorrespondenceEvent> correspondenceEvents = manageHearingsCorresponder
+            .buildCorrespondenceEventsIfNeeded(actionSelection, callbackRequest, userAuthorisation);
+
+        for (SendCorrespondenceEvent event : correspondenceEvents) {
+            log.info("Sending hearing correspondence for {} action. Party: {}. Case reference: {}",
+                actionSelection.getDescription(), event.describeNotificationParties(), finremCaseData.getCcdCaseId());
+            event.setEventId(callbackRequest.getEventType().getCcdType());
+            event.setNotificationTrackerId(finremCaseData.getNotificationAuditWrapper().getNotificationEventId());
+
+            String error = publishEvent(event);
+            if (isNotBlank(error)) {
+                errors.add(error);
+            }
+        }
+
+        if (!correspondenceEvents.isEmpty()) {
+            correspondenceEventAuditOrchestrationService.reconcileAndPersistAudits(
+                caseDetails,
+                "markPendingNotificationsAsSent",
+                correspondenceEvents.toArray(new SendCorrespondenceEvent[0])
+            );
+        }
+
+        return errors;
     }
 
-    private String publishEvent(String eventDescription, SendCorrespondenceEvent event) {
+    private String publishEvent(SendCorrespondenceEvent event) {
+        String notifyingPartyInString = event.describeNotificationParties();
+
         AtomicReference<String> error = new AtomicReference<>();
-        correspondenceEventAuditOrchestrationService.publishEvent(event, eventDescription, () ->
-            error.set(format("Notification to %s has failed. Please send notification to %s manually.",
-                event.describeNotificationParties(), event.describeNotificationParties()))
+        correspondenceEventAuditOrchestrationService.publishEvent(
+            event,
+            "sending hearing correspondence %s (%s)".formatted(
+                event.getNotificationTrackerId(),
+                event.describeNotificationParties()
+            ),
+            () -> error.set(format("Notification to %s has failed. Please send notification to %s manually.",
+                    notifyingPartyInString, notifyingPartyInString))
         );
         return error.get();
-    }
-
-    private void markPendingNotificationsAsSent(FinremCaseDetails caseDetails,
-                                                SendCorrespondenceEvent correspondenceEvent) {
-        correspondenceEventAuditOrchestrationService.reconcileAndPersistAudits(caseDetails,
-            "markPendingNotificationsAsSent", correspondenceEvent);
     }
 }

@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
@@ -41,18 +41,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifie
 public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final ManageHearingActionService manageHearingActionService;
-    private final NotificationAuditService notificationAuditService;
+    private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
     private final ManageHearingsCorresponder manageHearingsCorresponder;
     private final PartyService partyService;
 
     public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               ManageHearingActionService manageHearingActionService,
-                                              NotificationAuditService notificationAuditService,
+                                              CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService,
                                               ManageHearingsCorresponder manageHearingsCorresponder,
                                               PartyService partyService) {
         super(finremCaseDetailsMapper);
         this.manageHearingActionService = manageHearingActionService;
-        this.notificationAuditService = notificationAuditService;
+        this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
         this.manageHearingsCorresponder = manageHearingsCorresponder;
         this.partyService = partyService;
     }
@@ -80,6 +80,7 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
+
         ManageHearingsWrapper hearingsWrapper = finremCaseData.getManageHearingsWrapper();
         ManageHearingsAction actionSelection = hearingsWrapper.getManageHearingsActionSelection();
 
@@ -95,7 +96,8 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
 
         manageHearingActionService.updateTabData(finremCaseData);
 
-        List<SendCorrespondenceEvent> sendCorrespondenceEvents = manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+
+        List<SendCorrespondenceEvent> sendCorrespondenceEvents = manageHearingsCorresponder.buildCorrespondenceEventsIfNeeded(
             actionSelection, callbackRequest, userAuthorisation);
         createNotificationAuditRows(callbackRequest, sendCorrespondenceEvents
             .toArray(new SendCorrespondenceEvent[0]));
@@ -126,7 +128,7 @@ public class ManageHearingsAboutToSubmitHandler extends FinremAboutToSubmitCallb
     private void createNotificationAuditRows(FinremCallbackRequest callbackRequest, SendCorrespondenceEvent... events) {
         Arrays.stream(events)
             .filter(Objects::nonNull)
-            .forEach(event -> notificationAuditService.createAuditsForCorrespondence(
+            .forEach(event -> correspondenceEventAuditOrchestrationService.createPendingAudits(
                 event,
                 callbackRequest.getEventType()
             ));

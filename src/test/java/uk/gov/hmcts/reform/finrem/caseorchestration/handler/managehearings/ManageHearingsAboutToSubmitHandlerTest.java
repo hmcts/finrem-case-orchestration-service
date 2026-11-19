@@ -43,7 +43,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationAuditService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
@@ -75,6 +75,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verify
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.MANAGE_HEARINGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.ADD_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.ADJOURN_OR_VACATE_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
 
 @ExtendWith(MockitoExtension.class)
@@ -84,7 +85,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
     private ManageHearingActionService manageHearingActionService;
 
     @Mock
-    private NotificationAuditService notificationAuditService;
+    private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     @Mock
     private ManageHearingsCorresponder manageHearingsCorresponder;
@@ -143,7 +144,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         FinremCallbackRequest request = buildRequest(caseData);
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
-        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+        when(manageHearingsCorresponder.buildCorrespondenceEventsIfNeeded(
             ADD_HEARING,
             request,
             AUTH_TOKEN
@@ -238,14 +239,14 @@ class ManageHearingsAboutToSubmitHandlerTest {
     void givenValidCaseData_whenHandleVacate_thenPerformVacateHearingCalled() {
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .manageHearingsActionSelection(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING)
+                .manageHearingsActionSelection(ADJOURN_OR_VACATE_HEARING)
                 .build())
             .build();
 
         FinremCallbackRequest request = buildRequest(caseData);
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
-        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
-            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+        when(manageHearingsCorresponder.buildCorrespondenceEventsIfNeeded(
+            ADJOURN_OR_VACATE_HEARING,
             request,
             AUTH_TOKEN
         )).thenReturn(List.of(event));
@@ -254,27 +255,29 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         verify(manageHearingActionService).performAdjournOrVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(request.getCaseDetails().getData());
-        verify(manageHearingsCorresponder).buildCorrespondenceEventIfNeeded(
-            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+        verify(manageHearingsCorresponder).buildCorrespondenceEventsIfNeeded(
+            ADJOURN_OR_VACATE_HEARING,
             request,
             AUTH_TOKEN
         );
-        verify(notificationAuditService).createAuditsForCorrespondence(event, MANAGE_HEARINGS);
+        verify(correspondenceEventAuditOrchestrationService)
+            .createPendingAudits(event, MANAGE_HEARINGS);
     }
 
     @Test
     void givenValidCaseData_whenHandleVacateWithRelist_thenPerformPerformAddAndVacateHearingCalled() {
+
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .manageHearingsActionSelection(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING)
+                .manageHearingsActionSelection(ADJOURN_OR_VACATE_HEARING)
                 .isRelistSelected(YesOrNo.YES)
                 .build())
             .build();
 
         FinremCallbackRequest request = buildRequest(caseData);
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
-        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
-            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+        when(manageHearingsCorresponder.buildCorrespondenceEventsIfNeeded(
+            ADJOURN_OR_VACATE_HEARING,
             request,
             AUTH_TOKEN
         )).thenReturn(List.of(event));
@@ -284,12 +287,14 @@ class ManageHearingsAboutToSubmitHandlerTest {
         verify(manageHearingActionService).performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).performAdjournOrVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(request.getCaseDetails().getData());
-        verify(manageHearingsCorresponder).buildCorrespondenceEventIfNeeded(
-            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+        verify(manageHearingsCorresponder).buildCorrespondenceEventsIfNeeded(
+            ADJOURN_OR_VACATE_HEARING,
             request,
             AUTH_TOKEN
         );
-        verify(notificationAuditService).createAuditsForCorrespondence(event, MANAGE_HEARINGS);
+        verify(correspondenceEventAuditOrchestrationService)
+            .createPendingAudits(event, MANAGE_HEARINGS);
+
     }
 
     @Test
@@ -302,7 +307,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         FinremCallbackRequest request = buildRequest(caseData);
 
-        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(
+        when(manageHearingsCorresponder.buildCorrespondenceEventsIfNeeded(
             ADD_HEARING,
             request,
             AUTH_TOKEN
@@ -312,12 +317,13 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         verify(manageHearingActionService).performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(request.getCaseDetails().getData());
-        verify(manageHearingsCorresponder).buildCorrespondenceEventIfNeeded(
+        verify(manageHearingsCorresponder).buildCorrespondenceEventsIfNeeded(
             ADD_HEARING,
             request,
             AUTH_TOKEN
         );
-        verify(notificationAuditService, never()).createAuditsForCorrespondence(any(), any());
+        verify(correspondenceEventAuditOrchestrationService, never())
+            .createPendingAudits(any(SendCorrespondenceEvent.class), any(EventType.class));
     }
 
     @Test
@@ -327,8 +333,8 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         List<String> expectedErrors = List.of("some error messages");
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-            .validateRequiredIntervenersPostalAddresses(eq(caseData), eq(MANAGE_HEARINGS), anyBoolean(),
-                anyBoolean(), anyBoolean(), anyBoolean()))
+                .validateRequiredIntervenersPostalAddresses(eq(caseData), eq(MANAGE_HEARINGS), anyBoolean(),
+                    anyBoolean(), anyBoolean(), anyBoolean()))
             .thenReturn(expectedErrors);
 
         var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -352,8 +358,8 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         List<String> expectedErrors = List.of("expected error message");
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-            .validateRequiredIntervenersPostalAddresses(
-                caseData, MANAGE_HEARINGS, active[0], active[1], active[2], active[3]))
+                .validateRequiredIntervenersPostalAddresses(
+                    caseData, MANAGE_HEARINGS, active[0], active[1], active[2], active[3]))
             .thenReturn(expectedErrors);
 
         switch (intervenerNumber) {
@@ -366,7 +372,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         List<SendCorrespondenceEvent> events = List.of(event);
-        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(ADD_HEARING,
+        when(manageHearingsCorresponder.buildCorrespondenceEventsIfNeeded(ADD_HEARING,
             callbackRequest, AUTH_TOKEN)).thenReturn(events);
 
         MockedStatic.Verification addressRequiredCall = switch (intervenerNumber) {
@@ -404,7 +410,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         List<String> expectedErrors = List.of("some error messages");
         mockedContactDetailsValidator.when(() -> ContactDetailsValidator
-            .validateRequiredPostalAddresses(eq(caseData), eq(MANAGE_HEARINGS), anyBoolean(), anyBoolean()))
+                .validateRequiredPostalAddresses(eq(caseData), eq(MANAGE_HEARINGS), anyBoolean(), anyBoolean()))
             .thenReturn(expectedErrors);
 
         var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -429,7 +435,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         List<SendCorrespondenceEvent> events = List.of(event);
-        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
+        when(manageHearingsCorresponder.buildCorrespondenceEventsIfNeeded(any(ManageHearingsAction.class),
             eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
 
         try (MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class)) {
@@ -451,16 +457,16 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
             // record the instance call (doAnswer works for void methods)
             doAnswer(inv -> {
-                calls.add("createAuditsForCorrespondence");
+                calls.add("createPendingAudits");
                 return null;
-            }).when(notificationAuditService)
-                .createAuditsForCorrespondence(any(SendCorrespondenceEvent.class), any(EventType.class));
+            }).when(correspondenceEventAuditOrchestrationService)
+                .createPendingAudits(any(SendCorrespondenceEvent.class), any(EventType.class));
 
             var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
             assertThat(response.getErrors()).contains("ERROR");
             // to guarantee the simulation should go first before checking applicant or respondent address required
             assertThat(calls).containsExactly(
-                "createAuditsForCorrespondence",
+                "createPendingAudits",
                 "isApplicantAddressRequired",
                 "isRespondentAddressRequired");
         }
@@ -482,7 +488,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         List<SendCorrespondenceEvent> events = List.of(event);
-        when(manageHearingsCorresponder.buildCorrespondenceEventIfNeeded(any(ManageHearingsAction.class),
+        when(manageHearingsCorresponder.buildCorrespondenceEventsIfNeeded(any(ManageHearingsAction.class),
             eq(callbackRequest), eq(AUTH_TOKEN))).thenReturn(events);
 
         try (MockedStatic<SendCorrespondenceEvent> mockedSendCorrespondenceEvent = Mockito.mockStatic(SendCorrespondenceEvent.class)) {
@@ -503,16 +509,16 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
             // record the instance call (doAnswer works for void methods)
             doAnswer(inv -> {
-                calls.add("createAuditsForCorrespondence");
+                calls.add("createPendingAudits");
                 return null;
-            }).when(notificationAuditService)
-                .createAuditsForCorrespondence(any(SendCorrespondenceEvent.class), any(EventType.class));
+            }).when(correspondenceEventAuditOrchestrationService)
+                .createPendingAudits(any(SendCorrespondenceEvent.class), any(EventType.class));
 
             var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
             assertThat(response.getErrors()).isEmpty();
             // to guarantee the simulation should go first before checking applicant or respondent address required
             assertThat(calls).containsExactly(
-                "createAuditsForCorrespondence",
+                "createPendingAudits",
                 "isApplicantAddressRequired",
                 "isRespondentAddressRequired");
         }
