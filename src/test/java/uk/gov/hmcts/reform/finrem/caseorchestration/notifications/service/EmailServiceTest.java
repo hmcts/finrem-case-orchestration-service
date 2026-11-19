@@ -108,6 +108,9 @@ class EmailServiceTest {
     @Value("${finrem.manageCase.baseurl}")
     private String manageCaseBaseUrl;
 
+    @Value("${finrem.citizen.login-url}")
+    private String citizenLoginUrl;
+
     @Value("#{${uk.gov.notify.email.templates}}")
     private Map<String, String> emailTemplates;
 
@@ -483,6 +486,7 @@ class EmailServiceTest {
 
         assertEquals("3:45pm", returnedTemplateVars.get("timeOfSubmission"));
         assertEquals(true, returnedTemplateVars.get("hasCourtName"));
+        assertEquals(citizenLoginUrl, returnedTemplateVars.get("citizenLoginUrl"));
     }
 
     @Test
@@ -494,6 +498,7 @@ class EmailServiceTest {
 
         assertEquals("3:45pm", returnedTemplateVars.get("timeOfSubmission"));
         assertEquals(false, returnedTemplateVars.get("hasCourtName"));
+        assertEquals(citizenLoginUrl, returnedTemplateVars.get("citizenLoginUrl"));
     }
 
     @Test
@@ -1004,7 +1009,8 @@ class EmailServiceTest {
             emailService.buildTemplateVars(notificationRequest, FR_CUI_SIGN_IN_CONFIRMATION.name());
 
         assertThat(returnedTemplateVars)
-            .containsEntry("hasDivorceAccount", true);
+            .containsEntry("hasDivorceAccount", true)
+            .containsEntry("citizenLoginUrl", citizenLoginUrl);
     }
 
     @Test
