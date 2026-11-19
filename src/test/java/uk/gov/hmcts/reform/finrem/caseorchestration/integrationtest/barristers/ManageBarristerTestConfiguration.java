@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestObjectMapperFactory.createObjectMapper;
+
 @TestConfiguration
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers",
     "uk.gov.hmcts.reform.finrem.caseorchestration.handler.managebarrister",
@@ -15,5 +17,10 @@ public class ManageBarristerTestConfiguration {
     @Bean
     public CaseDataService caseDataService() {
         return new CaseDataService(new ObjectMapper());
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return createObjectMapper();
     }
 }

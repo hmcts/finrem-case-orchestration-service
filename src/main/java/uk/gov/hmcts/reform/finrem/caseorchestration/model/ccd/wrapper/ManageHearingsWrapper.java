@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.isCitizenFormCDocumentType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -48,6 +49,8 @@ public class ManageHearingsWrapper {
     private YesOrNo isAddHearingChosen;
     private YesOrNo isFinalOrder;
     private YesOrNo shouldSendVacateOrAdjNotice;
+    private CaseDocument formCApplicantCitizen;
+    private CaseDocument formCRespondentCitizen;
 
     // Hearing data Repositories
     private List<ManageHearingsCollectionItem> hearings;
@@ -146,9 +149,11 @@ public class ManageHearingsWrapper {
         if (hearingId == null || hearingDocumentsCollection == null) {
             return Collections.emptyList();
         }
+
         return hearingDocumentsCollection.stream()
             .map(ManageHearingDocumentsCollectionItem::getValue)
             .filter(doc -> hearingId.equals(doc.getHearingId()))
+            .filter(doc -> !isCitizenFormCDocumentType(doc.getHearingCaseDocumentType()))
             .map(ManageHearingDocument::getHearingDocument)
             .toList();
     }
@@ -168,9 +173,11 @@ public class ManageHearingsWrapper {
         if (hearingId == null || hearingDocumentsCollection == null) {
             return Collections.emptyList();
         }
+
         return hearingDocumentsCollection.stream()
             .map(ManageHearingDocumentsCollectionItem::getValue)
             .filter(doc -> hearingId.equals(doc.getHearingId()))
+            .filter(doc -> !isCitizenFormCDocumentType(doc.getHearingCaseDocumentType()))
             .map(ManageHearingDocument::getHearingDocument)
             .toList();
     }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostPersistenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
@@ -143,6 +144,8 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     ExpressCaseService expressCaseService;
     @MockitoBean
     private CitizenPinInPostPersistenceService citizenPinInPostPersistenceService;
+    @MockitoBean
+    private CitizenPinInPostService citizenPinInPostService;
     private final ObjectMapper objectMapper = createObjectMapper();
 
     private ArgumentCaptor<Map> placeholdersMapArgumentCaptor = ArgumentCaptor.forClass(Map.class);

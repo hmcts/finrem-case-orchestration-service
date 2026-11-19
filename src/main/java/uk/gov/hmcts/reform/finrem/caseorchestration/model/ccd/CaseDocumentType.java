@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public enum CaseDocumentType {
@@ -57,12 +59,40 @@ public enum CaseDocumentType {
     FORM_C("Form C"),
     FORM_C_FAST_TRACK("Form C - Fast Track"),
     FORM_C_EXPRESS("Form C - Express"),
+    FORM_C_APPLICANT_CITIZEN("Form C - Applicant Citizen"),
+    FORM_C_FAST_TRACK_APPLICANT_CITIZEN("Form C - Fast Track - Applicant Citizen"),
+    FORM_C_EXPRESS_APPLICANT_CITIZEN("Form C - Express - Applicant Citizen"),
+    FORM_C_RESPONDENT_CITIZEN("Form C - Respondent Citizen"),
+    FORM_C_FAST_TRACK_RESPONDENT_CITIZEN("Form C - Fast Track - Respondent Citizen"),
+    FORM_C_EXPRESS_RESPONDENT_CITIZEN("Form C - Express - Respondent Citizen"),
     FORM_G("Form G"),
     OUT_OF_COURT_RESOLUTION("Out of court resolution"),
     PFD_NCDR_COMPLIANCE_LETTER("PFD NCDR compliance letter"),
     PFD_NCDR_COVER_LETTER("PFD NCDR cover letter");
 
     private final String id;
+
+    public static final List<CaseDocumentType> DEFAULT_FORM_C_TYPES = List.of(
+        FORM_C,
+        FORM_C_FAST_TRACK,
+        FORM_C_EXPRESS
+    );
+
+    public static final List<CaseDocumentType> APPLICANT_CITIZEN_FORM_C_TYPES = List.of(
+        FORM_C_APPLICANT_CITIZEN,
+        FORM_C_FAST_TRACK_APPLICANT_CITIZEN,
+        FORM_C_EXPRESS_APPLICANT_CITIZEN
+    );
+
+    public static final List<CaseDocumentType> RESPONDENT_CITIZEN_FORM_C_TYPES = List.of(
+        FORM_C_RESPONDENT_CITIZEN,
+        FORM_C_FAST_TRACK_RESPONDENT_CITIZEN,
+        FORM_C_EXPRESS_RESPONDENT_CITIZEN
+    );
+
+    public static final List<CaseDocumentType> CITIZEN_FORM_C_TYPES =
+        Stream.concat(APPLICANT_CITIZEN_FORM_C_TYPES.stream(), RESPONDENT_CITIZEN_FORM_C_TYPES.stream())
+            .toList();
 
     @JsonValue
     public String getId() {
@@ -73,5 +103,29 @@ public enum CaseDocumentType {
         return Arrays.stream(CaseDocumentType.values())
             .filter(option -> option.id.equals(ccdType))
             .findFirst().orElseThrow(IllegalArgumentException::new);
+    }
+
+    public static boolean isCitizenFormCDocumentType(CaseDocumentType caseDocumentType) {
+        return caseDocumentType != null && CITIZEN_FORM_C_TYPES.contains(caseDocumentType);
+    }
+
+    public static boolean isDefaultFormCDocumentType(CaseDocumentType caseDocumentType) {
+        return caseDocumentType != null && DEFAULT_FORM_C_TYPES.contains(caseDocumentType);
+    }
+
+    public static CaseDocumentType getApplicantCitizenFormCType(CaseDocumentType standardFormCType) {
+        return switch (standardFormCType) {
+            case FORM_C_FAST_TRACK -> FORM_C_FAST_TRACK_APPLICANT_CITIZEN;
+            case FORM_C_EXPRESS -> FORM_C_EXPRESS_APPLICANT_CITIZEN;
+            default -> FORM_C_APPLICANT_CITIZEN;
+        };
+    }
+
+    public static CaseDocumentType getRespondentCitizenFormCType(CaseDocumentType standardFormCType) {
+        return switch (standardFormCType) {
+            case FORM_C_FAST_TRACK -> FORM_C_FAST_TRACK_RESPONDENT_CITIZEN;
+            case FORM_C_EXPRESS -> FORM_C_EXPRESS_RESPONDENT_CITIZEN;
+            default -> FORM_C_RESPONDENT_CITIZEN;
+        };
     }
 }
