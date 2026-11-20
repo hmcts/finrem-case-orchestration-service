@@ -13,6 +13,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class IntervenerWrapperTest {
 
@@ -42,6 +44,18 @@ class IntervenerWrapperTest {
             () -> assertThat(intervener.getIntervenerSolName()).isNull(),
             () -> assertThat(intervener.getIntervenerSolPhone()).isNull()
         );
+    }
+
+    @Test
+    void givenIntervenerNameNotBlank_isPresentShouldReturnTrue() {
+        assertTrue(IntervenerOne.builder().intervenerName("Jackson").build().isPresent());
+    }
+
+    @Test
+    void givenIntervenerNameBlank_isPresentShouldReturnFalse() {
+        assertFalse(IntervenerOne.builder().intervenerName(null).build().isPresent());
+        assertFalse(IntervenerOne.builder().intervenerName("").build().isPresent());
+        assertFalse(IntervenerOne.builder().intervenerName(" ").build().isPresent());
     }
 
     static class TestIntervenerWrapper extends IntervenerWrapper {

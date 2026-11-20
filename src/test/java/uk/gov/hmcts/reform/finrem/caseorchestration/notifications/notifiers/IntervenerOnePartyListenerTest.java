@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -14,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
@@ -26,14 +26,17 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 
 @ExtendWith(MockitoExtension.class)
-class IntervenerOnePartyListenerTest {
+class IntervenerOnePartyListenerTest extends BasePartyListenerTest {
     @Mock
     private BulkPrintService bulkPrintService;
     @Mock
@@ -56,7 +59,6 @@ class IntervenerOnePartyListenerTest {
 
     @BeforeEach
     void setUp() {
-
         testDocument = CaseDocument.builder()
             .documentFilename(TEST_DOC_NAME)
             .build();
@@ -71,14 +73,14 @@ class IntervenerOnePartyListenerTest {
                     .build())
                 .build())
             .build();
-        event = SendCorrespondenceEvent.builder()
+        event = spy(SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
             .emailNotificationRequest(NotificationRequest.builder().build())
             .notificationParties(List.of(NotificationParty.INTERVENER_ONE))
-            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .documentsToPost(List.of(CaseDocument.builder().documentFilename(TEST_DOC_NAME).build()))
             .authToken(AUTH_TOKEN)
-            .build();
+            .build());
 
         intervenerOnePartyListener = new IntervenerOnePartyListener(
             bulkPrintService, emailService, notificationService, internationalPostalService
@@ -153,7 +155,7 @@ class IntervenerOnePartyListenerTest {
         assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(INTERVENER_ONE_REF);
 
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(), caseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplate()));
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR));
     }
 
     /**
@@ -214,5 +216,17 @@ class IntervenerOnePartyListenerTest {
         assertThat(details.recipientSolName()).isEqualTo(expected);
         assertThat(details.recipientSolEmailAddress()).isEqualTo(expected);
         assertThat(details.recipientSolReference()).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void isNotificationPartySelected_shouldMatchIntervenerOneCorrespondenceEnabled(
+        boolean intervenerCorrespondenceEnabled) {
+        when(event.getCaseData()).thenReturn(finremCaseData);
+        IntervenerOne intervenerOne = mock(IntervenerOne.class);
+        when(intervenerOne.getIntervenerCorrespondenceEnabled()).thenReturn(intervenerCorrespondenceEnabled);
+        when(finremCaseData.getIntervenerOne()).thenReturn(intervenerOne);
+
+        assertThat(intervenerOnePartyListener.isNotificationPartySelected(event)).isEqualTo(intervenerCorrespondenceEnabled);
     }
 }

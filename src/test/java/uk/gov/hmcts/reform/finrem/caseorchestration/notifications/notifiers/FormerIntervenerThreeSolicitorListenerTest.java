@@ -153,4 +153,16 @@ class FormerIntervenerThreeSolicitorListenerTest extends BasePartyListenerTest {
         verifyNoInteractions(emailService);
         verifyNoLetterSent();
     }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void isNotificationPartySelected_shouldMatchIntervenerThreeCorrespondenceEnabled(
+        boolean intervenerCorrespondenceEnabled) {
+        when(event.getCaseData()).thenReturn(finremCaseData);
+        IntervenerThree intervenerThree = mock(IntervenerThree.class);
+        when(intervenerThree.getIntervenerCorrespondenceEnabled()).thenReturn(intervenerCorrespondenceEnabled);
+        when(finremCaseData.getIntervenerThree()).thenReturn(intervenerThree);
+
+        assertThat(underTest.isNotificationPartySelected(event)).isEqualTo(intervenerCorrespondenceEnabled);
+    }
 }

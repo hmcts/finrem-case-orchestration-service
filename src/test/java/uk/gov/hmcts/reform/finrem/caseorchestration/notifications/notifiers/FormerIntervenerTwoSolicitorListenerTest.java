@@ -152,4 +152,16 @@ class FormerIntervenerTwoSolicitorListenerTest extends BasePartyListenerTest {
         verifyNoInteractions(emailService);
         verifyNoLetterSent();
     }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void isNotificationPartySelected_shouldMatchRespondentCorrespondenceEnabled(
+        boolean intervenerCorrespondenceEnabled) {
+        when(event.getCaseData()).thenReturn(finremCaseData);
+        IntervenerTwo intervenerTwo = mock(IntervenerTwo.class);
+        when(intervenerTwo.getIntervenerCorrespondenceEnabled()).thenReturn(intervenerCorrespondenceEnabled);
+        when(finremCaseData.getIntervenerTwo()).thenReturn(intervenerTwo);
+
+        assertThat(underTest.isNotificationPartySelected(event)).isEqualTo(intervenerCorrespondenceEnabled);
+    }
 }

@@ -21,14 +21,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 
 @Slf4j
 @Service
-public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler {
+public class SendOrderAboutToStartHandler extends FinremCallbackHandler {
 
     private final GeneralOrderService generalOrderService;
     private final PartyService partyService;
 
-    public SendOrderContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                 GeneralOrderService generalOrderService,
-                                                 PartyService partyService) {
+    public SendOrderAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                        GeneralOrderService generalOrderService,
+                                        PartyService partyService) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
         this.partyService = partyService;

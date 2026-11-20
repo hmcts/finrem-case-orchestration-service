@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class SendOrderContestedAboutToStartHandlerTest {
+class SendOrderAboutToStartHandlerTest {
 
     @Mock
     private GeneralOrderService generalOrderService;
@@ -34,7 +34,7 @@ class SendOrderContestedAboutToStartHandlerTest {
     private PartyService partyService;
 
     @InjectMocks
-    private SendOrderContestedAboutToStartHandler handler;
+    private SendOrderAboutToStartHandler handler;
 
     @Test
     void testCanHandle() {

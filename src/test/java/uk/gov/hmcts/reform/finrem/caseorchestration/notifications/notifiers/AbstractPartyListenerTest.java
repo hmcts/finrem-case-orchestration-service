@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -73,6 +74,11 @@ class AbstractPartyListenerTest {
         @Override
         protected NotificationParty getNotificationPartyEnum() {
             return NotificationParty.APPLICANT;
+        }
+
+        @Override
+        protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
+            return false;
         }
 
         @Override
@@ -125,7 +131,14 @@ class AbstractPartyListenerTest {
         protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
             return true;
         }
+    }
 
+    class NotificationPartySelectedListener extends SendEmailNotificationListener {
+
+        @Override
+        protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
+            return true;
+        }
     }
 
     class SendEmailNotificationWithPartySpecificDetailsListener extends SendEmailNotificationListener {
@@ -142,7 +155,6 @@ class AbstractPartyListenerTest {
         protected boolean shouldSendPaperNotification(SendCorrespondenceEvent event) {
             return true;
         }
-
     }
 
     class SendPaperNotificationListener extends RelevantPartyListener {
@@ -209,6 +221,8 @@ class AbstractPartyListenerTest {
 
     private PaperNotificationWithoutCoversheetListener paperNotificationWithoutCoversheetListener;
 
+    private NotificationPartySelectedListener notificationPartySelectedListener;
+
     @BeforeEach
     void setUp() {
         irrelevantPartyListener = new IrrelevantPartyListener();
@@ -218,6 +232,7 @@ class AbstractPartyListenerTest {
         sendPaperNotificationListener = new SendPaperNotificationListener(false);
         emailOrPaperNotificationListener = new EmailOrPaperNotificationListener();
         paperNotificationWithoutCoversheetListener = new PaperNotificationWithoutCoversheetListener();
+        notificationPartySelectedListener = new NotificationPartySelectedListener();
     }
 
     @Test
@@ -273,25 +288,44 @@ class AbstractPartyListenerTest {
     }
 
     @Test
-    void givenNotificationRequestProvided_whenSendEmailNotificationListenerCalled_thenSendEmailAndNoLetterSent() {
+    void givenEventWithoutPartySelectionCheck_whenSendEmailListenerHandles_thenEmailSentAndNoLetterSent() {
         EmailTemplateNames template = mock(EmailTemplateNames.class);
-        NotificationRequest nr = spy(NotificationRequest.builder()
-            .notificationEmail(TEST_SOLICITOR_EMAIL)
-            .name(TEST_SOLICITOR_NAME)
-            .solicitorReferenceNumber(TEST_SOLICITOR_REFERENCE)
-            .build());
-
-        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
-            .emailTemplate(template)
-            .emailNotificationRequest(nr)
-            .notificationParties(List.of(NotificationParty.APPLICANT))
-            .build();
+        SendCorrespondenceEvent event = buildEvent(template);
 
         sendEmailNotificationListener.handleNotification(event);
 
         ArgumentCaptor<NotificationRequest> captor = ArgumentCaptor.forClass(NotificationRequest.class);
         verify(emailService).sendConfirmationEmail(captor.capture(), eq(template));
+        verifyEmailSent(captor);
         verifyNoLetterSent();
+    }
+
+    @Test
+    void givenEventRequiringPartySelectionCheck_whenSendEmailListenerHandles_thenNoEmailOrLetterSent() {
+        SendCorrespondenceEvent event = buildEvent(mock(EmailTemplateNames.class));
+        doReturn(true).when(event).shouldCheckNotificationPartySelection();
+
+        sendEmailNotificationListener.handleNotification(event);
+
+        verifyNoEmailSent();
+        verifyNoLetterSent();
+    }
+
+    @Test
+    void givenEventRequiringPartySelectionCheck_whenPartySelectedListenerHandles_thenEmailSentAndNoLetterSent() {
+        EmailTemplateNames template = mock(EmailTemplateNames.class);
+        SendCorrespondenceEvent event = buildEvent(template);
+        doReturn(true).when(event).shouldCheckNotificationPartySelection();
+
+        notificationPartySelectedListener.handleNotification(event);
+
+        ArgumentCaptor<NotificationRequest> captor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(captor.capture(), eq(template));
+        verifyEmailSent(captor);
+        verifyNoLetterSent();
+    }
+
+    private void verifyEmailSent(ArgumentCaptor<NotificationRequest> captor) {
         assertThat(captor.getValue())
             .extracting(
                 NotificationRequest::getName,
@@ -501,5 +535,19 @@ class AbstractPartyListenerTest {
 
     private void verifyNoLetterSent() {
         verifyNoInteractions(bulkPrintService, internationalPostalService);
+    }
+
+    private SendCorrespondenceEvent buildEvent(EmailTemplateNames template) {
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+            .notificationEmail(TEST_SOLICITOR_EMAIL)
+            .name(TEST_SOLICITOR_NAME)
+            .solicitorReferenceNumber(TEST_SOLICITOR_REFERENCE)
+            .build();
+
+        return spy(SendCorrespondenceEvent.builder()
+            .emailTemplate(template)
+            .emailNotificationRequest(notificationRequest)
+            .notificationParties(List.of(NotificationParty.APPLICANT))
+            .build());
     }
 }

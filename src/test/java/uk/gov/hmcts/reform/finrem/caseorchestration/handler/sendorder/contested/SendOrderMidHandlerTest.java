@@ -32,14 +32,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class SendOrderContestedMidHandlerTest {
+class SendOrderMidHandlerTest {
 
     private static final String AT_LEAST_ONE_ORDER_MESSAGE = "You must select at least one order.";
 
     private static final String NONE_SUPPORTING_DOCUMENTS_SELECTED = "You chose to include a supporting document but none have been selected.";
 
     @InjectMocks
-    private SendOrderContestedMidHandler underTest;
+    private SendOrderMidHandler underTest;
 
     @Test
     void testCanHandle() {
