@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremSubmittedCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,16 +28,18 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Slf4j
 @Service
-public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
+public class ManageHearingsSubmittedHandler extends FinremSubmittedCallbackHandler {
 
     private final ManageHearingsCorresponder manageHearingsCorresponder;
 
     private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
 
     public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                          EvidenceManagementDeleteService evidenceManagementDeleteService,
+                                          RetryExecutor retryExecutor,
                                           ManageHearingsCorresponder manageHearingsCorresponder,
                                           CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
-        super(finremCaseDetailsMapper);
+        super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
         this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
     }

@@ -60,10 +60,7 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
 
         List<String> errors = validateHearingService.validateManageHearingErrors(finremCaseData);
         if (!errors.isEmpty()) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(finremCaseData)
-                .errors(errors)
-                .build();
+            return responseWithoutWarnings(finremCaseData, errors);
         }
 
         // Reset any previous Manage Hearings action selection
@@ -85,9 +82,6 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
             );
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData)
-            .build();
+        return response(finremCaseData);
     }
-
 }
