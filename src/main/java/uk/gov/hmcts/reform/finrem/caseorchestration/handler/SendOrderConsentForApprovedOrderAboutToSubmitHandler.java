@@ -4,43 +4,59 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER;
 
 @Slf4j
 @Service
 public class SendOrderConsentForApprovedOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final ConsentOrderPrintService consentOrderPrintService;
+    private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    private final NotificationService notificationService;
 
     public SendOrderConsentForApprovedOrderAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                                ConsentOrderPrintService consentOrderPrintService) {
+                                                                ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
+                                                                NotificationService notificationService) {
         super(mapper);
-        this.consentOrderPrintService = consentOrderPrintService;
+        this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
+        this.notificationService = notificationService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER.equals(eventType);
+            && CONSENT_SEND_ORDER_FOR_APPROVED_ORDER.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Received request for {} about to submit callback for Case ID: {}",
-            EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, callbackRequest.getCaseDetails().getId());
-
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore,
-            EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, userAuthorisation);
+        FinremCaseData caseData = caseDetails.getData();
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
+        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            caseData.setConsentOrderApprovedCoverLetterApp(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(
+                caseDetails, userAuthorisation, DocumentHelper.PaperNotificationRecipient.APPLICANT));
+        } else {
+            caseData.setConsentOrderApprovedCoverLetterApp(null);
+        }
+
+        if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            caseData.setConsentOrderApprovedCoverLetterResp(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(
+                caseDetails, userAuthorisation, DocumentHelper.PaperNotificationRecipient.RESPONDENT));
+        } else {
+            caseData.setConsentOrderApprovedCoverLetterResp(null);
+        }
+        return response(caseData);
     }
 }
