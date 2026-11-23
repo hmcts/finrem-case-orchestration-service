@@ -42,28 +42,27 @@ public class SendOrderCorresponder {
     private final GeneralOrderService generalOrderService;
 
     /**
-     * Builds the {@link SendCorrespondenceEvent}s required to notify each party on the case
-     * that a contested order has been approved.
+     * Builds the {@link SendCorrespondenceEvent}s needed to notify the parties on a case that
+     * a contested order has been approved.
      *
-     * <p>One event is always created for the applicant and one for the respondent. An
-     * additional event is created for each intervener on the case that is
-     * {@linkplain IntervenerWrapper#isPresent() present}. Each event carries:
+     * <p>An event is created for the applicant, the respondent, and each
+     * {@linkplain IntervenerWrapper#isPresent() present} intervener, but only where the
+     * order is shared with that party. Each event contains:
      * <ul>
-     *   <li>the notification party (applicant, respondent or the relevant intervener),</li>
+     *   <li>the notification party,</li>
      *   <li>the solicitor notification request mapped from the case details,</li>
-     *   <li>the email template appropriate to that party, and</li>
+     *   <li>the email template for that party, and</li>
      *   <li>the documents to be posted to that party.</li>
      * </ul>
      *
-     * <p>The returned list is ordered applicant, respondent, then interveners in the order
-     * they appear on the case. Events are only built here; sending them is the caller's
-     * responsibility.
+     * <p>Events are ordered applicant, respondent, then interveners in the order they appear
+     * on the case. Events are only built here; sending them is the caller's responsibility.
      *
      * @param finremCaseDetails the case details from which the events are built
      * @param userAuthorisation the authorisation token of the user triggering the event,
      *                          passed through to each event
-     * @return a mutable list of correspondence events, containing at least two entries
-     *         (applicant and respondent), plus one per present intervener
+     * @return a mutable list of correspondence events, which is empty if the order is not
+     *         shared with any party
      */
     public List<SendCorrespondenceEvent> buildCorrespondenceEventIfNeeded(
         FinremCaseDetails finremCaseDetails,
