@@ -46,6 +46,8 @@ public class CftLibConfig implements CFTLibConfigurer {
             "caseworker-caa",
             "caseworker-divorce-financialremedy-superuser",
             "caseworker-financialremedy-rparobot",
+            "caseworker-wa-task-configuration",
+            "caseworker-ras-validation",
             "GS_profile"
         );
     }
