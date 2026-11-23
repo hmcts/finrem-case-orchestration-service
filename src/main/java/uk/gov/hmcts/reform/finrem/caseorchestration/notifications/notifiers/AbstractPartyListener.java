@@ -32,8 +32,6 @@ public abstract class AbstractPartyListener {
     protected final NotificationService notificationService;
     protected final InternationalPostalService internationalPostalService;
 
-    protected abstract boolean isNotificationPartySelected(SendCorrespondenceEvent event);
-
     protected abstract String getNotificationParty();
 
     protected abstract NotificationParty getNotificationPartyEnum();
@@ -90,11 +88,6 @@ public abstract class AbstractPartyListener {
     }
 
     private void sendNotification(SendCorrespondenceEvent event) {
-        if (event.shouldCheckNotificationPartySelection() && !isNotificationPartySelected(event)) {
-            log.info("{} - Not sending any notification because party was not selected", event.getCaseId());
-            return;
-        }
-
         boolean simulatingCorrespondence = event.isSimulatingCorrespondence();
         NotificationParty notificationParty = getNotificationPartyEnum();
 

@@ -23,11 +23,6 @@ public class CitizenApplicantPartyListener extends EmailNotificationOnlyListener
     }
 
     @Override
-    protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
-        return false;
-    }
-
-    @Override
     protected String getNotificationParty() {
         return "citizen applicant";
     }

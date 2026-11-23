@@ -89,14 +89,4 @@ class FormerRespondentSolicitorListenerTest extends BasePartyListenerTest {
         verifyNoInteractions(emailService);
         verifyNoLetterSent();
     }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void isNotificationPartySelected_shouldMatchRespondentCorrespondenceEnabled(
-        boolean isRespondentCorrespondenceEnabled) {
-        when(event.getCaseData()).thenReturn(finremCaseData);
-        when(finremCaseData.isRespondentCorrespondenceEnabled()).thenReturn(isRespondentCorrespondenceEnabled);
-
-        assertThat(underTest.isNotificationPartySelected(event)).isEqualTo(isRespondentCorrespondenceEnabled);
-    }
 }

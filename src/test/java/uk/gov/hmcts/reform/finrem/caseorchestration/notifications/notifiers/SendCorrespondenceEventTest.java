@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.APPLICANT;
@@ -403,22 +402,6 @@ class SendCorrespondenceEventTest {
 
         assertCommonAuditFields(audit, notificationParty, NotificationType.POSTAL, YesOrNo.YES, eventId);
         assertThat(audit.getLetterId()).isEqualTo(letterId.toString());
-    }
-
-    @Test
-    void shouldCheckNotificationPartySelectionReturnsTrueWhenEnabled() {
-        assertTrue(
-            SendCorrespondenceEvent.builder().checkNotificationPartySelection(true).build()
-                .shouldCheckNotificationPartySelection()
-        );
-        assertFalse(
-            SendCorrespondenceEvent.builder().checkNotificationPartySelection(false).build()
-                .shouldCheckNotificationPartySelection()
-        );
-        assertFalse(
-            SendCorrespondenceEvent.builder().build()
-                .shouldCheckNotificationPartySelection()
-        );
     }
 
     private void assertCommonAuditFields(NotificationAudit audit,

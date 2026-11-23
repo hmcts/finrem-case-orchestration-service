@@ -52,11 +52,6 @@ class EmailNotificationOnlyListenerTest {
         }
 
         @Override
-        protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
-            return false;
-        }
-
-        @Override
         protected String getNotificationParty() {
             return getClass().getSimpleName();
         }

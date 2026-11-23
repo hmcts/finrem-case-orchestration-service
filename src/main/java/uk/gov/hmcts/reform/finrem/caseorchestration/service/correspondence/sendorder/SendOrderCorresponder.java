@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.Notificat
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ public class SendOrderCorresponder {
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
 
     private final NotificationService notificationService;
+
+    private final GeneralOrderService generalOrderService;
 
     /**
      * Builds the {@link SendCorrespondenceEvent}s required to notify each party on the case
@@ -69,43 +72,63 @@ public class SendOrderCorresponder {
         List<SendCorrespondenceEvent> ret = new ArrayList<>();
 
         // Applicant
-        ret.add(baseEventBuilder(
-            List.of(APPLICANT),
-            finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(finremCaseDetails),
-            finremCaseDetails,
-            userAuthorisation,
-            FR_CONTEST_ORDER_APPROVED_APPLICANT,
-            getDocumentsToPostForApplicantAndRespondent(finremCaseDetails)
-        ).build());
+        if (generalOrderService.isOrderSharedWithApplicant(finremCaseDetails)) {
+            ret.add(baseEventBuilder(
+                List.of(APPLICANT),
+                finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(finremCaseDetails),
+                finremCaseDetails,
+                userAuthorisation,
+                FR_CONTEST_ORDER_APPROVED_APPLICANT,
+                getDocumentsToPostForApplicantAndRespondent(finremCaseDetails)
+            ).build());
+        }
 
         // Respondent
-        ret.add(baseEventBuilder(
-            List.of(RESPONDENT),
-            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(finremCaseDetails),
-            finremCaseDetails,
-            userAuthorisation,
-            FR_CONTEST_ORDER_APPROVED_RESPONDENT,
-            getDocumentsToPostForApplicantAndRespondent(finremCaseDetails)
-        ).build());
+        if (generalOrderService.isOrderSharedWithRespondent(finremCaseDetails)) {
+            ret.add(baseEventBuilder(
+                List.of(RESPONDENT),
+                finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(finremCaseDetails),
+                finremCaseDetails,
+                userAuthorisation,
+                FR_CONTEST_ORDER_APPROVED_RESPONDENT,
+                getDocumentsToPostForApplicantAndRespondent(finremCaseDetails)
+            ).build());
+        }
 
         // Interveners
-        finremCaseDetails.getData().getInterveners().stream()
+        ret.addAll(finremCaseDetails.getData().getInterveners().stream()
             .filter(IntervenerWrapper::isPresent)
-            .forEach(intervener ->
-            ret.add(
-                baseEventBuilder(
-                    List.of(NotificationParty.getIntervener(intervener.getIntervenerType())),
-                    finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(finremCaseDetails,
-                        notificationService.getCaseDataKeysForIntervenerSolicitor(intervener)),
-                    finremCaseDetails,
-                    userAuthorisation,
-                    getIntervenerEmailTemplate(intervener.getIntervenerType()),
-                    getDocumentsToPostForIntervener(finremCaseDetails, intervener)
-                ).build()
-            )
-        );
+            .filter(intervener -> isOrderSharedWith(intervener, finremCaseDetails))
+            .map(intervener -> buildIntervenerEvent(intervener, finremCaseDetails, userAuthorisation))
+            .toList());
 
         return ret;
+    }
+
+    private boolean isOrderSharedWith(IntervenerWrapper intervener, FinremCaseDetails caseDetails) {
+        return switch (intervener.getIntervenerType()) {
+            case INTERVENER_ONE -> generalOrderService.isOrderSharedWithIntervener1(caseDetails);
+            case INTERVENER_TWO -> generalOrderService.isOrderSharedWithIntervener2(caseDetails);
+            case INTERVENER_THREE -> generalOrderService.isOrderSharedWithIntervener3(caseDetails);
+            case INTERVENER_FOUR -> generalOrderService.isOrderSharedWithIntervener4(caseDetails);
+        };
+    }
+
+    private SendCorrespondenceEvent buildIntervenerEvent(IntervenerWrapper intervener,
+                                                         FinremCaseDetails caseDetails,
+                                                         String userAuthorisation) {
+        IntervenerType type = intervener.getIntervenerType();
+
+        return baseEventBuilder(
+            List.of(NotificationParty.getIntervener(type)),
+            finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
+                caseDetails,
+                notificationService.getCaseDataKeysForIntervenerSolicitor(intervener)),
+            caseDetails,
+            userAuthorisation,
+            getIntervenerEmailTemplate(type),
+            getDocumentsToPostForIntervener(caseDetails, intervener)
+        ).build();
     }
 
     private SendCorrespondenceEvent.SendCorrespondenceEventBuilder baseEventBuilder(
@@ -117,7 +140,6 @@ public class SendOrderCorresponder {
         List<CaseDocument> documentsToPost) {
         return SendCorrespondenceEvent.builder()
             .notificationParties(notificationParties)
-            .checkNotificationPartySelection(true) // Depends on question "Who should receive this order?"
             .emailNotificationRequest(notificationRequest)
             .emailTemplate(templateName)
             .documentsToPost(documentsToPost)
@@ -125,24 +147,13 @@ public class SendOrderCorresponder {
             .authToken(userAuthorisation);
     }
 
-    private EmailTemplateNames getIntervenerEmailTemplate(IntervenerType intervener) {
-        switch (intervener) {
-            case INTERVENER_ONE -> {
-                return FR_CONTEST_ORDER_APPROVED_INTERVENER1;
-            }
-            case INTERVENER_TWO -> {
-                return FR_CONTEST_ORDER_APPROVED_INTERVENER2;
-            }
-            case INTERVENER_THREE -> {
-                return FR_CONTEST_ORDER_APPROVED_INTERVENER3;
-            }
-            case INTERVENER_FOUR -> {
-                return FR_CONTEST_ORDER_APPROVED_INTERVENER4;
-            }
-            default -> {
-                return FR_CONTEST_ORDER_APPROVED_INTERVENER1;
-            }
-        }
+    private EmailTemplateNames getIntervenerEmailTemplate(IntervenerType intervenerType) {
+        return switch (intervenerType) {
+            case INTERVENER_ONE -> FR_CONTEST_ORDER_APPROVED_INTERVENER1;
+            case INTERVENER_TWO -> FR_CONTEST_ORDER_APPROVED_INTERVENER2;
+            case INTERVENER_THREE -> FR_CONTEST_ORDER_APPROVED_INTERVENER3;
+            case INTERVENER_FOUR -> FR_CONTEST_ORDER_APPROVED_INTERVENER4;
+        };
     }
 
     private List<CaseDocument> getDocumentsToPostForApplicantAndRespondent(FinremCaseDetails caseDetails) {
@@ -158,7 +169,8 @@ public class SendOrderCorresponder {
                                                                IntervenerWrapper intervenerWrapper) {
         // Copied from FinremMultiLetterOrEmailAllPartiesCorresponder.returnAndAddCaseDocumentsToIntervenerHearingNotices
         List<CaseDocument> caseDocuments = getDocumentsToPostForApplicantAndRespondent(caseDetails);
-        /* TODO clarifying https://hmcts.atlassian.net/browse/DFR-5782?focusedCommentId=2178599
+        /* Another ticket rebuilds the following logic as it's broken currently.
+        https://hmcts.atlassian.net/browse/DFR-5782?focusedCommentId=2178599
         List<IntervenerHearingNoticeCollection> intervenerHearingNoticesCollection =
             intervenerWrapper.getIntervenerHearingNoticesCollection(caseDetails.getData());
         caseDocuments.forEach(cd -> intervenerHearingNoticesCollection.add(getHearingNoticesDocumentCollection(cd)));

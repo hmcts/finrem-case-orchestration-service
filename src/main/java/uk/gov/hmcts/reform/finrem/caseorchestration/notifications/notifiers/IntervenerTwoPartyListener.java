@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -55,11 +54,5 @@ public class IntervenerTwoPartyListener extends AbstractPartyListener {
     @Override
     protected boolean isPartyOutsideUK(SendCorrespondenceEvent event) {
         return internationalPostalService.isIntervenerResideOutsideOfUK(event.getCaseData().getIntervenerTwo());
-    }
-
-    @Override
-    protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
-        FinremCaseData finremCaseData = event.getCaseData();
-        return finremCaseData.getIntervenerTwo().getIntervenerCorrespondenceEnabled();
     }
 }

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -229,15 +228,5 @@ class RespondentPartyListenerTest extends BasePartyListenerTest {
         assertThat(details.recipientSolName()).isEqualTo(expected);
         assertThat(details.recipientSolEmailAddress()).isEqualTo(expected);
         assertThat(details.recipientSolReference()).isEqualTo(expected);
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void isNotificationPartySelected_shouldMatchRespondentCorrespondenceEnabled(
-        boolean isRespondentCorrespondenceEnabled) {
-        when(event.getCaseData()).thenReturn(finremCaseData);
-        when(finremCaseData.isRespondentCorrespondenceEnabled()).thenReturn(isRespondentCorrespondenceEnabled);
-
-        assertThat(respondentPartyListener.isNotificationPartySelected(event)).isEqualTo(isRespondentCorrespondenceEnabled);
     }
 }

@@ -5,10 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -23,14 +21,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.sendorder.SendOrderCorresponder;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -50,8 +46,6 @@ class SendOrderSubmittedHandlerTest {
     @InjectMocks
     private SendOrderSubmittedHandler underTest;
     @Mock
-    private PartyService partyService;
-    @Mock
     private SendOrderCorresponder sendOrderCorresponder;
     @Mock
     private CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
@@ -61,32 +55,6 @@ class SendOrderSubmittedHandlerTest {
     @Test
     void testCanHandle() {
         assertCanHandle(underTest, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SEND_ORDER);
-    }
-
-    @Test
-    void shouldUpdateCorrespondenceEnabledFromSelectedPartiesBeforePublishingSendCorrespondenceEvents() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
-
-        SendCorrespondenceEvent event1 = mock(SendCorrespondenceEvent.class);
-        when(event1.getNotificationParties()).thenReturn(List.of(NotificationParty.RESPONDENT));
-        when(event1.describeNotificationParties()).thenReturn("APPLICANT SOLICITOR");
-        List<SendCorrespondenceEvent> events = List.of(event1);
-        when(sendOrderCorresponder.buildCorrespondenceEventIfNeeded(callbackRequest.getCaseDetails(),
-            AUTH_TOKEN)).thenReturn(events);
-
-        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
-
-        InOrder inOrder = Mockito.inOrder(partyService, correspondenceEventAuditOrchestrationService);
-        inOrder.verify(partyService)
-            .updateCorrespondenceEnabledFromSelectedParties(callbackRequest.getCaseDetails());
-        inOrder.verify(correspondenceEventAuditOrchestrationService)
-            .publishEvent(eq(event1), eq("Send order correspondence to party: APPLICANT SOLICITOR for the send order event"),
-                any(Runnable.class));
-
-        assertAll(
-            () -> assertNull(response.getConfirmationHeader()),
-            () -> assertNull(response.getConfirmationBody())
-        );
     }
 
     @Test

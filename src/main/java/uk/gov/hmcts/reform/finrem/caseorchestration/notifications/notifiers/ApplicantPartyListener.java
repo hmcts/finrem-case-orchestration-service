@@ -95,9 +95,4 @@ public class ApplicantPartyListener extends AbstractPartyListener {
     protected boolean isPartyOutsideUK(SendCorrespondenceEvent event) {
         return internationalPostalService.isApplicantResideOutsideOfUK(event.getCaseData());
     }
-
-    @Override
-    protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
-        return event.getCaseData().isApplicantCorrespondenceEnabled();
-    }
 }

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -26,7 +25,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -217,17 +215,5 @@ class IntervenerThreePartyListenerTest extends BasePartyListenerTest {
         assertThat(details.recipientSolName()).isEqualTo(expected);
         assertThat(details.recipientSolEmailAddress()).isEqualTo(expected);
         assertThat(details.recipientSolReference()).isEqualTo(expected);
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void isNotificationPartySelected_shouldMatchIntervenerThreeCorrespondenceEnabled(
-        boolean intervenerCorrespondenceEnabled) {
-        when(event.getCaseData()).thenReturn(finremCaseData);
-        IntervenerThree intervenerThree = mock(IntervenerThree.class);
-        when(intervenerThree.getIntervenerCorrespondenceEnabled()).thenReturn(intervenerCorrespondenceEnabled);
-        when(finremCaseData.getIntervenerThree()).thenReturn(intervenerThree);
-
-        assertThat(intervenerThreePartyListener.isNotificationPartySelected(event)).isEqualTo(intervenerCorrespondenceEnabled);
     }
 }

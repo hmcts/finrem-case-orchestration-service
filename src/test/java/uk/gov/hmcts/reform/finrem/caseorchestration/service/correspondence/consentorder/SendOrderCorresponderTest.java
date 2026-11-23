@@ -11,8 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.F
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNotice;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
@@ -22,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.sendorder.SendOrderCorresponder;
 
@@ -30,6 +29,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -83,9 +83,19 @@ class SendOrderCorresponderTest {
     @Mock
     private NotificationRequest intervenerRequest;
 
+    @Mock
+    private GeneralOrderService generalOrderService;
+
     @BeforeEach
     void setup() {
         when(finremCaseDetails.getData()).thenReturn(caseData);
+
+        lenient().when(generalOrderService.isOrderSharedWithApplicant(any(FinremCaseDetails.class))).thenReturn(true);
+        lenient().when(generalOrderService.isOrderSharedWithRespondent(any(FinremCaseDetails.class))).thenReturn(true);
+        lenient().when(generalOrderService.isOrderSharedWithIntervener1(any(FinremCaseDetails.class))).thenReturn(true);
+        lenient().when(generalOrderService.isOrderSharedWithIntervener2(any(FinremCaseDetails.class))).thenReturn(true);
+        lenient().when(generalOrderService.isOrderSharedWithIntervener3(any(FinremCaseDetails.class))).thenReturn(true);
+        lenient().when(generalOrderService.isOrderSharedWithIntervener4(any(FinremCaseDetails.class))).thenReturn(true);
     }
 
     @Test
@@ -187,12 +197,6 @@ class SendOrderCorresponderTest {
     private static OrderSentToPartiesCollection orderSentToPartiesCollection(CaseDocument caseDocument) {
         return OrderSentToPartiesCollection.builder()
             .value(SendOrderDocuments.builder().caseDocument(caseDocument).build())
-            .build();
-    }
-
-    private static IntervenerHearingNoticeCollection intervenerHearingNoticeCollection(CaseDocument caseDocument) {
-        return IntervenerHearingNoticeCollection.builder()
-            .value(IntervenerHearingNotice.builder().caseDocument(caseDocument).build())
             .build();
     }
 }

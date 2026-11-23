@@ -32,7 +32,6 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 @Slf4j
 @Service
 public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
-    private final PartyService partyService;
     private final CcdService ccdService;
     private final SendOrderCorresponder sendOrderCorresponder;
     private final CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService;
@@ -40,12 +39,10 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
     public SendOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                      EvidenceManagementDeleteService evidenceManagementDeleteService,
                                      RetryExecutor retryExecutor,
-                                     PartyService partyService,
                                      CcdService ccdService,
                                      SendOrderCorresponder sendOrderCorresponder,
                                      CorrespondenceEventAuditOrchestrationService correspondenceEventAuditOrchestrationService) {
         super(finremCaseDetailsMapper, evidenceManagementDeleteService, retryExecutor);
-        this.partyService = partyService;
         this.ccdService = ccdService;
         this.sendOrderCorresponder = sendOrderCorresponder;
         this.correspondenceEventAuditOrchestrationService = correspondenceEventAuditOrchestrationService;
@@ -102,9 +99,6 @@ public class SendOrderSubmittedHandler extends FinremSubmittedCallbackHandler {
 
     private List<String> sendNotifications(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-
-        // Set the party correspondence enabled flags. These changes will not be persisted.
-        partyService.updateCorrespondenceEnabledFromSelectedParties(finremCaseDetails);
 
         List<SendCorrespondenceEvent> events = sendOrderCorresponder.buildCorrespondenceEventIfNeeded(finremCaseDetails,
             userAuthorisation);

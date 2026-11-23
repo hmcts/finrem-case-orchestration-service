@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -27,9 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
@@ -333,29 +330,5 @@ class ApplicantPartyListenerTest extends BasePartyListenerTest {
         );
         assertThat(event.getAudits()).singleElement()
             .satisfies(audit -> assertThat(audit.getLetterId()).isEqualTo(letterId.toString()));
-    }
-
-    @Test
-    void givenApplicantCorrespondenceEnabled_whenIsNotificationPartySelected_thenReturnsTrue() {
-        when(caseData.isApplicantCorrespondenceEnabled()).thenReturn(true);
-
-        assertTrue(applicantPartyListener.isNotificationPartySelected(event));
-    }
-
-    @Test
-    void givenApplicantCorrespondenceDisabled_whenIsNotificationPartySelected_thenReturnsFalse() {
-        when(caseData.isApplicantCorrespondenceEnabled()).thenReturn(false);
-
-        assertFalse(applicantPartyListener.isNotificationPartySelected(event));
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void isNotificationPartySelected_shouldMatchApplicantCorrespondenceEnabled(
-        boolean isApplicantCorrespondenceEnabled) {
-        when(event.getCaseData()).thenReturn(finremCaseData);
-        when(finremCaseData.isApplicantCorrespondenceEnabled()).thenReturn(isApplicantCorrespondenceEnabled);
-
-        assertThat(applicantPartyListener.isNotificationPartySelected(event)).isEqualTo(isApplicantCorrespondenceEnabled);
     }
 }

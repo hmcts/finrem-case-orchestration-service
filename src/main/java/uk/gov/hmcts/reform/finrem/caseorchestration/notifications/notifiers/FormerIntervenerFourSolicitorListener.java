@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -27,11 +26,5 @@ public class FormerIntervenerFourSolicitorListener extends FormerIntervenerSolic
     @Override
     protected String getNotificationParty() {
         return "former intervener four solicitor";
-    }
-
-    @Override
-    protected boolean isNotificationPartySelected(SendCorrespondenceEvent event) {
-        FinremCaseData finremCaseData = event.getCaseData();
-        return finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled();
     }
 }
