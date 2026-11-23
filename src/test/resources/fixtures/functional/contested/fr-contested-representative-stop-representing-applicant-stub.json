@@ -1,0 +1,48 @@
+{
+  "templateId": "7b0538bd-1ea1-4b1a-8625-2429e562a0e9",
+  "httpMethod": "POST",
+  "url": "/v2/template/7b0538bd-1ea1-4b1a-8625-2429e562a0e9/preview",
+  "notificationRequest": {
+    "personalisation": {
+      "solicitorReferenceNumber": "Y707HZM",
+      "courtEmail": "rcj.familyhighcourt@justice.gov.uk",
+      "applicantName": "Frodo Baggins",
+      "divorceCaseNumber": "LV12D12345",
+      "dateOfIssue": "2026-10-09",
+      "notificationEmail": "fr_applicant_solicitor1@mailinator.com",
+      "frEmail": "contactFinancialRemedy@justice.gov.uk",
+      "courtName": "High Court Family Division",
+      "linkToSmartSurvey": "http://www.smartsurvey.co.uk/s/KCECE/",
+      "name": "Bilbo Baggins",
+      "contactNumber": "0300 303 0642",
+      "respondentName": "Smeagol Gollum",
+      "caseReferenceNumber": "1790181815056858"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "bodyAsJson": {
+      "postage": null,
+      "subject": "Case Reference Number {{jsonPath request.body '$.personalisation.caseReferenceNumber'}} – You have stopped representing your client",
+      "html": "<p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Reference no: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}<br>Applicant: {{jsonPath request.body '$.personalisation.applicantName'}}<br>Respondent: {{jsonPath request.body '$.personalisation.respondentName'}}<br>Issue date: {{jsonPath request.body '$.personalisation.dateOfIssue'}}<br>Your reference: {{jsonPath request.body '$.personalisation.solicitorReferenceNumber'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Dear {{jsonPath request.body '$.personalisation.name'}},</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">You are no longer representing {{jsonPath request.body '$.personalisation.applicantName'}} in this case. Your case access has been removed.</p><h2 style=\"Margin: 0 0 15px 0; padding: 10px 0 0 0; font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;\">Help us improve this service</h2><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">This is a new service which is still being developed. If you haven’t already, please tell us what you think of it and how it can be improved at <a style=\"word-wrap: break-word; color: #1D70B8;\" href=\"{{jsonPath request.body '$.personalisation.linkToSmartSurvey'}}\">{{jsonPath request.body '$.personalisation.linkToSmartSurvey'}}</a>.</p><h2 style=\"Margin: 0 0 15px 0; padding: 10px 0 0 0; font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;\">If you need help</h2><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">You can contact the court if you need help.</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Financial Remedies Court: {{jsonPath request.body '$.personalisation.courtName'}}</p><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">Email: {{jsonPath request.body '$.personalisation.courtEmail'}}</p><h2 style=\"Margin: 0 0 15px 0; padding: 10px 0 0 0; font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;\">HM Courts &amp; Tribunals Service</h2><p style=\"Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;\">This is an automated message, please don’t reply to this email.</p>",
+      "id": "{{request.pathSegments.[2]}}",
+      "body": "Reference no: {{jsonPath request.body '$.personalisation.caseReferenceNumber'}}\r\nApplicant: {{jsonPath request.body '$.personalisation.applicantName'}}\r\nRespondent: {{jsonPath request.body '$.personalisation.respondentName'}}\r\nIssue date: {{jsonPath request.body '$.personalisation.dateOfIssue'}}\r\nYour reference: {{jsonPath request.body '$.personalisation.solicitorReferenceNumber'}}\r\n\r\nDear {{jsonPath request.body '$.personalisation.name'}},\r\n\r\nYou are no longer representing {{jsonPath request.body '$.personalisation.applicantName'}} in this case. Your case access has been removed.\r\n\r\n#Help us improve this service\r\nThis is a new service which is still being developed. If you haven’t already, please tell us what you think of it and how it can be improved at {{jsonPath request.body '$.personalisation.linkToSmartSurvey'}}.\r\n\r\n#If you need help\r\nYou can contact the court if you need help.\r\n\r\nFinancial Remedies Court: {{jsonPath request.body '$.personalisation.courtName'}}\r\n\r\nEmail: {{jsonPath request.body '$.personalisation.courtEmail'}}\r\n\r\n#HM Courts & Tribunals Service\r\nThis is an automated message, please don’t reply to this email.",
+      "type": "email",
+      "version": 3,
+      "template_id": "{{request.pathSegments.[2]}}"
+    }
+  },
+  "expectedContains": [
+    "You have stopped representing your client",
+    "Reference no: 1790181815056858",
+    "Applicant: Frodo Baggins",
+    "Respondent: Smeagol Gollum",
+    "Issue date: 2026-10-09",
+    "Your reference: Y707HZM",
+    "Dear Bilbo Baggins",
+    "You are no longer representing Frodo Baggins in this case.",
+    "Financial Remedies Court: High Court Family Division",
+    "Email: rcj.familyhighcourt@justice.gov.uk"
+  ]
+}
