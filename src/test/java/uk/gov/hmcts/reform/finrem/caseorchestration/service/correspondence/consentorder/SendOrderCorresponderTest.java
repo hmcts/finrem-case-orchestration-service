@@ -194,6 +194,38 @@ class SendOrderCorresponderTest {
         verify(notificationService, never()).getCaseDataKeysForIntervenerSolicitor(any());
     }
 
+    @Test
+    void givenOrderNotSharedWithApplicant_whenBuild_thenApplicantEventNotPopulated() {
+        when(generalOrderService.isOrderSharedWithApplicant(finremCaseDetails)).thenReturn(false);
+        when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(finremCaseDetails))
+            .thenReturn(respondentRequest);
+
+        List<SendCorrespondenceEvent> events =
+            underTest.buildCorrespondenceEventIfNeeded(finremCaseDetails, AUTH_TOKEN);
+
+        assertThat(events).singleElement()
+            .returns(List.of(RESPONDENT), SendCorrespondenceEvent::getNotificationParties)
+            .returns(respondentRequest, SendCorrespondenceEvent::getEmailNotificationRequest)
+            .returns(FR_CONTEST_ORDER_APPROVED_RESPONDENT, SendCorrespondenceEvent::getEmailTemplate)
+            .returns(AUTH_TOKEN, SendCorrespondenceEvent::getAuthToken);
+    }
+
+    @Test
+    void givenOrderNotSharedWithRespondent_whenBuild_thenRespondentEventNotPopulated() {
+        when(generalOrderService.isOrderSharedWithRespondent(finremCaseDetails)).thenReturn(false);
+        when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(finremCaseDetails))
+            .thenReturn(applicantRequest);
+
+        List<SendCorrespondenceEvent> events =
+            underTest.buildCorrespondenceEventIfNeeded(finremCaseDetails, AUTH_TOKEN);
+
+        assertThat(events).singleElement()
+            .returns(List.of(APPLICANT), SendCorrespondenceEvent::getNotificationParties)
+            .returns(applicantRequest, SendCorrespondenceEvent::getEmailNotificationRequest)
+            .returns(FR_CONTEST_ORDER_APPROVED_APPLICANT, SendCorrespondenceEvent::getEmailTemplate)
+            .returns(AUTH_TOKEN, SendCorrespondenceEvent::getAuthToken);
+    }
+
     private static OrderSentToPartiesCollection orderSentToPartiesCollection(CaseDocument caseDocument) {
         return OrderSentToPartiesCollection.builder()
             .value(SendOrderDocuments.builder().caseDocument(caseDocument).build())
