@@ -98,6 +98,7 @@ public class RefusalOrderDocumentService {
             .build();
         refusalCollections.add(refusalCollection);
         caseData.setOrderRefusalCollection(refusalCollections);
+
         caseData.setOrderRefusalOnScreen(null);
         return caseData;
     }

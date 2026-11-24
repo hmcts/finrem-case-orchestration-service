@@ -11,12 +11,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalHolder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalOption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.RefusedConsentOrderDocumentCategoriser;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -42,7 +46,8 @@ class RejectedConsentOrderAboutToSubmitHandlerTest {
     void givenCase_whenHandled_thenRefusalOrderProcessedAnCategorised() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
-        FinremCaseData finremCaseData = mock(FinremCaseData.class);
+        FinremCaseData finremCaseData = FinremCaseData.builder().build();
+        finremCaseData.setOrderRefusalOnScreen(populatedOrderRefusalOrderHolder());
         when(refusalOrderDocumentService.processConsentOrderNotApproved(callbackRequest.getCaseDetails(),
             AUTH_TOKEN)).thenReturn(finremCaseData);
 
@@ -55,4 +60,15 @@ class RejectedConsentOrderAboutToSubmitHandlerTest {
             () -> verifyNoMoreInteractions(refusalOrderDocumentService, categoriser)
         );
     }
+
+    private OrderRefusalHolder populatedOrderRefusalOrderHolder() {
+        List<OrderRefusalOption> refusalOptionList = new ArrayList<>();
+        refusalOptionList.add(OrderRefusalOption.TRANSFERRED_TO_APPLICANTS_HOME_COURT_OLD);
+        return OrderRefusalHolder.builder()
+            .orderRefusal(refusalOptionList)
+            .orderRefusalOther("Some other reason")
+            .build();
+    }
+
+    // pt todo - add tests, may be able to parameterise above
 }
