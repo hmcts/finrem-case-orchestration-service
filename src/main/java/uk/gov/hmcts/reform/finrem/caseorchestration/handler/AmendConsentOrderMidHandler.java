@@ -47,25 +47,27 @@ public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = caseDetails.getCaseIdAsString();
         FinremCaseData finremCaseData = caseDetails.getData();
-        consentedApplicationHelper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
+        consentedApplicationHelper.setConsentVariationOrderLabelField(finremCaseData);
 
         List<String> errors = new ArrayList<>();
 
         List<AmendedConsentOrderCollection> amendedCollection = finremCaseData.getAmendedConsentOrderCollection();
         if (amendedCollection != null && !amendedCollection.isEmpty()) {
-            FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-            FinremCaseData finremCaseDataBefore = caseDetailsBefore.getData();
-            List<AmendedConsentOrderCollection> amendedCollectionBefore = finremCaseDataBefore.getAmendedConsentOrderCollection();
-            if (amendedCollectionBefore != null && !amendedCollectionBefore.isEmpty()) {
-                amendedCollection.removeAll(amendedCollectionBefore);
+            List<AmendedConsentOrderCollection> documentsToValidate = new ArrayList<>(amendedCollection);
+            FinremCaseData beforeData = callbackRequest.getFinremCaseDataBefore();
+            if (beforeData != null && beforeData.getAmendedConsentOrderCollection() != null) {
+                documentsToValidate.removeAll(beforeData.getAmendedConsentOrderCollection());
             }
-            amendedCollection.forEach(order -> {
+            documentsToValidate.forEach(order -> {
                 CaseDocument document = order.getValue().getAmendedConsentOrder();
-                bulkPrintDocumentService.validateEncryptionOnUploadedDocument(document,
-                    caseId, errors, userAuthorisation);
+                bulkPrintDocumentService.validateEncryptionOnUploadedDocument(
+                    document, caseId, errors, userAuthorisation);
             });
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(finremCaseData)
+            .errors(errors)
+            .build();
     }
 }
