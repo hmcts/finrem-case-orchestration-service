@@ -8,12 +8,21 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationOrderType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationTypeOfDocument;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +31,8 @@ import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -221,6 +232,92 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         assertEquals(CONSENT_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
         final String docLabel = (String) data.get(CV_OTHER_DOC_LABEL_FIELD);
         assertEquals(CONSENT_OTHER_DOC_LABEL_VALUE, docLabel);
+    }
+
+    @Test
+    public void shouldUseUploadDateWhenPreviousOrderHasNoMatchingAmendment() {
+        LocalDate uploadDate = LocalDate.of(2026, 11, 1);
+        CaseDocument previousOrder = consentOrderDocument("previous").toBuilder()
+            .uploadTimestamp(uploadDate.atTime(15, 30)).build();
+        FinremCallbackRequest request = buildArchiveRequest(previousOrder, consentOrderDocument("new"));
+        request.getFinremCaseDataBefore().setAmendedConsentOrderCollection(
+            List.of(amendedConsentOrder(consentOrderDocument("unrelated"), uploadDate.plusDays(1))));
+
+        consentOrderService.archiveAndUpdateLatestConsentOrder(request);
+
+        RespondToOrderDocument archivedOrder = request.getFinremCaseData().getRespondToOrderDocuments().getFirst().getValue();
+        assertEquals(uploadDate, archivedOrder.getDocumentDateAdded());
+    }
+
+    @Test
+    public void shouldArchiveWithNoDateWhenAmendmentDateAndUploadTimestampAreMissing() {
+        CaseDocument previousOrder = consentOrderDocument("previous");
+        CaseDocument newOrder = consentOrderDocument("new");
+        FinremCallbackRequest request = buildArchiveRequest(previousOrder, newOrder);
+        request.getFinremCaseDataBefore().setAmendedConsentOrderCollection(
+            List.of(amendedConsentOrder(previousOrder, null)));
+
+        consentOrderService.archiveAndUpdateLatestConsentOrder(request);
+
+        RespondToOrderDocument archivedOrder = request.getFinremCaseData().getRespondToOrderDocuments().getFirst().getValue();
+        assertEquals(previousOrder, archivedOrder.getDocumentLink());
+        assertNull(archivedOrder.getDocumentDateAdded());
+        assertSame(newOrder, request.getFinremCaseData().getLatestConsentOrder());
+    }
+
+    @Test
+    public void shouldLeaveLatestConsentOrderAndHistoryUnchangedWhenDocumentUrlHasNotChanged() {
+        CaseDocument previousOrder = consentOrderDocument("previous");
+        CaseDocument sameOrder = previousOrder.toBuilder()
+            .documentFilename("renamed.pdf")
+            .build();
+        FinremCallbackRequest request = buildArchiveRequest(previousOrder, sameOrder);
+
+        List<RespondToOrderDocumentCollection> existingDocuments =
+            List.of(archivedConsentOrder(consentOrderDocument("older")));
+        request.getFinremCaseData().setRespondToOrderDocuments(existingDocuments);
+
+        consentOrderService.archiveAndUpdateLatestConsentOrder(request);
+
+        assertSame(previousOrder, request.getFinremCaseData().getLatestConsentOrder());
+        assertEquals(existingDocuments, request.getFinremCaseData().getRespondToOrderDocuments());
+    }
+
+    private FinremCallbackRequest buildArchiveRequest(CaseDocument previousOrder, CaseDocument newOrder) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .latestConsentOrder(previousOrder)
+            .amendedConsentOrderCollection(List.of(amendedConsentOrder(newOrder, LocalDate.of(2026, 11, 2))))
+            .build();
+        FinremCaseData beforeData = FinremCaseData.builder().latestConsentOrder(previousOrder).build();
+        return FinremCallbackRequest.builder()
+            .eventType(EventType.AMEND_CONSENT_ORDER)
+            .caseDetails(FinremCaseDetails.builder().caseType(CaseType.CONSENTED).data(caseData).build())
+            .caseDetailsBefore(FinremCaseDetails.builder().caseType(CaseType.CONSENTED).data(beforeData).build())
+            .build();
+    }
+
+    private CaseDocument consentOrderDocument(String name) {
+        return caseDocument("http://dm-store/documents/" + name, name + ".pdf",
+            "http://dm-store/documents/" + name + "/binary");
+    }
+
+    private AmendedConsentOrderCollection amendedConsentOrder(CaseDocument document, LocalDate date) {
+        return AmendedConsentOrderCollection.builder()
+            .value(AmendedConsentOrder.builder()
+                .amendedConsentOrder(document)
+                .amendedConsentOrderDate(date)
+                .build())
+            .build();
+    }
+
+    private RespondToOrderDocumentCollection archivedConsentOrder(CaseDocument document) {
+        return RespondToOrderDocumentCollection.builder()
+            .value(RespondToOrderDocument.builder()
+                .documentType(RespondToOrderDocumentType.AMEND_CONSENT_ORDER)
+                .documentLink(document)
+                .documentFileName(document.getDocumentFilename())
+                .build())
+            .build();
     }
 
     private CallbackRequest buildCallbackRequest() {
