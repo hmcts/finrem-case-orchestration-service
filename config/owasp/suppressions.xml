@@ -2,6 +2,15 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
     <suppress until="2027-02-28Z">
         <notes><![CDATA[
+    CVE-2026-133981 - Elasticsearch An issue was discovered in Elasticsearch where specially crafted compressed payloads can cause an infinite loop.
+    Affecting versions 8.19.26 and prior, review when patch released.
+    ]]></notes>
+        <cpe>cpe:2.3:a:elastic:elasticsearch:8.19.26:*:*:*:*:*:*:*</cpe>
+        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:8.19.26:*:*:*:*:*:*:*</cpe>
+        <cve>CVE-2026-133981</cve>
+    </suppress>
+    <suppress until="2027-02-28Z">
+        <notes><![CDATA[
     CVE-2026-53914 - Kotlin stdlib false positive via overly broad jetbrains:kotlin CPE mapping.
     ]]></notes>
         <cpe>cpe:2.3:a:jetbrains:kotlin:*:*:*:*:*:*:*:*</cpe>
