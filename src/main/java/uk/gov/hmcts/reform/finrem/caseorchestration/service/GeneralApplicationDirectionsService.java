@@ -130,17 +130,16 @@ public class GeneralApplicationDirectionsService {
     public void submitCollectionGeneralApplicationDirections(FinremCaseDetails caseDetails, List<BulkPrintDocument> documents,
                                                              String authorisationToken) {
         if (shouldPrintSuppliedDocuments(caseDetails)) {
-            log.info("Sending {} document(s) to applicant via bulk print for Case ID: {}, document(s) are {}",
-                documents.size(), caseDetails.getId(),
-                documents);
-
             if (featureToggleService.isFinremCitizenUiEnabled()) {
                 citizenPinInPostService.generatePinIfNeeded(caseDetails, APPLICANT);
                 citizenPinInPostService.generatePinIfNeeded(caseDetails, RESPONDENT);
             }
 
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
             log.info("Sending {} document(s) to respondent via bulk print for Case ID: {}, document(s) are {}",
+                documents.size(), caseDetails.getId(),
+                documents);
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
+            log.info("Sending {} document(s) to applicant via bulk print for Case ID: {}, document(s) are {}",
                 documents.size(), caseDetails.getId(),
                 documents);
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
