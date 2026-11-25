@@ -46,9 +46,17 @@ public class RejectedConsentOrderAboutToSubmitHandler extends AbstractSendNotApp
             && EventType.REJECT_ORDER.equals(eventType);
     }
 
-    // PT todo.  Write javadoc for this.  Leave two comments below as a reminder.
-    // Refer to tech debt ticket to 1) move to submitted handler with audit pattern, having 2) validated that a court exists for the coversheet.
-    // Bulk Print Service will prevent duplicate documents being posted on CCD retries.
+    /**
+     * Processes and categorises the consent order refusal. If no hearing is required and no
+     * free-text reason is provided, sets the case data to Awaiting Response and sends the order
+     * to bulk print.
+     * Bulk Print should be idempotent and prevent duplicate documents being posted on CCD retries, provided
+     * that case version is not increased between retry attempts.
+     *
+     * @param callbackRequest the callback containing the case details and on-screen refusal reasons
+     * @param userAuthorisation the authorisation token used for document processing and bulk printing
+     * @return the updated case data or a callback error if court information is missing for bulk printing
+     */
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
@@ -70,16 +78,28 @@ public class RejectedConsentOrderAboutToSubmitHandler extends AbstractSendNotApp
         }
     }
 
-    // pt todo javadoc explaining that data comes from callback request set in start
-    // explain that null safe as start handler populates the OrderRefusalHolder, and validation forces a refusal reason.
+    /**
+     * Checks for a HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE in the on-screen refusal reasons.
+     * EXUI validates for requires a refusal reason before submitting the event, hence no null check.
+     *
+     * @param caseData the callback case data with the refusal holder is initialised in about-to-start
+     * @return true if a HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE option was selected
+     */
     private boolean refusedAsHearingNeeded(FinremCaseData caseData) {
         return caseData.getOrderRefusalOnScreen()
             .getOrderRefusal()
             .contains(OrderRefusalOption.HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE);
     }
 
-    // pt todo javadoc explaining that data comes from callback request set in start handler
-    // specify free format text not checkbox.
+    /**
+     * Checks the free-text refusal reason on the callback's on-screen refusal holder, which is
+     * initialised in the about-to-start handler. A missing or blank reason returns false.
+     *
+     * The Other checkbox is intentionally not checked, just the free-text reason.
+     *
+     * @param caseData the callback case data containing the on-screen refusal holder
+     * @return whether the free-text reason contains non-whitespace characters
+     */
     private boolean refusedForOtherReasons(FinremCaseData caseData) {
         return Optional.ofNullable(caseData.getOrderRefusalOnScreen().getOrderRefusalOther())
             .filter(otherReasonFreeFormatText -> !otherReasonFreeFormatText.isBlank())

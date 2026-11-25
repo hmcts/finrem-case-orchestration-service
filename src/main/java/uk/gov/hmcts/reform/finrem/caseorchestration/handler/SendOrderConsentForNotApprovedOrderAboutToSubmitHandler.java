@@ -30,7 +30,6 @@ public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        // PT todo.  Add a unit test to confirm that this handler calls the protected sendNotApprovedConsentOrderToBulkPrint method,
         return sendNotApprovedConsentOrderToBulkPrint(callbackRequest, userAuthorisation);
     }
 }
