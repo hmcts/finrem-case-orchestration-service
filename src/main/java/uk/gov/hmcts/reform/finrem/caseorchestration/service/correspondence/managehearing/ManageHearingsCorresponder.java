@@ -71,8 +71,8 @@ public class ManageHearingsCorresponder {
      * @return a list of correspondence events for the selected action, or an empty list if none are required
      */
     public List<SendCorrespondenceEvent> buildCorrespondenceEventsIfNeeded(ManageHearingsAction actionSelection,
-                                                                            FinremCallbackRequest callbackRequest,
-                                                                            String userAuthorisation) {
+                                                                           FinremCallbackRequest callbackRequest,
+                                                                           String userAuthorisation) {
         return switch (actionSelection) {
             case ADD_HEARING -> buildHearingCorrespondenceEventsIfNeeded(callbackRequest, userAuthorisation);
             case ADJOURN_OR_VACATE_HEARING -> buildAdjournedOrVacatedHearingCorrespondenceEventsIfNeeded(
@@ -327,9 +327,9 @@ public class ManageHearingsCorresponder {
      * @return posting documents for the specified party
      */
     private List<CaseDocument> buildDocumentsToPostForParty(FinremCaseDetails caseDetails,
-                                                             List<CaseDocument> baseDocumentsToPost,
-                                                             NotificationParty party,
-                                                             ManageHearingsAction action) {
+                                                            List<CaseDocument> baseDocumentsToPost,
+                                                            NotificationParty party,
+                                                            ManageHearingsAction action) {
         if (!ManageHearingsAction.ADD_HEARING.equals(action)) {
             return baseDocumentsToPost;
         }
