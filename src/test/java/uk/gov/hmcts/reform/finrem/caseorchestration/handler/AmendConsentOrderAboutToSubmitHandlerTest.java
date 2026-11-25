@@ -53,18 +53,16 @@ class AmendConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnyCase_whenHandle_thenSetCaseFlagInfoAndLatestConsentOrder() {
+    void givenAnyCase_whenHandle_thenArchiveAndUpdateLatestConsentOrderAndSetCaseFlagInfo() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
-        CaseDocument latestConsentOrder = mock(CaseDocument.class);
-        when(consentOrderService.getLatestConsentOrderData(any(FinremCallbackRequest.class))).thenReturn(latestConsentOrder);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getData().getLatestConsentOrder()).isEqualTo(latestConsentOrder);
-
-        verify(consentOrderService).getLatestConsentOrderData(callbackRequest);
+        verify(consentOrderService).archiveAndUpdateLatestConsentOrder(callbackRequest);
         verify(caseFlagsService).setCaseFlagInformation(callbackRequest.getCaseDetails());
+
+        assertThat(response.getData()).isSameAs(callbackRequest.getFinremCaseData());
     }
 
     @Test
