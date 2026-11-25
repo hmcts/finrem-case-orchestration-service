@@ -543,6 +543,16 @@ public class TestSetUpUtils {
             .build();
     }
 
+    public static OrganisationPolicy organisationPolicy(String id, String orgPolicyCaseAssignedRole) {
+        if (id == null) {
+            return null;
+        }
+        return OrganisationPolicy.builder()
+            .organisation(organisation(id))
+            .orgPolicyCaseAssignedRole(orgPolicyCaseAssignedRole)
+            .build();
+    }
+
     public static List<BarristerCollectionItem> barristers(String orgId) {
         return barristers(orgId, null);
     }
