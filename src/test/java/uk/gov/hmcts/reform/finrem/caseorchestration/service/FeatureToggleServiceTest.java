@@ -83,6 +83,11 @@ public class FeatureToggleServiceTest {
         }
 
         @Test
+        void isFinremWorkAllocationEnabledReturnsFalse() {
+            assertThat(featureToggleService.isFinremWorkAllocationEnabled()).isFalse();
+        }
+
+        @Test
         void isEstimatedAssetsChecklistV3EnabledReturnsFalse() {
             // default value is defined in src/test/resources/application.properties
             assertThat(featureToggleService.isEstimatedAssetsChecklistV3Enabled()).isFalse();
