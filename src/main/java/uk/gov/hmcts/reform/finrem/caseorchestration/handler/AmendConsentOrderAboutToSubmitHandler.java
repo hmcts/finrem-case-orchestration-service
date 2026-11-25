@@ -52,8 +52,7 @@ public class AmendConsentOrderAboutToSubmitHandler extends FinremCallbackHandler
 
         FinremCaseData caseData = caseDetails.getData();
 
-        CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
-        caseData.setLatestConsentOrder(caseDocument);
+        consentOrderService.archiveAndUpdateLatestConsentOrder(callbackRequest);
 
         caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

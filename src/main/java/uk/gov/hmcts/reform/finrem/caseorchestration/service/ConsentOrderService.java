@@ -9,14 +9,21 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentType;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONSENT_ORDER;
@@ -87,6 +94,76 @@ public class ConsentOrderService {
 
         setOtherDocuments(caseData, beforeData, caseDocumentList);
         return caseDocumentList;
+    }
+
+    public void archiveAndUpdateLatestConsentOrder(FinremCallbackRequest callbackRequest) {
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
+        FinremCaseData beforeData = callbackRequest.getFinremCaseDataBefore();
+
+        CaseDocument newOrder = getLatestConsentOrderData(callbackRequest);
+        CaseDocument previousOrder = beforeData.getLatestConsentOrder();
+
+        //no new amendment is found
+        if (previousOrder != null && Objects.equals(previousOrder.getDocumentUrl(), newOrder.getDocumentUrl())) {
+            return;
+        }
+
+        if (previousOrder != null) {
+            List<RespondToOrderDocumentCollection> archivedOrders =
+                new ArrayList<>(Optional.ofNullable(caseData.getRespondToOrderDocuments())
+                    .orElseGet(List::of));
+
+            boolean alreadyArchived = archivedOrders.stream()
+                .filter(Objects::nonNull)
+                .map(RespondToOrderDocumentCollection::getValue)
+                .filter(Objects::nonNull)
+                .map(RespondToOrderDocument::getDocumentLink)
+                .filter(Objects::nonNull)
+                .anyMatch(document -> Objects.equals(
+                    document.getDocumentUrl(), previousOrder.getDocumentUrl()));
+
+            if (!alreadyArchived) {
+                archivedOrders.add(RespondToOrderDocumentCollection.builder()
+                    .value(RespondToOrderDocument.builder()
+                        .documentType(RespondToOrderDocumentType.AMEND_CONSENT_ORDER)
+                        .documentLink(new CaseDocument(previousOrder))
+                        .documentFileName(previousOrder.getDocumentFilename())
+                        .documentDateAdded(getPreviousConsentOrderDate(beforeData, previousOrder))
+                        .build())
+                    .build());
+            }
+
+            caseData.setRespondToOrderDocuments(archivedOrders);
+        }
+
+        caseData.setLatestConsentOrder(newOrder);
+    }
+
+    private LocalDate getPreviousConsentOrderDate(FinremCaseData beforeData,
+                                                  CaseDocument previousOrder) {
+
+            Optional<LocalDate> amendedOrderDate =
+                Optional.ofNullable(beforeData.getAmendedConsentOrderCollection())
+                    .orElseGet(List::of)
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(AmendedConsentOrderCollection::getValue)
+                    .filter(Objects::nonNull)
+                    .filter(order -> order.getAmendedConsentOrder() != null
+                        && Objects.equals(
+                        order.getAmendedConsentOrder().getDocumentUrl(),
+                        previousOrder.getDocumentUrl()))
+                    .map(AmendedConsentOrder::getAmendedConsentOrderDate)
+                    .filter(Objects::nonNull)
+                    .findFirst();
+
+            if (amendedOrderDate.isPresent()) {
+                return amendedOrderDate.get();
+            }
+
+        return previousOrder.getUploadTimestamp() != null
+            ? previousOrder.getUploadTimestamp().toLocalDate()
+            : null;
     }
 
     private void setOtherDocuments(Map<String, Object> caseData, Map<String, Object> beforeData, List<CaseDocument> caseDocumentList) {
