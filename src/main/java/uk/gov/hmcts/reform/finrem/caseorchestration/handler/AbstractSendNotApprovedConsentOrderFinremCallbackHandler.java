@@ -13,7 +13,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
 
-public abstract class AbstractSendNotApprovedConsentOrderFinremCallbackHandler extends FinremCallbackHandler {
+public abstract class AbstractSendNotApprovedConsentOrderFinremCallbackHandler extends FinremAboutToSubmitCallbackHandler {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final ConsentOrderPrintService consentOrderPrintService;
 
@@ -33,9 +33,7 @@ public abstract class AbstractSendNotApprovedConsentOrderFinremCallbackHandler e
         try {
             consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore, SEND_ORDER,
                 userAuthorisation);
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseDetails.getData())
-                .build();
+            return response(caseDetails.getData());
         } catch (MissingCourtException e) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .errors(List.of("No FR court information is present on the case. "

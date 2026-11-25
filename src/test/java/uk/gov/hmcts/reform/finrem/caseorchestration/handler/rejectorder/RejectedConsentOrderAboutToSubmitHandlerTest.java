@@ -43,13 +43,14 @@ class RejectedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenCase_whenHandled_thenRefusalOrderProcessedAnCategorised() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+    void givenCase_whenHandled_thenRefusalOrderProcessedAndCategorised() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .orderRefusalOnScreen(populatedOrderRefusalOrderHolder())
+            .build();
 
-        FinremCaseData finremCaseData = FinremCaseData.builder().build();
-        finremCaseData.setOrderRefusalOnScreen(populatedOrderRefusalOrderHolder());
-        when(refusalOrderDocumentService.processConsentOrderNotApproved(callbackRequest.getCaseDetails(),
-            AUTH_TOKEN)).thenReturn(finremCaseData);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+        when(refusalOrderDocumentService.processConsentOrderNotApproved(callbackRequest.getCaseDetails(), AUTH_TOKEN))
+            .thenReturn(finremCaseData);
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -70,5 +71,6 @@ class RejectedConsentOrderAboutToSubmitHandlerTest {
             .build();
     }
 
-    // pt todo - add tests, may be able to parameterise above
+    // pt todo - identify and complete missing tests.  Ideally test refusedAsHearingNeeded and refusedForOtherReasons directly.  Confirm that the desired responses are given for the appropriate refusal choices.
+
 }

@@ -46,7 +46,7 @@ public class RejectedConsentOrderAboutToSubmitHandler extends AbstractSendNotApp
             && EventType.REJECT_ORDER.equals(eventType);
     }
 
-    // PT todo.  Javadoc.
+    // PT todo.  Write javadoc for this.  Leave two comments below as a reminder.
     // Refer to tech debt ticket to 1) move to submitted handler with audit pattern, having 2) validated that a court exists for the coversheet.
     // Bulk Print Service will prevent duplicate documents being posted on CCD retries.
     @Override
@@ -70,14 +70,15 @@ public class RejectedConsentOrderAboutToSubmitHandler extends AbstractSendNotApp
         }
     }
 
-    // pt todo javadoc expaineding that data comes from callback request set in start
+    // pt todo javadoc explaining that data comes from callback request set in start
+    // explain that null safe as start handler populates the OrderRefusalHolder, and validation forces a refusal reason.
     private boolean refusedAsHearingNeeded(FinremCaseData caseData) {
         return caseData.getOrderRefusalOnScreen()
             .getOrderRefusal()
             .contains(OrderRefusalOption.HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE);
     }
 
-    // pt todo javadoc expaineding that data comes from callback request set in start
+    // pt todo javadoc explaining that data comes from callback request set in start handler
     // specify free format text not checkbox.
     private boolean refusedForOtherReasons(FinremCaseData caseData) {
         return Optional.ofNullable(caseData.getOrderRefusalOnScreen().getOrderRefusalOther())
