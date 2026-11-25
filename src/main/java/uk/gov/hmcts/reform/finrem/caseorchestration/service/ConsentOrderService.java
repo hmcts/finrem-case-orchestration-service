@@ -142,24 +142,24 @@ public class ConsentOrderService {
     private LocalDate getPreviousConsentOrderDate(FinremCaseData beforeData,
                                                   CaseDocument previousOrder) {
 
-            Optional<LocalDate> amendedOrderDate =
-                Optional.ofNullable(beforeData.getAmendedConsentOrderCollection())
-                    .orElseGet(List::of)
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .map(AmendedConsentOrderCollection::getValue)
-                    .filter(Objects::nonNull)
-                    .filter(order -> order.getAmendedConsentOrder() != null
-                        && Objects.equals(
-                        order.getAmendedConsentOrder().getDocumentUrl(),
-                        previousOrder.getDocumentUrl()))
-                    .map(AmendedConsentOrder::getAmendedConsentOrderDate)
-                    .filter(Objects::nonNull)
-                    .findFirst();
+        Optional<LocalDate> amendedOrderDate =
+            Optional.ofNullable(beforeData.getAmendedConsentOrderCollection())
+                .orElseGet(List::of)
+                .stream()
+                .filter(Objects::nonNull)
+                .map(AmendedConsentOrderCollection::getValue)
+                .filter(Objects::nonNull)
+                .filter(order -> order.getAmendedConsentOrder() != null
+                    && Objects.equals(
+                    order.getAmendedConsentOrder().getDocumentUrl(),
+                    previousOrder.getDocumentUrl()))
+                .map(AmendedConsentOrder::getAmendedConsentOrderDate)
+                .filter(Objects::nonNull)
+                .findFirst();
 
-            if (amendedOrderDate.isPresent()) {
-                return amendedOrderDate.get();
-            }
+        if (amendedOrderDate.isPresent()) {
+            return amendedOrderDate.get();
+        }
 
         return previousOrder.getUploadTimestamp() != null
             ? previousOrder.getUploadTimestamp().toLocalDate()
