@@ -7,9 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.platform.commons.util.ReflectionUtils;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -25,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.List;
@@ -66,6 +69,8 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
     private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
     @Mock
     private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
+    @Mock
+    private GlobalSearchService globalSearchService;
 
     @BeforeEach
     void setUp() {
@@ -73,6 +78,8 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         underTest = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
             consentOrderService, updateRepresentationWorkflowService,
             createCaseMandatoryDataValidator);
+        ReflectionTestUtils.setField(underTest, "globalSearchService", globalSearchService);
+
     }
 
     @Test

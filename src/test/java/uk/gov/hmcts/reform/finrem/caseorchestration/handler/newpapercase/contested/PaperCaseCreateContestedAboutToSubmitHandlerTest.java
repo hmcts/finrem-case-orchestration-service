@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.newpapercase.contested;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -28,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.HashMap;
@@ -68,6 +71,14 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest {
 
     @InjectMocks
     private PaperCaseCreateContestedAboutToSubmitHandler handler;
+
+    @Mock
+    private GlobalSearchService globalSearchService;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(handler, "globalSearchService", globalSearchService);
+    }
 
     @Test
     void canHandle() {

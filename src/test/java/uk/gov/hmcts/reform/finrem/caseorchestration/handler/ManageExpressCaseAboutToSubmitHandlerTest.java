@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +51,9 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
     @Mock
     private ExpressCaseService expressCaseService;
 
+    @Mock
+    private GlobalSearchService globalSearchService;
+
     @InjectMocks
     private ManageExpressCaseAboutToSubmitHandler underTest;
 
@@ -68,6 +73,7 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
         lenient().when(caseDetails.getData()).thenReturn(caseData);
         lenient().when(caseData.getExpressCaseWrapper()).thenReturn(expressCaseWrapper);
         lenient().when(callbackRequest.getEventType()).thenReturn(MANAGE_EXPRESS_CASE);
+        ReflectionTestUtils.setField(underTest, "globalSearchService", globalSearchService);
     }
 
     @Test
