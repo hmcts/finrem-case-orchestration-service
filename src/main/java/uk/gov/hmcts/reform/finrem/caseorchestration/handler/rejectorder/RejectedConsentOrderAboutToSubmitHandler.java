@@ -94,7 +94,6 @@ public class RejectedConsentOrderAboutToSubmitHandler extends AbstractSendNotApp
     /**
      * Checks the free-text refusal reason on the callback's on-screen refusal holder, which is
      * initialised in the about-to-start handler. A missing or blank reason returns false.
-     *
      * The Other checkbox is intentionally not checked, just the free-text reason.
      *
      * @param caseData the callback case data containing the on-screen refusal holder
