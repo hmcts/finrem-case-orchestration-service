@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_RESPOND_TO_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.RESPOND_TO_ORDER;
 
 @Service
 @RequiredArgsConstructor
@@ -85,7 +85,7 @@ public class ConsentOrderService {
         String eventId = callbackRequest.getEventType().getCcdType();
         FinremCaseData caseData = caseDetails.getData();
 
-        if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
+        if (RESPOND_TO_ORDER.getCcdType().equalsIgnoreCase(eventId)) {
             return getLatestAmendedOrderUploadedInThisEvent(caseData, callbackRequest.getFinremCaseDataBefore())
                 .orElseGet(caseData::getLatestConsentOrder);
         } else if (AMEND_CONSENT_ORDER.getCcdType().equalsIgnoreCase(eventId)) {
