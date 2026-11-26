@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerCoversheetService;
@@ -75,6 +76,9 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         }
 
         if (ADD_OPERATION_CODES.contains(selectedOperationCode)) {
+            if (YesOrNo.NO.equals(intervener.getIntervenerRepresented())) {
+                intervener.clearIntervenerSolicitorFields();
+            }
             intervenerService.validateIntervenerInformation(intervener, errors);
 
             if (errors.isEmpty()) {
