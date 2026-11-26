@@ -9,12 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
@@ -28,10 +28,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -39,9 +37,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 
 @ExtendWith(MockitoExtension.class)
-class ApplicantPartyListenerTest {
+class ApplicantPartyListenerTest extends BasePartyListenerTest {
 
     @Mock
     private BulkPrintService bulkPrintService;
@@ -66,6 +65,7 @@ class ApplicantPartyListenerTest {
     private CaseDocument testDocument;
     private FinremCaseDetails caseDetails;
     private SendCorrespondenceEvent event;
+    private FinremCaseData caseData;
 
     @BeforeEach
     void setUp() {
@@ -75,31 +75,31 @@ class ApplicantPartyListenerTest {
             .build();
 
         caseDetails = spy(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
+            .caseType(CaseType.CONTESTED)
+            .data(caseData = spy(FinremCaseData.builder()
                 .ccdCaseId(CASE_ID)
                 .contactDetailsWrapper(
                     ContactDetailsWrapper
                         .builder()
                         .applicantSolicitorName(APPLICANT_NAME)
+                        .applicantSolicitorEmail(APPLICANT_EMAIL)
                         .solicitorReference(APPLICANT_REF)
                         .build()
-                ).build()).build());
+                ).build())).build());
 
-        event = SendCorrespondenceEvent.builder()
+        event = spy(SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
             .emailNotificationRequest(NotificationRequest.builder().build())
             .notificationParties(List.of(NotificationParty.APPLICANT))
-            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .documentsToPost(List.of(testDocument))
             .authToken(AUTH_TOKEN)
-            .build();
+            .build());
 
         applicantPartyListener = new ApplicantPartyListener(
             bulkPrintService, emailService, notificationService, internationalPostalService,
             citizenPinInPostPersistenceService, coverSheetPersistenceService
         );
-        lenient().when(caseDetails.isApplicantSolicitorDigital()).thenReturn(false);
-        clearInvocations(caseDetails);
     }
 
     @Test
@@ -117,7 +117,6 @@ class ApplicantPartyListenerTest {
      */
     @Test
     void shouldSetPartySpecificDetails() {
-        when(caseDetails.getAppSolicitorEmail()).thenReturn(APPLICANT_EMAIL);
         AbstractPartyListener.PartySpecificDetails details = applicantPartyListener.setPartySpecificDetails(event);
         assertThat(details.recipientSolEmailAddress()).isEqualTo(APPLICANT_EMAIL);
         assertThat(details.recipientSolName()).isEqualTo(APPLICANT_NAME);
@@ -181,7 +180,6 @@ class ApplicantPartyListenerTest {
 
     @Test
     void shouldSendDigitalNotificationWhenPartyIsDigitalViaHandleNotification() {
-        when(caseDetails.getAppSolicitorEmail()).thenReturn(APPLICANT_EMAIL);
         when(caseDetails.isApplicantSolicitorDigital()).thenReturn(true);
 
         // Set up event with applicant as notification party
@@ -191,34 +189,35 @@ class ApplicantPartyListenerTest {
         assertThat(event.getEmailNotificationRequest().getName()).isEqualTo(APPLICANT_NAME);
         assertThat(event.getEmailNotificationRequest().getNotificationEmail()).isEqualTo(APPLICANT_EMAIL);
         assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(APPLICANT_REF);
-        verify(caseDetails).isApplicantSolicitorDigital();
-        verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplate()));
+
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR));
     }
 
     @Test
     void shouldThrowIllegalArgumentWhenNotificationRequestIsNullOnSendDigitalNotification() {
-        when(caseDetails.isApplicantSolicitorDigital()).thenReturn(true);
 
         SendCorrespondenceEvent newEvent = SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
             .emailNotificationRequest(null)
             .notificationParties(List.of(NotificationParty.APPLICANT))
-            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .documentsToPost(List.of())
             .authToken(AUTH_TOKEN)
             .build();
+
+        when(caseDetails.isApplicantSolicitorDigital()).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> applicantPartyListener.handleNotification(newEvent));
 
         verifyNoInteractions(emailService);
-        verify(caseDetails).isApplicantSolicitorDigital();
 
         assertThat(exception.getMessage()).isEqualTo("Notification Request is required for digital notifications, case ID: " + CASE_ID);
     }
 
     @Test
     void shouldThrowIllegalArgumentWhenEmailTemplateIsNullOnSendDigitalNotification() {
+
         SendCorrespondenceEvent newEvent = SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
             .emailNotificationRequest(NotificationRequest.builder().build())
@@ -234,7 +233,6 @@ class ApplicantPartyListenerTest {
 
         verifyNoInteractions(emailService);
 
-        verify(caseDetails).isApplicantSolicitorDigital();
         assertThat(exception.getMessage()).isEqualTo("Email template is required for digital notifications, case ID: " + CASE_ID);
     }
 
@@ -254,6 +252,7 @@ class ApplicantPartyListenerTest {
             .build();
 
         // Cover sheet should be at the beginning of the documents sent for bulk print
+        when(caseDetails.isApplicantSolicitorDigital()).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))
@@ -288,7 +287,7 @@ class ApplicantPartyListenerTest {
             .caseDetails(caseDetails)
             .emailNotificationRequest(NotificationRequest.builder().build())
             .notificationParties(List.of(NotificationParty.APPLICANT))
-            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .emailTemplate(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .documentsToPost(List.of())
             .authToken(AUTH_TOKEN)
             .build();

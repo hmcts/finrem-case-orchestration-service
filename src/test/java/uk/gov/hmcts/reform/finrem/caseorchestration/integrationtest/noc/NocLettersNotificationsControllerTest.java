@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPin
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.citizenui.CitizenPinInPostService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.consented.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.sendorder.SendOrderCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
@@ -140,6 +141,8 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper;
     @MockitoBean
     ManageHearingsCorresponder manageHearingsCorresponder;
+    @MockitoBean
+    SendOrderCorresponder sendOrderCorresponder;
     @MockitoBean
     ExpressCaseService expressCaseService;
     @MockitoBean
