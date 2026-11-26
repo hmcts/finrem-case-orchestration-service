@@ -109,28 +109,41 @@ class AmendConsentOrderMidHandlerTest {
     }
 
     @Test
-    void givenExistingAmendedConsentOrder_whenHandle_thenOnlyValidateNewlyUploadedAndPopulateConsentVariationOrderLabelField() {
-        FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
-        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
-        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+    void givenExistingAndNewAmendedOrders_whenHandle_thenValidateOnlyNewAndPreserveBoth() {
+        FinremCallbackRequest callbackRequest = buildBaseCallbackRequest();
+        FinremCaseData beforeData = callbackRequest.getFinremCaseDataBefore();
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
 
-        CaseDocument amendedConsentOrder = mock(CaseDocument.class);
-        CaseDocument amendedConsentOrder2 = mock(CaseDocument.class);
+        CaseDocument previousDocument = mock(CaseDocument.class);
+        CaseDocument newDocument = mock(CaseDocument.class);
 
         AmendedConsentOrderCollection existing = AmendedConsentOrderCollection.builder()
-            .value(AmendedConsentOrder.builder().amendedConsentOrder(amendedConsentOrder).build()).build();
-        caseDataBefore.setAmendedConsentOrderCollection(List.of(existing));
-        caseData.setAmendedConsentOrderCollection(new ArrayList<>(List.of(
-            existing,
-            AmendedConsentOrderCollection.builder()
-                .value(AmendedConsentOrder.builder().amendedConsentOrder(amendedConsentOrder2).build()).build()
-        )));
+            .value(AmendedConsentOrder.builder()
+                .amendedConsentOrder(previousDocument)
+                .build())
+            .build();
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        AmendedConsentOrderCollection uploaded = AmendedConsentOrderCollection.builder()
+            .value(AmendedConsentOrder.builder()
+                .amendedConsentOrder(newDocument)
+                .build())
+            .build();
+
+        beforeData.setAmendedConsentOrderCollection(List.of(existing));
+        caseData.setAmendedConsentOrderCollection(
+            new ArrayList<>(List.of(existing, uploaded)));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(consentedApplicationHelper).setConsentVariationOrderLabelField(caseData);
-        verifyNotValidateEncryptionOnUploadedDocument(amendedConsentOrder);
-        verifyValidateEncryptionOnUploadedDocument(amendedConsentOrder2, response.getErrors());
+        verifyNotValidateEncryptionOnUploadedDocument(previousDocument);
+        verifyValidateEncryptionOnUploadedDocument(newDocument, response.getErrors());
+
+        assertThat(response.getData().getAmendedConsentOrderCollection())
+            .containsExactly(existing, uploaded);
+        assertThat(beforeData.getAmendedConsentOrderCollection())
+            .containsExactly(existing);
     }
 
     private FinremCallbackRequest buildBaseCallbackRequest() {

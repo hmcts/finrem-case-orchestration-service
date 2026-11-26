@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarni
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -52,8 +51,7 @@ public class AmendConsentOrderAboutToSubmitHandler extends FinremCallbackHandler
 
         FinremCaseData caseData = caseDetails.getData();
 
-        CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
-        caseData.setLatestConsentOrder(caseDocument);
+        consentOrderService.archiveAndUpdateLatestConsentOrder(callbackRequest);
 
         caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
