@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -46,6 +47,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CorrespondenceEventAuditOrchestrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
@@ -96,6 +98,9 @@ class ManageHearingsAboutToSubmitHandlerTest {
     @Mock
     private PartyService partyService;
 
+    @Mock
+    private GlobalSearchService globalSearchService;
+
     private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
 
     @InjectMocks
@@ -117,6 +122,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
                 .validateRequiredIntervenersPostalAddresses(any(FinremCaseData.class), any(EventType.class), eq(false),
                     eq(false), eq(false), eq(false)))
             .thenReturn(List.of());
+        ReflectionTestUtils.setField(manageHearingsAboutToSubmitHandler, "globalSearchService", globalSearchService);
     }
 
     @AfterEach
