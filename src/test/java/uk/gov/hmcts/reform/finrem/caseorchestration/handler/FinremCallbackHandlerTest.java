@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
@@ -201,6 +202,7 @@ class FinremCallbackHandlerTest {
         responseWithoutWarningsTestHandler = new ResponseWithoutWarningsTestHandler(finremCaseDetailsMapper, globalSearchService);
         responseTestHandler = new ResponseTestHandler(finremCaseDetailsMapper, globalSearchService);
         validateCaseDataTestHandler = new ValidateCaseDataTestHandler(finremCaseDetailsMapper);
+        ReflectionTestUtils.setField(finremCallbackHandler, "globalSearchService", globalSearchService);
     }
 
     @Test
