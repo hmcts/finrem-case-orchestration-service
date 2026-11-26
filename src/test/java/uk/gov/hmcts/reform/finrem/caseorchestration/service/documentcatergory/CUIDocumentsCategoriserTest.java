@@ -512,7 +512,7 @@ class CUIDocumentsCategoriserTest {
             applicant(CitizenUploadDocumentType.CAR_INSURANCE_LOAN_STATEMENT, NON_FDR,
                 DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
 
-            applicant(CitizenUploadDocumentType.PERSONAL_SELLING_SIGHT_STATEMENT, NON_FDR,
+            applicant(CitizenUploadDocumentType.PERSONAL_SELLING_SITE_STATEMENTS, NON_FDR,
                 DocumentCategory.APPLICANT_DOCUMENTS_UPDATING_DISCLOSURE),
 
             applicant(CitizenUploadDocumentType.SCHOOL_FEES, NON_FDR,
