@@ -33,7 +33,7 @@ def versions = [
         tika                 : '3.3.3',
         amClient             : '1.60.1',
         sendLetterClient     : '5.1.1',
-        elasticSearch        : '8.19.24',
+        elasticSearch        : '8.19.26',
         retry                : '1.3.4',
         commonsValidator     : '1.10.1',
         commonsBeanUtils     : '1.11.0',
@@ -161,6 +161,9 @@ tasks.withType(Test).configureEach {
 test {
     maxHeapSize = "2g"
     failFast = true
+    filter {
+        excludeTestsMatching '*.EmailNotificationIntegrationTest'
+    }
 }
 
 // before committing a change, make sure task still works
@@ -333,6 +336,26 @@ tasks.register('functional', Test) {
     description = "Runs functional Tests"
     setTestClassesDirs(sourceSets.functional.output.classesDirs)
     setClasspath(sourceSets.functional.runtimeClasspath)
+    finalizedBy 'notifyIntegrationTest'
+}
+
+tasks.register('notifyIntegrationTest', Test) {
+    description = 'Runs EmailNotificationIntegrationTest against GOV.UK Notify (needs UK_GOV_NOTIFY_API_KEY)'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    maxHeapSize = '2g'
+    filter {
+        includeTestsMatching '*.EmailNotificationIntegrationTest'
+    }
+    doFirst {
+        def envFile = project.file('./.aat-env')
+        if (!System.getenv('UK_GOV_NOTIFY_API_KEY') && envFile.exists()) {
+            envFile.readLines()
+                .find { it.startsWith('UK_GOV_NOTIFY_API_KEY=') }
+                ?.with { environment('UK_GOV_NOTIFY_API_KEY', it.substring(it.indexOf('=') + 1)) }
+        }
+    }
 }
 
 tasks.register('contractTest', Test) {
@@ -414,7 +437,7 @@ dependencyManagement {
     // Remove this section once a newer Spring Boot version manages Tomcat 11.0.25 or later.
     dependencies {
         dependency "org.apache.tomcat.embed:tomcat-embed-core:11.0.29"
-        dependency "org.apache.tomcat.embed:tomcat-embed-el:11.0.25"
+        dependency "org.apache.tomcat.embed:tomcat-embed-el:11.0.29"
         dependency "org.apache.tomcat.embed:tomcat-embed-websocket:11.0.25"
     }
 }

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.sendorder.contested
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,14 +12,18 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
@@ -53,6 +58,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SendOrdersCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderApplicantDocumentHandler;
@@ -63,7 +69,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderI
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderPartyDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderRespondentDocumentHandler;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -77,6 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -91,12 +101,13 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class SendOrderContestedAboutToSubmitHandlerTest {
+class SendOrderAboutToSubmitHandlerTest {
 
-    private SendOrderContestedAboutToSubmitHandler underTest;
+    private SendOrderAboutToSubmitHandler underTest;
     @Mock
     private GeneralOrderService generalOrderService;
     @Mock
@@ -139,6 +150,13 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     final String approvalJudge = "Peter Chapman";
     @Mock
     private CaseDocument coversheet;
+    @Mock
+    private PartyService partyService;
+    private MockedStatic<ContactDetailsValidator> mockedContactDetailsValidator;
+
+    private static final Instant FIXED_INSTANT = Instant.parse("2026-10-02T10:00:00Z");
+
+    private final Clock clock = Clock.fixed(FIXED_INSTANT, ZoneId.of("Europe/London"));
 
     private List<SendOrderPartyDocumentHandler> handlers;
 
@@ -163,7 +181,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             = spy(new SendOrderIntervenerFourDocumentHandler(consentOrderApprovedDocumentService,
             notificationService));
 
-        underTest = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper,
+        underTest = new SendOrderAboutToSubmitHandler(finremCaseDetailsMapper,
             generalOrderService,
             draftOrderService,
             genericDocumentService,
@@ -176,17 +194,27 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 sendOrderIntervenerThreeDocumentHandler,
                 sendOrderIntervenerFourDocumentHandler
             ),
-            orderDateService, sendOrdersCategoriser);
+            orderDateService, sendOrdersCategoriser, clock, partyService);
 
-        lenient().when(generalOrderService.getParties(any(FinremCaseDetails.class))).thenReturn(parties);
+        lenient().when(partyService.getCheckedActiveParties(any(FinremCaseDetails.class))).thenReturn(parties);
         lenient().when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
             .thenReturn(mock(Triple.class));
         lenient().when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(stampType);
+
+        mockedContactDetailsValidator = Mockito.mockStatic(ContactDetailsValidator.class);
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                any(FinremCaseData.class), any(EventType.class), anyBoolean(), anyBoolean()))
+            .thenReturn(List.of());
+    }
+
+    @AfterEach
+    void tearDownStatics() {
+        mockedContactDetailsValidator.close();
     }
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SEND_ORDER);
+        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, SEND_ORDER);
     }
 
     @Test
@@ -636,7 +664,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                                                 .approvalDate(approvalDate)
                                                 .approvalJudge(approvalJudge)
                                                 .coverLetter(coversheet)
-                                            .build()
+                                                .build()
                                         )
                                         .build()
                                 )))
@@ -767,6 +795,123 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .contains(tuple(
                 newProcessedOrder, submittedDate, submittedBy, finalOrder, approvalDate, approvalJudge,
                 coversheet));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenCheckedPartyHasNoPostalAddress_whenHandled_thenReturnAddressErrors(boolean applicantSelected) {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+        callbackRequest.setEventType(SEND_ORDER);
+
+        String caseRole = applicantSelected ? CaseRole.APP_SOLICITOR.getCcdCode() : CaseRole.RESP_SOLICITOR.getCcdCode();
+        when(partyService.getCheckedActiveParties(callbackRequest.getCaseDetails()))
+            .thenReturn(List.of(caseRole));
+
+        List<String> expectedErrors = new ArrayList<>(List.of("missing address error"));
+
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), eq(applicantSelected), eq(!applicantSelected)))
+            .thenReturn(new ArrayList<>(expectedErrors));
+
+        // Default: no errors for any combination
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
+            .thenReturn(List.of());
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        assertAll(
+            () -> assertThat(response.getErrors()).isEqualTo(expectedErrors),
+            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService)
+        );
+    }
+
+    @ParameterizedTest(name = "intervener {0}")
+    @ValueSource(ints = {1, 2, 3, 4})
+    void givenCheckedIntervenerHasNoPostalAddress_whenHandled_thenReturnAddressErrors(int intervenerNumber) {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+        callbackRequest.setEventType(SEND_ORDER);
+
+        String intervenerRole = switch (intervenerNumber) {
+            case 1 -> CaseRole.INTVR_SOLICITOR_1.getCcdCode();
+            case 2 -> CaseRole.INTVR_SOLICITOR_2.getCcdCode();
+            case 3 -> CaseRole.INTVR_SOLICITOR_3.getCcdCode();
+            case 4 -> CaseRole.INTVR_SOLICITOR_4.getCcdCode();
+            default -> throw new IllegalArgumentException("Unexpected intervener: " + intervenerNumber);
+        };
+        when(partyService.getCheckedActiveParties(callbackRequest.getCaseDetails()))
+            .thenReturn(List.of(intervenerRole));
+
+        List<String> expectedErrors = new ArrayList<>(List.of("missing address error"));
+
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean()))
+            .thenReturn(new ArrayList<>());
+
+        // Default: no errors for any combination
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
+            .thenReturn(List.of());
+
+        // Errors only when the intervener under test is the flagged one
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+                eq(caseData), eq(SEND_ORDER),
+                eq(intervenerNumber == 1), eq(intervenerNumber == 2),
+                eq(intervenerNumber == 3), eq(intervenerNumber == 4)))
+            .thenReturn(expectedErrors);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        assertAll(
+            () -> assertThat(response.getErrors()).isEqualTo(expectedErrors),
+            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService)
+        );
+    }
+
+    @Test
+    void givenMultiplePartiesCheckedWithMissingPostalAddresses_whenHandled_thenReturnCombinedAddressErrors() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+        callbackRequest.setEventType(SEND_ORDER);
+
+        when(partyService.getCheckedActiveParties(callbackRequest.getCaseDetails())).thenReturn(List.of(
+            CaseRole.APP_SOLICITOR.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_1.getCcdCode(),
+            CaseRole.INTVR_SOLICITOR_3.getCcdCode()
+        ));
+
+        List<String> partyErrors = new ArrayList<>(List.of("applicant address missing"));
+        List<String> intervenerErrors = new ArrayList<>(List.of(
+            "intervener 1 address missing",
+            "intervener 3 address missing"));
+
+        // Default: no errors for any combination
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean()))
+            .thenReturn(new ArrayList<>());
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
+            .thenReturn(new ArrayList<>());
+
+        // Errors only for the exact combination of parties checked
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), eq(true), eq(false)))
+            .thenReturn(partyErrors);
+        mockedContactDetailsValidator.when(() -> ContactDetailsValidator.validateRequiredIntervenersPostalAddresses(
+                eq(caseData), eq(SEND_ORDER), eq(true), eq(false), eq(true), eq(false)))
+            .thenReturn(intervenerErrors);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        assertAll(
+            () -> assertThat(response.getErrors()).containsExactlyInAnyOrder(
+                "applicant address missing",
+                "intervener 1 address missing",
+                "intervener 3 address missing"),
+            () -> verifyNoInteractions(generalOrderService, sendOrdersCategoriser, draftOrderService)
+        );
     }
 
     private OrderToShareCollection toSelectedOrderToShare(String documentName) {
