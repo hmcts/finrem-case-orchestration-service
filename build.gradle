@@ -438,7 +438,7 @@ dependencyManagement {
     dependencies {
         dependency "org.apache.tomcat.embed:tomcat-embed-core:11.0.29"
         dependency "org.apache.tomcat.embed:tomcat-embed-el:11.0.29"
-        dependency "org.apache.tomcat.embed:tomcat-embed-websocket:11.0.25"
+        dependency "org.apache.tomcat.embed:tomcat-embed-websocket:11.0.29"
     }
 }
 
