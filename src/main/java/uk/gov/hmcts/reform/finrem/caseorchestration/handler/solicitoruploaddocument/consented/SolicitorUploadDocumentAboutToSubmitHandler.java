@@ -9,17 +9,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitC
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Bin;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
@@ -46,12 +50,31 @@ public class SolicitorUploadDocumentAboutToSubmitHandler extends FinremAboutToSu
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         FinremCaseData finremCaseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
+        updateLatestConsentOrder(finremCaseDataBefore, finremCaseData);
+
         boolean isReadyToSubmit = finremCaseData.getGenericInputFields().isReadyToSubmit();
 
         binDeletedCaseDocuments(finremCaseDataBefore, finremCaseData);
 
         return response(finremCaseData, calculateWarning(isReadyToSubmit), null,
             calculatePostState(callbackRequest, isReadyToSubmit));
+    }
+
+    private void updateLatestConsentOrder(FinremCaseData before, FinremCaseData current) {
+        Set<CaseDocument> existingDocuments = emptyIfNull(before.getSolUploadDocuments()).stream()
+            .map(SolUploadDocumentCollection::getValue)
+            .filter(Objects::nonNull)
+            .map(SolUploadDocument::getDocumentLink)
+            .collect(Collectors.toSet());
+
+        emptyIfNull(current.getSolUploadDocuments()).stream()
+            .map(SolUploadDocumentCollection::getValue)
+            .filter(Objects::nonNull)
+            .filter(document -> SolUploadDocumentType.AMEND_CONSENT_ORDER.equals(document.getDocumentType()))
+            .map(SolUploadDocument::getDocumentLink)
+            .filter(link -> !existingDocuments.contains(link))
+            .reduce((first, second) -> second)
+            .ifPresent(current::setLatestConsentOrder);
     }
 
     private String calculatePostState(FinremCallbackRequest callbackRequest, boolean isReadyToSubmit) {
