@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
@@ -96,7 +97,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         variationList.add(orderCollection2);
         data.put("otherVariationCollection", variationList);
 
-        VariationOrderCollection orderCollectionBefore = getObj(VariationTypeOfDocument.ORIGINAL_ORDER, true);;
+        VariationOrderCollection orderCollectionBefore = getObj(VariationTypeOfDocument.ORIGINAL_ORDER, true);
 
         Map<String, Object> beforeData = callbackRequest.getCaseDetailsBefore().getData();
         List<VariationOrderCollection> variationListB = new ArrayList<>();
@@ -234,8 +235,31 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         assertEquals(CONSENT_OTHER_DOC_LABEL_VALUE, docLabel);
     }
 
+    //Amended Consent Order (caseworker route)
     @Test
-    public void shouldUseUploadDateWhenPreviousOrderHasNoMatchingAmendment() {
+    public void shouldArchivePreviousAmendedOrderWithItsAmendedDateWhenNewAmendmentUploaded() {
+        CaseDocument previousOrder = consentOrderDocument("previous");
+        CaseDocument newOrder = consentOrderDocument("new");
+        LocalDate previousAmendedDate = LocalDate.of(2026, 10, 20);
+        FinremCallbackRequest request = buildArchiveRequest(previousOrder, newOrder);
+        request.getFinremCaseDataBefore().setAmendedConsentOrderCollection(
+            List.of(amendedConsentOrder(previousOrder, previousAmendedDate)));
+
+        consentOrderService.archiveAndUpdateLatestConsentOrder(request);
+
+        FinremCaseData caseData = request.getFinremCaseData();
+        assertSame(newOrder, caseData.getLatestConsentOrder());
+        assertEquals(1, caseData.getRespondToOrderDocuments().size());
+        RespondToOrderDocument archived = caseData.getRespondToOrderDocuments().getFirst().getValue();
+        assertEquals(RespondToOrderDocumentType.AMEND_CONSENT_ORDER, archived.getDocumentType());
+        assertEquals(previousOrder, archived.getDocumentLink());
+        assertNotSame(previousOrder, archived.getDocumentLink());
+        assertEquals("previous.pdf", archived.getDocumentFileName());
+        assertEquals(previousAmendedDate, archived.getDocumentDateAdded());
+    }
+
+    @Test
+    public void shouldArchiveOriginalOrderUsingUploadDateWhenNotAnAmendedOrder() {
         LocalDate uploadDate = LocalDate.of(2026, 11, 1);
         CaseDocument previousOrder = consentOrderDocument("previous").toBuilder()
             .uploadTimestamp(uploadDate.atTime(15, 30)).build();
@@ -245,12 +269,13 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
 
         consentOrderService.archiveAndUpdateLatestConsentOrder(request);
 
-        RespondToOrderDocument archivedOrder = request.getFinremCaseData().getRespondToOrderDocuments().getFirst().getValue();
-        assertEquals(uploadDate, archivedOrder.getDocumentDateAdded());
+        RespondToOrderDocument archived = request.getFinremCaseData().getRespondToOrderDocuments().getFirst().getValue();
+        assertEquals(RespondToOrderDocumentType.AMEND_CONSENT_ORDER, archived.getDocumentType());
+        assertEquals(uploadDate, archived.getDocumentDateAdded());
     }
 
     @Test
-    public void shouldArchiveWithNoDateWhenAmendmentDateAndUploadTimestampAreMissing() {
+    public void shouldArchiveWithTodaysDateWhenAmendmentDateAndUploadTimestampAreMissing() {
         CaseDocument previousOrder = consentOrderDocument("previous");
         CaseDocument newOrder = consentOrderDocument("new");
         FinremCallbackRequest request = buildArchiveRequest(previousOrder, newOrder);
@@ -259,9 +284,9 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
 
         consentOrderService.archiveAndUpdateLatestConsentOrder(request);
 
-        RespondToOrderDocument archivedOrder = request.getFinremCaseData().getRespondToOrderDocuments().getFirst().getValue();
-        assertEquals(previousOrder, archivedOrder.getDocumentLink());
-        assertNull(archivedOrder.getDocumentDateAdded());
+        RespondToOrderDocument archived = request.getFinremCaseData().getRespondToOrderDocuments().getFirst().getValue();
+        assertEquals(previousOrder, archived.getDocumentLink());
+        assertEquals(LocalDate.now(), archived.getDocumentDateAdded());
         assertSame(newOrder, request.getFinremCaseData().getLatestConsentOrder());
     }
 
@@ -279,8 +304,113 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
 
         consentOrderService.archiveAndUpdateLatestConsentOrder(request);
 
-        assertSame(previousOrder, request.getFinremCaseData().getLatestConsentOrder());
         assertEquals(existingDocuments, request.getFinremCaseData().getRespondToOrderDocuments());
+    }
+
+    @Test
+    public void shouldSetLatestWithoutArchivingWhenThereIsNoPreviousOrder() {
+        CaseDocument newOrder = consentOrderDocument("new");
+        FinremCallbackRequest request = buildArchiveRequest(null, newOrder);
+
+        consentOrderService.archiveAndUpdateLatestConsentOrder(request);
+
+        assertSame(newOrder, request.getFinremCaseData().getLatestConsentOrder());
+        assertNull(request.getFinremCaseData().getRespondToOrderDocuments());
+    }
+
+    @Test
+    public void shouldNotArchiveTwiceWhenPreviousOrderIsAlreadyInRespondToOrderDocuments() {
+        CaseDocument previousOrder = consentOrderDocument("previous");
+        FinremCallbackRequest request = buildArchiveRequest(previousOrder, consentOrderDocument("new"));
+        request.getFinremCaseData().setRespondToOrderDocuments(List.of(archivedConsentOrder(previousOrder)));
+
+        consentOrderService.archiveAndUpdateLatestConsentOrder(request);
+
+        assertEquals(1, request.getFinremCaseData().getRespondToOrderDocuments().size());
+    }
+
+    @Test
+    public void shouldAppendToExistingHistoryInChronologicalOrder() {
+        CaseDocument olderOrder = consentOrderDocument("older");
+        CaseDocument previousOrder = consentOrderDocument("previous");
+        FinremCallbackRequest request = buildArchiveRequest(previousOrder, consentOrderDocument("new"));
+        request.getFinremCaseData().setRespondToOrderDocuments(List.of(archivedConsentOrder(olderOrder)));
+
+        consentOrderService.archiveAndUpdateLatestConsentOrder(request);
+
+        List<RespondToOrderDocumentCollection> history = request.getFinremCaseData().getRespondToOrderDocuments();
+        assertEquals(2, history.size());
+        assertEquals(olderOrder, history.get(0).getValue().getDocumentLink());
+        assertEquals(previousOrder, history.get(1).getValue().getDocumentLink());
+    }
+
+    @Test
+    public void shouldDoNothingWhenNoOrderCanBeResolved() {
+        CaseDocument previousOrder = consentOrderDocument("previous");
+        FinremCaseData caseData = FinremCaseData.builder().latestConsentOrder(previousOrder).build();
+        FinremCallbackRequest request = buildRequest(EventType.RESPOND_TO_ORDER, caseData,
+            FinremCaseData.builder().latestConsentOrder(previousOrder).build());
+        caseData.setLatestConsentOrder(null);
+
+        consentOrderService.archiveAndUpdateLatestConsentOrder(request);
+
+        assertNull(caseData.getLatestConsentOrder());
+        assertNull(caseData.getRespondToOrderDocuments());
+    }
+
+    //Respond To Order (solicitor route)
+    @Test
+    public void givenRespondToOrderWithNewAmendedOrder_thenPromoteItAndArchivePreviousOrder() {
+        CaseDocument originalOrder = consentOrderDocument("original");
+        CaseDocument uploaded = consentOrderDocument("solicitor-upload");
+        FinremCallbackRequest request = buildRespondToOrderRequest(originalOrder,
+            List.of(),
+            List.of(respondToOrderDocument(RespondToOrderDocumentType.AMEND_CONSENT_ORDER, uploaded)));
+
+        consentOrderService.archiveAndUpdateLatestConsentOrder(request);
+
+        FinremCaseData caseData = request.getFinremCaseData();
+        assertSame(uploaded, caseData.getLatestConsentOrder());
+        List<RespondToOrderDocumentCollection> history = caseData.getRespondToOrderDocuments();
+        assertEquals(2, history.size());
+        assertEquals(uploaded, history.get(0).getValue().getDocumentLink());
+        assertEquals(originalOrder, history.get(1).getValue().getDocumentLink());
+        assertEquals(RespondToOrderDocumentType.AMEND_CONSENT_ORDER, history.get(1).getValue().getDocumentType());
+    }
+
+    @Test
+    public void givenRespondToOrderWithoutNewAmendedOrder_thenArchivedOrdersAreNotPromoted() {
+        CaseDocument archivedOrder = consentOrderDocument("archived");
+        CaseDocument currentOrder = consentOrderDocument("current");
+        List<RespondToOrderDocumentCollection> before =
+            List.of(respondToOrderDocument(RespondToOrderDocumentType.AMEND_CONSENT_ORDER, archivedOrder));
+        FinremCallbackRequest request = buildRespondToOrderRequest(currentOrder, before,
+            List.of(before.getFirst(),
+                respondToOrderDocument(RespondToOrderDocumentType.APPLICANT_LETTER_EMAIL, consentOrderDocument("letter"))));
+
+        consentOrderService.archiveAndUpdateLatestConsentOrder(request);
+
+        assertSame(currentOrder, request.getFinremCaseData().getLatestConsentOrder());
+        assertEquals(2, request.getFinremCaseData().getRespondToOrderDocuments().size());
+    }
+
+    @Test
+    public void givenSecondRespondToOrder_thenNewUploadWinsOverEarlierUploadAndArchivedEntries() {
+        CaseDocument firstUpload = consentOrderDocument("first-upload");
+        CaseDocument archivedOriginal = consentOrderDocument("original");
+        CaseDocument secondUpload = consentOrderDocument("second-upload");
+        List<RespondToOrderDocumentCollection> before = List.of(
+            respondToOrderDocument(RespondToOrderDocumentType.AMEND_CONSENT_ORDER, firstUpload),
+            respondToOrderDocument(RespondToOrderDocumentType.AMEND_CONSENT_ORDER, archivedOriginal));
+        List<RespondToOrderDocumentCollection> after = new ArrayList<>(before);
+        after.add(respondToOrderDocument(RespondToOrderDocumentType.AMEND_CONSENT_ORDER, secondUpload));
+        FinremCallbackRequest request = buildRespondToOrderRequest(firstUpload, before, after);
+
+        consentOrderService.archiveAndUpdateLatestConsentOrder(request);
+
+        assertSame(secondUpload, request.getFinremCaseData().getLatestConsentOrder());
+        // firstUpload is already in the collection so it is not archived again
+        assertEquals(3, request.getFinremCaseData().getRespondToOrderDocuments().size());
     }
 
     private FinremCallbackRequest buildArchiveRequest(CaseDocument previousOrder, CaseDocument newOrder) {
@@ -289,8 +419,26 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
             .amendedConsentOrderCollection(List.of(amendedConsentOrder(newOrder, LocalDate.of(2026, 11, 2))))
             .build();
         FinremCaseData beforeData = FinremCaseData.builder().latestConsentOrder(previousOrder).build();
+        return buildRequest(EventType.AMEND_CONSENT_ORDER, caseData, beforeData);
+    }
+
+    private FinremCallbackRequest buildRespondToOrderRequest(CaseDocument previousOrder,
+                                                             List<RespondToOrderDocumentCollection> before,
+                                                             List<RespondToOrderDocumentCollection> after) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .latestConsentOrder(previousOrder)
+            .respondToOrderDocuments(after)
+            .build();
+        FinremCaseData beforeData = FinremCaseData.builder()
+            .latestConsentOrder(previousOrder)
+            .respondToOrderDocuments(before)
+            .build();
+        return buildRequest(EventType.RESPOND_TO_ORDER, caseData, beforeData);
+    }
+
+    private FinremCallbackRequest buildRequest(EventType eventType, FinremCaseData caseData, FinremCaseData beforeData) {
         return FinremCallbackRequest.builder()
-            .eventType(EventType.AMEND_CONSENT_ORDER)
+            .eventType(eventType)
             .caseDetails(FinremCaseDetails.builder().caseType(CaseType.CONSENTED).data(caseData).build())
             .caseDetailsBefore(FinremCaseDetails.builder().caseType(CaseType.CONSENTED).data(beforeData).build())
             .build();
@@ -311,9 +459,13 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     }
 
     private RespondToOrderDocumentCollection archivedConsentOrder(CaseDocument document) {
+        return respondToOrderDocument(RespondToOrderDocumentType.AMEND_CONSENT_ORDER, document);
+    }
+
+    private RespondToOrderDocumentCollection respondToOrderDocument(RespondToOrderDocumentType type, CaseDocument document) {
         return RespondToOrderDocumentCollection.builder()
             .value(RespondToOrderDocument.builder()
-                .documentType(RespondToOrderDocumentType.AMEND_CONSENT_ORDER)
+                .documentType(type)
                 .documentLink(document)
                 .documentFileName(document.getDocumentFilename())
                 .build())

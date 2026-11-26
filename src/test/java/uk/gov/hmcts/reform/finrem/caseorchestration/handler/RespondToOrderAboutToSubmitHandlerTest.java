@@ -16,10 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,14 +49,13 @@ class RespondToOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenCase_whenRequestToUpdateLatestConsentOrder_thenHandlerCanHandle() {
+    void givenCase_whenHandle_thenArchiveAndUpdateLatestConsentOrder() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        when(consentOrderService.getLatestConsentOrderData(any(FinremCallbackRequest.class))).thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        Assertions.assertNotNull(response.getData().getLatestConsentOrder());
-        verify(consentOrderService).getLatestConsentOrderData(any(FinremCallbackRequest.class));
+        verify(consentOrderService).archiveAndUpdateLatestConsentOrder(callbackRequest);
+        Assertions.assertSame(callbackRequest.getCaseDetails().getData(), response.getData());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
