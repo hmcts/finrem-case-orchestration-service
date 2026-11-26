@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
@@ -52,6 +53,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationSe
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.globalsearch.GlobalSearchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
 import java.io.InputStream;
@@ -128,6 +130,8 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     @Mock
     private PartyService partyService;
     @Mock
+    private GlobalSearchService globalSearchService;
+    @Mock
     private ManageHearingsCorresponder manageHearingsCorresponder;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
@@ -156,6 +160,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         lenient().when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(
             DynamicList.builder().value(DynamicListElement.builder().code("123#456").build()).build()
         );
+        ReflectionTestUtils.setField(aboutToSubmitHandler, "globalSearchService", globalSearchService);
     }
 
     @AfterEach
