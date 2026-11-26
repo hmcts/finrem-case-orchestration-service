@@ -46,7 +46,7 @@ public enum CitizenUploadDocumentType {
     PAYSLIPS("Payslips"),
     PENSION_REPORT_EXPERT_REPORT("Pension report/ expert report"),
     PENSION_STATEMENT("Pension statement"),
-    PERSONAL_SELLING_SITE_STATEMENTS("Personal selling site statements"),
+    PERSONAL_SELLING_SITE_STATEMENT("Personal selling site statement"),
     POINTS_OF_CLAIM_DEFENCE("Points of claim/defence"),
     POSITION_STATEMENT("Position statement"),
     POTENTIAL_BORROWING_CAPACITY_MORTGAGE_CAPACITIES(
