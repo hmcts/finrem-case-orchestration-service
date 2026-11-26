@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalOptionV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.RefusedConsentOrderDocumentCategoriser;
@@ -79,16 +80,19 @@ public class RejectedConsentOrderAboutToSubmitHandler extends AbstractSendNotApp
     }
 
     /**
-     * Checks for a HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE in the on-screen refusal reasons.
-     * EXUI validates for requires a refusal reason before submitting the event, hence no null check.
+     * Checks for the first-available-hearing option in either on-screen refusal list.
+     * Either list may be absent.
      *
-     * @param caseData the callback case data with the refusal holder is initialised in about-to-start
-     * @return true if a HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE option was selected
+     * @param caseData the callback case data with the refusal holder initialised at about-to-start
+     * @return true if either list contains the first-available-hearing option
      */
     private boolean refusedAsHearingNeeded(FinremCaseData caseData) {
-        return caseData.getOrderRefusalOnScreen()
-            .getOrderRefusal()
-            .contains(OrderRefusalOption.HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE);
+        var refusal = caseData.getOrderRefusalOnScreen();
+        var options = refusal.getOrderRefusal();
+        var optionsV2 = refusal.getOrderRefusalV2();
+
+        return (options != null && options.contains(OrderRefusalOption.HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE))
+            || (optionsV2 != null && optionsV2.contains(OrderRefusalOptionV2.HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE));
     }
 
     /**

@@ -16,6 +16,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_
 public abstract class AbstractSendNotApprovedConsentOrderFinremCallbackHandler extends FinremAboutToSubmitCallbackHandler {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final ConsentOrderPrintService consentOrderPrintService;
+    private static final String MISSING_COURT_SELECTION_ERROR = "No FR court information is present on the case. "
+        + "Please add this information using Update FR Court Info.";
 
     protected AbstractSendNotApprovedConsentOrderFinremCallbackHandler(
         FinremCaseDetailsMapper mapper, ConsentOrderPrintService consentOrderPrintService) {
@@ -23,6 +25,15 @@ public abstract class AbstractSendNotApprovedConsentOrderFinremCallbackHandler e
         this.consentOrderPrintService = consentOrderPrintService;
     }
 
+    /**
+     * Sends the unapproved consent order to bulk print using the Send Order document selection rules.
+     * SEND_ORDER is hardcoded. In this context, the event enum is used to conditionally choose documents to send.
+     * The concrete classes that use this abstract class want documents chosen as if the SEND_ORDER event is being run.
+     *
+     * @param callbackRequest the callback containing the current and previous case details
+     * @param userAuthorisation the authorisation token used for bulk printing
+     * @return a callback response containing the current case data and, if court information is missing, an error.
+     */
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> sendNotApprovedConsentOrderToBulkPrint(
         FinremCallbackRequest callbackRequest, String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
@@ -35,10 +46,7 @@ public abstract class AbstractSendNotApprovedConsentOrderFinremCallbackHandler e
                 userAuthorisation);
             return response(caseDetails.getData());
         } catch (MissingCourtException e) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .errors(List.of("No FR court information is present on the case. "
-                    + "Please add this information using Update FR Court Info."))
-                .build();
+            return responseWithoutWarnings(caseDetails.getData(), List.of(MISSING_COURT_SELECTION_ERROR));
         }
     }
 }

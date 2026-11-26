@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.rejectorder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
@@ -17,11 +18,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalOptionV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.RefusedConsentOrderDocumentCategoriser;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -51,34 +54,32 @@ class RejectedConsentOrderAboutToSubmitHandlerTest {
 
     @Test
     void givenFreeTextRefusalReason_whenHandled_thenDoNotPostOrderAndDoNotSetState() {
-
         OrderRefusalOption anyNonHearingRelatedOption = OrderRefusalOption.APPLICATION_FOR_VARIATION_ORDER_RECONSIDERED;
-        FinremCaseData finremCaseData = FinremCaseData.builder()
+        FinremCaseData caseData = FinremCaseData.builder()
             .orderRefusalOnScreen(populatedOrderRefusalOrderHolder(
                 anyNonHearingRelatedOption,
                 "Some other reason"))
             .build();
 
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(caseData);
         when(refusalOrderDocumentService.processConsentOrderNotApproved(callbackRequest.getCaseDetails(), AUTH_TOKEN))
-            .thenReturn(finremCaseData);
+            .thenReturn(caseData);
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertionsForProcessingAndCategorisation(callbackRequest, response);
         assertAll(
+            () -> assertionsForProcessingAndCategorisation(callbackRequest, response),
             () -> assertThat(response.getData().getState()).isNull(),
-            // thenDoNotPostOrder bit:
             () -> verifyNoInteractions(consentOrderPrintService)
         );
     }
 
-    @Test
-    void givenHearingRefusalReason_whenHandled_thenDoNotPostOrderAndDoNotSetState() {
+    @ParameterizedTest
+    @MethodSource("hearingRefusalReasons")
+    void givenHearingRefusalReasonInEitherList_whenHandled_thenDoNotPostOrderAndDoNotSetState(
+        OrderRefusalHolder refusalHolder) {
         FinremCaseData caseData = FinremCaseData.builder()
-            .orderRefusalOnScreen(populatedOrderRefusalOrderHolder(
-                OrderRefusalOption.HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE,
-                null))
+            .orderRefusalOnScreen(refusalHolder)
             .build();
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(caseData);
         when(refusalOrderDocumentService.processConsentOrderNotApproved(callbackRequest.getCaseDetails(), AUTH_TOKEN))
@@ -86,11 +87,11 @@ class RejectedConsentOrderAboutToSubmitHandlerTest {
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertionsForProcessingAndCategorisation(callbackRequest, response);
         assertAll(
+            () -> assertionsForProcessingAndCategorisation(callbackRequest, response),
             () -> assertThat(response.getData().getState()).isNull(),
-            // thenDoNotPostOrder bit:
-            () -> verifyNoInteractions(consentOrderPrintService));
+            () -> verifyNoInteractions(consentOrderPrintService)
+        );
     }
 
     @ParameterizedTest
@@ -108,12 +109,23 @@ class RejectedConsentOrderAboutToSubmitHandlerTest {
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertionsForProcessingAndCategorisation(callbackRequest, response);
-        assertAll(() -> assertThat(response.getErrors()).isEmpty(),
+        assertAll(
+            () -> assertionsForProcessingAndCategorisation(callbackRequest, response),
+            () -> assertThat(response.getErrors()).isEmpty(),
             () -> assertThat(response.getData().getState()).isEqualTo(AWAITING_RESPONSE.getStateId()),
             () -> verify(consentOrderPrintService).sendConsentOrderToBulkPrint(
-                callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(),
-                EventType.SEND_ORDER, AUTH_TOKEN)
+                callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(), EventType.SEND_ORDER, AUTH_TOKEN)
+        );
+    }
+
+    private static Stream<OrderRefusalHolder> hearingRefusalReasons() {
+        return Stream.of(
+            OrderRefusalHolder.builder()
+                .orderRefusal(List.of(OrderRefusalOption.HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE))
+                .build(),
+            OrderRefusalHolder.builder()
+                .orderRefusalV2(List.of(OrderRefusalOptionV2.HEARING_FIXED_FOR_FIRST_AVAILABLE_DATE))
+                .build()
         );
     }
 
@@ -130,8 +142,7 @@ class RejectedConsentOrderAboutToSubmitHandlerTest {
         );
     }
 
-    private OrderRefusalHolder populatedOrderRefusalOrderHolder(OrderRefusalOption refusalOption, String
-        otherReason) {
+    private OrderRefusalHolder populatedOrderRefusalOrderHolder(OrderRefusalOption refusalOption, String otherReason) {
         return OrderRefusalHolder.builder()
             .orderRefusal(List.of(refusalOption))
             .orderRefusalOther(otherReason)
