@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -26,6 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
 
+    @Spy
     @InjectMocks
     private SendOrderConsentForNotApprovedOrderAboutToSubmitHandler handler;
 
@@ -45,6 +48,18 @@ class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
             any(FinremCaseDetails.class),
             any(EventType.class),
             anyString());
+    }
+
+    @Test
+    void givenCallback_whenHandled_thenDelegateToSharedBulkPrintMethod() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        var expectedResponse = GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().build();
+        doReturn(expectedResponse).when(handler).sendNotApprovedConsentOrderToBulkPrint(callbackRequest, AUTH_TOKEN);
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(handler).sendNotApprovedConsentOrderToBulkPrint(callbackRequest, AUTH_TOKEN);
+        assertThat(response).isSameAs(expectedResponse);
     }
 
     @Test
