@@ -6,68 +6,136 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SendOrderConsentForApprovedOrderAboutToSubmitHandlerTest {
 
-    private static final String AUTH_TOKEN = "TOKEN-:";
     @InjectMocks
     private SendOrderConsentForApprovedOrderAboutToSubmitHandler handler;
 
     @Mock
-    private ConsentOrderPrintService service;
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @Mock
+    private NotificationService notificationService;
 
     @Test
-    void givenCase_whenEventIsAmendApplication_thenCanHandle() {
-        assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED,
-            EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER));
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER);
     }
 
     @Test
-    void given_case_when_wrong_callback_then_case_can_not_handle() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED,
-            EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER));
-    }
-
-    @Test
-    void given_case_when_wrong_casetype_then_case_can_not_handle() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED,
-            EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER));
-    }
-
-    @Test
-    void given_case_when_wrong_eventType_then_case_can_not_handle() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE));
-    }
-
-    @Test
-    void handle() {
+    void givenBothPartiesGetLetters_whenHandle_thenCoverLettersStored() {
         FinremCallbackRequest callbackRequest = callbackRequest();
-        handler.handle(callbackRequest, AUTH_TOKEN).hasErrors();
-        verify(service).sendConsentOrderToBulkPrint(any(FinremCaseDetails.class),
-            any(FinremCaseDetails.class),
-            any(EventType.class),
-            anyString());
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDocument applicantCoverLetter = document("appCoverLetter.pdf");
+        CaseDocument respondentCoverLetter = document("respCoverLetter.pdf");
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN, APPLICANT))
+            .thenReturn(applicantCoverLetter);
+        when(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN, RESPONDENT))
+            .thenReturn(respondentCoverLetter);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertEquals(applicantCoverLetter, response.getData().getConsentOrderApprovedCoverLetterApp());
+        assertEquals(respondentCoverLetter, response.getData().getConsentOrderApprovedCoverLetterResp());
+    }
+
+    @Test
+    void givenNotPaperApplication_whenHandle_thenNoCoverLettersStored() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        // The service returns null for non-paper applications (the mock's default)
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertNull(response.getData().getConsentOrderApprovedCoverLetterApp());
+        assertNull(response.getData().getConsentOrderApprovedCoverLetterResp());
+        verify(consentOrderApprovedDocumentService).getApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN, APPLICANT);
+        verify(consentOrderApprovedDocumentService).getApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN, RESPONDENT);
+    }
+
+    @Test
+    void givenBothSolicitorsDigital_whenHandle_thenNoCoverLettersGenerated() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertNull(response.getData().getConsentOrderApprovedCoverLetterApp());
+        assertNull(response.getData().getConsentOrderApprovedCoverLetterResp());
+        verify(consentOrderApprovedDocumentService, never()).getApprovedConsentOrderCoverLetter(any(), any(), any());
+    }
+
+    @Test
+    void givenApplicantDigitalAndRespondentByPost_whenHandle_thenOnlyRespondentCoverLetterStored() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDocument respondentCoverLetter = document("respCoverLetter.pdf");
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(consentOrderApprovedDocumentService.getApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN, RESPONDENT))
+            .thenReturn(respondentCoverLetter);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertNull(response.getData().getConsentOrderApprovedCoverLetterApp());
+        assertEquals(respondentCoverLetter, response.getData().getConsentOrderApprovedCoverLetterResp());
+        verify(consentOrderApprovedDocumentService, never()).getApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN, APPLICANT);
+    }
+
+    @Test
+    void givenCoverLettersFromPreviousRun_whenSolicitorsNowDigital_thenCoverLettersCleared() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseDetails.getData().setConsentOrderApprovedCoverLetterApp(document("oldApp.pdf"));
+        caseDetails.getData().setConsentOrderApprovedCoverLetterResp(document("oldResp.pdf"));
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertNull(response.getData().getConsentOrderApprovedCoverLetterApp());
+        assertNull(response.getData().getConsentOrderApprovedCoverLetterResp());
     }
 
     private FinremCallbackRequest callbackRequest() {
         return FinremCallbackRequest
             .builder()
-            .caseDetails(FinremCaseDetails.builder().id(123L)
+            .eventType(CONSENT_SEND_ORDER_FOR_APPROVED_ORDER)
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CaseType.CONSENTED)
                 .data(new FinremCaseData()).build())
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CaseType.CONSENTED)
                 .data(new FinremCaseData()).build())
             .build();
+    }
+
+    private CaseDocument document(String filename) {
+        return CaseDocument.builder().documentFilename(filename).build();
     }
 }

@@ -241,34 +241,8 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED);
     }
 
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #sendConsentOrderAvailableEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendConsentOrderAvailableEmailToApplicantSolicitor(CaseDetails caseDetails) {
-        sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
-    }
-
     public void sendConsentOrderAvailableEmailToApplicantSolicitor(FinremCaseDetails caseDetails) {
         sendConsentOrderAvailableEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
-    }
-
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #sendConsentOrderAvailableEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendConsentOrderAvailableEmailToRespondentSolicitor(CaseDetails caseDetails) {
-        sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
     public void sendConsentOrderAvailableEmailToRespondentSolicitor(FinremCaseDetails caseDetails) {
@@ -1326,12 +1300,6 @@ public class NotificationService {
     @Deprecated(since = "15-june-2023")
     private EmailTemplateNames getNoticeOfChangeTemplate(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
-            ? FR_CONSENTED_NOTICE_OF_CHANGE
-            : FR_CONTESTED_NOTICE_OF_CHANGE;
-    }
-
-    private EmailTemplateNames getNoticeOfChangeTemplate(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isConsentedApplication()
             ? FR_CONSENTED_NOTICE_OF_CHANGE
             : FR_CONTESTED_NOTICE_OF_CHANGE;
     }
