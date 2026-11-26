@@ -67,6 +67,19 @@ public class ConsentOrderService {
         return errors;
     }
 
+    /**
+     * Resolves which consent order should be the latest consent order for the current event.
+     *
+     * <ul>
+     *     <li><b>Respond To Order</b>: the last amended consent order uploaded by the solicitor in this event.
+     *     If none was uploaded, the existing latest consent order is kept.</li>
+     *     <li><b>Amended Consent Order</b>: the last order in the amended consent order collection.</li>
+     *     <li><b>Any other event</b> (e.g. case creation or amend application): the draft consent order.</li>
+     * </ul>
+     *
+     * @param callbackRequest the CCD callback request for the current event
+     * @return the consent order that should be the latest, or {@code null} if none can be resolved
+     */
     public CaseDocument getLatestConsentOrderData(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String eventId = callbackRequest.getEventType().getCcdType();
@@ -83,9 +96,15 @@ public class ConsentOrderService {
     }
 
     /**
-     * Respond To Order: only an amended consent order uploaded in this event can become the latest order.
-     * Entries already present before the event (earlier uploads, or orders archived by
-     * {@link #archiveAndUpdateLatestConsentOrder}) are ignored, so they can never be re-promoted.
+     * Finds the last amended consent order uploaded in Respond To Order Documents during the current event.
+     *
+     * <p>Documents that were already in the collection before the event (earlier solicitor uploads, or previous
+     * orders added by {@link #archiveAndUpdateLatestConsentOrder}) are ignored, so they can never become the
+     * latest consent order again. Documents are matched on their document URL.</p>
+     *
+     * @param caseData   case data after the event
+     * @param beforeData case data before the event; if {@code null}, every document is treated as new
+     * @return the last newly uploaded amended consent order, or empty if none was uploaded in this event
      */
     private Optional<CaseDocument> getLatestAmendedOrderUploadedInThisEvent(FinremCaseData caseData,
                                                                             FinremCaseData beforeData) {
@@ -124,9 +143,19 @@ public class ConsentOrderService {
     }
 
     /**
-     * Sets the latest consent order for the current event and, when it has changed, archives the
-     * previous latest order into Respond To Order Documents (DFR-4981).
-     * Used by both upload routes: Amended Consent Order (caseworker) and Respond To Order (solicitor).
+     * Updates the latest consent order for the current event and keeps the order it replaces as history (DFR-4981).
+     *
+     * <p>Used by both routes for uploading a new consent order after refusal: Amended Consent Order (caseworker)
+     * and Respond To Order (solicitor). Behaviour:</p>
+     * <ul>
+     *     <li>If no order can be resolved for the event, nothing changes. The latest consent order is never cleared.</li>
+     *     <li>If the resolved order is the same document as the previous latest order, only the latest consent
+     *     order is set. Nothing is added to the history.</li>
+     *     <li>Otherwise the previous latest order is added to Respond To Order Documents (unless it is already
+     *     there), and the new order becomes the latest consent order.</li>
+     * </ul>
+     *
+     * @param callbackRequest the CCD callback request; its case data is updated in place
      */
     public void archiveAndUpdateLatestConsentOrder(FinremCallbackRequest callbackRequest) {
         FinremCaseData caseData = callbackRequest.getFinremCaseData();
@@ -147,6 +176,18 @@ public class ConsentOrderService {
         caseData.setLatestConsentOrder(newOrder);
     }
 
+    /**
+     * Adds the previous latest consent order to the end of Respond To Order Documents, so the history stays in
+     * the order the versions were replaced.
+     *
+     * <p>Nothing is added if the order is already in the collection, for example when the solicitor uploaded
+     * it there in an earlier Respond To Order event. The archived entry holds a copy of the document reference,
+     * so it is independent of the latest consent order field.</p>
+     *
+     * @param caseData      case data after the event; its Respond To Order Documents are updated
+     * @param beforeData    case data before the event, used to find the order's amended date
+     * @param previousOrder the latest consent order before this event
+     */
     private void archivePreviousOrder(FinremCaseData caseData, FinremCaseData beforeData, CaseDocument previousOrder) {
         List<RespondToOrderDocumentCollection> respondToOrderDocuments =
             new ArrayList<>(Optional.ofNullable(caseData.getRespondToOrderDocuments()).orElseGet(List::of));
@@ -169,6 +210,21 @@ public class ConsentOrderService {
         caseData.setRespondToOrderDocuments(respondToOrderDocuments);
     }
 
+    /**
+     * Works out the date to show against an archived consent order.
+     *
+     * <p>Uses the first of:</p>
+     * <ol>
+     *     <li>the amended consent order date entered by the caseworker, if the order is in the amended
+     *     consent order collection</li>
+     *     <li>the date the document was uploaded</li>
+     *     <li>today's date, which is when it was archived</li>
+     * </ol>
+     *
+     * @param beforeData    case data before the event
+     * @param previousOrder the order being archived
+     * @return the date to show; never {@code null}
+     */
     private LocalDate getPreviousConsentOrderDate(FinremCaseData beforeData, CaseDocument previousOrder) {
         return findAmendedConsentOrder(beforeData, previousOrder)
             .map(AmendedConsentOrder::getAmendedConsentOrderDate)
@@ -176,6 +232,13 @@ public class ConsentOrderService {
             .orElseGet(LocalDate::now);
     }
 
+    /**
+     * Finds the entry in the amended consent order collection that holds the given document, matched on document URL.
+     *
+     * @param beforeData case data before the event
+     * @param document   the document to look for
+     * @return the matching amended consent order, or empty if the document is not an amended consent order
+     */
     private Optional<AmendedConsentOrder> findAmendedConsentOrder(FinremCaseData beforeData, CaseDocument document) {
         return Optional.ofNullable(beforeData.getAmendedConsentOrderCollection())
             .orElseGet(List::of)
@@ -188,6 +251,12 @@ public class ConsentOrderService {
             .findFirst();
     }
 
+    /**
+     * Returns the document links in a Respond To Order Documents collection, skipping null entries.
+     *
+     * @param documents the collection; may be {@code null}
+     * @return a stream of the non-null document links, in collection order
+     */
     private static Stream<CaseDocument> respondToOrderDocumentLinks(List<RespondToOrderDocumentCollection> documents) {
         return Optional.ofNullable(documents)
             .orElseGet(List::of)
