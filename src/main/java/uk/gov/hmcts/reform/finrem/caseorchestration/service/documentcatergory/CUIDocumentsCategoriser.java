@@ -104,7 +104,7 @@ public class CUIDocumentsCategoriser extends DocumentCategoriser {
                  LIST_OF_ASSETS,
                  LOAN_STATEMENT,
                  CAR_INSURANCE_LOAN_STATEMENT,
-                 PERSONAL_SELLING_SIGHT_STATEMENT,
+                 PERSONAL_SELLING_SITE_STATEMENT,
                  SCHOOL_FEES,
                  SELF_ASSESSMENT_TAX_FORMS,
                  UNIVERSAL_CREDIT_STATEMENT,
