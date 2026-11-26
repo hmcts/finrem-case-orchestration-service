@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BinFileUrls;
@@ -55,6 +56,37 @@ class SolicitorUploadDocumentAboutToSubmitHandlerTest {
     @Test
     void testCanHandle() {
         assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.SOLICITOR_UPLOAD_DOCUMENT);
+    }
+
+    @Test
+    void givenNewAmendedConsentOrderUploaded_whenHandled_thenLatestConsentOrderUpdated() {
+        CaseDocument existingDocument = caseDocument("existing.pdf");
+        CaseDocument amendedConsentOrder = caseDocument("amended-consent-order.pdf");
+
+        SolUploadDocumentCollection existing = SolUploadDocumentCollection.builder()
+            .value(SolUploadDocument.builder()
+                .documentType(SolUploadDocumentType.OTHER)
+                .documentLink(existingDocument)
+                .build())
+            .build();
+        SolUploadDocumentCollection newAmendedOrder = SolUploadDocumentCollection.builder()
+            .value(SolUploadDocument.builder()
+                .documentType(SolUploadDocumentType.AMEND_CONSENT_ORDER)
+                .documentLink(amendedConsentOrder)
+                .build())
+            .build();
+
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+            .solUploadDocuments(List.of(existing))
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .solUploadDocuments(List.of(newAmendedOrder, existing))
+            .build();
+
+        var response = underTest.handle(FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+            finremCaseDataBefore, finremCaseData), AUTH_TOKEN);
+
+        assertThat(response.getData().getLatestConsentOrder()).isEqualTo(amendedConsentOrder);
     }
 
     @Test
