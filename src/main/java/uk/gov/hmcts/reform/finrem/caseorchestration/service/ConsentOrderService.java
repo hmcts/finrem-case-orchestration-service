@@ -19,12 +19,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentType;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_RESPOND_TO_ORDER;
@@ -65,19 +69,42 @@ public class ConsentOrderService {
 
     public CaseDocument getLatestConsentOrderData(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        return getCaseDocument(caseDetails, callbackRequest.getEventType().getCcdType());
-    }
-
-    private CaseDocument getCaseDocument(FinremCaseDetails caseDetails, String eventId) {
+        String eventId = callbackRequest.getEventType().getCcdType();
         FinremCaseData caseData = caseDetails.getData();
+
         if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
-            return documentHelper.getLatestRespondToOrderDocuments(caseData)
+            return getLatestAmendedOrderUploadedInThisEvent(caseData, callbackRequest.getFinremCaseDataBefore())
                 .orElseGet(caseData::getLatestConsentOrder);
         } else if (AMEND_CONSENT_ORDER.getCcdType().equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestAmendedConsentOrder(caseData);
         } else {
             return caseData.getConsentOrder();
         }
+    }
+
+    /**
+     * Respond To Order: only an amended consent order uploaded in this event can become the latest order.
+     * Entries already present before the event (earlier uploads, or orders archived by
+     * {@link #archiveAndUpdateLatestConsentOrder}) are ignored, so they can never be re-promoted.
+     */
+    private Optional<CaseDocument> getLatestAmendedOrderUploadedInThisEvent(FinremCaseData caseData,
+                                                                            FinremCaseData beforeData) {
+        Set<String> urlsBefore = respondToOrderDocumentLinks(
+            beforeData == null ? null : beforeData.getRespondToOrderDocuments())
+            .map(CaseDocument::getDocumentUrl)
+            .collect(Collectors.toSet());
+
+        return Optional.ofNullable(caseData.getRespondToOrderDocuments())
+            .orElseGet(List::of)
+            .stream()
+            .filter(Objects::nonNull)
+            .map(RespondToOrderDocumentCollection::getValue)
+            .filter(Objects::nonNull)
+            .filter(document -> RespondToOrderDocumentType.AMEND_CONSENT_ORDER.equals(document.getDocumentType()))
+            .map(RespondToOrderDocument::getDocumentLink)
+            .filter(Objects::nonNull)
+            .filter(link -> !urlsBefore.contains(link.getDocumentUrl()))
+            .reduce((first, second) -> second);
     }
 
     public List<CaseDocument> checkIfD81DocumentContainsEncryption(Map<String, Object> caseData, Map<String, Object> beforeData) {
@@ -96,74 +123,84 @@ public class ConsentOrderService {
         return caseDocumentList;
     }
 
+    /**
+     * Sets the latest consent order for the current event and, when it has changed, archives the
+     * previous latest order into Respond To Order Documents (DFR-4981).
+     * Used by both upload routes: Amended Consent Order (caseworker) and Respond To Order (solicitor).
+     */
     public void archiveAndUpdateLatestConsentOrder(FinremCallbackRequest callbackRequest) {
         FinremCaseData caseData = callbackRequest.getFinremCaseData();
         FinremCaseData beforeData = callbackRequest.getFinremCaseDataBefore();
 
         CaseDocument newOrder = getLatestConsentOrderData(callbackRequest);
-        CaseDocument previousOrder = beforeData.getLatestConsentOrder();
+        CaseDocument previousOrder = beforeData == null ? null : beforeData.getLatestConsentOrder();
 
-        //no new amendment is found
-        if (previousOrder != null && Objects.equals(previousOrder.getDocumentUrl(), newOrder.getDocumentUrl())) {
+        if (newOrder == null) {
+            // nothing to promote - never clear an existing latest order
             return;
         }
 
-        if (previousOrder != null) {
-            List<RespondToOrderDocumentCollection> archivedOrders =
-                new ArrayList<>(Optional.ofNullable(caseData.getRespondToOrderDocuments())
-                    .orElseGet(List::of));
-
-            boolean alreadyArchived = archivedOrders.stream()
-                .filter(Objects::nonNull)
-                .map(RespondToOrderDocumentCollection::getValue)
-                .filter(Objects::nonNull)
-                .map(RespondToOrderDocument::getDocumentLink)
-                .filter(Objects::nonNull)
-                .anyMatch(document -> Objects.equals(
-                    document.getDocumentUrl(), previousOrder.getDocumentUrl()));
-
-            if (!alreadyArchived) {
-                archivedOrders.add(RespondToOrderDocumentCollection.builder()
-                    .value(RespondToOrderDocument.builder()
-                        .documentType(RespondToOrderDocumentType.AMEND_CONSENT_ORDER)
-                        .documentLink(new CaseDocument(previousOrder))
-                        .documentFileName(previousOrder.getDocumentFilename())
-                        .documentDateAdded(getPreviousConsentOrderDate(beforeData, previousOrder))
-                        .build())
-                    .build());
-            }
-
-            caseData.setRespondToOrderDocuments(archivedOrders);
+        if (previousOrder != null && !isSameDocument(previousOrder, newOrder)) {
+            archivePreviousOrder(caseData, beforeData, previousOrder);
         }
 
         caseData.setLatestConsentOrder(newOrder);
     }
 
-    private LocalDate getPreviousConsentOrderDate(FinremCaseData beforeData,
-                                                  CaseDocument previousOrder) {
+    private void archivePreviousOrder(FinremCaseData caseData, FinremCaseData beforeData, CaseDocument previousOrder) {
+        List<RespondToOrderDocumentCollection> respondToOrderDocuments =
+            new ArrayList<>(Optional.ofNullable(caseData.getRespondToOrderDocuments()).orElseGet(List::of));
 
-        Optional<LocalDate> amendedOrderDate =
-            Optional.ofNullable(beforeData.getAmendedConsentOrderCollection())
-                .orElseGet(List::of)
-                .stream()
-                .filter(Objects::nonNull)
-                .map(AmendedConsentOrderCollection::getValue)
-                .filter(Objects::nonNull)
-                .filter(order -> order.getAmendedConsentOrder() != null
-                    && Objects.equals(
-                    order.getAmendedConsentOrder().getDocumentUrl(),
-                    previousOrder.getDocumentUrl()))
-                .map(AmendedConsentOrder::getAmendedConsentOrderDate)
-                .filter(Objects::nonNull)
-                .findFirst();
-
-        if (amendedOrderDate.isPresent()) {
-            return amendedOrderDate.get();
+        // e.g. the previous order was itself uploaded via Respond To Order - it is already in the history
+        boolean alreadyArchived = respondToOrderDocumentLinks(respondToOrderDocuments)
+            .anyMatch(link -> isSameDocument(link, previousOrder));
+        if (alreadyArchived) {
+            return;
         }
 
-        return previousOrder.getUploadTimestamp() != null
-            ? previousOrder.getUploadTimestamp().toLocalDate()
-            : null;
+        respondToOrderDocuments.add(RespondToOrderDocumentCollection.builder()
+            .value(RespondToOrderDocument.builder()
+                .documentType(RespondToOrderDocumentType.AMEND_CONSENT_ORDER)
+                .documentLink(new CaseDocument(previousOrder))
+                .documentFileName(previousOrder.getDocumentFilename())
+                .documentDateAdded(getPreviousConsentOrderDate(beforeData, previousOrder))
+                .build())
+            .build());
+        caseData.setRespondToOrderDocuments(respondToOrderDocuments);
+    }
+
+    private LocalDate getPreviousConsentOrderDate(FinremCaseData beforeData, CaseDocument previousOrder) {
+        return findAmendedConsentOrder(beforeData, previousOrder)
+            .map(AmendedConsentOrder::getAmendedConsentOrderDate)
+            .or(() -> Optional.ofNullable(previousOrder.getUploadTimestamp()).map(LocalDateTime::toLocalDate))
+            .orElseGet(LocalDate::now);
+    }
+
+    private Optional<AmendedConsentOrder> findAmendedConsentOrder(FinremCaseData beforeData, CaseDocument document) {
+        return Optional.ofNullable(beforeData.getAmendedConsentOrderCollection())
+            .orElseGet(List::of)
+            .stream()
+            .filter(Objects::nonNull)
+            .map(AmendedConsentOrderCollection::getValue)
+            .filter(Objects::nonNull)
+            .filter(order -> order.getAmendedConsentOrder() != null
+                && isSameDocument(order.getAmendedConsentOrder(), document))
+            .findFirst();
+    }
+
+    private static Stream<CaseDocument> respondToOrderDocumentLinks(List<RespondToOrderDocumentCollection> documents) {
+        return Optional.ofNullable(documents)
+            .orElseGet(List::of)
+            .stream()
+            .filter(Objects::nonNull)
+            .map(RespondToOrderDocumentCollection::getValue)
+            .filter(Objects::nonNull)
+            .map(RespondToOrderDocument::getDocumentLink)
+            .filter(Objects::nonNull);
+    }
+
+    private static boolean isSameDocument(CaseDocument first, CaseDocument second) {
+        return Objects.equals(first.getDocumentUrl(), second.getDocumentUrl());
     }
 
     private void setOtherDocuments(Map<String, Object> caseData, Map<String, Object> beforeData, List<CaseDocument> caseDocumentList) {
