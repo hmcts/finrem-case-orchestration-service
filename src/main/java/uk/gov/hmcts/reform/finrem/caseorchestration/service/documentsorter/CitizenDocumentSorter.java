@@ -72,7 +72,7 @@ public class CitizenDocumentSorter {
     private void sortPartyDocuments(
         List<CitizenDocumentCollectionItem> citizenUploads,
         List<CitizenDocumentCollectionItem> partyDocumentsCollection,
-        List<CitizenDocumentCollectionItem> fdrDocumentsDocumentsCollection,
+        List<CitizenDocumentCollectionItem> fdrDocumentsCollection,
         List<CitizenDocumentCollectionItem> divorceSolutionDocumentsCollection,
         List<CitizenDocumentCollectionItem> hearingBundleDocCollectionCollection
     ) {
@@ -84,7 +84,7 @@ public class CitizenDocumentSorter {
             final boolean isFdrDocument = FDR_DOCUMENT_TYPES.contains(documentType) || YesOrNo.isYes(documentMarkedFdr);
 
             if (isFdrDocument) {
-                fdrDocumentsDocumentsCollection.add(documentItem);
+                fdrDocumentsCollection.add(documentItem);
             } else if (DIVORCE_DOCUMENT_TYPES.contains(documentType)) {
                 divorceSolutionDocumentsCollection.add(documentItem);
             } else if (HEARING_BUNDLE_DOCUMENT_TYPES.contains(documentType)) {
