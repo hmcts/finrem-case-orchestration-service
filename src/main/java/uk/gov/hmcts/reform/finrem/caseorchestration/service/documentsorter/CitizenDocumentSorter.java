@@ -12,17 +12,11 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.CERTIFICATE_OF_SERVICE_FORM_FP6;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.DIVORCE_APPLICATION_PETITION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.DIVORCE_CONDITIONAL_ORDER_DECREE_NISI;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.DIVORCE_FINAL_ORDER_DECREE_ABSOLUTE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.ESTIMATE_OF_COSTS_INCURRED_FORM_H;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.FDR_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.HEARING_BUNDLE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.REPLY_TO_QUESTIONNAIRE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.REPLY_TO_QUESTIONNAIRE_SUPPORTING_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES_SUPPORTING_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenUploadDocumentType.WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT;
 
 @Slf4j
@@ -36,17 +30,12 @@ public class CitizenDocumentSorter {
     );
 
     private static final Set<CitizenUploadDocumentType> HEARING_BUNDLE_DOCUMENT_TYPES = EnumSet.of(
-        HEARING_BUNDLE,
-        FDR_BUNDLE
+        HEARING_BUNDLE
     );
 
-    private static final Set<CitizenUploadDocumentType> NON_FDR_DOCUMENT_TYPES = EnumSet.of(
-        REPLY_TO_QUESTIONNAIRE,
-        REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES,
-        REPLY_TO_QUESTIONNAIRE_SUPPORTING_DOCUMENTS,
-        REPLY_TO_SCHEDULE_OF_DEFICIENCIES_OR_SUPPLEMENTAL_QUESTIONNAIRES_SUPPORTING_DOCUMENTS,
-        CERTIFICATE_OF_SERVICE_FORM_FP6,
-        ESTIMATE_OF_COSTS_INCURRED_FORM_H
+    private static final Set<CitizenUploadDocumentType> FDR_DOCUMENT_TYPES = EnumSet.of(
+        FDR_BUNDLE,
+        WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT
     );
 
     /**
@@ -92,14 +81,14 @@ public class CitizenDocumentSorter {
             var documentType = documentItem.getValue().getDocumentType();
             var documentMarkedFdr = documentItem.getValue().getIsFdr();
 
-            if (DIVORCE_DOCUMENT_TYPES.contains(documentType)) {
+            final boolean isFdrDocument = FDR_DOCUMENT_TYPES.contains(documentType) || YesOrNo.isYes(documentMarkedFdr);
+
+            if (isFdrDocument) {
+                fdrDocumentsDocumentsCollection.add(documentItem);
+            } else if (DIVORCE_DOCUMENT_TYPES.contains(documentType)) {
                 divorceSolutionDocumentsCollection.add(documentItem);
             } else if (HEARING_BUNDLE_DOCUMENT_TYPES.contains(documentType)) {
                 hearingBundleDocCollectionCollection.add(documentItem);
-            } else if ((YesOrNo.isYes(documentMarkedFdr)
-                && !NON_FDR_DOCUMENT_TYPES.contains(documentType))
-                || WITHOUT_PREJUDICE_OFFERS_FOR_SETTLEMENT.equals(documentType)) {
-                fdrDocumentsDocumentsCollection.add(documentItem);
             } else {
                 partyDocumentsCollection.add(documentItem);
             }
