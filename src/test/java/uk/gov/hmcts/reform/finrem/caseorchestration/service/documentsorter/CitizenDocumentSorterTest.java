@@ -57,9 +57,9 @@ class CitizenDocumentSorterTest {
         sorter.sortDocuments(wrapper, APPLICANT);
 
         assertThat(wrapper.getUploadedCuiApplicantDocuments()).isEmpty();
-        assertThat(wrapper.getFdrApplicantDocCollection()).containsExactly(withoutPrejudice, fdrMarkedDocument);
+        assertThat(wrapper.getFdrApplicantDocCollection()).containsExactly(withoutPrejudice, fdrBundle, fdrMarkedDocument);
         assertThat(wrapper.getDivorceApplicantDocCollection()).containsExactly(divorceDocument);
-        assertThat(wrapper.getHearingApplicantDocCollection()).containsExactly(hearingBundle, fdrBundle);
+        assertThat(wrapper.getHearingApplicantDocCollection()).containsExactly(hearingBundle);
         assertThat(wrapper.getApplicantDocCollection()).containsExactly(otherDocument);
     }
 
@@ -85,14 +85,14 @@ class CitizenDocumentSorterTest {
         sorter.sortDocuments(wrapper, RESPONDENT);
 
         assertThat(wrapper.getUploadedCuiRespondentDocuments()).isEmpty();
-        assertThat(wrapper.getFdrRespondentDocCollection()).containsExactly(withoutPrejudice, fdrMarkedDocument);
+        assertThat(wrapper.getFdrRespondentDocCollection()).containsExactly(withoutPrejudice, fdrBundle, fdrMarkedDocument);
         assertThat(wrapper.getDivorceRespondentDocCollection()).containsExactly(divorceDocument);
-        assertThat(wrapper.getHearingRespondentDocCollection()).containsExactly(hearingBundle, fdrBundle);
+        assertThat(wrapper.getHearingRespondentDocCollection()).containsExactly(hearingBundle);
         assertThat(wrapper.getRespondentDocCollection()).containsExactly(otherDocument);
     }
 
     @Test
-    void shouldKeepApplicantDocumentsWithNoFdrCollectionInPartyCollectionWhenMarkedFdr() {
+    void shouldMoveApplicantDocumentsToFdrCollectionWhenMarkedFdr() {
         List<CitizenDocumentCollectionItem> noFdrCollectionDocuments = noFdrCollectionDocuments();
 
         CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
@@ -101,12 +101,12 @@ class CitizenDocumentSorterTest {
         sorter.sortDocuments(wrapper, APPLICANT);
 
         assertThat(wrapper.getUploadedCuiApplicantDocuments()).isEmpty();
-        assertThat(wrapper.getApplicantDocCollection()).containsExactlyElementsOf(noFdrCollectionDocuments);
-        assertThat(wrapper.getFdrApplicantDocCollection()).isEmpty();
+        assertThat(wrapper.getFdrApplicantDocCollection()).containsExactlyElementsOf(noFdrCollectionDocuments);
+        assertThat(wrapper.getApplicantDocCollection()).isEmpty();
     }
 
     @Test
-    void shouldKeepRespondentDocumentsWithNoFdrCollectionChangeInPartyCollectionWhenMarkedFdr() {
+    void shouldMoveRespondentDocumentsToFdrCollectionWhenMarkedFdr() {
         List<CitizenDocumentCollectionItem> noFdrCollectionDocuments = noFdrCollectionDocuments();
 
         CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
@@ -115,8 +115,36 @@ class CitizenDocumentSorterTest {
         sorter.sortDocuments(wrapper, RESPONDENT);
 
         assertThat(wrapper.getUploadedCuiRespondentDocuments()).isEmpty();
-        assertThat(wrapper.getRespondentDocCollection()).containsExactlyElementsOf(noFdrCollectionDocuments);
-        assertThat(wrapper.getFdrRespondentDocCollection()).isEmpty();
+        assertThat(wrapper.getFdrRespondentDocCollection()).containsExactlyElementsOf(noFdrCollectionDocuments);
+        assertThat(wrapper.getRespondentDocCollection()).isEmpty();
+    }
+
+    @Test
+    void shouldRouteFdrBundleToFdrCollectionEvenWhenFdrIsNo() {
+        CitizenDocumentCollectionItem fdrBundleMarkedNo = document(FDR_BUNDLE, YesOrNo.NO);
+
+        CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
+        wrapper.setUploadedCuiApplicantDocuments(new ArrayList<>(List.of(fdrBundleMarkedNo)));
+
+        sorter.sortDocuments(wrapper, APPLICANT);
+
+        assertThat(wrapper.getUploadedCuiApplicantDocuments()).isEmpty();
+        assertThat(wrapper.getFdrApplicantDocCollection()).containsExactly(fdrBundleMarkedNo);
+        assertThat(wrapper.getHearingApplicantDocCollection()).isEmpty();
+    }
+
+    @Test
+    void shouldRouteDivorceDocumentToFdrCollectionWhenMarkedFdr() {
+        CitizenDocumentCollectionItem divorceDocumentMarkedFdr = document(DIVORCE_APPLICATION_PETITION, YesOrNo.YES);
+
+        CitizenDocumentWrapper wrapper = new CitizenDocumentWrapper();
+        wrapper.setUploadedCuiRespondentDocuments(new ArrayList<>(List.of(divorceDocumentMarkedFdr)));
+
+        sorter.sortDocuments(wrapper, RESPONDENT);
+
+        assertThat(wrapper.getUploadedCuiRespondentDocuments()).isEmpty();
+        assertThat(wrapper.getFdrRespondentDocCollection()).containsExactly(divorceDocumentMarkedFdr);
+        assertThat(wrapper.getDivorceRespondentDocCollection()).isEmpty();
     }
 
     private List<CitizenDocumentCollectionItem> noFdrCollectionDocuments() {
