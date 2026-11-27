@@ -29,7 +29,7 @@ def versions = [
         serviceTokenGenerator: '6.0.0',
         springDoc            : '3.1.0',
         wiremock             : '3.0.1',
-        idamClient           : '4.0.0',
+        idamClient           : '4.1.0-CCD-8220',
         tika                 : '3.3.3',
         amClient             : '1.60.1',
         sendLetterClient     : '5.1.1',
